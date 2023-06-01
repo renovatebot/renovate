@@ -1,0 +1,652 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><title>curl downloads</title>
+<!-- base href="https://curl.se/" -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+<link rel="stylesheet" type="text/css" href="curl-downloads_files/curl.css">
+<link rel="shortcut icon" href="https://curl.se/favicon.ico">
+<link rel="icon" href="https://curl.se/logo/curl-symbol.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="cURL Releases" href="https://github.com/curl/curl/releases.atom">
+</head>
+<body>
+<div class="main">
+<div class="menu">
+<div class="dropdown">
+  <a class="dropbtn" href="https://curl.se/download.html">Download</a>
+  <div class="dropdown-content">
+    <a href="https://github.com/curl/curl">Browse source</a>
+    <a href="https://curl.se/changes.html">Changelog</a>
+    <a href="https://curl.se/tiny/">tiny-curl</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="https://curl.se/docs/">Documentation</a>
+  <div class="dropdown-content">
+    <a href="https://curl.se/docs/projdocs.html">Project</a>
+      <small>
+      <a href="https://curl.se/docs/bugbounty.html">&nbsp; Bug Bounty</a>
+      <a href="https://curl.se/docs/faq.html">FAQ</a>
+      <a href="https://curl.se/docs/help-us.html">&nbsp; Help us</a>
+      <a href="https://curl.se/docs/knownbugs.html">&nbsp; Known bugs</a>
+      <a href="https://curl.se/docs/todo.html">&nbsp; TODO</a>
+      </small>
+    <a href="https://curl.se/docs/protdocs.html">Protocols</a>
+      <small>
+      <a href="https://curl.se/docs/caextract.html">&nbsp; CA bundle</a>
+      <a href="https://curl.se/docs/http-cookies.html">&nbsp; HTTP Cookies</a>
+      <a href="https://curl.se/docs/http2.html">&nbsp; HTTP/2</a>
+      <a href="https://curl.se/docs/sslcerts.html">&nbsp; SSL Certs</a>
+      </small>
+    <a href="https://curl.se/docs/reldocs.html">Releases</a>
+      <small>
+      <a href="https://curl.se/docs/security.html">&nbsp; Security</a>
+      <a href="https://curl.se/docs/versions.html">&nbsp; Version numbers</a>
+      <a href="https://curl.se/docs/vulnerabilities.html">&nbsp; Vulnerabilities</a>
+      </small>
+    <a href="https://curl.se/docs/tooldocs.html">curl tool</a>
+      <small>
+      <a href="https://curl.se/docs/manpage.html">&nbsp; man page</a>
+      <a href="https://curl.se/docs/manual.html">&nbsp; Tutorial</a>
+      <a href="https://curl.se/docs/httpscripting.html">&nbsp; HTTP scripting</a>
+      </small>
+    <a href="https://curl.se/docs/videos/">Videos</a>
+    <a href="https://curl.se/docs/whodocs.html">Who and Why</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="https://curl.se/libcurl/">libcurl</a>
+  <div class="dropdown-content">
+    <a href="https://curl.se/libcurl/abi.html">ABI</a>
+    <a href="https://curl.se/libcurl/c/">API</a>
+    <a href="https://curl.se/libcurl/competitors.html">Competitors</a>
+    <a href="https://curl.se/libcurl/c/example.html">Examples</a>
+    <a href="https://curl.se/libcurl/features.html">Features</a>
+    <a href="https://curl.se/mail/list.cgi?list=curl-library">Mailing list</a>
+    <a href="https://curl.se/libcurl/relatedlibs.html">Related libs</a>
+    <a href="https://curl.se/libcurl/using/">Using libcurl</a>
+    <a href="https://curl.se/libcurl/c/libcurl-tutorial.html">Tutorial</a>
+    <a href="https://curl.se/libcurl/theysay.html">Testimonials</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="https://curl.se/gethelp.html">Get Help</a>
+  <div class="dropdown-content">
+    <a href="https://lists.haxx.se/listinfo/curl-library">curl-library</a>
+    <a href="https://lists.haxx.se/listinfo/curl-users">curl-users</a>
+    <a href="https://curl.se/docs/irc.html">IRC / chat</a>
+    <a href="https://curl.se/mail/">Mailing lists</a>
+    <a href="https://curl.se/book.html">Everything curl [book]</a>
+    <a href="https://curl.se/docs/videos/">Video presentations</a>
+    <a href="https://github.com/curl/curl/issues">Report a bug</a>
+    <a href="https://curl.se/support.html">Paid support</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="https://curl.se/dev/">Development</a>
+  <div class="dropdown-content">
+    <a href="https://curl.se/dev/builds.html">Autobuilds</a>
+    <a href="https://curl.se/dev/code-review.html">Code review</a>
+    <a href="https://curl.se/dev/code-style.html">Code style</a>
+    <a href="https://curl.se/dev/contribute.html">Contribute</a>
+    <a href="https://curl.se/dashboard.html">Dashboard</a>
+    <a href="https://curl.se/dev/deprecate.html">Deprecate</a>
+    <a href="https://curl.se/dev/internals.html">Internals</a>
+    <a href="https://curl.se/dev/release-notes.html">Release Notes</a>
+    <a href="https://curl.se/dev/release-procedure.html">Release Procedure</a>
+    <a href="https://curl.se/dev/roadmap.html">Roadmap</a>
+    <a href="https://curl.se/dev/runtests.html">Run Tests</a>
+    <a href="https://curl.se/dev/secprocess.html">Security Process</a>
+    <a href="https://curl.se/rfc/">Specifications</a>
+    <a href="https://curl.se/dev/testcurl.html">Test curl</a>
+    <a href="https://curl.se/dev/tests-overview.html">Tests Overview</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="https://curl.se/news.html">News</a>
+  <div class="dropdown-content">
+    <a href="https://curl.se/changes.html">Changelog</a>
+    <a href="https://curl.se/docs/releases.html">Release table</a>
+  </div>
+</div>
+</div>
+<div class="contents">
+<div class="where"><a href="https://curl.se/">curl</a> / <b>download archive</b></div>
+<h1>curl download archive</h1>
+
+<div class="relatedbox">
+<b>Related:</b>
+<br><a href="https://curl.se/changes.html">Changelog</a>
+<br><a href="https://curl.se/download.html">Download page</a>
+<br><a href="https://curl.se/docs/releases.html">Release table</a>
+</div>
+<p>
+</p><table class="daily" cellspacing="0" cellpadding="3">
+<tbody><tr class="tabletop"><th>Version</th>
+<th>bz2</th>
+<th>gz</th>
+<th>lzma</th>
+<th>xz</th>
+<th>zip</th>
+</tr>
+<tr class="even"><td>8.2.1</td> <td><a href="https://curl.se/download/curl-8.2.1.tar.bz2">3.06MB</a></td><td><a href="https://curl.se/download/curl-8.2.1.tar.gz">4.19MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-8.2.1.tar.xz">2.51MB</a></td><td><a href="https://curl.se/download/curl-8.2.1.zip">6.38MB</a></td></tr>
+<tr class="odd"><td>8.2.0</td> <td><a href="https://curl.se/download/curl-8.2.0.tar.bz2">3.07MB</a></td><td><a href="https://curl.se/download/curl-8.2.0.tar.gz">4.20MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-8.2.0.tar.xz">2.52MB</a></td><td><a href="https://curl.se/download/curl-8.2.0.zip">6.39MB</a></td></tr>
+<tr class="even"><td>8.1.2</td> <td><a href="https://curl.se/download/curl-8.1.2.tar.bz2">3.02MB</a></td><td><a href="https://curl.se/download/curl-8.1.2.tar.gz">4.16MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-8.1.2.tar.xz">2.49MB</a></td><td><a href="https://curl.se/download/curl-8.1.2.zip">6.33MB</a></td></tr>
+<tr class="odd"><td>8.1.1</td> <td><a href="https://curl.se/download/curl-8.1.1.tar.bz2">3.02MB</a></td><td><a href="https://curl.se/download/curl-8.1.1.tar.gz">4.16MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-8.1.1.tar.xz">2.49MB</a></td><td><a href="https://curl.se/download/curl-8.1.1.zip">6.33MB</a></td></tr>
+<tr class="even"><td>8.1.0</td> <td><a href="https://curl.se/download/curl-8.1.0.tar.bz2">3.03MB</a></td><td><a href="https://curl.se/download/curl-8.1.0.tar.gz">4.17MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-8.1.0.tar.xz">2.49MB</a></td><td><a href="https://curl.se/download/curl-8.1.0.zip">6.34MB</a></td></tr>
+<tr class="odd"><td>8.0.1</td> <td><a href="https://curl.se/download/curl-8.0.1.tar.bz2">2.97MB</a></td><td><a href="https://curl.se/download/curl-8.0.1.tar.gz">4.09MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-8.0.1.tar.xz">2.46MB</a></td><td><a href="https://curl.se/download/curl-8.0.1.zip">6.23MB</a></td></tr>
+<tr class="even"><td>8.0.0</td> <td><a href="https://curl.se/download/curl-8.0.0.tar.bz2">2.98MB</a></td><td><a href="https://curl.se/download/curl-8.0.0.tar.gz">4.10MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-8.0.0.tar.xz">2.46MB</a></td><td><a href="https://curl.se/download/curl-8.0.0.zip">6.23MB</a></td></tr>
+<tr class="odd"><td>7.88.1</td> <td><a href="https://curl.se/download/curl-7.88.1.tar.bz2">3.04MB</a></td><td><a href="https://curl.se/download/curl-7.88.1.tar.gz">4.14MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.88.1.tar.xz">2.46MB</a></td><td><a href="https://curl.se/download/curl-7.88.1.zip">6.29MB</a></td></tr>
+<tr class="even"><td>7.88.0</td> <td><a href="https://curl.se/download/curl-7.88.0.tar.bz2">3.04MB</a></td><td><a href="https://curl.se/download/curl-7.88.0.tar.gz">4.14MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.88.0.tar.xz">2.45MB</a></td><td><a href="https://curl.se/download/curl-7.88.0.zip">6.29MB</a></td></tr>
+<tr class="odd"><td>7.87.0</td> <td><a href="https://curl.se/download/curl-7.87.0.tar.bz2">3.00MB</a></td><td><a href="https://curl.se/download/curl-7.87.0.tar.gz">4.09MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.87.0.tar.xz">2.43MB</a></td><td><a href="https://curl.se/download/curl-7.87.0.zip">6.24MB</a></td></tr>
+<tr class="even"><td>7.86.0</td> <td><a href="https://curl.se/download/curl-7.86.0.tar.bz2">2.97MB</a></td><td><a href="https://curl.se/download/curl-7.86.0.tar.gz">4.04MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.86.0.tar.xz">2.40MB</a></td><td><a href="https://curl.se/download/curl-7.86.0.zip">6.16MB</a></td></tr>
+<tr class="odd"><td>7.85.0</td> <td><a href="https://curl.se/download/curl-7.85.0.tar.bz2">2.95MB</a></td><td><a href="https://curl.se/download/curl-7.85.0.tar.gz">3.99MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.85.0.tar.xz">2.37MB</a></td><td><a href="https://curl.se/download/curl-7.85.0.zip">6.09MB</a></td></tr>
+<tr class="even"><td>7.84.0</td> <td><a href="https://curl.se/download/curl-7.84.0.tar.bz2">2.95MB</a></td><td><a href="https://curl.se/download/curl-7.84.0.tar.gz">3.98MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.84.0.tar.xz">2.36MB</a></td><td><a href="https://curl.se/download/curl-7.84.0.zip">6.07MB</a></td></tr>
+<tr class="odd"><td>7.83.1</td> <td><a href="https://curl.se/download/curl-7.83.1.tar.bz2">2.93MB</a></td><td><a href="https://curl.se/download/curl-7.83.1.tar.gz">3.97MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.83.1.tar.xz">2.36MB</a></td><td><a href="https://curl.se/download/curl-7.83.1.zip">6.00MB</a></td></tr>
+<tr class="even"><td>7.83.0</td> <td><a href="https://curl.se/download/curl-7.83.0.tar.bz2">2.93MB</a></td><td><a href="https://curl.se/download/curl-7.83.0.tar.gz">3.97MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.83.0.tar.xz">2.36MB</a></td><td><a href="https://curl.se/download/curl-7.83.0.zip">6.00MB</a></td></tr>
+<tr class="odd"><td>7.82.0</td> <td><a href="https://curl.se/download/curl-7.82.0.tar.bz2">2.91MB</a></td><td><a href="https://curl.se/download/curl-7.82.0.tar.gz">3.92MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.82.0.tar.xz">2.33MB</a></td><td><a href="https://curl.se/download/curl-7.82.0.zip">5.93MB</a></td></tr>
+<tr class="even"><td>7.81.0</td> <td><a href="https://curl.se/download/curl-7.81.0.tar.bz2">2.97MB</a></td><td><a href="https://curl.se/download/curl-7.81.0.tar.gz">3.99MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.81.0.tar.xz">2.37MB</a></td><td><a href="https://curl.se/download/curl-7.81.0.zip">6.02MB</a></td></tr>
+<tr class="odd"><td>7.80.0</td> <td><a href="https://curl.se/download/curl-7.80.0.tar.bz2">2.94MB</a></td><td><a href="https://curl.se/download/curl-7.80.0.tar.gz">3.97MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.80.0.tar.xz">2.36MB</a></td><td><a href="https://curl.se/download/curl-7.80.0.zip">5.99MB</a></td></tr>
+<tr class="even"><td>7.79.1</td> <td><a href="https://curl.se/download/curl-7.79.1.tar.bz2">2.92MB</a></td><td><a href="https://curl.se/download/curl-7.79.1.tar.gz">3.95MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.79.1.tar.xz">2.35MB</a></td><td><a href="https://curl.se/download/curl-7.79.1.zip">5.95MB</a></td></tr>
+<tr class="odd"><td>7.79.0</td> <td><a href="https://curl.se/download/curl-7.79.0.tar.bz2">2.92MB</a></td><td><a href="https://curl.se/download/curl-7.79.0.tar.gz">3.96MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.79.0.tar.xz">2.35MB</a></td><td><a href="https://curl.se/download/curl-7.79.0.zip">5.95MB</a></td></tr>
+<tr class="even"><td>7.78.0</td> <td><a href="https://curl.se/download/curl-7.78.0.tar.bz2">2.90MB</a></td><td><a href="https://curl.se/download/curl-7.78.0.tar.gz">3.92MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.78.0.tar.xz">2.33MB</a></td><td><a href="https://curl.se/download/curl-7.78.0.zip">5.91MB</a></td></tr>
+<tr class="odd"><td>7.77.0</td> <td><a href="https://curl.se/download/curl-7.77.0.tar.bz2">2.91MB</a></td><td><a href="https://curl.se/download/curl-7.77.0.tar.gz">3.95MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.77.0.tar.xz">2.33MB</a></td><td><a href="https://curl.se/download/curl-7.77.0.zip">5.94MB</a></td></tr>
+<tr class="even"><td>7.76.1</td> <td><a href="https://curl.se/download/curl-7.76.1.tar.bz2">2.88MB</a></td><td><a href="https://curl.se/download/curl-7.76.1.tar.gz">3.91MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.76.1.tar.xz">2.32MB</a></td><td><a href="https://curl.se/download/curl-7.76.1.zip">5.89MB</a></td></tr>
+<tr class="odd"><td>7.76.0</td> <td><a href="https://curl.se/download/curl-7.76.0.tar.bz2">2.89MB</a></td><td><a href="https://curl.se/download/curl-7.76.0.tar.gz">3.91MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.76.0.tar.xz">2.32MB</a></td><td><a href="https://curl.se/download/curl-7.76.0.zip">5.89MB</a></td></tr>
+<tr class="even"><td>7.75.0</td> <td><a href="https://curl.se/download/curl-7.75.0.tar.bz2">2.88MB</a></td><td><a href="https://curl.se/download/curl-7.75.0.tar.gz">3.89MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.75.0.tar.xz">2.31MB</a></td><td><a href="https://curl.se/download/curl-7.75.0.zip">5.84MB</a></td></tr>
+<tr class="odd"><td>7.74.0</td> <td><a href="https://curl.se/download/curl-7.74.0.tar.bz2">2.86MB</a></td><td><a href="https://curl.se/download/curl-7.74.0.tar.gz">3.86MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.74.0.tar.xz">2.29MB</a></td><td><a href="https://curl.se/download/curl-7.74.0.zip">5.79MB</a></td></tr>
+<tr class="even"><td>7.73.0</td> <td><a href="https://curl.se/download/curl-7.73.0.tar.bz2">2.86MB</a></td><td><a href="https://curl.se/download/curl-7.73.0.tar.gz">3.85MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.73.0.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.73.0.zip">5.77MB</a></td></tr>
+<tr class="odd"><td>7.72.0</td> <td><a href="https://curl.se/download/curl-7.72.0.tar.bz2">2.87MB</a></td><td><a href="https://curl.se/download/curl-7.72.0.tar.gz">3.86MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.72.0.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.72.0.zip">5.77MB</a></td></tr>
+<tr class="even"><td>7.71.1</td> <td><a href="https://curl.se/download/curl-7.71.1.tar.bz2">2.86MB</a></td><td><a href="https://curl.se/download/curl-7.71.1.tar.gz">3.85MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.71.1.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.71.1.zip">5.74MB</a></td></tr>
+<tr class="odd"><td>7.71.0</td> <td><a href="https://curl.se/download/curl-7.71.0.tar.bz2">2.86MB</a></td><td><a href="https://curl.se/download/curl-7.71.0.tar.gz">3.85MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.71.0.tar.xz">2.27MB</a></td><td><a href="https://curl.se/download/curl-7.71.0.zip">5.74MB</a></td></tr>
+<tr class="even"><td>7.70.0</td> <td><a href="https://curl.se/download/curl-7.70.0.tar.bz2">2.83MB</a></td><td><a href="https://curl.se/download/curl-7.70.0.tar.gz">3.80MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.70.0.tar.xz">2.24MB</a></td><td><a href="https://curl.se/download/curl-7.70.0.zip">5.68MB</a></td></tr>
+<tr class="odd"><td>7.69.1</td> <td><a href="https://curl.se/download/curl-7.69.1.tar.bz2">2.93MB</a></td><td><a href="https://curl.se/download/curl-7.69.1.tar.gz">3.94MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.69.1.tar.xz">2.35MB</a></td><td><a href="https://curl.se/download/curl-7.69.1.zip">5.78MB</a></td></tr>
+<tr class="even"><td>7.69.0</td> <td><a href="https://curl.se/download/curl-7.69.0.tar.bz2">2.93MB</a></td><td><a href="https://curl.se/download/curl-7.69.0.tar.gz">3.94MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.69.0.tar.xz">2.35MB</a></td><td><a href="https://curl.se/download/curl-7.69.0.zip">5.77MB</a></td></tr>
+<tr class="odd"><td>7.68.0</td> <td><a href="https://curl.se/download/curl-7.68.0.tar.bz2">2.91MB</a></td><td><a href="https://curl.se/download/curl-7.68.0.tar.gz">3.91MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.68.0.tar.xz">2.33MB</a></td><td><a href="https://curl.se/download/curl-7.68.0.zip">5.72MB</a></td></tr>
+<tr class="even"><td>7.67.0</td> <td><a href="https://curl.se/download/curl-7.67.0.tar.bz2">2.89MB</a></td><td><a href="https://curl.se/download/curl-7.67.0.tar.gz">3.88MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.67.0.tar.xz">2.31MB</a></td><td><a href="https://curl.se/download/curl-7.67.0.zip">5.68MB</a></td></tr>
+<tr class="odd"><td>7.66.0</td> <td><a href="https://curl.se/download/curl-7.66.0.tar.bz2">2.89MB</a></td><td><a href="https://curl.se/download/curl-7.66.0.tar.gz">3.88MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.66.0.tar.xz">2.30MB</a></td><td><a href="https://curl.se/download/curl-7.66.0.zip">5.67MB</a></td></tr>
+<tr class="even"><td>7.65.3</td> <td><a href="https://curl.se/download/curl-7.65.3.tar.bz2">2.87MB</a></td><td><a href="https://curl.se/download/curl-7.65.3.tar.gz">3.84MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.65.3.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.65.3.zip">5.60MB</a></td></tr>
+<tr class="odd"><td>7.65.2</td> <td><a href="https://curl.se/download/curl-7.65.2.tar.bz2">2.88MB</a></td><td><a href="https://curl.se/download/curl-7.65.2.tar.gz">3.84MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.65.2.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.65.2.zip">5.60MB</a></td></tr>
+<tr class="even"><td>7.65.1</td> <td><a href="https://curl.se/download/curl-7.65.1.tar.bz2">2.87MB</a></td><td><a href="https://curl.se/download/curl-7.65.1.tar.gz">3.83MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.65.1.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.65.1.zip">5.59MB</a></td></tr>
+<tr class="odd"><td>7.65.0</td> <td><a href="https://curl.se/download/curl-7.65.0.tar.bz2">2.87MB</a></td><td><a href="https://curl.se/download/curl-7.65.0.tar.gz">3.83MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.65.0.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.65.0.zip">5.59MB</a></td></tr>
+<tr class="even"><td>7.64.1</td> <td><a href="https://curl.se/download/curl-7.64.1.tar.bz2">2.86MB</a></td><td><a href="https://curl.se/download/curl-7.64.1.tar.gz">3.82MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.64.1.tar.xz">2.27MB</a></td><td><a href="https://curl.se/download/curl-7.64.1.zip">5.57MB</a></td></tr>
+<tr class="odd"><td>7.64.0</td> <td><a href="https://curl.se/download/curl-7.64.0.tar.bz2">2.87MB</a></td><td><a href="https://curl.se/download/curl-7.64.0.tar.gz">3.85MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.64.0.tar.xz">2.29MB</a></td><td><a href="https://curl.se/download/curl-7.64.0.zip">5.58MB</a></td></tr>
+<tr class="even"><td>7.63.0</td> <td><a href="https://curl.se/download/curl-7.63.0.tar.bz2">2.86MB</a></td><td><a href="https://curl.se/download/curl-7.63.0.tar.gz">3.84MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.63.0.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.63.0.zip">5.57MB</a></td></tr>
+<tr class="odd"><td>7.62.0</td> <td><a href="https://curl.se/download/curl-7.62.0.tar.bz2">2.88MB</a></td><td><a href="https://curl.se/download/curl-7.62.0.tar.gz">3.86MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.62.0.tar.xz">2.28MB</a></td><td><a href="https://curl.se/download/curl-7.62.0.zip">5.61MB</a></td></tr>
+<tr class="even"><td>7.61.1</td> <td><a href="https://curl.se/download/curl-7.61.1.tar.bz2">2.83MB</a></td><td><a href="https://curl.se/download/curl-7.61.1.tar.gz">3.80MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.61.1.tar.xz">2.25MB</a></td><td><a href="https://curl.se/download/curl-7.61.1.zip">5.54MB</a></td></tr>
+<tr class="odd"><td>7.61.0</td> <td><a href="https://curl.se/download/curl-7.61.0.tar.bz2">2.81MB</a></td><td><a href="https://curl.se/download/curl-7.61.0.tar.gz">3.78MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.61.0.tar.xz">2.24MB</a></td><td><a href="https://curl.se/download/curl-7.61.0.zip">5.51MB</a></td></tr>
+<tr class="even"><td>7.60.0</td> <td><a href="https://curl.se/download/curl-7.60.0.tar.bz2">2.80MB</a></td><td><a href="https://curl.se/download/curl-7.60.0.tar.gz">3.77MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.60.0.tar.xz">2.23MB</a></td><td><a href="https://curl.se/download/curl-7.60.0.zip">5.48MB</a></td></tr>
+<tr class="odd"><td>7.59.0</td> <td><a href="https://curl.se/download/curl-7.59.0.tar.bz2">2.77MB</a></td><td><a href="https://curl.se/download/curl-7.59.0.tar.gz">3.73MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.59.0.tar.xz">2.21MB</a></td><td><a href="https://curl.se/download/curl-7.59.0.zip">5.43MB</a></td></tr>
+<tr class="even"><td>7.58.0</td> <td><a href="https://curl.se/download/curl-7.58.0.tar.bz2">2.76MB</a></td><td><a href="https://curl.se/download/curl-7.58.0.tar.gz">3.70MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.58.0.tar.xz">2.20MB</a></td><td><a href="https://curl.se/download/curl-7.58.0.zip">5.38MB</a></td></tr>
+<tr class="odd"><td>7.57.0</td> <td><a href="https://curl.se/download/curl-7.57.0.tar.bz2">2.72MB</a></td><td><a href="https://curl.se/download/curl-7.57.0.tar.gz">3.65MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.57.0.tar.xz">2.18MB</a></td><td><a href="https://curl.se/download/curl-7.57.0.zip">5.32MB</a></td></tr>
+<tr class="even"><td>7.56.1</td> <td><a href="https://curl.se/download/curl-7.56.1.tar.bz2">2.69MB</a></td><td><a href="https://curl.se/download/curl-7.56.1.tar.gz">3.62MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.56.1.tar.xz">2.16MB</a></td><td><a href="https://curl.se/download/curl-7.56.1.zip">5.28MB</a></td></tr>
+<tr class="odd"><td>7.56.0</td> <td><a href="https://curl.se/download/curl-7.56.0.tar.bz2">2.71MB</a></td><td><a href="https://curl.se/download/curl-7.56.0.tar.gz">3.65MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.56.0.tar.xz">2.17MB</a></td><td><a href="https://curl.se/download/curl-7.56.0.zip">5.30MB</a></td></tr>
+<tr class="even"><td>7.55.1</td> <td><a href="https://curl.se/download/curl-7.55.1.tar.bz2">2.66MB</a></td><td><a href="https://curl.se/download/curl-7.55.1.tar.gz">3.56MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.55.1.tar.xz">2.13MB</a></td><td><a href="https://curl.se/download/curl-7.55.1.zip">5.18MB</a></td></tr>
+<tr class="odd"><td>7.55.0</td> <td><a href="https://curl.se/download/curl-7.55.0.tar.bz2">2.65MB</a></td><td><a href="https://curl.se/download/curl-7.55.0.tar.gz">3.56MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.55.0.tar.xz">2.13MB</a></td><td><a href="https://curl.se/download/curl-7.55.0.zip">5.18MB</a></td></tr>
+<tr class="even"><td>7.54.1</td> <td><a href="https://curl.se/download/curl-7.54.1.tar.bz2">2.49MB</a></td><td><a href="https://curl.se/download/curl-7.54.1.tar.gz">3.36MB</a></td><td><a href="https://curl.se/download/curl-7.54.1.tar.lzma">2.00MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.54.1.zip">4.95MB</a></td></tr>
+<tr class="odd"><td>7.54.0</td> <td><a href="https://curl.se/download/curl-7.54.0.tar.bz2">2.48MB</a></td><td><a href="https://curl.se/download/curl-7.54.0.tar.gz">3.34MB</a></td><td><a href="https://curl.se/download/curl-7.54.0.tar.lzma">1.99MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.54.0.zip">4.91MB</a></td></tr>
+<tr class="even"><td>7.53.1</td> <td><a href="https://curl.se/download/curl-7.53.1.tar.bz2">2.49MB</a></td><td><a href="https://curl.se/download/curl-7.53.1.tar.gz">3.35MB</a></td><td><a href="https://curl.se/download/curl-7.53.1.tar.lzma">1.98MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.53.1.zip">4.92MB</a></td></tr>
+<tr class="odd"><td>7.53.0</td> <td><a href="https://curl.se/download/curl-7.53.0.tar.bz2">2.49MB</a></td><td><a href="https://curl.se/download/curl-7.53.0.tar.gz">3.36MB</a></td><td><a href="https://curl.se/download/curl-7.53.0.tar.lzma">1.98MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.53.0.zip">4.92MB</a></td></tr>
+<tr class="even"><td>7.52.1</td> <td><a href="https://curl.se/download/curl-7.52.1.tar.bz2">2.48MB</a></td><td><a href="https://curl.se/download/curl-7.52.1.tar.gz">3.34MB</a></td><td><a href="https://curl.se/download/curl-7.52.1.tar.lzma">1.97MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.52.1.zip">4.90MB</a></td></tr>
+<tr class="odd"><td>7.52.0</td> <td><a href="https://curl.se/download/curl-7.52.0.tar.bz2">2.48MB</a></td><td><a href="https://curl.se/download/curl-7.52.0.tar.gz">3.34MB</a></td><td><a href="https://curl.se/download/curl-7.52.0.tar.lzma">1.97MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.52.0.zip">4.90MB</a></td></tr>
+<tr class="even"><td>7.51.0</td> <td><a href="https://curl.se/download/curl-7.51.0.tar.bz2">2.45MB</a></td><td><a href="https://curl.se/download/curl-7.51.0.tar.gz">3.28MB</a></td><td><a href="https://curl.se/download/curl-7.51.0.tar.lzma">1.97MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.51.0.zip">4.75MB</a></td></tr>
+<tr class="odd"><td>7.50.3</td> <td><a href="https://curl.se/download/curl-7.50.3.tar.bz2">7.13MB</a></td><td><a href="https://curl.se/download/curl-7.50.3.tar.gz">8.50MB</a></td><td><a href="https://curl.se/download/curl-7.50.3.tar.lzma">5.73MB</a></td><td><a href="https://curl.se/download/curl-7.50.3.tar.xz">5.73MB</a></td><td><a href="https://curl.se/download/curl-7.50.3.zip">10.58MB</a></td></tr>
+<tr class="even"><td>7.50.2</td> <td><a href="https://curl.se/download/curl-7.50.2.tar.bz2">7.13MB</a></td><td><a href="https://curl.se/download/curl-7.50.2.tar.gz">8.50MB</a></td><td><a href="https://curl.se/download/curl-7.50.2.tar.lzma">5.72MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.50.2.zip">10.58MB</a></td></tr>
+<tr class="odd"><td>7.50.1</td> <td><a href="https://curl.se/download/curl-7.50.1.tar.bz2">7.12MB</a></td><td><a href="https://curl.se/download/curl-7.50.1.tar.gz">8.48MB</a></td><td><a href="https://curl.se/download/curl-7.50.1.tar.lzma">5.72MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.50.1.zip">10.56MB</a></td></tr>
+<tr class="even"><td>7.50.0</td> <td><a href="https://curl.se/download/curl-7.50.0.tar.bz2">7.12MB</a></td><td><a href="https://curl.se/download/curl-7.50.0.tar.gz">8.48MB</a></td><td><a href="https://curl.se/download/curl-7.50.0.tar.lzma">5.71MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.50.0.zip">10.56MB</a></td></tr>
+<tr class="odd"><td>7.49.1</td> <td><a href="https://curl.se/download/curl-7.49.1.tar.bz2">7.11MB</a></td><td><a href="https://curl.se/download/curl-7.49.1.tar.gz">8.47MB</a></td><td><a href="https://curl.se/download/curl-7.49.1.tar.lzma">5.71MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.49.1.zip">10.55MB</a></td></tr>
+<tr class="even"><td>7.49.0</td> <td><a href="https://curl.se/download/curl-7.49.0.tar.bz2">7.11MB</a></td><td><a href="https://curl.se/download/curl-7.49.0.tar.gz">8.46MB</a></td><td><a href="https://curl.se/download/curl-7.49.0.tar.lzma">5.71MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.49.0.zip">10.54MB</a></td></tr>
+<tr class="odd"><td>7.48.0</td> <td><a href="https://curl.se/download/curl-7.48.0.tar.bz2">7.07MB</a></td><td><a href="https://curl.se/download/curl-7.48.0.tar.gz">8.38MB</a></td><td><a href="https://curl.se/download/curl-7.48.0.tar.lzma">5.65MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.48.0.zip">10.44MB</a></td></tr>
+<tr class="even"><td>7.47.1</td> <td><a href="https://curl.se/download/curl-7.47.1.tar.bz2">3.34MB</a></td><td><a href="https://curl.se/download/curl-7.47.1.tar.gz">4.36MB</a></td><td><a href="https://curl.se/download/curl-7.47.1.tar.lzma">2.74MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.47.1.zip">6.39MB</a></td></tr>
+<tr class="odd"><td>7.47.0</td> <td><a href="https://curl.se/download/curl-7.47.0.tar.bz2">3.34MB</a></td><td><a href="https://curl.se/download/curl-7.47.0.tar.gz">4.35MB</a></td><td><a href="https://curl.se/download/curl-7.47.0.tar.lzma">2.75MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.47.0.zip">6.39MB</a></td></tr>
+<tr class="even"><td>7.46.0</td> <td><a href="https://curl.se/download/curl-7.46.0.tar.bz2">3.33MB</a></td><td><a href="https://curl.se/download/curl-7.46.0.tar.gz">4.34MB</a></td><td><a href="https://curl.se/download/curl-7.46.0.tar.lzma">2.73MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.46.0.zip">6.37MB</a></td></tr>
+<tr class="odd"><td>7.45.0</td> <td><a href="https://curl.se/download/curl-7.45.0.tar.bz2">3.31MB</a></td><td><a href="https://curl.se/download/curl-7.45.0.tar.gz">4.31MB</a></td><td><a href="https://curl.se/download/curl-7.45.0.tar.lzma">2.72MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.45.0.zip">6.32MB</a></td></tr>
+<tr class="even"><td>7.44.0</td> <td><a href="https://curl.se/download/curl-7.44.0.tar.bz2">3.24MB</a></td><td><a href="https://curl.se/download/curl-7.44.0.tar.gz">4.22MB</a></td><td><a href="https://curl.se/download/curl-7.44.0.tar.lzma">2.66MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.44.0.zip">6.10MB</a></td></tr>
+<tr class="odd"><td>7.43.0</td> <td><a href="https://curl.se/download/curl-7.43.0.tar.bz2">3.21MB</a></td><td><a href="https://curl.se/download/curl-7.43.0.tar.gz">4.13MB</a></td><td><a href="https://curl.se/download/curl-7.43.0.tar.lzma">2.64MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.43.0.zip">6.00MB</a></td></tr>
+<tr class="even"><td>7.42.1</td> <td><a href="https://curl.se/download/curl-7.42.1.tar.bz2">3.17MB</a></td><td><a href="https://curl.se/download/curl-7.42.1.tar.gz">4.09MB</a></td><td><a href="https://curl.se/download/curl-7.42.1.tar.lzma">2.61MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.42.1.zip">5.95MB</a></td></tr>
+<tr class="odd"><td>7.42.0</td> <td><a href="https://curl.se/download/curl-7.42.0.tar.bz2">3.18MB</a></td><td><a href="https://curl.se/download/curl-7.42.0.tar.gz">4.10MB</a></td><td><a href="https://curl.se/download/curl-7.42.0.tar.lzma">2.61MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.42.0.zip">5.94MB</a></td></tr>
+<tr class="even"><td>7.41.0</td> <td><a href="https://curl.se/download/curl-7.41.0.tar.bz2">3.15MB</a></td><td><a href="https://curl.se/download/curl-7.41.0.tar.gz">4.07MB</a></td><td><a href="https://curl.se/download/curl-7.41.0.tar.lzma">2.60MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.41.0.zip">5.90MB</a></td></tr>
+<tr class="odd"><td>7.40.0</td> <td><a href="https://curl.se/download/curl-7.40.0.tar.bz2">3.12MB</a></td><td><a href="https://curl.se/download/curl-7.40.0.tar.gz">4.03MB</a></td><td><a href="https://curl.se/download/curl-7.40.0.tar.lzma">2.56MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.40.0.zip">5.84MB</a></td></tr>
+<tr class="even"><td>7.39.0</td> <td><a href="https://curl.se/download/curl-7.39.0.tar.bz2">3.09MB</a></td><td><a href="https://curl.se/download/curl-7.39.0.tar.gz">3.98MB</a></td><td><a href="https://curl.se/download/curl-7.39.0.tar.lzma">2.53MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.39.0.zip">5.79MB</a></td></tr>
+<tr class="odd"><td>7.38.0</td> <td><a href="https://curl.se/download/curl-7.38.0.tar.bz2">3.01MB</a></td><td><a href="https://curl.se/download/curl-7.38.0.tar.gz">3.90MB</a></td><td><a href="https://curl.se/download/curl-7.38.0.tar.lzma">2.49MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.38.0.zip">5.68MB</a></td></tr>
+<tr class="even"><td>7.37.1</td> <td><a href="https://curl.se/download/curl-7.37.1.tar.bz2">3.01MB</a></td><td><a href="https://curl.se/download/curl-7.37.1.tar.gz">3.89MB</a></td><td><a href="https://curl.se/download/curl-7.37.1.tar.lzma">2.48MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.37.1.zip">5.66MB</a></td></tr>
+<tr class="odd"><td>7.37.0</td> <td><a href="https://curl.se/download/curl-7.37.0.tar.bz2">2.74MB</a></td><td><a href="https://curl.se/download/curl-7.37.0.tar.gz">3.49MB</a></td><td><a href="https://curl.se/download/curl-7.37.0.tar.lzma">2.22MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.37.0.zip">4.67MB</a></td></tr>
+<tr class="even"><td>7.36.0</td> <td><a href="https://curl.se/download/curl-7.36.0.tar.bz2">2.68MB</a></td><td><a href="https://curl.se/download/curl-7.36.0.tar.gz">3.40MB</a></td><td><a href="https://curl.se/download/curl-7.36.0.tar.lzma">2.17MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.36.0.zip">4.55MB</a></td></tr>
+<tr class="odd"><td>7.35.0</td> <td><a href="https://curl.se/download/curl-7.35.0.tar.bz2">2.65MB</a></td><td><a href="https://curl.se/download/curl-7.35.0.tar.gz">3.38MB</a></td><td><a href="https://curl.se/download/curl-7.35.0.tar.lzma">2.17MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.35.0.zip">4.52MB</a></td></tr>
+<tr class="even"><td>7.34.0</td> <td><a href="https://curl.se/download/curl-7.34.0.tar.bz2">2.64MB</a></td><td><a href="https://curl.se/download/curl-7.34.0.tar.gz">3.36MB</a></td><td><a href="https://curl.se/download/curl-7.34.0.tar.lzma">2.15MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.34.0.zip">4.47MB</a></td></tr>
+<tr class="odd"><td>7.33.0</td> <td><a href="https://curl.se/download/curl-7.33.0.tar.bz2">2.62MB</a></td><td><a href="https://curl.se/download/curl-7.33.0.tar.gz">3.33MB</a></td><td><a href="https://curl.se/download/curl-7.33.0.tar.lzma">2.14MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.33.0.zip">4.42MB</a></td></tr>
+<tr class="even"><td>7.32.0</td> <td><a href="https://curl.se/download/curl-7.32.0.tar.bz2">2.60MB</a></td><td><a href="https://curl.se/download/curl-7.32.0.tar.gz">3.31MB</a></td><td><a href="https://curl.se/download/curl-7.32.0.tar.lzma">2.12MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.32.0.zip">4.38MB</a></td></tr>
+<tr class="odd"><td>7.31.0</td> <td><a href="https://curl.se/download/curl-7.31.0.tar.bz2">2.56MB</a></td><td><a href="https://curl.se/download/curl-7.31.0.tar.gz">3.22MB</a></td><td><a href="https://curl.se/download/curl-7.31.0.tar.lzma">2.07MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.31.0.zip">4.28MB</a></td></tr>
+<tr class="even"><td>7.30.0</td> <td><a href="https://curl.se/download/curl-7.30.0.tar.bz2">2.50MB</a></td><td><a href="https://curl.se/download/curl-7.30.0.tar.gz">3.18MB</a></td><td><a href="https://curl.se/download/curl-7.30.0.tar.lzma">2.05MB</a></td><td>&nbsp;</td>
+<td><a href="https://curl.se/download/curl-7.30.0.zip">4.21MB</a></td></tr>
+<tr class="odd"><td>7.29.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.29.0.tar.gz">3.11MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.28.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.28.0.tar.gz">3.04MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.27.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.27.0.tar.gz">3.01MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.26.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.26.0.tar.gz">2.93MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.25.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.25.0.tar.gz">2.92MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.24.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.24.0.tar.gz">2.91MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.23.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.23.0.tar.gz">2.87MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.22.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.22.0.tar.gz">2.82MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.21.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.21.0.tar.gz">2.59MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.20.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.20.0.tar.gz">2.53MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.19.7</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.7.tar.gz">2.87MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.19.6</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.6.tar.gz">2.86MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.19.5</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.5.tar.gz">2.80MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.19.4</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.4.tar.gz">2.81MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.19.3</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.3.tar.gz">2.77MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.19.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.2.tar.gz">2.74MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.19.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.1.tar.gz">2.74MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.19.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.19.0.tar.gz">2.68MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.18.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.18.2.tar.gz">2.17MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.18.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.18.1.tar.gz">2.12MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.18.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.18.0.tar.gz">2.18MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.17.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.17.1.tar.gz">2.12MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.17.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.17.0.tar.gz">2.09MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.16.4</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.16.4.tar.gz">2.03MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.16.3</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.16.3.tar.gz">2.02MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.16.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.16.2.tar.gz">2.02MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.16.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.16.1.tar.gz">1.89MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.16.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.16.0.tar.gz">1.86MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.15.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.15.0.tar.gz">1.67MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.14.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.14.0.tar.gz">2.13MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.13.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.13.0.tar.gz">2.07MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.12.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.12.0.tar.gz">1.44MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.11.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.11.2.tar.gz">1.37MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.11.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.11.0.tar.gz">1.29MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.10.8</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.10.8.tar.gz">1.21MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.10.4</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.10.4.tar.gz">1.02MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.10.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.10.1.tar.gz">0.82MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.10</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.10.tar.gz">0.80MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.9.8</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.9.8.tar.gz">0.70MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.9</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.9.tar.gz">0.59MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.8.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.8.1.tar.gz">0.54MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.8</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.8.tar.gz">0.60MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.7.3</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.7.3.tar.gz">0.50MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.7.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.7.2.tar.gz">0.49MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.7.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.7.1.tar.gz">0.47MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.7</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.7.tar.gz">0.47MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.6.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.6.1.tar.gz">0.43MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.6</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.6.tar.gz">0.42MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.5.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.5.2.tar.gz">0.41MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.5.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.5.1.tar.gz">0.43MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.5</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.5.tar.gz">0.43MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.4.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.4.2.tar.gz">0.41MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.4.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.4.1.tar.gz">0.39MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.3</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.3.tar.gz">0.38MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.2.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.2.1.tar.gz">0.37MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>7.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.2.tar.gz">0.37MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>7.1.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-7.1.1.tar.gz">0.36MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>6.5.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-6.5.2.tar.gz">0.25MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>6.4</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-6.4.tar.gz">0.24MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>6.3.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-6.3.1.tar.gz">0.23MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>6.2</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-6.2.tar.gz">0.23MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>6.1</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-6.1.tar.gz">0.22MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>6.0</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-6.0.tar.gz">0.22MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>5.9</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-5.9.tar.gz">0.19MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>4.8</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/curl-4.8.tar.gz">0.05MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even"><td>3.12</td> <td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/urlget-3.12.tar.gz">0.03MB</a></td><td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd"><td>3.5</td> <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><a href="https://curl.se/download/archeology/urlget-3.5.zip">0.04MB</a></td></tr>
+</tbody></table>
+<p>
+
+
+</p></div>
+</div>
+<script defer="defer" src="curl-downloads_files/insights.js" type="text/javascript"></script>
+
+
+</body></html>
