@@ -1,17 +1,16 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ToolConstraint } from '../../../util/exec/types';
 import {
   getSiblingFileName,
-  privateCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
+import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   generateRegistryLoginCmd,
@@ -89,21 +88,7 @@ export async function updateArtifacts({
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
     await exec(cmd, {
       docker: {},
-      extraEnv: {
-        // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-        HELM_REGISTRY_CONFIG: `${upath.join(
-          privateCacheDir(),
-          'registry.json'
-        )}`,
-        HELM_REPOSITORY_CONFIG: `${upath.join(
-          privateCacheDir(),
-          'repositories.yaml'
-        )}`,
-        HELM_REPOSITORY_CACHE: `${upath.join(
-          privateCacheDir(),
-          'repositories'
-        )}`,
-      },
+      extraEnv: generateHelmEnvs(),
       toolConstraints,
     });
 
