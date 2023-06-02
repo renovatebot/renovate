@@ -128,7 +128,7 @@ releases:
     chart: private-charts/chart
     version: 0.12.0
 `;
-    const lockFileOCIPrivateRepo = codeBlock`
+    const lockFileWithoutRepositories = codeBlock`
 version: 0.151.0
 dependencies:
 - name: chart
@@ -137,7 +137,7 @@ dependencies:
 digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
 generated: "2023-03-08T21:32:06.122276997+01:00"
 `;
-    git.getFile.mockResolvedValueOnce(lockFileOCIPrivateRepo as never);
+    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories as never);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
