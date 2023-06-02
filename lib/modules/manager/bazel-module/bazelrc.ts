@@ -110,8 +110,7 @@ async function readFile(
   }
   const entries = parse(contents);
   const results: BazelrcEntries[] = [];
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
+  for (const entry of entries) {
     if (entry.entryType === 'import') {
       const importFile = entry.path.replace('%workspace%', workspaceDir);
       const importEntries = await readFile(importFile, workspaceDir);
