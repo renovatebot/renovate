@@ -12,11 +12,9 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
-import { DockerDatasource } from '../../datasource/docker';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { RepositoryRule } from './types';
 import {
+  generateRegistryLoginCmd,
   getRepositories,
   isOCIRegistry,
   parseDoc,
@@ -71,40 +69,40 @@ export async function updateArtifacts({
     }
 
     const cmd: string[] = [];
-    const doc = parseDoc(newPackageFileContent)
-
-    const ociRepositoryRules: RepositoryRule[] = getRepositories(doc)
-      .filter(isOCIRegistry)
-      .map((value) => {
-        return {
-          ...value,
-          hostRule: hostRules.find({
-            url: 'https://' + value.url,
-            hostType: DockerDatasource.id,
-          }),
-        };
-    });
+    const doc = parseDoc(newPackageFileContent);
 
     const regexOfURLPath = /\/.*/;
-    ociRepositoryRules.forEach((value) => {
-      const { username, password } = value.hostRule;
-      if (username && password) {
-        const host = value.url.replace(regexOfURLPath, '')
-
-        cmd.push(
-          `helm registry login --username ${quote(username)} --password ${quote(password)} ${host}`
+    getRepositories(doc)
+      .filter(isOCIRegistry)
+      .forEach((value) => {
+        const loginCmd = generateRegistryLoginCmd(
+          value.name,
+          'https://' + value.url,
+          value.url.replace(regexOfURLPath, '')
         );
-      }
-    });
 
-    cmd.push(`helmfile deps -f ${quote(packageFileName)}`)
+        if (loginCmd) {
+          cmd.push(loginCmd);
+        }
+      });
+
+    cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
     await exec(cmd, {
       docker: {},
       extraEnv: {
         // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-        HELM_REGISTRY_CONFIG: `${upath.join(privateCacheDir(), 'registry.json')}`,
-        HELM_REPOSITORY_CONFIG: `${upath.join(privateCacheDir(), 'repositories.yaml')}`,
-        HELM_REPOSITORY_CACHE: `${upath.join(privateCacheDir(), 'repositories')}`,
+        HELM_REGISTRY_CONFIG: `${upath.join(
+          privateCacheDir(),
+          'registry.json'
+        )}`,
+        HELM_REPOSITORY_CONFIG: `${upath.join(
+          privateCacheDir(),
+          'repositories.yaml'
+        )}`,
+        HELM_REPOSITORY_CACHE: `${upath.join(
+          privateCacheDir(),
+          'repositories'
+        )}`,
       },
       toolConstraints,
     });

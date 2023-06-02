@@ -44,8 +44,9 @@ For this you use a custom `hostRules` array.
       hostType: 'docker',
       username: '<some-username>',
       encrypted: {
-        password: 'some-encrypted-password'
-      }
+        password: 'some-encrypted-password',
+      },
     },
   ],
 }
+```

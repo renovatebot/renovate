@@ -218,21 +218,27 @@ generated: "2023-03-08T21:30:48.273709455+01:00"
         cmd: 'helm registry login --username test --password password ghcr.io',
         options: {
           env: {
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
         cmd: 'helmfile deps -f helmfile.yaml',
         options: {
           env: {
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });

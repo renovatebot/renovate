@@ -3,6 +3,11 @@ import yaml from 'js-yaml';
 import upath from 'upath';
 
 import { getParentDir, localPathExists } from '../../../util/fs';
+import * as hostRules from '../../../util/host-rules';
+import { DockerDatasource } from '../../datasource/docker';
+import { generateLoginCmd } from '../helmv3/common';
+import type { RepositoryRule } from '../helmv3/types';
+
 import { DocSchema } from './schema';
 import type { Doc, Release, Repository } from './types';
 
@@ -27,29 +32,40 @@ export async function localChartHasKustomizationsYaml(
   );
 }
 
-export function parseDoc(
-  packageFileContent: string,
-): Doc {
-  const doc = yaml.load(packageFileContent)
+export function parseDoc(packageFileContent: string): Doc {
+  const doc = yaml.load(packageFileContent);
   return DocSchema.parse(doc);
 }
 
-export function getRepositories(
-  doc: Doc
-): Repository[] {
+export function getRepositories(doc: Doc): Repository[] {
   if (is.nullOrUndefined(doc.repositories)) {
     return [] as Repository[];
   }
 
-  return doc.repositories
+  return doc.repositories;
 }
 
-export function isOCIRegistry(
-  repository: Repository
-): boolean {
+export function isOCIRegistry(repository: Repository): boolean {
   if (is.nullOrUndefined(repository.oci)) {
     return false;
   }
 
-  return repository.oci
+  return repository.oci;
+}
+
+export function generateRegistryLoginCmd(
+  repositoryName: string,
+  repositoryURL: string,
+  repositoryHost: string
+): string | null {
+  const repositoryRule: RepositoryRule = {
+    name: repositoryName,
+    repository: repositoryHost,
+    hostRule: hostRules.find({
+      url: repositoryURL,
+      hostType: DockerDatasource.id,
+    }),
+  };
+
+  return generateLoginCmd(repositoryRule, 'helm registry login');
 }
