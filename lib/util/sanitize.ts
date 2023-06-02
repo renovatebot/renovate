@@ -41,7 +41,10 @@ export function sanitize(
 
 const GITHUB_APP_TOKEN_PREFIX = 'x-access-token:';
 
-export function addSecretForSanitizing(secret: string, type = 'repo'): void {
+export function addSecretForSanitizing(
+  secret: string | undefined,
+  type = 'repo'
+): void {
   if (!is.nonEmptyString(secret)) {
     return;
   }

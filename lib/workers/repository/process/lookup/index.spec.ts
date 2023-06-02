@@ -2113,7 +2113,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     describe('handles merge confidence', () => {
-      const defaultApiBaseUrl = 'https://badges.renovateapi.com/';
+      const defaultApiBaseUrl = 'https://developer.mend.io/';
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
         'getMergeConfidenceLevel'

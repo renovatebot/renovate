@@ -492,10 +492,14 @@ describe('modules/manager/npm/extract/locked-versions', () => {
 
   it('uses pnpm-lock', async () => {
     pnpm.getPnpmLock.mockReturnValue({
-      lockedVersions: {
-        a: '1.0.0',
-        b: '2.0.0',
-        c: '3.0.0',
+      lockedVersionsWithPath: {
+        '.': {
+          dependencies: {
+            a: '1.0.0',
+            b: '2.0.0',
+            c: '3.0.0',
+          },
+        },
       },
       lockfileVersion: 6.0,
     });
@@ -510,14 +514,16 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         deps: [
           {
             depName: 'a',
+            depType: 'dependencies',
             currentValue: '1.0.0',
           },
           {
             depName: 'b',
+            depType: 'dependencies',
             currentValue: '2.0.0',
           },
         ],
-        packageFile: 'some-file',
+        packageFile: 'package.json',
       },
     ];
     await getLockedVersions(packageFiles);
@@ -525,12 +531,22 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       {
         extractedConstraints: { pnpm: '>=6.0.0' },
         deps: [
-          { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
-          { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
+          {
+            currentValue: '1.0.0',
+            depName: 'a',
+            lockedVersion: '1.0.0',
+            depType: 'dependencies',
+          },
+          {
+            currentValue: '2.0.0',
+            depName: 'b',
+            lockedVersion: '2.0.0',
+            depType: 'dependencies',
+          },
         ],
         lockFiles: ['pnpm-lock.yaml'],
         managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
-        packageFile: 'some-file',
+        packageFile: 'package.json',
       },
     ]);
   });

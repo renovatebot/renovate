@@ -126,7 +126,7 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
-  branchFingerprint?: string;
+  commitFingerprint?: string;
   skipBranchUpdate?: boolean;
 }
 
