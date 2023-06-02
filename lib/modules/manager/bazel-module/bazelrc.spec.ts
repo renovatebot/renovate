@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as fs from '../../../util/fs';
 import { BazelOption, CommandEntry, ImportEntry, parse, read } from './bazelrc';
 
 const adminConfig: RepoGlobalConfig = {
@@ -92,6 +93,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
     });
 
     it('when .bazelrc has invalid lines', async () => {
+      const bazelrc = codeBlock`
+        // This is not a valid comment
+        build --show_timestamps --keep_going --jobs 600
+        `;
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(bazelrc);
       const result = await read('bazelrc/invalid-bazelrc');
       expect(result).toEqual([
         new CommandEntry('build', [
@@ -103,6 +109,12 @@ describe('modules/manager/bazel-module/bazelrc', () => {
     });
 
     it('when .bazelrc has no imports', async () => {
+      const bazelrc = codeBlock`
+        # This comment should be ignored
+        build --show_timestamps --keep_going --jobs 600
+        build --color=yes
+        `;
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(bazelrc);
       const result = await read('bazelrc/no-imports');
       expect(result).toEqual([
         new CommandEntry('build', [
