@@ -254,6 +254,7 @@ generated: "2023-03-08T21:30:48.273709455+01:00"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+            '-e HELM_EXPERIMENTAL_OCI ' +
             '-e HELM_REGISTRY_CONFIG ' +
             '-e HELM_REPOSITORY_CONFIG ' +
             '-e HELM_REPOSITORY_CACHE ' +
