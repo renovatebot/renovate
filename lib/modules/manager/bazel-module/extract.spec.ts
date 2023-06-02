@@ -96,5 +96,69 @@ describe('modules/manager/bazel-module/extract', () => {
         ])
       );
     });
+
+    it('returns bazel_dep and archive_override dependencies', () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo", version = "1.2.3")
+        archive_override(
+          module_name = "rules_foo",
+          urls = [
+            "https://example.com/archive.tar.gz",
+          ],
+        )
+      `;
+      const result = extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toHaveLength(2);
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            skipReason: 'file-dependency',
+          },
+          {
+            depType: 'archive_override',
+            depName: 'rules_foo',
+            skipReason: 'unsupported-datasource',
+          },
+        ])
+      );
+    });
+
+    it('returns bazel_dep and local_path_override dependencies', () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo", version = "1.2.3")
+        local_path_override(
+          module_name = "rules_foo",
+          urls = "/path/to/repo",
+        )
+      `;
+      const result = extractPackageFile(input, 'MODULE.bazel');
+      if (!result) {
+        throw new Error('Expected a result.');
+      }
+      expect(result.deps).toHaveLength(2);
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            skipReason: 'local-dependency',
+          },
+          {
+            depType: 'local_path_override',
+            depName: 'rules_foo',
+            skipReason: 'unsupported-datasource',
+          },
+        ])
+      );
+    });
   });
 });

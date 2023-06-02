@@ -77,5 +77,64 @@ describe('modules/manager/bazel-module/parser', () => {
         ),
       ]);
     });
+
+    it('finds archive_override', () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo", version = "1.2.3")
+        archive_override(
+          module_name = "rules_foo",
+          urls = [
+            "https://example.com/archive.tar.gz",
+          ],
+        )
+      `;
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('bazel_dep'),
+            name: fragments.string('rules_foo'),
+            version: fragments.string('1.2.3'),
+          },
+          true
+        ),
+        fragments.record(
+          {
+            rule: fragments.string('archive_override'),
+            module_name: fragments.string('rules_foo'),
+          },
+          true
+        ),
+      ]);
+    });
+
+    it('finds local_path_override', () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo", version = "1.2.3")
+        local_path_override(
+          module_name = "rules_foo",
+          urls = "/path/to/repo",
+        )
+      `;
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('bazel_dep'),
+            name: fragments.string('rules_foo'),
+            version: fragments.string('1.2.3'),
+          },
+          true
+        ),
+        fragments.record(
+          {
+            rule: fragments.string('local_path_override'),
+            module_name: fragments.string('rules_foo'),
+            urls: fragments.string('/path/to/repo'),
+          },
+          true
+        ),
+      ]);
+    });
   });
 });
