@@ -71,8 +71,12 @@ export async function updateArtifacts({
     const doc = parseDoc(newPackageFileContent);
 
     const regexOfURLPath = /\/.*/;
-    getRepositories(doc)
-      .filter(isOCIRegistry)
+    const repositories =  getRepositories(doc)
+    if (repositories.length < 1) {
+      return null
+    }
+
+    repositories.filter(isOCIRegistry)
       .forEach((value) => {
         const loginCmd = generateRegistryLoginCmd(
           value.name,

@@ -121,6 +121,36 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
   });
 
+  it('returns null if repositories were undefined.', async () => {
+    const helmfileYamlWithoutRepositories = codeBlock`
+releases:
+  - name: chart
+    chart: private-charts/chart
+    version: 0.12.0
+`;
+    const lockFileOCIPrivateRepo = codeBlock`
+version: 0.151.0
+dependencies:
+- name: chart
+  repository: oci://ghcr.io/private-charts
+  version: 0.11.0
+digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
+generated: "2023-03-08T21:32:06.122276997+01:00"
+`;
+    git.getFile.mockResolvedValueOnce(lockFileOCIPrivateRepo as never);
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
+    expect(
+      await helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps,
+        newPackageFileContent: helmfileYamlWithoutRepositories,
+        config,
+      })
+    ).toBeNull();
+  });
+
   it('returns updated helmfile.lock', async () => {
     git.getFile.mockResolvedValueOnce(lockFile as never);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
