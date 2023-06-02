@@ -10,7 +10,7 @@ import * as rules from './rules';
 
 export async function extractPackageFile(
   content: string,
-  filename: string
+  packageFile: string
 ): Promise<PackageFileContent | null> {
   try {
     const records = parse(content);
@@ -24,7 +24,7 @@ export async function extractPackageFile(
       return null;
     }
 
-    const registryUrls = (await bazelrc.read(dirname(filename)))
+    const registryUrls = (await bazelrc.read(dirname(packageFile)))
       // Ignore any entries for custom configurations
       .filter((ce) => ce.config === undefined)
       .map((ce) => ce.getOption('registry')?.value)
@@ -35,7 +35,7 @@ export async function extractPackageFile(
 
     return pfc;
   } catch (err) {
-    logger.debug({ err, filename }, 'Failed to parse bazel module file.');
+    logger.debug({ err, packageFile }, 'Failed to parse bazel module file.');
     return null;
   }
 }
