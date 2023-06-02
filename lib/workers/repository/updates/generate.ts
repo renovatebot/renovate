@@ -293,7 +293,7 @@ export function generateBranchConfig(
     if (config.upgrades[0].depName?.startsWith('@types/')) {
       logger.debug('Found @types - reversing upgrades to use depName in PR');
       sortTypesGroup(config.upgrades);
-      config.upgrades[0].recreateClosed = true;
+      config.upgrades[0].recreateClosed = false;
       config.hasTypes = true;
     }
   } else {

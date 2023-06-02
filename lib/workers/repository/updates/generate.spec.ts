@@ -969,7 +969,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.recreateClosed).toBe(true);
+      expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
       expect(generateBranchConfig(branch)).toMatchSnapshot({
         upgrades: [
