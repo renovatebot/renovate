@@ -96,11 +96,8 @@ export function setOnboardingConfigDetails(
 ): void {
   const cache = getCache();
   if (cache.onboardingBranchCache) {
-    const newOnboardingCache = structuredClone(cache.onboardingBranchCache);
-
-    newOnboardingCache.configFileName = configFileName;
-    newOnboardingCache.configFileParsed = configFileParsed;
-    cache.onboardingBranchCache = newOnboardingCache;
+    cache.onboardingBranchCache.configFileName = configFileName;
+    cache.onboardingBranchCache.configFileParsed = configFileParsed;
   }
 }
 
