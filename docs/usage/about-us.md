@@ -41,7 +41,7 @@ Some features made a lot of people happy, and efficient!
 - [@cgrindel](https://github.com/cgrindel) created the `bazel-module` manager
 - [@RahulGautamSingh](https://github.com/RahulGautamSingh) refactored our code and ...
 - [@Gabriel-Ladzaretti](https://github.com/Gabriel-Ladzaretti) ...
-- [@Churro](https://github.com/Churro) worked on the `gradle` manager
+- [@Churro](https://github.com/Churro) worked on the `gradle` manager and added support for OSV vulnerabilities
 
 ## Renovate development
 
