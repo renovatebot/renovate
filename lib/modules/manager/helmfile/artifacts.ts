@@ -71,23 +71,22 @@ export async function updateArtifacts({
     const doc = parseDoc(newPackageFileContent);
 
     const regexOfURLPath = /\/.*/;
-    const repositories =  getRepositories(doc)
+    const repositories = getRepositories(doc);
     if (repositories.length < 1) {
-      return null
+      return null;
     }
 
-    repositories.filter(isOCIRegistry)
-      .forEach((value) => {
-        const loginCmd = generateRegistryLoginCmd(
-          value.name,
-          'https://' + value.url,
-          value.url.replace(regexOfURLPath, '')
-        );
+    repositories.filter(isOCIRegistry).forEach((value) => {
+      const loginCmd = generateRegistryLoginCmd(
+        value.name,
+        'https://' + value.url,
+        value.url.replace(regexOfURLPath, '')
+      );
 
-        if (loginCmd) {
-          cmd.push(loginCmd);
-        }
-      });
+      if (loginCmd) {
+        cmd.push(loginCmd);
+      }
+    });
 
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
     await exec(cmd, {
