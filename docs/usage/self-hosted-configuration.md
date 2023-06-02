@@ -399,7 +399,7 @@ If you must expose all environment variables to package managers, you can set th
     Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
-Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
+Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -541,7 +541,7 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 ## onboardingConfigFileName
 
-If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
+If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
