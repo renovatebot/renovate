@@ -14,11 +14,13 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   try {
     const records = parse(content);
-    const pfc: PackageFileContent = LooseArray(RuleToBazelModulePackageDep)
+    const pfc: PackageFileContent | null = LooseArray(
+      RuleToBazelModulePackageDep
+    )
       .transform(rules.toPackageDependencies)
-      .transform((deps) => ({ deps }))
+      .transform((deps) => (deps.length ? { deps } : null))
       .parse(records);
-    if (!pfc.deps.length) {
+    if (!pfc) {
       return null;
     }
 
