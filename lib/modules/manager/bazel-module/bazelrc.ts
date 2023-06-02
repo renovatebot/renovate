@@ -124,8 +124,7 @@ async function readFile(
 
 export async function read(workspaceDir: string): Promise<CommandEntry[]> {
   const bazelrcPath = upath.join(workspaceDir, '.bazelrc');
-  const entries = await readFile(bazelrcPath, workspaceDir);
-  return entries.filter(
+  return (await readFile(bazelrcPath, workspaceDir)).filter(
     (entry): entry is CommandEntry => entry.entryType === 'command'
   );
 }
