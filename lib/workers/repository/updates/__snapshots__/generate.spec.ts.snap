@@ -102,7 +102,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
-  "recreateWhen": "auto",
+  "recreateClosed": true,
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
   "upgrades": [
@@ -120,7 +120,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
       "newValue": "0.6.0",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
-      "recreateWhen": "auto",
+      "recreateClosed": true,
     },
     {
       "branchName": "some-branch",

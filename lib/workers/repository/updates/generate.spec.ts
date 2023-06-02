@@ -249,7 +249,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeDefined();
-      expect(res.recreateWhen).toBeFalsy();
+      expect(res.recreateClosed).toBeFalsy();
     });
 
     it('groups multiple digest updates immortally', () => {
@@ -279,7 +279,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeDefined();
-      expect(res.recreateWhen).toBe('always');
+      expect(res.recreateClosed).toBe(true);
     });
 
     it('Grouped pin & pinDigest can be recreated', () => {
@@ -301,7 +301,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] as BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.recreateWhen).toBe('always');
+      expect(res.recreateClosed).toBe(true);
     });
 
     it('Grouped pin & pinDigest cannot be recreated when closed if recreateWhen is never', () => {
@@ -325,7 +325,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] as BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.recreateWhen).toBe('never');
+      expect(res.recreateClosed).toBe(false);
     });
 
     it('Grouped pin can be recreated', () => {
@@ -352,7 +352,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.recreateWhen).toBe('always');
+      expect(res.recreateClosed).toBe(true);
     });
 
     it('grouped pinDigest can be recreated', () => {
@@ -378,7 +378,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.recreateWhen).toBe('always');
+      expect(res.recreateClosed).toBe(true);
     });
 
     it('skips appending baseBranch and updateType to prTitle when prTitleStrict is true', () => {
@@ -428,7 +428,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res).toMatchObject({
         foo: 2,
         isGroup: true,
-        recreateWhen: 'always',
+        recreateClosed: true,
         prTitle: 'some-group',
         commitMessage: 'some-group',
         groupName: 'some-group',
@@ -481,7 +481,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res).toMatchObject({
         foo: 2,
         isGroup: true,
-        recreateWhen: 'always',
+        recreateClosed: true,
         prTitle: 'some-group (minor)',
         commitMessage: 'some-group',
         groupName: 'some-group',
@@ -527,7 +527,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateWhen).toBeUndefined();
+      expect(res.recreateClosed).toBeUndefined();
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
@@ -570,7 +570,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateWhen).toBeUndefined();
+      expect(res.recreateClosed).toBeUndefined();
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
@@ -611,7 +611,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateWhen).toBe('always');
+      expect(res.recreateClosed).toBe(true);
       expect(res.groupName).toBeDefined();
     });
 
@@ -969,7 +969,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.recreateWhen).toBe('auto');
+      expect(res.recreateClosed).toBe(true);
       expect(res.groupName).toBeUndefined();
       expect(generateBranchConfig(branch)).toMatchSnapshot({
         upgrades: [

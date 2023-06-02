@@ -178,16 +178,14 @@ export function generateBranchConfig(
       logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateWhen =
-        upgrade.recreateWhen === 'never' ? 'never' : 'always';
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (
       newValue.length > 1 &&
       (upgrade.isDigest || upgrade.isPinDigest)
     ) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateWhen =
-        upgrade.recreateWhen === 'never' ? 'never' : 'always';
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
@@ -295,7 +293,7 @@ export function generateBranchConfig(
     if (config.upgrades[0].depName?.startsWith('@types/')) {
       logger.debug('Found @types - reversing upgrades to use depName in PR');
       sortTypesGroup(config.upgrades);
-      config.upgrades[0].recreateWhen = 'auto';
+      config.upgrades[0].recreateClosed = true;
       config.hasTypes = true;
     }
   } else {

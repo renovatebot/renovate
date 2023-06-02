@@ -72,6 +72,7 @@ export interface RenovateSharedConfig {
   stopUpdatingLabel?: string;
   rebaseWhen?: string;
   recreateWhen?: RecreateWhen;
+  recreateClosed?:boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;
