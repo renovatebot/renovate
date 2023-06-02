@@ -31,7 +31,7 @@ export function getPrConfigDescription(config: BranchConfig): string {
     prBody += 'Whenever PR becomes conflicted';
   }
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
-  if (config.recreateWhen === 'always') {
+  if (config.recreateClosed) {
     prBody += emojify(
       // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
