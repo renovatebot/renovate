@@ -9,6 +9,8 @@ import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -394,6 +396,16 @@ export async function initRepo({
         name: config.repositoryName,
       },
     });
+
+    if (res?.errors) {
+      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
+        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+      }
+      logger.debug({ res }, 'Unexpected Graph QL errors');
+      throw new Error(PLATFORM_UNKNOWN_ERROR);
+    }
+
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
@@ -409,7 +421,7 @@ export async function initRepo({
       repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
     ) {
       logger.debug(
-        { repository, this_repository: repo.nameWithOwner },
+        { desiredRepo: repository, foundRepo: repo.nameWithOwner },
         'Repository has been renamed'
       );
       throw new Error(REPOSITORY_RENAMED);

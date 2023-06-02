@@ -9,7 +9,7 @@ describe('modules/manager/npm/extract/npm', () => {
     it('returns null if failed to parse', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');
       const res = await getNpmLock('package.json');
-      expect(res).toBeNull();
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(0);
     });
 
     it('extracts', async () => {
@@ -69,13 +69,13 @@ describe('modules/manager/npm/extract/npm', () => {
     it('returns null if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getNpmLock('package.json');
-      expect(res).toBeNull();
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(0);
     });
 
     it('returns null on read error', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       const res = await getNpmLock('package.json');
-      expect(res).toBeNull();
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(0);
     });
   });
 });
