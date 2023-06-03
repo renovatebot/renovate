@@ -2887,8 +2887,10 @@ Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` 
 
 ## recreateWhen
 
+This feature used to be called `recreateClosed`.
+
 By default, Renovate detects if it proposed an update to a project before, and will not propose the same update again.
-For example the Webpack 3.x case described in the `separateMajorMinor` documentation.
+For example the Webpack 3.x case described in the [`separateMajorMinor`](#separatemajorminor) documentation.
 You can use `recreateWhen` to customize this behavior down to a per-package level.
 For example we override it to `always` in the following cases where branch names and PR titles must be reused:
 
@@ -2896,7 +2898,7 @@ For example we override it to `always` in the following cases where branch names
 - When pinning versions
 - Lock file maintenance
 
-You can select which behavior you want from Renovate bot:
+You can select which behavior you want from Renovate:
 
 - `always`: Recreates all closed or blocking PRs
 - `auto`: The default option. Recreates only immortal PRs (default)
