@@ -282,7 +282,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('Grouped pin & pinDigest can be recreated', () => {
+    it('recreates grouped pin & pinDigest', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -304,7 +304,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('Grouped pin & pinDigest cannot be recreated when closed if recreateWhen is never', () => {
+    it('does not recreate grouped pin & pinDigest when closed if recreateWhen=never', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -328,7 +328,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeFalse();
     });
 
-    it('Grouped pin can be recreated', () => {
+    it('recreates grouped pin', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -355,7 +355,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('grouped pinDigest can be recreated', () => {
+    it('recreates grouped pinDigest', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
