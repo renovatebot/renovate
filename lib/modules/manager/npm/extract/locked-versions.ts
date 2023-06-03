@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
@@ -42,7 +43,7 @@ export async function getLockedVersions(
       }
       for (const dep of packageFile.deps) {
         dep.lockedVersion =
-          lockFileCache[yarnLock].lockedVersions[
+          lockFileCache[yarnLock].lockedVersions?.[
             // TODO: types (#7154)
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${dep.depName}@${dep.currentValue}`
@@ -96,7 +97,7 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         // TODO: types (#7154)
         dep.lockedVersion = semver.valid(
-          lockFileCache[npmLock].lockedVersions[dep.depName!]
+          lockFileCache[npmLock].lockedVersions?.[dep.depName!]
         )!;
       }
     } else if (pnpmShrinkwrap) {
@@ -107,11 +108,20 @@ export async function getLockedVersions(
         lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
       }
 
+      const parentDir = packageFile.packageFile
+        .replace(/\/package\.json$/, '')
+        .replace(/^package\.json$/, '.');
       for (const dep of packageFile.deps) {
+        const { depName, depType } = dep;
         // TODO: types (#7154)
-        dep.lockedVersion = semver.valid(
-          lockFileCache[pnpmShrinkwrap].lockedVersions[dep.depName!]
-        )!;
+        const lockedVersion = semver.valid(
+          lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[parentDir]?.[
+            depType!
+          ]?.[depName!]
+        );
+        if (is.string(lockedVersion)) {
+          dep.lockedVersion = lockedVersion;
+        }
       }
     }
     if (lockFiles.length) {
