@@ -181,5 +181,26 @@ describe('modules/manager/bazel-module/bazelrc', () => {
         new CommandEntry('build', [new BazelOption('jobs', '600')]),
       ]);
     });
+
+    it('when bazlerc files recursively import each other', async () => {
+      mockReadLocalFile({
+        '.bazelrc': codeBlock`
+          import %workspace%/shared.bazelrc
+          build --jobs 600
+          `,
+        'shared.bazelrc': codeBlock`
+          import %workspace%/foo.bazelrc
+          `,
+        'foo.bazelrc': codeBlock`
+          import %workspace%/shared.bazelrc
+          `,
+      });
+      expect.assertions(1);
+      await expect(read('.')).rejects.toEqual(
+        new Error(
+          'Attempted to read a bazelrc multiple times. file: shared.bazelrc'
+        )
+      );
+    });
   });
 });
