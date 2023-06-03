@@ -92,18 +92,20 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.registryUrls).toEqual([
-        'https://example.com/custom_registry.git',
-        'https://github.com/bazelbuild/bazel-central-registry',
-      ]);
-      expect(result.deps).toEqual([
-        {
-          datasource: BazelDatasource.id,
-          depType: 'bazel_dep',
-          depName: 'rules_foo',
-          currentValue: '1.2.3',
-        },
-      ]);
+      expect(result).toEqual({
+        registryUrls: [
+          'https://example.com/custom_registry.git',
+          'https://github.com/bazelbuild/bazel-central-registry',
+        ],
+        deps: [
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+          },
+        ],
+      });
     });
 
     it('returns bazel_dep and archive_override dependencies', async () => {
