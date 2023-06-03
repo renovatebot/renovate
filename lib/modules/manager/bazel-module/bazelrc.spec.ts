@@ -1,13 +1,9 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as fs from '../../../util/fs';
+import { fs } from '../../../../test/util';
 import { BazelOption, CommandEntry, ImportEntry, parse, read } from './bazelrc';
 
-const adminConfig: RepoGlobalConfig = {
-  localDir: upath.resolve('lib/modules/manager/bazel-module/__fixtures__'),
-};
+jest.mock('../../../util/fs');
 
 describe('modules/manager/bazel-module/bazelrc', () => {
   describe('BazelOption', () => {
@@ -79,14 +75,6 @@ describe('modules/manager/bazel-module/bazelrc', () => {
   });
 
   describe('read()', () => {
-    beforeEach(() => {
-      GlobalConfig.set(adminConfig);
-    });
-
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('when .bazelrc does not exist', async () => {
       const result = await read('.');
       expect(result).toHaveLength(0);
@@ -97,7 +85,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
         // This is not a valid comment
         build --show_timestamps --keep_going --jobs 600
         `;
-      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(bazelrc);
+      fs.readLocalFile.mockResolvedValueOnce(bazelrc);
       const result = await read('bazelrc/invalid-bazelrc');
       expect(result).toEqual([
         new CommandEntry('build', [
@@ -109,13 +97,22 @@ describe('modules/manager/bazel-module/bazelrc', () => {
     });
 
     it('when .bazelrc has no imports', async () => {
-      const bazelrc = codeBlock`
-        # This comment should be ignored
-        build --show_timestamps --keep_going --jobs 600
-        build --color=yes
-        `;
-      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(bazelrc);
-      const result = await read('bazelrc/no-imports');
+      const readDir = 'bazelrc/no-imports';
+      const bazelrcFile = upath.join(readDir, '.bazelrc');
+      fs.readLocalFile.mockImplementation((file): Promise<any> => {
+        let content = '';
+        if (file === bazelrcFile) {
+          content = codeBlock`
+            # This comment should be ignored
+            build --show_timestamps --keep_going --jobs 600
+            build --color=yes
+            `;
+        } else {
+          return Promise.reject(new Error(`Unexpected file: ${file}`));
+        }
+        return Promise.resolve(content);
+      });
+      const result = await read(readDir);
       expect(result).toEqual([
         new CommandEntry('build', [
           new BazelOption('show_timestamps'),
@@ -127,7 +124,31 @@ describe('modules/manager/bazel-module/bazelrc', () => {
     });
 
     it('when .bazelrc has import and try-import, try-import exists', async () => {
-      const result = await read('bazelrc/single-level-imports');
+      const readDir = 'bazelrc/single-level-imports';
+      const bazelrcFile = upath.join(readDir, '.bazelrc');
+      const sharedFile = upath.join(readDir, 'shared.bazelrc');
+      const localFile = upath.join(readDir, 'local.bazelrc');
+      fs.readLocalFile.mockImplementation((file): Promise<any> => {
+        let content = '';
+        if (file === bazelrcFile) {
+          content = codeBlock`
+              import %workspace%/shared.bazelrc
+              try-import %workspace%/local.bazelrc
+              `;
+        } else if (file === sharedFile) {
+          content = codeBlock`
+              build --show_timestamps
+              `;
+        } else if (file === localFile) {
+          content = codeBlock`
+              build --color=yes
+              `;
+        } else {
+          return Promise.reject(new Error(`Unexpected file: ${file}`));
+        }
+        return Promise.resolve(content);
+      });
+      const result = await read(readDir);
       expect(result).toEqual([
         new CommandEntry('build', [new BazelOption('show_timestamps')]),
         new CommandEntry('build', [new BazelOption('color', 'yes')]),
@@ -135,14 +156,55 @@ describe('modules/manager/bazel-module/bazelrc', () => {
     });
 
     it('when .bazelrc has import and try-import, try-import does not exist', async () => {
-      const result = await read('bazelrc/try-import-does-not-exist');
+      const readDir = 'bazelrc/try-import-does-not-exist';
+      const bazelrcFile = upath.join(readDir, '.bazelrc');
+      const localFile = upath.join(readDir, 'local.bazelrc');
+      fs.readLocalFile.mockImplementation((file): Promise<any> => {
+        let content: string | null = '';
+        if (file === bazelrcFile) {
+          content = codeBlock`
+            build --jobs 600
+            try-import %workspace%/local.bazelrc
+            `;
+        } else if (file === localFile) {
+          content = null;
+        } else {
+          return Promise.reject(new Error(`Unexpected file: ${file}`));
+        }
+        return Promise.resolve(content);
+      });
+      const result = await read(readDir);
       expect(result).toEqual([
         new CommandEntry('build', [new BazelOption('jobs', '600')]),
       ]);
     });
 
     it('when .bazelrc multi-level import', async () => {
-      const result = await read('bazelrc/multi-level-imports');
+      const readDir = 'bazelrc/multi-level-imports';
+      const bazelrcFile = upath.join(readDir, '.bazelrc');
+      const sharedFile = upath.join(readDir, 'shared.bazelrc');
+      const fooFile = upath.join(readDir, 'foo.bazelrc');
+      fs.readLocalFile.mockImplementation((file): Promise<any> => {
+        let content = '';
+        if (file === bazelrcFile) {
+          content = codeBlock`
+            import %workspace%/shared.bazelrc
+            build --jobs 600
+            `;
+        } else if (file === sharedFile) {
+          content = codeBlock`
+            import %workspace%/foo.bazelrc
+            `;
+        } else if (file === fooFile) {
+          content = codeBlock`
+            build --show_timestamps
+            `;
+        } else {
+          return Promise.reject(new Error(`Unexpected file: ${file}`));
+        }
+        return Promise.resolve(content);
+      });
+      const result = await read(readDir);
       expect(result).toEqual([
         new CommandEntry('build', [new BazelOption('show_timestamps')]),
         new CommandEntry('build', [new BazelOption('jobs', '600')]),

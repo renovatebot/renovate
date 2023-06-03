@@ -1,2 +1,0 @@
-build --jobs 600
-try-import %workspace%/local.bazelrc

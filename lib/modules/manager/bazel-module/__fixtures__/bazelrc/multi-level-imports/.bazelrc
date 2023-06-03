@@ -1,2 +1,0 @@
-import %workspace%/shared.bazelrc
-build --jobs 600
