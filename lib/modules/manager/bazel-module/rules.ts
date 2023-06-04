@@ -87,9 +87,37 @@ const GitOverrideToPackageDep = RecordFragmentSchema.extend({
   }
 );
 
+const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
+  children: z.object({
+    rule: StringFragmentSchema.extend({
+      value: z.enum(['archive_override', 'local_path_override']),
+    }),
+    module_name: StringFragmentSchema,
+  }),
+}).transform(
+  ({ children: { rule, module_name: moduleName } }): OverridePackageDep => {
+    let bazelDepSkipReason: SkipReason = 'unsupported';
+    switch (rule.value) {
+      case 'archive_override':
+        bazelDepSkipReason = 'file-dependency';
+        break;
+      case 'local_path_override':
+        bazelDepSkipReason = 'local-dependency';
+        break;
+    }
+    return {
+      depType: rule.value,
+      depName: moduleName.value,
+      skipReason: 'unsupported-datasource',
+      bazelDepSkipReason,
+    };
+  }
+);
+
 export const RuleToBazelModulePackageDep = z.union([
   BazelDepToPackageDep,
   GitOverrideToPackageDep,
+  UnsupportedOverrideToPackageDep,
 ]);
 
 const githubRemoteRegex = regEx(

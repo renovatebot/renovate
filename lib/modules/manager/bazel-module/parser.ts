@@ -5,7 +5,12 @@ import type { RecordFragment } from './fragments';
 import * as starlark from './starlark';
 
 const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
-const supportedRules = ['bazel_dep', 'git_override'];
+const supportedRules = [
+  'archive_override',
+  'bazel_dep',
+  'git_override',
+  'local_path_override',
+];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
 /**
