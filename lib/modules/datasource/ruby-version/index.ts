@@ -62,7 +62,7 @@ export class RubyVersionDatasource extends Datasource {
     return res;
   }
 
-  override handleSpecificErrors(err: HttpError): never | void {
+  override handleHttpErrors(err: HttpError): never | void {
     throw new ExternalHostError(err);
   }
 }
