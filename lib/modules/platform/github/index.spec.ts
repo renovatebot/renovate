@@ -2129,7 +2129,7 @@ describe('modules/platform/github/index', () => {
             state: 'closed',
           },
         ]);
-      await github.initRepo({ repository: 'some/repo' } as never);
+      await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.findPr({
         branchName: 'branch-a',

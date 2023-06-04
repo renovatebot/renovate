@@ -11,6 +11,7 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+import { partial } from '../../../../test/util';
 
 interface TestAdapterInput {
   version: string;
@@ -211,7 +212,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
           resp(false, [
             { version: v3, releaseTimestamp: t3, foo: '3' },
             { version: v2, releaseTimestamp: t2, foo: '2' },
-            {} as never,
+            partial<TestAdapterInput>(),
             { version: v1, releaseTimestamp: t1, foo: '1' },
           ])
         );

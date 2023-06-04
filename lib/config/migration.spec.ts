@@ -441,7 +441,7 @@ describe('config/migration', () => {
         extends: ['npm:unpublishSafe'],
       });
 
-      config = { unpublishSafe: true, extends: 'foo' } as never;
+      config = { unpublishSafe: true, extends: 'foo'} as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
