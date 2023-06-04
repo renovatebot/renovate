@@ -26,7 +26,7 @@ function extractDepFromIncludeFile(
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
     return dep;
   }
   dep.currentValue = includeObj.ref;
@@ -63,7 +63,10 @@ function getAllIncludeProjects(data: GitlabPipeline): GitlabIncludeProject[] {
   return childrenData;
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const { platform, endpoint } = GlobalConfig.get();
   try {
@@ -80,9 +83,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
-      logger.debug({ err }, 'YAML exception extracting GitLab CI includes');
+      logger.debug(
+        { err, packageFile },
+        'YAML exception extracting GitLab CI includes'
+      );
     } else {
-      logger.warn({ err }, 'Error extracting GitLab CI includes');
+      logger.debug({ err, packageFile }, 'Error extracting GitLab CI includes');
     }
   }
   if (!deps.length) {

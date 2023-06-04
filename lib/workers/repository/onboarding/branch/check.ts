@@ -52,8 +52,13 @@ function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
+
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
+  // The repo is considered "not onboarded" if:
+  // - An onboarding cache is present, and
+  // - The current default branch SHA matches the default SHA found in the cache
+  // Also if there is a closed pr skip using cache as it is outdated
   if (config.requireConfig === 'optional' && config.onboarding === false) {
     // Return early and avoid checking for config files
     return true;
@@ -63,19 +68,17 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return true;
   }
 
-  const pr = await closedPrExists(config);
+  const closedOnboardingPr = await closedPrExists(config);
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
   // if onboarding cache is present and base branch has not been updated branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
     config.onboarding &&
-    !pr &&
+    !closedOnboardingPr &&
     onboardingBranchCache &&
     onboardingBranchCache.defaultBranchSha ===
-      getBranchCommit(config.defaultBranch!) &&
-    onboardingBranchCache.onboardingBranchSha ===
-      getBranchCommit(config.onboardingBranch!)
+      getBranchCommit(config.defaultBranch!)
   ) {
     logger.debug('Onboarding cache is valid. Repo is not onboarded');
     return false;
@@ -123,7 +126,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
-  if (!pr) {
+  if (!closedOnboardingPr) {
     logger.debug('Found no closed onboarding PR');
     return false;
   }
@@ -136,9 +139,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (!config.suppressNotifications!.includes('onboardingClose')) {
     // ensure PR comment
     await ensureComment({
-      number: pr.number,
+      number: closedOnboardingPr.number,
       topic: `Renovate is disabled`,
-      content: `Renovate is disabled due to lack of config. If you wish to reenable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
+      content: `Renovate is disabled because there is no Renovate configuration file. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
     });
   }
   throw new Error(REPOSITORY_CLOSED_ONBOARDING);

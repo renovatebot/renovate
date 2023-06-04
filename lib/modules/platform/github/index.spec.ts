@@ -3,6 +3,8 @@ import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -542,6 +544,40 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
 
+    it('throws unexpected graphql errors', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'SOME_ERROR_TYPE',
+              message: 'Some error message',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_UNKNOWN_ERROR);
+    });
+
+    it('throws graphql rate limit error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMITED',
+              message: 'API rate limit exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
     it('should throw error if renamed', async () => {
       httpMock
         .scope(githubApiHost)
@@ -865,13 +901,19 @@ describe('modules/platform/github/index', () => {
           },
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ days: 6 }).toISO(),
             updated_at: '01-09-2022',
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -957,12 +999,18 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              repo: { full_name: 'some/repo' },
+              sha: '123',
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -985,12 +1033,18 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(422);
 
@@ -2856,8 +2910,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
-        message:
-          'At least 1 approving review is required by reviewers with write access.',
+        message: 'Waiting on code owner review from org/team.',
       });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
@@ -3291,6 +3344,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -3319,6 +3374,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
@@ -3331,6 +3388,94 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBe('0abcdef');
+    });
+
+    it('continues if rebase fails due to 422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(422)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+
+    it('aborts if rebase fails due to non-422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it("aborts if commit SHA doesn't exist", async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
     });
   });
 });

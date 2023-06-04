@@ -1,3 +1,4 @@
+import { regEx } from '../../../util/regex';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
@@ -158,9 +159,11 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   flutter: {
     asdfPluginUrl: 'https://github.com/oae/asdf-flutter',
-    config: {
+    config: (version) => ({
       datasource: FlutterVersionDatasource.id,
-    },
+      // asdf-flutter plugin supports channel on version suffix.
+      currentValue: version.replace(regEx(/-(stable|beta|dev)$/), ''),
+    }),
   },
   flux2: {
     asdfPluginUrl: 'https://github.com/tablexi/asdf-flux2.git',
@@ -240,22 +243,42 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: (version) => {
       const adoptOpenJdkMatches = version.match(
         /^adoptopenjdk-(?<version>\d\S+)/
-      );
+      )?.groups;
       if (adoptOpenJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
-          currentValue: adoptOpenJdkMatches.groups!.version,
+          currentValue: adoptOpenJdkMatches.version,
         };
       }
       const adoptOpenJreMatches = version.match(
         /^adoptopenjdk-jre-(?<version>\d\S+)/
-      );
+      )?.groups;
       if (adoptOpenJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
-          currentValue: adoptOpenJreMatches.groups!.version,
+          currentValue: adoptOpenJreMatches.version,
+        };
+      }
+      const temurinJdkMatches = version.match(
+        /^temurin-(?<version>\d\S+)/
+      )?.groups;
+      if (temurinJdkMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jdk',
+          currentValue: temurinJdkMatches.version,
+        };
+      }
+      const temurinJreMatches = version.match(
+        /^temurin-jre-(?<version>\d\S+)/
+      )?.groups;
+      if (temurinJreMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jre',
+          currentValue: temurinJreMatches.version,
         };
       }
 
@@ -521,6 +544,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'pinterest/ktlint',
+    },
+  },
+  yamlfmt: {
+    asdfPluginUrl: 'https://github.com/kachick/asdf-yamlfmt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'google/yamlfmt',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
 };

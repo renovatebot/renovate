@@ -8,13 +8,15 @@ import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
-interface LegacyHostRule {
+export interface LegacyHostRule {
   hostName?: string;
   domainName?: string;
   baseUrl?: string;
+  host?: string;
+  endpoint?: string;
 }
 
-function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   const cloned: LegacyHostRule & HostRule = structuredClone(rule);
   delete cloned.hostName;
   delete cloned.domainName;

@@ -14,15 +14,12 @@ export function extractMsbuildGlobalManifest(
   try {
     manifest = JSON.parse(content);
   } catch (err) {
-    logger.debug(`Invalid JSON in ${packageFile}`);
+    logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }
 
   if (!manifest['msbuild-sdks'] && !manifest.sdk?.version) {
-    logger.debug(
-      { fileName: packageFile },
-      'This global.json is not a Nuget file'
-    );
+    logger.debug({ packageFile }, 'This global.json is not a Nuget file');
     return null;
   }
 

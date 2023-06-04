@@ -60,7 +60,7 @@ ecspresso 2.1.0
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
-flutter 3.7.6
+flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
 gohugo extended_0.104.3
@@ -104,6 +104,7 @@ zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
 ktlint 0.48.1
+yamlfmt 0.9.0
 dummy 1.2.3
 `
       );
@@ -509,6 +510,13 @@ dummy 1.2.3
             depName: 'ktlint',
           },
           {
+            currentValue: '0.9.0',
+            datasource: 'github-releases',
+            packageName: 'google/yamlfmt',
+            depName: 'yamlfmt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             depName: 'dummy',
             skipReason: 'unsupported-datasource',
           },
@@ -516,9 +524,32 @@ dummy 1.2.3
       });
     });
 
+    it('can handle flutter version channel', () => {
+      const withChannel = extractPackageFile('flutter 3.10.0-stable');
+      expect(withChannel).toEqual({
+        deps: [
+          {
+            currentValue: '3.10.0',
+            datasource: 'flutter-version',
+            depName: 'flutter',
+          },
+        ],
+      });
+      const withoutChannel = extractPackageFile('flutter 3.10.0');
+      expect(withoutChannel).toEqual({
+        deps: [
+          {
+            currentValue: '3.10.0',
+            datasource: 'flutter-version',
+            depName: 'flutter',
+          },
+        ],
+      });
+    });
+
     it('can handle java jre / jdk', () => {
-      const jdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
-      expect(jdkRes).toEqual({
+      const adoptOpenJdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
+      expect(adoptOpenJdkRes).toEqual({
         deps: [
           {
             currentValue: '16.0.0+36',
@@ -528,8 +559,32 @@ dummy 1.2.3
           },
         ],
       });
-      const jreRes = extractPackageFile('java adoptopenjdk-jre-16.0.0+36');
-      expect(jreRes).toEqual({
+      const adoptOpenJreRes = extractPackageFile(
+        'java adoptopenjdk-jre-16.0.0+36'
+      );
+      expect(adoptOpenJreRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jre',
+          },
+        ],
+      });
+      const temurinJdkRes = extractPackageFile('java temurin-16.0.0+36');
+      expect(temurinJdkRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jdk',
+          },
+        ],
+      });
+      const temurinJreRes = extractPackageFile('java temurin-jre-16.0.0+36');
+      expect(temurinJreRes).toEqual({
         deps: [
           {
             currentValue: '16.0.0+36',

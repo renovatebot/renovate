@@ -44,12 +44,12 @@ function extractFromSection(
         currentValue = requirements.version;
         nestedVersion = true;
       } else if (is.object(requirements)) {
-        skipReason = 'any-version';
+        skipReason = 'unspecified-version';
       } else {
         currentValue = requirements;
       }
       if (currentValue === '*') {
-        skipReason = 'any-version';
+        skipReason = 'unspecified-version';
       }
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
@@ -103,16 +103,16 @@ function extractFromSection(
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string
 ): Promise<PackageFileContent | null> {
-  logger.debug('pipenv.extractPackageFile()');
+  logger.trace(`pipenv.extractPackageFile(${packageFile})`);
 
   let pipfile: PipFile;
   try {
     // TODO: fix type (#9610)
     pipfile = toml.parse(content) as any;
   } catch (err) {
-    logger.debug({ err }, 'Error parsing Pipfile');
+    logger.debug({ err, packageFile }, 'Error parsing Pipfile');
     return null;
   }
   const res: PackageFileContent = { deps: [] };
@@ -142,7 +142,7 @@ export async function extractPackageFile(
     constraints.pipenv = pipfile['dev-packages']!.pipenv;
   }
 
-  const lockFileName = fileName + '.lock';
+  const lockFileName = `${packageFile}.lock`;
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];
   }

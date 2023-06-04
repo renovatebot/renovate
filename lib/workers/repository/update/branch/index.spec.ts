@@ -289,6 +289,21 @@ describe('workers/repository/update/branch/index', () => {
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });
 
+    it('allows branch but disables automerge if merged PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      scm.branchExists.mockResolvedValue(true);
+      config.automerge = true;
+      config.updateType = 'digest';
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 13,
+          state: 'merged',
+        })
+      );
+      await branchWorker.processBranch(config);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+    });
+
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       scm.branchExists.mockResolvedValue(true);
@@ -1334,7 +1349,7 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'new/some-branch',
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
-        branchFingerprint: '111',
+        commitFingerprint: '111',
         reuseExistingBranch: true,
         skipBranchUpdate: true,
       };

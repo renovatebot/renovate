@@ -9,8 +9,8 @@ import { logger } from '../../../../logger';
 const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
-  'every month': 'before 3am on the first day of the month',
-  monthly: 'before 3am on the first day of the month',
+  'every month': 'before 5am on the first day of the month',
+  monthly: 'before 5am on the first day of the month',
 };
 
 export function hasValidTimezone(timezone: string): [true] | [false, string] {

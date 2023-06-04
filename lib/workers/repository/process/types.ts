@@ -21,5 +21,5 @@ export interface DependencyVulnerabilities {
 export interface SeverityDetails {
   cvssVector: string;
   score: string;
-  severityLevel?: string;
+  severityLevel: string;
 }

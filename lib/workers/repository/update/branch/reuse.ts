@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
@@ -22,35 +21,6 @@ export async function shouldReuseExistingBranch(
     return result;
   }
   logger.debug(`Branch already exists`);
-
-  // Check for existing PR
-  const pr = await platform.getBranchPr(branchName);
-
-  if (pr) {
-    if (pr.title?.startsWith('rebase!')) {
-      logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
-      return result;
-    }
-    if (pr.bodyStruct?.rebaseRequested) {
-      logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
-      return result;
-    }
-    if (pr.labels?.includes(config.rebaseLabel!)) {
-      logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
-      // istanbul ignore if
-      if (GlobalConfig.get('dryRun')) {
-        logger.info(
-          `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
-            pr.number
-          }`
-        );
-      } else {
-        await platform.deleteLabel(pr.number, config.rebaseLabel!);
-      }
-      return result;
-    }
-  }
-
   if (
     config.rebaseWhen === 'behind-base-branch' ||
     (config.rebaseWhen === 'auto' &&
