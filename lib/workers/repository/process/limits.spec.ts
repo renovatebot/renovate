@@ -2,11 +2,13 @@ import { DateTime } from 'luxon';
 import {
   RenovateConfig,
   getConfig,
+  partial,
   platform,
   scm,
 } from '../../../../test/util';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
+import type { Pr } from '../../../modules/platform/types';
 
 let config: RenovateConfig;
 
@@ -59,10 +61,12 @@ describe('workers/repository/process/limits', () => {
       config.prConcurrentLimit = 20;
       platform.getBranchPr.mockImplementation((branchName) =>
         branchName
-          ? Promise.resolve({
-              sourceBranch: branchName,
-              state: 'open',
-            } as never)
+          ? Promise.resolve(
+              partial<Pr>({
+                sourceBranch: branchName,
+                state: 'open',
+              })
+            )
           : Promise.reject('some error')
       );
       const branches: BranchConfig[] = [

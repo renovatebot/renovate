@@ -19,6 +19,7 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
+import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
 
 jest.mock('../../../../../util/host-rules');
 
@@ -675,7 +676,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           url: 'https://github.com/some/other-repository/releases/other@1.0.0',
           name: 'some/dep',
           description: 'some body',
-        } as never,
+        },
         {
           version: 'other@1.0.1',
           description:
@@ -685,7 +686,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           url: 'https://github.com/some/other-repository/releases/other@1.0.1',
           name: 'some/dep',
         },
-      ]);
+      ] satisfies GithubReleaseItem[]);
       const res = await getReleaseNotes(
         {
           ...githubProject,

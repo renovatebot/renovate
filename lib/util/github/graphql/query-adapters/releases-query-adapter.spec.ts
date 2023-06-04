@@ -1,5 +1,3 @@
-import { partial } from '../../../../../test/util';
-import type { GithubGraphqlDatasourceAdapter } from '../types';
 import { adapter } from './releases-query-adapter';
 import type { GithubGraphqlRelease } from './releases-query-adapter';
 
