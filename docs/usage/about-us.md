@@ -39,7 +39,7 @@ Some features made a lot of people happy, and efficient!
 - [@shegox](https://github.com/shegox) worked on the Go manager, and improved our docs
 - [@setchy](https://github.com/setchy) focused on Bitbucket Cloud and replacement features
 - [@cgrindel](https://github.com/cgrindel) created the `bazel-module` manager
-- [@RahulGautamSingh](https://github.com/RahulGautamSingh) refactored our code and ...
+- [@RahulGautamSingh](https://github.com/RahulGautamSingh) refactored a lot of code and worked on performance improvements like reduced cloning during updates and onboarding
 - [@Gabriel-Ladzaretti](https://github.com/Gabriel-Ladzaretti) ...
 - [@Churro](https://github.com/Churro) worked on the `gradle` manager and added support for OSV vulnerabilities
 
