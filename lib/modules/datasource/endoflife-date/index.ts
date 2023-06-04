@@ -5,7 +5,7 @@ import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, registryUrl } from './common';
-import { EndoflifeHttpResponseScheme } from './schema';
+import { EndoflifeDateVersions } from './schema';
 
 export class EndoflifeDatePackagesource extends Datasource {
   static readonly id = datasource;
@@ -41,10 +41,7 @@ export class EndoflifeDatePackagesource extends Datasource {
     const url = joinUrlParts(registryUrl, `${packageName}.json`);
 
     try {
-      const response = await this.http.getJson(
-        url,
-        EndoflifeHttpResponseScheme
-      );
+      const response = await this.http.getJson(url, EndoflifeDateVersions);
 
       result.releases.push(...response.body);
 
