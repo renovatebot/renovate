@@ -103,6 +103,10 @@ export function generateBranchConfig(
       upg.displayFrom = upg.currentValue;
       upg.displayTo = upg.newValue;
     }
+
+    if (upg.isLockFileMaintenance) {
+      upg.recreateClosed = upg.recreateWhen !== 'never';
+    }
     upg.displayFrom ??= '';
     upg.displayTo ??= '';
     if (!depNames.includes(upg.depName!)) {

@@ -67,6 +67,7 @@ describe('workers/repository/updates/generate', () => {
             branchName: 'some-branch',
             prTitle: 'some-title',
             isLockFileMaintenance: true,
+            recreateClosed: true,
           },
         ],
       });
