@@ -217,14 +217,7 @@ describe('modules/datasource/rubygems/versions-datasource', () => {
         .get('/versions')
         .reply(
           200,
-          codeBlock`
-            created_at: 2021-05-04T00:00:00.000Z
-            ---
-            foo 1.1.1 11111111111111111111111111111111
-            bar 2.2.2 22222222222222222222222222222222
-            baz 3.3.3 33333333333333333333333333333333
-            foo -1.1.1,1.2.3 44444444444444444444444444444444
-          ` + '\n'
+          fullBody + `foo -1.1.1,1.2.3 44444444444444444444444444444444\n`
         );
 
       const res2 = await rubygems.getReleases({
@@ -237,6 +230,81 @@ describe('modules/datasource/rubygems/versions-datasource', () => {
         memCache.get('rubygems-versions-cache:https://rubygems.org')
       ).toMatchObject({
         contentTail: '44444444444444444444444444444444\n',
+      });
+    });
+
+    describe('Error handling', () => {
+      beforeEach(async () => {
+        httpMock
+          .scope('https://rubygems.org')
+          .get('/versions')
+          .reply(200, fullBody);
+
+        await rubygems.getReleases({
+          registryUrl: 'https://rubygems.org',
+          packageName: 'foo',
+        });
+
+        jest.advanceTimersByTime(15 * 60 * 1000);
+      });
+
+      it('handles 404', async () => {
+        httpMock.scope('https://rubygems.org').get('/versions').reply(404);
+
+        await expect(
+          rubygems.getReleases({
+            registryUrl: 'https://rubygems.org',
+            packageName: 'foo',
+          })
+        ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
+
+        await expect(
+          rubygems.getReleases({
+            registryUrl: 'https://rubygems.org',
+            packageName: 'foo',
+          })
+        ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
+      });
+
+      it('handles 416', async () => {
+        httpMock
+          .scope('https://rubygems.org')
+          .get('/versions')
+          .reply(416)
+          .get('/versions')
+          .reply(
+            200,
+            codeBlock`
+              created_at: 2021-05-05T00:00:00.000Z
+              ---
+              foo 9.9.9 99999999999999999999999999999999
+            ` + '\n'
+          );
+
+        const res = await rubygems.getReleases({
+          registryUrl: 'https://rubygems.org',
+          packageName: 'foo',
+        });
+
+        expect(res).toEqual({ releases: [{ version: '9.9.9' }] });
+      });
+
+      it('handles unknown errors', async () => {
+        httpMock
+          .scope('https://rubygems.org')
+          .get('/versions')
+          .replyWithError('Unknown error');
+
+        await expect(
+          rubygems.getReleases({
+            registryUrl: 'https://rubygems.org',
+            packageName: 'foo',
+          })
+        ).rejects.toThrow(ExternalHostError);
+
+        expect(
+          memCache.get('rubygems-versions-cache:https://rubygems.org')
+        ).toBeUndefined();
       });
     });
   });

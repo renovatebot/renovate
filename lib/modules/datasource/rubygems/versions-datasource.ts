@@ -214,7 +214,7 @@ export class VersionsDatasource extends Datasource {
         return { versionsEndpointSupported: false };
       }
 
-      throw err instanceof ExternalHostError ? err : new ExternalHostError(err);
+      throw new ExternalHostError(err);
     }
   }
 
@@ -242,14 +242,19 @@ export class VersionsDatasource extends Datasource {
       }
 
       /**
-       * Most likely the content has changed since the last sync.
-       * This means we need to start over with a full sync.
+       * We request data in range that overlaps previously fetched data.
+       * If the head of the response doesn't match the tail of the previous response,
+       * it means that the data we have is no longer valid.
+       * In this case we start over with a full sync.
        */
       const contentHead = getContentHead(body);
       if (contentHead !== oldCache.contentTail) {
         return this.fullSync(registryUrl);
       }
 
+      /**
+       * Update the cache with the new data.
+       */
       const versionsEndpointSupported = true;
       const delta = stripContentHead(body);
       const packageVersions = VersionsDatasource.reconcilePackageVersions(
@@ -272,19 +277,23 @@ export class VersionsDatasource extends Datasource {
         const responseStatus = err.response?.statusCode;
 
         /**
-         * In case of `416 Range Not Satisfiable` we need to do a full sync.
-         * This is unlikely to happen in real life.
+         * In case of `416 Range Not Satisfiable` we do a full sync.
+         * This is unlikely to happen in real life, but anyway.
          */
         if (responseStatus === 416) {
           return this.fullSync(registryUrl);
         }
 
+        /**
+         * If the endpoint is not supported, we stop trying.
+         * This is unlikely to happen in real life, but still.
+         */
         if (responseStatus === 404) {
           return { versionsEndpointSupported: false };
         }
       }
 
-      throw err instanceof ExternalHostError ? err : new ExternalHostError(err);
+      throw new ExternalHostError(err);
     }
   }
 }
