@@ -265,10 +265,10 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
       },
       {
-        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+        cmd: "helm dependency update ''",
       },
     ]);
   });
@@ -318,10 +318,32 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
-        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+        cmd: "helm dependency update ''",
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });
@@ -364,10 +386,32 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
-        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+        cmd: "helm dependency update ''",
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });
@@ -417,10 +461,32 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
-        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+        cmd: "helm dependency update ''",
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });
@@ -455,10 +521,32 @@ describe('modules/manager/helmv3/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
-        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+        cmd: "helm dependency update ''",
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });
