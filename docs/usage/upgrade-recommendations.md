@@ -26,7 +26,7 @@ But updating regulary actually _saves_ you time, because:
 - Regular updates tend to be small
 - Applying `major` updates is easier
 - You'll be ready for CVE patches
-- You'll look for ways to automate the update process
+- You'll look for ways to automate the updates
 
 #### Regular updates tend to be small
 
@@ -50,6 +50,15 @@ Thirdly, you'll be ready when a upstream package releases a patch for a critical
 If you're current, you can review and merge Renovate's PR quickly.
 
 If you're behind on updates you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
+
+#### You'll look for ways to automate the updates
+
+Finally, when you're updating often, you'll start looking for ways to automate the updates.
+You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.
+Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](https://docs.renovatebot.com/presets-default/#automergepatch) preset.
+
+You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md/#github-merge-queue) to speed up the merge process.
+Renovate does not support GitLab's Merge Trains, see [issue #5573](https://github.com/renovatebot/renovate/issues/5573).
 
 ## Starting from a new project
 
@@ -82,14 +91,21 @@ Now that you're up to date, it's important to start thinking about how to make u
 ## Project with five year old dependencies
 
 Let's assume your Dependency Dashboard lists more than 50 updates, and you have a few `major` version updates pending.
-If a project becomes this badly behind on updates, you have a bigger problem than just the updates.
-Let's deal with the easier stuff first: getting back up to date, and deal with the big problem after that.
+If your project is this badly behind on updates, you have two problems.
+The first problem is to get your dependencies back up to date, the second is improving your update process.
 
+### Focus on critical updates first
+
+Let's fix the easier problem first: getting back up to date.
 First update any dependencies that have critical updates for CVEs or other security related improvements.
+
+### Fix blocking updates
 
 Next, update any dependency that's blocking another update.
 You may need to update dependency `A` before you can take an update for dependency `B` or `C`.
 In that case, update dependency `A` first.
+
+### Update to latest `minor` or `patch` of current version
 
 Then update all dependencies to their latest `minor` or `patch` version to prepare for dealing with `major` updates.
 
@@ -99,10 +115,12 @@ You should update to `2`, then `3` and finally `4`.
 Avoid updating from `1` directly to `4`.
 Taking `major` updates in sequence allows you to read the changelogs/blogs for each `major` version, and learn why upstream made certain breaking changes.
 
+### Update development tools
+
 Finally update your development tools.
 
-You're done with the _technical_ side of things, but you still need to work on the _human_ side.
-If you don't fix the human side, you'll end up with outdated dependencies again.
+You're done with the _technical_ side, now you can start improving the _human_ side.
+By improving the human side, you'll avoid ending up with outdated dependencies again.
 Keep reading to learn how to deal with the human side of things.
 
 ## Why developers avoid updating
@@ -136,6 +154,7 @@ Here's my short list:
 - Avoid long lived branches that diverge from `main` over time
 - Ensure company policy allows frequent updates
 - Dig beyond "developer error" when things go wrong, focus on the process
+- Enable GitHub Merge Queue to speed up merges
 
 ## How we use Renovate
 
