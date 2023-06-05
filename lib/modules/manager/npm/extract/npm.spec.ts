@@ -9,7 +9,7 @@ describe('modules/manager/npm/extract/npm', () => {
     it('returns empty if failed to parse', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');
       const res = await getNpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(0);
     });
 
     it('extracts', async () => {
@@ -17,7 +17,7 @@ describe('modules/manager/npm/extract/npm', () => {
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock as never);
       const res = await getNpmLock('package.json');
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.lockedVersions)).toHaveLength(7);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(7);
     });
 
     it('extracts npm 7 lockfile', async () => {
@@ -25,14 +25,14 @@ describe('modules/manager/npm/extract/npm', () => {
       fs.readLocalFile.mockResolvedValueOnce(npm7Lock as never);
       const res = await getNpmLock('package.json');
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.lockedVersions)).toHaveLength(7);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(7);
       expect(res.lockfileVersion).toBe(2);
     });
 
     it('returns empty if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getNpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(Object.keys(res.lockedVersions!)).toHaveLength(0);
     });
   });
 });

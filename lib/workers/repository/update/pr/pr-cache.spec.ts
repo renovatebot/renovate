@@ -37,12 +37,12 @@ describe('workers/repository/update/pr/pr-cache', () => {
 
     it('returns prCache', () => {
       branchCache.prCache = {
-        fingerprint: 'fp',
+        bodyFingerprint: 'fp',
         lastEdited: new Date('11/11/2011').toISOString(),
       };
       cache.getCache.mockReturnValue(dummyCache);
       expect(getPrCache('branch_name')).toStrictEqual({
-        fingerprint: 'fp',
+        bodyFingerprint: 'fp',
         lastEdited: new Date('11/11/2011').toISOString(),
       });
     });
@@ -66,7 +66,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
           {
             ...branchCache,
             prCache: {
-              fingerprint: 'fingerprint_hash',
+              bodyFingerprint: 'fingerprint_hash',
               lastEdited: new Date('2020-01-01').toISOString(),
             },
           },

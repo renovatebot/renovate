@@ -168,16 +168,16 @@ This helped a lot to reduce the noise in PRs, the second month we got 400 Pull R
 > The next section could look like an ad or a sponsored post; it’s not. We’re just big fans of the product.
 
 The ease of getting started with Renovate’s Docker image is what got us onboard easily.
-But what confirmed our choice is the insane crazy amount of features and [configuration options](https://docs.renovatebot.com/configuration-options/).
+But what confirmed our choice is the insane crazy amount of features and [configuration options](../configuration-options.md).
 
 Some features and options we enjoy:
 
-- [Shared configurations (presets)](https://docs.renovatebot.com/key-concepts/presets/), we have a Swissquote default configuration we set for all repositories, each team can extend it with their own practices
-- [Integration with GitHub’s Dependabot alerts](https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts) to raise the priority and send security remediation PRs as soon as possible
-- Each rule can be customized either globally [or specified per package](https://docs.renovatebot.com/configuration-options/#packagerules)
-- Works with your [private package registry](https://docs.renovatebot.com/getting-started/private-packages/)
+- [Shared configurations (presets)](../key-concepts/presets.md), we have a Swissquote default configuration we set for all repositories, each team can extend it with their own practices
+- [Integration with GitHub’s Dependabot alerts](../configuration-options.md#vulnerabilityalerts) to raise the priority and send security remediation PRs as soon as possible
+- Each rule can be customized either globally [or specified per package](../configuration-options.md#packagerules)
+- Works with your [private package registry](../getting-started/private-packages.md)
 - Supports more than 70 [languages and package managers](https://docs.renovatebot.com/modules/manager/#supported-managers): Maven, Docker, npm, Docker Compose, Python
-- If you are using dependencies in a custom way, [there is a special regexManager](https://docs.renovatebot.com/configuration-options/#regexmanagers) that allows you to transform patterns into dependencies
+- If you are using dependencies in a custom way, [there is a special regexManager](../configuration-options.md#regexmanagers) that allows you to transform patterns into dependencies
 
 There is an [on-premise option](https://www.mend.io/free-developer-tools/renovate/on-premises/), but you can also have it as [an app on GitHub.com](https://github.com/marketplace/renovate).
 On our side, we’re not using the on-premise but rather a custom scheduler using the open source Docker image.
