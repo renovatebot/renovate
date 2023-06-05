@@ -68,10 +68,7 @@ function shouldProcessLine(line: string): boolean {
   if (line.length === 0) {
     return false;
   }
-  if (line.startsWith('#')) {
-    return false;
-  }
-  return true;
+  return !line.startsWith('#');
 }
 
 function createEntry(line: string): BazelrcEntries | undefined {
