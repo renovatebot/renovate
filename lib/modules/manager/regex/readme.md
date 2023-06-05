@@ -131,8 +131,6 @@ The `Dockerfile` is documented better as well.
 The syntax in the example is arbitrary, and you can set your own syntax.
 If you do, update your `matchStrings` regex!
 
-You can use simple versions of such comments to increase readability.
-
 For example the `appVersion` property in a `Chart.yaml` of a Helm chart is always referenced to an Docker image.
 In such scenarios, some values can be hard-coded.
 For example:

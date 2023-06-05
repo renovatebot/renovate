@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, mockedFunction } from '../../../../test/util';
@@ -36,6 +37,25 @@ describe('modules/manager/pep621/artifacts', () => {
       expect(result).toBeNull();
     });
 
+    it('return artifact error if newPackageFile content is not valid', async () => {
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+        },
+      ];
+      const result = await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        newPackageFileContent: '--test string--',
+        config,
+        updatedDeps,
+      });
+      expect(result).toEqual([
+        {
+          artifactError: { stderr: 'Failed to parse new package file content' },
+        },
+      ]);
+    });
+
     it('return processor result', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
@@ -44,7 +64,11 @@ describe('modules/manager/pep621/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('new test content');
       // python
       getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+        releases: [
+          { version: '3.7.1' },
+          { version: '3.8.1' },
+          { version: '3.11.2' },
+        ],
       });
       // pdm
       getPkgReleases.mockResolvedValueOnce({
@@ -54,7 +78,12 @@ describe('modules/manager/pep621/artifacts', () => {
       const updatedDeps = [{ packageName: 'dep1' }];
       const result = await updateArtifacts({
         packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
+        newPackageFileContent: codeBlock`
+[project]
+name = "pdm"
+dynamic = ["version"]
+requires-python = "<3.9"
+        `,
         config: {},
         updatedDeps,
       });
@@ -90,11 +119,11 @@ describe('modules/manager/pep621/artifacts', () => {
             '-w "/tmp/github/some/repo" ' +
             'containerbase/sidecar ' +
             'bash -l -c "' +
-            'install-tool python 3.11.2 ' +
+            'install-tool python 3.8.1 ' +
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update dep1' +
+            'pdm update --no-sync dep1' +
             '"',
           options: {
             cwd: '/tmp/github/some/repo',

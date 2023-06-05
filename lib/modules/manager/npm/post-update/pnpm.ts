@@ -194,7 +194,7 @@ export async function getConstraintFromLockFile(
  */
 
 const lockToPnpmVersionMapping = [
-  { lockfileVersion: 6.0, lowerConstraint: '>=8' },
+  { lockfileVersion: 6.0, lowerConstraint: '>=7.24.2' },
   {
     lockfileVersion: 5.4,
     lowerConstraint: '>=7',

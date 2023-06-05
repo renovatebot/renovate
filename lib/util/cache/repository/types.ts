@@ -41,7 +41,11 @@ export interface OnboardingBranchCache {
 }
 
 export interface PrCache {
-  fingerprint: string;
+  /**
+   * Fingerprint of the PR body
+   */
+  fingerprint?: string; // Defunct
+  bodyFingerprint: string; // Actively used
   /**
    * last PR modified ISO timestamp
    */
@@ -64,7 +68,8 @@ export interface BranchCache {
   /**
    * Hash of the manager fingerprints and the filtered update branch config
    */
-  branchFingerprint?: string;
+  branchFingerprint?: string; // Defunct
+  commitFingerprint?: string; // Actively used
   /**
    * Branch name
    */

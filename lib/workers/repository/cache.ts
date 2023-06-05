@@ -98,14 +98,14 @@ async function generateBranchCache(
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
-    const branchFingerprint = branch.branchFingerprint;
+    const commitFingerprint = branch.commitFingerprint;
     const prCache = getPrCache(branchName);
 
     return {
       automerge,
       baseBranchSha,
       baseBranch,
-      branchFingerprint,
+      commitFingerprint,
       branchName,
       isBehindBase,
       isConflicted,

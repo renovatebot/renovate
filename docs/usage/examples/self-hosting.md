@@ -95,7 +95,7 @@ stringData:
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
 
-A `config.js` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com):
+A `config.json` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com):
 
 ```yaml
 ---
@@ -201,7 +201,7 @@ workflows:
 ### GitLab CI/CD pipeline
 
 For GitLab pipelines we recommend you use the [`renovate-runner` project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
-We prepared some pipeline templates so its easy to run Renovate on pipeline schedules.
+We created some pipeline templates to help you run Renovate on pipeline schedules.
 You can also find the configuration steps there.
 
 For self-hosted GitLab clone/import the [`renovate-runner` project on GitLab](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
@@ -314,7 +314,7 @@ metadata:
   namespace: <namespace>
 ```
 
-Then you just need to add Git author, and mount volumes.
+Then you need to add a Git author, and configure the mount volumes.
 The final configuration should look something like this:
 
 ```yml
