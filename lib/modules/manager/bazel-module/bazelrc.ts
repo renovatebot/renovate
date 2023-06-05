@@ -116,15 +116,16 @@ async function readFile(
   const entries = parse(contents);
   const results: BazelrcEntries[] = [];
   for (const entry of entries) {
-    if (entry.entryType === 'import') {
-      const importFile = upath.normalize(
-        entry.path.replace('%workspace%', workspaceDir)
-      );
-      const importEntries = await readFile(importFile, workspaceDir, readFiles);
-      results.push(...importEntries);
-    } else {
+    if (entry.entryType === 'command') {
       results.push(entry);
+      continue;
     }
+
+    const importFile = upath.normalize(
+      entry.path.replace('%workspace%', workspaceDir)
+    );
+    const importEntries = await readFile(importFile, workspaceDir, readFiles);
+    results.push(...importEntries);
   }
   return results;
 }
