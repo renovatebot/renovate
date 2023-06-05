@@ -1,4 +1,5 @@
 import JSON5 from 'json5';
+import { DateTime } from 'luxon';
 import type { JsonValue } from 'type-fest';
 import { z } from 'zod';
 
@@ -211,3 +212,14 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
     return z.NEVER;
   }
 });
+
+export const UtcDate = z
+  .string({ description: 'ISO 8601 string' })
+  .transform((str, ctx): DateTime => {
+    const date = DateTime.fromISO(str, { zone: 'utc' });
+    if (!date.isValid) {
+      ctx.addIssue({ code: 'custom', message: 'Invalid date' });
+      return z.NEVER;
+    }
+    return date;
+  });

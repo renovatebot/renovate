@@ -1,3 +1,4 @@
+import { DateTime, Settings } from 'luxon';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -12,6 +13,11 @@ const packageName = 'amazon-eks';
 const eksMockPath = `/${packageName}.json`;
 
 describe('modules/datasource/endoflife-date/index', () => {
+  beforeAll(() => {
+    const now = DateTime.fromISO('2023-06-03');
+    Settings.now = () => now.valueOf();
+  });
+
   describe('getReleases', () => {
     it('processes real data', async () => {
       httpMock
