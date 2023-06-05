@@ -109,15 +109,20 @@ In that case, update dependency `A` first.
 
 Then update all dependencies to their latest `minor` or `patch` version to prepare for dealing with `major` updates.
 
+### Take `major` updates in sequence
+
 We recommend you take `major` updates in sequence.
-Say you're on version `1` of dependency `A`, and the latest `major` version is at `4`.
+Taking `major` updates in sequence allows you to read the changelogs/blogs for each `major` version, and learn _why_ upstream made certain breaking changes.
+
+Say you're on version `1` of a dependency, and the latest `major` version is at `4`.
 You should update to `2`, then `3` and finally `4`.
 Avoid updating from `1` directly to `4`.
-Taking `major` updates in sequence allows you to read the changelogs/blogs for each `major` version, and learn why upstream made certain breaking changes.
 
 ### Update development tools
 
 Finally update your development tools.
+
+### Improve the human side
 
 You're done with the _technical_ side, now you can start improving the _human_ side.
 By improving the human side, you'll avoid ending up with outdated dependencies again.
@@ -143,18 +148,21 @@ Focus on the process, not on the people.
 
 ### Make updating easy and fast
 
+- Make sure building the project is as fast as it can be
+- Have automated tests for the critical path of your project
+- Run the automated tests on every PR
+- Enable [GitHub Merge Queue](./key-concepts/automerge.md/#github-merge-queue) to speed up merges
+
+### Talk with your team about the update process
+
 Insert recommendations from Renovate maintainers here on how to deal with a team that doesn't want to apply updates, arguments to convince people to update often, dealing with team dynamics, and so on.
 
-Here's my short list:
+#### Ground rules
 
-- Run Renovate bot on all projects
-- Make sure building the project is as fast as it can be
-- Run automated tests on each PR
-- Have automated tests for the critical path of your project
+- Run Renovate bot on _all_ projects
 - Avoid long lived branches that diverge from `main` over time
-- Ensure company policy allows frequent updates
 - Dig beyond "developer error" when things go wrong, focus on the process
-- Enable GitHub Merge Queue to speed up merges
+- Ensure company policy allows frequent updates
 
 ## How we use Renovate
 
