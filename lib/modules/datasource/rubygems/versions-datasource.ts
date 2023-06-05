@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
