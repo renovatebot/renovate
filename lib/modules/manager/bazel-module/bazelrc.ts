@@ -22,27 +22,28 @@ export class BazelOption {
     const parts = input.split(spaceRegex);
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
-      if (part.startsWith('--')) {
-        const nameStartIdx = 2;
-        let name: string;
-        let value: string | undefined;
-        // Check for --option_name=option_value
-        const equalSignIdx = part.indexOf('=');
-        if (equalSignIdx >= 0) {
-          name = part.substring(nameStartIdx, equalSignIdx);
-          value = part.substring(equalSignIdx + 1);
-        } else {
-          name = part.substring(nameStartIdx);
-          const nextIdx = i + 1;
-          // Check for --option_name OR --option_name option_value
-          value =
-            nextIdx < parts.length && !parts[nextIdx].startsWith('--')
-              ? parts[nextIdx]
-              : undefined;
-        }
-        const option = new BazelOption(name, value);
-        options.push(option);
+      if (!part.startsWith('--')) {
+        continue;
       }
+
+      const nameStartIdx = 2;
+      // Check for --option_name=option_value
+      const equalSignIdx = part.indexOf('=');
+      if (equalSignIdx >= 0) {
+        const name = part.substring(nameStartIdx, equalSignIdx);
+        const value = part.substring(equalSignIdx + 1);
+        options.push(new BazelOption(name, value));
+        continue;
+      }
+
+      const name = part.substring(nameStartIdx);
+      const nextIdx = i + 1;
+      // Check for --option_name OR --option_name option_value
+      const value =
+        nextIdx < parts.length && !parts[nextIdx].startsWith('--')
+          ? parts[nextIdx]
+          : undefined;
+      options.push(new BazelOption(name, value));
     }
     return options;
   }
