@@ -214,7 +214,7 @@ export class VersionsDatasource extends Datasource {
         return { versionsEndpointSupported: false };
       }
 
-      throw new ExternalHostError(err);
+      this.handleGenericErrors(err);
     }
   }
 
@@ -293,7 +293,7 @@ export class VersionsDatasource extends Datasource {
         }
       }
 
-      throw new ExternalHostError(err);
+      this.handleGenericErrors(err);
     }
   }
 }

@@ -93,14 +93,14 @@ describe('modules/datasource/rubygems/versions-datasource', () => {
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
-        .replyWithError('Unknown');
+        .replyWithError('Unknown error');
 
       await expect(
         rubygems.getReleases({
           registryUrl: 'https://rubygems.org',
           packageName: 'foo',
         })
-      ).rejects.toThrow(ExternalHostError);
+      ).rejects.toThrow('Unknown error');
       expect(memCache.size).toBe(0);
     });
   });
@@ -300,7 +300,7 @@ describe('modules/datasource/rubygems/versions-datasource', () => {
             registryUrl: 'https://rubygems.org',
             packageName: 'foo',
           })
-        ).rejects.toThrow(ExternalHostError);
+        ).rejects.toThrow('Unknown error');
 
         expect(
           memCache.get('rubygems-versions-cache:https://rubygems.org')
