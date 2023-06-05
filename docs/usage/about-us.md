@@ -27,6 +27,7 @@ Next up, we have these people who help maintain parts of Renovate:
 - [@fgreinacher](https://github.com/fgreinacher) worked on NuGet
 - [@Turbo87](https://github.com/Turbo87) has helped in multiple areas, especially Cargo
 - [@HonkingGoose](https://github.com/HonkingGoose) works on the documentation and helps manage the community
+- [@Churro](https://github.com/Churro) worked on the `gradle` manager and added support for OSV vulnerabilities
 
 ### Valuable contributions
 
@@ -41,7 +42,6 @@ Some features made a lot of people happy, and efficient!
 - [@cgrindel](https://github.com/cgrindel) created the `bazel-module` manager
 - [@RahulGautamSingh](https://github.com/RahulGautamSingh) refactored a lot of code and worked on performance improvements like reduced cloning during updates and onboarding
 - [@Gabriel-Ladzaretti](https://github.com/Gabriel-Ladzaretti) ...
-- [@Churro](https://github.com/Churro) worked on the `gradle` manager and added support for OSV vulnerabilities
 
 ## Renovate development
 
