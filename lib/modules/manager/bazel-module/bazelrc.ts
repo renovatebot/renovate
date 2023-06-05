@@ -73,13 +73,13 @@ function shouldProcessLine(line: string): boolean {
 
 function createEntry(line: string): BazelrcEntries | undefined {
   const importResult = importRegex.exec(line);
-  if (importResult) {
-    const irGroups = importResult.groups!;
+  if (importResult?.groups) {
+    const irGroups = importResult.groups;
     return new ImportEntry(irGroups.path, irGroups.type === 'try-import');
   }
   const optionResult = optionRegex.exec(line);
-  if (optionResult) {
-    const orGroups = optionResult.groups!;
+  if (optionResult?.groups) {
+    const orGroups = optionResult.groups;
     return new CommandEntry(
       orGroups.command,
       BazelOption.parse(orGroups.options),
