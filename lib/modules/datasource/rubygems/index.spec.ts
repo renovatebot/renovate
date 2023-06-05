@@ -63,26 +63,6 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res).toBeNull();
     });
 
-    // it('returns null for an error without "not_supported" reason', async () => {
-    //   const versionsdataSourceSpy = jest
-    //     .spyOn(VersionsDatasource.prototype, 'syncVersions')
-    //     .mockImplementationOnce(() => {
-    //       throw new Error();
-    //     });
-
-    //   try {
-    //     const res = await getPkgReleases({
-    //       versioning: rubyVersioning.id,
-    //       datasource: RubyGemsDatasource.id,
-    //       packageName: 'rails',
-    //       registryUrls: [],
-    //     });
-    //     expect(res).toBeNull();
-    //   } finally {
-    //     versionsdataSourceSpy.mockRestore();
-    //   }
-    // });
-
     it('returns a dep for rubygems.org package hit', async () => {
       httpMock
         .scope('https://rubygems.org')
