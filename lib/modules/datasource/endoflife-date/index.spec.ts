@@ -52,7 +52,7 @@ describe('modules/datasource/endoflife-date/index', () => {
             version: '1.21-eks-17',
           },
           {
-            isDeprecated: true,
+            isDeprecated: false,
             releaseTimestamp: '2022-04-04T00:00:00.000Z',
             version: '1.22-eks-12',
           },
