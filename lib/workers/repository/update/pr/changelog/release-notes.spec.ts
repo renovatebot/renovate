@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
 import { mocked, partial } from '../../../../../../test/util';
 import * as githubGraphql from '../../../../../util/github/graphql';
+import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
 import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -19,7 +20,6 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
-import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
 
 jest.mock('../../../../../util/host-rules');
 

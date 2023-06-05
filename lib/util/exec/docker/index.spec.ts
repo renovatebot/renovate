@@ -1,4 +1,5 @@
 import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
+import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -13,7 +14,6 @@ import {
   resetPrefetchedImages,
   sideCarImage,
 } from '.';
-import { partial } from '../../../../test/util';
 
 jest.mock('../../../modules/datasource');
 
@@ -57,9 +57,9 @@ describe('util/exec/docker/index', () => {
     it('returns "latest" for bad release results', async () => {
       jest
         .spyOn(modulesDatasource, 'getPkgReleases')
-        .mockResolvedValue(undefined as never)
-        .mockResolvedValue(partial<modulesDatasource.ReleaseResult>())
-        .mockResolvedValue(
+        .mockResolvedValueOnce(undefined as never)
+        .mockResolvedValueOnce(partial<modulesDatasource.ReleaseResult>())
+        .mockResolvedValueOnce(
           partial<modulesDatasource.ReleaseResult>({ releases: [] })
         );
       expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
@@ -90,7 +90,7 @@ describe('util/exec/docker/index', () => {
       ];
       jest
         .spyOn(modulesDatasource, 'getPkgReleases')
-        .mockResolvedValue(
+        .mockResolvedValueOnce(
           partial<modulesDatasource.ReleaseResult>({ releases })
         );
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
@@ -105,7 +105,7 @@ describe('util/exec/docker/index', () => {
       ];
       jest
         .spyOn(modulesDatasource, 'getPkgReleases')
-        .mockResolvedValue(
+        .mockResolvedValueOnce(
           partial<modulesDatasource.ReleaseResult>({ releases })
         );
       expect(await getDockerTag('foo', '>=12', 'node')).toBe('14.0.2');

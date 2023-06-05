@@ -1,5 +1,6 @@
 import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
+import { partial } from '../../../../test/util';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
@@ -11,7 +12,6 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
-import { partial } from '../../../../test/util';
 
 interface TestAdapterInput {
   version: string;
