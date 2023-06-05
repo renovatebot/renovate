@@ -154,6 +154,12 @@ spec:
 
 ### CircleCI
 
+<!-- prettier-ignore -->
+!!! warning
+    The CircleCI configuration examples are for version `2` of `daniel-shuy/renovate`, which is outdated.
+    Do you know how to get `daniel-shuy/renovate` version `3` working?
+    Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
+
 If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
