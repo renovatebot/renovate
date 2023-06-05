@@ -35,7 +35,8 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             {
               manager: 'some-manager',
               updateType: 'lockFileMaintenance',
-            } as never,
+              branchName: 'some-branch',
+            },
           ],
         },
       ];
@@ -98,7 +99,8 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               depType: 'devDependencies',
               newValue: '2.0.1',
               isLockfileUpdate: true,
-            } as never,
+              branchName: 'some-branch',
+            },
           ],
         },
       ];

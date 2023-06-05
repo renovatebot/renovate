@@ -1,5 +1,4 @@
 import { NugetDatasource } from '../modules/datasource/nuget';
-import type { HostRule } from '../types';
 import {
   add,
   clear,
@@ -22,7 +21,7 @@ describe('util/host-rules', () => {
           hostType: 'azure',
           domainName: 'github.com',
           hostName: 'api.github.com',
-        } as HostRule)
+        } as never)
       ).toThrow();
     });
 
@@ -32,7 +31,7 @@ describe('util/host-rules', () => {
           hostType: 'azure',
           domainName: 'github.com',
           matchHost: 'https://api.github.com',
-        } as HostRule)
+        } as never)
       ).toThrow();
     });
 
@@ -42,7 +41,7 @@ describe('util/host-rules', () => {
           hostType: 'azure',
           hostName: 'api.github.com',
           matchHost: 'https://api.github.com',
-        } as HostRule)
+        } as never)
       ).toThrow();
     });
 
@@ -75,7 +74,7 @@ describe('util/host-rules', () => {
         username: 'root',
         password: 'p4$$w0rd',
         token: undefined,
-      } as HostRule);
+      } as never);
       expect(find({ hostType: NugetDatasource.id })).toEqual({});
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.org' })
@@ -111,7 +110,7 @@ describe('util/host-rules', () => {
       add({
         domainName: 'github.com',
         token: 'def',
-      } as HostRule);
+      } as never);
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
           .token
@@ -194,7 +193,7 @@ describe('util/host-rules', () => {
       add({
         hostName: 'nuget.local',
         token: 'abc',
-      } as HostRule);
+      } as never);
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' })
       ).toEqual({ token: 'abc' });
@@ -313,7 +312,7 @@ describe('util/host-rules', () => {
         hostType: NugetDatasource.id,
         hostName: 'my.local.registry',
         token: 'def',
-      } as HostRule);
+      } as never);
       add({
         hostType: NugetDatasource.id,
         matchHost: 'another.local.registry',
