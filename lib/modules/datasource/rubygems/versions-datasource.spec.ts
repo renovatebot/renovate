@@ -1,7 +1,6 @@
 import { codeBlock } from 'common-tags';
 import * as httpMock from '../../../../test/http-mock';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GetReleasesConfig } from '../types';
 import { VersionsDatasource, memCache } from './versions-datasource';
 
