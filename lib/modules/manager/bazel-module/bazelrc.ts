@@ -102,7 +102,7 @@ async function readFile(
   file: string,
   workspaceDir: string,
   readFiles: Set<string>
-): Promise<BazelrcEntries[]> {
+): Promise<CommandEntry[]> {
   if (readFiles.has(file)) {
     throw new Error(
       `Attempted to read a bazelrc multiple times. file: ${file}`
@@ -114,7 +114,7 @@ async function readFile(
     return [];
   }
   const entries = parse(contents);
-  const results: BazelrcEntries[] = [];
+  const results: CommandEntry[] = [];
   for (const entry of entries) {
     if (entry.entryType === 'command') {
       results.push(entry);
@@ -133,7 +133,5 @@ async function readFile(
 export async function read(workspaceDir: string): Promise<CommandEntry[]> {
   const bazelrcPath = upath.join(workspaceDir, '.bazelrc');
   const readFiles = new Set<string>();
-  return (await readFile(bazelrcPath, workspaceDir, readFiles)).filter(
-    (entry): entry is CommandEntry => entry.entryType === 'command'
-  );
+  return await readFile(bazelrcPath, workspaceDir, readFiles);
 }
