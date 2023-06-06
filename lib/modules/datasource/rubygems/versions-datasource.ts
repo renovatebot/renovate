@@ -226,7 +226,7 @@ export class VersionsDatasource extends Datasource {
       const startByte = oldCache.contentLength - oldCache.contentTail.length;
       const opts: HttpOptions = {
         headers: {
-          ['Accept-Encoding']: 'deflate, compress, br',
+          ['Accept-Encoding']: 'deflate, compress, br', // Note: `gzip` usage breaks http client, when used with `Range` header
           ['Range']: `bytes=${startByte}-`,
         },
       };
