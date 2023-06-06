@@ -47,7 +47,7 @@ export const presets: Record<string, Preset> = {
       {
         fileMatch: ['.+\\.tfvars$'],
         matchStrings: [
-          '#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
+          '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
         ],
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
