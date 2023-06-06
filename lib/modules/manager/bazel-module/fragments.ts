@@ -7,15 +7,6 @@ export const StringFragmentSchema = z.object({
   value: z.string(),
   isComplete: z.literal(true),
 });
-// TODO: Clean up
-// export const ArrayFragmentSchema = z.object({
-//   type: z.literal('array'),
-//   items: LooseArray(StringFragmentSchema),
-//   isComplete: z.boolean(),
-// });
-// const ValueFragmentsSchema = z.discriminatedUnion('type', [
-//   ArrayFragmentSchema,
-//   StringFragmentSchema,
 export const BooleanFragmentSchema = z.object({
   type: z.literal('boolean'),
   value: z.boolean(),
