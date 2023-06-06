@@ -18,7 +18,7 @@ export async function extractPackageFile(
       RuleToBazelModulePackageDep
     )
       .transform(rules.toPackageDependencies)
-      .transform((deps) => ({ deps }))
+      .transform((deps) => (deps.length ? { deps } : null))
       .parse(records);
     if (!pfc) {
       return null;
