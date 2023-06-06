@@ -174,7 +174,7 @@ Some features and options we enjoy:
 
 - [Shared configurations (presets)](../key-concepts/presets.md), we have a Swissquote default configuration we set for all repositories, each team can extend it with their own practices
 - [Integration with GitHub’s Dependabot alerts](../configuration-options.md#vulnerabilityalerts) to raise the priority and send security remediation PRs as soon as possible
-- Each rule can be customized either globally [or specified per package](../configuration-options/#packagerules)
+- Each rule can be customized either globally [or specified per package](../configuration-options.md#packagerules)
 - Works with your [private package registry](../getting-started/private-packages.md)
 - Supports more than 70 [languages and package managers](https://docs.renovatebot.com/modules/manager/#supported-managers): Maven, Docker, npm, Docker Compose, Python
 - If you are using dependencies in a custom way, [there is a special regexManager](../configuration-options.md#regexmanagers) that allows you to transform patterns into dependencies

@@ -1,42 +1,35 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
+import { UtcDate } from '../../../util/schema-utils';
 import type { Release } from '../types';
 
-const EndoflifeDateVersionScheme = z
+const ExpireableField = z.union([
+  UtcDate.transform((x) => {
+    const now = DateTime.now().toUTC();
+    return x <= now;
+  }),
+  z.boolean(),
+]);
+
+export const EndoflifeDateVersions = z
   .object({
     cycle: z.string(),
     latest: z.optional(z.string()),
     releaseDate: z.optional(z.string()),
-    eol: z.optional(z.union([z.string(), z.boolean()])),
-    discontinued: z.optional(z.union([z.string(), z.boolean()])),
+    eol: z.optional(ExpireableField),
+    discontinued: z.optional(ExpireableField),
   })
-  .transform(({ cycle, latest, releaseDate, eol, discontinued }): Release => {
-    let isDeprecated = false;
-
-    // If "eol" date or "discontinued" date has passed or any of the values is explicitly true, set to deprecated
-    // "support" is not checked because support periods sometimes end before the EOL.
-    if (
-      eol === true ||
-      discontinued === true ||
-      (typeof eol === 'string' &&
-        DateTime.fromISO(eol, { zone: 'utc' }) <= DateTime.now().toUTC()) ||
-      (typeof discontinued === 'string' &&
-        DateTime.fromISO(discontinued, { zone: 'utc' }) <=
-          DateTime.now().toUTC())
-    ) {
-      isDeprecated = true;
+  .transform(
+    ({
+      cycle,
+      latest,
+      releaseDate: releaseTimestamp,
+      eol,
+      discontinued,
+    }): Release => {
+      const version = latest ?? cycle;
+      const isDeprecated = eol === true || discontinued === true;
+      return { version, releaseTimestamp, isDeprecated };
     }
-
-    let version = cycle;
-    if (latest !== undefined) {
-      version = latest;
-    }
-
-    return {
-      version,
-      releaseTimestamp: releaseDate,
-      isDeprecated,
-    };
-  });
-
-export const EndoflifeHttpResponseScheme = z.array(EndoflifeDateVersionScheme);
+  )
+  .array();
