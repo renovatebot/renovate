@@ -42,7 +42,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   tfvarsVersions: {
-    description: 'Update `*_version` variables in `.tfvars` files',
+    description: 'Update `*_version` variables in `.tfvars` files.',
     regexManagers: [
       {
         fileMatch: ['.+\\.tfvars$'],
