@@ -164,34 +164,8 @@ describe('modules/manager/bazel-module/rules', () => {
       ${'single_version_override, with version and registry'}    | ${[bazelDepPkgDep, singleVersionOverridePkgDep]}                          | ${expectedBazelDepAndSingleVersionOverride}
       ${'single_version_override, with registry'}                | ${[bazelDepPkgDep, singleVersionOverrideWithRegistryPkgDep]}              | ${expectedBazelDepWithRegistry}
       ${'single_version_override, without version and registry'} | ${[bazelDepPkgDep, singleVersionOverrideWithoutVersionAndRegistryPkgDep]} | ${[bazelDepPkgDep]}
-    `('with $msg', ({ a, exp }) => {
+    `('with $msg', ({ msg, a, exp }) => {
       const result = toPackageDependencies(a);
-      expect(result).toEqual(exp);
-    });
-  });
-
-  describe('.bazelModulePackageDepToPackageDependency()', () => {
-    const expectedGitOverridePackageDependency: PackageDependency = {
-      datasource: GithubTagsDatasource.id,
-      depType: 'git_override',
-      depName: 'rules_foo',
-      packageName: 'example/rules_foo',
-      currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
-    };
-    const expectedSingleVersionOverridePackageDependency: PackageDependency = {
-      depType: 'single_version_override',
-      depName: 'rules_foo',
-      skipReason: 'ignored',
-      currentValue: '1.2.3',
-      registryUrls: [customRegistryUrl],
-    };
-
-    it.each`
-      a                              | exp
-      ${gitOverrideForGithubPkgDep}  | ${expectedGitOverridePackageDependency}
-      ${singleVersionOverridePkgDep} | ${expectedSingleVersionOverridePackageDependency}
-    `('.bazelModulePackageDepToPackageDependency($a)', ({ a, exp }) => {
-      const result = bazelModulePackageDepToPackageDependency(a);
       expect(result).toEqual(exp);
     });
   });

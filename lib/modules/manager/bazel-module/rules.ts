@@ -39,19 +39,26 @@ function isOverride(value: BazelModulePackageDep): value is OverridePackageDep {
 }
 
 function isMerge(value: BazelModulePackageDep): value is MergePackageDep {
-  return (value as MergePackageDep).bazelDepMergeFields !== undefined;
+  return 'bazelDepMergeFields' in value;
 }
 
 // This function exists to remove properties that are specific to
-// OverridePackageDep. In theory, there is no harm in leaving the properties
+// BazelModulePackageDep. In theory, there is no harm in leaving the properties
 // as it does not invalidate the PackageDependency interface. However, it might
 // be surprising to someone outside the bazel-module code to see the extra
 // properties.
-export function overrideToPackageDependency(
-  override: OverridePackageDep
+export function bazelModulePackageDepToPackageDependency(
+  bmpd: BazelModulePackageDep
 ): PackageDependency {
-  const copy: Partial<OverridePackageDep> = { ...override };
-  delete copy.bazelDepSkipReason;
+  const copy: BazelModulePackageDep = structuredClone(bmpd);
+  if (isOverride(copy)) {
+    const partial = copy as Partial<OverridePackageDep>;
+    delete partial.bazelDepSkipReason;
+  }
+  if (isMerge(copy)) {
+    const partial = copy as Partial<MergePackageDep>;
+    delete partial.bazelDepMergeFields;
+  }
   return copy;
 }
 
@@ -201,7 +208,14 @@ export function processModulePkgDeps(
     logger.debug(`A 'bazel_dep' was not found for '${moduleName}'.`);
     return [];
   }
-  const deps: PackageDependency[] = [bazelDep];
+  // Create a new bazelDep that will be modified. We do not want to change the
+  // input.
+  const bazelDepOut = { ...bazelDep };
+  const deps: PackageDependency[] = [bazelDepOut];
+  const merges = packageDeps.filter(isMerge);
+  for (const merge of merges) {
+    merge.bazelDepMergeFields.forEach((k) => (bazelDepOut[k] = merge[k]));
+  }
   const overrides = packageDeps.filter(isOverride);
   // It is an error for more than one override to exist for a module. We will
   // ignore the overrides if there is more than one.
@@ -214,8 +228,8 @@ export function processModulePkgDeps(
     return deps;
   }
   const override = overrides[0];
-  deps.push(overrideToPackageDependency(override));
-  bazelDep.skipReason = override.bazelDepSkipReason;
+  deps.push(bazelModulePackageDepToPackageDependency(override));
+  bazelDepOut.skipReason = override.bazelDepSkipReason;
   return deps;
 }
 

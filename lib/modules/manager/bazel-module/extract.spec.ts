@@ -195,21 +195,25 @@ describe('modules/manager/bazel-module/extract', () => {
         throw new Error('Expected a result.');
       }
       expect(result.deps).toHaveLength(2);
-      expect(result.deps).toContainEqual({
-        datasource: BazelDatasource.id,
-        depType: 'bazel_dep',
-        depName: 'rules_foo',
-        currentValue: '1.2.3',
-        skipReason: 'is-pinned',
-        registryUrls: ['https://example.com/custom_registry'],
-      });
-      expect(result.deps).toContainEqual({
-        depType: 'single_version_override',
-        depName: 'rules_foo',
-        currentValue: '1.2.3',
-        skipReason: 'ignored',
-        registryUrls: ['https://example.com/custom_registry'],
-      });
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            skipReason: 'is-pinned',
+            registryUrls: ['https://example.com/custom_registry'],
+          },
+          {
+            depType: 'single_version_override',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            skipReason: 'ignored',
+            registryUrls: ['https://example.com/custom_registry'],
+          },
+        ])
+      );
     });
 
     it('returns bazel_dep dependency if single_version_override does not have a version', async () => {
@@ -224,14 +228,15 @@ describe('modules/manager/bazel-module/extract', () => {
       if (!result) {
         throw new Error('Expected a result.');
       }
-      expect(result.deps).toHaveLength(1);
-      expect(result.deps).toContainEqual({
-        datasource: BazelDatasource.id,
-        depType: 'bazel_dep',
-        depName: 'rules_foo',
-        currentValue: '1.2.3',
-        registryUrls: ['https://example.com/custom_registry'],
-      });
+      expect(result.deps).toEqual([
+        {
+          datasource: BazelDatasource.id,
+          depType: 'bazel_dep',
+          depName: 'rules_foo',
+          currentValue: '1.2.3',
+          registryUrls: ['https://example.com/custom_registry'],
+        },
+      ]);
     });
   });
 });
