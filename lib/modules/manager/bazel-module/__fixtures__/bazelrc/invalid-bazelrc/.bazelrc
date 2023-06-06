@@ -1,2 +1,0 @@
-// This is not a valid comment
-build --show_timestamps --keep_going --jobs 600
