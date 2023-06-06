@@ -41,7 +41,7 @@ Some features made a lot of people happy, and efficient!
 - [@setchy](https://github.com/setchy) focused on Bitbucket Cloud and replacement features
 - [@cgrindel](https://github.com/cgrindel) created the `bazel-module` manager
 - [@RahulGautamSingh](https://github.com/RahulGautamSingh) refactored a lot of code and worked on performance improvements like reduced cloning during updates and onboarding
-- [@Gabriel-Ladzaretti](https://github.com/Gabriel-Ladzaretti) ...
+- [@Gabriel-Ladzaretti](https://github.com/Gabriel-Ladzaretti) S3 repo cache, child process refactoring, others
 
 ## Renovate development
 
