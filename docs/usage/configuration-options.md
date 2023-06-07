@@ -1663,9 +1663,13 @@ If you want to add/combine labels, use the `addLabels` config option, which is m
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date.
-"Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
-Supported lock files are:
+You can use `lockFileMaintenance` to refresh lock files to keep them up-to-date.
+
+When Renovate performs `lockFileMaintenance` it deletes the lock file and runs the relevant package manager.
+That package manager creates a new lock file, where all dependency versions are updated to the latest version.
+Renovate then commits that lock file to the update branch and creates the lock file update PR.
+
+Supported lock files:
 
 - `.terraform.lock.hcl`
 - `Cargo.lock`
@@ -1686,10 +1690,10 @@ Supported lock files are:
 - `requirements.txt`
 - `yarn.lock`
 
-Others may be added via feature request.
+Support for new lock files may be added via feature request.
 
-This feature is disabled by default.
-If you wish to enable this feature then you could add this to your configuration:
+By default, `lockFileMaintenance` is disabled.
+To enable `lockFileMaintenance` add this to your configuration:
 
 ```json
 {
@@ -1697,7 +1701,7 @@ If you wish to enable this feature then you could add this to your configuration
 }
 ```
 
-To reduce "noise" in the repository, it defaults its schedule to `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
+To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
 ## major
