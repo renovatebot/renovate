@@ -5,7 +5,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
     const message = new SemanticCommitMessage();
     message.subject = 'test';
 
-    expect(message.toString()).toBe('Test');
+    expect(message.toString()).toBe('test');
   });
 
   it('should format sematic type', () => {

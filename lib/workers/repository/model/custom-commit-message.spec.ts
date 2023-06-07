@@ -4,8 +4,8 @@ describe('workers/repository/model/custom-commit-message', () => {
   describe('CustomCommitMessage', () => {
     it.each`
       subject                                      | prefix             | result
-      ${'test'}                                    | ${''}              | ${'Test'}
-      ${'  test  '}                                | ${'  '}            | ${'Test'}
+      ${'test'}                                    | ${''}              | ${'test'}
+      ${'  test  '}                                | ${'  '}            | ${'test'}
       ${'test'}                                    | ${'fix'}           | ${'fix: test'}
       ${'test'}                                    | ${'fix:'}          | ${'fix: test'}
       ${'Message    With   Extra  Whitespaces   '} | ${'  refactor   '} | ${'refactor: message With Extra Whitespaces'}
@@ -40,7 +40,7 @@ describe('workers/repository/model/custom-commit-message', () => {
         prefix: '',
         subject: 'subject',
       });
-      expect(commitMessage.toString()).toBe('Subject\n\nbody\n\nfooter');
+      expect(commitMessage.toString()).toBe('subject\n\nbody\n\nfooter');
     });
 
     it('should remove empty subject by default', () => {

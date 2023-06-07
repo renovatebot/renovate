@@ -77,7 +77,7 @@ export abstract class CommitMessage {
       return this._subject.charAt(0).toLowerCase() + this._subject.slice(1);
     }
 
-    return this._subject.charAt(0).toUpperCase() + this._subject.slice(1);
+    return this._subject.charAt(0) + this._subject.slice(1);
   }
 
   protected abstract get prefix(): string;
