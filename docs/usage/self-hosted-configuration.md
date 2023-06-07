@@ -150,46 +150,21 @@ If the "development branch" is configured but the branch itself does not exist (
 ## binarySource
 
 Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
-By default, Renovate uses a child process to run such tools, so they must be:
+By default, Renovate uses a child process to run such binaries, so they must be:
 
 - installed before running Renovate
 - available in the path
 
-But you can tell Renovate to use "sidecar" containers for third-party tools by setting `binarySource=docker`.
+But you can tell Renovate to use "sidecar" containers for third-party binaries by setting `binarySource=docker`.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
-Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
+Now Renovate uses `docker run` to create containers like Node.js or Python to run binaries in as-needed.
 
 Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
-This mode means that Renovate will dynamically install the version of tools available, if supported.
+This mode means that Renovate will dynamically install the version of binaries available, if supported. // I think we now support install-mode for all binaries/tools???
 
-Supported tools for dynamic install are:
+If all projects are managed by Hermit, you can tell Renovate to use the binary versions specified in each project via Hermit by setting `binarySource=hermit`.
 
-- `bundler`
-- `cargo`
-- `composer`
-- `dotnet`
-- `flux`
-- `golang`
-- `gradle-wrapper`
-- `helm`
-- `jb`
-- `jsonnet-bundler`
-- `lerna`
-- `mix`
-- `node`
-- `npm`
-- `pip_requirements`
-- `pip-compile`
-- `pipenv`
-- `pnpm`
-- `poetry`
-- `python`
-- `rust`
-- `yarn`
-
-If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
-
-Tools not on this list fall back to `binarySource=global`.
+Binaries not on this list fall back to `binarySource=global`.
 
 ## cacheDir
 
