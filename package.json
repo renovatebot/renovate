@@ -294,7 +294,7 @@
     "aws-sdk-client-mock": "2.1.1",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
-    "conventional-changelog-conventionalcommits": "5.0.0",
+    "conventional-changelog-conventionalcommits": "6.0.0",
     "cross-env": "7.0.3",
     "diff": "5.1.0",
     "emojibase-data": "7.0.1",
