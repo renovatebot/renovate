@@ -18,10 +18,6 @@ inputs:
     description: 'Whether to cache jest data'
     required: false
     default: false
-  force-yarn-cache:
-    description: 'Setup global Yarn cache'
-    required: false
-    default: false
 outputs:
   cache-hit:
     description: 'Cache hit for `node_modules`'
@@ -38,12 +34,9 @@ runs:
 
     - name: Setup Node
       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
-      env:
-        force-yarn-cache: ${{ inputs.force-yarn-cache }}
-        modules-cache-hit: ${{ steps.node-modules-cache.outputs.cache-hit }}
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ (env.force-yarn-cache == 'true' || env.modules-cache-hit != 'true') && 'yarn' || '' }}
+        cache: ${{ steps.node-modules-cache.outputs.cache-hit != 'true' && 'yarn' || '' }}
 
     - name: Install dependencies
       uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
