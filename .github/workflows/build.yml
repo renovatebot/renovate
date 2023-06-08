@@ -65,6 +65,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
           jest-cache: true
+          force-yarn-cache: true # used by e2e test
 
       - name: Init platform
         shell: bash
