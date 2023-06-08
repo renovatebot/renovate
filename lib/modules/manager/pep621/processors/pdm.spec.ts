@@ -86,7 +86,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update dep1' +
+            'pdm update --no-sync dep1' +
             '"',
         },
       ]);
@@ -173,16 +173,16 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update dep1 dep2',
+          cmd: 'pdm update --no-sync dep1 dep2',
         },
         {
-          cmd: 'pdm update -G group1 dep3 dep4',
+          cmd: 'pdm update --no-sync -G group1 dep3 dep4',
         },
         {
-          cmd: 'pdm update -dG group2 dep5 dep6',
+          cmd: 'pdm update --no-sync -dG group2 dep5 dep6',
         },
         {
-          cmd: 'pdm update -dG group3 dep7 dep8',
+          cmd: 'pdm update --no-sync -dG group3 dep7 dep8',
         },
       ]);
     });
@@ -224,7 +224,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update',
+          cmd: 'pdm update --no-sync',
           options: {
             cwd: '/tmp/github/some/repo/folder',
           },

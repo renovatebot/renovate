@@ -225,7 +225,7 @@ module.exports = {
 };
 ```
 
-You can add additional host rules, read the [`hostRules` documentation](https://docs.renovatebot.com/configuration-options/#hostrules) for more information.
+You can add additional host rules, read the [`hostRules` documentation](./configuration-options.md#hostrules) for more information.
 
 #### Self-hosted Docker registry
 
@@ -298,7 +298,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
       }
       ```
 
-   1. If you want to add it to your repository Renovate configuration file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
       ```json
       {
@@ -351,7 +351,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
       }
       ```
 
-   1. If you want to add it to your repository Renovate configuration file, [encrypt](https://docs.renovatebot.com/configuration-options/#encrypted) it and then add it:
+   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
       ```json
       {
@@ -388,7 +388,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:35.103.0
+FROM renovate/renovate:35.110.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

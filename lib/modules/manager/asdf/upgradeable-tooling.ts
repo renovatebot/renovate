@@ -243,22 +243,42 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: (version) => {
       const adoptOpenJdkMatches = version.match(
         /^adoptopenjdk-(?<version>\d\S+)/
-      );
+      )?.groups;
       if (adoptOpenJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
-          currentValue: adoptOpenJdkMatches.groups!.version,
+          currentValue: adoptOpenJdkMatches.version,
         };
       }
       const adoptOpenJreMatches = version.match(
         /^adoptopenjdk-jre-(?<version>\d\S+)/
-      );
+      )?.groups;
       if (adoptOpenJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
-          currentValue: adoptOpenJreMatches.groups!.version,
+          currentValue: adoptOpenJreMatches.version,
+        };
+      }
+      const temurinJdkMatches = version.match(
+        /^temurin-(?<version>\d\S+)/
+      )?.groups;
+      if (temurinJdkMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jdk',
+          currentValue: temurinJdkMatches.version,
+        };
+      }
+      const temurinJreMatches = version.match(
+        /^temurin-jre-(?<version>\d\S+)/
+      )?.groups;
+      if (temurinJreMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jre',
+          currentValue: temurinJreMatches.version,
         };
       }
 

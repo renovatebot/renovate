@@ -21,7 +21,7 @@ Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, o
 
 ## Private packages
 
-If you are using a [privately hosted Composer package](https://getcomposer.org/doc/articles/authentication-for-private-packages.md) you can pass the credentials via the [`hostRules`](https://docs.renovatebot.com/configuration-options/#hostrules) configuration.
+If you are using a [privately hosted Composer package](https://getcomposer.org/doc/articles/authentication-for-private-packages.md) you can pass the credentials via the [`hostRules`](./configuration-options.md#hostrules) configuration.
 
 ```json
 {

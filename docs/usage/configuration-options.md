@@ -526,7 +526,7 @@ To help you with this, Renovate will create config migration pull requests, when
 
 Example:
 
-After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration-options/#basebranches) feature, the Renovate configuration migration pull request would make this change:
+After we changed the [`baseBranches`](#basebranches) feature, the Renovate configuration migration pull request would make this change:
 
 ```diff
 {
@@ -853,7 +853,7 @@ Encrypted secrets usually have a single organization.
 But you may encrypt a secret with more than one organization, for example: `org1,org2`.
 This way the secret can be used in both the `org1` and `org2` organizations.
 
-For more information on how to use secrets for private packages, read [Private package support](https://docs.renovatebot.com/getting-started/private-packages).
+For more information on how to use secrets for private packages, read [Private package support](./getting-started/private-packages.md).
 
 ## excludeCommitPaths
 
@@ -930,7 +930,7 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except github.com, you need to [configure a Personal Access Token](https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from github.com.
+If you are running on any platform except github.com, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from github.com.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1663,9 +1663,13 @@ If you want to add/combine labels, use the `addLabels` config option, which is m
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date.
-"Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
-Supported lock files are:
+You can use `lockFileMaintenance` to refresh lock files to keep them up-to-date.
+
+When Renovate performs `lockFileMaintenance` it deletes the lock file and runs the relevant package manager.
+That package manager creates a new lock file, where all dependency versions are updated to the latest version.
+Renovate then commits that lock file to the update branch and creates the lock file update PR.
+
+Supported lock files:
 
 - `.terraform.lock.hcl`
 - `Cargo.lock`
@@ -1686,10 +1690,10 @@ Supported lock files are:
 - `requirements.txt`
 - `yarn.lock`
 
-Others may be added via feature request.
+Support for new lock files may be added via feature request.
 
-This feature is disabled by default.
-If you wish to enable this feature then you could add this to your configuration:
+By default, `lockFileMaintenance` is disabled.
+To enable `lockFileMaintenance` add this to your configuration:
 
 ```json
 {
@@ -1697,7 +1701,7 @@ If you wish to enable this feature then you could add this to your configuration
 }
 ```
 
-To reduce "noise" in the repository, it defaults its schedule to `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
+To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
 ## major
@@ -1706,13 +1710,15 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 ## minimumReleaseAge
 
+This feature used to be called `stabilityDays`.
+
 If this is set _and_ an update has a release timestamp header, then Renovate will check if the set duration has passed.
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
 Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).
 `minimumReleaseAge` is not intended to help with slowing down fast releasing project updates.
 If you want to slow down PRs for a specific package, setup a custom schedule for that package.
-Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
+Read [our selective-scheduling help](./noise-reduction.md#selective-scheduling) to learn how to set the schedule.
 
 If the time since the release is less than the set `minimumReleaseAge` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
@@ -1770,12 +1776,12 @@ Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a c
 
 ## npmToken
 
-See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
+See [Private npm module support](./getting-started/private-packages.md) for details on how this is used.
 Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See [Private npm module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used.
+See [Private npm module support](./getting-started/private-packages.md) for details on how this is used.
 
 ## npmrcMerge
 
@@ -2590,11 +2596,11 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowpostupgradecommandtemplating) is enabled.
+You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](./self-hosted-configuration.md#allowpostupgradecommandtemplating) is enabled.
 
 <!-- prettier-ignore -->
 !!! note
-    Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](https://docs.renovatebot.com/self-hosted-configuration/#filefilters) instead.
+    Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](#filefilters) instead.
 
 ### fileFilters
 
@@ -3333,11 +3339,11 @@ Renovate does not support scheduled minutes or "at an exact time" granularity.
 !!! tip
     If you want to _disable_ Renovate, then avoid setting `schedule` to `"never"`.
     Instead, use the `enabled` config option to disable Renovate.
-    Read the [`enabled` config option docs](https://docs.renovatebot.com/configuration-options/#enabled) to learn more.
+    Read the [`enabled` config option docs](#enabled) to learn more.
 
 <!-- prettier-ignore -->
 !!! note
-    Actions triggered via the [Dependency Dashboard](https://docs.renovatebot.com/configuration-options/#dependencydashboard) are not restricted by a configured schedule.
+    Actions triggered via the [Dependency Dashboard](#dependencydashboard) are not restricted by a configured schedule.
 
 <!-- prettier-ignore -->
 !!! tip

@@ -9,6 +9,7 @@ export const PLATFORM_GPG_FAILED = 'gpg-failed';
 export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
+export const PLATFORM_UNKNOWN_ERROR = 'platform-unknown-error';
 
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';

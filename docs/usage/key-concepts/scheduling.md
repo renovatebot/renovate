@@ -60,7 +60,7 @@ You can set a specific time zone in your local config file like this:
 }
 ```
 
-Read our docs on the [timezone](https://docs.renovatebot.com/configuration-options/#timezone) configuration option.
+Also read the [`timezone` config option docs](../configuration-options.md#timezone).
 
 ### Scheduling syntax
 
@@ -139,4 +139,4 @@ Say you want to restrict `aws-sdk` to weekly updates, you would create this pack
 The "schedule" property must _always_ be defined in an array, even if you only set a single schedule.
 Multiple entries in the array means "or".
 
-Read the [schedule config option](https://docs.renovatebot.com/configuration-options/#schedule) documentation to learn more.
+Read the [schedule config option](../configuration-options.md#schedule) documentation to learn more.
