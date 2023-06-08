@@ -3460,10 +3460,10 @@
     "@typescript-eslint/types" "5.59.8"
     eslint-visitor-keys "^3.3.0"
 
-"@yarnpkg/core@3.5.1":
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.5.1.tgz#bb1f13ffed9828a8b4d22980615bb7f1569daefe"
-  integrity sha512-BkbqhE7Ti/Kk2zl0MF2TPosUSh7yS9iaZWnmcXfzKPcPatY0NTg1wX+OuW/eXMFAHudXXmMMte9Ve2f6Kj7itQ==
+"@yarnpkg/core@3.5.2":
+  version "3.5.2"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.5.2.tgz#a387f3cae7766c9f6801ad356e2f9bd9548485e6"
+  integrity sha512-IaKWHArtc0JAUXuDN2sSV57+yjemVsz//k8NjHT02AmUlCM7dOmIT/FeGfcVFZ6Zy8ZSwEwyzQLf3nxx5alzQg==
   dependencies:
     "@arcanis/slice-ansi" "^1.1.1"
     "@types/semver" "^7.1.0"
@@ -3472,7 +3472,7 @@
     "@yarnpkg/json-proxy" "^2.1.1"
     "@yarnpkg/libzip" "^2.3.0"
     "@yarnpkg/parsers" "^2.5.1"
-    "@yarnpkg/pnp" "^3.3.2"
+    "@yarnpkg/pnp" "^3.3.3"
     "@yarnpkg/shell" "^3.2.5"
     camelcase "^5.3.1"
     chalk "^3.0.0"
@@ -3538,10 +3538,10 @@
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^3.3.2":
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.3.2.tgz#348e1c4ac3ad4ff60a2ba5f274ec7d6f97fe2727"
-  integrity sha512-3rJbY9/wB7fLrjZtgcYyqtWHK3ihmCbFFqnjghH3MnBYABeh5IgB83BjSfbIT5s/BtVIg583yBHok02OO4ighg==
+"@yarnpkg/pnp@^3.3.3":
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.3.3.tgz#8e8151232959c4c9aaa42289c271794facbd70cf"
+  integrity sha512-pI1mQ4m5RwgUA/TW6Y4odqSOt4QV+FuWXi9M9WKfuD+gePgjsMgjRA2siK8DekVmPUUb6ffhWEcKuGjjjj69Iw==
   dependencies:
     "@types/node" "^13.7.0"
     "@yarnpkg/fslib" "^2.10.3"
