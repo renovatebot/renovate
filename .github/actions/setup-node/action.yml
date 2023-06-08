@@ -14,10 +14,6 @@ inputs:
   os:
     description: 'Composite actions do not support `runner.os`, so it must be passed in as an input'
     required: true
-  jest-cache:
-    description: 'Whether to cache jest data'
-    required: false
-    default: false
 outputs:
   cache-hit:
     description: 'Cache hit for `node_modules`'
@@ -49,10 +45,3 @@ runs:
     - name: Run scripts
       shell: bash
       run: yarn --silent prepare
-
-    - name: Cache jest
-      uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
-      if: inputs.jest-cache == 'true'
-      with:
-        path: .cache/jest
-        key: jest-cache-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
