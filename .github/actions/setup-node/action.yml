@@ -1,0 +1,58 @@
+# This is the composite action:
+#   https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+#
+# Composite actions have some limitations:
+#   - many contexts are unavailable, e.g. `runner`
+#   - `env` can be specified per-step only
+#   - if `run` is used, `shell` must be explicitly specified
+name: 'Setup Node and install dependencies'
+description: 'Setup Node and install dependencies using cache'
+inputs:
+  node-version:
+    description: 'Node version'
+    required: true
+  os:
+    description: 'Composite actions do not support `runner.os`, so it must be passed in as an input'
+    required: true
+  jest-cache:
+    description: 'Whether to cache jest data'
+    required: false
+    default: false
+outputs:
+  cache-hit:
+    description: 'Cache hit for `node_modules`'
+    value: ${{ steps.node-modules-cache.outputs.cache-hit }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache node_modules
+      id: node-modules-cache
+      uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: node_modules
+        key: node-modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
+
+    - name: Setup Node
+      uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ steps.node-modules-cache.outputs.cache-hit != 'true' && 'yarn' || '' }}
+
+    - name: Install dependencies
+      uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
+      if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: yarn --silent install --frozen-lockfile --ignore-scripts
+
+    - name: Run scripts
+      shell: ${{ (inputs.os == 'Windows' && 'pwsh') || 'bash' }}
+      run: yarn --silent prepare
+
+    - name: Cache jest
+      uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      if: inputs.jest-cache == 'true'
+      with:
+        path: .cache/jest
+        key: jest-cache-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}

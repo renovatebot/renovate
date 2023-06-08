@@ -59,11 +59,12 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+          os: ${{ runner.os }}
+          jest-cache: true
 
       - name: Init platform
         shell: bash
@@ -76,22 +77,9 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      - name: Installing dependencies
-        uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: yarn install --frozen-lockfile
-
       # build before tests to for static file check
       - name: Build
         run: yarn build
-
-      - name: Cache jest cache
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
-        with:
-          path: .cache/jest
-          key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
 
       - name: Unit tests
         run: yarn jest --ci --coverage ${{ env.coverage }}
@@ -114,11 +102,11 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+          os: ${{ runner.os }}
 
       - name: Init platform
         run: |
@@ -128,9 +116,6 @@ jobs:
           git config --global user.name  'Renovate Bot'
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
-
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
 
       - name: Type check
         run: yarn type-check
