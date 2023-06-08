@@ -47,7 +47,7 @@ runs:
         command: yarn --silent install --frozen-lockfile --ignore-scripts
 
     - name: Run scripts
-      shell: ${{ (inputs.os == 'Windows' && 'pwsh') || 'bash' }}
+      shell: bash
       run: yarn --silent prepare
 
     - name: Cache jest
