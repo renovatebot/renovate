@@ -37,16 +37,74 @@ function jestGithubRunnerSpecs(): JestConfig {
   };
 }
 
+const shardMap: Record<string, string[]> = {
+  datasource: ['lib/modules/datasource'],
+  manager_1: ['lib/modules/manager/[a-m]*'],
+  manager_2: ['lib/modules/manager/[n-z]*'],
+  platform: ['lib/modules/platform'],
+  versioning: ['lib/modules/versioning'],
+  workers: ['lib/workers'],
+  other: ['lib'],
+};
+
+type ShardConfig = Pick<JestConfig, 'testMatch' | 'collectCoverageFrom'>;
+
+function tryShardOr(fallback: ShardConfig = {}): ShardConfig {
+  const shardKey = process.env.TEST_SHARD;
+  if (!shardKey) {
+    return fallback;
+  }
+
+  if (!shardMap[shardKey]) {
+    const keys = Object.keys(shardMap).join(', ');
+    throw new Error(
+      `Unknown value for TEST_SHARD: ${shardKey} (possible values: ${keys})`
+    );
+  }
+
+  const testMatch: string[] = [];
+  const collectCoverageFrom: string[] = [
+    '!lib/**/types.ts',
+    '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
+    '!lib/**/*.{d,spec}.ts',
+  ];
+
+  loop: for (const [key, patterns] of Object.entries(shardMap)) {
+    for (let pattern of patterns) {
+      pattern = pattern.replace(/\/+$/, '');
+
+      const testPattern = `${pattern}/**/*.spec.ts`;
+      const coveragePattern = `${pattern}/**/*.ts`;
+
+      if (key === shardKey || key === 'other') {
+        testMatch.push(`<rootDir>/${testPattern}`);
+        collectCoverageFrom.push(coveragePattern);
+        break loop;
+      }
+
+      testMatch.push(`!**/${testPattern}`);
+      collectCoverageFrom.push(`!${coveragePattern}`);
+    }
+  }
+
+  testMatch.reverse();
+  collectCoverageFrom.reverse();
+  const result = { testMatch, collectCoverageFrom };
+  return result;
+}
+
 const config: JestConfig = {
+  ...tryShardOr({
+    collectCoverageFrom: [
+      'lib/**/*.{js,ts}',
+      '!lib/**/*.{d,spec}.ts',
+      '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
+      '!lib/**/types.ts',
+    ],
+  }),
   cacheDirectory: '.cache/jest',
   clearMocks: true,
   collectCoverage: true,
-  collectCoverageFrom: [
-    'lib/**/*.{js,ts}',
-    '!lib/**/*.{d,spec}.ts',
-    '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
-    '!lib/**/types.ts',
-  ],
   coverageDirectory: './coverage',
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']
