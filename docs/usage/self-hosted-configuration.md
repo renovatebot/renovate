@@ -149,22 +149,22 @@ If the "development branch" is configured but the branch itself does not exist (
 
 ## binarySource
 
-Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
-By default, Renovate uses a child process to run such binaries, so they must be:
+Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
+By default, Renovate uses a child process to run such tools, so they must be:
 
 - installed before running Renovate
 - available in the path
 
-But you can tell Renovate to use "sidecar" containers for third-party binaries by setting `binarySource=docker`.
+But you can tell Renovate to use "sidecar" containers for third-party tools by setting `binarySource=docker`.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
-Now Renovate uses `docker run` to create containers like Node.js or Python to run binaries in as-needed.
+Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
 Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
-This mode means that Renovate will dynamically install the version of binaries available, if supported. // I think we now support install-mode for all binaries/tools???
+This mode means that Renovate will dynamically install the version of tools available, if supported. // I think we now support install-mode for all tools???
 
-If all projects are managed by Hermit, you can tell Renovate to use the binary versions specified in each project via Hermit by setting `binarySource=hermit`.
+If all projects are managed by Hermit, you can tell Renovate to use the tool versions specified in each project via Hermit by setting `binarySource=hermit`.
 
-Binaries not on this list fall back to `binarySource=global`.
+Tools not on this list fall back to `binarySource=global`.
 
 ## cacheDir
 
@@ -321,7 +321,7 @@ Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/conta
 
 ## dockerUser
 
-Override default user and group used by Docker-based binaries.
+Override default user and group used by Docker-based tools.
 The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
