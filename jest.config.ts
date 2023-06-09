@@ -37,8 +37,33 @@ function jestGithubRunnerSpecs(): JestConfig {
   };
 }
 
+/**
+ * Configuration for single test shard.
+ */
 interface ShardConfig {
-  patterns: string[];
+  /**
+   * Path patterns to match against the test file paths, of two types:
+   *
+   * 1. Particular file, e.g. `lib/util/git/index.spec.ts`
+   *
+   *    - File pattern MUST end with `.spec.ts`
+   *    - This will only search for the particular test file
+   *    - It enables coverage for the `*.ts` file with the same name,
+   *      e.g. `lib/util/git/index.ts`
+   *    - You probably want to use directory pattern instead
+   *
+   * 2. Whole directory, e.g. `lib/modules/datasource`
+   *
+   *    - This will search for all `*.spec.ts` files under the directory
+   *    - It enables coverage all `*.ts` files under the directory,
+   *      e.g. `lib/modules/datasource/foo/bar/baz.ts`
+   */
+  matchPaths: string[];
+
+  /**
+   * Coverage threshold settings for the entire shard (via `global` field).
+   * Ommitted fields default to `100` (i.e. 100%).
+   */
   threshold?: {
     branches?: number;
     functions?: number;
@@ -47,21 +72,138 @@ interface ShardConfig {
   };
 }
 
+/**
+ * Configuration for test shards that can be run with `TEST_SHARD` environment variable.
+ *
+ * For each shard, we specify a subset of tests to run.
+ * The tests from previous shards are excluded from the next shard.
+ *
+ * If the coverage threshold is not met, we adjust it
+ * using the optional `threshold` field.
+ *
+ * Eventually, we aim to reach 100% coverage for most cases,
+ * so the `threshold` field is meant to be mostly omitted in the future.
+ */
+const testShards: Record<string, ShardConfig> = {
+  datasource_1: {
+    matchPaths: ['lib/modules/datasource/[a-g]*'],
+    threshold: {
+      branches: 96.95,
+    },
+  },
+  datasource_2: {
+    matchPaths: ['lib/modules/datasource'],
+    threshold: {
+      statements: 99.35,
+      branches: 96.0,
+      functions: 98.25,
+      lines: 99.35,
+    },
+  },
+  manager_1: {
+    matchPaths: ['lib/modules/manager/[a-c]*'],
+    threshold: {
+      functions: 99.3,
+    },
+  },
+  manager_2: {
+    matchPaths: ['lib/modules/manager/[d-h]*'],
+    threshold: {
+      functions: 99.7,
+    },
+  },
+  manager_3: {
+    matchPaths: ['lib/modules/manager/[i-n]*'],
+    threshold: {
+      statements: 99.65,
+      branches: 98.5,
+      functions: 98.65,
+      lines: 99.65,
+    },
+  },
+  manager_4: {
+    matchPaths: ['lib/modules/manager'],
+  },
+  platform: {
+    matchPaths: ['lib/modules/platform'],
+    threshold: {
+      branches: 97.5,
+    },
+  },
+  versioning: {
+    matchPaths: ['lib/modules/versioning'],
+    threshold: {
+      branches: 97.25,
+    },
+  },
+  workers_1: {
+    matchPaths: ['lib/workers/repository/{onboarding,process}'],
+  },
+  workers_2: {
+    matchPaths: ['lib/workers/repository/update/pr'],
+    threshold: {
+      branches: 97.1,
+    },
+  },
+  workers_3: {
+    matchPaths: ['lib/workers/repository/update'],
+    threshold: {
+      branches: 97.75,
+    },
+  },
+  workers_4: {
+    matchPaths: ['lib/workers'],
+    threshold: {
+      statements: 99.95,
+      branches: 97.2,
+      lines: 99.95,
+    },
+  },
+  git_1: {
+    matchPaths: ['lib/util/git/index.spec.ts'],
+    threshold: {
+      statements: 99.8,
+      functions: 97.55,
+      lines: 99.8,
+    },
+  },
+  git_2: {
+    matchPaths: ['lib/util/git'],
+    threshold: {
+      statements: 98.4,
+      branches: 98.65,
+      functions: 93.9,
+      lines: 98.4,
+    },
+  },
+  util: {
+    matchPaths: ['lib/util'],
+    threshold: {
+      statements: 97.85,
+      branches: 96.15,
+      functions: 95.85,
+      lines: 97.95,
+    },
+  },
+  other: { matchPaths: ['lib'] },
+};
+
+/**
+ * Subset of Jest config that is relevant for sharded test run.
+ */
 type JestShardedSubconfig = Pick<
   JestConfig,
   'testMatch' | 'collectCoverageFrom' | 'coverageThreshold'
 >;
 
-const shardMap: Record<string, ShardConfig> = {
-  datasource: { patterns: ['lib/modules/datasource'] },
-  manager_1: { patterns: ['lib/modules/manager/[a-m]*'] },
-  manager_2: { patterns: ['lib/modules/manager/[n-z]*'] },
-  platform: { patterns: ['lib/modules/platform'] },
-  versioning: { patterns: ['lib/modules/versioning'] },
-  workers: { patterns: ['lib/workers'] },
-  other: { patterns: ['lib'] },
-};
-
+/**
+ * Generates Jest config for sharded test run.
+ *
+ * If `TEST_SHARD` environment variable is not set,
+ * it falls back to the provided config.
+ *
+ * Otherwise, `fallback` value is used to determine some defaults.
+ */
 function useShardingOrFallbackTo(
   fallback: JestShardedSubconfig
 ): JestShardedSubconfig {
@@ -70,37 +212,82 @@ function useShardingOrFallbackTo(
     return fallback;
   }
 
-  if (!shardMap[shardKey]) {
-    const keys = Object.keys(shardMap).join(', ');
+  if (!testShards[shardKey]) {
+    const keys = Object.keys(testShards).join(', ');
     throw new Error(
       `Unknown value for TEST_SHARD: ${shardKey} (possible values: ${keys})`
     );
   }
 
   const testMatch: string[] = [];
-  const collectCoverageFrom: string[] = [
-    '!lib/**/types.ts',
-    '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
-    '!lib/**/*.{d,spec}.ts',
-  ];
 
-  for (const [key, { patterns }] of Object.entries(shardMap)) {
-    if (key === shardKey || key === 'other') {
-      testMatch.push(...patterns.map((p) => `<rootDir>/${p}/**/*.spec.ts`));
-      collectCoverageFrom.push(...patterns.map((p) => `${p}/**/*.ts`));
+  // Use exclusion patterns from the fallback config
+  const collectCoverageFrom: string[] =
+    fallback.collectCoverageFrom?.filter((pattern) =>
+      pattern.startsWith('!')
+    ) ?? [];
+
+  // Use coverage threshold from the fallback config
+  const defaultGlobal = fallback.coverageThreshold?.global;
+  const coverageThreshold: JestConfig['coverageThreshold'] = {
+    global: {
+      branches: defaultGlobal?.branches ?? 100,
+      functions: defaultGlobal?.functions ?? 100,
+      lines: defaultGlobal?.lines ?? 100,
+      statements: defaultGlobal?.statements ?? 100,
+    },
+  };
+
+  // Convert match pattern to a form that matches on file with `.ts` or `.spec.ts` extension.
+  const normalizePattern = (
+    pattern: string,
+    suffix: '.ts' | '.spec.ts'
+  ): string =>
+    pattern.endsWith('.spec.ts')
+      ? pattern.replace(/\.spec\.ts$/, suffix)
+      : `${pattern}/**/*${suffix}`;
+
+  for (const [key, { matchPaths: patterns, threshold }] of Object.entries(
+    testShards
+  )) {
+    if (key === shardKey) {
+      const testMatchPatterns = patterns.map((pattern) => {
+        const filePattern = normalizePattern(pattern, '.spec.ts');
+        return `<rootDir>/${filePattern}`;
+      });
+      testMatch.push(...testMatchPatterns);
+
+      const coveragePatterns = patterns.map((pattern) =>
+        normalizePattern(pattern, '.ts')
+      );
+      collectCoverageFrom.push(...coveragePatterns);
+
+      if (threshold) {
+        coverageThreshold.global = {
+          ...coverageThreshold.global,
+          ...threshold,
+        };
+      }
+
       break;
     }
 
-    testMatch.push(...patterns.map((pattern) => `!**/${pattern}/**/*.spec.ts`));
-    collectCoverageFrom.push(
-      ...patterns.map((pattern) => `!${pattern}/**/*.ts`)
-    );
+    const testMatchPatterns = patterns.map((pattern) => {
+      const filePattern = normalizePattern(pattern, '.spec.ts');
+      return `!**/${filePattern}`;
+    });
+    testMatch.push(...testMatchPatterns);
+
+    const coveragePatterns = patterns.map((pattern) => {
+      const filePattern = normalizePattern(pattern, '.ts');
+      return `!${filePattern}`;
+    });
+    collectCoverageFrom.push(...coveragePatterns);
   }
 
   testMatch.reverse();
   collectCoverageFrom.reverse();
-  const result = { testMatch, collectCoverageFrom };
-  return result;
+  return { testMatch, collectCoverageFrom, coverageThreshold };
 }
 
 const config: JestConfig = {
@@ -111,6 +298,14 @@ const config: JestConfig = {
       '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
       '!lib/**/types.ts',
     ],
+    coverageThreshold: {
+      global: {
+        branches: 98,
+        functions: 100,
+        lines: 100,
+        statements: 100,
+      },
+    },
   }),
   cacheDirectory: '.cache/jest',
   clearMocks: true,
@@ -119,14 +314,6 @@ const config: JestConfig = {
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']
     : ['html', 'text-summary'],
-  coverageThreshold: {
-    global: {
-      branches: 98,
-      functions: 100,
-      lines: 100,
-      statements: 100,
-    },
-  },
   transform: {
     '\\.ts$': [
       'ts-jest',
