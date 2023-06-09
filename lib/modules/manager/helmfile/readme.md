@@ -33,7 +33,7 @@ For this you use a custom `hostRules` array.
     },
     {
       // for repository string oci://ghci.io/user/oci-helm-test
-      matchHost: 'https://ghci.io/user/oci-helm-test',
+      matchHost: 'https://ghci.io',
       hostType: 'docker',
       username: '<some-username>',
       password: '<some-password>',
