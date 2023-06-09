@@ -96,7 +96,10 @@ const repoGroups = {
   fela: 'https://github.com/robinweser/fela',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
-  fontsource: 'https://github.com/fontsource/fontsource',
+  fontsource: [
+    'https://github.com/fontsource/fontsource', // old repo
+    'https://github.com/fontsource/font-files',
+  ],
   formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
