@@ -6665,10 +6665,10 @@ jest-environment-node@^29.5.0:
     jest-mock "^29.5.0"
     jest-util "^29.5.0"
 
-jest-extended@3.2.4:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-3.2.4.tgz#4ee93c9e495f983ceb911170613ce305f3533b94"
-  integrity sha512-lSEYhSmvXZG/7YXI7KO3LpiUiQ90gi5giwCJNDMMsX5a+/NZhdbQF2G4ALOBN+KcXVT3H6FPVPohAuMXooaLTQ==
+jest-extended@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-4.0.0.tgz#00bb4b478566c28fd1b91ffd6f9cb405dc52d092"
+  integrity sha512-GMhMFdrwhYPB0y+cmI/5esz+F/Xc0OIzKbnr8SaiZ74YcWamxf7sVT78YlA15+JIQMTlpHBEgcxheyRBdHFqPA==
   dependencies:
     jest-diff "^29.0.0"
     jest-get-type "^29.0.0"
