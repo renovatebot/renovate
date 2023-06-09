@@ -379,6 +379,7 @@ export async function ensurePr(
           prTitle,
           prBody,
           platformOptions: getPlatformPrOptions(config),
+          targetBranch: config.baseBranch,
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
         setPrCache(branchName, prBodyFingerprint, true);
@@ -389,6 +390,7 @@ export async function ensurePr(
           ...existingPr,
           bodyStruct: getPrBodyStruct(prBody),
           title: prTitle,
+          targetBranch: config.baseBranch,
         },
       };
     }
@@ -412,7 +414,7 @@ export async function ensurePr(
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
-          targetBranch: config.baseBranch ?? '',
+          targetBranch: config.baseBranch,
           prTitle,
           prBody,
           labels: prepareLabels(config),
