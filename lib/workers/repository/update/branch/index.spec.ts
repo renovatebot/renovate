@@ -1349,7 +1349,7 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'new/some-branch',
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
-        branchFingerprint: '111',
+        commitFingerprint: '111',
         reuseExistingBranch: true,
         skipBranchUpdate: true,
       };
@@ -1550,7 +1550,8 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
-      } as never);
+        updatedArtifacts: [],
+      } satisfies PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [
@@ -1561,14 +1562,16 @@ describe('workers/repository/update/branch/index', () => {
         ],
       } as never);
       scm.branchExists.mockResolvedValue(true);
-      platform.getBranchPr.mockResolvedValueOnce({
-        title: 'rebase!',
-        state: 'open',
-        bodyStruct: {
-          hash: hashBody(`- [x] <!-- rebase-check -->`),
-          rebaseRequested: true,
-        },
-      } as never);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'rebase!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        })
+      );
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({

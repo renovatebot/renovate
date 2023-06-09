@@ -46,7 +46,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
     "registryUrls": [
       "https://cloud.redhat.com/api/automation-hub/",
     ],
-    "skipReason": "no-version",
+    "skipReason": "unspecified-version",
   },
   {
     "currentValue": null,
@@ -54,7 +54,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
     "depName": "foo.bar/organization/repo_name",
     "depType": "galaxy-collection",
     "packageName": "https://foo.bar/organization/repo_name.git",
-    "skipReason": "no-version",
+    "skipReason": "unspecified-version",
   },
   {
     "currentValue": "1.0.0",

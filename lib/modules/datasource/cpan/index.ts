@@ -43,6 +43,7 @@ export class CpanDatasource extends Datasource {
             filter: {
               and: [
                 { term: { 'module.name': packageName } },
+                { term: { 'module.authorized': true } },
                 { exists: { field: 'module.associated_pod' } },
               ],
             },

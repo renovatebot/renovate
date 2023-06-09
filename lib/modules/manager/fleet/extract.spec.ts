@@ -118,7 +118,7 @@ kind: Fleet
             packageName: 'cert-manager',
             registryUrls: ['https://charts.jetstack.io'],
             depType: 'fleet',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
         ]);
       });
@@ -129,7 +129,7 @@ kind: Fleet
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([
           {
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
             datasource: 'helm',
             depName: 'cert-manager',
             registryUrls: ['https://charts.jetstack.io'],
@@ -204,7 +204,7 @@ kind: Fleet
             datasource: 'git-tags',
             depName: 'https://github.com/rancher/rancher',
             depType: 'git_repo',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
             sourceUrl: 'https://github.com/rancher/rancher',
           },
         ]);

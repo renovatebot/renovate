@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import type { PagedResult } from '../../modules/platform/bitbucket/types';
 import { parseUrl, resolveBaseUrl } from '../url';
-import type { HttpOptions, HttpResponse } from './types';
+import type { HttpOptions, HttpRequestOptions, HttpResponse } from './types';
 import { Http } from '.';
 
 const MAX_PAGES = 100;
@@ -26,7 +26,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
   protected override async request<T>(
     path: string,
-    options?: BitbucketHttpOptions
+    options?: BitbucketHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
 
@@ -53,7 +53,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
       while (is.nonEmptyString(nextURL) && page <= MAX_PAGES) {
         const nextResult = await super.request<PagedResult<T>>(
           nextURL,
-          options
+          options as BitbucketHttpOptions
         );
 
         resultBody.values.push(...nextResult.body.values);

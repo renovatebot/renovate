@@ -28,7 +28,7 @@ describe('modules/manager/pipenv/extract', () => {
       expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(4);
     });
 
-    it('marks packages with "extras" as skipReason === any-version', async () => {
+    it('marks packages with "extras" as skipReason === unspecified-version', async () => {
       const res = await extractPackageFile(pipfile3, 'Pipfile');
       expect(res?.deps.filter((r) => !r.skipReason)).toHaveLength(0);
       expect(res?.deps.filter((r) => r.skipReason)).toHaveLength(6);
@@ -83,7 +83,7 @@ describe('modules/manager/pipenv/extract', () => {
       expect(res).toMatchSnapshot({
         extractedConstraints: { python: '== 2.7.*' },
         deps: [
-          { depName: 'requests', skipReason: 'any-version' },
+          { depName: 'requests', skipReason: 'unspecified-version' },
           {
             currentValue: '>0.5.0',
             datasource: 'pypi',
@@ -93,8 +93,8 @@ describe('modules/manager/pipenv/extract', () => {
           { depName: 'django', skipReason: 'git-dependency' },
           { depName: 'e682b37', skipReason: 'file-dependency' },
           { depName: 'e1839a8', skipReason: 'local-dependency' },
-          { depName: 'pywinusb', skipReason: 'any-version' },
-          { currentValue: '*', skipReason: 'any-version' },
+          { depName: 'pywinusb', skipReason: 'unspecified-version' },
+          { currentValue: '*', skipReason: 'unspecified-version' },
           {
             currentValue: '>=1.0,<3.0',
             datasource: 'pypi',

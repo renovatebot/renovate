@@ -57,8 +57,8 @@ export function extractPackageFile(
         deps,
       };
     }
-  } catch (e) {
-    logger.debug(`Could not parse dependency from ${packageFile}`);
+  } catch (err) {
+    logger.debug({ packageFile, err }, `Could not parse YAML`);
   }
   return null;
 }
