@@ -305,8 +305,7 @@ describe('workers/repository/update/pr/index', () => {
         );
       });
 
-      // eslint-disable-next-line
-      it.only('updates PR target branch if base branch changed in config', async () => {
+      it('updates PR target branch if base branch changed in config', async () => {
         platform.getBranchPr.mockResolvedValueOnce(pr);
 
         const res = await ensurePr({ ...config, baseBranch: 'new_base' }); // user changed base branch in config

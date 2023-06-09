@@ -1611,7 +1611,7 @@ export async function updatePr({
     patchBody.body = body;
   }
   if (targetBranch) {
-    patchBody.baseUrl = targetBranch;
+    patchBody.base = targetBranch;
   }
   if (state) {
     patchBody.state = state;

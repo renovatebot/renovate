@@ -342,6 +342,7 @@ export async function ensurePr(
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
       if (
+        existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
