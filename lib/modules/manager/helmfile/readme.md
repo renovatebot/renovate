@@ -32,13 +32,6 @@ For this you use a custom `hostRules` array.
       password: '<some-password>',
     },
     {
-      // for repository string oci://ghci.io/user/oci-helm-test
-      matchHost: 'https://ghci.io',
-      hostType: 'docker',
-      username: '<some-username>',
-      password: '<some-password>',
-    },
-    {
       // login with encrypted password
       matchHost: 'https://ghci.io',
       hostType: 'docker',

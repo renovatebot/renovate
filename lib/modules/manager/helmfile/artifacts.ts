@@ -72,9 +72,6 @@ export async function updateArtifacts({
 
     const regexOfURLPath = /\/.*/;
     const repositories = getRepositories(doc);
-    if (repositories.length < 1) {
-      return null;
-    }
 
     repositories.filter(isOCIRegistry).forEach((value) => {
       const loginCmd = generateRegistryLoginCmd(

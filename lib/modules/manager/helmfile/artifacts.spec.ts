@@ -121,36 +121,6 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
   });
 
-  it('returns null if repositories were undefined.', async () => {
-    const helmfileYamlWithoutRepositories = codeBlock`
-releases:
-  - name: chart
-    chart: private-charts/chart
-    version: 0.12.0
-`;
-    const lockFileWithoutRepositories = codeBlock`
-version: 0.151.0
-dependencies:
-- name: chart
-  repository: oci://ghcr.io/private-charts
-  version: 0.11.0
-digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
-generated: "2023-03-08T21:32:06.122276997+01:00"
-`;
-    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories as never);
-    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
-    fs.getParentDir.mockReturnValue('');
-    const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
-    expect(
-      await helmfile.updateArtifacts({
-        packageFileName: 'helmfile.yaml',
-        updatedDeps,
-        newPackageFileContent: helmfileYamlWithoutRepositories,
-        config,
-      })
-    ).toBeNull();
-  });
-
   it('returns updated helmfile.lock', async () => {
     git.getFile.mockResolvedValueOnce(lockFile as never);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
@@ -182,35 +152,93 @@ generated: "2023-03-08T21:32:06.122276997+01:00"
     ]);
   });
 
+  it('returns updated helmfile.lock if repositories were defined in ../helmfile-defaults.yaml.', async () => {
+    const helmfileYamlWithoutRepositories = codeBlock`
+    bases:
+      - ../helmfile-defaults.yaml
+    releases:
+      - name: backstage
+        chart: backstage/backstage
+        version: 0.12.0
+    `;
+    const lockFileWithoutRepositories = codeBlock`
+    version: 0.151.0
+    dependencies:
+    - name: backstage
+      repository: https://backstage.github.io/charts
+      version: 0.11.0
+    digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
+    generated: "2023-03-08T21:32:06.122276997+01:00"
+    `;
+    const lockFileTwoWithoutRepositories = codeBlock`
+    version: 0.151.0
+    dependencies:
+    - name: backstage
+      repository: https://backstage.github.io/charts
+      version: 0.12.0
+    digest: sha256:9d83889176d005effb86041d30c20361625561cbfb439cbd16d7243225bac17c
+    generated: "2023-03-08T21:30:48.273709455+01:00"
+    `;
+
+    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories as never);
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwoWithoutRepositories as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
+    expect(
+      await helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps,
+        newPackageFileContent: helmfileYamlWithoutRepositories,
+        config,
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'helmfile.lock',
+          contents: lockFileTwoWithoutRepositories,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'helmfile deps -f helmfile.yaml' },
+    ]);
+  });
+
   it('log into private OCI registries, returns updated helmfile.lock', async () => {
     const helmfileYamlOCIPrivateRepo = codeBlock`
-repositories:
-  - name: private-charts
-    url: ghcr.io/charts
-    oci: true
-releases:
-  - name: chart
-    chart: private-charts/chart
-    version: 0.12.0
-`;
+    repositories:
+      - name: private-charts
+        url: ghcr.io/charts
+        oci: true
+    releases:
+      - name: chart
+        chart: private-charts/chart
+        version: 0.12.0
+    `;
     const lockFileOCIPrivateRepo = codeBlock`
-version: 0.151.0
-dependencies:
-- name: chart
-  repository: oci://ghcr.io/private-charts
-  version: 0.11.0
-digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
-generated: "2023-03-08T21:32:06.122276997+01:00"
-`;
+    version: 0.151.0
+    dependencies:
+    - name: chart
+      repository: oci://ghcr.io/private-charts
+      version: 0.11.0
+    digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
+    generated: "2023-03-08T21:32:06.122276997+01:00"
+    `;
     const lockFileOCIPrivateRepoTwo = codeBlock`
-version: 0.151.0
-dependencies:
-- name: chart
-  repository: oci://ghcr.io/private-charts
-  version: 0.12.0
-digest: sha256:9d83889176d005effb86041d30c20361625561cbfb439cbd16d7243225bac17c
-generated: "2023-03-08T21:30:48.273709455+01:00"
-`;
+    version: 0.151.0
+    dependencies:
+    - name: chart
+      repository: oci://ghcr.io/private-charts
+      version: 0.12.0
+    digest: sha256:9d83889176d005effb86041d30c20361625561cbfb439cbd16d7243225bac17c
+    generated: "2023-03-08T21:30:48.273709455+01:00"
+    `;
     hostRules.add({
       username: 'test',
       password: 'password',
