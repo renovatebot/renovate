@@ -185,8 +185,14 @@ const testShards: Record<string, ShardConfig> = {
       lines: 97.95,
     },
   },
-  other: { matchPaths: ['lib'] },
 };
+
+/**
+ * This shard is used as catch-all for all tests not covered
+ * by other shards in the config.
+ */
+const defaultShard: ShardConfig = { matchPaths: ['lib'] };
+testShards['other'] = defaultShard;
 
 /**
  * Subset of Jest config that is relevant for sharded test run.
