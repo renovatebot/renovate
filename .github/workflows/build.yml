@@ -34,14 +34,34 @@ jobs:
     outputs:
       os: ${{ steps.setup-matrix.outputs.os }}
     env:
-      # skip macOS and Windows test on pull requests without 'ci:fulltest' label
-      is-fulltest: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest') }}
+      is-pr: ${{ github.event_name == 'pull_request' }}
+      pr: ${{ github.event.pull_request.number }}
+      repo: ${{ github.event.repository.full_name }}
       ubuntu-only: '["ubuntu-latest"]'
       all-platforms: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+
     steps:
+      - name: Fetch PR info
+        id: pr-info
+        if: ${{ env.is-pr == 'true' }}
+        run: |
+          curl -s -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ env.repo }}/pulls/${{ env.pr }} \
+            | jq -c '{ labels: [.labels[].name] }' \
+            | sed '1s/^/pr=/g' \
+            > "$GITHUB_OUTPUT"
+
       - name: Detect matrix parameters
         id: setup-matrix
-        run: echo 'os=${{ env.is-fulltest == 'true' && env.all-platforms || env.ubuntu-only }}' >> "$GITHUB_OUTPUT"
+        env:
+          has-fulltest-label: ${{ contains(fromJSON(steps.pr-info.outputs.pr || '{}').labels, 'ci:fulltest') }}
+        run: |
+          echo 'os=${{
+            (env.is-pr != 'true' || env.has-fulltest-label == 'true') && env.all-platforms || env.ubuntu-only
+          }}' >> "$GITHUB_OUTPUT"
 
   test:
     needs: setup-test-matrix
