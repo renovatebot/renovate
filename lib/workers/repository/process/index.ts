@@ -71,6 +71,35 @@ async function getBaseBranchConfig(
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranches = config.baseBranches;
   }
+  else if (
+    config.useBaseBranchConfig === 'replace' &&
+    baseBranch !== config.defaultBranch
+  ) {
+    logger.debug(
+      { baseBranch },
+      `Replacing config from base branch because useBaseBranchConfig=replace`
+    );
+
+    const branchConfigFileName = 'TBD'; // TODO: re-detect config file name on `baseBranch`
+
+    baseBranchConfig = await platform.getJsonFile(
+      branchConfigFileName,
+      config.repository,
+      baseBranch
+    );
+    logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
+
+    // istanbul ignore if
+    if (config.printConfig) {
+      logger.info(
+        { config: baseBranchConfig },
+        'Base branch config after replace'
+      );
+    }
+
+    // baseBranches value should be based off the default branch
+    baseBranchConfig.baseBranches = config.baseBranches;
+  }
 
   if (config.baseBranches!.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;

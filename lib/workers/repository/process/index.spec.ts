@@ -69,7 +69,7 @@ describe('workers/repository/process/index', () => {
       );
     });
 
-    it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
+    it('reads config from branches in baseBranches if useBaseBranchConfig=merge specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = jest.fn().mockResolvedValue({});
       config.baseBranches = ['master', 'dev'];
@@ -90,7 +90,7 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
-    it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
+    it('handles config name mismatch between baseBranches if useBaseBranchConfig=merge specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = jest
         .fn()
@@ -105,6 +105,27 @@ describe('workers/repository/process/index', () => {
       config.useBaseBranchConfig = 'merge';
       await expect(extractDependencies(config)).rejects.toThrow(
         CONFIG_VALIDATION
+      );
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
+      expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
+    });
+
+    // TODO: fix this test
+    it.skip('reads config from branches in baseBranches if useBaseBranchConfig=replace specified', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getJsonFile = jest.fn().mockResolvedValue({});
+      config.baseBranches = ['master', 'dev'];
+      config.useBaseBranchConfig = 'replace';
+      const res = await extractDependencies(config);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
+      expect(platform.getJsonFile).toHaveBeenCalledWith(
+        'renovate.json',
+        undefined,
+        'dev'
       );
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });

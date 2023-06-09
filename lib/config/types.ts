@@ -193,7 +193,7 @@ export interface RegExManager extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
 }
 
-export type UseBaseBranchConfigType = 'merge' | 'none';
+export type UseBaseBranchConfigType = 'merge' | 'replace' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
