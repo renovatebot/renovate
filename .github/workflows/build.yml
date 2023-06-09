@@ -29,7 +29,22 @@ env:
   DRY_RUN: true
 
 jobs:
+  setup-test-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      os: ${{ steps.setup-matrix.outputs.os }}
+    env:
+      # skip macOS and Windows test on pull requests without 'ci:fulltest' label
+      is-fulltest: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest') }}
+      ubuntu-only: '["ubuntu-latest"]'
+      all-platforms: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+    steps:
+      - name: Detect matrix parameters
+        id: setup-matrix
+        run: echo 'os=${{ env.is-fulltest == 'true' && env.all-platforms || env.ubuntu-only }}' >> "$GITHUB_OUTPUT"
+
   test:
+    needs: setup-test-matrix
     name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
@@ -38,17 +53,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: ${{ fromJSON(needs.setup-test-matrix.outputs.os) }}
         node-version: [18]
-        # skip macOS and Windows test on pull requests without 'ci:fulltest' label
-        include: >-
-          ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
-            "os": "macos-latest",
-            "node-version": 18
-          }, {
-            "os": "windows-latest",
-            "node-version": 18
-          }]' || '[]') }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
