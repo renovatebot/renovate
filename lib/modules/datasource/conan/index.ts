@@ -5,6 +5,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
+import { isArtifactoryServer } from '../common';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -151,8 +152,7 @@ export class ConanDatasource extends Datasource {
             }
           }
 
-          const artifactoryConanApi = `${artifactoryApi}/conan`
-          if (url.includes(artifactoryConanApi)) {
+          if (isArtifactoryServer(rep)) {
             const conanApiRegexp = /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^\/]+)/
             const groups = url.match(conanApiRegexp)?.groups
             if (!groups) {

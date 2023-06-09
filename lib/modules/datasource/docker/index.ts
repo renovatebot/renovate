@@ -16,7 +16,7 @@ import {
 import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { isArtifactoryServer } from './artifactory';
+import { isArtifactoryServer } from '../common';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
