@@ -183,7 +183,9 @@ describe('modules/manager/helmfile/artifacts', () => {
     git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories as never);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileTwoWithoutRepositories as never);
+    fs.readLocalFile.mockResolvedValueOnce(
+      lockFileTwoWithoutRepositories as never
+    );
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
