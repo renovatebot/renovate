@@ -37,19 +37,34 @@ function jestGithubRunnerSpecs(): JestConfig {
   };
 }
 
-const shardMap: Record<string, string[]> = {
-  datasource: ['lib/modules/datasource'],
-  manager_1: ['lib/modules/manager/[a-m]*'],
-  manager_2: ['lib/modules/manager/[n-z]*'],
-  platform: ['lib/modules/platform'],
-  versioning: ['lib/modules/versioning'],
-  workers: ['lib/workers'],
-  other: ['lib'],
+interface ShardConfig {
+  patterns: string[];
+  threshold?: {
+    branches?: number;
+    functions?: number;
+    lines?: number;
+    statements?: number;
+  };
+}
+
+type JestShardedSubconfig = Pick<
+  JestConfig,
+  'testMatch' | 'collectCoverageFrom' | 'coverageThreshold'
+>;
+
+const shardMap: Record<string, ShardConfig> = {
+  datasource: { patterns: ['lib/modules/datasource'] },
+  manager_1: { patterns: ['lib/modules/manager/[a-m]*'] },
+  manager_2: { patterns: ['lib/modules/manager/[n-z]*'] },
+  platform: { patterns: ['lib/modules/platform'] },
+  versioning: { patterns: ['lib/modules/versioning'] },
+  workers: { patterns: ['lib/workers'] },
+  other: { patterns: ['lib'] },
 };
 
-type ShardConfig = Pick<JestConfig, 'testMatch' | 'collectCoverageFrom'>;
-
-function tryShardOr(fallback: ShardConfig = {}): ShardConfig {
+function useShardingOrFallbackTo(
+  fallback: JestShardedSubconfig
+): JestShardedSubconfig {
   const shardKey = process.env.TEST_SHARD;
   if (!shardKey) {
     return fallback;
@@ -69,22 +84,17 @@ function tryShardOr(fallback: ShardConfig = {}): ShardConfig {
     '!lib/**/*.{d,spec}.ts',
   ];
 
-  loop: for (const [key, patterns] of Object.entries(shardMap)) {
-    for (let pattern of patterns) {
-      pattern = pattern.replace(/\/+$/, '');
-
-      const testPattern = `${pattern}/**/*.spec.ts`;
-      const coveragePattern = `${pattern}/**/*.ts`;
-
-      if (key === shardKey || key === 'other') {
-        testMatch.push(`<rootDir>/${testPattern}`);
-        collectCoverageFrom.push(coveragePattern);
-        break loop;
-      }
-
-      testMatch.push(`!**/${testPattern}`);
-      collectCoverageFrom.push(`!${coveragePattern}`);
+  for (const [key, { patterns }] of Object.entries(shardMap)) {
+    if (key === shardKey || key === 'other') {
+      testMatch.push(...patterns.map((p) => `<rootDir>/${p}/**/*.spec.ts`));
+      collectCoverageFrom.push(...patterns.map((p) => `${p}/**/*.ts`));
+      break;
     }
+
+    testMatch.push(...patterns.map((pattern) => `!**/${pattern}/**/*.spec.ts`));
+    collectCoverageFrom.push(
+      ...patterns.map((pattern) => `!${pattern}/**/*.ts`)
+    );
   }
 
   testMatch.reverse();
@@ -94,7 +104,7 @@ function tryShardOr(fallback: ShardConfig = {}): ShardConfig {
 }
 
 const config: JestConfig = {
-  ...tryShardOr({
+  ...useShardingOrFallbackTo({
     collectCoverageFrom: [
       'lib/**/*.{js,ts}',
       '!lib/**/*.{d,spec}.ts',
