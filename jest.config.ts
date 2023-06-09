@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import os from 'node:os';
 import v8 from 'node:v8';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
@@ -83,109 +84,13 @@ interface ShardConfig {
  *
  * Eventually, we aim to reach 100% coverage for most cases,
  * so the `threshold` field is meant to be mostly omitted in the future.
+ *
+ * Storing shards config in the separate file helps to form CI matrix
+ * using pre-installed `jq` utility.
  */
-const testShards: Record<string, ShardConfig> = {
-  datasource_1: {
-    matchPaths: ['lib/modules/datasource/[a-g]*'],
-    threshold: {
-      branches: 96.95,
-    },
-  },
-  datasource_2: {
-    matchPaths: ['lib/modules/datasource'],
-    threshold: {
-      statements: 99.35,
-      branches: 96.0,
-      functions: 98.25,
-      lines: 99.35,
-    },
-  },
-  manager_1: {
-    matchPaths: ['lib/modules/manager/[a-c]*'],
-    threshold: {
-      functions: 99.3,
-    },
-  },
-  manager_2: {
-    matchPaths: ['lib/modules/manager/[d-h]*'],
-    threshold: {
-      functions: 99.7,
-    },
-  },
-  manager_3: {
-    matchPaths: ['lib/modules/manager/[i-n]*'],
-    threshold: {
-      statements: 99.65,
-      branches: 98.5,
-      functions: 98.65,
-      lines: 99.65,
-    },
-  },
-  manager_4: {
-    matchPaths: ['lib/modules/manager'],
-  },
-  platform: {
-    matchPaths: ['lib/modules/platform'],
-    threshold: {
-      branches: 97.5,
-    },
-  },
-  versioning: {
-    matchPaths: ['lib/modules/versioning'],
-    threshold: {
-      branches: 97.25,
-    },
-  },
-  workers_1: {
-    matchPaths: ['lib/workers/repository/{onboarding,process}'],
-  },
-  workers_2: {
-    matchPaths: ['lib/workers/repository/update/pr'],
-    threshold: {
-      branches: 97.1,
-    },
-  },
-  workers_3: {
-    matchPaths: ['lib/workers/repository/update'],
-    threshold: {
-      branches: 97.75,
-    },
-  },
-  workers_4: {
-    matchPaths: ['lib/workers'],
-    threshold: {
-      statements: 99.95,
-      branches: 97.2,
-      lines: 99.95,
-    },
-  },
-  git_1: {
-    matchPaths: ['lib/util/git/index.spec.ts'],
-    threshold: {
-      statements: 99.8,
-      functions: 97.55,
-      lines: 99.8,
-    },
-  },
-  git_2: {
-    matchPaths: ['lib/util/git'],
-    threshold: {
-      statements: 98.4,
-      branches: 98.65,
-      functions: 93.9,
-      lines: 98.4,
-    },
-  },
-  util: {
-    matchPaths: ['lib/util'],
-    threshold: {
-      statements: 97.85,
-      branches: 96.15,
-      functions: 95.85,
-      lines: 97.95,
-    },
-  },
-};
+const testShards: Record<string, ShardConfig> = JSON.parse(
+  readFileSync('.test-shards.json', 'utf-8')
+);
 
 /**
  * This shard is used as catch-all for all tests not covered
@@ -210,7 +115,7 @@ type JestShardedSubconfig = Pick<
  *
  * Otherwise, `fallback` value is used to determine some defaults.
  */
-function useShardingOrFallbackTo(
+function configureShardingOrFallbackTo(
   fallback: JestShardedSubconfig
 ): JestShardedSubconfig {
   const shardKey = process.env.TEST_SHARD;
@@ -297,7 +202,7 @@ function useShardingOrFallbackTo(
 }
 
 const config: JestConfig = {
-  ...useShardingOrFallbackTo({
+  ...configureShardingOrFallbackTo({
     collectCoverageFrom: [
       'lib/**/*.{js,ts}',
       '!lib/**/*.{d,spec}.ts',
