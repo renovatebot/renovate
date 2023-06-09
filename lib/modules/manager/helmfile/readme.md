@@ -40,7 +40,7 @@ For this you use a custom `hostRules` array.
     },
     {
       // login with encrypted password
-      matchHost: 'https://ghci.io/user/oci-helm-test',
+      matchHost: 'https://ghci.io',
       hostType: 'docker',
       username: '<some-username>',
       encrypted: {
