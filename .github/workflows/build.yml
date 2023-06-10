@@ -36,24 +36,20 @@ jobs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
 
     env:
+      # Field required for GitHub CLI
       GH_REPO: ${{ github.event.repository.full_name }}
       GH_TOKEN: ${{ github.token }}
 
+      # Pull Request data may present or it may not
       PR: ${{ github.event.pull_request.number }}
       PR_LABELS: '[]'
-      PR_DRAFT: ''
-
-      OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
-      OS_LINUX_ONLY: '["ubuntu-latest"]'
 
     steps:
       - name: Fetch PR data
         if: ${{ env.PR }}
         env:
           PR_URL: https://api.github.com/repos/{owner}/{repo}/pulls/${{ env.PR }}
-          JQ_FILTER: >-
-            "PR_LABELS=" + ([.labels[].name] | tostring),
-            "PR_DRAFT="  + (select(.draft == true) | .draft | tostring)
+          JQ_FILTER: "PR_LABELS=" + ([.labels[].name] | tostring),
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
       - name: Detect OS matrix
@@ -61,6 +57,8 @@ jobs:
         env:
           CI_FULLTEST: >-
             ${{ contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || '' }}
+          OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+          OS_LINUX_ONLY: '["ubuntu-latest"]'
         run: >-
           echo 'os-matrix=${{
             (!env.PR || env.CI_FULLTEST) && env.OS_ALL || env.OS_LINUX_ONLY
