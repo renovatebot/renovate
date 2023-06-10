@@ -360,7 +360,8 @@ describe('modules/datasource/go/base', () => {
 
         expect(res).toEqual({
           datasource: GitTagsDatasource.id,
-          packageName: 'https://dev.azure.com/my-organization/my-project/_git/my-repo.git',
+          packageName:
+            'https://dev.azure.com/my-organization/my-project/_git/my-repo',
         });
       });
 
