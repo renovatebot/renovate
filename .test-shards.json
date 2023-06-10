@@ -98,5 +98,8 @@
       "functions": 95.85,
       "lines": 97.95
     }
+  },
+  "other": {
+    "matchPaths": ["lib"]
   }
 }

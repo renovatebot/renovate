@@ -93,19 +93,21 @@ const testShards: Record<string, ShardConfig> = JSON.parse(
 );
 
 /**
- * This shard is used as catch-all for all tests not covered
- * by other shards in the config.
- */
-const defaultShard: ShardConfig = { matchPaths: ['lib'] };
-testShards['other'] = defaultShard;
-
-/**
  * Subset of Jest config that is relevant for sharded test run.
  */
 type JestShardedSubconfig = Pick<
   JestConfig,
   'testMatch' | 'collectCoverageFrom' | 'coverageThreshold'
 >;
+
+/**
+ * Convert match pattern to a form that matches on file with `.ts` or `.spec.ts` extension.
+ */
+function normalizePattern(pattern: string, suffix: '.ts' | '.spec.ts'): string {
+  return pattern.endsWith('.spec.ts')
+    ? pattern.replace(/\.spec\.ts$/, suffix)
+    : `${pattern}/**/*${suffix}`;
+}
 
 /**
  * Generates Jest config for sharded test run.
@@ -148,15 +150,6 @@ function configureShardingOrFallbackTo(
       statements: defaultGlobal?.statements ?? 100,
     },
   };
-
-  // Convert match pattern to a form that matches on file with `.ts` or `.spec.ts` extension.
-  const normalizePattern = (
-    pattern: string,
-    suffix: '.ts' | '.spec.ts'
-  ): string =>
-    pattern.endsWith('.spec.ts')
-      ? pattern.replace(/\.spec\.ts$/, suffix)
-      : `${pattern}/**/*${suffix}`;
 
   for (const [key, { matchPaths: patterns, threshold }] of Object.entries(
     testShards
