@@ -21,7 +21,7 @@ export function detectPlatform(
   if (hostname === 'gitlab.com' || hostname?.includes('gitlab')) {
     return 'gitlab';
   }
-  if (hostname === 'dev.azure.com') {
+  if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
     return 'azure';
   }
 
