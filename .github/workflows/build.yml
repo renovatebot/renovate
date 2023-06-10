@@ -48,7 +48,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ env.repo }}
         run: |
-          gh api https://api.github.com/repos/\{owner\}/\{repo\}/pulls/${{ env.pr }} \
+          gh api https://api.github.com/repos/{owner}/{repo}/pulls/${{ env.pr }} \
             | jq -c '{ labels: [.labels[].name] }' \
             | sed '1s/^/pr=/g' \
             > "$GITHUB_OUTPUT"
