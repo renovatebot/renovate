@@ -91,10 +91,9 @@ assert get_matching_shards(test_shards, ['lib/foo/bar/baz/qux.js']) == ['shard-2
 assert get_matching_shards(test_shards, ['lib/foo/bar/README.md']) == ['shard-2']
 assert get_matching_shards(test_shards, ['lib/foo/README.md']) == ['shard-1', 'shard-2']
 
-# Get the list of paths from COMMIT_FILES environment variable (encoded as JSON)
-# Read shards from `.test-shards.json` and print matching shards to stdout as JSON prepended with `test-shards=`
-commit_files = json.loads(os.environ['COMMIT_FILES'])
-shards = json.load(open('.test-shards.json'))
+commit_files = json.loads(os.environ['COMMIT_FILES'] or '[]')
+with open(os.path.join(os.path.dirname(__file__), 'test-shards.json')) as f:
+    shards = json.load(f)
 matching_shards = get_matching_shards(shards, commit_files)
-print('shards-all=' + json.dumps(list(shards.keys())))
 print('shards-matched=' + json.dumps(matching_shards))
+print('shards-all=' + json.dumps(list(shards.keys())))
