@@ -49,7 +49,8 @@ jobs:
         if: ${{ env.PR }}
         env:
           PR_URL: https://api.github.com/repos/{owner}/{repo}/pulls/${{ env.PR }}
-          JQ_FILTER: "PR_LABELS=" + ([.labels[].name] | tostring)
+          JQ_FILTER: >-
+            "PR_LABELS=" + ([.labels[].name] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
       - name: Detect OS matrix
