@@ -74,25 +74,6 @@ interface ShardConfig {
 }
 
 /**
- * Configuration for test shards that can be run with `TEST_SHARD` environment variable.
- *
- * For each shard, we specify a subset of tests to run.
- * The tests from previous shards are excluded from the next shard.
- *
- * If the coverage threshold is not met, we adjust it
- * using the optional `threshold` field.
- *
- * Eventually, we aim to reach 100% coverage for most cases,
- * so the `threshold` field is meant to be mostly omitted in the future.
- *
- * Storing shards config in the separate file helps to form CI matrix
- * using pre-installed `jq` utility.
- */
-const testShards: Record<string, ShardConfig> = JSON.parse(
-  readFileSync('.test-shards.json', 'utf-8')
-);
-
-/**
  * Subset of Jest config that is relevant for sharded test run.
  */
 type JestShardedSubconfig = Pick<
@@ -124,6 +105,25 @@ function configureShardingOrFallbackTo(
   if (!shardKey) {
     return fallback;
   }
+
+  /**
+   * Configuration for test shards that can be run with `TEST_SHARD` environment variable.
+   *
+   * For each shard, we specify a subset of tests to run.
+   * The tests from previous shards are excluded from the next shard.
+   *
+   * If the coverage threshold is not met, we adjust it
+   * using the optional `threshold` field.
+   *
+   * Eventually, we aim to reach 100% coverage for most cases,
+   * so the `threshold` field is meant to be mostly omitted in the future.
+   *
+   * Storing shards config in the separate file helps to form CI matrix
+   * using pre-installed `jq` utility.
+   */
+  const testShards: Record<string, ShardConfig> = JSON.parse(
+    readFileSync('.github/test-shards.json', 'utf-8')
+  );
 
   if (!testShards[shardKey]) {
     const keys = Object.keys(testShards).join(', ');
