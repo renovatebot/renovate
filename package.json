@@ -324,7 +324,7 @@
     "nock": "13.3.1",
     "npm-run-all": "4.1.5",
     "rimraf": "5.0.1",
-    "semantic-release": "21.0.2",
+    "semantic-release": "21.0.3",
     "strip-ansi": "6.0.1",
     "tar": "6.1.15",
     "tmp-promise": "3.0.3",
