@@ -1,3 +1,5 @@
+# Shard detection script for GitHub Actions
+
 import json
 import os
 from fnmatch import fnmatch
