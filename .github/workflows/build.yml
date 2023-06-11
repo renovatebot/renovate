@@ -40,7 +40,7 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
-      os-matrix-is-full: ${{ steps.os-matrix.outputs.os-matrix-is-full }}
+      os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.os-matrix-prefetch }}
 
     env:
@@ -61,17 +61,26 @@ jobs:
             "PR_LABELS=" + ([.labels[].name] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
-      - name: Detect OS matrix
+      - name: Calculate `CI_FULLTEST` env variable
+        run: |
+          echo 'CI_FULLTEST=${{
+            contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || ''
+          }}' >> "$GITHUB_ENV"
+
+      - name: Calculating `os-matrix-is-full` output
+        id: os-matrix-is-full
+        env:
+          IS_FULL: ${{ (!env.PR || env.CI_FULLTEST) && 'true' || '' }}
+        run: |
+          echo 'OS_MATRIX_IS_FULL=${{ env.IS_FULL }}' >> "$GITHUB_ENV"
+          echo 'os-matrix-is-full=${{ env.IS_FULL }}' >> "$GITHUB_OUTPUT"
+
+      - name: Calculating `os-matrix` output
         id: os-matrix
         env:
-          CI_FULLTEST: >-
-            ${{ contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || '' }}
-          OS_MATRIX_IS_FULL: ${{ (env.PR != '' || env.CI_FULLTEST == 'true') && 'true' || '' }}
           OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
           OS_LINUX_ONLY: '["ubuntu-latest"]'
         run: |
-          echo 'OS_MATRIX_IS_FULL=${{ env.OS_MATRIX_IS_FULL }}' >> "$GITHUB_ENV"
-          echo 'os-matrix-is-full=${{ env.OS_MATRIX_IS_FULL }}' >> "$GITHUB_OUTPUT"
           echo 'os-matrix=${{
             env.OS_MATRIX_IS_FULL && env.OS_ALL || env.OS_LINUX_ONLY
           }}' >> "$GITHUB_OUTPUT"
@@ -90,32 +99,36 @@ jobs:
 
       - name: Dispatch `node_modules` prefetch for MacOS and Windows
         id: os-matrix-prefetch
-        if: env.OS_MATRIX_IS_FULL
         env:
           # Prefetch for Ubuntu has already done, scheduling for other OSes
           OS_MATRIX_PREFETCH: '["macos-latest", "windows-latest"]'
+          OS_MATRIX_FALLBACK: '["ubuntu-latest"]'
         run: |
-          echo 'os-matrix-prefetch=${{ env.OS_MATRIX_PREFETCH }}' >> "$GITHUB_OUTPUT"
+          echo 'os-matrix-prefetch=${{
+            env.OS_MATRIX_IS_FULL && env.OS_MATRIX_PREFETCH || env.OS_MATRIX_FALLBACK
+          }}' >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
-    if: needs.setup.outputs.os-matrix-prefetch
 
     strategy:
       matrix:
-        os: ${{ fromJSON(needs.setup.outputs.prefetch-matrix) }}
+        os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
         node-version: [18]
+
     runs-on: ${{ matrix.os }}
 
     timeout-minutes: 10
 
     steps:
       - name: Checkout code
+        if: needs.setup.outputs.os-matrix-is-full
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
+        if: needs.setup.outputs.os-matrix-is-full
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -123,10 +136,6 @@ jobs:
 
   test:
     needs: [setup, prefetch]
-    if: |
-      always() &&
-      (needs.setup.result == 'success' || needs.setup.result == 'skipped') &&
-      (needs.prefetch.result == 'success' || needs.prefetch.result == 'skipped')
 
     name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
