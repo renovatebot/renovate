@@ -110,10 +110,9 @@ jobs:
           JQ_FILTER: >-
             "ACTIONS_CACHE_KEYS=" + ([.[].actions_caches[].key] | tostring)
         run: |
-          gh api ${{ env.CACHES_URL }} --paginate \
-            | jq -s '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
+          gh api ${{ env.CACHES_URL }} --paginate | jq -s '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
-      - run: echo $ACTIONS_CACHE_KEYS
+      - run: echo ${{ACTIONS_CACHE_KEYS}}
 
       - name: Calculate cache hits for Windows and MacOS
         id: modules-caches
