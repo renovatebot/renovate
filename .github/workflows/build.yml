@@ -41,7 +41,7 @@ jobs:
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
       os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
-      os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.os-matrix-prefetch }}
+      os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
 
     env:
       # Field required for GitHub CLI
@@ -75,11 +75,6 @@ jobs:
           echo 'OS_MATRIX_IS_FULL=${{ env.IS_FULL }}' >> "$GITHUB_ENV"
           echo 'os-matrix-is-full=${{ env.IS_FULL }}' >> "$GITHUB_OUTPUT"
 
-      - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
-
       - name: Calculate `os-matrix` output
         id: os-matrix
         env:
@@ -90,53 +85,24 @@ jobs:
             env.OS_MATRIX_IS_FULL && env.OS_ALL || env.OS_LINUX_ONLY
           }}' >> "$GITHUB_OUTPUT"
 
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+
       - name: Calculate `yarn-lock-hash` output
         id: yarn-lock-hash
         run: |
           echo 'yarn-lock-hash=${{ hashFiles('yarn.lock') }}' >> "$GITHUB_OUTPUT"
 
-      - name: Calculate cache keys
-        env:
-          LOCK_HASH: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
-        run: |
-          echo 'MACOS_CACHE_KEY=node-modules-macOS-${{ env.NODE_VERSION }}-${{ env.LOCK_HASH }}' >> "$GITHUB_ENV"
-          echo 'WINDOWS_CACHE_KEY=node-modules-Windows-${{ env.NODE_VERSION }}-${{ env.LOCK_HASH }}' >> "$GITHUB_ENV"
-
-      - name: Calculate `ACTIONS_CACHE_KEYS` variable
-        id: caches-list
-        env:
-          CACHES_URL: /repos/{owner}/{repo}/actions/caches
-          JQ_FILTER: >-
-            "ACTIONS_CACHE_KEYS=" + ([.[].actions_caches[].key] | tostring)
-        run: |
-          gh api ${{ env.CACHES_URL }} --paginate | jq -rcs '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
-
-      - name: Calculate cache misses for Windows and MacOS
-        id: modules-caches
-        run: |
-          echo 'windows=${{
-            !contains(fromJSON(env.ACTIONS_CACHE_KEYS), env.WINDOWS_CACHE_KEY) && 'true' || ''
-          }}' >> "$GITHUB_OUTPUT"
-          echo 'macos=${{
-            !contains(fromJSON(env.ACTIONS_CACHE_KEYS), env.MACOS_CACHE_KEY) && 'true' || ''
-          }}' >> "$GITHUB_OUTPUT"
-
-      - name: Dispatch `node_modules` prefetch for MacOS and Windows
+      - name: Calculate matrix for `node_modules` prefetch
+        uses: ./.github/actions/calculate-prefetch-matrix
         id: os-matrix-prefetch
-        env:
-          WINDOWS_MISS: ${{ steps.modules-caches.outputs.windows }}
-          MACOS_MISS: ${{ steps.modules-caches.outputs.macos }}
-          PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
-          PREFETCH_MAC_ONLY: '["macos-latest"]'
-          PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
-          PREFETCH_FALLBACK: '["ubuntu-latest"]'
-        run: |
-          echo 'os-matrix-prefetch=${{
-            (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.MACOS_MISS && env.PREFETCH_BOTH) ||
-            (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.PREFETCH_WINDOWS_ONLY) ||
-            (env.OS_MATRIX_IS_FULL && env.MACOS_MISS && env.PREFETCH_MAC_ONLY) ||
-            env.PREFETCH_FALLBACK
-          }}' >> "$GITHUB_OUTPUT"
+        with:
+          repo: ${{ GH_REPO }}
+          token: ${{ GH_TOKEN }}
+          node-version: ${{ env.NODE_VERSION }}
+          hash: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
 
       - name: Prefetch modules for `ubuntu-latest`
         id: setup-node
