@@ -127,14 +127,28 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Cache node_modules
+        id: node-modules-cache
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: node_modules
+          key: node-modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
+          lookup-only: true
+
+      - name: Calculate `NEEDS_PREFETCH` env variable
+        if: >-
+          needs.setup.outputs.os-matrix-is-full &&
+          !steps.node-modules-cache.outputs.cache-hit
+        run: echo 'NEEDS_PREFETCH=true' >> "$GITHUB_ENV"
+
       - name: Checkout code
-        if: needs.setup.outputs.os-matrix-is-full
+        if: env.NEEDS_PREFETCH
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
-        if: needs.setup.outputs.os-matrix-is-full
+        if: env.NEEDS_PREFETCH
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
