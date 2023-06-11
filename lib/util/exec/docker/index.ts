@@ -222,6 +222,7 @@ export async function generateDockerCommand(
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
+    dockerCliOptions,
     dockerImagePrefix,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
@@ -231,6 +232,9 @@ export async function generateDockerCommand(
   result.push(`--label=${containerLabel}`);
   if (dockerUser) {
     result.push(`--user=${dockerUser}`);
+  }
+  if (dockerCliOptions) {
+    result.push(dockerCliOptions)
   }
 
   const volumeDirs: VolumeOption[] = [localDir, cacheDir];
