@@ -110,7 +110,7 @@ jobs:
 
       - name: Detect test shards
         id: shards
-        run: yarn -s jest.config.ts >> "$GITHUB_OUTPUT"
+        run: yarn -s test-shards >> "$GITHUB_OUTPUT"
 
   test:
     needs: setup
