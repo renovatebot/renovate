@@ -58,8 +58,14 @@ jobs:
             "PR_LABELS=" + ([.labels[].name] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
-      - name: Detect BASEHEAD
-        if: ${{ github.event.compare }}
+      - name: Detect BASEHEAD from `github.event.pull_request`
+        if: ${{ !env.BASEHEAD }}
+        run: |
+          echo '${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}' \
+            >> "$GITHUB_ENV"
+
+      - name: Detect BASEHEAD from `github.event`
+        if: ${{ !env.BASEHEAD }}
         run: |
           echo '${{ github.event.compare }}' \
             | sed 's/.*compare\/\([^ ]*\)/BASEHEAD=\1/'
