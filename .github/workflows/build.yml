@@ -67,7 +67,7 @@ jobs:
             contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || ''
           }}' >> "$GITHUB_ENV"
 
-      - name: Calculating `os-matrix-is-full` output
+      - name: Calculate `os-matrix-is-full` output
         id: os-matrix-is-full
         env:
           IS_FULL: ${{ (!env.PR || env.CI_FULLTEST) && 'true' || '' }}
@@ -75,7 +75,7 @@ jobs:
           echo 'OS_MATRIX_IS_FULL=${{ env.IS_FULL }}' >> "$GITHUB_ENV"
           echo 'os-matrix-is-full=${{ env.IS_FULL }}' >> "$GITHUB_OUTPUT"
 
-      - name: Calculating `os-matrix` output
+      - name: Calculate `os-matrix` output
         id: os-matrix
         env:
           OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
