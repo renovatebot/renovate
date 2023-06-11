@@ -143,7 +143,9 @@ jobs:
           lookup-only: true
 
       - name: Setup Node.js
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        if: |
+          needs.setup.outputs.os-matrix-is-full &&
+          steps.node-modules-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
