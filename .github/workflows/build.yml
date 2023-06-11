@@ -165,13 +165,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        if: needs.setup.outputs.os-matrix-is-full
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
-        if: needs.setup.outputs.os-matrix-is-full
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
