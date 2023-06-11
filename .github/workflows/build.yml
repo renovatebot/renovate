@@ -94,7 +94,7 @@ jobs:
 
   prefetch-modules:
     needs: setup
-    if: ${{ !needs.setup.outputs.prefetch-matrix }}
+    if: ${{ needs.setup.outputs.prefetch-matrix }}
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.prefetch-matrix) }}
