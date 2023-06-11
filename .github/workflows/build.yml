@@ -137,14 +137,14 @@ jobs:
         run: |
           echo 'os-matrix-prefetch=${{
             (env.OS_MATRIX_IS_FULL &&
-              steps.windows-modules-cache.outputs.cache-hit != "true" &&
-              steps.macos-modules-cache.outputs.cache-hit != "true" &&
+              steps.windows-modules-cache.outputs.cache-hit != 'true' &&
+              steps.macos-modules-cache.outputs.cache-hit != 'true' &&
               env.PREFETCH_BOTH) ||
             (env.OS_MATRIX_IS_FULL &&
-              steps.windows-modules-cache.outputs.cache-hit != "true" &&
+              steps.windows-modules-cache.outputs.cache-hit != 'true' &&
               env.PREFETCH_WINDOWS_ONLY) ||
             (env.OS_MATRIX_IS_FULL &&
-              steps.macos-modules-cache.outputs.cache-hit != "true" &&
+              steps.macos-modules-cache.outputs.cache-hit != 'true' &&
               env.PREFETCH_MAC_ONLY) ||
             env.PREFETCH_NONE
           }}' >> "$GITHUB_OUTPUT"
