@@ -73,7 +73,7 @@ export async function updateArtifacts({
     const regexOfURLPath = /\/.*/;
     const repositories = getRepositories(doc);
 
-    repositories.filter(isOCIRegistry).forEach((value) => {
+    for (const value of repositories.filter(isOCIRegistry)) {
       const loginCmd = generateRegistryLoginCmd(
         value.name,
         'https://' + value.url,
@@ -83,7 +83,7 @@ export async function updateArtifacts({
       if (loginCmd) {
         cmd.push(loginCmd);
       }
-    });
+    }
 
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
     await exec(cmd, {
