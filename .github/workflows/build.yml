@@ -34,6 +34,8 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
+      shards-matched: ${{ steps.shards.outputs.shards-matched }}
+      shards-all: ${{ steps.shards.outputs.shards-all }}
 
     env:
       # Field required for GitHub CLI
@@ -44,6 +46,9 @@ jobs:
       PR: ${{ github.event.pull_request.number }}
       PR_LABELS: '[]'
 
+      BASEHEAD: ''
+      COMMIT_FILES: '[]'
+
     steps:
       - name: Fetch PR data
         if: ${{ env.PR }}
@@ -52,6 +57,25 @@ jobs:
           JQ_FILTER: >-
             "PR_LABELS=" + ([.labels[].name] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
+
+      - name: Detect BASEHEAD
+        if: ${{ github.event.compare }}
+        run: |
+          echo '${{ github.event.compare }}' \
+            | sed 's/.*compare\/\([^ ]*\)/BASEHEAD=\1/'
+            >> "$GITHUB_ENV"
+
+      - name: Fetch files changed
+        if: ${{ env.BASEHEAD }}
+        env:
+          PR_URL: https://api.github.com/repos/{owner}/{repo}/compare/${{ env.BASEHEAD }}
+          JQ_FILTER: >-
+            "COMMIT_FILES=" + ([.files[].filename] | tostring)
+        run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
+
+      - name: Detect test shards
+        id: shards
+        run: python .github/test-shards.py >> "$GITHUB_OUTPUT"
 
       - name: Detect OS matrix
         id: os-matrix

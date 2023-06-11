@@ -77,8 +77,8 @@ def get_matching_shards(shards, paths):
             if any(match(pattern, path) for pattern in config['matchPaths']):
                 matching_shards_set.add(shard)
                 break
-        else:
-            return list(shards.keys())
+    if not matching_shards_set:
+        return list(shards.keys())
     return [shard for shard in shards.keys() if shard in matching_shards_set]
 
 # Tests
