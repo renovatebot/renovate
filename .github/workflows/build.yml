@@ -143,7 +143,7 @@ jobs:
 
   lint-eslint:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -154,6 +154,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - name: Cache eslint
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .eslintcache
+          key: eslint-cache
 
       - name: Lint
         run: yarn eslint -f gha
@@ -172,8 +178,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
+      - name: Cache prettier
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .prettier-cache
+          key: prettier-cache
+
       - name: Lint
-        run: yarn prettier
+        run: yarn prettier --cache-location .prettier-cache
 
   lint-other:
     runs-on: ubuntu-latest
