@@ -110,13 +110,12 @@ jobs:
 
   prefetch:
     needs: [setup]
-    # We can't use `if: needs.setup.outputs.os-matrix-is-full` here
-    #
-    # It will lead to further complications that aren't solvable
+    # We can't use `if: needs.setup.outputs.os-matrix-is-full` here,
+    # as it will lead to further complications that aren't solvable
     # with current GitHub Actions feature set.
     #
-    # This job can probably be short-lived `no-op`,
-    # but it's the best option.
+    # Although this job sometimes may act as short-lived `no-op`,
+    # it's actually the best option available.
 
     strategy:
       matrix:
