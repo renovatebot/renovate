@@ -328,6 +328,16 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 !!! note
     Dangling containers are only removed when Renovate runs again with the same prefix.
 
+## dockerCliOptions
+
+Adds command-line docker cli options to Renovate sidecar Docker containers.
+
+for example `--memory=1g --cpus="1.5"`
+
+Read the [Docker runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) for more information.
+
+Note: there are other config options available for docker side-car container that adds cli options as well for running and also cleaning containers from previous runs
+
 ## dockerImagePrefix
 
 By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.

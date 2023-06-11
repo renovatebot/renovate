@@ -344,6 +344,12 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
+    name: 'dockerCliOptions',
+    description: 'Change this value to add docker run command options to Renovate Docker sidecar container.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'dockerImagePrefix',
     description:
       'Change this value to override the default Renovate Docker sidecar image name prefix.',
