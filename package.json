@@ -50,6 +50,7 @@
     "test-e2e:install": "yarn --cwd test/e2e install --no-lockfile --ignore-optional --prod",
     "test-e2e:run": "yarn --cwd test/e2e test",
     "test-schema": "run-s create-json-schema",
+    "test-shards": "ts-node jest.config.ts",
     "tsc": "tsc",
     "type-check": "run-s generate:* \"tsc --noEmit {@}\" --",
     "update-static-data": "run-s update-static-data:*",

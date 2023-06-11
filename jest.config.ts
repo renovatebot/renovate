@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
-import os from 'node:os';
-import v8 from 'node:v8';
+import os from 'os';
+import v8 from 'v8';
+import { minimatch } from 'minimatch';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
 const ci = !!process.env.CI;
@@ -13,12 +13,6 @@ type JestConfig = InitialOptionsTsJest & {
 const cpus = os.cpus();
 const mem = os.totalmem();
 const stats = v8.getHeapStatistics();
-
-process.stderr.write(`Host stats:
-  Cpus:      ${cpus.length}
-  Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB
-  HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
-`);
 
 /**
  * https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
@@ -74,6 +68,127 @@ interface ShardConfig {
 }
 
 /**
+ * Configuration for test shards that can be run with `TEST_SHARD` environment variable.
+ *
+ * For each shard, we specify a subset of tests to run.
+ * The tests from previous shards are excluded from the next shard.
+ *
+ * If the coverage threshold is not met, we adjust it
+ * using the optional `threshold` field.
+ *
+ * Eventually, we aim to reach 100% coverage for most cases,
+ * so the `threshold` field is meant to be mostly omitted in the future.
+ *
+ * Storing shards config in the separate file helps to form CI matrix
+ * using pre-installed `jq` utility.
+ */
+const testShards: Record<string, ShardConfig> = {
+  'datasources-1': {
+    matchPaths: ['lib/modules/datasource/[a-g]*'],
+    threshold: {
+      branches: 96.95,
+    },
+  },
+  'datasources-2': {
+    matchPaths: ['lib/modules/datasource'],
+    threshold: {
+      statements: 99.35,
+      branches: 96.0,
+      functions: 98.25,
+      lines: 99.35,
+    },
+  },
+  'managers-1': {
+    matchPaths: ['lib/modules/manager/[a-c]*'],
+    threshold: {
+      functions: 99.3,
+    },
+  },
+  'managers-2': {
+    matchPaths: ['lib/modules/manager/[d-h]*'],
+    threshold: {
+      functions: 99.7,
+    },
+  },
+  'managers-3': {
+    matchPaths: ['lib/modules/manager/[i-n]*'],
+    threshold: {
+      statements: 99.65,
+      branches: 98.5,
+      functions: 98.65,
+      lines: 99.65,
+    },
+  },
+  'managers-4': {
+    matchPaths: ['lib/modules/manager'],
+  },
+  platform: {
+    matchPaths: ['lib/modules/platform'],
+    threshold: {
+      branches: 97.5,
+    },
+  },
+  versioning: {
+    matchPaths: ['lib/modules/versioning'],
+    threshold: {
+      branches: 97.25,
+    },
+  },
+  'workers-1': {
+    matchPaths: ['lib/workers/repository/{onboarding,process}'],
+  },
+  'workers-2': {
+    matchPaths: ['lib/workers/repository/update/pr'],
+    threshold: {
+      branches: 97.1,
+    },
+  },
+  'workers-3': {
+    matchPaths: ['lib/workers/repository/update'],
+    threshold: {
+      branches: 97.75,
+    },
+  },
+  'workers-4': {
+    matchPaths: ['lib/workers'],
+    threshold: {
+      statements: 99.95,
+      branches: 97.2,
+      lines: 99.95,
+    },
+  },
+  'git-1': {
+    matchPaths: ['lib/util/git/index.spec.ts'],
+    threshold: {
+      statements: 99.8,
+      functions: 97.55,
+      lines: 99.8,
+    },
+  },
+  'git-2': {
+    matchPaths: ['lib/util/git'],
+    threshold: {
+      statements: 98.4,
+      branches: 98.65,
+      functions: 93.9,
+      lines: 98.4,
+    },
+  },
+  util: {
+    matchPaths: ['lib/util'],
+    threshold: {
+      statements: 97.85,
+      branches: 96.15,
+      functions: 95.85,
+      lines: 97.95,
+    },
+  },
+  other: {
+    matchPaths: ['lib'],
+  },
+};
+
+/**
  * Subset of Jest config that is relevant for sharded test run.
  */
 type JestShardedSubconfig = Pick<
@@ -105,25 +220,6 @@ function configureShardingOrFallbackTo(
   if (!shardKey) {
     return fallback;
   }
-
-  /**
-   * Configuration for test shards that can be run with `TEST_SHARD` environment variable.
-   *
-   * For each shard, we specify a subset of tests to run.
-   * The tests from previous shards are excluded from the next shard.
-   *
-   * If the coverage threshold is not met, we adjust it
-   * using the optional `threshold` field.
-   *
-   * Eventually, we aim to reach 100% coverage for most cases,
-   * so the `threshold` field is meant to be mostly omitted in the future.
-   *
-   * Storing shards config in the separate file helps to form CI matrix
-   * using pre-installed `jq` utility.
-   */
-  const testShards: Record<string, ShardConfig> = JSON.parse(
-    readFileSync('.github/test-shards.json', 'utf-8')
-  );
 
   if (!testShards[shardKey]) {
     const keys = Object.keys(testShards).join(', ');
@@ -194,6 +290,33 @@ function configureShardingOrFallbackTo(
   return { testMatch, collectCoverageFrom, coverageThreshold };
 }
 
+/**
+ * Given the file list affected by commit, return the list
+ * of shards that  test these changes.
+ */
+function getMatchingShards(files: string[]): string[] {
+  const matchingShards = new Set<string>();
+  for (const file of files) {
+    for (const [key, { matchPaths }] of Object.entries(testShards)) {
+      const patterns = matchPaths.map((path) =>
+        path.endsWith('.spec.ts')
+          ? path.replace(/\.spec\.ts$/, '{.ts,.spec.ts}')
+          : `${path}/**/*`
+      );
+
+      if (patterns.some((pattern) => minimatch(file, pattern))) {
+        matchingShards.add(key);
+        break;
+      }
+    }
+  }
+
+  const allShards = Object.keys(testShards);
+  return matchingShards.size > 0
+    ? allShards.filter((shard) => matchingShards.has(shard))
+    : allShards;
+}
+
 const config: JestConfig = {
   ...configureShardingOrFallbackTo({
     collectCoverageFrom: [
@@ -251,3 +374,31 @@ const config: JestConfig = {
 };
 
 export default config;
+
+/**
+ * If `COMMIT_FILES` env variable is set, it means we're in `setup` CI job.
+ * We don't want to see anything except key-value pairs in the output.
+ * Otherwise, we're printing useful stats.
+ */
+if (process.env.COMMIT_FILES) {
+  try {
+    const commitFiles = JSON.parse(process.env.COMMIT_FILES);
+    const allShards = Object.keys(testShards);
+    const matchingShards = getMatchingShards(commitFiles);
+
+    // eslint-disable-next-line no-console
+    console.log(`shards-all=${JSON.stringify(allShards)}`);
+
+    // eslint-disable-next-line no-console
+    console.log(`shards-matched=${JSON.stringify(matchingShards)}`);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(`Invalid COMMIT_FILES value: "${process.env.COMMIT_FILES}"`);
+  }
+} else {
+  process.stderr.write(`Host stats:
+    Cpus:      ${cpus.length}
+    Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB
+    HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
+  `);
+}
