@@ -34,6 +34,7 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
+      prefetch-matrix: ${{ steps.prefetch-matrix.outputs.prefetch-matrix }}
 
     env:
       # Field required for GitHub CLI
@@ -76,13 +77,50 @@ jobs:
             data
 
       - name: Setup Node.js
+        id: setup-node
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Prefetch matrix
+        if: ${{ !steps.setup-node.outputs.cache-hit }}
+        id: prefetch-matrix
+        env:
+          # Prefetch for Ubuntu has already done, scheduling for other OSes
+          PREFETCH_MATRIX: '["macos-latest", "windows-latest"]'
+        run: >-
+          echo 'prefetch-matrix=${{ env.PREFETCH_MATRIX }}' >> "$GITHUB_OUTPUT"
+
+  prefetch-modules:
+    needs: setup
+    if: ${{ !needs.setup.outputs.prefetch-matrix }}
+    strategy:
+      matrix:
+        os: ${{ fromJSON(needs.setup.outputs.prefetch-matrix) }}
+        node-version: [18]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: |-
+            package.json
+            yarn.lock
+            .github/actions/setup-node
+            tools/generate-imports.mjs
+            data
+
+      - name: Setup Node.js
+        id: setup-node
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
   test:
-    needs: setup
+    needs: [setup, prefetch-modules]
     name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
