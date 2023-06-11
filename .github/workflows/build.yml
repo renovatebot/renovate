@@ -136,18 +136,14 @@ jobs:
           key: node-modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
           lookup-only: true
 
-      - name: Calculate `NEEDS_PREFETCH` env variable
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: echo 'NEEDS_PREFETCH=true' >> "$GITHUB_ENV"
-
       - name: Checkout code
-        if: env.NEEDS_PREFETCH
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
-        if: env.NEEDS_PREFETCH
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
