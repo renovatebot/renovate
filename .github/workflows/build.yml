@@ -134,6 +134,7 @@ jobs:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Cache node_modules
+        if: needs.setup.outputs.os-matrix-is-full
         id: node-modules-cache
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
