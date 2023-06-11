@@ -27,6 +27,7 @@ runs:
   using: 'composite'
   steps:
     - name: Calculate cache keys
+      id: cache-keys
       env:
         LOCK_HASH: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
       shell: bash
@@ -50,8 +51,8 @@ runs:
       id: modules-caches
       env:
         ACTIONS_CACHE_KEYS: ${{ steps.caches-list.outputs.keys }}
-        MACOS_CACHE_KEY: ${{ steps.caches-list.outputs.macos-cache-key }}
-        WINDOWS_CACHE_KEY: ${{ steps.caches-list.outputs.windows-cache-key }}
+        MACOS_CACHE_KEY: ${{ steps.cache-keys.outputs.macos-cache-key }}
+        WINDOWS_CACHE_KEY: ${{ steps.cache-keys.outputs.windows-cache-key }}
       shell: bash
       run: |
         echo 'macos=${{
