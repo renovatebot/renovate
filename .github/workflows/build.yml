@@ -62,7 +62,7 @@ jobs:
             "PR_LABELS=" + ([.labels[].name] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
-      - name: Calculate `CI_FULLTEST` env variable
+      - name: Calculate `CI_FULLTEST` variable
         run: |
           echo 'CI_FULLTEST=${{
             contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || ''
@@ -96,6 +96,30 @@ jobs:
         run: |
           echo 'yarn-lock-hash=${{ hashFiles('yarn.lock') }}' >> "$GITHUB_OUTPUT"
 
+      - name: Detecting Windows modules cache
+        if: env.OS_MATRIX_IS_FULL
+        id: windows-modules-cache
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: node_modules
+          key: >-
+            node-modules-Windows-${{ env.NODE_VERSION }}-${{
+              needs.setup.outputs.yarn-lock-hash
+            }}
+          lookup-only: true
+
+      - name: Detecting MacOS modules cache
+        if: env.OS_MATRIX_IS_FULL
+        id: macos-modules-cache
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: node_modules
+          key: >-
+            node-modules-macOS-${{ env.NODE_VERSION }}-${{
+              needs.setup.outputs.yarn-lock-hash
+            }}
+          lookup-only: true
+
       - name: Setup Node.js
         id: setup-node
         uses: ./.github/actions/setup-node
@@ -106,12 +130,23 @@ jobs:
       - name: Dispatch `node_modules` prefetch for MacOS and Windows
         id: os-matrix-prefetch
         env:
-          # Prefetch for Ubuntu has already done, scheduling for other OSes
-          OS_MATRIX_PREFETCH: '["macos-latest", "windows-latest"]'
-          OS_MATRIX_FALLBACK: '["ubuntu-latest"]'
+          PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
+          PREFETCH_MAC_ONLY: '["macos-latest"]'
+          PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
+          PREFETCH_NONE: '["ubuntu-latest"]'
         run: |
           echo 'os-matrix-prefetch=${{
-            env.OS_MATRIX_IS_FULL && env.OS_MATRIX_PREFETCH || env.OS_MATRIX_FALLBACK
+            (env.OS_MATRIX_IS_FULL &&
+              steps.windows-modules-cache.outputs.cache-hit != "true" &&
+              steps.macos-modules-cache.outputs.cache-hit != "true" &&
+              env.PREFETCH_BOTH) ||
+            (env.OS_MATRIX_IS_FULL &&
+              steps.windows-modules-cache.outputs.cache-hit != "true" &&
+              env.PREFETCH_WINDOWS_ONLY) ||
+            (env.OS_MATRIX_IS_FULL &&
+              steps.macos-modules-cache.outputs.cache-hit != "true" &&
+              env.PREFETCH_MAC_ONLY) ||
+            env.PREFETCH_NONE
           }}' >> "$GITHUB_OUTPUT"
 
   prefetch:
@@ -133,34 +168,14 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Cache node_modules
-        if: needs.setup.outputs.os-matrix-is-full
-        id: node-modules-cache
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
-        with:
-          path: node_modules
-          key: >-
-            node-modules-${{ runner.os }}-${{ env.NODE_VERSION }}-${{
-              needs.setup.outputs.yarn-lock-hash
-            }}
-          lookup-only: true
-
-      - name: Calculate if prefetch is required
-        id: prefetch-required
-        if: |
-          needs.setup.outputs.os-matrix-is-full &&
-          steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: |
-          echo 'prefetch-required=true' >> "$GITHUB_OUTPUT"
-
       - name: Checkout code
-        if: steps.prefetch-required.outputs.prefetch-required
+        if: needs.setup.outputs.os-matrix-is-full
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
-        if: steps.prefetch-required.outputs.prefetch-required
+        if: needs.setup.outputs.os-matrix-is-full
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
