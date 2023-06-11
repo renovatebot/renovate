@@ -65,6 +65,22 @@ jobs:
             (!env.PR || env.CI_FULLTEST) && env.OS_ALL || env.OS_LINUX_ONLY
           }}' >> "$GITHUB_OUTPUT"
 
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: |-
+            package.json
+            yarn.lock
+            .github/actions/setup-node
+            tools/generate-imports.mjs
+            data
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
   test:
     needs: setup
     name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
