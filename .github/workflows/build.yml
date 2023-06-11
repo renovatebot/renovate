@@ -27,6 +27,12 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 18
   DRY_RUN: true
+  SPARSE_CHECKOUT: |-
+    .github/actions/
+    data/
+    tools/
+    package.json
+    yarn.lock
 
 jobs:
   setup:
@@ -69,12 +75,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
-          sparse-checkout: |-
-            package.json
-            yarn.lock
-            .github/actions/setup-node
-            tools/generate-imports.mjs
-            data
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
         id: setup-node
@@ -107,12 +108,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
-          sparse-checkout: |-
-            package.json
-            yarn.lock
-            .github/actions/setup-node
-            tools/generate-imports.mjs
-            data
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
