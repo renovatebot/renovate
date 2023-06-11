@@ -99,8 +99,8 @@ jobs:
         uses: ./.github/actions/calculate-prefetch-matrix
         id: os-matrix-prefetch
         with:
-          repo: ${{ GH_REPO }}
-          token: ${{ GH_TOKEN }}
+          repo: ${{ env.GH_REPO }}
+          token: ${{ env.GH_TOKEN }}
           node-version: ${{ env.NODE_VERSION }}
           hash: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
 
