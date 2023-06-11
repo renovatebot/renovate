@@ -90,7 +90,7 @@ jobs:
           # Prefetch for Ubuntu has already done, scheduling for other OSes
           PREFETCH_MATRIX: '["macos-latest", "windows-latest"]'
         run: >-
-          echo 'prefetch-matrix=${{ PREFETCH_MATRIX }}' >> "$GITHUB_OUTPUT"
+          echo 'prefetch-matrix=${{ env.PREFETCH_MATRIX }}' >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
