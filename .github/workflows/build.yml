@@ -45,6 +45,8 @@ jobs:
       PR: ${{ github.event.pull_request.number }}
       PR_LABELS: '[]'
 
+      PREFETCH_MATRIX: '[]'
+
     steps:
       - name: Fetch PR data
         if: ${{ env.PR }}
@@ -93,7 +95,7 @@ jobs:
           echo 'prefetch-matrix=${{ env.PREFETCH_MATRIX }}' >> "$GITHUB_OUTPUT"
 
   prefetch-modules:
-    needs: setup
+    needs: [setup]
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.prefetch-matrix) }}
@@ -102,7 +104,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        if: ${{ needs.setup.outputs.prefetch-matrix }}
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: |-
@@ -113,7 +114,6 @@ jobs:
             data
 
       - name: Setup Node.js
-        if: ${{ needs.setup.outputs.prefetch-matrix }}
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
