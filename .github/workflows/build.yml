@@ -129,6 +129,7 @@ jobs:
     steps:
       - name: Cache node_modules
         id: node-modules-cache
+        if: needs.setup.outputs.os-matrix-is-full
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: node_modules
@@ -136,9 +137,7 @@ jobs:
           lookup-only: true
 
       - name: Calculate `NEEDS_PREFETCH` env variable
-        if: >-
-          needs.setup.outputs.os-matrix-is-full &&
-          !steps.node-modules-cache.outputs.cache-hit
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: echo 'NEEDS_PREFETCH=true' >> "$GITHUB_ENV"
 
       - name: Checkout code
