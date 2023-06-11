@@ -42,7 +42,6 @@ jobs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
       os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.os-matrix-prefetch }}
-      yarn-lock-hash: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
 
     env:
       # Field required for GitHub CLI
@@ -136,7 +135,7 @@ jobs:
             (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.MACOS_MISS && env.PREFETCH_BOTH) ||
             (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.PREFETCH_WINDOWS_ONLY) ||
             (env.OS_MATRIX_IS_FULL && env.MACOS_MISS && env.PREFETCH_MAC_ONLY) ||
-            env.PREFETCH_NONE
+            env.PREFETCH_FALLBACK
           }}' >> "$GITHUB_OUTPUT"
 
       - name: Prefetch modules for `ubuntu-latest`
