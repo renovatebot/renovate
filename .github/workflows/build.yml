@@ -59,9 +59,9 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
       - name: Detect BASEHEAD from `github.event.pull_request`
-        if: ${{ !env.BASEHEAD }}
+        if: ${{ github.event.pull_request.base.sha && github.event.pull_request.head.sha }}
         run: |
-          echo '${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}' \
+          echo 'BASEHEAD=${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}' \
             >> "$GITHUB_ENV"
 
       - name: Detect BASEHEAD from `github.event`
