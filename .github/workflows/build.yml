@@ -129,7 +129,7 @@ jobs:
           PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
           PREFETCH_MAC_ONLY: '["macos-latest"]'
           PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
-          PREFETCH_FALLBACK: '[]'
+          PREFETCH_FALLBACK: '["ubuntu-latest"]'
         run: |
           echo 'os-matrix-prefetch=${{
             (env.OS_MATRIX_IS_FULL && env.WINDOWS_MISS && env.MACOS_MISS && env.PREFETCH_BOTH) ||
