@@ -113,6 +113,8 @@ jobs:
           gh api ${{ env.CACHES_URL }} --paginate \
             | jq -s '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
+      - run: echo $ACTIONS_CACHE_KEYS
+
       - name: Calculate cache hits for Windows and MacOS
         id: modules-caches
         run: |
