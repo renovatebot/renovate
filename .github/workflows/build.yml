@@ -110,7 +110,7 @@ jobs:
           JQ_FILTER: >-
             "ACTIONS_CACHE_KEYS=" + ([.[].actions_caches[].key] | tostring)
         run: |
-          gh api ${{ env.CACHES_URL }} --paginate | jq -s '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
+          gh api ${{ env.CACHES_URL }} --paginate | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
       - run: echo ${{ env.ACTIONS_CACHE_KEYS }}
 
