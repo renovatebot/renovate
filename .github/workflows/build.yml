@@ -64,7 +64,7 @@ jobs:
           echo 'BASEHEAD=${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}' \
             >> "$GITHUB_ENV"
 
-      - name: Detect BASEHEAD from `github.event`
+      - name: Detect BASEHEAD from `github.event.compare`
         if: ${{ !env.BASEHEAD && github.event.compare }}
         run: |
           echo '${{ github.event.compare }}' \
