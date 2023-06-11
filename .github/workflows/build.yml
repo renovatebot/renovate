@@ -58,6 +58,18 @@ jobs:
             "PR_LABELS=" + ([.labels[].name] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
+      - name: Detect OS matrix
+        id: os-matrix
+        env:
+          CI_FULLTEST: >-
+            ${{ contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || '' }}
+          OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+          OS_LINUX_ONLY: '["ubuntu-latest"]'
+        run: >-
+          echo 'os-matrix=${{
+            (!env.PR || env.CI_FULLTEST) && env.OS_ALL || env.OS_LINUX_ONLY
+          }}' >> "$GITHUB_OUTPUT"
+
       - name: Detect BASEHEAD from `github.event.pull_request`
         if: ${{ github.event.pull_request.base.sha && github.event.pull_request.head.sha }}
         run: |
@@ -83,24 +95,20 @@ jobs:
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: |-
-            .github/test-shards.py
-            .github/test-shards.json
+            jest.config.ts
+            package.json
+            yarn.lock
+            .github/actions/setup-node
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
 
       - name: Detect test shards
         id: shards
-        run: python .github/test-shards.py >> "$GITHUB_OUTPUT"
-
-      - name: Detect OS matrix
-        id: os-matrix
-        env:
-          CI_FULLTEST: >-
-            ${{ contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || '' }}
-          OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
-          OS_LINUX_ONLY: '["ubuntu-latest"]'
-        run: >-
-          echo 'os-matrix=${{
-            (!env.PR || env.CI_FULLTEST) && env.OS_ALL || env.OS_LINUX_ONLY
-          }}' >> "$GITHUB_OUTPUT"
+        run: yarn -s jest.config.ts >> "$GITHUB_OUTPUT"
 
   test:
     needs: setup
