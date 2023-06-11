@@ -34,7 +34,7 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
-      prefetch-matrix: ${{ steps.prefetch-matrix.outputs.prefetch-matrix }}
+      prefetch-matrix: ${{ steps.prefetch-matrix.outputs.prefetch-matrix || '[]' }}
 
     env:
       # Field required for GitHub CLI
@@ -44,8 +44,6 @@ jobs:
       # Pull Request data may present or it may not
       PR: ${{ github.event.pull_request.number }}
       PR_LABELS: '[]'
-
-      PREFETCH_MATRIX: '[]'
 
     steps:
       - name: Fetch PR data
