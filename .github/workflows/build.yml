@@ -34,7 +34,9 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
-      prefetch-matrix: ${{ steps.prefetch-matrix.outputs.prefetch-matrix || '[]' }}
+
+      prefetch: ${{ steps.modules-prefetch.outputs.prefetch }}
+      prefetch-matrix: ${{ steps.modules-prefetch.outputs.prefetch-matrix }}
 
     env:
       # Field required for GitHub CLI
@@ -83,16 +85,23 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Prefetch matrix
-        # if: ${{ !steps.setup-node.outputs.cache-hit }}
-        id: prefetch-matrix
+      - name: Dispatch node modules prefetch
+        id: modules-prefetch
         env:
+          # No-op job being performed on Ubuntu
+          NO_OP_MATRIX: '["ubuntu-latest"]'
           # Prefetch for Ubuntu has already done, scheduling for other OSes
           PREFETCH_MATRIX: '["macos-latest", "windows-latest"]'
         run: >-
-          echo 'prefetch-matrix=${{ env.PREFETCH_MATRIX }}' >> "$GITHUB_OUTPUT"
+          echo 'prefetch=${{
+            !steps.setup-node.outputs.cache-hit && 'true' || ''
+          }}' >> "$GITHUB_OUTPUT"
 
-  prefetch-modules:
+          echo 'prefetch-matrix=${{
+            steps.setup-node.outputs.cache-hit && env.NO_OP_MATRIX || env.PREFETCH_MATRIX
+          }}' >> "$GITHUB_OUTPUT"
+
+  prefetch:
     needs: [setup]
     strategy:
       matrix:
@@ -102,6 +111,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
+        if: ${{ needs.setup.outputs.prefetch }}
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: |-
@@ -112,10 +122,13 @@ jobs:
             data
 
       - name: Setup Node.js
+        if: ${{ needs.setup.outputs.prefetch }}
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - run: echo "Done."
 
   test:
     needs: [setup, prefetch-modules]
