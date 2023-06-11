@@ -65,7 +65,7 @@ jobs:
             >> "$GITHUB_ENV"
 
       - name: Detect BASEHEAD from `github.event`
-        if: ${{ !env.BASEHEAD }}
+        if: ${{ !env.BASEHEAD && github.event.compare }}
         run: |
           echo '${{ github.event.compare }}' \
             | sed 's/.*compare\/\([^ ]*\)/BASEHEAD=\1/'
