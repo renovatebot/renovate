@@ -73,6 +73,13 @@ jobs:
             "COMMIT_FILES=" + ([.files[].filename] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
+      - name: Checkout shards detection code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse: |-
+            .github/test-shards.py
+            .github/test-shards.json
+
       - name: Detect test shards
         id: shards
         run: python .github/test-shards.py >> "$GITHUB_OUTPUT"
