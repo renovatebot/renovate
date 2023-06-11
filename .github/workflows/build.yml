@@ -92,7 +92,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
-          jest-cache: true
 
       - name: Init platform
         shell: bash
