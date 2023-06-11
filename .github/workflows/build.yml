@@ -193,7 +193,7 @@ jobs:
         run: yarn test-schema
 
   release:
-    needs: [lint, test]
+    needs: [lint, test, test-e2e]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
