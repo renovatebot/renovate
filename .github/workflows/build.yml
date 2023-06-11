@@ -34,8 +34,6 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
-
-      prefetch: ${{ steps.modules-prefetch.outputs.prefetch }}
       prefetch-matrix: ${{ steps.modules-prefetch.outputs.prefetch-matrix }}
 
     env:
@@ -85,24 +83,18 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Dispatch node modules prefetch
+      - name: Dispatch `node_modules` prefetch for MacOS and Windows
+        if: ${{ !steps.setup-node.outputs.cache-hit }}
         id: modules-prefetch
         env:
-          # No-op job being performed on Ubuntu
-          NO_OP_MATRIX: '["ubuntu-latest"]'
           # Prefetch for Ubuntu has already done, scheduling for other OSes
           PREFETCH_MATRIX: '["macos-latest", "windows-latest"]'
         run: >-
-          echo 'prefetch=${{
-            !steps.setup-node.outputs.cache-hit && 'true' || ''
-          }}' >> "$GITHUB_OUTPUT"
-
-          echo 'prefetch-matrix=${{
-            steps.setup-node.outputs.cache-hit && env.NO_OP_MATRIX || env.PREFETCH_MATRIX
-          }}' >> "$GITHUB_OUTPUT"
+          echo 'prefetch-matrix=${{ PREFETCH_MATRIX }}' >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
+    if: needs.setup.outputs.prefetch-matrix
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.prefetch-matrix) }}
@@ -111,7 +103,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        if: ${{ needs.setup.outputs.prefetch }}
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: |-
@@ -122,16 +113,18 @@ jobs:
             data
 
       - name: Setup Node.js
-        if: ${{ needs.setup.outputs.prefetch }}
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - run: echo "Done."
-
   test:
-    needs: [setup, prefetch-modules]
+    needs: [setup, prefetch]
+    if: |
+      always() &&
+      (needs.setup.result == 'success' || needs.setup.result == 'skipped') &&
+      (needs.prefetch.result == 'success' || needs.prefetch.result == 'skipped')
+
     name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
