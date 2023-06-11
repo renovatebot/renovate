@@ -46,11 +46,7 @@ export function getRepositories(doc: Doc): Repository[] {
 }
 
 export function isOCIRegistry(repository: Repository): boolean {
-  if (is.nullOrUndefined(repository.oci)) {
-    return false;
-  }
-
-  return repository.oci;
+  return repository.oci === true;
 }
 
 export function generateRegistryLoginCmd(
