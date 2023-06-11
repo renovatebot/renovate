@@ -84,7 +84,9 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Dispatch `node_modules` prefetch for MacOS and Windows
-        if: ${{ !steps.setup-node.outputs.cache-hit }}
+        if: |
+          !steps.setup-node.outputs.cache-hit &&
+          (!env.PR || env.CI_FULLTEST)
         id: modules-prefetch
         env:
           # Prefetch for Ubuntu has already done, scheduling for other OSes
