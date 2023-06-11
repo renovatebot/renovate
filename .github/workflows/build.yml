@@ -84,7 +84,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Prefetch matrix
-        if: ${{ !steps.setup-node.outputs.cache-hit }}
+        # if: ${{ !steps.setup-node.outputs.cache-hit }}
         id: prefetch-matrix
         env:
           # Prefetch for Ubuntu has already done, scheduling for other OSes
@@ -177,6 +177,7 @@ jobs:
         run: yarn test-e2e
 
   lint:
+    needs: [setup]
     runs-on: ubuntu-latest
 
     # lint shouldn't need more than 10 min
