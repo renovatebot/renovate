@@ -104,10 +104,6 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      # build before tests to for static file check
-      - name: Build
-        run: yarn build
-
       - name: Cache jest
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
@@ -120,6 +116,35 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         if: always() && env.coverage == 'true'
+
+  test-e2e:
+    needs: setup
+    name: ${{ matrix.node-version == 18 && format('test-e2e ({0})', matrix.os) || format('test-e2e ({0}, node-{1})', matrix.os, matrix.node-version) }}
+    runs-on: ${{ matrix.os }}
+
+    # tests shouldn't need more time
+    timeout-minutes: 45
+
+    strategy:
+      matrix:
+        os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
+        node-version: [18]
+
+    env:
+      NODE_VERSION: ${{ matrix.node-version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Build
+        run: yarn build
 
       - name: E2E Test
         run: yarn test-e2e
