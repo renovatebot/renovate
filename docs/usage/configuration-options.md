@@ -2210,20 +2210,6 @@ The following example matches any `package.json`, including files like `backend/
 }
 ```
 
-The following example matches any `package.json`, including files like `backend/package.json`:
-
-```json
-{
-  "packageRules": [
-    {
-      "description": "Group dependencies from package.json files",
-      "matchFileNames": ["**/package.json"],
-      "groupName": "All package.json changes"
-    }
-  ]
-}
-```
-
 The following example matches any file in directories starting with `app/`:
 
 ```json
