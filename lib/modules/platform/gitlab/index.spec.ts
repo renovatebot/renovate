@@ -585,7 +585,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
         .reply(200, [
-          { context: 'renovate/stability-days', status: 'success' },
+          { context: 'renovate/minimum-release-age', status: 'success' },
           { context: 'renovate/other', status: 'success' },
         ])
         .get(
@@ -603,7 +603,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
         .reply(200, [
-          { name: 'renovate/stability-days', status: 'success' },
+          { name: 'renovate/minimum-release-age', status: 'success' },
           { name: 'renovate/other', status: 'success' },
         ])
         .get(

@@ -1602,7 +1602,7 @@ If you are more interested in including only certain package managers (e.g. `npm
 
 ## internalChecksAsSuccess
 
-By default, internal Renovate checks such as `renovate/stability-days` are not counted towards a branch being "green" or not.
+By default, internal Renovate checks such as `renovate/minimum-release-age` are not counted towards a branch being "green" or not.
 This is primarily to prevent automerge when the only check is a passing Renovate check.
 
 Internal checks will always be counted/considered if they are in pending or failed states.
@@ -1730,7 +1730,7 @@ Maven users: you cannot use `minimumReleaseAge` if a Maven source returns unreli
 
 <!-- prettier-ignore -->
 !!! note
-    Configuring this option will add a `renovate/stability-days` option to the status checks.
+    Configuring this option will add a `renovate/minimum-release-age` option to the status checks.
 
 There are a couple of uses for `minimumReleaseAge`:
 
@@ -1760,7 +1760,7 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 #### Await X time duration before Automerging
 
 If you enabled `automerge` _and_ `minimumReleaseAge`, it means that PRs will be created immediately but automerging will be delayed until the time-duration has passed.
-This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+This works because Renovate will add a "renovate/minimum-release-age" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
 
 <!-- markdownlint-enable MD001 -->
 

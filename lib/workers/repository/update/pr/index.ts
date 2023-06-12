@@ -160,7 +160,7 @@ export async function ensurePr(
     ) {
       logger.debug(`Branch automerge is enabled`);
       if (
-        config.stabilityStatus !== 'yellow' &&
+        config.ageStatus !== 'yellow' &&
         (await getBranchStatus()) === 'yellow' &&
         is.number(config.prNotPendingHours)
       ) {
@@ -200,7 +200,7 @@ export async function ensurePr(
         const elapsedHours = getElapsedHours(lastCommitTime);
         if (
           !dependencyDashboardCheck &&
-          ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
+          ((config.ageStatus && config.ageStatus !== 'yellow') ||
             (is.number(config.prNotPendingHours) &&
               elapsedHours < config.prNotPendingHours))
         ) {

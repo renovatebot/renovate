@@ -46,7 +46,7 @@ import { getUpdatedPackageFiles } from './get-updated';
 import { handleClosedPr, handleModifiedPr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
-import { setConfidence, setStability } from './status-checks';
+import { setAge, setConfidence } from './status-checks';
 
 async function rebaseCheck(
   config: RenovateConfig,
@@ -333,7 +333,7 @@ export async function processBranch(
     ) {
       // Only set a stability status check if one or more of the updates contain
       // both a minimumReleaseAge setting and a releaseTimestamp
-      config.stabilityStatus = 'green';
+      config.ageStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
         if (
@@ -350,7 +350,7 @@ export async function processBranch(
               },
               'Update has not passed minimum release age'
             );
-            config.stabilityStatus = 'yellow';
+            config.ageStatus = 'yellow';
             continue;
           }
         }
@@ -385,7 +385,7 @@ export async function processBranch(
       if (
         !dependencyDashboardCheck &&
         !branchExists &&
-        config.stabilityStatus === 'yellow' &&
+        config.ageStatus === 'yellow' &&
         ['not-pending', 'status-success'].includes(config.prCreation!)
       ) {
         logger.debug(
@@ -585,7 +585,7 @@ export async function processBranch(
     }
     // Set branch statuses
     await setArtifactErrorStatus(config);
-    await setStability(config);
+    await setAge(config);
     await setConfidence(config);
 
     // new commit means status check are pretty sure pending but maybe not reported yet

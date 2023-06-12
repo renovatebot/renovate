@@ -188,7 +188,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
-      it('skips PR creation due to stabilityStatus', async () => {
+      it('skips PR creation due to ageStatus', async () => {
         const now = DateTime.now();
         const then = now.minus({ hours: 1 });
 
@@ -198,7 +198,7 @@ describe('workers/repository/update/pr/index', () => {
         const res = await ensurePr({
           ...config,
           prCreation: 'not-pending',
-          stabilityStatus: 'green',
+          ageStatus: 'green',
         });
 
         expect(res).toEqual({
@@ -482,7 +482,7 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           automerge: true,
           automergeType: 'branch',
-          stabilityStatus: 'green',
+          ageStatus: 'green',
           prNotPendingHours: 1,
         });
 
@@ -503,7 +503,7 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           automerge: true,
           automergeType: 'branch',
-          stabilityStatus: 'green',
+          ageStatus: 'green',
           prNotPendingHours: 2,
         });
 

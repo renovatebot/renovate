@@ -1080,7 +1080,7 @@ describe('modules/platform/github/index', () => {
           state: 'success',
           statuses: [
             {
-              context: 'renovate/stability-days',
+              context: 'renovate/minimum-release-age',
               state: 'success',
             },
           ],

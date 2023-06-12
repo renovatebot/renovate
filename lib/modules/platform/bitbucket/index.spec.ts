@@ -297,7 +297,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [
             {
-              key: 'renovate/stability-days',
+              key: 'renovate/minimum-release-age',
               state: 'SUCCESSFUL',
             },
           ],
@@ -373,7 +373,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [
             {
-              key: 'renovate/stability-days',
+              key: 'renovate/minimum-release-age',
               state: 'SUCCESSFUL',
             },
           ],

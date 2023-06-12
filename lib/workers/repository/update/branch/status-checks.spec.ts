@@ -3,8 +3,8 @@ import {
   ConfidenceConfig,
   StabilityConfig,
   resolveBranchStatus,
+  setAge,
   setConfidence,
-  setStability,
 } from './status-checks';
 
 describe('workers/repository/update/branch/status-checks', () => {
@@ -23,28 +23,28 @@ describe('workers/repository/update/branch/status-checks', () => {
     });
 
     it('returns if not configured', async () => {
-      await setStability(config);
+      await setAge(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
 
     it('sets status yellow', async () => {
-      config.stabilityStatus = 'yellow';
-      await setStability(config);
+      config.ageStatus = 'yellow';
+      await setAge(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
     it('sets status green', async () => {
-      config.stabilityStatus = 'green';
-      await setStability(config);
+      config.ageStatus = 'green';
+      await setAge(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
     it('skips status if already set', async () => {
-      config.stabilityStatus = 'green';
+      config.ageStatus = 'green';
       platform.getBranchStatusCheck.mockResolvedValueOnce('green');
-      await setStability(config);
+      await setAge(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
     });

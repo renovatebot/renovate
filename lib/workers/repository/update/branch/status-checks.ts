@@ -54,24 +54,24 @@ async function setStatusCheck(
 }
 
 export interface StabilityConfig extends RenovateConfig {
-  stabilityStatus?: BranchStatus;
+  ageStatus?: BranchStatus;
   branchName: string;
 }
 
-export async function setStability(config: StabilityConfig): Promise<void> {
-  if (!config.stabilityStatus) {
+export async function setAge(config: StabilityConfig): Promise<void> {
+  if (!config.ageStatus) {
     return;
   }
-  const context = `renovate/stability-days`;
+  const context = `renovate/minimum-release-age`;
   const description =
-    config.stabilityStatus === 'green'
+    config.ageStatus === 'green'
       ? 'Updates have met minimum release age requirement'
       : 'Updates have not met minimum release age requirement';
   await setStatusCheck(
     config.branchName,
     context,
     description,
-    config.stabilityStatus,
+    config.ageStatus,
     config.productLinks?.documentation
   );
 }

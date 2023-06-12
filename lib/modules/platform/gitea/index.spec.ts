@@ -676,7 +676,7 @@ describe('modules/platform/gitea/index', () => {
           {
             id: 1,
             status: 'success',
-            context: 'renovate/stability-days',
+            context: 'renovate/minimum-release-age',
             description: 'internal check',
             target_url: '',
             created_at: '',
@@ -695,7 +695,7 @@ describe('modules/platform/gitea/index', () => {
             {
               id: 1,
               status: 'success',
-              context: 'renovate/stability-days',
+              context: 'renovate/minimum-release-age',
               description: 'internal check',
               target_url: '',
               created_at: '',
