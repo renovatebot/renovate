@@ -143,66 +143,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-  test:
-    needs: [setup, prefetch]
-
-    name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
-    runs-on: ${{ matrix.os }}
-
-    # tests shouldn't need more time
-    timeout-minutes: 45
-
-    strategy:
-      matrix:
-        os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
-        node-version: [18]
-
-    env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
-      NODE_VERSION: ${{ matrix.node-version }}
-
-    steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          fetch-depth: 2
-
-      - name: Setup Node.js
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          os: ${{ runner.os }}
-
-      - name: Init platform
-        shell: bash
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          git --version
-          echo "Node $(node --version)"
-          echo "Yarn $(yarn --version)"
-
-      # build before tests to for static file check
-      - name: Build
-        run: yarn build
-
-      - name: Cache jest
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
-        with:
-          path: .cache/jest
-          key: jest-cache-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
-
-      - name: Unit tests
-        run: yarn jest --ci --coverage ${{ env.coverage }}
-
-      - name: Codecov
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
-        if: always() && env.coverage == 'true'
-
-      - name: E2E Test
-        run: yarn test-e2e
-
   lint-types:
     needs: [setup]
     runs-on: ubuntu-latest
@@ -298,6 +238,66 @@ jobs:
 
       - name: Test schema
         run: yarn test-schema
+
+  test:
+    needs: [setup, prefetch]
+
+    name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
+    runs-on: ${{ matrix.os }}
+
+    # tests shouldn't need more time
+    timeout-minutes: 45
+
+    strategy:
+      matrix:
+        os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
+        node-version: [18]
+
+    env:
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
+      NODE_VERSION: ${{ matrix.node-version }}
+
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Init platform
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          git --version
+          echo "Node $(node --version)"
+          echo "Yarn $(yarn --version)"
+
+      # build before tests to for static file check
+      - name: Build
+        run: yarn build
+
+      - name: Cache jest
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .cache/jest
+          key: jest-cache-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Unit tests
+        run: yarn jest --ci --coverage ${{ env.coverage }}
+
+      - name: Codecov
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+        if: always() && env.coverage == 'true'
+
+      - name: E2E Test
+        run: yarn test-e2e
 
   release:
     needs: [lint-types, lint-eslint, lint-prettier, lint-other, test]
