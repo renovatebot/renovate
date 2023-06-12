@@ -42,8 +42,8 @@ jobs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
       os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
-      shards-matched: ${{ steps.shards.outputs.shards-matched }}
-      shards-all: ${{ steps.shards.outputs.shards-all }}
+      shards-matched: ${{ steps.test-shards.outputs.shards-matched }}
+      shards-all: ${{ steps.test-shards.outputs.shards-all }}
 
     env:
       # Field required for GitHub CLI
@@ -116,29 +116,18 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Detect BASEHEAD from `github.event.pull_request`
-        if: ${{ github.event.pull_request.base.sha && github.event.pull_request.head.sha }}
-        run: |
-          echo 'BASEHEAD=${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}' \
-            >> "$GITHUB_ENV"
-
-      - name: Detect BASEHEAD from `github.event.compare`
-        if: ${{ !env.BASEHEAD && github.event.compare }}
-        run: |
-          echo '${{ github.event.compare }}' \
-            | sed 's/.*compare\/\([^ ]*\)/BASEHEAD=\1/'
-            >> "$GITHUB_ENV"
-
-      - name: Fetch files changed
-        if: ${{ env.BASEHEAD }}
-        env:
-          PR_URL: https://api.github.com/repos/{owner}/{repo}/compare/${{ env.BASEHEAD }}
-          JQ_FILTER: >-
-            "COMMIT_FILES=" + ([.files[].filename] | tostring)
-        run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
+      - name: Detect changed files list
+        id: commit-files
+        uses: ./.github/actions/detect-commit-files
+        with:
+          repo: ${{ env.GH_REPO }}
+          token: ${{ env.GH_TOKEN }}
+          event: ${{ toJSON(github.event) }}
 
       - name: Detect test shards
-        id: shards
+        id: test-shards
+        env:
+          COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files }}
         run: yarn -s test-shards >> "$GITHUB_OUTPUT"
 
   prefetch:
