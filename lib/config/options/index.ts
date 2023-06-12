@@ -1286,7 +1286,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchFileNames',
+    name: 'matchFiles',
     description:
       'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
     type: 'array',
