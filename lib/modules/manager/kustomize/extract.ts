@@ -71,7 +71,7 @@ export function extractImage(image: Image): PackageDependency | null {
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
-    logger.warn(
+    logger.debug(
       { newTag, digest },
       'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`'
     );
@@ -146,11 +146,15 @@ export function extractHelmChart(
   };
 }
 
-export function parseKustomize(content: string): Kustomize | null {
+export function parseKustomize(
+  content: string,
+  packageFile?: string
+): Kustomize | null {
   let pkg: Kustomize | null = null;
   try {
     pkg = load(content, { json: true }) as Kustomize;
   } catch (e) /* istanbul ignore next */ {
+    logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;
   }
 
@@ -167,11 +171,14 @@ export function parseKustomize(content: string): Kustomize | null {
   return pkg;
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
-  logger.trace('kustomize.extractPackageFile()');
+export function extractPackageFile(
+  content: string,
+  packageFile?: string // TODO: fix tests
+): PackageFileContent | null {
+  logger.trace(`kustomize.extractPackageFile(${packageFile!})`);
   const deps: PackageDependency[] = [];
 
-  const pkg = parseKustomize(content);
+  const pkg = parseKustomize(content, packageFile);
   if (!pkg) {
     return null;
   }

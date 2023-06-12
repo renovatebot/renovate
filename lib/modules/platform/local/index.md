@@ -1,20 +1,22 @@
 # Local
 
-The "local" platform exists to allow users to perform dry runs against the local file system, such as to test out new config.
+With the "local" platform you can perform dry runs of Renovate against the local file system.
+This can be handy when testing a new Renovate configuration for example.
 
 ## Usage
 
-Run `renovate --platform=local` in the directory you want Renovate to run in.
-In this mode, Renovate will default to `dryRun=lookup`.
-No "repositories" arguments should be provided, as you cannot run against multiple directories or run in the non-working directory.
+Run the `renovate --platform=local` command in the directory you want Renovate to run in.
+In this mode, Renovate defaults to `dryRun=lookup`.
 
-It is possible to run on both a git and non-git directory.
-Config is optional - so it will run either with or without any "repo config" found.
+Avoid giving "repositories" arguments, as this command can only run in a _single_ directory, and it can only run in the _current working_ directory.
 
-It does not do any "compare" or before and after analysis - if your purpose is to test a new config then you will need to manually compare.
+You may run the command above on "plain" directories, or "Git directories".
+You don't need to provide any config, as the command will run with or without "repo config".
+
+The command doesn't do any "compare" - or before and after analysis - if you want to test a new config then you must manually compare.
 
 ## Limitations
 
-- `local>` presets cannot be resolved. Normally these would point to the local platform such as GitHub, but in the case of running locally, it does not exist
+- `local>` presets can't be resolved. Normally these would point to the local platform such as GitHub, but in the case of running locally, it does not exist
 - `baseBranches` are ignored
 - Branch creation is not supported

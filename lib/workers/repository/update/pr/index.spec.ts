@@ -27,7 +27,7 @@ import * as _prBody from './body';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
 import * as _participants from './participants';
 import * as _prCache from './pr-cache';
-import { generatePrFingerprintConfig } from './pr-fingerprint';
+import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
 import { ensurePr } from '.';
 
 jest.mock('../../../../util/git');
@@ -797,7 +797,7 @@ describe('workers/repository/update/pr/index', () => {
       it('does not update lastEdited pr-cache when pr fingerprint is same but pr was edited within 24hrs', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
+          bodyFingerprint: fingerprint(generatePrBodyFingerprintConfig(config)),
           lastEdited: new Date().toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
@@ -814,7 +814,7 @@ describe('workers/repository/update/pr/index', () => {
         );
         expect(prCache.setPrCache).toHaveBeenCalledWith(
           sourceBranch,
-          cachedPr.fingerprint,
+          cachedPr.bodyFingerprint,
           false
         );
       });
@@ -822,7 +822,7 @@ describe('workers/repository/update/pr/index', () => {
       it('updates pr-cache when pr fingerprint is different', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: 'old',
+          bodyFingerprint: 'old',
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
@@ -841,8 +841,11 @@ describe('workers/repository/update/pr/index', () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: fingerprint(
-            generatePrFingerprintConfig({ ...config, fetchReleaseNotes: true })
+          bodyFingerprint: fingerprint(
+            generatePrBodyFingerprintConfig({
+              ...config,
+              fetchReleaseNotes: true,
+            })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
@@ -871,8 +874,11 @@ describe('workers/repository/update/pr/index', () => {
           state: 'open',
         });
         cachedPr = {
-          fingerprint: fingerprint(
-            generatePrFingerprintConfig({ ...config, fetchReleaseNotes: true })
+          bodyFingerprint: fingerprint(
+            generatePrBodyFingerprintConfig({
+              ...config,
+              fetchReleaseNotes: true,
+            })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };

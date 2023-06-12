@@ -78,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
+  commitMessageLowerCase?: 'auto' | 'never';
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -231,6 +232,7 @@ export interface RenovateConfig
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
+  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -251,6 +253,7 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
+  vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
@@ -309,8 +312,8 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  matchFiles?: string[];
-  matchPaths?: string[];
+  isVulnerabilityAlert?: boolean;
+  matchFileNames?: string[];
   matchLanguages?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
@@ -333,6 +336,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
+  vulnerabilitySeverity?: string;
 }
 
 export interface ValidationMessage {
@@ -454,6 +458,7 @@ export type RenovateOptions =
 export interface PackageRuleInputConfig extends Record<string, unknown> {
   versioning?: string;
   packageFile?: string;
+  lockFiles?: string[];
   depType?: string;
   depTypes?: string[];
   depName?: string;

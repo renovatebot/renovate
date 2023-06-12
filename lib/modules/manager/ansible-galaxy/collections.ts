@@ -124,7 +124,7 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
   }
 
   if (!dependency.currentValue && !dep.skipReason) {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
   }
   return true;
 }
