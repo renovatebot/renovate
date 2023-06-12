@@ -476,19 +476,15 @@ export async function extractPackageFile(
       return null;
     }
   }
-  let skipInstalls = config.skipInstalls;
-  if (skipInstalls === null) {
-    if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
-      // https://github.com/npm/cli/issues/1432
-      // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
-      //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
-      //  - Also, do not skip install if Yarn zero-install is used
-      logger.debug('Automatically setting skipInstalls to false');
-      skipInstalls = false;
-    } else {
-      skipInstalls = true;
-    }
+  let skipInstalls = true; // skip installing modules by default
+  if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
+    // https://github.com/npm/cli/issues/1432
+    // Explanation:
+    //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
+    //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
+    //  - Also, do not skip install if Yarn zero-install is used
+    logger.debug('Automatically setting skipInstalls to false');
+    skipInstalls = false;
   }
 
   return {
