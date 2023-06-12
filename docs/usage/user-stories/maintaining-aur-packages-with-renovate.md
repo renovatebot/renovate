@@ -1,13 +1,13 @@
+---
+title: Maintaining AUR packages with Renovate
+---
+
 <!-- hide table of contents in navigation sidebar -->
 <style>
 .md-nav--primary .md-nav__link[for=__toc] ~ .md-nav {
     display: none;
 }
 </style>
-
----
-title: Maintaining AUR packages with Renovate
----
 
 # Maintaining AUR packages with Renovate
 
