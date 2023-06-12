@@ -143,24 +143,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-  lint-types:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    timeout-minutes: 7
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-
-      - name: Setup Node.js
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          os: ${{ runner.os }}
-
-      - name: Type check
-        run: yarn type-check
-
   lint-eslint:
     needs: [setup]
     runs-on: ubuntu-latest
@@ -179,11 +161,11 @@ jobs:
       - name: Cache eslint
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
-          path: .eslintcache
+          path: .cache/eslint
           key: eslint-cache
 
       - name: Lint
-        run: yarn eslint -f gha
+        run: yarn -s eslint-ci
 
   lint-prettier:
     needs: [setup]
@@ -279,10 +261,6 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      # build before tests to for static file check
-      - name: Build
-        run: yarn build
-
       - name: Cache jest
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
@@ -296,11 +274,59 @@ jobs:
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         if: always() && env.coverage == 'true'
 
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Build
+        run: yarn -s build
+
+      - name: Pack
+        run: yarn -s test-e2e:pack
+
+      - name: Upload
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: renovate-package
+          path: renovate-v0.0.0-semantic-release.tgz
+
+  test-e2e:
+    needs: [setup, build]
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download package
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: renovate-package
+
+      - name: Install dependencies
+        run: yarn -s test-e2e:install
+
       - name: E2E Test
-        run: yarn test-e2e
+        run: yarn -s test-e2e:run
 
   release:
-    needs: [lint-types, lint-eslint, lint-prettier, lint-other, test]
+    needs: [lint-eslint, lint-prettier, lint-other, test, test-e2e]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
