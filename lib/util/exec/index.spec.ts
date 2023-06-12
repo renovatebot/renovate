@@ -413,7 +413,7 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: {
-          dockerSidecarImage: 'ghcr.io/containerbase',
+          dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
           binarySource: 'docker',
         },
       },

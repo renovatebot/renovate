@@ -333,7 +333,7 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
 You can use the `dockerSidecarImage` option to override this default.
 
-Say you want to pull a custom image from `ghcr.io/your_company`.
+Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
 ```json
