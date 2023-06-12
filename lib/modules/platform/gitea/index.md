@@ -15,7 +15,7 @@ Then let Renovate use your PAT by doing _one_ of the following:
 You must set `platform=gitea` in your Renovate config file.
 
 
-The user scope must have these permissions:
+The PAT should have these permissions:
 
 - `repo`
 - `read:user` and `read:email`
