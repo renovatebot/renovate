@@ -40,8 +40,8 @@ runs:
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: yarn --silent install --frozen-lockfile --ignore-scripts
+        command: yarn install --frozen-lockfile --ignore-scripts
 
     - name: Run scripts
       shell: bash
-      run: yarn --silent prepare
+      run: yarn prepare
