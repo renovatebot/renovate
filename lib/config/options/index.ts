@@ -787,7 +787,7 @@ const options: RenovateOptions[] = [
     description:
       'Whether to read configuration from `baseBranches` instead of only the default branch.',
     type: 'string',
-    allowedValues: ['merge', 'replace', 'none'],
+    allowedValues: ['merge', 'none', 'replace'],
     default: 'none',
   },
   {
