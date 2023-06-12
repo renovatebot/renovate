@@ -578,6 +578,65 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## platform
 
+## postUpdateOptions
+
+Table with options:
+
+| Name                     | Description                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`    | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
+| `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
+| `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
+| `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `pnpmDedupe`             | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
+| `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
+
+## postUpgradeTasks
+
+Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
+The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
+
+Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (a global-only configuration option) in order to be executed.
+If the list of allowed tasks is empty then no tasks will be executed.
+
+e.g.
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["tslint --fix"],
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "update"
+  }
+}
+```
+
+The `postUpgradeTasks` configuration consists of three fields:
+
+### commands
+
+A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
+
+You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](./self-hosted-configuration.md#allowpostupgradecommandtemplating) is enabled.
+
+<!-- prettier-ignore -->
+!!! note
+    Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](#filefilters) instead.
+
+### fileFilters
+
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
+
+### executionMode
+
+Defaults to `update`, but can also be set to `branch`.
+This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
+If set to `branch` the postUpgradeTask is executed for the whole branch.
+
 ## prCommitsPerRunLimit
 
 Parameter to reduce CI load.
