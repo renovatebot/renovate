@@ -1,10 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
-import {
-  RenovateConfig,
-  getConfig,
-  mockedFunction,
-  partial,
-} from '../../../../test/util';
+import { RenovateConfig, mockedFunction, partial } from '../../../../test/util';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import * as cache from '../../../util/cache/repository';
@@ -28,11 +23,13 @@ const result = Object.keys(prJson).map((key) => {
 });
 
 describe('workers/repository/finalize/repository-statistics', () => {
-  let config: RenovateConfig;
+  let config = partial<RenovateConfig>({
+    onboardingPrTitle: 'Configure Renovate',
+    defaultBranch: 'main',
+  });
 
   describe('runRenovateRepoStats', () => {
     beforeEach(() => {
-      config = getConfig();
       mockedFunction(platform.getPrList).mockReturnValue(prJson);
       config.repository = 'owner/repo';
     });

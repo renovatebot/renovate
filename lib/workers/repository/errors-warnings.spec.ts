@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../test/util';
+import { RenovateConfig, partial } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
 import {
   getDepWarningsDashboard,
@@ -10,11 +10,10 @@ import {
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
-    let config: RenovateConfig;
+    let config = partial<RenovateConfig>();
 
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig();
     });
 
     it('returns warning text', () => {
@@ -213,11 +212,10 @@ describe('workers/repository/errors-warnings', () => {
   });
 
   describe('getErrors()', () => {
-    let config: RenovateConfig;
+    let config = partial<RenovateConfig>();
 
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig();
     });
 
     it('returns error text', () => {

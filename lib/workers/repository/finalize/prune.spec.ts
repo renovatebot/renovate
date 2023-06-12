@@ -1,6 +1,5 @@
 import {
   RenovateConfig,
-  getConfig,
   git,
   partial,
   platform,
@@ -12,11 +11,16 @@ import * as cleanup from './prune';
 
 jest.mock('../../../util/git');
 
-let config: RenovateConfig;
+// default values
+let config = partial<RenovateConfig>({
+  repoIsOnboarded: true,
+  branchPrefix: `renovate/`,
+  pruneStaleBranches: true,
+  ignoredAuthors: [],
+});
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
   config.platform = 'github';
   config.errors = [];
   config.warnings = [];
