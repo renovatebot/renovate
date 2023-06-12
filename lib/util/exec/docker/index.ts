@@ -222,7 +222,7 @@ export async function generateDockerCommand(
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
-    dockerImagePrefix,
+    sidecarImage,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
@@ -260,7 +260,7 @@ export async function generateDockerCommand(
   }
 
   image = `${ensureTrailingSlash(
-    dockerImagePrefix ?? 'containerbase'
+    sidecarImage ?? 'containerbase'
   )}${image}`;
 
   // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');

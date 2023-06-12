@@ -344,11 +344,11 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
-    name: 'dockerImagePrefix',
+    name: 'sidecarImage',
     description:
-      'Change this value to override the default Renovate Docker sidecar image name prefix.',
+      'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'docker.io/containerbase',
+    default: 'containerbase/sidecar:8.0.2',
     globalOnly: true,
   },
   {
