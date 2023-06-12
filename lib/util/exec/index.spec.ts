@@ -53,7 +53,7 @@ describe('util/exec/index', () => {
     process.env = processEnvOrig;
   });
 
-  const image = dockerModule.sideCarImage;
+  const image = dockerModule.dockerSidecarImage;
   const fullImage = `containerbase/${image}`;
   const name = `renovate_${image}`;
   const inCmd = 'echo hello';
@@ -413,7 +413,7 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: {
-          sidecarImage: 'ghcr.io/containerbase',
+          dockerSidecarImage: 'ghcr.io/containerbase',
           binarySource: 'docker',
         },
       },

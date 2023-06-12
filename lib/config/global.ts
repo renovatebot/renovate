@@ -14,7 +14,7 @@ export class GlobalConfig {
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
-    'sidecarImage',
+    'dockerSidecarImage',
     'dockerUser',
     'dryRun',
     'exposeAllEnv',

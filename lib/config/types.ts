@@ -123,7 +123,7 @@ export interface RepoGlobalConfig {
   cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
-  sidecarImage?: string;
+  dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
   executionTimeout?: number;

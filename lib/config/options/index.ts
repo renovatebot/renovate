@@ -344,7 +344,7 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
-    name: 'sidecarImage',
+    name: 'dockerSidecarImage',
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',

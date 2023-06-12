@@ -5,7 +5,6 @@ import { logger } from '../../../logger';
 import { getPkgReleases } from '../../../modules/datasource';
 import * as versioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
-import { ensureTrailingSlash } from '../../url';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
@@ -214,18 +213,19 @@ export async function generateDockerCommand(
   options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd } = options;
-  let image = sideCarImage;
   const volumes = options.volumes ?? [];
+  let image = sideCarImage;
   const {
     localDir,
     cacheDir,
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
-    sidecarImage,
+    dockerSidecarImage,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
-  const containerName = getContainerName(image, dockerChildPrefix);
+  // TODO: #7154
+  const containerName = getContainerName(image!, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
   result.push(`--name=${containerName}`);
   result.push(`--label=${containerLabel}`);
@@ -259,11 +259,12 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  image = sidecarImage;
+  // TODO: #7154
+  image = dockerSidecarImage!;
 
-  // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
+  // TODO: add constraint: const tag = getDockerTag(image, dockerSidecarImageVersion, 'semver');
   logger.debug(
-    { image /*, tagConstraint: sideCarImageVersion, tag */ },
+    { image /*, tagConstraint: dockerSidecarImageVersion, tag */ },
     'Resolved tag constraint'
   );
 
