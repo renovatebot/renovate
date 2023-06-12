@@ -1,7 +1,7 @@
 import { getConfig, platform } from '../../../../../test/util';
 import {
+  AgeConfig,
   ConfidenceConfig,
-  StabilityConfig,
   resolveBranchStatus,
   setAge,
   setConfidence,
@@ -9,7 +9,7 @@ import {
 
 describe('workers/repository/update/branch/status-checks', () => {
   describe('setStability', () => {
-    let config: StabilityConfig;
+    let config: AgeConfig;
 
     beforeEach(() => {
       config = {
