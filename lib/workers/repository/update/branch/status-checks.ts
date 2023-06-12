@@ -58,7 +58,7 @@ export interface AgeConfig extends RenovateConfig {
   branchName: string;
 }
 
-export async function setAge(config: StabilityConfig): Promise<void> {
+export async function setAge(config: AgeConfig): Promise<void> {
   if (!config.ageStatus) {
     return;
   }
