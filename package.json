@@ -19,6 +19,7 @@
     "doc-fence-check": "node tools/check-fenced-code.mjs",
     "eslint": "eslint . --cache --report-unused-disable-directives",
     "eslint-fix": "eslint --cache --fix . --report-unused-disable-directives",
+    "eslint-ci": "eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha",
     "generate": "run-s generate:*",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
