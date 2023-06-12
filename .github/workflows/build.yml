@@ -161,11 +161,11 @@ jobs:
       - name: Cache eslint
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
-          path: .eslintcache
+          path: .cache/eslint
           key: eslint-cache
 
       - name: Lint
-        run: yarn eslint -f gha
+        run: yarn -s eslint-ci
 
   lint-prettier:
     needs: [setup]
