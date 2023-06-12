@@ -54,9 +54,6 @@ jobs:
       PR: ${{ github.event.pull_request.number }}
       PR_LABELS: '[]'
 
-      BASEHEAD: ''
-      COMMIT_FILES: '[]'
-
     steps:
       - name: Fetch PR data
         if: env.PR
@@ -127,7 +124,7 @@ jobs:
       - name: Detect test shards
         id: test-shards
         env:
-          COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files }}
+          COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files || '[]' }}
         run: yarn -s test-shards >> "$GITHUB_OUTPUT"
 
   prefetch:
