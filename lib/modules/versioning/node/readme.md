@@ -1,3 +1,5 @@
-Renovate's Node.js versioning is a wrapper around npm's versioning, except that it makes sure to strip "v" prefixes from exact versions when replacing.
+Renovate's Node.js versioning is a wrapper around npm's versioning.
+But Renovate removes any `v` prefixes from exact versions when replacing.
 
-It is planned to extend it one day to support "stability" awareness, because Node.js's version stability does not follow the SemVer approach.
+We plan to extend the Node.js versioning to support "stability" awareness.
+This is nice to have because Node.js's version stability does not match the SemVer rules.
