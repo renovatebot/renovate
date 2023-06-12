@@ -1288,7 +1288,18 @@ const options: RenovateOptions[] = [
   {
     name: 'matchFileNames',
     description:
-      'List of glob patterns to match against package or lock files (with full repo path). Only works inside a `packageRules` object.',
+      'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchPaths',
+    description:
+      'List of glob patterns to match against package files. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1886,7 +1897,7 @@ const options: RenovateOptions[] = [
       commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
       commitMessageExtra: null,
-      schedule: ['before 5am on monday'],
+      schedule: ['before 4am on monday'],
       groupName: null,
       prBodyDefinitions: {
         Change: 'All locks refreshed',
@@ -2157,6 +2168,7 @@ const options: RenovateOptions[] = [
       'composer',
       'gomod',
       'npm',
+      'pep621',
       'pipenv',
       'poetry',
     ],

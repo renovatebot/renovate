@@ -5,7 +5,10 @@ import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -71,7 +74,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting circleci images');
+    logger.debug({ err, packageFile }, 'Error extracting circleci images');
   }
   if (!deps.length) {
     return null;

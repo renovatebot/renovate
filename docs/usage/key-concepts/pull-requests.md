@@ -46,7 +46,7 @@ This document explains why we have immortal PRs, and how you can fix them.
 ### Why we have immortal PRs
 
 First off, we don't have immortal PRs for some philosphical reason like: "don't ignore this update, it's good for you!".
-We just have no way to ignore some PRs after they're closed.
+We have no good way to ignore some PRs after they're closed.
 
 #### Branch name and PR title are cache keys
 
@@ -84,10 +84,10 @@ Instead, set `"dependencyDashboardApproval": true` for major updates so that you
 
 ## Ignoring PRs
 
-To ignore a PR you just close it unmerged.
+Close a Renovate PR to ignore it.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate will re-create any PRs that is marked "immortal".
-    What this means is that any immortal PR you close, will pop up again the next time Renovate runs.
+    Renovate re-creates any PRs that are marked "immortal".
+    This means that any immortal PR you close, pops up again the next time Renovate runs.
     To ignore immortal PRs, follow the advice in the [How to fix immortal PRs](#how-to-fix-immortal-prs) section.

@@ -1,6 +1,13 @@
-import { getConfig, git, platform, scm } from '../../../../../test/util';
+import {
+  getConfig,
+  git,
+  partial,
+  platform,
+  scm,
+} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
+import type { Pr } from '../../../../modules/platform/types';
 import * as schedule from '../branch/schedule';
 import { tryBranchAutomerge } from './automerge';
 
@@ -49,7 +56,7 @@ describe('workers/repository/update/branch/automerge', () => {
     });
 
     it('returns false if PR exists', async () => {
-      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
