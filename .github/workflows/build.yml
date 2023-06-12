@@ -44,6 +44,7 @@ jobs:
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
       test-shards: ${{ steps.test-shards.outputs.test-shards }}
       test-shards-all: ${{ steps.test-shards.outputs.test-shards-all }}
+      commit-sha: ${{ steps.commit-sha.outputs.commit-sha }}
 
     env:
       # Field required for GitHub CLI
@@ -91,6 +92,11 @@ jobs:
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+
+      - name: Detect commit SHA
+        id: commit-sha
+        run: |
+          echo "commit-sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Calculate `yarn-lock-hash` output
         id: yarn-lock-hash
