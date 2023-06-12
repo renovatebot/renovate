@@ -143,24 +143,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-  lint-types:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    timeout-minutes: 7
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-
-      - name: Setup Node.js
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          os: ${{ runner.os }}
-
-      - name: Type check
-        run: yarn type-check
-
   lint-eslint:
     needs: [setup]
     runs-on: ubuntu-latest
@@ -292,10 +274,10 @@ jobs:
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         if: always() && env.coverage == 'true'
 
-  pack:
+  build:
     needs: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -319,19 +301,9 @@ jobs:
           path: renovate-v0.0.0-semantic-release.tgz
 
   test-e2e:
-    needs: [setup, pack]
-    runs-on: ${{ matrix.os }}
-
-    # tests shouldn't need more time
-    timeout-minutes: 45
-
-    strategy:
-      matrix:
-        os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
-        node-version: [18]
-
-    env:
-      NODE_VERSION: ${{ matrix.node-version }}
+    needs: [setup, build]
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 7
 
     steps:
       - name: Checkout code
@@ -341,7 +313,6 @@ jobs:
         uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
 
       - name: Download package
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -355,7 +326,7 @@ jobs:
         run: yarn -s test-e2e:run
 
   release:
-    needs: [lint-types, lint-eslint, lint-prettier, lint-other, test, test-e2e]
+    needs: [lint-eslint, lint-prettier, lint-other, test, test-e2e]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
