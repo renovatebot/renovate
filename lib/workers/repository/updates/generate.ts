@@ -363,7 +363,7 @@ export function generateBranchConfig(
         }
 
         return acc;
-      }, {} as Record<string, boolean>)
+      }, {})
     );
   }
 
