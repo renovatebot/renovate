@@ -47,7 +47,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       registryAliases: {
         notStable: 'http://some.link.2',
       },
-      skipInstalls: null,
     });
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
@@ -66,7 +65,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       registryAliases: {
         stable: 'http://some.link',
       },
-      skipInstalls: null,
     });
   });
 
@@ -90,7 +88,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       npmrc: 'some-string',
       npmrcMerge: true,
       registryAliases: {},
-      skipInstalls: null,
     });
     expect(
       fingerprintConfig.managers.find(
@@ -109,7 +106,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       npmrc: 'some-string',
       npmrcMerge: true,
       registryAliases: {},
-      skipInstalls: null,
     });
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
