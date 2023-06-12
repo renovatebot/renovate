@@ -92,12 +92,12 @@ async function getModules(
 
 export default async function extractPackageFile(
   _content: string,
-  fileName: string,
-  config: ExtractConfig
+  packageFile: string,
+  _config: ExtractConfig
 ): Promise<PackageFileContent | null> {
   const { localDir } = GlobalConfig.get();
   const git = Git(localDir, simpleGitConfig());
-  const gitModulesPath = upath.join(localDir, fileName);
+  const gitModulesPath = upath.join(localDir, packageFile);
 
   const depNames = await getModules(git, gitModulesPath);
 
@@ -130,7 +130,10 @@ export default async function extractPackageFile(
         currentDigest,
       });
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'Error mapping git submodules during extraction');
+      logger.warn(
+        { err, packageFile },
+        'Error mapping git submodules during extraction'
+      );
     }
   }
 

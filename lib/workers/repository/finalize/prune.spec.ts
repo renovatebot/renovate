@@ -2,10 +2,12 @@ import {
   RenovateConfig,
   getConfig,
   git,
+  partial,
   platform,
   scm,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import type { Pr } from '../../../modules/platform/types';
 import * as cleanup from './prune';
 
 jest.mock('../../../util/git');
@@ -53,7 +55,7 @@ describe('workers/repository/finalize/prune', () => {
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
@@ -65,9 +67,11 @@ describe('workers/repository/finalize/prune', () => {
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockResolvedValueOnce({
-        title: 'foo - autoclosed',
-      } as never);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'foo - autoclosed',
+        })
+      );
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
@@ -80,7 +84,7 @@ describe('workers/repository/finalize/prune', () => {
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
@@ -93,7 +97,7 @@ describe('workers/repository/finalize/prune', () => {
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
@@ -105,11 +109,9 @@ describe('workers/repository/finalize/prune', () => {
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       scm.isBranchModified.mockResolvedValueOnce(true);
-      platform.findPr.mockResolvedValueOnce({
-        title: 'foo',
-      } as never);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
@@ -122,11 +124,11 @@ describe('workers/repository/finalize/prune', () => {
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       scm.isBranchModified.mockResolvedValueOnce(true);
-      platform.findPr.mockResolvedValueOnce({
-        title: 'foo - abandoned',
-      } as never);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ title: 'foo - abandoned' })
+      );
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
@@ -137,9 +139,9 @@ describe('workers/repository/finalize/prune', () => {
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       scm.isBranchModified.mockResolvedValueOnce(true);
-      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);

@@ -366,6 +366,10 @@ describe('workers/repository/update/pr/changelog/github', () => {
           { version: '1.0.1' },
           { version: 'correctPrefix/target@1.0.1' },
           { version: 'wrongPrefix/target-1.0.1' },
+          { version: 'v1.0.2' },
+          { version: '1.0.2' },
+          { version: 'correctPrefix/target-1.0.2' },
+          { version: 'wrongPrefix/target@1.0.2' },
         ])
       );
 
@@ -376,9 +380,10 @@ describe('workers/repository/update/pr/changelog/github', () => {
         endpoint: 'https://api.github.com/',
         versioning: 'npm',
         currentVersion: '1.0.0',
-        newVersion: '1.0.1',
+        newVersion: '1.0.2',
         sourceUrl: 'https://github.com/chalk/chalk',
         releases: [
+          { version: '1.0.2', gitRef: '789012' },
           { version: '1.0.1', gitRef: '123456' },
           { version: '0.1.1', gitRef: 'npm_1.0.0' },
         ],
@@ -398,6 +403,18 @@ describe('workers/repository/update/pr/changelog/github', () => {
           packageName: 'correctPrefix/target',
         },
         versions: [
+          {
+            version: '1.0.2',
+            date: undefined,
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/correctPrefix/target@1.0.1...correctPrefix/target-1.0.2',
+            },
+            releaseNotes: {
+              url: 'https://github.com/chalk/chalk/compare/correctPrefix/target@1.0.1...correctPrefix/target-1.0.2',
+              notesSourceUrl: '',
+            },
+          },
           {
             version: '1.0.1',
             date: undefined,

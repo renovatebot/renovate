@@ -39,7 +39,8 @@ This way you have all global configuration in a single file, in a single reposit
 
 ## Presets are modular
 
-Preset configs are modular, they can be as small as a single package rule or as large as an entire configuration, just like an ESLint config.
+Preset configs are modular, they can be as small as a single package rule or as large as an entire configuration.
+This is similar to the way you can share ESLint configurations.
 
 ## Built-in presets
 

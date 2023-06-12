@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import * as rubyVersioning from '../../versioning/ruby';
-import { VersionsDatasource, memCache } from './versions-datasource';
+import { memCache } from './versions-datasource';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
@@ -26,12 +26,16 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://firstparty.com')
         .get('/basepath/api/v1/gems/rails.json')
-        .reply(200);
+        .reply(200, { name: 'rails' })
+        .get('/basepath/api/v1/versions/rails.json')
+        .reply(200, []);
       httpMock.scope('https://thirdparty.com').get('/versions').reply(404);
       httpMock
         .scope('https://thirdparty.com')
         .get('/api/v1/gems/rails.json')
-        .reply(200);
+        .reply(200, { name: 'rails' })
+        .get('/api/v1/versions/rails.json')
+        .reply(200, []);
       expect(
         await getPkgReleases({
           versioning: rubyVersioning.id,
@@ -57,26 +61,6 @@ describe('modules/datasource/rubygems/index', () => {
         registryUrls: [],
       });
       expect(res).toBeNull();
-    });
-
-    it('returns null for an error without "not_supported" reason', async () => {
-      const versionsdataSourceSpy = jest
-        .spyOn(VersionsDatasource.prototype, 'syncVersions')
-        .mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-      try {
-        const res = await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [],
-        });
-        expect(res).toBeNull();
-      } finally {
-        versionsdataSourceSpy.mockRestore();
-      }
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
