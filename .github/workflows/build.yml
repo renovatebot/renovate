@@ -27,6 +27,12 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 18
   DRY_RUN: true
+  SPARSE_CHECKOUT: |-
+    .github/actions/
+    data/
+    tools/
+    package.json
+    yarn.lock
 
 jobs:
   setup:
@@ -34,6 +40,8 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
+      os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
+      os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
 
     env:
       # Field required for GitHub CLI
@@ -46,27 +54,98 @@ jobs:
 
     steps:
       - name: Fetch PR data
-        if: ${{ env.PR }}
+        if: env.PR
         env:
           PR_URL: https://api.github.com/repos/{owner}/{repo}/pulls/${{ env.PR }}
           JQ_FILTER: >-
             "PR_LABELS=" + ([.labels[].name] | tostring)
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_ENV"
 
-      - name: Detect OS matrix
+      - name: Calculate `CI_FULLTEST` variable
+        run: |
+          echo 'CI_FULLTEST=${{
+            contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || ''
+          }}' >> "$GITHUB_ENV"
+
+      - name: Calculate `os-matrix-is-full` output
+        id: os-matrix-is-full
+        env:
+          IS_FULL: ${{ (!env.PR || env.CI_FULLTEST) && 'true' || '' }}
+        run: |
+          echo 'OS_MATRIX_IS_FULL=${{ env.IS_FULL }}' >> "$GITHUB_ENV"
+          echo 'os-matrix-is-full=${{ env.IS_FULL }}' >> "$GITHUB_OUTPUT"
+
+      - name: Calculate `os-matrix` output
         id: os-matrix
         env:
-          CI_FULLTEST: >-
-            ${{ contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || '' }}
           OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
           OS_LINUX_ONLY: '["ubuntu-latest"]'
-        run: >-
+        run: |
           echo 'os-matrix=${{
-            (!env.PR || env.CI_FULLTEST) && env.OS_ALL || env.OS_LINUX_ONLY
+            env.OS_MATRIX_IS_FULL && env.OS_ALL || env.OS_LINUX_ONLY
           }}' >> "$GITHUB_OUTPUT"
 
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+
+      - name: Calculate `yarn-lock-hash` output
+        id: yarn-lock-hash
+        run: |
+          echo 'yarn-lock-hash=${{ hashFiles('yarn.lock') }}' >> "$GITHUB_OUTPUT"
+
+      - name: Calculate matrix for `node_modules` prefetch
+        uses: ./.github/actions/calculate-prefetch-matrix
+        id: os-matrix-prefetch
+        with:
+          repo: ${{ env.GH_REPO }}
+          token: ${{ env.GH_TOKEN }}
+          node-version: ${{ env.NODE_VERSION }}
+          hash: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
+
+      - name: Prefetch modules for `ubuntu-latest`
+        id: setup-node
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+  prefetch:
+    needs: [setup]
+    # We can't use `if: needs.setup.outputs.os-matrix-is-full` here,
+    # as it will lead to further complications that aren't solvable
+    # with current GitHub Actions feature set.
+    #
+    # Although this job sometimes may act as short-lived `no-op`,
+    # it's actually the best option available.
+
+    strategy:
+      matrix:
+        os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
+        node-version: [18]
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+
+      - name: Setup Node.js
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
   test:
-    needs: setup
+    needs: [setup, prefetch]
+
     name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
@@ -125,6 +204,7 @@ jobs:
         run: yarn test-e2e
 
   lint:
+    needs: [setup]
     runs-on: ubuntu-latest
 
     # lint shouldn't need more than 10 min
