@@ -162,6 +162,84 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
+  lint-eslint:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Cache eslint
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .cache/eslint
+          key: eslint-cache
+
+      - name: Lint
+        run: yarn -s eslint-ci
+
+  lint-prettier:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Cache prettier
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .prettier-cache
+          key: prettier-cache
+
+      - name: Lint
+        run: yarn prettier --cache-location .prettier-cache
+
+  lint-other:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Lint markdown
+        uses: DavidAnson/markdownlint-cli2-action@bb4bb94c73936643d73d345b48fead3e96f90a5e # v10.0.1
+
+      - name: Lint project file structure
+        run: yarn ls-lint
+
+      - name: Check git version
+        run: yarn git-check
+
+      - name: Lint fenced code blocks
+        run: yarn doc-fence-check
+
+      - name: Test schema
+        run: yarn test-schema
+
   test:
     needs: [setup, prefetch]
 
@@ -202,10 +280,6 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      # build before tests to for static file check
-      - name: Build
-        run: yarn build
-
       - name: Cache jest
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
@@ -219,20 +293,13 @@ jobs:
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         if: always() && env.coverage == 'true'
 
-      - name: E2E Test
-        run: yarn test-e2e
-
-  lint:
-    needs: [setup]
+  build:
+    needs: setup
     runs-on: ubuntu-latest
-
-    # lint shouldn't need more than 10 min
-    timeout-minutes: 15
-
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          fetch-depth: 2
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -240,37 +307,47 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Init platform
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          echo "Node $(node --version)"
-          echo "Yarn $(yarn --version)"
+      - name: Build
+        run: yarn -s build
 
-      - name: Type check
-        run: yarn type-check
+      - name: Pack
+        run: yarn -s test-e2e:pack
 
-      - name: markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@bb4bb94c73936643d73d345b48fead3e96f90a5e # v10.0.1
+      - name: Upload
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: renovate-package
+          path: renovate-v0.0.0-semantic-release.tgz
 
-      - name: Lint
-        run: |
-          yarn ls-lint
-          yarn eslint -f gha
-          yarn prettier
-          yarn git-check
-          yarn doc-fence-check
+  test-e2e:
+    needs: [setup, build]
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 7
 
-      - name: Test schema
-        run: yarn test-schema
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download package
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: renovate-package
+
+      - name: Install dependencies
+        run: yarn -s test-e2e:install
+
+      - name: E2E Test
+        run: yarn -s test-e2e:run
 
   release:
-    needs: [lint, test]
+    needs: [lint-eslint, lint-prettier, lint-other, test, test-e2e]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    # release shouldn't need more than 5 min
     timeout-minutes: 15
     permissions:
       contents: write
