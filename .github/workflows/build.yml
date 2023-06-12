@@ -319,7 +319,7 @@ jobs:
           path: renovate-v0.0.0-semantic-release.tgz
 
   test-e2e:
-    needs: setup
+    needs: [setup, pack]
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
