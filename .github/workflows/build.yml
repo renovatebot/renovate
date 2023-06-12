@@ -42,6 +42,8 @@ jobs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
       os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
+      test-shards: ${{ steps.test-shards.outputs.test-shards }}
+      test-shards-all: ${{ steps.test-shards.outputs.test-shards-all }}
 
     env:
       # Field required for GitHub CLI
@@ -110,6 +112,20 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - name: Detect changed files list
+        id: commit-files
+        uses: ./.github/actions/detect-commit-files
+        with:
+          repo: ${{ env.GH_REPO }}
+          token: ${{ env.GH_TOKEN }}
+          event: ${{ toJSON(github.event) }}
+
+      - name: Detect test shards
+        id: test-shards
+        env:
+          COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files || '[]' }}
+        run: yarn -s test-shards >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
