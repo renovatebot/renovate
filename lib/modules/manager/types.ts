@@ -20,7 +20,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
-  skipInstalls?: boolean | null;
+  skipInstalls?: boolean;
 }
 
 export interface CustomExtractConfig extends RegexManagerTemplates {
@@ -64,7 +64,7 @@ export interface PackageFileContent<T = Record<string, any>>
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;
-  skipInstalls?: boolean | null;
+  skipInstalls?: boolean;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
@@ -274,7 +274,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
     ManagerData<T> {
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
-  skipInstalls?: boolean | null;
+  skipInstalls?: boolean;
   ignoreScripts?: boolean;
 
   packageFile?: string;
