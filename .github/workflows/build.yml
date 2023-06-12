@@ -296,6 +296,14 @@ jobs:
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         if: always() && env.coverage == 'true'
 
+  test-success:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    if: always()
+    steps:
+      - run: return ${{ needs.test.result == 'success' && 0 || 1 }}
+
   build:
     needs: setup
     runs-on: ubuntu-latest
