@@ -6,6 +6,7 @@ Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
 ## Authentication
 
 First, [create a Personal Access Token (PAT)](https://docs.gitea.io/en-us/api-usage/#authentication) for the bot account.
+The bot account should have full name and email address configured.
 Then let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
