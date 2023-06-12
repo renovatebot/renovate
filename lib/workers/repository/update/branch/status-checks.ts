@@ -53,7 +53,7 @@ async function setStatusCheck(
   }
 }
 
-export interface StabilityConfig extends RenovateConfig {
+export interface AgeConfig extends RenovateConfig {
   ageStatus?: BranchStatus;
   branchName: string;
 }
