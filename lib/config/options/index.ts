@@ -345,7 +345,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dockerCliOptions',
-    description: 'Change this value to add docker run command options to Renovate Docker sidecar container.',
+    description: 'Docker run command options for use when `binarySource=docker`.',
     type: 'string',
     globalOnly: true,
   },
