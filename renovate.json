@@ -34,9 +34,8 @@
     {
       "fileMatch": ["config/options/index.ts"],
       "matchStrings": [
-        "default: 'ghcr.io/containerbase/sidecar:(?<currentValue>.*)'"
+        "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
       ],
-      "depNameTemplate": "containerbase/sidecar",
       "datasourceTemplate": "docker"
     }
   ]
