@@ -303,7 +303,8 @@ jobs:
     timeout-minutes: 1
     if: always()
     steps:
-      - run: exit ${{ needs.test.result == 'success' && 0 || 1 }}
+      - if: needs.test.result != 'success'
+        run: exit 1
 
   build:
     needs: setup
