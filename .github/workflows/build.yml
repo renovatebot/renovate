@@ -42,8 +42,8 @@ jobs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
       os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
-      shards-matched: ${{ steps.test-shards.outputs.shards-matched }}
-      shards-all: ${{ steps.test-shards.outputs.shards-all }}
+      test-shards: ${{ steps.test-shards.outputs.test-shards }}
+      test-shards-all: ${{ steps.test-shards.outputs.test-shards-all }}
 
     env:
       # Field required for GitHub CLI

@@ -383,17 +383,18 @@ export default config;
 if (process.env.COMMIT_FILES) {
   try {
     const commitFiles = JSON.parse(process.env.COMMIT_FILES);
-    const allShards = Object.keys(testShards);
+
     const matchingShards = getMatchingShards(commitFiles);
-
     // eslint-disable-next-line no-console
-    console.log(`shards-all=${JSON.stringify(allShards)}`);
+    console.log(`test-shards=${JSON.stringify(matchingShards)}`);
 
+    const allShards = Object.keys(testShards);
     // eslint-disable-next-line no-console
-    console.log(`shards-matched=${JSON.stringify(matchingShards)}`);
+    console.log(`test-shards-all=${JSON.stringify(allShards)}`);
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(`Invalid COMMIT_FILES value: "${process.env.COMMIT_FILES}"`);
+    throw new Error(
+      `Invalid COMMIT_FILES value: "${process.env.COMMIT_FILES}"`
+    );
   }
 } else {
   process.stderr.write(`Host stats:
