@@ -8,11 +8,13 @@ export async function prAlreadyExisted(
   config: BranchConfig
 ): Promise<Pr | null> {
   logger.trace({ config }, 'prAlreadyExisted');
-  if (config.recreateClosed) {
-    logger.debug('recreateClosed is true');
+  if (config.recreateWhen === 'always') {
+    logger.debug('recreateWhen is "always". No need to check for closed PR.');
     return null;
   }
-  logger.debug('recreateClosed is false');
+  logger.debug(
+    'Check for closed PR because recreating closed PRs is disabled.'
+  );
   // Return if same PR already existed
   let pr = await platform.findPr({
     branchName: config.branchName,
