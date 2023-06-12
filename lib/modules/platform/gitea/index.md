@@ -14,12 +14,6 @@ Then let Renovate use your PAT by doing _one_ of the following:
 
 You must set `platform=gitea` in your Renovate config file.
 
-Either the account should have full name and email address set to allow Renovate to establish Git identity, or the `gitAuthor` config option should be set.
-
-### If you do not set `username` or `gitAuthor`
-
-If you don't set `username` or `gitAuthor`, then you must use the user scope.
-User scopes need Gitea `v1.19` or higher.
 
 The user scope must have these permissions:
 
