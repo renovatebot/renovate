@@ -12,7 +12,7 @@ import {
   removeDanglingContainers,
   removeDockerContainer,
   resetPrefetchedImages,
-  dockerSidecarImage,
+  sideCarImage,
 } from '.';
 
 jest.mock('../../../modules/datasource');
@@ -212,7 +212,7 @@ describe('util/exec/docker/index', () => {
     const preCommands = [null as never, 'foo', undefined as never];
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
-    const image = dockerSidecarImage;
+    const image = sideCarImage;
     const dockerOptions = {
       cwd: '/tmp/foobar',
       envVars,

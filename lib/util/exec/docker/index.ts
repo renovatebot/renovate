@@ -213,8 +213,8 @@ export async function generateDockerCommand(
   options: DockerOptions
 ): Promise<string> {
   const { envVars, cwd } = options;
-  const volumes = options.volumes ?? [];
   let image = sideCarImage;
+  const volumes = options.volumes ?? [];
   const {
     localDir,
     cacheDir,
@@ -224,8 +224,7 @@ export async function generateDockerCommand(
     dockerSidecarImage,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
-  // TODO: #7154
-  const containerName = getContainerName(image!, dockerChildPrefix);
+  const containerName = getContainerName(image, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
   result.push(`--name=${containerName}`);
   result.push(`--label=${containerLabel}`);
@@ -262,9 +261,9 @@ export async function generateDockerCommand(
   // TODO: #7154
   image = dockerSidecarImage!;
 
-  // TODO: add constraint: const tag = getDockerTag(image, dockerSidecarImageVersion, 'semver');
+  // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
   logger.debug(
-    { image /*, tagConstraint: dockerSidecarImageVersion, tag */ },
+    { image /*, tagConstraint: sideCarImageVersion, tag */ },
     'Resolved tag constraint'
   );
 

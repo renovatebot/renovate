@@ -53,7 +53,7 @@ describe('util/exec/index', () => {
     process.env = processEnvOrig;
   });
 
-  const image = dockerModule.dockerSidecarImage;
+  const image = dockerModule.sideCarImage;
   const fullImage = `containerbase/${image}`;
   const name = `renovate_${image}`;
   const inCmd = 'echo hello';
