@@ -8,7 +8,7 @@ import { generateInstallCommands, isDynamicInstall } from './containerbase';
 import {
   generateDockerCommand,
   removeDockerContainer,
-  dockerSidecarImage,
+  sideCarImage,
 } from './docker';
 import { getChildProcessEnv } from './env';
 import { getHermitEnvs, isHermit } from './hermit';
@@ -120,7 +120,7 @@ async function prepareRawExec(
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
   if (isDocker(docker)) {
-    logger.debug({ image: dockerSidecarImage }, 'Using docker to execute');
+    logger.debug({ image: sideCarImage }, 'Using docker to execute');
     const extraEnv = {
       ...opts.extraEnv,
       ...customEnvVariables,
@@ -180,7 +180,7 @@ export async function exec(
   for (const rawCmd of rawCommands) {
     const startTime = Date.now();
     if (useDocker) {
-      await removeDockerContainer(dockerSidecarImage, dockerChildPrefix);
+      await removeDockerContainer(sideCarImage, dockerChildPrefix);
     }
     logger.debug({ command: rawCmd }, 'Executing command');
     logger.trace({ commandOptions: rawOptions }, 'Command options');
@@ -190,7 +190,7 @@ export async function exec(
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug({ err, durationMs }, 'rawExec err');
       if (useDocker) {
-        await removeDockerContainer(dockerSidecarImage, dockerChildPrefix).catch(
+        await removeDockerContainer(sideCarImage, dockerChildPrefix).catch(
           (removeErr: Error) => {
             const message: string = err.message;
             throw new Error(
