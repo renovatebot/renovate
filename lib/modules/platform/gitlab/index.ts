@@ -543,9 +543,11 @@ async function ignoreApprovals(pr: number): Promise<void> {
     );
 
     if (existingAnyApproverRule) {
-      await gitlabApi.putJson(`${url}/${existingAnyApproverRule.id}`, {
-        body: { ...existingAnyApproverRule, approvals_required: 0 },
-      });
+      for (const rule of rules) {
+        await gitlabApi.putJson(`${url}/${rule.id}`, {
+          body: { ...existingAnyApproverRule, approvals_required: 0 },
+        });
+      }
       return;
     }
 
