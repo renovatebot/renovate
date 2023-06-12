@@ -1296,17 +1296,6 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
-  {
-    name: 'matchPaths',
-    description:
-      'List of glob patterns to match against package files. Only works inside a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    stage: 'repository',
-    parent: 'packageRules',
-    cli: false,
-    env: false,
-  },
   // Version behaviour
   {
     name: 'allowedVersions',
