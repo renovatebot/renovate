@@ -67,9 +67,10 @@ runs:
       env:
         MACOS_MISS: ${{ steps.modules-caches.outputs.macos }}
         WINDOWS_MISS: ${{ steps.modules-caches.outputs.windows }}
-        PREFETCH_MAC_ONLY: '["macos-latest"]'
-        PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
-        PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
+        # Ubuntu is always available as the subject of required status check
+        PREFETCH_MAC_ONLY: '["ubuntu-latest", "macos-latest"]'
+        PREFETCH_WINDOWS_ONLY: '["ubuntu-latest", "windows-latest"]'
+        PREFETCH_BOTH: '["ubuntu-latest", "macos-latest", "windows-latest"]'
         PREFETCH_FALLBACK: '["ubuntu-latest"]'
       shell: bash
       run: |
