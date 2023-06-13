@@ -25,7 +25,9 @@ runs:
       id: node-modules-cache
       uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
       with:
-        path: node_modules
+        path: |
+          node_modules
+          lib/**/*.generated.ts
         key: node-modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
 
     - name: Setup Node
@@ -34,14 +36,16 @@ runs:
         node-version: ${{ inputs.node-version }}
         cache: ${{ steps.node-modules-cache.outputs.cache-hit != 'true' && 'yarn' || '' }}
 
+    - name: Ensure folders for `*.generated.ts`
+      if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p lib/modules/manager
+
     - name: Install dependencies
       uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
       if: steps.node-modules-cache.outputs.cache-hit != 'true'
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: yarn install --frozen-lockfile --ignore-scripts
-
-    - name: Run scripts
-      shell: bash
-      run: yarn prepare
+        command: yarn install --frozen-lockfile
