@@ -112,7 +112,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
-          update-cache: true
+          save-cache: true
 
       - name: Detect changed files list
         id: commit-files
@@ -159,7 +159,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
-          update-cache: true
+          save-cache: true
 
   lint-eslint:
     needs: [setup]
