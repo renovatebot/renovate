@@ -112,6 +112,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+          save-cache: true
 
       - name: Detect changed files list
         id: commit-files
@@ -158,6 +159,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+          save-cache: true
 
   lint-eslint:
     needs: [setup]
@@ -383,11 +385,11 @@ jobs:
       - name: Check dry run
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
       - name: Installing dependencies

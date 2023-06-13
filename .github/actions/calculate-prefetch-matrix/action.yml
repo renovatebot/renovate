@@ -29,41 +29,32 @@ runs:
         HASH: ${{ hashFiles('yarn.lock') }}
       shell: bash
       run: |
-        echo 'macos-cache-key=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
-        echo 'windows-cache-key=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
+        echo 'MACOS_KEY=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
+        echo 'WINDOWS_KEY=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
 
-    - name: Fetch available cache keys
-      id: caches-list
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        GH_REPO: ${{ inputs.repo }}
-        CACHES_URL: /repos/{owner}/{repo}/actions/caches
-        JQ_FILTER: >-
-          "keys=" + ([.[].actions_caches[].key] | tostring)
-      shell: bash
-      run: |
-        gh api ${{ env.CACHES_URL }} --paginate | jq -rcs '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
+    - name: Check cache miss for MacOS
+      id: macos-cache
+      uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: node_modules
+        key: ${{ env.MACOS_KEY }}
+        lookup-only: true
+        enableCrossOsArchive: true
 
-    - name: Calculate cache misses for Windows and MacOS
-      id: modules-caches
-      env:
-        ACTIONS_CACHE_KEYS: ${{ steps.caches-list.outputs.keys }}
-        MACOS_CACHE_KEY: ${{ steps.cache-keys.outputs.macos-cache-key }}
-        WINDOWS_CACHE_KEY: ${{ steps.cache-keys.outputs.windows-cache-key }}
-      shell: bash
-      run: |
-        echo 'macos=${{
-          !contains(fromJSON(env.ACTIONS_CACHE_KEYS), env.MACOS_CACHE_KEY) && 'true' || ''
-        }}' >> "$GITHUB_OUTPUT"
-        echo 'windows=${{
-          !contains(fromJSON(env.ACTIONS_CACHE_KEYS), env.WINDOWS_CACHE_KEY) && 'true' || ''
-        }}' >> "$GITHUB_OUTPUT"
+    - name: Check cache miss for Windows
+      id: windows-cache
+      uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: node_modules
+        key: ${{ env.WINDOWS_KEY }}
+        lookup-only: true
+        enableCrossOsArchive: true
 
     - name: Dispatch `node_modules` prefetch for MacOS and Windows
       id: os-matrix-prefetch
       env:
-        MACOS_MISS: ${{ steps.modules-caches.outputs.macos }}
-        WINDOWS_MISS: ${{ steps.modules-caches.outputs.windows }}
+        MACOS_MISS: ${{ steps.macos-cache.outputs.cache-hit != 'true' && 'true' || '' }}
+        WINDOWS_MISS: ${{ steps.windows-cache.outputs.cache-hit != 'true' && 'true' || '' }}
         PREFETCH_MAC_ONLY: '["macos-latest"]'
         PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
         PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
