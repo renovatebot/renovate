@@ -126,7 +126,7 @@ jobs:
         env:
           COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files || '[]' }}
         run: |
-          "test-shard-matrix=$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          echo "test-shard-matrix=$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
