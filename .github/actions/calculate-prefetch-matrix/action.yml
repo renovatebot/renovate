@@ -29,8 +29,8 @@ runs:
         HASH: ${{ hashFiles('yarn.lock') }}
       shell: bash
       run: |
-        echo 'MACOS_KEY=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
-        echo 'WINDOWS_KEY=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
+        echo 'MACOS_KEY=x-node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
+        echo 'WINDOWS_KEY=x-node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
 
     - name: Check cache miss for MacOS
       id: macos-cache
