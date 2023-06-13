@@ -244,7 +244,7 @@ jobs:
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: ${{ matrix.timeout }}
+    timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
     strategy:
       matrix:
@@ -292,7 +292,7 @@ jobs:
           do
             TEST_SHARD="$shard" yarn jest \
               --ci \
-              --test-timeout ${{ matrix.test-timeout }} \
+              --test-timeout ${{ matrix.test-timeout-milliseconds }} \
               --coverage ${{ env.coverage }}
           done
 

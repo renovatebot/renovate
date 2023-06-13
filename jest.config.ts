@@ -378,12 +378,12 @@ interface ShardGroup {
   /**
    * It's used to set test runner timeout.
    */
-  'runner-timeout': number;
+  'runner-timeout-minutes': number;
 
   /**
    * It's used to set `--test-timeout` Jest CLI flag.
    */
-  'test-timeout': number;
+  'test-timeout-milliseconds': number;
 }
 
 function partitionBy<T>(input: T[], size: number): T[][] {
@@ -447,8 +447,8 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
         name: `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
         'cache-key': cacheKey,
-        'runner-timeout': runnerTimeoutMinutes,
-        'test-timeout': testTimeoutMilliseconds,
+        'runner-timeout-minutes': runnerTimeoutMinutes,
+        'test-timeout-milliseconds': testTimeoutMilliseconds,
       });
     }
   }
