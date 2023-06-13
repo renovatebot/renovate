@@ -98,11 +98,6 @@ jobs:
         run: |
           echo "commit-sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Calculate `yarn-lock-hash` output
-        id: yarn-lock-hash
-        run: |
-          echo 'yarn-lock-hash=${{ hashFiles('yarn.lock') }}' >> "$GITHUB_OUTPUT"
-
       - name: Calculate matrix for `node_modules` prefetch
         uses: ./.github/actions/calculate-prefetch-matrix
         id: os-matrix-prefetch
@@ -110,7 +105,6 @@ jobs:
           repo: ${{ env.GH_REPO }}
           token: ${{ env.GH_TOKEN }}
           node-version: ${{ env.NODE_VERSION }}
-          hash: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
 
       - name: Prefetch modules for `ubuntu-latest`
         id: setup-node
@@ -118,6 +112,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+          save-cache: true
 
       - name: Detect changed files list
         id: commit-files
@@ -164,6 +159,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+          save-cache: true
 
   lint-eslint:
     needs: [setup]
@@ -294,7 +290,17 @@ jobs:
 
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
-        if: always() && env.coverage == 'true'
+        if: (success() || failure()) && env.coverage == 'true'
+
+  # This allows not to specify particular jobs in matrix as required
+  test-success:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    if: always()
+    steps:
+      - if: needs.test.result != 'success'
+        run: exit 1
 
   build:
     needs: setup
@@ -348,7 +354,7 @@ jobs:
         run: yarn -s test-e2e:run
 
   release:
-    needs: [lint-eslint, lint-prettier, lint-other, test, test-e2e]
+    needs: [lint-eslint, lint-prettier, lint-other, test-e2e, test-success]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -379,11 +385,11 @@ jobs:
       - name: Check dry run
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
       - name: Installing dependencies
