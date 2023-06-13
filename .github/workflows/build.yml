@@ -277,6 +277,7 @@ jobs:
           key: jest-cache-${{ matrix.test-shard }}-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
 
       - name: Unit tests
+        shell: bash
         run: |
           for shard in ${{ matrix.shards }};
           do
