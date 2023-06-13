@@ -39,6 +39,7 @@ runs:
         path: node_modules
         key: ${{ env.MACOS_KEY }}
         lookup-only: true
+        enableCrossOsArchive: true
 
     - name: Check cache miss for Windows
       id: windows-cache

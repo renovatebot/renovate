@@ -43,6 +43,7 @@ runs:
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
 
     - name: Restore `node_modules` and update cache
       if: ${{ inputs.update-cache == 'true' }}
@@ -51,6 +52,7 @@ runs:
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
 
     - name: Calculate `CACHE_HIT`
       shell: bash
