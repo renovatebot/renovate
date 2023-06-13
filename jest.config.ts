@@ -147,7 +147,11 @@ const testShards: Record<string, ShardConfig> = {
     },
   },
   'workers-3': {
-    matchPaths: ['lib/workers/repository/update'],
+    matchPaths: [
+      'lib/workers/repository/init',
+      'lib/workers/repository/finalize',
+      'lib/workers/repository/update',
+    ],
     threshold: {
       branches: 97.75,
     },
