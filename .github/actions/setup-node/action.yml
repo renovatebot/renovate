@@ -46,4 +46,7 @@ runs:
 
     - name: Generate files
       shell: bash
-      run: test -d lib && yarn prepare:generate || exit 0
+      run: >
+        if [ -d lib ]; then
+          yarn prepare:generate;
+        fi
