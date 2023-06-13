@@ -16,9 +16,6 @@ inputs:
   node-version:
     description: 'Node version'
     required: true
-  hash:
-    description: 'Yarn lock hash'
-    required: true
 outputs:
   matrix:
     description: 'Matrix of OSes to prefetch `node_modules` for'
@@ -29,11 +26,11 @@ runs:
     - name: Calculate cache keys
       id: cache-keys
       env:
-        LOCK_HASH: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
+        HASH: ${{ hashFiles('yarn.lock') }}
       shell: bash
       run: |
-        echo 'macos-cache-key=node-modules-macOS-${{ inputs.node-version }}-${{ inputs.hash }}' >> "$GITHUB_OUTPUT"
-        echo 'windows-cache-key=node-modules-Windows-${{ inputs.node-version }}-${{ inputs.hash }}' >> "$GITHUB_OUTPUT"
+        echo 'macos-cache-key=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
+        echo 'windows-cache-key=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
 
     - name: Fetch available cache keys
       id: caches-list

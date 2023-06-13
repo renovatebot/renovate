@@ -26,7 +26,7 @@ runs:
       uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
       with:
         path: node_modules
-        key: node-modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
+        key: node_modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
 
     - name: Setup Node
       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
@@ -40,8 +40,13 @@ runs:
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: yarn install --frozen-lockfile --ignore-scripts
+        command: |
+          yarn install --frozen-lockfile --ignore-scripts
+          yarn prepare:re2
 
-    - name: Run scripts
+    - name: Generate files
       shell: bash
-      run: yarn prepare
+      run: >
+        if [ -d lib ]; then
+          yarn prepare:generate;
+        fi

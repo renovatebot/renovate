@@ -98,11 +98,6 @@ jobs:
         run: |
           echo "commit-sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Calculate `yarn-lock-hash` output
-        id: yarn-lock-hash
-        run: |
-          echo 'yarn-lock-hash=${{ hashFiles('yarn.lock') }}' >> "$GITHUB_OUTPUT"
-
       - name: Calculate matrix for `node_modules` prefetch
         uses: ./.github/actions/calculate-prefetch-matrix
         id: os-matrix-prefetch
@@ -110,7 +105,6 @@ jobs:
           repo: ${{ env.GH_REPO }}
           token: ${{ env.GH_TOKEN }}
           node-version: ${{ env.NODE_VERSION }}
-          hash: ${{ steps.yarn-lock-hash.outputs.yarn-lock-hash }}
 
       - name: Prefetch modules for `ubuntu-latest`
         id: setup-node
