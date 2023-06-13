@@ -51,6 +51,7 @@ runs:
         key: ${{ env.CACHE_KEY }}
 
     - name: Calculate `CACHE_HIT`
+      shell: bash
       run: |
         echo 'CACHE_HIT=${{
           (steps.node-modules-restore.outputs.cache-hit == 'true' ||
