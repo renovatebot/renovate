@@ -452,29 +452,37 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
     for (let idx = 0; idx < groups.length; idx += 1) {
       const number = idx + 1;
       const platform = os.replace(/-latest$/, '');
+      const name =
+        platform === 'ubuntu'
+          ? `test (${number}/${total})`
+          : `test-${platform} (${number}/${total})`;
+
       const shards = groups[idx];
-      const md5 = crypto.createHash('md5');
-      const cacheKey = md5.update(shards.join(':')).digest('hex');
+      const cacheKey = crypto
+        .createHash('md5')
+        .update(shards.join(':'))
+        .digest('hex');
+
+      const runnerTimeoutMinutes =
+        {
+          ubuntu: 5,
+          windows: 10,
+          macos: 15,
+        }[platform] ?? 20;
+
+      const testTimeoutMilliseconds =
+        {
+          windows: 240000,
+        }[platform] ?? 120000;
 
       shardGroups.push({
         os: os as RunsOn,
         coverage,
-        name:
-          platform === 'ubuntu'
-            ? `test (${number}/${total})`
-            : `test-${platform} (${number}/${total})`,
+        name,
         shards: shards.join(' '),
         'cache-key': cacheKey,
-        'runner-timeout-minutes':
-          {
-            ubuntu: 5,
-            windows: 10,
-            macos: 15,
-          }[platform] ?? 20,
-        'test-timeout-milliseconds':
-          {
-            windows: 240000,
-          }[platform] ?? 120000,
+        'runner-timeout-minutes': runnerTimeoutMinutes,
+        'test-timeout-milliseconds': testTimeoutMilliseconds,
       });
     }
   }
