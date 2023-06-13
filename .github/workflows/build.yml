@@ -385,11 +385,11 @@ jobs:
       - name: Check dry run
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
       - name: Installing dependencies
