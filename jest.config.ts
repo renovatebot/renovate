@@ -358,6 +358,7 @@ interface ShardGroup {
   name: string;
   shards: string;
   'cache-key': string;
+  timeout: number;
 }
 
 function partitionBy<T>(input: T[], size: number): T[][] {
@@ -390,11 +391,15 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
       const shards = groups[idx];
       const md5 = crypto.createHash('md5');
       const cacheKey = md5.update(shards.join(':')).digest('hex');
+
+      const timeout = platform === 'ubuntu' ? 5 : 12;
+
       shardGroups.push({
         os: os as RunsOn,
         name: `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
         'cache-key': cacheKey,
+        timeout,
       });
     }
   }

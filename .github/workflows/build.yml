@@ -244,7 +244,7 @@ jobs:
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: ${{ needs.setup.outputs.os-matrix-is-full && '15' || '5' }}
+    timeout-minutes: ${{ matrix.timeout }}
 
     strategy:
       matrix:
