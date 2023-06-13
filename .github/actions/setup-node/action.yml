@@ -27,7 +27,8 @@ runs:
       with:
         path: |
           node_modules
-          lib/**/*.generated.ts
+          lib/data-files.generated.ts
+          lib/modules/manager/fingerprint.generated.ts
         key: node-modules-full-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
 
     - name: Setup Node
