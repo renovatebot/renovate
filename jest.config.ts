@@ -136,22 +136,22 @@ const testShards: Record<string, ShardConfig> = {
   },
   'workers-1': {
     matchPaths: [
+      'lib/workers/repository/init',
       'lib/workers/repository/onboarding',
       'lib/workers/repository/process',
     ],
   },
   'workers-2': {
-    matchPaths: ['lib/workers/repository/update/pr'],
+    matchPaths: [
+      'lib/workers/repository/update/pr',
+      'lib/workers/repository/finalize',
+    ],
     threshold: {
       branches: 97.1,
     },
   },
   'workers-3': {
-    matchPaths: [
-      'lib/workers/repository/init',
-      'lib/workers/repository/finalize',
-      'lib/workers/repository/update',
-    ],
+    matchPaths: ['lib/workers/repository/update'],
     threshold: {
       branches: 97.75,
     },
@@ -160,7 +160,7 @@ const testShards: Record<string, ShardConfig> = {
     matchPaths: ['lib/workers'],
     threshold: {
       statements: 99.95,
-      branches: 97.2,
+      branches: 97.34,
       lines: 99.95,
     },
   },
@@ -445,6 +445,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
   const shardGroups: ShardGroup[] = [];
   for (const [os, groups] of Object.entries(shardGrouping)) {
     const coverage = os === 'ubuntu-latest';
+
     const total = groups.length;
     for (let idx = 0; idx < groups.length; idx += 1) {
       const number = idx + 1;
