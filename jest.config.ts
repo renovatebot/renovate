@@ -196,7 +196,10 @@ const testShards: Record<string, ShardConfig> = {
  */
 type JestShardedSubconfig = Pick<
   JestConfig,
-  'testMatch' | 'collectCoverageFrom' | 'coverageThreshold'
+  | 'testMatch'
+  | 'collectCoverageFrom'
+  | 'coverageThreshold'
+  | 'coverageDirectory'
 >;
 
 /**
@@ -290,7 +293,14 @@ function configureShardingOrFallbackTo(
 
   testMatch.reverse();
   collectCoverageFrom.reverse();
-  return { testMatch, collectCoverageFrom, coverageThreshold };
+
+  const coverageDirectory = `./coverage/shard/${shardKey}`;
+  return {
+    testMatch,
+    collectCoverageFrom,
+    coverageThreshold,
+    coverageDirectory,
+  };
 }
 
 const config: JestConfig = {
@@ -309,14 +319,12 @@ const config: JestConfig = {
         statements: 100,
       },
     },
+    coverageDirectory: './coverage',
   }),
   cacheDirectory: '.cache/jest',
   clearMocks: true,
   collectCoverage: true,
-  coverageDirectory: './coverage',
-  coverageReporters: ci
-    ? ['html', 'json', 'text-summary']
-    : ['html', 'text-summary'],
+  coverageReporters: ci ? ['json', 'text-summary'] : ['html', 'text-summary'],
   transform: {
     '\\.ts$': [
       'ts-jest',

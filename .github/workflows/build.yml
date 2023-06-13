@@ -297,9 +297,34 @@ jobs:
               --coverage ${{ env.coverage }}
           done
 
-      # - name: Codecov
-      #   uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
-      #   if: (success() || failure()) && env.coverage == 'true'
+      - name: Move coverage files
+        if: (success() || failure()) && env.coverage == 'true'
+        run: |
+          mkdir reports
+          for shard in ${{ matrix.shards }};
+          do
+            mv coverage/shard/$shard/coverage-final.json reports/$shard.json
+          done
+
+      - name: Save coverage artifacts
+        if: (success() || failure()) && env.coverage == 'true'
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: coverage
+          path: reports/*.json
+
+  codecov:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: success() || failure()
+    steps:
+      - name: Download coverage reports
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: coverage
+
+      - run: ls -la reports
 
   # This allows not to specify particular jobs in matrix as required
   test-success:
