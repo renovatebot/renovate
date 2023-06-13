@@ -46,7 +46,7 @@ runs:
         command: |
           yarn install --frozen-lockfile --ignore-scripts
           yarn prepare:install-re2
-          prepare:re2
+          yarn prepare:re2
 
     - name: Generate files
       shell: bash
