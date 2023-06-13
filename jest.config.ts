@@ -449,29 +449,25 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
       const md5 = crypto.createHash('md5');
       const cacheKey = md5.update(shards.join(':')).digest('hex');
 
-      const runnerTimeoutMinutes =
-        {
-          ubuntu: 5,
-          windows: 10,
-          macos: 15,
-        }[platform] ?? 20;
-
-      const testTimeoutMilliseconds =
-        {
-          windows: 240000,
-        }[platform] ?? 120000;
-
       shardGroups.push({
         os: os as RunsOn,
         coverage,
         name:
-          platform === 'ubuntu' && groups.length === 1
+          platform === 'ubuntu' && shards.length === 1
             ? shards[0]
             : `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
         'cache-key': cacheKey,
-        'runner-timeout-minutes': runnerTimeoutMinutes,
-        'test-timeout-milliseconds': testTimeoutMilliseconds,
+        'runner-timeout-minutes':
+          {
+            ubuntu: 5,
+            windows: 10,
+            macos: 15,
+          }[platform] ?? 20,
+        'test-timeout-milliseconds':
+          {
+            windows: 240000,
+          }[platform] ?? 120000 ,
       });
     }
   }
