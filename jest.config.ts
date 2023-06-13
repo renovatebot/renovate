@@ -483,7 +483,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
    * Output will be consumed by `codecov` GitHub Action.
    */
   const testCoverageFiels = Object.keys(testShards)
-    .map((shard) => `./reports/${shard}.json`)
+    .map((shard) => `./coverage-reports/${shard}.json`)
     .join(',');
   // eslint-disable-next-line no-console
   console.log(`test-coverage-files=${testCoverageFiels}`);

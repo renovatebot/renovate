@@ -43,6 +43,7 @@ jobs:
       os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
       test-shard-matrix: ${{ steps.schedule-test-shards.outputs.test-shard-matrix }}
+      test-coverage-files: ${{ steps.schedule-test-shards.outputs.test-coverage-files }}
       commit-sha: ${{ steps.commit-sha.outputs.commit-sha }}
 
     env:
@@ -295,7 +296,7 @@ jobs:
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && matrix.coverage == 'true'
+        if: (success() || failure()) && matrix.coverage
         run: |
           mkdir ./coverage-reports
           for shard in ${{ matrix.shards }};
@@ -304,7 +305,7 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && matrix.coverage == 'true'
+        if: (success() || failure()) && matrix.coverage
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: coverage-reports
@@ -322,6 +323,16 @@ jobs:
           name: coverage-reports
 
       - run: ls -la coverage-reports
+
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: codecov.yml
+
+      - name: Codecov
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+        with:
+          files: ${{ needs.setup.outputs.test-coverage-files }}
 
   # This allows not to specify particular jobs in matrix as required
   test-success:
