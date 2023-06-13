@@ -467,7 +467,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
         'test-timeout-milliseconds':
           {
             windows: 240000,
-          }[platform] ?? 120000 ,
+          }[platform] ?? 120000,
       });
     }
   }
