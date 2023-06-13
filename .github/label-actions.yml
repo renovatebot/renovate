@@ -216,6 +216,7 @@
 
     Thanks, the Renovate team
   close: true
+  close-reason: 'not planned'
   lock: true
   lock-reason: 'resolved'
 
