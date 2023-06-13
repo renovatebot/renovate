@@ -290,33 +290,6 @@ function configureShardingOrFallbackTo(
   return { testMatch, collectCoverageFrom, coverageThreshold };
 }
 
-/**
- * Given the file list affected by commit, return the list
- * of shards that  test these changes.
- */
-function getMatchingShards(files: string[]): string[] {
-  const matchingShards = new Set<string>();
-  for (const file of files) {
-    for (const [key, { matchPaths }] of Object.entries(testShards)) {
-      const patterns = matchPaths.map((path) =>
-        path.endsWith('.spec.ts')
-          ? path.replace(/\.spec\.ts$/, '{.ts,.spec.ts}')
-          : `${path}/**/*`
-      );
-
-      if (patterns.some((pattern) => minimatch(file, pattern))) {
-        matchingShards.add(key);
-        break;
-      }
-    }
-  }
-
-  const allShards = Object.keys(testShards);
-  return matchingShards.size > 0
-    ? allShards.filter((shard) => matchingShards.has(shard))
-    : allShards;
-}
-
 const config: JestConfig = {
   ...configureShardingOrFallbackTo({
     collectCoverageFrom: [
@@ -375,31 +348,56 @@ const config: JestConfig = {
 
 export default config;
 
+type RunsOn = 'ubuntu-latest' | 'windows-latest' | 'macos-latest';
+
+interface ShardGroup {
+  os: RunsOn;
+  name: string;
+  shards: string[];
+}
+
+function partitionBy<T>(input: T[], size: number): T[][] {
+  const partitions: T[][] = [];
+  for (let idx = 0; idx < input.length; idx += size) {
+    partitions.push(input.slice(idx, idx + size));
+  }
+  return partitions;
+}
+
 /**
- * If `COMMIT_FILES` env variable is set, it means we're in `setup` CI job.
+ * If `SCHEDULE_TEST_SHARDS` env variable is set, it means we're in `setup` CI job.
  * We don't want to see anything except key-value pairs in the output.
  * Otherwise, we're printing useful stats.
  */
-if (process.env.COMMIT_FILES) {
-  try {
-    const commitFiles = JSON.parse(process.env.COMMIT_FILES);
+if (process.env.SCHEDULE_TEST_SHARDS) {
+  const shardKeys = Object.keys(testShards);
+  const shardGrouping = {
+    'ubuntu-latest': partitionBy(shardKeys, 1),
+    'windows-latest': partitionBy(shardKeys, 2),
+    'macos-latest': partitionBy(shardKeys, 4),
+  };
 
-    const matchingShards = getMatchingShards(commitFiles);
-    // eslint-disable-next-line no-console
-    console.log(`test-shards=${JSON.stringify(matchingShards)}`);
-
-    const allShards = Object.keys(testShards);
-    // eslint-disable-next-line no-console
-    console.log(`test-shards-all=${JSON.stringify(allShards)}`);
-  } catch (err) {
-    throw new Error(
-      `Invalid COMMIT_FILES value: "${process.env.COMMIT_FILES}"`
-    );
+  const shardGroups: ShardGroup[] = [];
+  for (const [os, groups] of Object.entries(shardGrouping)) {
+    const total = groups.length;
+    for (let idx = 0; idx < groups.length; idx += 1) {
+      const number = idx + 1;
+      const platform = os.replace(/-latest$/, '');
+      shardGroups.push({
+        os: os as RunsOn,
+        name: `test-${platform} (${number}/${total})`,
+        shards: groups[idx],
+      });
+    }
   }
-} else {
-  process.stderr.write(`Host stats:
+
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify(shardGroups));
+  process.exit(0);
+}
+
+process.stderr.write(`Host stats:
     Cpus:      ${cpus.length}
     Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB
     HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
   `);
-}

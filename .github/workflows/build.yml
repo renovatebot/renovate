@@ -42,8 +42,7 @@ jobs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
       os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
-      test-shards: ${{ steps.test-shards.outputs.test-shards }}
-      test-shards-all: ${{ steps.test-shards.outputs.test-shards-all }}
+      test-shard-matrix: ${{ steps.schedule-test-shards.outputs.test-shard-matrix }}
       commit-sha: ${{ steps.commit-sha.outputs.commit-sha }}
 
     env:
@@ -122,11 +121,12 @@ jobs:
           token: ${{ env.GH_TOKEN }}
           event: ${{ toJSON(github.event) }}
 
-      - name: Detect test shards
-        id: test-shards
+      - name: Schedule test shards
+        id: schedule-test-shards
         env:
           COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files || '[]' }}
-        run: yarn -s test-shards >> "$GITHUB_OUTPUT"
+        run: |
+          "test-shard-matrix=$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
@@ -242,23 +242,16 @@ jobs:
   test:
     needs: [setup, prefetch]
 
-    name: >-
-      ${{
-        matrix.node-version == 18 && format('test-{0} ({1})', matrix.test-shard, matrix.os) ||
-        format('test-{0} ({1}, node-{2})', matrix.test-shard, matrix.os, matrix.node-version)
-      }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
 
     strategy:
       matrix:
-        os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
-        node-version: [18]
-        test-shard: ${{ fromJSON(needs.setup.outputs.test-shards-all) }}
+        include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
-      NODE_VERSION: ${{ matrix.node-version }}
 
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -284,9 +277,11 @@ jobs:
           key: jest-cache-${{ matrix.test-shard }}-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
 
       - name: Unit tests
-        env:
-          TEST_SHARD: ${{ matrix.test-shard }}
-        run: yarn jest --ci --coverage ${{ env.coverage }}
+        run: |
+          for shard in ${{ matrix.shards }};
+          do
+            TEST_SHARD="$shard" yarn jest --ci --coverage ${{ env.coverage }}
+          done
 
       # - name: Codecov
       #   uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
