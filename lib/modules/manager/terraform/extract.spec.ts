@@ -40,6 +40,17 @@ describe('modules/manager/terraform/extract', () => {
       expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
     });
 
+    it('returns null for no deps', async () => {
+      // ModuleExtractor matches `module` at any position.
+      const src = codeBlock`
+        data "sops_file" "secrets" {
+          source_file = "\${path.module}/secrets.enc.json"
+        }
+        `;
+
+      expect(await extractPackageFile(src, '1.tf', {})).toBeNull();
+    });
+
     it('extracts  modules', async () => {
       const res = await extractPackageFile(modules, 'modules.tf', {});
       expect(res?.deps).toHaveLength(18);
