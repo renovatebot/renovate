@@ -33,7 +33,7 @@ runs:
         echo 'WINDOWS_KEY=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
 
     - name: Check cache miss for MacOS
-      id: macos-cache-miss
+      id: macos-cache
       uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
       with:
         path: node_modules
@@ -41,7 +41,7 @@ runs:
         lookup-only: true
 
     - name: Check cache miss for Windows
-      id: windows-cache-miss
+      id: windows-cache
       uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
       with:
         path: node_modules
@@ -51,8 +51,8 @@ runs:
     - name: Dispatch `node_modules` prefetch for MacOS and Windows
       id: os-matrix-prefetch
       env:
-        MACOS_MISS: ${{ steps.macos-cache-miss.outputs.cache-hit != 'true' && 'true' || '' }}
-        WINDOWS_MISS: ${{ steps.windows-cache-miss.outputs.cache-hit != 'true' && 'true' || '' }}
+        MACOS_MISS: ${{ steps.macos-cache.outputs.cache-hit != 'true' && 'true' || '' }}
+        WINDOWS_MISS: ${{ steps.windows-cache.outputs.cache-hit != 'true' && 'true' || '' }}
         PREFETCH_MAC_ONLY: '["macos-latest"]'
         PREFETCH_WINDOWS_ONLY: '["windows-latest"]'
         PREFETCH_BOTH: '["macos-latest", "windows-latest"]'
