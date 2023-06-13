@@ -414,11 +414,16 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
    * - We can't run more than 10 Windows runners
    * - We can't run more than 5 MacOS runners
    */
-  const shardGrouping = {
+  const shardGrouping: Record<string, string[][]> = {
     'ubuntu-latest': partitionBy(shardKeys, 1),
     'windows-latest': partitionBy(shardKeys, 2),
     'macos-latest': partitionBy(shardKeys, 4),
   };
+
+  if (process.env.CI_FULLTEST !== 'true') {
+    delete shardGrouping['windows-latest'];
+    delete shardGrouping['macos-latest'];
+  }
 
   const shardGroups: ShardGroup[] = [];
   for (const [os, groups] of Object.entries(shardGrouping)) {

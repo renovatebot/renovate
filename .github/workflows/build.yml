@@ -124,6 +124,7 @@ jobs:
       - name: Schedule test shards
         id: schedule-test-shards
         env:
+          CI_FULLTEST: ${{ env.CI_FULLTEST }}
           COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files || '[]' }}
         run: |
           echo "test-shard-matrix=$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
