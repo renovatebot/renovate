@@ -290,7 +290,10 @@ jobs:
         run: |
           for shard in ${{ matrix.shards }};
           do
-            TEST_SHARD="$shard" yarn jest --ci --test-timeout 300000 --coverage ${{ env.coverage }}
+            TEST_SHARD="$shard" yarn jest \
+              --ci \
+              --test-timeout ${{ matrix.test-timeout }} \
+              --coverage ${{ env.coverage }}
           done
 
       # - name: Codecov

@@ -354,11 +354,36 @@ export default config;
 type RunsOn = 'ubuntu-latest' | 'windows-latest' | 'macos-latest';
 
 interface ShardGroup {
+  /**
+   * Input for `runs-on` field.
+   */
   os: RunsOn;
+
+  /**
+   * Input for `name` field.
+   */
   name: string;
+
+  /**
+   * Space-separated list of shard keys, it's
+   * meant to be inserted into bash for-loop.
+   */
   shards: string;
+
+  /**
+   * It's meant to be used for Jest caching.
+   */
   'cache-key': string;
-  timeout: number;
+
+  /**
+   * It's used to set test runner timeout.
+   */
+  'runner-timeout': number;
+
+  /**
+   * It's used to set `--test-timeout` Jest CLI flag.
+   */
+  'test-timeout': number;
 }
 
 function partitionBy<T>(input: T[], size: number): T[][] {
@@ -376,6 +401,19 @@ function partitionBy<T>(input: T[], size: number): T[][] {
  */
 if (process.env.SCHEDULE_TEST_SHARDS) {
   const shardKeys = Object.keys(testShards);
+
+  /**
+   * Not all runners are created equal.
+   * Minutes cost proportion is 1:2:10 for Ubuntu:Windows:MacOS.
+   *
+   * Although it's free in our case,
+   * we can't run as many Windows and MacOS runners as we want.
+   *
+   * Because of this, we partition shards into groups, given that:
+   * - There are 16 shards in total
+   * - We can't run more than 10 Windows runners
+   * - We can't run more than 5 MacOS runners
+   */
   const shardGrouping = {
     'ubuntu-latest': partitionBy(shardKeys, 1),
     'windows-latest': partitionBy(shardKeys, 2),
@@ -392,23 +430,32 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
       const md5 = crypto.createHash('md5');
       const cacheKey = md5.update(shards.join(':')).digest('hex');
 
-      const timeout =
+      const runnerTimeoutMinutes =
         {
           ubuntu: 5,
           windows: 10,
           macos: 15,
         }[platform] ?? 20;
 
+      const testTimeoutMilliseconds =
+        {
+          windows: 240000,
+        }[platform] ?? 120000;
+
       shardGroups.push({
         os: os as RunsOn,
         name: `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
         'cache-key': cacheKey,
-        timeout,
+        'runner-timeout': runnerTimeoutMinutes,
+        'test-timeout': testTimeoutMilliseconds,
       });
     }
   }
 
+  /**
+   * Output will be consumed by `setup` CI job.
+   */
   // eslint-disable-next-line no-console
   console.log(JSON.stringify(shardGroups));
   process.exit(0);
