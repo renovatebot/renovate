@@ -25,10 +25,7 @@ runs:
       id: node-modules-cache
       uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
       with:
-        path: |
-          node_modules
-          lib/data-files.generated.ts
-          lib/modules/manager/fingerprint.generated.ts
+        path: node_modules
         key: modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
 
     - name: Setup Node
