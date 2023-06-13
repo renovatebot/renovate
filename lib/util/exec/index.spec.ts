@@ -38,7 +38,11 @@ describe('util/exec/index', () => {
   const defaultCacheVolume = `-v "${cacheDir}":"${cacheDir}"`;
   const defaultVolumes = `-v "${cwd}":"${cwd}" ${defaultCacheVolume}`;
 
-  const globalConfig: RepoGlobalConfig = { cacheDir, containerbaseDir };
+  const globalConfig: RepoGlobalConfig = {
+    cacheDir,
+    containerbaseDir,
+    dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+  };
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
@@ -54,7 +58,7 @@ describe('util/exec/index', () => {
   });
 
   const image = dockerModule.sideCarImage;
-  const fullImage = `containerbase/${image}`;
+  const fullImage = `ghcr.io/containerbase/sidecar`;
   const name = `renovate_${image}`;
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
