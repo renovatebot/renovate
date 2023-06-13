@@ -256,6 +256,7 @@ jobs:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
         node-version: [18]
+        test-shard: ${{ fromJSON(needs.test-shards.outputs.test-shards-all) }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
@@ -290,11 +291,13 @@ jobs:
           key: jest-cache-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
 
       - name: Unit tests
+        env:
+          TEST_SHARD: ${{ matrix.test-shard }}
         run: yarn jest --ci --coverage ${{ env.coverage }}
 
-      - name: Codecov
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
-         if: (success() || failure()) && env.coverage == 'true'
+      # - name: Codecov
+      #   uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+      #    if: (success() || failure()) && env.coverage == 'true'
 
   # This allows not to specify particular jobs in matrix as required
   test-success:
