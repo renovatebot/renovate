@@ -28,7 +28,7 @@ runs:
     - name: Calculate `CACHE_KEY`
       shell: bash
       run: |
-        echo 'CACHE_KEY=x-node_modules-${{
+        echo 'CACHE_KEY=node_modules-${{
           inputs.os
         }}-${{
           inputs.node-version
