@@ -26,13 +26,15 @@ runs:
   using: 'composite'
   steps:
     - name: Calculate `CACHE_KEY`
-      env:
-        OS: ${{ inputs.os }}
-        NODE_VERSION: ${{ inputs.node-version }}
-        HASH: ${{ hashFiles('yarn.lock') }}
       shell: bash
       run: |
-        echo 'node_modules-${{ env.OS }}-${{ env.NODE_VERSION }}-${{ env.HASH }}' >> "$GITHUB_ENV"
+        echo 'CACHE_KEY=node_modules-${{
+          inputs.os
+        }}-${{
+          inputs.node-version
+        }}-${{
+          hashFiles('yarn.lock')
+        }}' >> "$GITHUB_ENV"
 
     - name: Restore `node_modules`
       if: ${{ inputs.update-cache != 'true' }}
