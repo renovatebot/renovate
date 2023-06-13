@@ -470,7 +470,17 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
    * Output will be consumed by `setup` CI job.
    */
   // eslint-disable-next-line no-console
-  console.log(JSON.stringify(shardGroups));
+  console.log(`test-shard-matrix=${JSON.stringify(shardGroups)}`);
+
+  /**
+   * Output will be consumed by `codecov` GitHub Action.
+   */
+  const testCoverageFiels = Object.keys(testShards)
+    .map((shard) => `./reports/${shard}.json`)
+    .join(',');
+  // eslint-disable-next-line no-console
+  console.log(`test-coverage-files=${testCoverageFiels}`);
+
   process.exit(0);
 }
 

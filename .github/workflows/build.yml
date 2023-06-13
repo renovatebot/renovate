@@ -127,7 +127,7 @@ jobs:
           CI_FULLTEST: ${{ env.CI_FULLTEST }}
           COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files || '[]' }}
         run: |
-          echo "test-shard-matrix=$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          echo "$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
@@ -252,7 +252,7 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && env.NODE_VERSION == '18' }}
 
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -300,18 +300,18 @@ jobs:
       - name: Move coverage files
         if: (success() || failure()) && env.coverage == 'true'
         run: |
-          mkdir reports
+          mkdir ./coverage-reports
           for shard in ${{ matrix.shards }};
           do
-            mv coverage/shard/$shard/coverage-final.json reports/$shard.json
+            mv ./coverage/shard/$shard/coverage-final.json ./coverage-reports/$shard.json
           done
 
       - name: Save coverage artifacts
         if: (success() || failure()) && env.coverage == 'true'
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
-          name: coverage
-          path: reports/*.json
+          name: coverage-reports
+          path: ./coverage-reports/*.json
 
   codecov:
     needs: test
@@ -322,9 +322,9 @@ jobs:
       - name: Download coverage reports
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
-          name: coverage
+          name: coverage-reports
 
-      - run: ls -la reports
+      - run: ls -la coverage-reports
 
   # This allows not to specify particular jobs in matrix as required
   test-success:
