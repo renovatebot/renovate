@@ -1921,7 +1921,8 @@ describe('modules/platform/gitea/index', () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -1931,7 +1932,8 @@ describe('modules/platform/gitea/index', () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'different/repo' });
       const res = await gitea.getJsonFile('file.json', 'different/repo');
       expect(res).toEqual(data);
@@ -1941,7 +1943,8 @@ describe('modules/platform/gitea/index', () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json', 'some/repo', 'dev');
       expect(res).toEqual(data);
@@ -1956,7 +1959,8 @@ describe('modules/platform/gitea/index', () => {
       `;
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: json5Data,
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1965,7 +1969,8 @@ describe('modules/platform/gitea/index', () => {
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });

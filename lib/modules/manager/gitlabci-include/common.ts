@@ -13,7 +13,7 @@ export function isNonEmptyObject(obj: any): boolean {
 export function filterIncludeFromGitlabPipeline(
   pipeline: GitlabPipeline
 ): GitlabPipeline {
-  const pipeline_without_include = {} as GitlabPipeline;
+  const pipeline_without_include: GitlabPipeline = {};
   for (const key of Object.keys(pipeline).filter((key) => key !== 'include')) {
     const pipeline_key = key as keyof typeof pipeline;
     pipeline_without_include[pipeline_key] = pipeline[pipeline_key];
