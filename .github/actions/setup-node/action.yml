@@ -28,7 +28,7 @@ runs:
         path: |
           node_modules
           lib/**/*.generated.ts
-        key: node-modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
+        key: node-modules-full-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
 
     - name: Setup Node
       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
