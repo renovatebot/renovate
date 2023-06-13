@@ -177,7 +177,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     GlobalConfig.set({
       localDir: './',
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const result = await updateArtifacts({
@@ -197,7 +197,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2',
+        cmd: 'docker pull ghcr.io/containerbase/sidecar',
         options: { encoding: 'utf-8' },
       },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -208,7 +208,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
-          'ghcr.io/containerbase/sidecar:8.0.2' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 17.0.0 ' +
           '&& ' +

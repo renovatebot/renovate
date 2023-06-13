@@ -35,7 +35,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const osPlatformSpy = jest.spyOn(os, 'platform');
@@ -323,7 +323,7 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -334,7 +334,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar:8.0.2' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +
@@ -352,7 +352,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar:8.0.2' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +

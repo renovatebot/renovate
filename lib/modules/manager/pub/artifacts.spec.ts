@@ -144,7 +144,7 @@ describe('modules/manager/pub/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
@@ -166,7 +166,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2',
+          cmd: 'docker pull ghcr.io/containerbase/sidecar',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -179,7 +179,7 @@ describe('modules/manager/pub/artifacts', () => {
             '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar:8.0.2 ' +
+            'ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
             `install-tool ${params.sdk} 3.3.9` +
             ' && ' +

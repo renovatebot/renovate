@@ -93,7 +93,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
@@ -168,7 +168,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
@@ -232,7 +232,7 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
     mockExecAll();

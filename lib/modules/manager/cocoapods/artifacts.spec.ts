@@ -26,7 +26,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 describe('modules/manager/cocoapods/artifacts', () => {
@@ -253,7 +253,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
       config,
     });
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -262,7 +262,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar:8.0.2' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool ruby 3.1.0' +
           ' && ' +

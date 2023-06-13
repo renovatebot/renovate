@@ -156,7 +156,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
@@ -592,7 +592,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     GlobalConfig.set({
       ...adminConfig,
       binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);

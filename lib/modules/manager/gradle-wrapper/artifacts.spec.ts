@@ -182,7 +182,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
 
       const result = await updateArtifacts({
@@ -202,7 +202,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2' },
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -213,7 +213,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/containerbase/sidecar:8.0.2' +
+            'ghcr.io/containerbase/sidecar' +
             ' bash -l -c "' +
             'install-tool java 11.0.1' +
             ' && ' +

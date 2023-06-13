@@ -33,7 +33,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
-  dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const repoStatus = partial<StatusResult>({
@@ -785,7 +785,7 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2',
+        cmd: 'docker pull ghcr.io/containerbase/sidecar',
         options: {
           encoding: 'utf-8',
         },
@@ -805,7 +805,7 @@ describe('modules/manager/composer/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar:8.0.2' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool php 7.3' +
           ' && ' +
