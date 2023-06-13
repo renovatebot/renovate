@@ -18,5 +18,6 @@
   "omnisharp.autoStart": false,
   "jest.autoRun": "off",
   "jest.jestCommandLine": "yarn jest",
-  "npm.packageManager": "yarn"
+  "npm.packageManager": "yarn",
+  "prettier.prettierPath": "./node_modules/prettier",
 }
