@@ -246,6 +246,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -259,7 +260,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -268,7 +269,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar:8.0.2 ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& ' +

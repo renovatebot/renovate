@@ -58,7 +58,11 @@ describe('modules/manager/pep621/artifacts', () => {
 
     it('return processor result', async () => {
       const execSnapshots = mockExecAll();
-      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      });
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       fs.readLocalFile.mockResolvedValueOnce('old test content');
       fs.readLocalFile.mockResolvedValueOnce('new test content');
@@ -98,7 +102,7 @@ requires-python = "<3.9"
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2',
           options: {
             encoding: 'utf-8',
           },
@@ -117,7 +121,7 @@ requires-python = "<3.9"
             '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'containerbase/sidecar ' +
+            'ghcr.io/containerbase/sidecar:8.0.2 ' +
             'bash -l -c "' +
             'install-tool python 3.8.1 ' +
             '&& ' +

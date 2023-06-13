@@ -134,7 +134,11 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
     it('suppports docker', async () => {
       const execSnapshots = mockExecAll();
-      GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+      GlobalConfig.set({
+        ...globalConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar:8.0.2',
+      });
 
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -144,7 +148,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/containerbase/sidecar:8.0.2',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -155,7 +159,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
-            '-w "some-dir" containerbase/sidecar ' +
+            '-w "some-dir" ghcr.io/containerbase/sidecar:8.0.2 ' +
             'bash -l -c "' +
             'install-tool node 16.16.0 ' +
             '&& ' +
