@@ -296,7 +296,7 @@ jobs:
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && matrix.coverage
+        if: matrix.coverage
         run: |
           mkdir ./coverage-reports
           for shard in ${{ matrix.shards }};
@@ -305,7 +305,7 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && matrix.coverage
+        if: matrix.coverage
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: coverage-reports
