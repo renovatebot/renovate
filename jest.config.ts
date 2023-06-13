@@ -465,7 +465,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
         os: os as RunsOn,
         coverage,
         name:
-          platform === 'ubuntu' && total === 1
+          platform === 'ubuntu' && groups.length === 1
             ? shards[0]
             : `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
