@@ -368,6 +368,11 @@ interface ShardGroup {
   os: RunsOn;
 
   /**
+   * Controls whether coverage is collected for this shard group.
+   */
+  coverage: boolean;
+
+  /**
    * Input for `name` field.
    */
   name: string;
@@ -435,6 +440,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
 
   const shardGroups: ShardGroup[] = [];
   for (const [os, groups] of Object.entries(shardGrouping)) {
+    const coverage = os === 'ubuntu-latest';
     const total = groups.length;
     for (let idx = 0; idx < groups.length; idx += 1) {
       const number = idx + 1;
@@ -457,6 +463,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
 
       shardGroups.push({
         os: os as RunsOn,
+        coverage,
         name: `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
         'cache-key': cacheKey,

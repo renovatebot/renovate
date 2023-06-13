@@ -251,9 +251,6 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
-    env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && env.NODE_VERSION == '18' }}
-
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
@@ -294,11 +291,11 @@ jobs:
             TEST_SHARD="$shard" yarn jest \
               --ci \
               --test-timeout ${{ matrix.test-timeout-milliseconds }} \
-              --coverage ${{ env.coverage }}
+              --coverage ${{ matrix.coverage }}
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && env.coverage == 'true'
+        if: (success() || failure()) && matrix.coverage == 'true'
         run: |
           mkdir ./coverage-reports
           for shard in ${{ matrix.shards }};
@@ -307,7 +304,7 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && env.coverage == 'true'
+        if: (success() || failure()) && matrix.coverage == 'true'
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: coverage-reports
