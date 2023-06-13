@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
+  MISSING_API_CREDENTIALS,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -54,7 +55,11 @@ export function processResult(
     REPOSITORY_RENAMED,
     REPOSITORY_UNINITIATED,
   ];
-  const enabledStatuses = [CONFIG_SECRETS_EXPOSED, CONFIG_VALIDATION];
+  const enabledStatuses = [
+    CONFIG_SECRETS_EXPOSED,
+    CONFIG_VALIDATION,
+    MISSING_API_CREDENTIALS,
+  ];
   let status: ProcessStatus;
   let enabled: boolean | undefined;
   let onboarded: boolean | undefined;

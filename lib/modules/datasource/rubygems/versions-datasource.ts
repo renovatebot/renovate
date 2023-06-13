@@ -1,27 +1,69 @@
 import { z } from 'zod';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
+import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
+import { copystr } from '../../../util/string';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-type PackageReleases = Map<string, string[]>;
-
-interface RegistryCache {
-  lastSync: Date;
-  packageReleases: PackageReleases;
-  contentLength: number;
-  isSupported: boolean;
-  registryUrl: string;
+interface VersionsEndpointUnsupported {
+  versionsEndpointSupported: false;
 }
 
-export const memCache = new Map<string, RegistryCache>();
+type PackageVersions = Map<string, string[]>;
 
-const Lines = z
+interface VersionsEndpointData {
+  versionsEndpointSupported: true;
+  packageVersions: PackageVersions;
+  syncedAt: Date;
+  contentLength: number;
+
+  /**
+   * Last 33 characters of the response (32 hex digits + newline)
+   */
+  contentTail: string;
+}
+
+function getContentTail(content: string): string {
+  return content.slice(-33);
+}
+
+function getContentHead(content: string): string {
+  return content.slice(0, 33);
+}
+
+function stripContentHead(content: string): string {
+  return content.slice(33);
+}
+
+function parseFullBody(body: string): VersionsEndpointData {
+  const versionsEndpointSupported = true;
+  const packageVersions = VersionsDatasource.reconcilePackageVersions(
+    new Map<string, string[]>(),
+    VersionLines.parse(body)
+  );
+  const syncedAt = new Date();
+  const contentLength = body.length;
+  const contentTail = getContentTail(body);
+
+  return {
+    versionsEndpointSupported,
+    packageVersions,
+    syncedAt,
+    contentLength,
+    contentTail,
+  };
+}
+
+type VersionsEndpointCache = VersionsEndpointUnsupported | VersionsEndpointData;
+
+export const memCache = new Map<string, VersionsEndpointCache>();
+
+const VersionLines = z
   .string()
   .transform((x) => x.split(newlineRegex))
   .pipe(
@@ -45,92 +87,27 @@ const Lines = z
             }
           }
           return { packageName, deletedVersions, addedVersions };
-        }),
-      {
-        onError: ({ error: err, input }) => {
-          logger.debug(
-            { err, input },
-            'Rubygems: failed to parse some version lines'
-          );
-        },
-      }
+        })
     )
   );
-type Lines = z.infer<typeof Lines>;
+type VersionLines = z.infer<typeof VersionLines>;
 
 export class VersionsDatasource extends Datasource {
-  private isInitialFetch = true;
-
   constructor(override readonly id: string) {
     super(id);
   }
 
-  getRegistryCache(registryUrl: string): RegistryCache {
-    const cacheKey = `rubygems-versions-cache:${registryUrl}`;
-    const regCache = memCache.get(cacheKey) ?? {
-      lastSync: new Date('2000-01-01'),
-      packageReleases: new Map<string, string[]>(),
-      contentLength: 0,
-      isSupported: false,
-      registryUrl,
-    };
-    memCache.set(cacheKey, regCache);
-    return regCache;
+  static isStale(regCache: VersionsEndpointData): boolean {
+    return getElapsedMinutes(regCache.syncedAt) >= 15;
   }
 
-  async getReleases({
-    registryUrl,
-    packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    logger.debug(`getRubygemsOrgDependency(${packageName})`);
-
-    // istanbul ignore if
-    if (!registryUrl) {
-      return null;
-    }
-    const regCache = this.getRegistryCache(registryUrl);
-
-    await this.syncVersions(regCache);
-
-    if (!regCache.isSupported) {
-      throw new Error(PAGE_NOT_FOUND_ERROR);
-    }
-
-    const versions = regCache.packageReleases.get(packageName);
-    if (!versions) {
-      return null;
-    }
-
-    const releases = versions.map((version) => ({ version }));
-    return { releases };
-  }
-
-  /**
-   * Since each `/versions` reponse exceed 10MB,
-   * there is potential for a memory leak if we construct slices
-   * of the response body and cache them long-term:
-   *
-   *   https://bugs.chromium.org/p/v8/issues/detail?id=2869
-   *
-   * This method meant to be called for `version` and `packageName`
-   * before storing them in the cache.
-   */
-  private copystr(x: string): string {
-    const len = Buffer.byteLength(x, 'utf8');
-    const buf = this.isInitialFetch
-      ? Buffer.allocUnsafe(len) // allocate from pre-allocated buffer
-      : Buffer.allocUnsafeSlow(len); // allocate standalone buffer
-    buf.write(x, 'utf8');
-    return buf.toString('utf8');
-  }
-
-  private updatePackageReleases(
-    packageReleases: PackageReleases,
-    lines: Lines
-  ): void {
-    for (const line of lines) {
-      const packageName = this.copystr(line.packageName);
-      let versions = packageReleases.get(packageName) ?? [];
+  static reconcilePackageVersions(
+    packageVersions: PackageVersions,
+    versionLines: VersionLines
+  ): PackageVersions {
+    for (const line of versionLines) {
+      const packageName = copystr(line.packageName);
+      let versions = packageVersions.get(packageName) ?? [];
 
       const { deletedVersions, addedVersions } = line;
 
@@ -142,68 +119,180 @@ export class VersionsDatasource extends Datasource {
         const existingVersions = new Set(versions);
         for (const addedVersion of addedVersions) {
           if (!existingVersions.has(addedVersion)) {
-            const version = this.copystr(addedVersion);
+            const version = copystr(addedVersion);
             versions.push(version);
           }
         }
       }
 
-      packageReleases.set(packageName, versions);
+      packageVersions.set(packageName, versions);
     }
+
+    return packageVersions;
   }
 
-  async updateRubyGemsVersions(regCache: RegistryCache): Promise<void> {
-    const url = `${regCache.registryUrl}/versions`;
-    const options = {
-      headers: {
-        'accept-encoding': 'gzip',
-        range: `bytes=${regCache.contentLength}-`,
-      },
-    };
-    let newLines: string;
+  private cacheRequests = new Map<string, Promise<VersionsEndpointCache>>();
+
+  /**
+   * At any given time, there should only be one request for a given registryUrl.
+   */
+  private async getCache(registryUrl: string): Promise<VersionsEndpointCache> {
+    const cacheKey = `rubygems-versions-cache:${registryUrl}`;
+
+    const oldCache = memCache.get(cacheKey);
+    memCache.delete(cacheKey); // If no error is thrown, we'll re-set the cache
+
+    let newCache: VersionsEndpointCache;
+
+    if (!oldCache) {
+      newCache = await this.fullSync(registryUrl);
+    } else if (oldCache.versionsEndpointSupported === false) {
+      newCache = oldCache;
+    } else if (VersionsDatasource.isStale(oldCache)) {
+      newCache = await this.deltaSync(oldCache, registryUrl);
+    } else {
+      newCache = oldCache;
+    }
+    memCache.set(cacheKey, newCache);
+    return newCache;
+  }
+
+  async getReleases({
+    registryUrl,
+    packageName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
+    /**
+     * Ensure that only one request for a given registryUrl is in flight at a time.
+     */
+    let cacheRequest = this.cacheRequests.get(registryUrl);
+    if (!cacheRequest) {
+      cacheRequest = this.getCache(registryUrl);
+      this.cacheRequests.set(registryUrl, cacheRequest);
+    }
+    let cache: VersionsEndpointCache;
     try {
-      logger.debug('Rubygems: Fetching rubygems.org versions');
-      const startTime = Date.now();
-      newLines = (await this.http.get(url, options)).body;
-      const durationMs = Math.round(Date.now() - startTime);
-      logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
-        regCache.isSupported = false;
-        return;
-      }
-
-      if (err.statusCode === 416) {
-        logger.debug('Rubygems: No update');
-        regCache.lastSync = new Date();
-        return;
-      }
-
-      regCache.contentLength = 0;
-      regCache.packageReleases.clear();
-
-      logger.debug({ err }, 'Rubygems fetch error');
-      throw new ExternalHostError(err);
+      cache = await cacheRequest;
+    } finally {
+      this.cacheRequests.delete(registryUrl);
     }
 
-    regCache.isSupported = true;
-    regCache.lastSync = new Date();
+    if (cache.versionsEndpointSupported === false) {
+      logger.debug(
+        { packageName, registryUrl },
+        'Rubygems: endpoint not supported'
+      );
+      throw new Error(PAGE_NOT_FOUND_ERROR);
+    }
 
-    const lines = Lines.parse(newLines);
-    this.updatePackageReleases(regCache.packageReleases, lines);
-    this.isInitialFetch = false;
+    const packageVersions = cache.packageVersions.get(packageName);
+    if (!packageVersions?.length) {
+      logger.debug(
+        { packageName, registryUrl },
+        'Rubygems: versions not found'
+      );
+      return null;
+    }
+
+    const releases = packageVersions.map((version) => ({ version }));
+    return { releases };
   }
 
-  private updateRubyGemsVersionsPromise: Promise<void> | null = null;
+  async fullSync(registryUrl: string): Promise<VersionsEndpointCache> {
+    try {
+      const url = `${registryUrl}/versions`;
+      const opts: HttpOptions = { headers: { 'Accept-Encoding': 'gzip' } };
+      const { body } = await this.http.get(url, opts);
+      return parseFullBody(body);
+    } catch (err) {
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        return { versionsEndpointSupported: false };
+      }
 
-  async syncVersions(regCache: RegistryCache): Promise<void> {
-    const isStale = getElapsedMinutes(regCache.lastSync) >= 15;
-    if (isStale) {
-      this.updateRubyGemsVersionsPromise =
-        this.updateRubyGemsVersionsPromise ??
-        this.updateRubyGemsVersions(regCache);
-      await this.updateRubyGemsVersionsPromise;
-      this.updateRubyGemsVersionsPromise = null;
+      this.handleGenericErrors(err);
+    }
+  }
+
+  async deltaSync(
+    oldCache: VersionsEndpointData,
+    registryUrl: string
+  ): Promise<VersionsEndpointCache> {
+    try {
+      const url = `${registryUrl}/versions`;
+      const startByte = oldCache.contentLength - oldCache.contentTail.length;
+      const opts: HttpOptions = {
+        headers: {
+          ['Accept-Encoding']: 'deflate, compress, br', // Note: `gzip` usage breaks http client, when used with `Range` header
+          ['Range']: `bytes=${startByte}-`,
+        },
+      };
+      const { statusCode, body } = await this.http.get(url, opts);
+
+      /**
+       * Rubygems will return the full body instead of `416 Range Not Satisfiable`.
+       * In this case, status code will be 200 instead of 206.
+       */
+      if (statusCode === 200) {
+        return parseFullBody(body);
+      }
+
+      /**
+       * We request data in range that overlaps previously fetched data.
+       * If the head of the response doesn't match the tail of the previous response,
+       * it means that the data we have is no longer valid.
+       * In this case we start over with a full sync.
+       */
+      const contentHead = getContentHead(body);
+      if (contentHead !== oldCache.contentTail) {
+        return this.fullSync(registryUrl);
+      }
+
+      /**
+       * Update the cache with the new data.
+       */
+      const versionsEndpointSupported = true;
+      const delta = stripContentHead(body);
+      const packageVersions = VersionsDatasource.reconcilePackageVersions(
+        oldCache.packageVersions,
+        VersionLines.parse(delta)
+      );
+      const syncedAt = new Date();
+      const contentLength = oldCache.contentLength + delta.length;
+      const contentTail = getContentTail(body);
+
+      return {
+        versionsEndpointSupported,
+        packageVersions,
+        syncedAt,
+        contentLength,
+        contentTail,
+      };
+    } catch (err) {
+      if (err instanceof HttpError) {
+        const responseStatus = err.response?.statusCode;
+
+        /**
+         * In case of `416 Range Not Satisfiable` we do a full sync.
+         * This is unlikely to happen in real life, but anyway.
+         */
+        if (responseStatus === 416) {
+          return this.fullSync(registryUrl);
+        }
+
+        /**
+         * If the endpoint is not supported, we stop trying.
+         * This is unlikely to happen in real life, but still.
+         */
+        if (responseStatus === 404) {
+          return { versionsEndpointSupported: false };
+        }
+      }
+
+      this.handleGenericErrors(err);
     }
   }
 }

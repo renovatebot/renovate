@@ -375,7 +375,7 @@ async function getStatus(
     return (
       await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
         paginate: true,
-        useCache,
+        memCache: useCache,
       })
     ).body;
   } catch (err) /* istanbul ignore next */ {
@@ -534,7 +534,25 @@ export async function getPrList(): Promise<Pr[]> {
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJson<{ name: string }[]>(url);
+    const { body: rules } = await gitlabApi.getJson<
+      {
+        name: string;
+        rule_type: string;
+        id: number;
+      }[]
+    >(url);
+
+    const existingAnyApproverRule = rules?.find(
+      ({ rule_type }) => rule_type === 'any_approver'
+    );
+
+    if (existingAnyApproverRule) {
+      await gitlabApi.putJson(`${url}/${existingAnyApproverRule.id}`, {
+        body: { ...existingAnyApproverRule, approvals_required: 0 },
+      });
+      return;
+    }
+
     const ruleName = 'renovateIgnoreApprovals';
     const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
     if (!zeroApproversRule) {
@@ -756,7 +774,7 @@ export async function findPr({
     prList.find(
       (p: { sourceBranch: string; title: string; state: string }) =>
         p.sourceBranch === branchName &&
-        (!prTitle || p.title === prTitle) &&
+        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
         matchesState(p.state, state)
     ) ?? null
   );
@@ -850,7 +868,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     const res = await gitlabApi.getJson<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {
-      useCache: false,
+      memCache: false,
       paginate: true,
     });
     // istanbul ignore if
@@ -875,7 +893,7 @@ export async function getIssue(
     const issueBody = (
       await gitlabApi.getJson<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
-        { useCache }
+        { memCache: useCache }
       )
     ).body.description;
     return {

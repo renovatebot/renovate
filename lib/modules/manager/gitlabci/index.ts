@@ -5,7 +5,7 @@ import { extractAllPackageFiles, extractPackageFile } from './extract';
 export { extractAllPackageFiles, extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['\\.gitlab-ci\\.yml$'],
+  fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
 };
 
 export const categories: Category[] = ['ci'];

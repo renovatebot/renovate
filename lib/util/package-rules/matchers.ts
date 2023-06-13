@@ -6,13 +6,12 @@ import { DatasourcesMatcher } from './datasources';
 import { DepNameMatcher } from './dep-names';
 import { DepPatternsMatcher } from './dep-patterns';
 import { DepTypesMatcher } from './dep-types';
-import { FilesMatcher } from './files';
+import { FileNamesMatcher } from './files';
 import { ManagersMatcher } from './managers';
 import { MergeConfidenceMatcher } from './merge-confidence';
 import { PackageNameMatcher } from './package-names';
 import { PackagePatternsMatcher } from './package-patterns';
 import { PackagePrefixesMatcher } from './package-prefixes';
-import { PathsMatcher } from './paths';
 import { SourceUrlPrefixesMatcher } from './sourceurl-prefixes';
 import { SourceUrlsMatcher } from './sourceurls';
 import type { MatcherApi } from './types';
@@ -29,8 +28,7 @@ matchers.push([
   new PackagePatternsMatcher(),
   new PackagePrefixesMatcher(),
 ]);
-matchers.push([new FilesMatcher()]);
-matchers.push([new PathsMatcher()]);
+matchers.push([new FileNamesMatcher()]);
 matchers.push([new DepTypesMatcher()]);
 matchers.push([new BaseBranchesMatcher()]);
 matchers.push([new ManagersMatcher()]);

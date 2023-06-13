@@ -2,6 +2,15 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
+  approveMajorUpdates: {
+    description: 'Require dependency dashboard approval for `major` updates.',
+    packageRules: [
+      {
+        dependencyDashboardApproval: true,
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
   assignAndReview: {
     description: 'Set `{{arg0}}` as assignee and reviewer of PRs.',
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
@@ -358,7 +367,7 @@ export const presets: Record<string, Preset> = {
       'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
     packageRules: [
       {
-        matchPaths: ['{{arg0}}'],
+        matchFileNames: ['{{arg0}}'],
         semanticCommitType: '{{arg1}}',
       },
     ],

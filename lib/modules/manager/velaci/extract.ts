@@ -5,13 +5,16 @@ import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { VelaPipelineConfiguration } from './types';
 
-export function extractPackageFile(file: string): PackageFileContent | null {
+export function extractPackageFile(
+  file: string,
+  packageFile?: string
+): PackageFileContent | null {
   let doc: VelaPipelineConfiguration | undefined;
 
   try {
     doc = load(file, { json: true }) as VelaPipelineConfiguration;
   } catch (err) {
-    logger.debug({ err, file }, 'Failed to parse Vela file.');
+    logger.debug({ err, packageFile }, 'Failed to parse Vela file.');
     return null;
   }
 

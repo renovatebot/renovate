@@ -69,7 +69,13 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`terraform.updateArtifacts(${packageFileName})`);
 
-  const lockFilePath = findLockFile(packageFileName);
+  const lockFilePath = await findLockFile(packageFileName);
+
+  if (!lockFilePath) {
+    logger.debug('No .terraform.lock.hcl found');
+    return null;
+  }
+
   try {
     const lockFileContent = await readLockFile(lockFilePath);
     if (!lockFileContent) {

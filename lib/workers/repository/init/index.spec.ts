@@ -1,4 +1,4 @@
-import { logger, mocked } from '../../../../test/util';
+import { RenovateConfig, logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
@@ -32,23 +32,27 @@ describe('workers/repository/init/index', () => {
 
   describe('initRepo', () => {
     it('runs', async () => {
-      apis.initApis.mockResolvedValue({} as never);
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       config.getRepoConfig.mockResolvedValueOnce({});
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
-      secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
+      secrets.applySecretsToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>()
+      );
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toEqual({});
     });
 
     it('warns on unsupported options', async () => {
-      apis.initApis.mockResolvedValue({} as never);
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       config.getRepoConfig.mockResolvedValueOnce({
         filterUnavailableUsers: true,
       });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
-      secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
+      secrets.applySecretsToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>()
+      );
       await initRepo({});
       expect(logger.logger.warn).toHaveBeenCalledWith(
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform 'undefined'."

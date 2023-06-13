@@ -48,7 +48,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
       {
         packageRules: [
           {
-            matchPaths: [],
+            matchFileNames: [],
             packgageRules: {
               languages: ['javascript'],
             },

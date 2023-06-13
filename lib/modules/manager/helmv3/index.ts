@@ -12,7 +12,7 @@ export const defaultConfig = {
     stable: 'https://charts.helm.sh/stable',
   },
   commitMessageTopic: 'helm chart {{depName}}',
-  fileMatch: ['(^|/)Chart\\.yaml$'],
+  fileMatch: ['(^|/)Chart\\.ya?ml$'],
 };
 
 export const categories: Category[] = ['helm', 'kubernetes'];

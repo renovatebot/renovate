@@ -239,7 +239,7 @@ export function getDep(
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  _packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];

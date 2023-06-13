@@ -29,7 +29,7 @@ module.exports = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
+The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped.
 
 ```json
 {
@@ -297,7 +297,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 ### Datasource and credentials only
 
-You can skip the host part, and use just the datasource and credentials.
+You can skip the host part, and use only the datasource and credentials.
 
 `DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
 
@@ -397,7 +397,7 @@ If you must expose all environment variables to package managers, you can set th
     Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
-Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
+Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -539,7 +539,7 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 ## onboardingConfigFileName
 
-If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
+If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
@@ -588,7 +588,7 @@ Default is no limit.
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
+If you want a UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
 To create the key pair with GPG use the following commands:
 
@@ -657,7 +657,9 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 
 <!-- prettier-ignore -->
 !!! note
-    Simple public key encryption was previously used to encrypt secrets, but this approach has been deprecated and is no longer documented.
+    You could use public key encryption with earlier versions of Renovate.
+    We deprecated this approach and removed the documentation for it.
+    If you're _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## privateKeyOld
 
@@ -795,12 +797,6 @@ It could then be used in a repository config or preset like so:
 ```
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
-
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 

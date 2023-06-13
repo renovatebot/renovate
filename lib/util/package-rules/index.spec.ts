@@ -1,6 +1,9 @@
+import { hostRules } from '../../../test/util';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
+import { MISSING_API_CREDENTIALS } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import { OrbDatasource } from '../../modules/datasource/orb';
+import type { HostRule } from '../../types';
 import type { MergeConfidence } from '../merge-confidence/types';
 import { applyPackageRules } from './index';
 
@@ -644,58 +647,95 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
-  it('matches matchConfidence', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchConfidence: ['high'],
-          x: 1,
-        },
-      ],
+  describe('matchConfidence', () => {
+    const hostRule: HostRule = {
+      hostType: 'merge-confidence',
+      token: 'some-token',
     };
-    const dep = {
-      depType: 'dependencies',
-      depName: 'a',
-      mergeConfidenceLevel: 'high' as MergeConfidence,
-    };
-    const res = applyPackageRules({ ...config, ...dep });
-    expect(res.x).toBe(1);
-  });
 
-  it('non-matches matchConfidence', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchConfidence: ['high'],
-          x: 1,
-        },
-      ],
-    };
-    const dep = {
-      depType: 'dependencies',
-      depName: 'a',
-      mergeConfidenceLevel: 'low' as MergeConfidence,
-    };
-    const res = applyPackageRules({ ...config, ...dep });
-    expect(res.x).toBeUndefined();
-  });
+    beforeEach(() => {
+      hostRules.clear();
+      hostRules.add(hostRule);
+    });
 
-  it('does not match matchConfidence when there is no mergeConfidenceLevel', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchConfidence: ['high'],
-          x: 1,
-        },
-      ],
-    };
-    const dep = {
-      depType: 'dependencies',
-      depName: 'a',
-      mergeConfidenceLevel: undefined,
-    };
-    const res = applyPackageRules({ ...config, ...dep });
-    expect(res.x).toBeUndefined();
+    it('matches matchConfidence', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+        mergeConfidenceLevel: 'high' as MergeConfidence,
+      };
+      const res = applyPackageRules({ ...config, ...dep });
+      expect(res.x).toBe(1);
+    });
+
+    it('non-matches matchConfidence', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+        mergeConfidenceLevel: 'low' as MergeConfidence,
+      };
+      const res = applyPackageRules({ ...config, ...dep });
+      expect(res.x).toBeUndefined();
+    });
+
+    it('does not match matchConfidence when there is no mergeConfidenceLevel', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+        mergeConfidenceLevel: undefined,
+      };
+      const res = applyPackageRules({ ...config, ...dep });
+      expect(res.x).toBeUndefined();
+    });
+
+    it('throws when unauthenticated', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      hostRules.clear();
+
+      let error = new Error();
+      try {
+        applyPackageRules(config);
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toStrictEqual(new Error(MISSING_API_CREDENTIALS));
+      expect(error.validationMessage).toBe('Missing credentials');
+      expect(error.validationError).toBe(
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.'
+      );
+    });
   });
 
   it('filters naked depType', () => {
@@ -908,7 +948,7 @@ describe('util/package-rules/index', () => {
       packageFile: 'examples/foo/package.json',
       packageRules: [
         {
-          matchFiles: ['package.json'],
+          matchFileNames: ['package.json'],
           x: 1,
         },
       ],
@@ -932,7 +972,7 @@ describe('util/package-rules/index', () => {
       lockFiles: ['yarn.lock'],
       packageRules: [
         {
-          matchFiles: ['yarn.lock'],
+          matchFileNames: ['yarn.lock'],
           x: 1,
         },
       ],
@@ -946,7 +986,7 @@ describe('util/package-rules/index', () => {
       packageFile: 'examples/foo/package.json',
       packageRules: [
         {
-          matchPaths: ['examples/**', 'lib/'],
+          matchFileNames: ['examples/**', 'lib/'],
           x: 1,
         },
       ],
@@ -967,7 +1007,7 @@ describe('util/package-rules/index', () => {
       ...config,
       depName: 'test',
     });
-    expect(res3.x).toBeDefined();
+    expect(res3.x).toBeUndefined();
   });
 
   it('empty rules', () => {

@@ -101,13 +101,13 @@ export function extractAzurePipelinesTasks(
 
 export function parseAzurePipelines(
   content: string,
-  filename: string
+  packageFile: string
 ): AzurePipelines | null {
   let pkg: AzurePipelines | null = null;
   try {
     pkg = load(content, { json: true }) as AzurePipelines;
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ filename, err }, 'Error parsing azure-pipelines content');
+    logger.debug({ packageFile, err }, 'Error parsing azure-pipelines content');
     return null;
   }
 
@@ -116,12 +116,12 @@ export function parseAzurePipelines(
 
 export function extractPackageFile(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageFileContent | null {
-  logger.trace(`azurePipelines.extractPackageFile(${filename})`);
+  logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
-  const pkg = parseAzurePipelines(content, filename);
+  const pkg = parseAzurePipelines(content, packageFile);
   if (!pkg) {
     return null;
   }

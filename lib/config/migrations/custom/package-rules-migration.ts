@@ -3,7 +3,9 @@ import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export const renameMap = {
-  paths: 'matchPaths',
+  matchFiles: 'matchFileNames',
+  matchPaths: 'matchFileNames',
+  paths: 'matchFileNames',
   languages: 'matchLanguages',
   baseBranchList: 'matchBaseBranches',
   managers: 'matchManagers',
