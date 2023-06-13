@@ -65,7 +65,7 @@ runs:
       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ env.CACHE_HIT == 'true' && '' || 'yarn' }}
+        cache: ${{ env.CACHE_HIT != 'true' && 'yarn' || '' }}
 
     - name: Install dependencies
       uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
