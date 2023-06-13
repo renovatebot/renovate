@@ -1,6 +1,5 @@
 import os from 'node:os';
 import v8 from 'node:v8';
-import { minimatch } from 'minimatch';
 import type { InitialOptionsTsJest } from 'ts-jest';
 
 const ci = !!process.env.CI;
