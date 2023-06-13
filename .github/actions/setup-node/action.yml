@@ -29,13 +29,7 @@ runs:
           node_modules
           lib/data-files.generated.ts
           lib/modules/manager/fingerprint.generated.ts
-        key: modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock', 'data/**') }}
-
-    - name: Ensure folders for `*.generated.ts`
-      if: steps.node-modules-cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        mkdir -p lib/modules/manager
+        key: modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
 
     - name: Setup Node
       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
@@ -49,4 +43,11 @@ runs:
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: yarn install --frozen-lockfile
+        command: |
+          yarn install --frozen-lockfile --ignore-scripts
+          yarn prepare:install-re2
+          prepare:re2
+
+    - name: Generate files
+      shell: bash
+      run: test -d lib && yarn prepare:generate

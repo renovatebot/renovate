@@ -26,7 +26,7 @@ runs:
     - name: Calculate cache keys
       id: cache-keys
       env:
-        HASH: ${{ hashFiles('yarn.lock', 'data/**') }}
+        HASH: ${{ hashFiles('yarn.lock') }}
       shell: bash
       run: |
         echo 'macos-cache-key=modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
