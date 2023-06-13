@@ -252,7 +252,6 @@ jobs:
         format('test-{0} ({1}, node-{2})', matrix.test-shard, matrix.os, matrix.node-version)
       }}
     runs-on: ${{ matrix.os }}
-
     timeout-minutes: 10
 
     strategy:
