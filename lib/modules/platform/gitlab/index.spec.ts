@@ -1770,7 +1770,7 @@ describe('modules/platform/gitlab/index', () => {
       });
     });
 
-    it('will modify rules of type regular, if such rules exist', async () => {
+    it('will remove rules of type regular, if such rules exist', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
@@ -1797,11 +1797,6 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [
           {
-            name: 'AnyApproverRule',
-            rule_type: 'any_approver',
-            id: 50005,
-          },
-          {
             name: 'RegularApproverRule',
             rule_type: 'regular',
             id: 50006,
@@ -1812,17 +1807,15 @@ describe('modules/platform/gitlab/index', () => {
             id: 50007,
           },
         ])
-        .put(
-          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005'
-        )
-        .reply(200)
-        .put(
+        .delete(
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50006'
         )
         .reply(200)
-        .put(
+        .delete(
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50007'
         )
+        .reply(200)
+        .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
       expect(
         await gitlab.createPr({

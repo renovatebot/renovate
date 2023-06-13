@@ -538,20 +538,28 @@ async function ignoreApprovals(pr: number): Promise<void> {
       }[]
     >(url);
 
+    const ruleName = 'renovateIgnoreApprovals';
+
     const existingAnyApproverRule = rules?.find(
       ({ rule_type }) => rule_type === 'any_approver'
     );
+    const existingRegularApproverRules = rules?.filter(
+      ({ rule_type, name }) => rule_type !== 'any_approver' && name !== ruleName
+    );
+
+    await Promise.all(
+      existingRegularApproverRules?.map(async (rule) => {
+        await gitlabApi.deleteJson(`${url}/${rule.id}`);
+      })
+    );
 
     if (existingAnyApproverRule) {
-      for (const rule of rules) {
-        await gitlabApi.putJson(`${url}/${rule.id}`, {
-          body: { ...existingAnyApproverRule, approvals_required: 0 },
-        });
-      }
+      await gitlabApi.putJson(`${url}/${existingAnyApproverRule.id}`, {
+        body: { ...existingAnyApproverRule, approvals_required: 0 },
+      });
       return;
     }
 
-    const ruleName = 'renovateIgnoreApprovals';
     const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
     if (!zeroApproversRule) {
       await gitlabApi.postJson(url, {
