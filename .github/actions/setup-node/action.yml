@@ -50,4 +50,4 @@ runs:
 
     - name: Generate files
       shell: bash
-      run: test -d lib && yarn prepare:generate
+      run: test -d lib && yarn prepare:generate || exit 0
