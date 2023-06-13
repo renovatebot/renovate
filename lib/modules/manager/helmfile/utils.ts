@@ -39,7 +39,7 @@ export function parseDoc(packageFileContent: string): Doc {
 
 export function getRepositories(doc: Doc): Repository[] {
   if (is.nullOrUndefined(doc.repositories)) {
-    return [] as Repository[];
+    return [];
   }
 
   return doc.repositories;
