@@ -459,7 +459,10 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
       shardGroups.push({
         os: os as RunsOn,
         coverage,
-        name: `test-${platform} (${number}/${total})`,
+        name:
+          platform === 'ubuntu'
+            ? `test (${number}/${total})`
+            : `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
         'cache-key': cacheKey,
         'runner-timeout-minutes':
