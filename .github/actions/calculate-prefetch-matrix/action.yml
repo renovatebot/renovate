@@ -47,6 +47,7 @@ runs:
         path: node_modules
         key: ${{ env.WINDOWS_KEY }}
         lookup-only: true
+        enableCrossOsArchive: true
 
     - name: Dispatch `node_modules` prefetch for MacOS and Windows
       id: os-matrix-prefetch
