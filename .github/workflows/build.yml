@@ -128,39 +128,6 @@ jobs:
           COMMIT_FILES: ${{ steps.commit-files.outputs.commit-files || '[]' }}
         run: yarn -s test-shards >> "$GITHUB_OUTPUT"
 
-  prefetch:
-    needs: [setup]
-    # We can't use `if: needs.setup.outputs.os-matrix-is-full` here,
-    # as it will lead to further complications that aren't solvable
-    # with current GitHub Actions feature set.
-    #
-    # Although this job sometimes may act as short-lived `no-op`,
-    # it's actually the best option available.
-
-    strategy:
-      matrix:
-        os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
-        node-version: [18]
-
-    runs-on: ${{ matrix.os }}
-
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout code
-        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
-
-      - name: Setup Node.js
-        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          os: ${{ runner.os }}
-          update-cache: true
-
   lint-eslint:
     needs: [setup]
     runs-on: ubuntu-latest
@@ -238,6 +205,39 @@ jobs:
 
       - name: Test schema
         run: yarn test-schema
+
+  prefetch:
+    needs: [setup]
+    # We can't use `if: needs.setup.outputs.os-matrix-is-full` here,
+    # as it will lead to further complications that aren't solvable
+    # with current GitHub Actions feature set.
+    #
+    # Although this job sometimes may act as short-lived `no-op`,
+    # it's actually the best option available.
+
+    strategy:
+      matrix:
+        os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
+        node-version: [18]
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+
+      - name: Setup Node.js
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+          update-cache: true
 
   test:
     needs: [setup, prefetch]
