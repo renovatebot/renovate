@@ -1026,7 +1026,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [partial<ArtifactError>()],
         updatedArtifacts: [partial<FileChange>()],
       });
-      config.recreateClosed = true;
+      config.recreateWhen = 'always';
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
