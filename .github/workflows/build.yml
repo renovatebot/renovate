@@ -312,7 +312,7 @@ jobs:
           path: ./coverage-reports/*.json
 
   codecov:
-    needs: test
+    needs: [setup, test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: success() || failure()
