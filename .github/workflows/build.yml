@@ -246,7 +246,11 @@ jobs:
   test:
     needs: [setup, prefetch]
 
-    name: ${{ format('test ({0}, {1})', matrix.test-shard, matrix.os) }}
+    name: >-
+      ${{
+        matrix.node-version == 18 && format('test-{0} ({1})', matrix.test-shard, matrix.os) ||
+        format('test-{0} ({1}, node-{2})', matrix.test-shard, matrix.os, matrix.node-version)
+      }}
     runs-on: ${{ matrix.os }}
 
     timeout-minutes: 10
@@ -254,8 +258,8 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
-        test-shard: ${{ fromJSON(needs.setup.outputs.test-shards-all) }}
         node-version: [18]
+        test-shard: ${{ fromJSON(needs.setup.outputs.test-shards-all) }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
