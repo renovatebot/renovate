@@ -40,7 +40,7 @@ jobs:
 
     outputs:
       os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
-      os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
+      os-matrix-is-full && '15' || '5' ${{ steps.os-matrix-is-full && .'15' || '5'.os-matrix-is-full &&  '15' || '5'
       os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
       test-shard-matrix: ${{ steps.schedule-test-shards.outputs.test-shard-matrix }}
       commit-sha: ${{ steps.commit-sha.outputs.commit-sha }}
@@ -69,13 +69,13 @@ jobs:
             contains(fromJSON(env.PR_LABELS), 'ci:fulltest') && 'true' || ''
           }}' >> "$GITHUB_ENV"
 
-      - name: Calculate `os-matrix-is-full` output
-        id: os-matrix-is-full
-        env:
+      - name: Calculate `os-matrix-is-full && '15' || '5' output
+        id: os-matrix-is-full &&
+        '15' || '5':
           IS_FULL: ${{ (!env.PR || env.CI_FULLTEST) && 'true' || '' }}
         run: |
           echo 'OS_MATRIX_IS_FULL=${{ env.IS_FULL }}' >> "$GITHUB_ENV"
-          echo 'os-matrix-is-full=${{ env.IS_FULL }}' >> "$GITHUB_OUTPUT"
+          echo 'os-matrix-is-full && '15' || '5' env.IS_FULL }}' >> "$GITHUB_OUTPUT"
 
       - name: Calculate `os-matrix` output
         id: os-matrix
@@ -130,7 +130,7 @@ jobs:
 
   prefetch:
     needs: [setup]
-    # We can't use `if: needs.setup.outputs.os-matrix-is-full` here,
+    # We can't use `if: needs.setup.outputs.os-matrix-is-full && '15' || '5' here,
     # as it will lead to further complications that aren't solvable
     # with current GitHub Actions feature set.
     #
@@ -148,13 +148,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        if: needs.setup.outputs.os-matrix-is-full &&  '15' || '5' runner.os != 'Linux'
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
-        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        if: needs.setup.outputs.os-matrix-is-full &&  '15' || '5' runner.os != 'Linux'
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -244,7 +244,7 @@ jobs:
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: ${{ needs.setup.outputs.os-matrix-is-full && '15' || '5' }}
 
     strategy:
       matrix:
