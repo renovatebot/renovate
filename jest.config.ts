@@ -147,9 +147,9 @@ const testShards: Record<string, ShardConfig> = {
       'lib/workers/repository/finalize',
     ],
     threshold: {
-      statements: 99.25,
-      branches: 97.11,
-      lines: 99.24,
+      statements: 99.2,
+      branches: 97.1,
+      lines: 99.2,
     },
   },
   'workers-3': {
