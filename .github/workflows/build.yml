@@ -246,11 +246,10 @@ jobs:
   test:
     needs: [setup, prefetch]
 
-    name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
+    name: ${{ format('test ({0}, {1})', matrix.test-shard, matrix.os) }}
     runs-on: ${{ matrix.os }}
 
-    # tests shouldn't need more time
-    timeout-minutes: 45
+    timeout-minutes: 10
 
     strategy:
       matrix:
@@ -264,8 +263,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-        with:
-          fetch-depth: 2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -280,15 +277,12 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
-          git --version
-          echo "Node $(node --version)"
-          echo "Yarn $(yarn --version)"
 
       - name: Cache jest
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/jest
-          key: jest-cache-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+          key: jest-cache-${{ matrix.test-shard }}-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
 
       - name: Unit tests
         env:
