@@ -392,7 +392,12 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
       const md5 = crypto.createHash('md5');
       const cacheKey = md5.update(shards.join(':')).digest('hex');
 
-      const timeout = platform === 'ubuntu' ? 5 : 12;
+      const timeout =
+        {
+          ubuntu: 5,
+          windows: 10,
+          macos: 15,
+        }[platform] ?? 20;
 
       shardGroups.push({
         os: os as RunsOn,
