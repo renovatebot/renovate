@@ -398,7 +398,8 @@ jobs:
         run: yarn -s test-e2e:run
 
   release:
-    needs: [lint-eslint, lint-prettier, lint-other, test-e2e, test-success, codecov]
+    needs:
+      [lint-eslint, lint-prettier, lint-other, test-e2e, test-success, codecov]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
