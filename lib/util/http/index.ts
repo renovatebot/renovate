@@ -308,7 +308,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ): JsonArgs<Opts, ResT> {
     const res: JsonArgs<Opts, ResT> = { url: arg1 };
 
-    if (arg2 instanceof ZodType<ResT>) {
+    if (arg2 instanceof ZodType) {
       res.schema = arg2;
     } else if (arg2) {
       res.httpOptions = arg2;
