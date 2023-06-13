@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import type { GetPkgReleasesConfig } from './types';
 import type { HttpResponse } from '../../util/http/types';
+import type { GetPkgReleasesConfig } from './types';
 
 export function isGetPkgReleasesConfig(
   input: unknown

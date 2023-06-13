@@ -1,11 +1,13 @@
+import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
-import { Datasource } from '../datasource';
+import * as allVersioning from '../../versioning';
 import { isArtifactoryServer } from '../common';
+import { Datasource } from '../datasource';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -25,8 +27,6 @@ import type {
   ConanRevisionsJSON,
   ConanYAML
 } from './types';
-
-import * as allVersioning from '../../versioning';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -126,6 +126,7 @@ export class ConanDatasource extends Datasource {
       { packageName, registryUrl },
       'Looking up conan api dependency'
     );
+
     if (registryUrl) {
       const url = ensureTrailingSlash(registryUrl);
       const lookupUrl = joinUrlParts(
@@ -153,7 +154,7 @@ export class ConanDatasource extends Datasource {
           }
 
           if (isArtifactoryServer(rep)) {
-            const conanApiRegexp = /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^\/]+)/
+            const conanApiRegexp = /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^/]+)/
             const groups = url.match(conanApiRegexp)?.groups
             if (!groups) {
               return dep

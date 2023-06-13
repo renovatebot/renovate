@@ -11,6 +11,7 @@ const pocoRevisions = Fixtures.getJson('poco_revisions.json');
 const pocoYamlGitHubContent = Fixtures.get('poco.yaml');
 const malformedJson = Fixtures.get('malformed.json');
 const fakeJson = Fixtures.get('fake.json');
+const artifactoryJson = Fixtures.get('artifactory.json');
 const datasource = ConanDatasource.id;
 
 const nonDefaultRegistryUrl = 'https://not.conan.io/';
@@ -253,6 +254,72 @@ describe('modules/datasource/conan/index', () => {
           packageName: 'poco/1.2@_/_',
         })
       ).toBeNull();
+    });
+
+    it('artifactory sourceurl', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/search?q=arti')
+        .reply(200, artifactoryJson, { 'x-jfrog-version': 'latest' });
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/arti/1.1.1/_/_/latest')
+        .reply(200, {
+          "revision" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "time" : "2032-06-23T00:00:00.000+0000"
+        });
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/storage/test-repo/')
+        .get('/_/arti/1.1.1/_/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/export/conanfile.py?properties=conan.package.url')
+        .reply(200, {
+          "properties" : {
+            "conan.package.url" : "https://fake.conan.url.com",
+          }
+        });
+
+      config.registryUrls = ['https://fake.artifactory.com/artifactory/api/conan/test-repo'];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl: "https://fake.artifactory.com/artifactory/api/conan/test-repo",
+        releases: [
+          {
+            version: "1.0.0"
+          },
+          {
+            version: "1.1.1"
+          }
+        ]
+      });
+    });
+
+    it('artifactory header without api', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com')
+        .get('/v2/conans/search?q=arti')
+        .reply(200, artifactoryJson, { 'x-jfrog-version': 'latest' });
+      config.registryUrls = ['https://fake.artifactory.com'];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl: "https://fake.artifactory.com",
+        releases: [
+          {
+            version: "1.0.0"
+          },
+          {
+            version: "1.1.1"
+          }
+        ]
+      });
     });
   });
 });
