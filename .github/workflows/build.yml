@@ -255,8 +255,8 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.os-matrix) }}
+        test-shard: ${{ fromJSON(needs.setup.outputs.test-shards-all) }}
         node-version: [18]
-        test-shard: ${{ fromJSON(needs.test-shards.outputs.test-shards-all) }}
 
     env:
       coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
