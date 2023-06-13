@@ -274,7 +274,16 @@ jobs:
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/jest
-          key: jest-cache-${{ matrix.test-shard }}-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+          key: |
+            jest-cache-${{
+              runner.os
+            }}-${{
+              env.NODE_VERSION
+            }}-${{
+              hashFiles('yarn.lock')
+            }}-${{
+              matrix.cache-key
+            }}
 
       - name: Unit tests
         shell: bash

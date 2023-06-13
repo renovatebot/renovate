@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import os from 'node:os';
 import v8 from 'node:v8';
 import type { InitialOptionsTsJest } from 'ts-jest';
@@ -134,7 +135,10 @@ const testShards: Record<string, ShardConfig> = {
     },
   },
   'workers-1': {
-    matchPaths: ['lib/workers/repository/{onboarding,process}'],
+    matchPaths: [
+      'lib/workers/repository/onboarding',
+      'lib/workers/repository/process',
+    ],
   },
   'workers-2': {
     matchPaths: ['lib/workers/repository/update/pr'],
@@ -353,6 +357,7 @@ interface ShardGroup {
   os: RunsOn;
   name: string;
   shards: string;
+  'cache-key': string;
 }
 
 function partitionBy<T>(input: T[], size: number): T[][] {
@@ -383,10 +388,13 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
       const number = idx + 1;
       const platform = os.replace(/-latest$/, '');
       const shards = groups[idx];
+      const md5 = crypto.createHash('md5');
+      const cacheKey = md5.update(shards.join(':')).digest('hex');
       shardGroups.push({
         os: os as RunsOn,
         name: `test-${platform} (${number}/${total})`,
         shards: shards.join(' '),
+        'cache-key': cacheKey,
       });
     }
   }
