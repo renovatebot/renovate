@@ -353,7 +353,7 @@ type RunsOn = 'ubuntu-latest' | 'windows-latest' | 'macos-latest';
 interface ShardGroup {
   os: RunsOn;
   name: string;
-  shards: string[];
+  shards: string;
 }
 
 function partitionBy<T>(input: T[], size: number): T[][] {
@@ -383,10 +383,11 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
     for (let idx = 0; idx < groups.length; idx += 1) {
       const number = idx + 1;
       const platform = os.replace(/-latest$/, '');
+      const shards = groups[idx];
       shardGroups.push({
         os: os as RunsOn,
         name: `test-${platform} (${number}/${total})`,
-        shards: groups[idx],
+        shards: shards.join(' '),
       });
     }
   }
