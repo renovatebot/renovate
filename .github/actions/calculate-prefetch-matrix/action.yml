@@ -29,8 +29,8 @@ runs:
         HASH: ${{ hashFiles('yarn.lock') }}
       shell: bash
       run: |
-        echo 'macos-cache-key=modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
-        echo 'windows-cache-key=modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
+        echo 'macos-cache-key=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
+        echo 'windows-cache-key=node_modules-Windows-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_OUTPUT"
 
     - name: Fetch available cache keys
       id: caches-list
