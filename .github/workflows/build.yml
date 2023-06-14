@@ -126,12 +126,18 @@ jobs:
 
   prefetch:
     needs: [setup]
-    # We can't use `if: needs.setup.outputs.os-matrix-is-full` here,
+
+    # We can't check `needs.setup.outputs.os-matrix-is-full` here,
     # as it will lead to further complications that aren't solvable
     # with current GitHub Actions feature set.
     #
     # Although this job sometimes may act as short-lived `no-op`,
     # it's actually the best option available.
+    #
+    # However, in draft mode we can skip this step.
+    if: |
+      github.event.pull_request.draft == true &&
+      needs.setup.outputs.test-matrix-empty == 'true'
 
     strategy:
       matrix:
@@ -403,8 +409,7 @@ jobs:
         run: yarn -s test-e2e:run
 
   release:
-    needs:
-      [lint-eslint, lint-prettier, lint-other, test-e2e, passing, codecov]
+    needs: [lint-eslint, lint-prettier, lint-other, test-e2e, passing, codecov]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
