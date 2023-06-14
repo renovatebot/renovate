@@ -7,8 +7,8 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = partial<RenovateConfig>();
       jest.resetAllMocks();
+      config = partial<RenovateConfig>();
     });
 
     it('returns empty if no baseBranch', () => {
