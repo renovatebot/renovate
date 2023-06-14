@@ -119,7 +119,7 @@ jobs:
         id: schedule-test-shards
         env:
           ALL_PLATFORMS: ${{ env.OS_MATRIX_IS_FULL }}
-          FILTER_SHARDS: ${{ event.pull_request.draft && 'true' || '' }}
+          FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
           echo "$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
