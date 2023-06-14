@@ -11,7 +11,6 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-      - converted_to_draft
 
   merge_group:
 
@@ -333,10 +332,6 @@ jobs:
           name: coverage-reports
           path: ./coverage-reports
 
-      - run: ls -la .
-      - run: ls -la coverage-reports
-      - run: echo '${{ needs.setup.outputs.test-coverage-files }}'
-
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
@@ -349,9 +344,6 @@ jobs:
     timeout-minutes: 1
     if: always()
     steps:
-      - run: echo '${{ github.event.pull_request.draft }}'
-      - run: echo '${{ needs.setup.outputs.test-matrix-empty }}'
-      - run: echo '${{ toJSON(needs.test) }}'
       - if: |
           needs.test.result == 'failure' ||
           needs.test.result == 'cancelled' ||
