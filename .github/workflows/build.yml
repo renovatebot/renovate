@@ -240,7 +240,6 @@ jobs:
 
     if: needs.setup.outputs.test-matrix-empty != 'true'
 
-    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
