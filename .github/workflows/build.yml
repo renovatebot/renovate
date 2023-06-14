@@ -423,7 +423,7 @@ jobs:
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
-          fetch-depth: 0 # zero stands for full checkout, needed by semantic-release
+          fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
