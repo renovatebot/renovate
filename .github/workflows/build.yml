@@ -248,6 +248,8 @@ jobs:
       !(github.event.pull_request.draft == true &&
         needs.setup.outputs.test-matrix-empty == 'true')
 
+    name: ${{ matrix.name }}
+
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
@@ -341,7 +343,7 @@ jobs:
           files: '${{ needs.setup.outputs.test-coverage-files }}'
 
   # This allows not to specify particular jobs in matrix as required
-  passing:
+  test-success:
     needs: [setup, test]
     runs-on: ubuntu-latest
     timeout-minutes: 1
@@ -414,7 +416,7 @@ jobs:
         run: yarn -s test-e2e:run
 
   release:
-    needs: [lint-eslint, lint-prettier, lint-other, test-e2e, passing, codecov]
+    needs: [lint-eslint, lint-prettier, lint-other, test-e2e, test-success, codecov]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
