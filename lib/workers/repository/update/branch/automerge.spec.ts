@@ -1,10 +1,4 @@
-import {
-  getConfig,
-  git,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { git, partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';
@@ -16,10 +10,9 @@ jest.mock('../../../../util/git');
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
     const isScheduledSpy = jest.spyOn(schedule, 'isScheduledNow');
-    let config: RenovateConfig;
+    let config = partial<RenovateConfig>();
 
     beforeEach(() => {
-      config = getConfig();
       GlobalConfig.reset();
     });
 

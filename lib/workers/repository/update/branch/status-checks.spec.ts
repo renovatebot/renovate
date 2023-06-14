@@ -1,4 +1,4 @@
-import { getConfig, platform } from '../../../../../test/util';
+import { partial, platform } from '../../../../../test/util';
 import {
   ConfidenceConfig,
   StabilityConfig,
@@ -9,11 +9,10 @@ import {
 
 describe('workers/repository/update/branch/status-checks', () => {
   describe('setStability', () => {
-    let config: StabilityConfig;
+    let config = partial<StabilityConfig>();
 
     beforeEach(() => {
       config = {
-        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
     });
