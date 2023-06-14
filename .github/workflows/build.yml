@@ -345,6 +345,8 @@ jobs:
     timeout-minutes: 1
     if: always()
     steps:
+      - run: echo '${{ github.event.pull_request.draft }}'
+      - run: echo '${{ needs.setup.outputs.test-matrix-empty }}'
       - run: echo '${{ toJSON(needs.test) }}'
       - if: |
           needs.test.result == 'failure' ||
