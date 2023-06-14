@@ -923,7 +923,12 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Set this to `false` if you want to disable release notes fetching.
+Use this config option to configure release notes fetching.
+The available options are:
+
+- `off` - disable release notes fetching
+- `branch` - fetche release notes while creating/updating branch
+- `pr`(default) - fecthes release notes while creating/updating pull-request
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 

@@ -54,6 +54,7 @@ import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
+import { FetchReleaseNotes } from './custom/fetch-release-notes-migration';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
@@ -146,6 +147,7 @@ export class MigrationsService {
     MatchDatasourcesMigration,
     DatasourceMigration,
     StabilityDaysMigration,
+    FetchReleaseNotes,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

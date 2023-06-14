@@ -124,7 +124,7 @@ describe('workers/repository/updates/branchify', () => {
     });
 
     it('no fetch changelogs', async () => {
-      config.fetchReleaseNotes = false;
+      config.fetchReleaseNotes = 'off';
       flattenUpdates.mockResolvedValueOnce([
         {
           depName: 'foo',
@@ -155,7 +155,7 @@ describe('workers/repository/updates/branchify', () => {
     });
 
     it('fetch changelogs if required', async () => {
-      config.fetchReleaseNotes = true;
+      config.fetchReleaseNotes = 'pr';
       config.repoIsOnboarded = true;
       mockedFunction(_changelog.needsChangelogs).mockReturnValueOnce(true);
       flattenUpdates.mockResolvedValueOnce([
