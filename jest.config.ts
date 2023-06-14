@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import os from 'node:os';
 import v8 from 'node:v8';
 import { minimatch } from 'minimatch';
@@ -135,26 +136,41 @@ const testShards: Record<string, ShardConfig> = {
     },
   },
   'workers-1': {
-    matchPaths: ['lib/workers/repository/{onboarding,process}'],
+    matchPaths: [
+      'lib/workers/repository/changelog',
+      'lib/workers/repository/config-migration',
+      'lib/workers/repository/extract',
+      'lib/workers/repository/finalize',
+      'lib/workers/repository/init',
+      'lib/workers/repository/model',
+    ],
+    threshold: {
+      statements: 98.99,
+      branches: 94.0,
+      lines: 98.98,
+    },
   },
   'workers-2': {
-    matchPaths: ['lib/workers/repository/update/pr'],
+    matchPaths: [
+      'lib/workers/repository/onboarding',
+      'lib/workers/repository/process',
+    ],
     threshold: {
-      branches: 97.1,
+      branches: 98.73,
     },
   },
   'workers-3': {
-    matchPaths: ['lib/workers/repository/update'],
-    threshold: {
-      branches: 97.75,
-    },
+    matchPaths: [
+      'lib/workers/repository/update',
+      'lib/workers/repository/updates',
+    ],
   },
   'workers-4': {
     matchPaths: ['lib/workers'],
     threshold: {
-      statements: 99.95,
-      branches: 97.2,
-      lines: 99.95,
+      statements: 99.9,
+      branches: 98.27,
+      lines: 99.9,
     },
   },
   'git-1': {
@@ -184,7 +200,13 @@ const testShards: Record<string, ShardConfig> = {
     },
   },
   other: {
-    matchPaths: ['lib'],
+    matchPaths: ['lib', 'test'],
+    threshold: {
+      statements: 91.9,
+      branches: 90.8,
+      functions: 83.3,
+      lines: 92.0,
+    },
   },
 };
 
@@ -193,7 +215,10 @@ const testShards: Record<string, ShardConfig> = {
  */
 type JestShardedSubconfig = Pick<
   JestConfig,
-  'testMatch' | 'collectCoverageFrom' | 'coverageThreshold'
+  | 'testMatch'
+  | 'collectCoverageFrom'
+  | 'coverageThreshold'
+  | 'coverageDirectory'
 >;
 
 /**
@@ -287,34 +312,14 @@ function configureShardingOrFallbackTo(
 
   testMatch.reverse();
   collectCoverageFrom.reverse();
-  return { testMatch, collectCoverageFrom, coverageThreshold };
-}
 
-/**
- * Given the file list affected by commit, return the list
- * of shards that  test these changes.
- */
-function getMatchingShards(files: string[]): string[] {
-  const matchingShards = new Set<string>();
-  for (const file of files) {
-    for (const [key, { matchPaths }] of Object.entries(testShards)) {
-      const patterns = matchPaths.map((path) =>
-        path.endsWith('.spec.ts')
-          ? path.replace(/\.spec\.ts$/, '{.ts,.spec.ts}')
-          : `${path}/**/*`
-      );
-
-      if (patterns.some((pattern) => minimatch(file, pattern))) {
-        matchingShards.add(key);
-        break;
-      }
-    }
-  }
-
-  const allShards = Object.keys(testShards);
-  return matchingShards.size > 0
-    ? allShards.filter((shard) => matchingShards.has(shard))
-    : allShards;
+  const coverageDirectory = `./coverage/shard/${shardKey}`;
+  return {
+    testMatch,
+    collectCoverageFrom,
+    coverageThreshold,
+    coverageDirectory,
+  };
 }
 
 const config: JestConfig = {
@@ -333,14 +338,12 @@ const config: JestConfig = {
         statements: 100,
       },
     },
+    coverageDirectory: './coverage',
   }),
   cacheDirectory: '.cache/jest',
   clearMocks: true,
   collectCoverage: true,
-  coverageDirectory: './coverage',
-  coverageReporters: ci
-    ? ['html', 'json', 'text-summary']
-    : ['html', 'text-summary'],
+  coverageReporters: ci ? ['json', 'text-summary'] : ['html', 'text-summary'],
   transform: {
     '\\.ts$': [
       'ts-jest',
@@ -375,31 +378,206 @@ const config: JestConfig = {
 
 export default config;
 
+type RunsOn = 'ubuntu-latest' | 'windows-latest' | 'macos-latest';
+
+interface ShardGroup {
+  /**
+   * Input for `runs-on` field.
+   */
+  os: RunsOn;
+
+  /**
+   * Controls whether coverage is collected for this shard group.
+   */
+  coverage: boolean;
+
+  /**
+   * Input for `name` field.
+   */
+  name: string;
+
+  /**
+   * Space-separated list of shard keys, it's
+   * meant to be inserted into bash for-loop.
+   */
+  shards: string;
+
+  /**
+   * It's meant to be used for Jest caching.
+   */
+  'cache-key': string;
+
+  /**
+   * It's used to set test runner timeout.
+   */
+  'runner-timeout-minutes': number;
+
+  /**
+   * It's used to set `--test-timeout` Jest CLI flag.
+   */
+  'test-timeout-milliseconds': number;
+}
+
 /**
- * If `COMMIT_FILES` env variable is set, it means we're in `setup` CI job.
+ * Given the file list affected by commit, return the list
+ * of shards that  test these changes.
+ */
+function getMatchingShards(files: string[]): string[] {
+  const matchingShards = new Set<string>();
+  for (const file of files) {
+    for (const [key, { matchPaths }] of Object.entries(testShards)) {
+      const patterns = matchPaths.map((path) =>
+        path.endsWith('.spec.ts')
+          ? path.replace(/\.spec\.ts$/, '{.ts,.spec.ts}')
+          : `${path}/**/*`
+      );
+
+      if (patterns.some((pattern) => minimatch(file, pattern))) {
+        matchingShards.add(key);
+        break;
+      }
+    }
+  }
+
+  return Object.keys(testShards).filter((shard) => matchingShards.has(shard));
+}
+
+/**
+ * Distribute items evenly across runner instances.
+ */
+function scheduleItems<T>(items: T[], availableInstances: number): T[][] {
+  const numInstances = Math.min(items.length, availableInstances);
+  const maxPerInstance = Math.ceil(items.length / numInstances);
+  const lighterInstancesIdx =
+    items.length % numInstances === 0
+      ? numInstances
+      : items.length % numInstances;
+
+  const partitionSizes = Array.from({ length: numInstances }, (_, idx) =>
+    idx < lighterInstancesIdx ? maxPerInstance : maxPerInstance - 1
+  );
+
+  const result: T[][] = Array.from({ length: numInstances }, () => []);
+  let rest = items.slice();
+  for (let idx = 0; idx < numInstances; idx += 1) {
+    const partitionSize = partitionSizes[idx];
+    const partition = rest.slice(0, partitionSize);
+    result[idx] = partition;
+    rest = rest.slice(partitionSize);
+  }
+
+  return result;
+}
+
+/**
+ * If `SCHEDULE_TEST_SHARDS` env variable is set, it means we're in `setup` CI job.
  * We don't want to see anything except key-value pairs in the output.
  * Otherwise, we're printing useful stats.
  */
-if (process.env.COMMIT_FILES) {
-  try {
-    const commitFiles = JSON.parse(process.env.COMMIT_FILES);
+if (process.env.SCHEDULE_TEST_SHARDS) {
+  let shardKeys = Object.keys(testShards);
 
-    const matchingShards = getMatchingShards(commitFiles);
-    // eslint-disable-next-line no-console
-    console.log(`test-shards=${JSON.stringify(matchingShards)}`);
-
-    const allShards = Object.keys(testShards);
-    // eslint-disable-next-line no-console
-    console.log(`test-shards-all=${JSON.stringify(allShards)}`);
-  } catch (err) {
-    throw new Error(
-      `Invalid COMMIT_FILES value: "${process.env.COMMIT_FILES}"`
-    );
+  if (process.env.FILTER_SHARDS === 'true' && process.env.CHANGED_FILES) {
+    try {
+      const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES);
+      const matchingShards = getMatchingShards(changedFiles);
+      if (matchingShards.length === 0) {
+        // eslint-disable-next-line no-console
+        console.log(`test-matrix-empty=true`);
+        process.exit(0);
+      }
+      shardKeys = shardKeys.filter((key) => matchingShards.includes(key));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      process.exit(1);
+    }
   }
-} else {
-  process.stderr.write(`Host stats:
+
+  /**
+   * Not all runners are created equal.
+   * Minutes cost proportion is 1:2:10 for Ubuntu:Windows:MacOS.
+   *
+   * Although it's free in our case,
+   * we can't run as many Windows and MacOS runners as we want.
+   *
+   * Because of this, we partition shards into groups, given that:
+   * - There are 16 shards in total
+   * - We can't run more than 10 Windows runners
+   * - We can't run more than 5 MacOS runners
+   */
+  const shardGrouping: Record<string, string[][]> = {
+    'ubuntu-latest': scheduleItems(shardKeys, 16),
+  };
+
+  if (process.env.ALL_PLATFORMS === 'true') {
+    shardGrouping['windows-latest'] = scheduleItems(shardKeys, 8);
+    shardGrouping['macos-latest'] = scheduleItems(shardKeys, 4);
+  }
+
+  const shardGroups: ShardGroup[] = [];
+  for (const [os, groups] of Object.entries(shardGrouping)) {
+    const coverage = os === 'ubuntu-latest';
+
+    const total = groups.length;
+    for (let idx = 0; idx < groups.length; idx += 1) {
+      const number = idx + 1;
+      const platform = os.replace(/-latest$/, '');
+      const name =
+        platform === 'ubuntu'
+          ? `test (${number}/${total})`
+          : `test-${platform} (${number}/${total})`;
+
+      const shards = groups[idx];
+      const cacheKey = crypto
+        .createHash('md5')
+        .update(shards.join(':'))
+        .digest('hex');
+
+      const runnerTimeoutMinutes =
+        {
+          ubuntu: 10,
+          windows: 20,
+          macos: 20,
+        }[platform] ?? 20;
+
+      const testTimeoutMilliseconds =
+        {
+          windows: 240000,
+        }[platform] ?? 120000;
+
+      shardGroups.push({
+        os: os as RunsOn,
+        coverage,
+        name,
+        shards: shards.join(' '),
+        'cache-key': cacheKey,
+        'runner-timeout-minutes': runnerTimeoutMinutes,
+        'test-timeout-milliseconds': testTimeoutMilliseconds,
+      });
+    }
+  }
+
+  /**
+   * Output will be consumed by `setup` CI job.
+   */
+  // eslint-disable-next-line no-console
+  console.log(`test-shard-matrix=${JSON.stringify(shardGroups)}`);
+
+  /**
+   * Output will be consumed by `codecov` GitHub Action.
+   */
+  const testCoverageFiels = shardKeys
+    .map((shard) => `./coverage-reports/${shard}.json`)
+    .join(',');
+  // eslint-disable-next-line no-console
+  console.log(`test-coverage-files=${testCoverageFiels}`);
+
+  process.exit(0);
+}
+
+process.stderr.write(`Host stats:
     Cpus:      ${cpus.length}
     Memory:    ${(mem / 1024 / 1024 / 1024).toFixed(2)} GB
     HeapLimit: ${(stats.heap_size_limit / 1024 / 1024 / 1024).toFixed(2)} GB
   `);
-}
