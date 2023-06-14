@@ -551,7 +551,7 @@ export async function processBranch(
       if (config.commitBody) {
         if (
           // only fetch if fetchReleaseNotes=pr as we would have already
-          // fetched notes before the postUpgradeTasks if fetchReleaseNotes=branch
+          // fetched the notes before executing the postUpgradeTasks if fetchReleaseNotes=branch
           config.fetchReleaseNotes === 'pr' &&
           needsChangelogs(config, ['commitBody'])
         ) {
