@@ -20,13 +20,13 @@ describe('workers/repository/update/branch/check-existing', () => {
     });
 
     it('returns false if recreating closed PRs', async () => {
-      config.recreateClosed = true;
+      config.recreateWhen = 'always';
       expect(await prAlreadyExisted(config)).toBeNull();
       expect(platform.findPr).toHaveBeenCalledTimes(0);
     });
 
     it('returns false if check misses', async () => {
-      config.recreatedClosed = true;
+      config.recreateWhen = 'auto';
       expect(await prAlreadyExisted(config)).toBeNull();
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });

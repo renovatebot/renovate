@@ -6,6 +6,12 @@ on:
       - main
 
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
   merge_group:
 
   workflow_dispatch:
@@ -27,133 +33,387 @@ env:
   DEFAULT_BRANCH: main
   NODE_VERSION: 18
   DRY_RUN: true
+  SPARSE_CHECKOUT: |-
+    .github/actions/
+    data/
+    tools/
+    package.json
+    yarn.lock
 
 jobs:
-  test:
-    name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
-    runs-on: ${{ matrix.os }}
+  setup:
+    runs-on: ubuntu-latest
 
-    # tests shouldn't need more time
-    timeout-minutes: 45
+    outputs:
+      os-matrix: ${{ steps.os-matrix.outputs.os-matrix }}
+      os-matrix-is-full: ${{ steps.os-matrix-is-full.outputs.os-matrix-is-full }}
+      os-matrix-prefetch: ${{ steps.os-matrix-prefetch.outputs.matrix }}
+      test-shard-matrix: ${{ steps.schedule-test-shards.outputs.test-shard-matrix }}
+      test-coverage-files: ${{ steps.schedule-test-shards.outputs.test-coverage-files }}
+      test-matrix-empty: ${{ steps.schedule-test-shards.outputs.test-matrix-empty }}
+
+    steps:
+      - name: Calculate `os-matrix-is-full` output
+        id: os-matrix-is-full
+        env:
+          IS_FULL: >-
+            ${{
+              (
+                github.event_name != 'pull_request' ||
+                contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
+              ) && 'true' || ''
+            }}
+        run: |
+          echo 'OS_MATRIX_IS_FULL=${{ env.IS_FULL }}' >> "$GITHUB_ENV"
+          echo 'os-matrix-is-full=${{ env.IS_FULL }}' >> "$GITHUB_OUTPUT"
+
+      - name: Calculate `os-matrix` output
+        id: os-matrix
+        env:
+          OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+          OS_LINUX_ONLY: '["ubuntu-latest"]'
+        run: |
+          echo 'os-matrix=${{
+            env.OS_MATRIX_IS_FULL && env.OS_ALL || env.OS_LINUX_ONLY
+          }}' >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed files
+        if: ${{ github.event_name == 'pull_request' }}
+        id: changed-files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.event.repository.full_name }}
+          PR_URL: >-
+            https://api.github.com/repos/{owner}/{repo}/compare/${{
+              github.event.pull_request.base.sha
+            }}...${{
+              github.event.pull_request.head.sha
+            }}
+          JQ_FILTER: >-
+            "changed-files=" + ([.files[].filename] | tostring)
+        run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
+
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+
+      - name: Calculate matrix for `node_modules` prefetch
+        uses: ./.github/actions/calculate-prefetch-matrix
+        id: os-matrix-prefetch
+        with:
+          repo: ${{ github.event.repository.full_name }}
+          token: ${{ github.token }}
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Prefetch modules for `ubuntu-latest`
+        id: setup-node
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+          save-cache: true
+
+      - name: Schedule test shards
+        id: schedule-test-shards
+        env:
+          ALL_PLATFORMS: ${{ env.OS_MATRIX_IS_FULL }}
+          FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
+        run: |
+          echo "$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+
+  prefetch:
+    needs: [setup]
+
+    # We can't check `needs.setup.outputs.os-matrix-is-full` here,
+    # as it will lead to further complications that aren't solvable
+    # with current GitHub Actions feature set.
+    #
+    # Although this job sometimes may act as short-lived `no-op`,
+    # it's actually the best option available.
+    #
+    # However, in draft mode we can skip this step.
+    if: |
+      !(github.event.pull_request.draft == true &&
+        needs.setup.outputs.test-matrix-empty == 'true')
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
         node-version: [18]
-        # skip macOS and Windows test on pull requests without 'ci:fulltest' label
-        include: >-
-          ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
-            "os": "macos-latest",
-            "node-version": 18
-          }, {
-            "os": "windows-latest",
-            "node-version": 18
-          }]' || '[]') }}
 
-    env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
-      NODE_VERSION: ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - name: Checkout code
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
-          fetch-depth: 2
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      - name: Setup Node.js
+        if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+          os: ${{ runner.os }}
+          save-cache: true
 
-      - name: Init platform
-        shell: bash
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          git --version
-          echo "Node $(node --version)"
-          echo "Yarn $(yarn --version)"
-
-      - name: Installing dependencies
-        uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: yarn install --frozen-lockfile
-
-      # build before tests to for static file check
-      - name: Build
-        run: yarn build
-
-      - name: Cache jest cache
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
-        with:
-          path: .cache/jest
-          key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
-
-      - name: Unit tests
-        run: yarn jest --ci --coverage ${{ env.coverage }}
-
-      - name: Codecov
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
-        if: always() && env.coverage == 'true'
-
-      - name: E2E Test
-        run: yarn test-e2e
-
-  lint:
+  lint-eslint:
+    needs: [setup]
     runs-on: ubuntu-latest
-
-    # lint shouldn't need more than 10 min
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
-        with:
-          fetch-depth: 2
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+          os: ${{ runner.os }}
 
-      - name: Init platform
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
-          echo "Node $(node --version)"
-          echo "Yarn $(yarn --version)"
-
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Type check
-        run: yarn type-check
-
-      - name: markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@bb4bb94c73936643d73d345b48fead3e96f90a5e # v10.0.1
+      - name: Cache eslint
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .cache/eslint
+          key: eslint-cache
 
       - name: Lint
-        run: |
-          yarn ls-lint
-          yarn eslint -f gha
-          yarn prettier
-          yarn git-check
-          yarn doc-fence-check
+        run: yarn -s eslint-ci
+
+  lint-prettier:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Cache prettier
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .prettier-cache
+          key: prettier-cache
+
+      - name: Lint
+        run: yarn prettier --cache-location .prettier-cache
+
+  lint-other:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Lint markdown
+        uses: DavidAnson/markdownlint-cli2-action@bb4bb94c73936643d73d345b48fead3e96f90a5e # v10.0.1
+
+      - name: Lint project file structure
+        run: yarn ls-lint
+
+      - name: Check git version
+        run: yarn git-check
+
+      - name: Lint fenced code blocks
+        run: yarn doc-fence-check
+
+      - name: Lint website docs
+        run: yarn -s lint-website-docs
 
       - name: Test schema
         run: yarn test-schema
 
+  test:
+    needs: [setup, prefetch]
+
+    if: |
+      !(github.event.pull_request.draft == true &&
+        needs.setup.outputs.test-matrix-empty == 'true')
+
+    name: ${{ matrix.name }}
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.runner-timeout-minutes }}
+
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
+
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Cache jest
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .cache/jest
+          key: |
+            jest-cache-${{
+              runner.os
+            }}-${{
+              env.NODE_VERSION
+            }}-${{
+              hashFiles('yarn.lock')
+            }}-${{
+              matrix.cache-key
+            }}
+
+      - name: Unit tests
+        shell: bash
+        run: |
+          for shard in ${{ matrix.shards }};
+          do
+            TEST_SHARD="$shard" yarn jest \
+              --ci \
+              --test-timeout ${{ matrix.test-timeout-milliseconds }} \
+              --coverage ${{ matrix.coverage }}
+          done
+
+      - name: Move coverage files
+        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        run: |
+          mkdir ./coverage-reports
+          for shard in ${{ matrix.shards }};
+          do
+            mv ./coverage/shard/$shard/coverage-final.json ./coverage-reports/$shard.json
+          done
+
+      - name: Save coverage artifacts
+        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: coverage-reports
+          path: ./coverage-reports/*.json
+
+  codecov:
+    needs: [setup, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: (success() || failure()) && github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: codecov.yml
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: coverage-reports
+          path: ./coverage-reports
+
+      - name: Codecov
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+        with:
+          files: '${{ needs.setup.outputs.test-coverage-files }}'
+
+  # This allows not to specify particular jobs in matrix as required
+  test-success:
+    needs: [setup, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    if: always()
+    steps:
+      - if: |
+          needs.test.result == 'failure' ||
+          needs.test.result == 'cancelled' ||
+          (needs.test.result == 'skipped' &&
+            !(github.event.pull_request.draft &&
+              needs.setup.outputs.test-matrix-empty == 'true')
+          )
+        run: exit 1
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Build
+        run: yarn -s build
+
+      - name: Pack
+        run: yarn -s test-e2e:pack
+
+      - name: Upload
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: renovate-package
+          path: renovate-v0.0.0-semantic-release.tgz
+
+  test-e2e:
+    needs: [setup, build]
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 7
+
+    if: github.event.pull_request.draft != true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download package
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: renovate-package
+
+      - name: Install dependencies
+        run: yarn -s test-e2e:install
+
+      - name: E2E Test
+        run: yarn -s test-e2e:run
+
   release:
-    needs: [lint, test]
+    needs:
+      - setup
+      - lint-eslint
+      - lint-prettier
+      - lint-other
+      - test-e2e
+      - test-success
+      - codecov
+
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    # release shouldn't need more than 5 min
     timeout-minutes: 15
     permissions:
       contents: write
@@ -161,36 +421,25 @@ jobs:
       pull-requests: write
 
     steps:
-      # full checkout for semantic-release
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
 
-      - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
-
-      - name: Init platform
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.symlinks true
-          git config --global user.email 'renovate@whitesourcesoftware.com'
-          git config --global user.name  'Renovate Bot'
+          os: ${{ runner.os }}
 
       - name: Check dry run
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
-            echo "DRY_RUN=false" >> $GITHUB_ENV
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
-
-      - name: Installing dependencies
-        run: yarn install --frozen-lockfile
 
       - name: semantic-release
         run: |

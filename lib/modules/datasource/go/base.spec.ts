@@ -346,6 +346,25 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('handles go-import with azure devops source', async () => {
+        const meta =
+          '<meta name="go-import" content="dev.azure.com/my-organization/my-project/_git/my-repo.git git https://dev.azure.com/my-organization/my-project/_git/my-repo.git" />';
+        httpMock
+          .scope('https://dev.azure.com')
+          .get('/my-organization/my-project/_git/my-repo.git?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'dev.azure.com/my-organization/my-project/_git/my-repo.git'
+        );
+
+        expect(res).toEqual({
+          datasource: GitTagsDatasource.id,
+          packageName:
+            'https://dev.azure.com/my-organization/my-project/_git/my-repo',
+        });
+      });
+
       it('handles uncommon imports', async () => {
         const meta =
           '<meta name="go-import" content="example.com/uncommon git ssh://git.example.com/uncommon">';
