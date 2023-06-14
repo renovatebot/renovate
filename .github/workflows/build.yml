@@ -345,6 +345,7 @@ jobs:
     timeout-minutes: 1
     if: always()
     steps:
+      - run: echo '${{ needs.test }}'
       - if: |
           needs.test.result == 'failure' ||
           needs.test.result == 'cancelled' ||
