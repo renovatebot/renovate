@@ -275,7 +275,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm registry login --username test --password password ghcr.io',
+        cmd: 'helm registry login --username test --password password https://ghcr.io',
         options: {
           env: {
             HELM_REGISTRY_CONFIG:

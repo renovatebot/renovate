@@ -51,14 +51,13 @@ export function isOCIRegistry(repository: Repository): boolean {
 
 export function generateRegistryLoginCmd(
   repositoryName: string,
-  repositoryURL: string,
-  repositoryHost: string
+  repositoryBaseURL: string
 ): string | null {
   const repositoryRule: RepositoryRule = {
     name: repositoryName,
-    repository: repositoryHost,
+    repository: repositoryBaseURL,
     hostRule: hostRules.find({
-      url: repositoryURL,
+      url: repositoryBaseURL,
       hostType: DockerDatasource.id,
     }),
   };

@@ -76,8 +76,7 @@ export async function updateArtifacts({
     for (const value of repositories.filter(isOCIRegistry)) {
       const loginCmd = generateRegistryLoginCmd(
         value.name,
-        `https://${value.url}`,
-        replaceUrlPath(value.url, '')
+        replaceUrlPath(`https://${value.url}`, '')
       );
 
       if (loginCmd) {
