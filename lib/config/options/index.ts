@@ -2549,7 +2549,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Controls if and in which stage release notes are fetched.',
+    description: 'Controls if and when release notes are fetched.',
     type: 'string',
     allowedValues: ['off', 'branch', 'pr'],
     default: 'pr',
