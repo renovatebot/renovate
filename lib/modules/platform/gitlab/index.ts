@@ -547,7 +547,7 @@ async function ignoreApprovals(pr: number): Promise<void> {
       ({ rule_type, name }) => rule_type !== 'any_approver' && name !== ruleName
     );
 
-    if (existingRegularApproverRules.length) {
+    if (existingRegularApproverRules?.length) {
       await p.all(
         existingRegularApproverRules.map((rule) => async (): Promise<void> => {
           await gitlabApi.deleteJson(`${url}/${rule.id}`);
