@@ -1,4 +1,3 @@
-import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
@@ -167,6 +166,10 @@ export class ConanDatasource extends Datasource {
               .sort((a, b) => version.sortVersions(a.version, b.version));
 
             const latestVersion = sortedReleases.at(-1)?.version
+
+            if (!latestVersion) {
+              return dep
+            }
             logger.debug(`Conan package ${packageName} has latest version ${latestVersion}`)
 
             const latestRevisionUrl = joinUrlParts(
