@@ -550,7 +550,7 @@ export async function processBranch(
       // compile commit message with body, which maybe needs changelogs
       if (config.commitBody) {
         if (
-          config.fetchReleaseNotes !== 'off' &&
+          config.fetchReleaseNotes === 'pr' &&
           needsChangelogs(config, ['commitBody'])
         ) {
           // we only need first upgrade, the others are only needed on PR update
