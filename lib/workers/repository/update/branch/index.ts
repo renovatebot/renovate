@@ -556,21 +556,18 @@ export async function processBranch(
           // we only need first upgrade, the others are only needed on PR update
           // we add it to first, so PR fetch can skip fetching for that update
           await embedChangelog(config.upgrades[0]);
-
-          // changelog is on first upgrade
-          config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
-            config.commitBody,
-            {
-              ...config,
-              logJSON: config.upgrades[0].logJSON,
-              releases: config.upgrades[0].releases,
-            }
-          )}`;
-
-          logger.trace(
-            `commitMessage: ` + JSON.stringify(config.commitMessage)
-          );
         }
+        // changelog is on first upgrade
+        config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
+          config.commitBody,
+          {
+            ...config,
+            logJSON: config.upgrades[0].logJSON,
+            releases: config.upgrades[0].releases,
+          }
+        )}`;
+
+        logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
       }
 
       commitSha = await commitFilesToBranch(config);
