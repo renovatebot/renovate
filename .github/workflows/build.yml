@@ -333,7 +333,7 @@ jobs:
           files: '${{ needs.setup.outputs.test-coverage-files }}'
 
   # This allows not to specify particular jobs in matrix as required
-  test-success:
+  passing:
     needs: [setup, test]
     runs-on: ubuntu-latest
     timeout-minutes: 1
@@ -404,7 +404,7 @@ jobs:
 
   release:
     needs:
-      [lint-eslint, lint-prettier, lint-other, test-e2e, test-success, codecov]
+      [lint-eslint, lint-prettier, lint-other, test-e2e, passing, codecov]
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
