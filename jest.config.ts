@@ -504,7 +504,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
     'ubuntu-latest': scheduleItems(shardKeys, 16),
   };
 
-  if (process.env.ALL_PLATFORMS !== 'true') {
+  if (process.env.ALL_PLATFORMS === 'true') {
     shardGrouping['windows-latest'] = scheduleItems(shardKeys, 8);
     shardGrouping['macos-latest'] = scheduleItems(shardKeys, 4);
   }
