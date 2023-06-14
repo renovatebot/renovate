@@ -21,6 +21,8 @@ on:
         default: 'true'
         required: false
 
+  workflow_call:
+
 permissions:
   contents: read
 
