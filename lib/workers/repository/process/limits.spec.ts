@@ -1,20 +1,19 @@
 import { DateTime } from 'luxon';
-import {
-  RenovateConfig,
-  getConfig,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
+import { RenovateConfig, partial, platform, scm } from '../../../../test/util';
 import type { Pr } from '../../../modules/platform/types';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
 
-let config: RenovateConfig;
+let config = partial<RenovateConfig>({
+  branchPrefix: 'foo/',
+  onboardingBranch: 'bar/configure',
+});
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  config.prHourlyLimit = 2;
+  config.prConcurrentLimit = 10;
+  config.branchConcurrentLimit = null;
 });
 
 describe('workers/repository/process/limits', () => {
@@ -36,8 +35,6 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getPrHourlyRemaining({
         ...config,
         prHourlyLimit: 10,
-        branchPrefix: 'foo/',
-        onboardingBranch: 'bar/configure',
       });
       expect(res).toBe(7);
     });

@@ -1,14 +1,13 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { RenovateConfig, partial } from '../../../../../test/util';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {
-    let config: RenovateConfig;
+    let config = partial<RenovateConfig>();
 
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig();
     });
 
     it('returns empty', () => {
