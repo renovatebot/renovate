@@ -240,7 +240,7 @@ jobs:
 
     if: needs.setup.outputs.test-matrix-empty != 'true'
 
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name || 'test' }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
@@ -335,12 +335,23 @@ jobs:
 
   # This allows not to specify particular jobs in matrix as required
   test-success:
-    needs: test
+    needs: [setup, test]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
     steps:
-      - if: needs.test.result != 'success'
+      - env:
+          SKIPPED_ON_DRAFT: >-
+            ${{
+               && 'true' || ''
+            }}
+        if: >-
+          needs.test.result == 'failure' ||
+          needs.test.result == 'cancelled' ||
+          (needs.test.result == 'skipped' &&
+            !(github.event.pull_request.draft &&
+              needs.setup.outputs.test-matrix-empty == 'true')
+          )
         run: exit 1
 
   build:
