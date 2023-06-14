@@ -77,3 +77,10 @@ runs:
         if [ -d lib ]; then
           yarn prepare:generate;
         fi
+
+    - name: Git config
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.symlinks true
+        git config --global user.email 'renovate@whitesourcesoftware.com'
+        git config --global user.name  'Renovate Bot'
