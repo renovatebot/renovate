@@ -240,7 +240,7 @@ jobs:
 
     if: needs.setup.outputs.test-matrix-empty != 'true'
 
-    name: ${{ matrix.name || 'test' }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
 
@@ -353,6 +353,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -379,6 +380,8 @@ jobs:
     needs: [setup, build]
     runs-on: 'ubuntu-latest'
     timeout-minutes: 7
+
+    if: github.event.pull_request.draft != true
 
     steps:
       - name: Checkout code
