@@ -41,15 +41,19 @@ export class ModuleExtractor extends DependencyExtractor {
     }
 
     const dependencies = [];
-    for (const moduleElement of Object.values(modules).flat()) {
-      const dep = {
-        currentValue: moduleElement.version,
-        managerData: {
-          source: moduleElement.source,
-        },
-      };
-      dependencies.push(this.analyseTerraformModule(dep));
+    for (const [depName, moduleElements] of Object.entries(modules)) {
+      for (const moduleElement of moduleElements) {
+        const dep = {
+          depName,
+          currentValue: moduleElement.version,
+          managerData: {
+            source: moduleElement.source,
+          },
+        };
+        dependencies.push(this.analyseTerraformModule(dep));
+      }
     }
+
     return dependencies;
   }
 
@@ -100,7 +104,7 @@ export class ModuleExtractor extends DependencyExtractor {
       dep.datasource = GitTagsDatasource.id;
     } else if (source) {
       const moduleParts = source.split('//')[0].split('/');
-      if (moduleParts[0] === '..') {
+      if (moduleParts[0] === '.' || moduleParts[0] === '..') {
         dep.skipReason = 'local';
       } else if (moduleParts.length >= 3) {
         const hostnameMatch = hostnameMatchRegex.exec(source);
