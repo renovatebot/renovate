@@ -200,7 +200,7 @@ const testShards: Record<string, ShardConfig> = {
     },
   },
   other: {
-    matchPaths: ['lib'],
+    matchPaths: ['lib', 'test'],
   },
 };
 
