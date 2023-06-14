@@ -13,6 +13,11 @@ jobs:
   handle-ci-label:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          sparse-checkout: .github/workflows/build.yml
+
       - name: Call `build` workflow
         if: github.event.label.name == 'ci:fulltest'
         uses: ./.github/workflows/build.yml
