@@ -23,6 +23,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     });
 
     it('returns if not configured', async () => {
+      // stabilityStatus
+      // productLinks
+
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
@@ -55,7 +58,6 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     beforeEach(() => {
       config = {
-        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
     });
