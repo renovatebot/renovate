@@ -6,11 +6,12 @@ on:
       - labeled
       - unlabeled
 
-permissions:
-  contents: read
-
 jobs:
   handle-ci-label:
     if: github.event.label.name == 'ci:fulltest'
     uses: ./.github/workflows/build.yml
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
