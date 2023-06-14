@@ -10,6 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
+import { replaceUrlPath } from '../../../util/url';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
