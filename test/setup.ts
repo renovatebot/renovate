@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { Jest } from '@jest/environment';
 // Check for missing or pending http mocks
 import './http-mock';
@@ -28,6 +29,14 @@ jest.mock('../lib/modules/platform/scm', () => ({
 }));
 
 jest.mock('../lib/logger', () => jest.createMockFromModule('../lib/logger'));
+
+const consoleError = console.error.bind(console);
+console.error = (...args) => {
+  const [first] = args;
+  if (first !== 'reusing global emitter') {
+    consoleError(...args);
+  }
+};
 
 //------------------------------------------------
 // Required global jest types
