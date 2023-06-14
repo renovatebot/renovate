@@ -77,7 +77,7 @@ export async function updateArtifacts({
       const loginCmd = generateRegistryLoginCmd(
         value.name,
         `https://${value.url}`,
-        replaceUrlPath(value.url, "")
+        replaceUrlPath(value.url, '')
       );
 
       if (loginCmd) {
