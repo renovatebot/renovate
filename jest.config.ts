@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import os from 'node:os';
 import v8 from 'node:v8';
+import { minimatch } from 'minimatch';
 import type { InitialOptionsTsJest } from 'ts-jest';
 
 const ci = !!process.env.CI;
@@ -411,12 +412,51 @@ interface ShardGroup {
   'test-timeout-milliseconds': number;
 }
 
-function partitionBy<T>(input: T[], size: number): T[][] {
-  const partitions: T[][] = [];
-  for (let idx = 0; idx < input.length; idx += size) {
-    partitions.push(input.slice(idx, idx + size));
+/**
+ * Given the file list affected by commit, return the list
+ * of shards that  test these changes.
+ */
+function getMatchingShards(files: string[]): string[] {
+  const matchingShards = new Set<string>();
+  for (const file of files) {
+    for (const [key, { matchPaths }] of Object.entries(testShards)) {
+      const patterns = matchPaths.map((path) =>
+        path.endsWith('.spec.ts')
+          ? path.replace(/\.spec\.ts$/, '{.ts,.spec.ts}')
+          : `${path}/**/*`
+      );
+
+      if (patterns.some((pattern) => minimatch(file, pattern))) {
+        matchingShards.add(key);
+        break;
+      }
+    }
   }
-  return partitions;
+
+  return Object.keys(testShards).filter((shard) => matchingShards.has(shard));
+}
+
+/**
+ * Distribute items evenly across runner instances.
+ */
+function scheduleItems<T>(items: T[], availableInstances: number): T[][] {
+  const numInstances = Math.min(items.length, availableInstances);
+  const maxPerInstance = Math.ceil(items.length / numInstances);
+  const lighterInstancesIdx = items.length % numInstances;
+  const partitionSizes = Array.from({ length: numInstances }, (_, idx) =>
+    idx < lighterInstancesIdx ? maxPerInstance : maxPerInstance - 1
+  );
+
+  const result: T[][] = Array.from({ length: numInstances }, () => []);
+  let rest = items.slice();
+  for (let idx = 0; idx < numInstances; idx += 1) {
+    const partitionSize = partitionSizes[idx];
+    const partition = rest.slice(0, partitionSize);
+    result[idx] = partition;
+    rest = rest.slice(partitionSize);
+  }
+
+  return result;
 }
 
 /**
@@ -425,7 +465,24 @@ function partitionBy<T>(input: T[], size: number): T[][] {
  * Otherwise, we're printing useful stats.
  */
 if (process.env.SCHEDULE_TEST_SHARDS) {
-  const shardKeys = Object.keys(testShards);
+  let shardKeys = Object.keys(testShards);
+
+  if (process.env.FILTER_SHARDS === 'true' && process.env.CHANGED_FILES) {
+    try {
+      const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES);
+      const matchingShards = getMatchingShards(changedFiles);
+      if (matchingShards.length === 0) {
+        // eslint-disable-next-line no-console
+        console.log(`test-matrix-empty=true`);
+        process.exit(0);
+      }
+      shardKeys = shardKeys.filter((key) => matchingShards.includes(key));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      process.exit(1);
+    }
+  }
 
   /**
    * Not all runners are created equal.
@@ -440,12 +497,12 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
    * - We can't run more than 5 MacOS runners
    */
   const shardGrouping: Record<string, string[][]> = {
-    'ubuntu-latest': partitionBy(shardKeys, 1),
-    'windows-latest': partitionBy(shardKeys, 2),
-    'macos-latest': partitionBy(shardKeys, 4),
+    'ubuntu-latest': scheduleItems(shardKeys, 16),
+    'windows-latest': scheduleItems(shardKeys, 8),
+    'macos-latest': scheduleItems(shardKeys, 4),
   };
 
-  if (process.env.CI_FULLTEST !== 'true') {
+  if (process.env.ALL_PLATFORMS !== 'true') {
     delete shardGrouping['windows-latest'];
     delete shardGrouping['macos-latest'];
   }
