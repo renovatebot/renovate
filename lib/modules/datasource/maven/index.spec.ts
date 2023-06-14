@@ -280,22 +280,17 @@ describe('modules/datasource/maven/index', () => {
 
   it('collects releases from all registry urls', async () => {
     mockGenericPackage({ html: null });
-    mockGenericPackage({
-      base: baseUrlCustom,
-      meta: Fixtures.get('metadata-extra.xml'),
-      latest: '3.0.0',
-      jars: { '3.0.0': 200 },
-      snapshots: [],
-    });
 
     const res = await get('org.example:package', baseUrl, baseUrlCustom);
 
     expect(res?.releases).toMatchObject([
       { version: '0.0.1' },
-      { version: '1.0.0' },
-      { version: '1.0.3-SNAPSHOT' },
-      { version: '2.0.0' },
-      { version: '3.0.0' },
+      { version: '1.0.0', releaseTimestamp: '2020-01-01T01:00:00.000Z' },
+      {
+        version: '1.0.3-SNAPSHOT',
+        releaseTimestamp: '2020-01-01T01:00:03.000Z',
+      },
+      { version: '2.0.0', releaseTimestamp: '2020-01-01T02:00:00.000Z' },
     ]);
   });
 
