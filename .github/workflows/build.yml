@@ -292,7 +292,7 @@ jobs:
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && matrix.coverage
+        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
         run: |
           mkdir ./coverage-reports
           for shard in ${{ matrix.shards }};
@@ -301,7 +301,7 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && matrix.coverage
+        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: coverage-reports
@@ -311,7 +311,7 @@ jobs:
     needs: [setup, test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: success() || failure()
+    if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
