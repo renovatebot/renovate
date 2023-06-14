@@ -144,10 +144,9 @@ const testShards: Record<string, ShardConfig> = {
       'lib/workers/repository/model',
     ],
     threshold: {
-      statements: 90.0,
-      branches: 90.0,
-      functions: 90.0,
-      lines: 90.0,
+      statements: 98.99,
+      branches: 94.0,
+      lines: 98.98,
     },
   },
   'workers-2': {
@@ -156,10 +155,7 @@ const testShards: Record<string, ShardConfig> = {
       'lib/workers/repository/process',
     ],
     threshold: {
-      statements: 90.0,
-      branches: 90.0,
-      functions: 90.0,
-      lines: 90.0,
+      branches: 98.73,
     },
   },
   'workers-3': {
@@ -167,20 +163,13 @@ const testShards: Record<string, ShardConfig> = {
       'lib/workers/repository/update',
       'lib/workers/repository/updates',
     ],
-    threshold: {
-      statements: 90.0,
-      branches: 90.0,
-      functions: 90.0,
-      lines: 90.0,
-    },
   },
   'workers-4': {
     matchPaths: ['lib/workers'],
     threshold: {
-      statements: 90.0,
-      branches: 90.0,
-      functions: 90.0,
-      lines: 90.0,
+      statements: 99.9,
+      branches: 98.27,
+      lines: 99.9,
     },
   },
   'git-1': {
