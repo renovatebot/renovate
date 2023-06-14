@@ -136,8 +136,8 @@ jobs:
     #
     # However, in draft mode we can skip this step.
     if: |
-      github.event.pull_request.draft == true &&
-      needs.setup.outputs.test-matrix-empty == 'true'
+      !(github.event.pull_request.draft == true &&
+        needs.setup.outputs.test-matrix-empty == 'true')
 
     strategy:
       matrix:
@@ -244,7 +244,9 @@ jobs:
   test:
     needs: [setup, prefetch]
 
-    if: needs.setup.outputs.test-matrix-empty != 'true'
+    if: |
+      !(github.event.pull_request.draft == true &&
+        needs.setup.outputs.test-matrix-empty == 'true')
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.runner-timeout-minutes }}
