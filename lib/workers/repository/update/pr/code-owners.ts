@@ -134,7 +134,9 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         });
 
     logger.debug(
-      `CODEOWNERS matched the following files: ${fileOwners.map((f) => f.file).join(', ')}`
+      `CODEOWNERS matched the following files: ${fileOwners
+        .map((f) => f.file)
+        .join(', ')}`
     );
 
     // Get list of all matched users and the files they own (reverse keys of fileOwners)
