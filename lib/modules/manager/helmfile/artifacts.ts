@@ -70,7 +70,6 @@ export async function updateArtifacts({
     const cmd: string[] = [];
     const doc = parseDoc(newPackageFileContent);
 
-    const regexOfURLPath = /\/.*/;
     const repositories = getRepositories(doc);
 
     for (const value of repositories.filter(isOCIRegistry)) {
