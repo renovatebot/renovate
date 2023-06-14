@@ -213,9 +213,9 @@ describe('workers/repository/errors-warnings', () => {
       expect(res).toBe('');
     });
 
-    it('suppress notifications contains depLookupWarnings flag then return empty string', () => {
+    it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {
       const config: RenovateConfig = {
-        suppressNotifications: ['depLookupWarnings'],
+        suppressNotifications: ['dependencyLookupWarnings'],
       };
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsDashboard(packageFiles, config);
