@@ -354,6 +354,16 @@ export async function ensurePr(
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
+      if (existingPr?.targetBranch !== config.baseBranch) {
+        logger.debug(
+          {
+            branchName,
+            oldBaseBranch: existingPr?.targetBranch,
+            newBaseBranch: config.baseBranch,
+          },
+          'PR base branch has changed'
+        );
+      }
       if (existingPrTitle !== newPrTitle) {
         logger.debug(
           {
@@ -371,6 +381,7 @@ export async function ensurePr(
           'PR body changed'
         );
       }
+
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
         return { type: 'with-pr', pr: existingPr };

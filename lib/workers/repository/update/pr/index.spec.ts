@@ -317,6 +317,14 @@ describe('workers/repository/update/pr/index', () => {
           { pr: pr.number, prTitle },
           `PR updated`
         );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            oldBaseBranch: 'base',
+            newBaseBranch: 'new_base',
+          },
+          'PR base branch has changed'
+        );
         expect(res).toEqual({
           type: 'with-pr',
           pr: { ...pr, targetBranch: 'new_base' }, // updated target branch of pr
