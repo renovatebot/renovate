@@ -45,6 +45,7 @@ export class ModuleExtractor extends DependencyExtractor {
       for (const moduleElement of moduleElements) {
         const dep = {
           depName,
+          depType: 'module',
           currentValue: moduleElement.version,
           managerData: {
             source: moduleElement.source,
@@ -70,12 +71,10 @@ export class ModuleExtractor extends DependencyExtractor {
         regEx(/\.git$/),
         ''
       );
-      dep.depType = 'module';
       dep.depName = 'github.com/' + dep.packageName;
       dep.currentValue = githubRefMatch.groups.tag;
       dep.datasource = GithubTagsDatasource.id;
     } else if (bitbucketRefMatch?.groups) {
-      dep.depType = 'module';
       dep.depName =
         bitbucketRefMatch.groups.workspace +
         '/' +
@@ -84,13 +83,11 @@ export class ModuleExtractor extends DependencyExtractor {
       dep.currentValue = bitbucketRefMatch.groups.tag;
       dep.datasource = BitbucketTagsDatasource.id;
     } else if (azureDevOpsSshRefMatch?.groups) {
-      dep.depType = 'module';
       dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;
       dep.packageName = azureDevOpsSshRefMatch.groups.url;
       dep.currentValue = azureDevOpsSshRefMatch.groups.tag;
       dep.datasource = GitTagsDatasource.id;
     } else if (gitTagsRefMatch?.groups) {
-      dep.depType = 'module';
       if (gitTagsRefMatch.groups.path.includes('//')) {
         logger.debug('Terraform module contains subdirectory');
         dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
@@ -111,7 +108,6 @@ export class ModuleExtractor extends DependencyExtractor {
         if (hostnameMatch?.groups) {
           dep.registryUrls = [`https://${hostnameMatch.groups.hostname}`];
         }
-        dep.depType = 'module';
         dep.depName = moduleParts.join('/');
         dep.datasource = TerraformModuleDatasource.id;
       }

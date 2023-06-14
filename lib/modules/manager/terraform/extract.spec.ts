@@ -171,16 +171,19 @@ describe('modules/manager/terraform/extract', () => {
         },
         {
           depName: 'relative',
+          depType: 'module',
           currentValue: undefined,
           skipReason: 'local',
         },
         {
           depName: 'relative',
+          depType: 'module',
           currentValue: undefined,
           skipReason: 'local',
         },
         {
           depName: 'nosauce',
+          depType: 'module',
           currentValue: undefined,
           skipReason: 'no-source',
         },
