@@ -2832,7 +2832,7 @@ Defaults to `true`.
 
 ## python
 
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files, or any file that matches the pattern `requirements-*.(txt|pip)` - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
