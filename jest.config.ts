@@ -201,6 +201,12 @@ const testShards: Record<string, ShardConfig> = {
   },
   other: {
     matchPaths: ['lib', 'test'],
+    threshold: {
+      statements: 92.0,
+      branches: 90.8,
+      functions: 83.3,
+      lines: 92.0,
+    },
   },
 };
 
