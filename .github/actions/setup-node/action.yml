@@ -79,6 +79,7 @@ runs:
         fi
 
     - name: Git config
+      shell: bash
       run: |
         git config --global core.autocrlf false
         git config --global core.symlinks true
