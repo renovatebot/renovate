@@ -1,4 +1,4 @@
-import { mocked, partial } from '../../../../../test/util';
+import { mocked } from '../../../../../test/util';
 import type { Release } from '../../../../modules/datasource';
 import * as allVersioning from '../../../../modules/versioning';
 import * as _dateUtil from '../../../../util/date';
@@ -13,7 +13,7 @@ jest.mock('../../../../util/merge-confidence');
 const dateUtil = mocked(_dateUtil);
 const mergeConfidence = mocked(_mergeConfidence);
 
-let config = partial<LookupUpdateConfig & UpdateResult>();
+let config: Partial<LookupUpdateConfig & UpdateResult>;
 
 const versioning = allVersioning.get('semver');
 

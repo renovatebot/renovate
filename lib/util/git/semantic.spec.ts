@@ -4,10 +4,11 @@ import { detectSemanticCommits } from './semantic';
 
 jest.mock('.');
 
-let config = partial<RenovateConfig>();
+let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  config = partial<RenovateConfig>();
 });
 
 describe('util/git/semantic', () => {

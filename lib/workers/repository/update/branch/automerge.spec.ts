@@ -10,9 +10,10 @@ jest.mock('../../../../util/git');
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
     const isScheduledSpy = jest.spyOn(schedule, 'isScheduledNow');
-    let config = partial<RenovateConfig>();
+    let config: RenovateConfig;
 
     beforeEach(() => {
+      config = partial<RenovateConfig>();
       GlobalConfig.reset();
     });
 

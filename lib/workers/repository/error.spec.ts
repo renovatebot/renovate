@@ -33,10 +33,11 @@ import handleError from './error';
 
 jest.mock('./error-config');
 
-const config = partial<RenovateConfig>({ branchList: [] });
+let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  config = partial<RenovateConfig>({ branchList: [] });
 });
 
 describe('workers/repository/error', () => {

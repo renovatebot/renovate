@@ -9,12 +9,12 @@ import {
 
 describe('workers/repository/update/branch/status-checks', () => {
   describe('setStability', () => {
-    let config = partial<StabilityConfig>();
+    let config: StabilityConfig;
 
     beforeEach(() => {
-      config = {
+      config = partial<StabilityConfig>({
         branchName: 'renovate/some-branch',
-      };
+      });
     });
 
     afterEach(() => {

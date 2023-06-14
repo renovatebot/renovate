@@ -11,19 +11,19 @@ import * as cleanup from './prune';
 
 jest.mock('../../../util/git');
 
-// default values
-let config = partial<RenovateConfig>({
-  repoIsOnboarded: true,
-  branchPrefix: `renovate/`,
-  pruneStaleBranches: true,
-  ignoredAuthors: [],
-});
+let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config.platform = 'github';
-  config.errors = [];
-  config.warnings = [];
+  config = partial<RenovateConfig>({
+    repoIsOnboarded: true,
+    branchPrefix: `renovate/`,
+    pruneStaleBranches: true,
+    ignoredAuthors: [],
+    platform: 'github',
+    errors: [],
+    warnings: [],
+  });
 });
 
 describe('workers/repository/finalize/prune', () => {

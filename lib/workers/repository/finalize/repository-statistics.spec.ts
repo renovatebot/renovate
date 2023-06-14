@@ -23,15 +23,16 @@ const result = Object.keys(prJson).map((key) => {
 });
 
 describe('workers/repository/finalize/repository-statistics', () => {
-  let config = partial<RenovateConfig>({
-    onboardingPrTitle: 'Configure Renovate',
-    defaultBranch: 'main',
-  });
+  let config: RenovateConfig;
 
   describe('runRenovateRepoStats', () => {
     beforeEach(() => {
       mockedFunction(platform.getPrList).mockReturnValue(prJson);
-      config.repository = 'owner/repo';
+      config = partial<RenovateConfig>({
+        onboardingPrTitle: 'Configure Renovate',
+        defaultBranch: 'main',
+        repository: 'owner/repo',
+      });
     });
 
     it('Calls runRenovateRepoStats', () => {

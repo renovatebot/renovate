@@ -9,11 +9,7 @@ jest.mock('../../../../config/presets/local');
 const mockedPresets = presets as jest.Mocked<typeof presets>;
 
 describe('workers/repository/onboarding/branch/config', () => {
-  let config = partial<RenovateConfig>({
-    onboardingConfig: {
-      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-    },
-  });
+  let config: RenovateConfig;
 
   beforeAll(() => {
     GlobalConfig.set({
@@ -23,8 +19,13 @@ describe('workers/repository/onboarding/branch/config', () => {
   });
 
   beforeEach(() => {
-    config.platform = 'github';
-    config.repository = 'some/repo';
+    config = partial<RenovateConfig>({
+      onboardingConfig: {
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      },
+      platform: 'github',
+      repository: 'some/repo',
+    });
   });
 
   describe('getOnboardingConfigContents', () => {

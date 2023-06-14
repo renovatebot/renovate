@@ -1,14 +1,14 @@
 import { RenovateConfig, partial } from '../../../test/util';
 import { checkIfConfigured } from './configured';
 
-// default values
-let config = partial<RenovateConfig>({
-  enabled: true,
-  forkProcessing: 'auto',
-});
+let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  config = partial<RenovateConfig>({
+    enabled: true,
+    forkProcessing: 'auto',
+  });
 });
 
 describe('workers/repository/configured', () => {

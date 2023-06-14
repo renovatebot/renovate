@@ -4,9 +4,10 @@ import { getBaseBranchDesc } from './base-branch';
 
 describe('workers/repository/onboarding/pr/base-branch', () => {
   describe('getBaseBranchDesc()', () => {
-    let config = partial<RenovateConfig>();
+    let config: RenovateConfig;
 
     beforeEach(() => {
+      config = partial<RenovateConfig>();
       jest.resetAllMocks();
     });
 

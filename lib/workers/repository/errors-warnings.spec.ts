@@ -10,10 +10,11 @@ import {
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
-    let config = partial<RenovateConfig>();
+    let config: RenovateConfig;
 
     beforeEach(() => {
       jest.resetAllMocks();
+      config = partial<RenovateConfig>();
     });
 
     it('returns warning text', () => {
@@ -212,10 +213,11 @@ describe('workers/repository/errors-warnings', () => {
   });
 
   describe('getErrors()', () => {
-    let config = partial<RenovateConfig>();
+    let config: RenovateConfig;
 
     beforeEach(() => {
       jest.resetAllMocks();
+      config = partial<RenovateConfig>();
     });
 
     it('returns error text', () => {

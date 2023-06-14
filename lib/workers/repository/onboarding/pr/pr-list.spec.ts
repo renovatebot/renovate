@@ -4,12 +4,13 @@ import { getPrList } from './pr-list';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {
-    let config = partial<RenovateConfig>({
-      prHourlyLimit: 2, // default
-    });
+    let config: RenovateConfig;
 
     beforeEach(() => {
       jest.resetAllMocks();
+      config = partial<RenovateConfig>({
+        prHourlyLimit: 2, // default
+      });
     });
 
     it('handles empty', () => {

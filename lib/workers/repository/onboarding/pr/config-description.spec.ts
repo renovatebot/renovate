@@ -4,9 +4,10 @@ import { getConfigDesc } from './config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {
-    let config = partial<RenovateConfig>();
+    let config: RenovateConfig;
 
     beforeEach(() => {
+      config = partial<RenovateConfig>();
       jest.resetAllMocks();
     });
 

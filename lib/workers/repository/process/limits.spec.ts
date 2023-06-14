@@ -4,16 +4,17 @@ import type { Pr } from '../../../modules/platform/types';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
 
-let config = partial<RenovateConfig>({
-  branchPrefix: 'foo/',
-  onboardingBranch: 'bar/configure',
-});
+let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config.prHourlyLimit = 2;
-  config.prConcurrentLimit = 10;
-  config.branchConcurrentLimit = null;
+  config = partial<RenovateConfig>({
+    branchPrefix: 'foo/',
+    onboardingBranch: 'bar/configure',
+    prHourlyLimit: 2,
+    prConcurrentLimit: 10,
+    branchConcurrentLimit: null,
+  });
 });
 
 describe('workers/repository/process/limits', () => {

@@ -13,10 +13,10 @@ const html = mocked(_html);
 
 describe('workers/repository/extract/manager-files', () => {
   describe('getManagerPackageFiles()', () => {
-    let config = partial<RenovateConfig>();
-
+    let config: RenovateConfig;
     beforeEach(() => {
       jest.resetAllMocks();
+      config = partial<RenovateConfig>();
     });
 
     it('returns empty of manager is disabled', async () => {
