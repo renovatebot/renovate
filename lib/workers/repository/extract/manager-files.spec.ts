@@ -14,6 +14,7 @@ const html = mocked(_html);
 describe('workers/repository/extract/manager-files', () => {
   describe('getManagerPackageFiles()', () => {
     let config: RenovateConfig;
+
     beforeEach(() => {
       jest.resetAllMocks();
       config = partial<RenovateConfig>();
