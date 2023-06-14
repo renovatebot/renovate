@@ -53,8 +53,8 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts  modules', async () => {
       const res = await extractPackageFile(modules, 'modules.tf', {});
-      expect(res?.deps).toHaveLength(18);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
+      expect(res?.deps).toHaveLength(19);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
           packageName: 'hashicorp/example',
@@ -170,9 +170,21 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'terraform-module',
         },
         {
+          depName: 'relative',
+          depType: 'module',
+          currentValue: undefined,
           skipReason: 'local',
         },
         {
+          depName: 'relative',
+          depType: 'module',
+          currentValue: undefined,
+          skipReason: 'local',
+        },
+        {
+          depName: 'nosauce',
+          depType: 'module',
+          currentValue: undefined,
           skipReason: 'no-source',
         },
       ]);
