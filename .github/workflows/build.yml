@@ -340,12 +340,7 @@ jobs:
     timeout-minutes: 1
     if: always()
     steps:
-      - env:
-          SKIPPED_ON_DRAFT: >-
-            ${{
-               && 'true' || ''
-            }}
-        if: >-
+      - if: |
           needs.test.result == 'failure' ||
           needs.test.result == 'cancelled' ||
           (needs.test.result == 'skipped' &&
