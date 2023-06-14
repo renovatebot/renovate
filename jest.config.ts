@@ -442,7 +442,11 @@ function getMatchingShards(files: string[]): string[] {
 function scheduleItems<T>(items: T[], availableInstances: number): T[][] {
   const numInstances = Math.min(items.length, availableInstances);
   const maxPerInstance = Math.ceil(items.length / numInstances);
-  const lighterInstancesIdx = items.length % numInstances;
+  const lighterInstancesIdx =
+    items.length % numInstances === 0
+      ? numInstances
+      : items.length % numInstances;
+
   const partitionSizes = Array.from({ length: numInstances }, (_, idx) =>
     idx < lighterInstancesIdx ? maxPerInstance : maxPerInstance - 1
   );
@@ -498,13 +502,11 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
    */
   const shardGrouping: Record<string, string[][]> = {
     'ubuntu-latest': scheduleItems(shardKeys, 16),
-    'windows-latest': scheduleItems(shardKeys, 8),
-    'macos-latest': scheduleItems(shardKeys, 4),
   };
 
   if (process.env.ALL_PLATFORMS !== 'true') {
-    delete shardGrouping['windows-latest'];
-    delete shardGrouping['macos-latest'];
+    shardGrouping['windows-latest'] = scheduleItems(shardKeys, 8);
+    shardGrouping['macos-latest'] = scheduleItems(shardKeys, 4);
   }
 
   const shardGroups: ShardGroup[] = [];
