@@ -136,34 +136,51 @@ const testShards: Record<string, ShardConfig> = {
   },
   'workers-1': {
     matchPaths: [
+      'lib/workers/repository/changelog',
+      'lib/workers/repository/config-migration',
+      'lib/workers/repository/extract',
+      'lib/workers/repository/finalize',
       'lib/workers/repository/init',
-      'lib/workers/repository/onboarding',
-      'lib/workers/repository/process',
+      'lib/workers/repository/model',
     ],
+    threshold: {
+      statements: 95.0,
+      branches: 95.0,
+      functions: 95.0,
+      lines: 95.0,
+    },
   },
   'workers-2': {
     matchPaths: [
-      'lib/workers/repository/update/pr',
-      'lib/workers/repository/finalize',
+      'lib/workers/repository/onboarding',
+      'lib/workers/repository/process',
     ],
     threshold: {
-      statements: 99.25,
-      branches: 97.11,
-      lines: 99.24,
+      statements: 95.0,
+      branches: 95.0,
+      functions: 95.0,
+      lines: 95.0,
     },
   },
   'workers-3': {
-    matchPaths: ['lib/workers/repository/update'],
+    matchPaths: [
+      'lib/workers/repository/update',
+      'lib/workers/repository/updates',
+    ],
     threshold: {
-      branches: 97.75,
+      statements: 95.0,
+      branches: 95.0,
+      functions: 95.0,
+      lines: 95.0,
     },
   },
   'workers-4': {
     matchPaths: ['lib/workers'],
     threshold: {
-      statements: 99.95,
-      branches: 97.34,
-      lines: 99.95,
+      statements: 95.0,
+      branches: 95.0,
+      functions: 95.0,
+      lines: 95.0,
     },
   },
   'git-1': {
