@@ -1,5 +1,4 @@
 import { Marshal } from '@qnighy/marshal';
-import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
@@ -8,14 +7,14 @@ import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GemVersions, GemsInfo, MarshalledVersionInfo } from './schema';
-import { VersionsDatasource } from './versions-datasource';
+import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
 
   constructor() {
     super(RubyGemsDatasource.id);
-    this.versionsDatasource = new VersionsDatasource(RubyGemsDatasource.id);
+    this.versionsEndpointCache = new VersionsEndpointCache(this.http);
   }
 
   override readonly defaultRegistryUrls = ['https://rubygems.org'];
@@ -24,7 +23,7 @@ export class RubyGemsDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  private readonly versionsDatasource: VersionsDatasource;
+  private readonly versionsEndpointCache: VersionsEndpointCache;
 
   @cache({
     namespace: `datasource-${RubyGemsDatasource.id}`,
@@ -43,24 +42,33 @@ export class RubyGemsDatasource extends Datasource {
     }
 
     try {
-      return await this.versionsDatasource.getReleases({
-        packageName,
+      const cachedVersions = await this.versionsEndpointCache.getVersions(
         registryUrl,
-      });
-    } catch (error) {
+        packageName
+      );
+
+      if (cachedVersions.type === 'success') {
+        const { versions } = cachedVersions;
+        return { releases: versions.map((version) => ({ version })) };
+      }
+
+      const registryHostname = parseUrl(registryUrl)?.hostname;
       if (
-        error.message === PAGE_NOT_FOUND_ERROR &&
-        parseUrl(registryUrl)?.hostname !== 'rubygems.org'
+        cachedVersions.type === 'not-supported' &&
+        registryHostname !== 'rubygems.org'
       ) {
         const pkgName = packageName.toLowerCase();
-        const hostname = parseUrl(registryUrl)?.hostname;
+        const hostname = registryHostname;
         return hostname === 'rubygems.pkg.github.com' ||
           hostname === 'gitlab.com'
           ? await this.getDependencyFallback(registryUrl, pkgName)
           : await this.getDependency(registryUrl, pkgName);
       }
-      throw error;
+    } catch (error) {
+      this.handleGenericErrors(error);
     }
+
+    return null;
   }
 
   async getDependencyFallback(
