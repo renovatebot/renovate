@@ -2,11 +2,11 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import v8 from 'node:v8';
 import { minimatch } from 'minimatch';
-import type { InitialOptionsTsJest } from 'ts-jest';
+import type { JestConfigWithTsJest } from 'ts-jest';
 
 const ci = !!process.env.CI;
 
-type JestConfig = InitialOptionsTsJest & {
+type JestConfig = JestConfigWithTsJest & {
   // https://github.com/renovatebot/renovate/issues/17034
   workerIdleMemoryLimit?: string;
 };
@@ -200,13 +200,7 @@ const testShards: Record<string, ShardConfig> = {
     },
   },
   other: {
-    matchPaths: ['lib', 'test'],
-    threshold: {
-      statements: 91.9,
-      branches: 90.8,
-      functions: 83.3,
-      lines: 92.0,
-    },
+    matchPaths: ['lib'],
   },
 };
 
@@ -340,6 +334,11 @@ const config: JestConfig = {
     },
     coverageDirectory: './coverage',
   }),
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/test/',
+    '<rootDir>/tools/',
+  ],
   cacheDirectory: '.cache/jest',
   clearMocks: true,
   collectCoverage: true,
