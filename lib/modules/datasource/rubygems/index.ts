@@ -26,6 +26,13 @@ export class RubyGemsDatasource extends Datasource {
 
   private readonly versionsDatasource: VersionsDatasource;
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `${registryUrl}/${packageName}`,
+  })
   async getReleases({
     packageName,
     registryUrl,
@@ -45,11 +52,12 @@ export class RubyGemsDatasource extends Datasource {
         error.message === PAGE_NOT_FOUND_ERROR &&
         parseUrl(registryUrl)?.hostname !== 'rubygems.org'
       ) {
+        const pkgName = packageName.toLowerCase();
         const hostname = parseUrl(registryUrl)?.hostname;
         return hostname === 'rubygems.pkg.github.com' ||
           hostname === 'gitlab.com'
-          ? await this.getDependencyFallback(registryUrl, packageName)
-          : await this.getDependency(registryUrl, packageName);
+          ? await this.getDependencyFallback(registryUrl, pkgName)
+          : await this.getDependency(registryUrl, pkgName);
       }
       throw error;
     }
@@ -109,13 +117,6 @@ export class RubyGemsDatasource extends Datasource {
     }
   }
 
-  @cache({
-    namespace: `datasource-${RubyGemsDatasource.id}-getDependency`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      /* eslint-disable @typescript-eslint/restrict-template-expressions */
-      `${registryUrl}/${packageName}`,
-  })
   async getDependency(
     registryUrl: string,
     packageName: string
