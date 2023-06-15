@@ -19,7 +19,6 @@ const registryUrl = 'https://rubygems.org';
 describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
   beforeEach(() => {
     memCache.clear();
-    jest.resetAllMocks();
   });
 
   describe('Full sync', () => {
