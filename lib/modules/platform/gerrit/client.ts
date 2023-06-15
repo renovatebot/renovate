@@ -60,7 +60,7 @@ class GerritClient {
       `a/changes/?q=` +
         filters.join('+') +
         this.requestDetails.map((det) => '&o=' + det).join(''),
-      { useCache: !refreshCache }
+      { memCache: !refreshCache }
     );
     logger.trace(
       `findChanges(${filters.join(', ')}) => ${changes.body.length}`
@@ -114,7 +114,7 @@ class GerritClient {
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJson<GerritChangeMessageInfo[]>(
       `a/changes/${changeNumber}/messages`,
-      { useCache: false }
+      { memCache: false }
     );
     return messages.body;
   }
