@@ -11,7 +11,6 @@ const pocoRevisions = Fixtures.getJson('poco_revisions.json');
 const pocoYamlGitHubContent = Fixtures.get('poco.yaml');
 const malformedJson = Fixtures.get('malformed.json');
 const fakeJson = Fixtures.get('fake.json');
-const artifactoryJson = Fixtures.get('artifactory.json');
 const datasource = ConanDatasource.id;
 
 const nonDefaultRegistryUrl = 'https://not.conan.io/';
@@ -260,7 +259,9 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
         .get('/v2/conans/search?q=arti')
-        .reply(200, artifactoryJson, { 'x-jfrog-version': 'latest' });
+        .reply(200, ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'], {
+          'x-jfrog-version': 'latest',
+        });
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
         .get('/v2/conans/arti/1.1.1/_/_/latest')
@@ -308,7 +309,9 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope('https://fake.artifactory.com')
         .get('/v2/conans/search?q=arti')
-        .reply(200, artifactoryJson, { 'x-jfrog-version': 'latest' });
+        .reply(200, ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'], {
+          'x-jfrog-version': 'latest',
+        });
       config.registryUrls = ['https://fake.artifactory.com'];
       config.packageName = 'arti';
       expect(

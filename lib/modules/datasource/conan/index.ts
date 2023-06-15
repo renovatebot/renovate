@@ -159,12 +159,11 @@ export class ConanDatasource extends Datasource {
             if (!groups) {
               return dep;
             }
-            const versioning = 'semver';
-            const version = allVersioning.get(versioning);
+            const semver = allVersioning.get('semver');
 
             const sortedReleases = dep.releases
-              .filter((release) => version.isVersion(release.version))
-              .sort((a, b) => version.sortVersions(a.version, b.version));
+              .filter((release) => semver.isVersion(release.version))
+              .sort((a, b) => semver.sortVersions(a.version, b.version));
 
             const latestVersion = sortedReleases.at(-1)?.version;
 
