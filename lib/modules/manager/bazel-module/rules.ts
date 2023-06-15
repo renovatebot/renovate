@@ -16,27 +16,49 @@ export interface BasePackageDep extends PackageDependency {
   depName: string;
 }
 
+type BasePackageDepMergeKeys = Extract<keyof BasePackageDep, 'registryUrls'>;
+
+export interface MergePackageDep extends BasePackageDep {
+  // The fields that should be copied from this struct to the bazel_dep
+  // PackageDependency.
+  bazelDepMergeFields: BasePackageDepMergeKeys[];
+}
+
 export interface OverridePackageDep extends BasePackageDep {
   // This value is set as the skipReason on the bazel_dep PackageDependency.
   bazelDepSkipReason: SkipReason;
 }
 
-export type BazelModulePackageDep = BasePackageDep | OverridePackageDep;
+export type BazelModulePackageDep =
+  | BasePackageDep
+  | OverridePackageDep
+  | MergePackageDep;
 
 function isOverride(value: BazelModulePackageDep): value is OverridePackageDep {
   return 'bazelDepSkipReason' in value;
 }
 
+function isMerge(value: BazelModulePackageDep): value is MergePackageDep {
+  return 'bazelDepMergeFields' in value;
+}
+
 // This function exists to remove properties that are specific to
-// OverridePackageDep. In theory, there is no harm in leaving the properties
+// BazelModulePackageDep. In theory, there is no harm in leaving the properties
 // as it does not invalidate the PackageDependency interface. However, it might
 // be surprising to someone outside the bazel-module code to see the extra
 // properties.
-export function overrideToPackageDependency(
-  override: OverridePackageDep
+export function bazelModulePackageDepToPackageDependency(
+  bmpd: BazelModulePackageDep
 ): PackageDependency {
-  const copy: Partial<OverridePackageDep> = { ...override };
-  delete copy.bazelDepSkipReason;
+  const copy: BazelModulePackageDep = structuredClone(bmpd);
+  if (isOverride(copy)) {
+    const partial = copy as Partial<OverridePackageDep>;
+    delete partial.bazelDepSkipReason;
+  }
+  if (isMerge(copy)) {
+    const partial = copy as Partial<MergePackageDep>;
+    delete partial.bazelDepMergeFields;
+  }
   return copy;
 }
 
@@ -87,6 +109,40 @@ const GitOverrideToPackageDep = RecordFragmentSchema.extend({
   }
 );
 
+const SingleVersionOverrideToPackageDep = RecordFragmentSchema.extend({
+  children: z.object({
+    rule: StringFragmentSchema.extend({
+      value: z.literal('single_version_override'),
+    }),
+    module_name: StringFragmentSchema,
+    version: StringFragmentSchema.optional(),
+    registry: StringFragmentSchema.optional(),
+  }),
+}).transform(
+  ({
+    children: { rule, module_name: moduleName, version, registry },
+  }): BasePackageDep => {
+    const base: BasePackageDep = {
+      depType: rule.value,
+      depName: moduleName.value,
+      skipReason: 'ignored',
+    };
+    // If a version is specified, then add a skipReason to bazel_dep
+    if (version) {
+      const override = base as OverridePackageDep;
+      override.bazelDepSkipReason = 'is-pinned';
+      override.currentValue = version.value;
+    }
+    // If a registry is specified, then merge it into the bazel_dep
+    if (registry) {
+      const merge = base as MergePackageDep;
+      merge.bazelDepMergeFields = ['registryUrls'];
+      merge.registryUrls = [registry.value];
+    }
+    return base;
+  }
+);
+
 const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
   children: z.object({
     rule: StringFragmentSchema.extend({
@@ -117,6 +173,7 @@ const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
 export const RuleToBazelModulePackageDep = z.union([
   BazelDepToPackageDep,
   GitOverrideToPackageDep,
+  SingleVersionOverrideToPackageDep,
   UnsupportedOverrideToPackageDep,
 ]);
 
@@ -151,7 +208,14 @@ export function processModulePkgDeps(
     logger.debug(`A 'bazel_dep' was not found for '${moduleName}'.`);
     return [];
   }
-  const deps: PackageDependency[] = [bazelDep];
+  // Create a new bazelDep that will be modified. We do not want to change the
+  // input.
+  const bazelDepOut = { ...bazelDep };
+  const deps: PackageDependency[] = [bazelDepOut];
+  const merges = packageDeps.filter(isMerge);
+  for (const merge of merges) {
+    merge.bazelDepMergeFields.forEach((k) => (bazelDepOut[k] = merge[k]));
+  }
   const overrides = packageDeps.filter(isOverride);
   // It is an error for more than one override to exist for a module. We will
   // ignore the overrides if there is more than one.
@@ -164,8 +228,8 @@ export function processModulePkgDeps(
     return deps;
   }
   const override = overrides[0];
-  deps.push(overrideToPackageDependency(override));
-  bazelDep.skipReason = override.bazelDepSkipReason;
+  deps.push(bazelModulePackageDepToPackageDependency(override));
+  bazelDepOut.skipReason = override.bazelDepSkipReason;
   return deps;
 }
 
