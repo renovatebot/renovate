@@ -537,7 +537,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
         {
           ubuntu: 7,
           windows: 10,
-          macos: 12,
+          macos: 13,
         }[platform] ?? 15;
 
       const testTimeoutMilliseconds =
