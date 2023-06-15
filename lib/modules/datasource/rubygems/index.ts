@@ -57,12 +57,11 @@ export class RubyGemsDatasource extends Datasource {
         cachedVersions.type === 'not-supported' &&
         registryHostname !== 'rubygems.org'
       ) {
-        const pkgName = packageName.toLowerCase();
         const hostname = registryHostname;
         return hostname === 'rubygems.pkg.github.com' ||
           hostname === 'gitlab.com'
-          ? await this.getDependencyFallback(registryUrl, pkgName)
-          : await this.getDependency(registryUrl, pkgName);
+          ? await this.getDependencyFallback(registryUrl, packageName)
+          : await this.getDependency(registryUrl, packageName);
       }
     } catch (error) {
       this.handleGenericErrors(error);
