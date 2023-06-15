@@ -27,8 +27,8 @@ export class RubyGemsDatasource extends Datasource {
   private readonly versionsDatasource: VersionsDatasource;
 
   async getReleases({
-    registryUrl,
     packageName,
+    registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
     if (!registryUrl) {
