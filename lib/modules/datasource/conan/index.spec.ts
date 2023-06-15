@@ -259,9 +259,13 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
         .get('/v2/conans/search?q=arti')
-        .reply(200, ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'], {
-          'x-jfrog-version': 'latest',
-        });
+        .reply(
+          200,
+          { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
+          {
+            'x-jfrog-version': 'latest',
+          }
+        );
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
         .get('/v2/conans/arti/1.1.1/_/_/latest')
@@ -309,9 +313,13 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope('https://fake.artifactory.com')
         .get('/v2/conans/search?q=arti')
-        .reply(200, ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'], {
-          'x-jfrog-version': 'latest',
-        });
+        .reply(
+          200,
+          { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
+          {
+            'x-jfrog-version': 'latest',
+          }
+        );
       config.registryUrls = ['https://fake.artifactory.com'];
       config.packageName = 'arti';
       expect(
