@@ -139,7 +139,7 @@ export class ConanDatasource extends Datasource {
         if (versions) {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };
- 
+
           for (const resultString of Object.values(versions.results ?? {})) {
             const fromMatch = conanDatasourceRegex.exec(resultString);
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
