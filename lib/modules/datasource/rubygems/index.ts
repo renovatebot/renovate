@@ -67,8 +67,7 @@ export class RubyGemsDatasource extends Datasource {
     packageName: string
   ): Promise<ReleaseResult | null> {
     const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
-    const gems = packageName.toLocaleLowerCase();
-    const query = getQueryString({ gems });
+    const query = getQueryString({ gems: packageName });
     const url = `${path}?${query}`;
     const { body: buffer } = await this.http.getBuffer(url);
     const data = Marshal.parse(buffer);
@@ -121,22 +120,21 @@ export class RubyGemsDatasource extends Datasource {
     registryUrl: string,
     packageName: string
   ): Promise<ReleaseResult | null> {
-    const pkgName = packageName.toLocaleLowerCase();
-    const info = await this.fetchGemsInfo(registryUrl, pkgName);
+    const info = await this.fetchGemsInfo(registryUrl, packageName);
     if (!info) {
-      return await this.getDependencyFallback(registryUrl, pkgName);
+      return await this.getDependencyFallback(registryUrl, packageName);
     }
 
-    if (info.packageName !== pkgName) {
+    if (info.packageName !== packageName) {
       logger.warn(
-        { lookup: pkgName, returned: info.packageName },
+        { lookup: packageName, returned: info.packageName },
         'Lookup name does not match the returned name.'
       );
       return null;
     }
 
     let releases: Release[] | null = null;
-    const gemVersions = await this.fetchGemVersions(registryUrl, pkgName);
+    const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
     if (gemVersions?.length) {
       releases = gemVersions;
     } else if (info.version) {
