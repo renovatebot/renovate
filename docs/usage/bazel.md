@@ -24,16 +24,18 @@ Renovate checks the workspace's `bazelrc` files for custom registry entries.
 If no registries are specified, it will default to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 If you do not set any custom registries, Renovate defaults to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 
-The following are some important points about Renovate's Bazel registry discovery:
+Here are some important points about Renovate's Bazel registry searches.
+Renovate will:
 
-- Renovate will use all `--registry` flag values found in a workspace's `.bazelrc` file or any files transitively imported by the `.bazelrc` file.
-- Renovate will only use `--registry` flag values that are not associated with [a configuration](https://bazel.build/run/bazelrc#config).
-- Renovate will query the registries in the order that they are found in the bazlerc files.
+- use _all_ `--registry` flag values found in a workspace's `.bazelrc` file
+- use any files that are transitively imported by a `.bazelrc` file
+- only use `--registry` flag values that are not associated with [a configuration](https://bazel.build/run/bazelrc#config)
+- query the registries in the order that they are found in the `.bazelrc` file
 
-#### Example: Multiple bazelrc Files
+#### Example: multiple `.bazelrc` files
 
-In the following example, there is a `.bazelrc` file that imports a file called `.registry.bazelrc`.
-Each of these files contains `--registry` values.
+In this example, there is a `.bazelrc` file which imports another file called `.registry.bazelrc`.
+Both those files have `--registry` values:
 
 ```
 # -------------
@@ -55,7 +57,7 @@ The resulting registry list is:
 
 #### Example: Registry entries using Bazel configuration
 
-In this example, a `.bazelrc` file contains registry values with and without a configuration.
+In this example, a `.bazelrc` file has registry values with and without a configuration:
 
 ```
 # -------------
@@ -66,9 +68,9 @@ build --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-regi
 ```
 
 In this case the `https://internal.server/custom_registry` will be ignored.
-The resulting registry list is:
+The final registry list is:
 
-1. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
+1. `<https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>`
 
 ### Supported Bazel module declarations
 
@@ -101,7 +103,7 @@ If there is a more recent commit on the primary branch than the one listed, the 
 
 #### `single_version_override`
 
-The [single_version_override](https://bazel.build/rules/lib/globals/module#single_version_override) is a declaration with many purposes.
+The [`single_version_override`](https://bazel.build/rules/lib/globals/module#single_version_override) is a declaration with many purposes.
 Renovate evaluates two attributes from this declaration: `version` and `registry`.
 
 If a `version` is specified, it overrides the version specified in the `bazel_dep` pinning it to the specified value.
@@ -119,7 +121,7 @@ single_version_override(
 
 If a `registry` is specified, Renovate will use the specified registry URL to check for a new version.
 In the following example, Renovate will only use the `https://example.com/custom_registry` registry to discover `rules_foo` versions.
-Any registry values specified in the repository's bazlerc files will be ignored for the `rules_foo` module.
+Any registry values specified in the repository's `.bazelrc` files will be ignored for the `rules_foo` module.
 
 ```python
 bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -132,8 +134,8 @@ single_version_override(
 
 #### `archive_override` and `local_path_override`
 
-If Renovate finds an [archive_override](https://bazel.build/rules/lib/globals/module#archive_override) or a [local_path_override](https://bazel.build/rules/lib/globals/module#local_path_override), it will ignore the related `bazel_dep`.
-Since there are no versionable attributes on these declarations, no updates will occur.
+If Renovate finds an [`archive_override`](https://bazel.build/rules/lib/globals/module#archive_override) or a [`local_path_override`](https://bazel.build/rules/lib/globals/module#local_path_override), it will ignore the related `bazel_dep`.
+Because these declarations lack versionable attributes, Renovate will not update them.
 
 ```python
 bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -148,12 +150,19 @@ archive_override(
 
 #### `multiple_version_override`
 
-Renovate ignores [multiple_version_override](https://bazel.build/rules/lib/globals/module#multiple_version_override).
-It does not affect the processing of version updates for a module.
+Renovate ignores [`multiple_version_override`](https://bazel.build/rules/lib/globals/module#multiple_version_override).
+`multiple_version_override` does not affect the processing of version updates for a module.
 
-## Legacy `WORKSPACE` File Support
+## Legacy `WORKSPACE` files
 
-Existing dependencies will be extracted from `container_pull`, `oci_pull`, `git_repository`, `go_repository`, `maven_install`, and `http_archive`/`http_file` declarations
+Renovate will extract dependencies from:
+
+- `container_pull`
+- `oci_pull`
+- `git_repository`
+- `go_repository`
+- `maven_install`
+- `http_archive` or `http_file` declarations
 
 ### `git_repository`
 
