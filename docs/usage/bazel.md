@@ -10,9 +10,9 @@ Renovate supports upgrading dependencies in Bazel `WORKSPACE` files and `MODULE.
 ## How it works
 
 1. Bazel support is enabled automatically
-2. Renovate will search for any `WORKSPACE` and `MODULE.bazel` files in the repository
-3. Existing dependencies will be extracted from the files (see below for the supported dependency declarations)
-4. Renovate will replace any old versions with the latest version available
+1. Renovate will search for any `WORKSPACE` and `MODULE.bazel` files in the repository
+1. Existing dependencies will be extracted from the files (see below for the supported dependency declarations)
+1. Renovate will replace any old versions with the latest version available
 
 ## Bazel module (`MODULE.bazel`) support
 
@@ -51,7 +51,7 @@ build --registry=https://example.com/custom_registry
 The resulting registry list is:
 
 1. <https://example.com/custom_registry>
-2. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
+1. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
 
 #### Example: Registry entries using Bazel configuration
 
@@ -160,8 +160,8 @@ Existing dependencies will be extracted from `container_pull`, `oci_pull`, `git_
 Renovate will update any `git_repository` declaration that has the following:
 
 1. name
-2. remote matching `https://github.com/<owner>/<repo>.git`
-3. tag using a valid SemVer
+1. remote matching `https://github.com/<owner>/<repo>.git`
+1. tag using a valid SemVer
 
 e.g.:
 
@@ -180,8 +180,8 @@ Renovate uses the list of **tags** on the remote repository (GitHub) to detect a
 Renovate will update any `http_archive` or `http_file` declaration that has the following:
 
 1. name
-2. url matching `https://github.com/<owner>/<repo>/releases/download/<semver>/<repo>.tar.gz`
-3. sha256
+1. url matching `https://github.com/<owner>/<repo>/releases/download/<semver>/<repo>.tar.gz`
+1. sha256
 
 e.g.:
 
