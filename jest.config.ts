@@ -535,10 +535,10 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
 
       const runnerTimeoutMinutes =
         {
-          ubuntu: 10,
-          windows: 20,
-          macos: 20,
-        }[platform] ?? 20;
+          ubuntu: 7,
+          windows: 10,
+          macos: 12,
+        }[platform] ?? 15;
 
       const testTimeoutMilliseconds =
         {
