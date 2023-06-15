@@ -1,5 +1,4 @@
-import { fs, mocked } from '../../../../test/util';
-import { getConfig } from '../../../config/defaults';
+import { fs, mocked, partial } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../modules/manager/html';
 import * as _fileMatch from './file-match';
@@ -18,7 +17,7 @@ describe('workers/repository/extract/manager-files', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig();
+      config = partial<RenovateConfig>();
     });
 
     it('returns empty of manager is disabled', async () => {

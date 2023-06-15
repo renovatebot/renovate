@@ -1,5 +1,4 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { getConfig } from '../../../../config/defaults';
+import { RenovateConfig, partial } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 
@@ -9,7 +8,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig();
+      config = partial<RenovateConfig>({
+        prHourlyLimit: 2, // default
+      });
     });
 
     it('handles empty', () => {

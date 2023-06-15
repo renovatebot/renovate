@@ -16,7 +16,13 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  // default values
+  config = partial<RenovateConfig>({
+    onboardingBranch: 'configure/renovate',
+    suppressNotifications: ['deprecationWarningIssues'],
+    configWarningReuseIssue: true,
+    confidential: false,
+  });
 });
 
 describe('workers/repository/error-config', () => {

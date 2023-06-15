@@ -104,8 +104,12 @@ export function getDepWarningsPR(
 }
 
 export function getDepWarningsDashboard(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
+  config: RenovateConfig
 ): string {
+  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+    return '';
+  }
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   if (!warnings.length) {
     return '';

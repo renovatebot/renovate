@@ -1,12 +1,14 @@
-import type { RenovateConfig } from '../../../test/util';
-import { getConfig } from '../../config/defaults';
+import { RenovateConfig, partial } from '../../../test/util';
 import { processResult } from './result';
 
 let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({
+    repoIsActivated: true,
+    repoIsOnboarded: true,
+  });
 });
 
 describe('workers/repository/result', () => {

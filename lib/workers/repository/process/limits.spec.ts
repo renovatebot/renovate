@@ -9,7 +9,13 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({
+    branchPrefix: 'foo/',
+    onboardingBranch: 'bar/configure',
+    prHourlyLimit: 2,
+    prConcurrentLimit: 10,
+    branchConcurrentLimit: null,
+  });
 });
 
 describe('workers/repository/process/limits', () => {
@@ -31,8 +37,6 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getPrHourlyRemaining({
         ...config,
         prHourlyLimit: 10,
-        branchPrefix: 'foo/',
-        onboardingBranch: 'bar/configure',
       });
       expect(res).toBe(7);
     });

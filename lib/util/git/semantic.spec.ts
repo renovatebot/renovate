@@ -1,5 +1,4 @@
-import { RenovateConfig, git } from '../../../test/util';
-import { getConfig } from '../../config/defaults';
+import { RenovateConfig, git, partial } from '../../../test/util';
 import { initRepoCache } from '../cache/repository/init';
 import { detectSemanticCommits } from './semantic';
 
@@ -9,9 +8,7 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
-  config.errors = [];
-  config.warnings = [];
+  config = partial<RenovateConfig>();
 });
 
 describe('util/git/semantic', () => {
