@@ -269,6 +269,7 @@ export async function resolveConstraint(
   const releases = pkgReleases?.releases ?? [];
 
   if (!releases?.length) {
+    logger.warn({ toolConfig }, 'No tool releases found.');
     throw new Error('No tool releases found.');
   }
 
