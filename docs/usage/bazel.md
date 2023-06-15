@@ -55,7 +55,7 @@ The resulting registry list is:
 1. `<https://example.com/custom_registry>`
 1. `<https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>`
 
-#### Example: Registry entries using Bazel configuration
+#### Example: registry entries using Bazel configuration
 
 In this example, a `.bazelrc` file has registry values with and without a configuration:
 
