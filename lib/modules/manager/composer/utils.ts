@@ -34,6 +34,10 @@ export function getComposerArguments(
     }
   }
 
+  if (config.composerAdditionalArguments) {
+    args += ` ${config.composerAdditionalArguments}`;
+  }
+
   args += ' --no-ansi --no-interaction';
   if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
     args += ' --no-scripts --no-autoloader';

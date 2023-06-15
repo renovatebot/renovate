@@ -367,6 +367,12 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
+    name: 'composerAdditionalArguments',
+    description:
+      'Configure additional arguments for the Composer package manager.',
+    type: 'string',
+  },
+  {
     name: 'goGetDirs',
     description: 'Directory pattern to run `go get` on',
     type: 'array',
