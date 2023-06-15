@@ -18,16 +18,16 @@ Renovate supports upgrading dependencies in Bazel `WORKSPACE` files and `MODULE.
 
 ### Bazel Registry Discovery
 
-Bazel module version discovery centers around interrogation of one or more [Bazel registries](https://bazel.build/external/registry). 
+Bazel module version discovery centers around interrogation of one or more [Bazel registries](https://bazel.build/external/registry).
 A Bazel workspace can specify the registries that it uses by including [--registry](https://bazel.build/reference/command-line-reference#flag--registry) entries in [bazelrc files](https://bazel.build/run/bazelrc).
 Renovate will inspect a workspace's bazelrc files looking for registries to use during Bazel module version discovery.
 If no registries are specified, it will default to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 
 The following are some important points about Renovate's Bazel registry discovery:
+
 - Renovate will use all `--registry` flag values found in a workspace's `.bazelrc` file or any files transitively imported by the `.bazelrc` file.
 - Renovate will only use `--registry` flag values that are not associated with [a configuration](https://bazel.build/run/bazelrc#config).
 - Renovate will query the registries in the order that they are found in the bazlerc files.
-
 
 #### Example: Multiple bazelrc Files
 
@@ -49,9 +49,8 @@ build --registry=https://example.com/custom_registry
 
 The resulting registry list is:
 
-1. https://example.com/custom_registry
-2. https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
-
+1. <https://example.com/custom_registry>
+2. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
 
 #### Example: Registry Entries Using Bazel Configuration
 
@@ -65,22 +64,22 @@ build:ci --registry=https://internal.server/custom_registry
 build --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
 ```
 
-In this case the `https://internal.server/custom_registry` will be ignored. 
+In this case the `https://internal.server/custom_registry` will be ignored.
 The resulting registry list is:
 
-1. https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
+1. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
 
 ### Supported Bazel Module Declarations
 
 #### `bazel_dep`
 
-Renovate will update the `version` value for a [bazel_dep](https://bazel.build/rules/lib/globals/module#bazel_dep) declaration. 
+Renovate will update the `version` value for a [bazel_dep](https://bazel.build/rules/lib/globals/module#bazel_dep) declaration.
 
 ```python
 bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
 ```
 
-In the example above, the `0.15.0` will be evaluated against a repository's registries. 
+In the example above, the `0.15.0` will be evaluated against a repository's registries.
 If a new version is found, the value will be replaced with the new version.
 
 #### `git_override`
@@ -117,7 +116,7 @@ single_version_override(
 )
 ```
 
-If a `registry` is specified, Renovate will use the specified registry URL to check for a new version. 
+If a `registry` is specified, Renovate will use the specified registry URL to check for a new version.
 In the following example, Renovate will only use the `https://example.com/custom_registry` registry to discover `rules_foo` versions.
 Any registry values specified in the repository's bazlerc files will be ignored for the `rules_foo` module.
 
