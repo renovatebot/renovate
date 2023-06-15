@@ -118,7 +118,7 @@ single_version_override(
 ```
 
 If a `registry` is specified, Renovate will use the specified registry URL to check for a new version. 
-In the following example, Renovate will only use the `https://example.com/custom_registry` registry to look for versions for `rules_foo`.
+In the following example, Renovate will only use the `https://example.com/custom_registry` registry to discover `rules_foo` versions.
 Any registry values specified in the repository's bazlerc files will be ignored for the `rules_foo` module.
 
 ```python
