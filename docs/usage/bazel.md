@@ -14,9 +14,9 @@ Renovate supports upgrading dependencies in Bazel `WORKSPACE` files and `MODULE.
 3. Existing dependencies will be extracted from the files (see below for the supported dependency declarations)
 4. Renovate will replace any old versions with the latest version available
 
-## Bazel Module (`MODULE.bazel`) Support
+## Bazel module (`MODULE.bazel`) support
 
-### Bazel Registry Discovery
+### Bazel registry discovery
 
 Bazel module version discovery centers around interrogation of one or more [Bazel registries](https://bazel.build/external/registry).
 A Bazel workspace can specify the registries that it uses by including [--registry](https://bazel.build/reference/command-line-reference#flag--registry) entries in [bazelrc files](https://bazel.build/run/bazelrc).
@@ -52,7 +52,7 @@ The resulting registry list is:
 1. <https://example.com/custom_registry>
 2. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
 
-#### Example: Registry Entries Using Bazel Configuration
+#### Example: Registry entries using Bazel configuration
 
 In this example, a `.bazelrc` file contains registry values with and without a configuration.
 
@@ -69,7 +69,7 @@ The resulting registry list is:
 
 1. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
 
-### Supported Bazel Module Declarations
+### Supported Bazel module declarations
 
 #### `bazel_dep`
 
