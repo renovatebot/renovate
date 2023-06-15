@@ -33,10 +33,10 @@ export class RubyGemsDatasource extends Datasource {
       /* eslint-disable @typescript-eslint/restrict-template-expressions */
       `${registryUrl}/${packageName}`,
   })
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const registryUrl = config.registryUrl;
-    const packageName = config.packageName.toLocaleLowerCase();
-
+  async getReleases({
+    registryUrl,
+    packageName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
     if (!registryUrl) {
       return null;
@@ -67,7 +67,8 @@ export class RubyGemsDatasource extends Datasource {
     packageName: string
   ): Promise<ReleaseResult | null> {
     const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
-    const query = getQueryString({ gems: packageName });
+    const gems = packageName.toLocaleLowerCase();
+    const query = getQueryString({ gems });
     const url = `${path}?${query}`;
     const { body: buffer } = await this.http.getBuffer(url);
     const data = Marshal.parse(buffer);
@@ -120,21 +121,22 @@ export class RubyGemsDatasource extends Datasource {
     registryUrl: string,
     packageName: string
   ): Promise<ReleaseResult | null> {
-    const info = await this.fetchGemsInfo(registryUrl, packageName);
+    const pkgName = packageName.toLocaleLowerCase();
+    const info = await this.fetchGemsInfo(registryUrl, pkgName);
     if (!info) {
-      return await this.getDependencyFallback(registryUrl, packageName);
+      return await this.getDependencyFallback(registryUrl, pkgName);
     }
 
-    if (info.packageName !== packageName) {
+    if (info.packageName !== pkgName) {
       logger.warn(
-        { lookup: packageName, returned: info.packageName },
+        { lookup: pkgName, returned: info.packageName },
         'Lookup name does not match the returned name.'
       );
       return null;
     }
 
     let releases: Release[] | null = null;
-    const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
+    const gemVersions = await this.fetchGemVersions(registryUrl, pkgName);
     if (gemVersions?.length) {
       releases = gemVersions;
     } else if (info.version) {
