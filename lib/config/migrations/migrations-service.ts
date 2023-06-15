@@ -39,6 +39,7 @@ import { PostUpdateOptionsMigration } from './custom/post-update-options-migrati
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
+import { RecreateClosedMigration } from './custom/recreate-closed-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
@@ -146,6 +147,7 @@ export class MigrationsService {
     SemanticPrefixMigration,
     MatchDatasourcesMigration,
     DatasourceMigration,
+    RecreateClosedMigration,
     StabilityDaysMigration,
     FetchReleaseNotes,
   ];
