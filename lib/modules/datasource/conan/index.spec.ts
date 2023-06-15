@@ -265,19 +265,25 @@ describe('modules/datasource/conan/index', () => {
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
         .get('/v2/conans/arti/1.1.1/_/_/latest')
         .reply(200, {
-          "revision" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "time" : "2032-06-23T00:00:00.000+0000"
+          revision: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          time: '2032-06-23T00:00:00.000+0000',
         });
       httpMock
-        .scope('https://fake.artifactory.com/artifactory/api/storage/test-repo/')
-        .get('/_/arti/1.1.1/_/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/export/conanfile.py?properties=conan.package.url')
+        .scope(
+          'https://fake.artifactory.com/artifactory/api/storage/test-repo/'
+        )
+        .get(
+          '/_/arti/1.1.1/_/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/export/conanfile.py?properties=conan.package.url'
+        )
         .reply(200, {
-          "properties" : {
-            "conan.package.url" : "https://fake.conan.url.com",
-          }
+          properties: {
+            'conan.package.url': 'https://fake.conan.url.com',
+          },
         });
 
-      config.registryUrls = ['https://fake.artifactory.com/artifactory/api/conan/test-repo'];
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
       config.packageName = 'arti';
       expect(
         await getPkgReleases({
@@ -285,15 +291,16 @@ describe('modules/datasource/conan/index', () => {
           packageName: 'arti/1.1@_/_',
         })
       ).toEqual({
-        registryUrl: "https://fake.artifactory.com/artifactory/api/conan/test-repo",
+        registryUrl:
+          'https://fake.artifactory.com/artifactory/api/conan/test-repo',
         releases: [
           {
-            version: "1.0.0"
+            version: '1.0.0',
           },
           {
-            version: "1.1.1"
-          }
-        ]
+            version: '1.1.1',
+          },
+        ],
       });
     });
 
@@ -310,15 +317,15 @@ describe('modules/datasource/conan/index', () => {
           packageName: 'arti/1.1@_/_',
         })
       ).toEqual({
-        registryUrl: "https://fake.artifactory.com",
+        registryUrl: 'https://fake.artifactory.com',
         releases: [
           {
-            version: "1.0.0"
+            version: '1.0.0',
           },
           {
-            version: "1.1.1"
-          }
-        ]
+            version: '1.1.1',
+          },
+        ],
       });
     });
 
@@ -326,10 +333,16 @@ describe('modules/datasource/conan/index', () => {
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo')
         .get('/v2/conans/search?q=arti')
-        .reply(200, {
-          "results" : [ "arti/invalid_version@_/_" ]
-        }, { 'x-jfrog-version': 'latest' });
-      config.registryUrls = ['https://fake.artifactory.com/artifactory/api/conan/test-repo'];
+        .reply(
+          200,
+          {
+            results: ['arti/invalid_version@_/_'],
+          },
+          { 'x-jfrog-version': 'latest' }
+        );
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
       config.packageName = 'arti';
       expect(
         await getPkgReleases({
@@ -337,17 +350,20 @@ describe('modules/datasource/conan/index', () => {
           packageName: 'arti/1.1@_/_',
         })
       ).toEqual({
-        registryUrl: 'https://fake.artifactory.com/artifactory/api/conan/test-repo',
-        releases: []
+        registryUrl:
+          'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+        releases: [],
       });
-    })
+    });
 
     it('non artifactory header', async () => {
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo')
         .get('/v2/conans/search?q=arti')
         .reply(200, {}, { 'x-jfrog-invalid-header': 'latest' });
-      config.registryUrls = ['https://fake.artifactory.com/artifactory/api/conan/test-repo'];
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
       config.packageName = 'arti';
       expect(
         await getPkgReleases({
@@ -355,6 +371,6 @@ describe('modules/datasource/conan/index', () => {
           packageName: 'arti/1.1@_/_',
         })
       ).toBeNull();
-    })
+    });
   });
 });

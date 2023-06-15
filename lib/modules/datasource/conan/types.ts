@@ -21,12 +21,12 @@ export interface ConanPackage {
 }
 
 export interface ConanRecipeProperties {
-  "conan.package.channel" : string[];
-  "conan.package.license" : string[];
-  "conan.package.name" : string[];
-  "conan.package.url" : string[];
-  "conan.package.user" : string[];
-  "conan.package.version" : string[];
+  'conan.package.channel': string[];
+  'conan.package.license': string[];
+  'conan.package.name': string[];
+  'conan.package.url': string[];
+  'conan.package.user': string[];
+  'conan.package.version': string[];
 }
 
 export interface ConanProperties {
