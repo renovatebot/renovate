@@ -930,7 +930,7 @@ describe('util/package-rules/index', () => {
       packageFile: 'examples/foo/package.json',
       packageRules: [
         {
-          matchFiles: ['package.json'],
+          matchFileNames: ['package.json'],
           x: 1,
         },
       ],
@@ -954,7 +954,7 @@ describe('util/package-rules/index', () => {
       lockFiles: ['yarn.lock'],
       packageRules: [
         {
-          matchFiles: ['yarn.lock'],
+          matchFileNames: ['yarn.lock'],
           x: 1,
         },
       ],
@@ -968,7 +968,7 @@ describe('util/package-rules/index', () => {
       packageFile: 'examples/foo/package.json',
       packageRules: [
         {
-          matchPaths: ['examples/**', 'lib/'],
+          matchFileNames: ['examples/**', 'lib/'],
           x: 1,
         },
       ],
@@ -989,7 +989,7 @@ describe('util/package-rules/index', () => {
       ...config,
       depName: 'test',
     });
-    expect(res3.x).toBeDefined();
+    expect(res3.x).toBeUndefined();
   });
 
   it('empty rules', () => {

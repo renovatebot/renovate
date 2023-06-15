@@ -1863,28 +1863,28 @@ Example:
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
-Path rules are convenient to use if you wish to apply configuration rules to certain package files using patterns.
+File name matches are convenient to use if you wish to apply configuration rules to certain package or lock files using patterns.
 For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPaths": ["examples/**"],
+      "matchFileNames": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
     }
   ]
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with a `minimatch` pattern or use [`matchFiles`](#matchfiles) with an exact match.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` pattern (which can include an exact file name match).
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchFiles": ["package.json"],
+      "matchFileNames": ["package.json"],
       "dependencyDashboardApproval": true
     }
   ]
@@ -2179,23 +2179,50 @@ Use the syntax `!/ /` like this:
 }
 ```
 
-### matchFiles
+### matchFileNames
 
-Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
+Renovate will compare `matchFileNames` glob matching against the dependency's package file or lock file.
 
-For example the following would match `package.json` but not `package/frontend/package.json`:
+The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchFiles": ["package.json"]
+      "matchFileNames": ["package.json"],
+      "labels": ["npm"]
     }
   ]
 }
 ```
 
-Use [`matchPaths`](#matchpaths) instead if you need more flexible matching.
+The following example matches any `package.json`, including files like `backend/package.json`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group dependencies from package.json files",
+      "matchFileNames": ["**/package.json"],
+      "groupName": "All package.json changes"
+    }
+  ]
+}
+```
+
+The following example matches any file in directories starting with `app/`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchFileNames": ["app/**"],
+      "groupName": "App dependencies"
+    }
+  ]
+}
+```
 
 ### matchDepNames
 
@@ -2254,43 +2281,6 @@ See also `excludePackagePrefixes`.
 ```
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
-
-### matchPaths
-
-Renovate finds the file(s) listed in `matchPaths` with a `minimatch` glob pattern.
-
-For example the following matches any `package.json`, including files like `backend/package.json`:
-
-```json
-{
-  "packageRules": [
-    {
-      "description": "Group dependencies from package.json files",
-      "matchPaths": ["**/package.json"],
-      "groupName": "All package.json changes"
-    }
-  ]
-}
-```
-
-The following matches any file in directories starting with `app/`:
-
-```json
-{
-  "packageRules": [
-    {
-      "description": "Group all dependencies from the app directory",
-      "matchPaths": ["app/**"],
-      "groupName": "App dependencies"
-    }
-  ]
-}
-```
-
-<!-- prettier-ignore -->
-!!! warning
-    Partial matches for `matchPaths` are deprecated.
-    Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
 
 ### matchSourceUrlPrefixes
 
@@ -2513,28 +2503,28 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 ## platformAutomerge
 
 <!-- prettier-ignore -->
-!!! warning
-    Before you enable `platformAutomerge` you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
+!!! note
+    If you use the default `platformAutomerge=true` then you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
     If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
     On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
     [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
     [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
     If you're using another platform, search their documentation for a similar feature.
 
-If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
 Renovate tries platform-native automerge only when it initially creates the PR.
 Any PR that is being updated will be automerged with the Renovate-based automerge.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure, GitHub and GitLab.
+This option is available for Azure, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
 Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=true`.
 Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
-This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
+This behavior is no longer guaranteed when `platformAutomerge` is `true` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
 Please check platform specific docs for version requirements.
@@ -2605,6 +2595,7 @@ You can use variable templating in your commands if [`allowPostUpgradeCommandTem
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
+Dotfiles are included.
 
 ### executionMode
 
@@ -3276,9 +3267,8 @@ There are times when a dependency version in use by a project gets removed from 
 For some registries, existing releases or even whole packages can be removed or "yanked" at any time, while for some registries only very new or unused releases can be removed.
 Renovate's "rollback" feature exists to propose a downgrade to the next-highest release if the current release is no longer found in the registry.
 
-Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
-
-You can configure the `rollbackPrs` property globally, per-language, or per-package to override the default behavior.
+Renovate does not create these rollback PRs by default, so this functionality needs to be opted-into.
+We recommend you do this selectively with `packageRules` and not globally.
 
 ## ruby
 

@@ -19,22 +19,17 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPostUpgradeCommandTemplating
 
-Set to `true` to allow templating of dependency level post-upgrade commands.
-
 Let's look at an example of configuring packages with existing Angular migrations.
-
-Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`:
 
 ```javascript
 module.exports = {
-  allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
+The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped.
 
 ```json
 {
@@ -59,6 +54,9 @@ With this configuration, the executable command for `@angular/core` looks like t
 npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
+
+If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
+But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
 
 ## allowScripts
 
@@ -799,12 +797,6 @@ It could then be used in a repository config or preset like so:
 ```
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
-
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 

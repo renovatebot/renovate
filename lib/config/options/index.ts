@@ -24,9 +24,9 @@ const options: RenovateOptions[] = [
   {
     name: 'allowPostUpgradeCommandTemplating',
     description:
-      'Set this to `true` to allow templating for post-upgrade commands.',
+      'Set this to `false` to disable template compilation for post-upgrade commands.',
     type: 'boolean',
-    default: false,
+    default: true,
     globalOnly: true,
   },
   {
@@ -730,14 +730,6 @@ const options: RenovateOptions[] = [
     type: 'boolean',
   },
   {
-    name: 'skipInstalls',
-    description:
-      'Skip installing modules/dependencies if lock file updating is possible without a full install.',
-    type: 'boolean',
-    default: null,
-    globalOnly: true,
-  },
-  {
     name: 'autodiscover',
     description: 'Autodiscover all repositories.',
     stage: 'global',
@@ -1294,20 +1286,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchFiles',
+    name: 'matchFileNames',
     description:
       'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    stage: 'repository',
-    parent: 'packageRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'matchPaths',
-    description:
-      'List of strings or glob patterns to match against package files. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -2406,6 +2387,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'branchAutomergeFailure',
       'configErrorIssue',
+      'dependencyLookupWarnings',
       'deprecationWarningIssues',
       'lockFileErrors',
       'missingCredentialsError',
@@ -2612,7 +2594,7 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
-    default: false,
+    default: true,
   },
   {
     name: 'userStrings',
