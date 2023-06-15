@@ -14,34 +14,74 @@ inputs:
   os:
     description: 'Composite actions do not support `runner.os`, so it must be passed in as an input'
     required: true
-outputs:
-  cache-hit:
-    description: 'Cache hit for `node_modules`'
-    value: ${{ steps.node-modules-cache.outputs.cache-hit }}
+  save-cache:
+    description: 'Save cache when needed'
+    required: false
+    default: false
 runs:
   using: 'composite'
   steps:
-    - name: Cache node_modules
-      id: node-modules-cache
-      uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+    - name: Calculate `CACHE_KEY`
+      shell: bash
+      run: |
+        echo 'CACHE_KEY=node_modules-${{
+          inputs.os
+        }}-${{
+          inputs.node-version
+        }}-${{
+          hashFiles('yarn.lock')
+        }}' >> "$GITHUB_ENV"
+
+    - name: Restore `node_modules`
+      id: node-modules-restore
+      uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
       with:
         path: node_modules
-        key: node-modules-${{ inputs.os }}-${{ inputs.node-version }}-${{ hashFiles('yarn.lock') }}
+        key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
+
+    - name: Calculate `CACHE_HIT`
+      shell: bash
+      run: |
+        echo 'CACHE_HIT=${{
+          (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
+        }}' >> "$GITHUB_ENV"
 
     - name: Setup Node
       uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ steps.node-modules-cache.outputs.cache-hit != 'true' && 'yarn' || '' }}
+        cache: ${{ env.CACHE_HIT != 'true' && 'yarn' || '' }}
 
     - name: Install dependencies
       uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
-      if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: yarn --silent install --frozen-lockfile --ignore-scripts
+        command: |
+          yarn install --frozen-lockfile --ignore-scripts
+          yarn prepare:re2
 
-    - name: Run scripts
+    - name: Write `node_modules` cache
+      if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
+      uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: node_modules
+        key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
+
+    - name: Generate files
       shell: bash
-      run: yarn --silent prepare
+      run: >
+        if [ -d lib ]; then
+          yarn prepare:generate;
+        fi
+
+    - name: Git config
+      shell: bash
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.symlinks true
+        git config --global user.email 'renovate@whitesourcesoftware.com'
+        git config --global user.name  'Renovate Bot'
