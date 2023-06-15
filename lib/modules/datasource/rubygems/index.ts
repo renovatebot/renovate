@@ -26,13 +26,6 @@ export class RubyGemsDatasource extends Datasource {
 
   private readonly versionsDatasource: VersionsDatasource;
 
-  @cache({
-    namespace: `datasource-${RubyGemsDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      /* eslint-disable @typescript-eslint/restrict-template-expressions */
-      `${registryUrl}/${packageName}`,
-  })
   async getReleases({
     registryUrl,
     packageName,
@@ -116,6 +109,13 @@ export class RubyGemsDatasource extends Datasource {
     }
   }
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}-getDependency`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `${registryUrl}/${packageName}`,
+  })
   async getDependency(
     registryUrl: string,
     packageName: string
