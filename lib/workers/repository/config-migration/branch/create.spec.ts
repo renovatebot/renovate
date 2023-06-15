@@ -1,10 +1,11 @@
 import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, getConfig, partial } from '../../../../../test/util';
+import { RenovateConfig, partial } from '../../../../../test/util';
 import { scm } from '../../../../modules/platform/scm';
 import { createConfigMigrationBranch } from './create';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
+import { getConfig } from '../../../../config/defaults';
 
 jest.mock('../../../../util/git');
 

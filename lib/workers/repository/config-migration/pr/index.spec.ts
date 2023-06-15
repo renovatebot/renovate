@@ -4,7 +4,6 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   partial,
   platform,
   scm,
@@ -16,6 +15,7 @@ import { hashBody } from '../../../../modules/platform/pr-body';
 import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
+import { getConfig } from '../../../../config/defaults';
 
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = jest.spyOn(platform, 'massageMarkdown');

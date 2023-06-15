@@ -1,4 +1,5 @@
-import { getConfig, mocked } from '../../../../../test/util';
+import { mocked } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import type { Release } from '../../../../modules/datasource';
 import * as allVersioning from '../../../../modules/versioning';
 import * as _dateUtil from '../../../../util/date';

@@ -1,7 +1,6 @@
 import type { RequestError, Response } from 'got';
 import {
   RenovateConfig,
-  getConfig,
   partial,
   platform,
   scm,
@@ -14,6 +13,7 @@ import * as memCache from '../../../../util/cache/memory';
 import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
+import { getConfig } from '../../../../config/defaults';
 
 jest.mock('../../../../util/git');
 

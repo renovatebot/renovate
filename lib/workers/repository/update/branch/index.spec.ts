@@ -1,6 +1,5 @@
 import {
   fs,
-  getConfig,
   git,
   mocked,
   mockedFunction,
@@ -46,6 +45,7 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
+import { getConfig } from '../../../../config/defaults';
 
 jest.mock('./get-updated');
 jest.mock('./schedule');

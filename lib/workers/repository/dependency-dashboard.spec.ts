@@ -4,7 +4,6 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mockedFunction,
   platform,
@@ -24,6 +23,7 @@ import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+import { getConfig } from '../../config/defaults';
 
 const createVulnerabilitiesMock = jest.fn();
 jest.mock('./process/vulnerabilities', () => {

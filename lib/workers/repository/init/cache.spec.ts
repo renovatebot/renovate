@@ -1,4 +1,4 @@
-import { getConfig } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import type { WorkerPlatformConfig } from './apis';
 import { initializeCaches } from './cache';

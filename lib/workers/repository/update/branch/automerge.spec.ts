@@ -1,10 +1,5 @@
-import {
-  getConfig,
-  git,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { git, partial, platform, scm } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';

@@ -2,7 +2,6 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   fs,
-  getConfig,
   git,
   mocked,
   platform,
@@ -24,6 +23,7 @@ import { OnboardingState } from '../common';
 import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import { checkOnboardingBranch } from '.';
+import { getConfig } from '../../../../config/defaults';
 
 const configModule: any = _config;
 

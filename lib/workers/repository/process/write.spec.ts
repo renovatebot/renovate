@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mocked,
   partial,
@@ -26,6 +25,7 @@ import {
   syncBranchState,
   writeUpdates,
 } from './write';
+import { getConfig } from '../../../config/defaults';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/cache/repository');

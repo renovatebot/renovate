@@ -1,4 +1,5 @@
-import { fs, getConfig, mocked } from '../../../../test/util';
+import { fs, mocked } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../modules/manager/html';
 import * as _fileMatch from './file-match';

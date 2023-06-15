@@ -1,10 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  getConfig,
-  partial,
-  platform,
-} from '../../../test/util';
+import { RenovateConfig, partial, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -13,6 +8,7 @@ import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
 } from './error-config';
+import { getConfig } from '../../config/defaults';
 
 jest.mock('../../modules/platform');
 

@@ -1,9 +1,10 @@
-import { getConfig, mocked, partial, scm } from '../../../../test/util';
+import { mocked, partial, scm } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
+import { getConfig } from '../../../config/defaults';
 
 jest.mock('./manager-files');
 jest.mock('../../../util/git');

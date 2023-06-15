@@ -1,13 +1,13 @@
 import {
   RenovateConfig,
   fs,
-  getConfig,
   logger,
   mocked,
   partial,
   platform,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
 import * as repoCache from '../../../util/cache/repository';

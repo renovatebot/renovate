@@ -1,4 +1,5 @@
-import { getConfig, platform } from '../../../../../test/util';
+import { platform } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import {
   ConfidenceConfig,
   StabilityConfig,

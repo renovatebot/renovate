@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
+import { getConfig } from '../../../config/defaults';
 
 const {
   commitMessage,

@@ -2,7 +2,6 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   git,
   mockedFunction,
   partial,
@@ -16,6 +15,7 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
+import { getConfig } from '../../../../config/defaults';
 
 jest.mock('./migrated-data');
 jest.mock('./rebase');

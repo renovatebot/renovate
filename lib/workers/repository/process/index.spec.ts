@@ -1,6 +1,5 @@
 import {
   RenovateConfig,
-  getConfig,
   git,
   logger,
   mocked,
@@ -14,6 +13,7 @@ import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, updateRepo } from '.';
+import { getConfig } from '../../../config/defaults';
 
 jest.mock('../../../util/git');
 jest.mock('./extract-update');
