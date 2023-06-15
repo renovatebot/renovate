@@ -19,8 +19,8 @@ Renovate supports upgrading dependencies in Bazel `WORKSPACE` files and `MODULE.
 ### Bazel registry discovery
 
 Renovate searches [Bazel registries](https://bazel.build/external/registry) to find new Bazel module versions.
-You can customize the registries your Bazel workspace uses by including [`--registry` CLI flag](https://bazel.build/reference/command-line-reference#flag--registry) entries in your [`bazelrc` files](https://bazel.build/run/bazelrc).
-Renovate checks the workspace's `bazelrc` files for custom registry entries.
+You can customize the registries your Bazel workspace uses by including [`--registry` CLI flag](https://bazel.build/reference/command-line-reference#flag--registry) entries in your [`.bazelrc` files](https://bazel.build/run/bazelrc).
+Renovate checks the workspace's `.bazelrc` files for custom registry entries.
 If no registries are specified, it will default to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 If you do not set any custom registries, Renovate defaults to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 
@@ -52,8 +52,8 @@ build --registry=https://example.com/custom_registry
 
 The resulting registry list is:
 
-1. <https://example.com/custom_registry>
-1. <https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>
+1. `<https://example.com/custom_registry>`
+1. `<https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>`
 
 #### Example: Registry entries using Bazel configuration
 
@@ -76,7 +76,7 @@ The final registry list is:
 
 #### `bazel_dep`
 
-Renovate will update the `version` value for a [bazel_dep](https://bazel.build/rules/lib/globals/module#bazel_dep) declaration.
+Renovate will update the `version` value for a [`bazel_dep`](https://bazel.build/rules/lib/globals/module#bazel_dep) declaration.
 
 ```python
 bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
@@ -87,7 +87,7 @@ If a new version is found, the value will be replaced with the new version.
 
 #### `git_override`
 
-If Renovate finds a [git_override](https://bazel.build/rules/lib/globals/module#git_override), it will ignore the related `bazel_dep` and evaluate the `commit` value at the specified `remote`.
+If Renovate finds a [`git_override`](https://bazel.build/rules/lib/globals/module#git_override), it will ignore the related `bazel_dep` and evaluate the `commit` value at the specified `remote`.
 
 ```python
 bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
@@ -99,7 +99,7 @@ git_override(
 )
 ```
 
-If there is a more recent commit on the primary branch than the one listed, the `commit` value will be updated.
+If the primary branch has a newer commit than in the list, Renovate will update the `commit` value.
 
 #### `single_version_override`
 
