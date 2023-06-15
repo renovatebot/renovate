@@ -22,6 +22,7 @@ Renovate searches [Bazel registries](https://bazel.build/external/registry) to f
 You can customize the registries your Bazel workspace uses by including [`--registry` CLI flag](https://bazel.build/reference/command-line-reference#flag--registry) entries in your [`bazelrc` files](https://bazel.build/run/bazelrc).
 Renovate checks the workspace's `bazelrc` files for custom registry entries.
 If no registries are specified, it will default to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
+If you do not set any custom registries, Renovate defaults to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 
 The following are some important points about Renovate's Bazel registry discovery:
 
