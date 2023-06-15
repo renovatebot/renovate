@@ -320,6 +320,7 @@ jobs:
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           sparse-checkout: codecov.yml
+          fetch-depth: 2 # We think codecov used to resolve coverage changes using previous commit, but maybe not
 
       - name: Download coverage reports
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
