@@ -28,6 +28,7 @@ INFO: Config validated successfully
 ### Pass files to check as CLI arguments
 
 Or you can pass the files to check to the `renovate-config-validator` program as CLI arguments.
+You can use this to check config files with non-default names, like when you're using preset repositories.
 For example:
 
 ```console
