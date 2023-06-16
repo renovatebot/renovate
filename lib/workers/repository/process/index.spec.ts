@@ -150,5 +150,20 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'dev' });
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'some-other' });
     });
+
+    it('maps $default to defaultBranch', async () => {
+      extract.mockResolvedValue({} as never);
+      config.baseBranches = ['$default'];
+      config.defaultBranch = 'master';
+      git.getBranchList.mockReturnValue(['dev', 'master']);
+      scm.branchExists.mockResolvedValue(true);
+      const res = await extractDependencies(config);
+      expect(res).toStrictEqual({
+        branchList: [undefined],
+        branches: [undefined],
+        packageFiles: undefined,
+      });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'master' });
+    });
   });
 });
