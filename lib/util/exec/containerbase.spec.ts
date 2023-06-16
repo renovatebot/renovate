@@ -166,7 +166,10 @@ describe('util/exec/containerbase', () => {
 
     it('removes pep440 ==', async () => {
       expect(
-        await resolveConstraint({ toolName: 'pipenv', constraint: '==2020.8.13' })
+        await resolveConstraint({
+          toolName: 'pipenv',
+          constraint: '==2020.8.13',
+        })
       ).toBe('2020.8.13');
     });
   });
