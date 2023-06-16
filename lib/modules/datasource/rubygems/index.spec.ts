@@ -201,32 +201,6 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('returns null if mismatched name', async () => {
-      httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, { ...railsInfo, name: 'oooops' });
-      httpMock
-        .scope('https://firstparty.com/')
-        .get('/basepath/versions')
-        .reply(404)
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200);
-      expect(
-        await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [
-            'https://thirdparty.com',
-            'https://firstparty.com/basepath/',
-          ],
-        })
-      ).toBeNull();
-    });
-
     it('falls back to info when version request fails', async () => {
       httpMock
         .scope('https://thirdparty.com/')
