@@ -1,9 +1,8 @@
+import { add, clear } from '../host-rules';
 import {
   getGitAuthenticatedEnvironmentVariables,
   getGitEnvironmentVariables,
 } from './auth';
-
-import { add, clear } from '../host-rules';
 
 describe('util/git/auth', () => {
   afterEach(() => {
@@ -412,7 +411,7 @@ describe('util/git/auth', () => {
       expect(getGitEnvironmentVariables()).toStrictEqual({});
     });
 
-    it('returns environment variables when hostType is explicatly set', () => {
+    it('returns environment variables when hostType is explicitly set', () => {
       add({
         hostType: 'custom',
         matchHost: 'https://custom.example.com',
@@ -429,6 +428,15 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_1: 'git@custom.example.com:',
         GIT_CONFIG_VALUE_2: 'https://custom.example.com/',
       });
+    });
+
+    it('returns empty environment variables when matchHost contains invalid protocol', () => {
+      add({
+        hostType: 'github',
+        matchHost: 'invalid://*.github.example.com',
+        token: 'token123',
+      });
+      expect(getGitEnvironmentVariables(['custom'])).toStrictEqual({});
     });
   });
 });
