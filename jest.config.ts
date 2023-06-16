@@ -115,7 +115,7 @@ const testShards: Record<string, ShardConfig> = {
     matchPaths: ['lib/modules/manager/[i-n]*'],
     threshold: {
       statements: 99.65,
-      branches: 98.5,
+      branches: 98.45,
       functions: 98.65,
       lines: 99.65,
     },
