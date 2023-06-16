@@ -1663,9 +1663,13 @@ If you want to add/combine labels, use the `addLabels` config option, which is m
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date.
-"Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
-Supported lock files are:
+You can use `lockFileMaintenance` to refresh lock files to keep them up-to-date.
+
+When Renovate performs `lockFileMaintenance` it deletes the lock file and runs the relevant package manager.
+That package manager creates a new lock file, where all dependency versions are updated to the latest version.
+Renovate then commits that lock file to the update branch and creates the lock file update PR.
+
+Supported lock files:
 
 - `.terraform.lock.hcl`
 - `Cargo.lock`
@@ -1686,10 +1690,10 @@ Supported lock files are:
 - `requirements.txt`
 - `yarn.lock`
 
-Others may be added via feature request.
+Support for new lock files may be added via feature request.
 
-This feature is disabled by default.
-If you wish to enable this feature then you could add this to your configuration:
+By default, `lockFileMaintenance` is disabled.
+To enable `lockFileMaintenance` add this to your configuration:
 
 ```json
 {
@@ -1697,7 +1701,7 @@ If you wish to enable this feature then you could add this to your configuration
 }
 ```
 
-To reduce "noise" in the repository, it defaults its schedule to `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
+To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
 ## major
@@ -2828,7 +2832,7 @@ Defaults to `true`.
 
 ## python
 
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files, or any file that matches the pattern `requirements-*.(txt|pip)` - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
@@ -2885,18 +2889,27 @@ It is also recommended to avoid `rebaseWhen=never` as it can result in conflicte
 
 Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` as this can prevent creation of PRs.
 
-## recreateClosed
+## recreateWhen
 
-By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
-For example the Webpack 3.x case described above.
-This field lets you customize this behavior down to a per-package level.
-For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
+This feature used to be called `recreateClosed`.
+
+By default, Renovate detects if it proposed an update to a project before, and will not propose the same update again.
+For example the Webpack 3.x case described in the [`separateMajorMinor`](#separatemajorminor) documentation.
+You can use `recreateWhen` to customize this behavior down to a per-package level.
+For example we override it to `always` in the following cases where branch names and PR titles must be reused:
 
 - Package groups
 - When pinning versions
 - Lock file maintenance
 
-Typically you shouldn't need to modify this setting.
+You can select which behavior you want from Renovate:
+
+- `always`: Recreates all closed or blocking PRs
+- `auto`: The default option. Recreates only immortal PRs (default)
+- `never`: No PR is recreated, doesn't matter if it is immortal or not
+
+We recommend that you stick with the default setting for this option.
+Only change this setting if you really need to.
 
 ## regexManagers
 
@@ -3180,16 +3193,17 @@ You can use the `registryAliases` object to set registry aliases.
 
 This feature works with the following managers:
 
-- [`helm-requirements`](/modules/manager/helm-requirements/)
-- [`helmv3`](/modules/manager/helmv3/)
-- [`helmfile`](/modules/manager/helmfile/)
-- [`gitlabci`](/modules/manager/gitlabci/)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`kubernetes`](/modules/manager/kubernetes)
 - [`ansible`](/modules/manager/ansible)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`dockerfile`](/modules/manager/dockerfile)
 - [`droneci`](/modules/manager/droneci)
+- [`gitlabci`](/modules/manager/gitlabci/)
+- [`helm-requirements`](/modules/manager/helm-requirements/)
+- [`helmfile`](/modules/manager/helmfile/)
+- [`helmv3`](/modules/manager/helmv3/)
+- [`kubernetes`](/modules/manager/kubernetes)
 - [`terraform`](/modules/manager/terraform)
+- [`woodpecker`](/modules/manager/woodpecker)
 
 ## registryUrls
 

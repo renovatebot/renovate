@@ -103,6 +103,10 @@ export function generateBranchConfig(
       upg.displayFrom = upg.currentValue;
       upg.displayTo = upg.newValue;
     }
+
+    if (upg.isLockFileMaintenance) {
+      upg.recreateClosed = upg.recreateWhen !== 'never';
+    }
     upg.displayFrom ??= '';
     upg.displayTo ??= '';
     if (!depNames.includes(upg.depName!)) {
@@ -178,14 +182,14 @@ export function generateBranchConfig(
       logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (
       newValue.length > 1 &&
       (upgrade.isDigest || upgrade.isPinDigest)
     ) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
