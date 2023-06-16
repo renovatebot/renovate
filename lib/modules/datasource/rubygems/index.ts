@@ -6,7 +6,7 @@ import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GemVersions, GemsInfo, MarshalledVersionInfo } from './schema';
+import { GemVersions, GemMetadata, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 export class RubyGemsDatasource extends Datasource {
@@ -64,7 +64,19 @@ export class RubyGemsDatasource extends Datasource {
           return await this.getDependencyFallback(registryUrl, packageName);
         }
 
-        const result = await this.getDependency(registryUrl, packageName);
+        const gemMetadata = await this.fetchGemMetadata(
+          registryUrl,
+          packageName
+        );
+        if (!gemMetadata) {
+          return await this.getDependencyFallback(registryUrl, packageName);
+        }
+
+        const result = await this.getDependency(
+          registryUrl,
+          packageName,
+          gemMetadata
+        );
         if (result) {
           return result;
         }
@@ -90,14 +102,14 @@ export class RubyGemsDatasource extends Datasource {
     return MarshalledVersionInfo.parse(data);
   }
 
-  async fetchGemsInfo(
+  async fetchGemMetadata(
     registryUrl: string,
     packageName: string
-  ): Promise<GemsInfo | null> {
+  ): Promise<GemMetadata | null> {
     try {
       const { body } = await this.http.getJson(
         joinUrlParts(registryUrl, '/api/v1/gems', `${packageName}.json`),
-        GemsInfo
+        GemMetadata
       );
       return body;
     } catch (err) {
@@ -134,37 +146,32 @@ export class RubyGemsDatasource extends Datasource {
 
   async getDependency(
     registryUrl: string,
-    packageName: string
+    packageName: string,
+    gemMetadata: GemMetadata
   ): Promise<ReleaseResult | null> {
-    const info = await this.fetchGemsInfo(registryUrl, packageName);
-    if (!info) {
-      return null;
-    }
+    const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
 
     let releases: Release[] | null = null;
-    const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
     if (gemVersions?.length) {
       releases = gemVersions;
-    } else if (info.version) {
-      releases = [{ version: info.version }];
-    }
-
-    if (!releases) {
+    } else if (gemMetadata.latestVersion) {
+      releases = [{ version: gemMetadata.latestVersion }];
+    } else {
       return null;
     }
 
     const result: ReleaseResult = { releases };
 
-    if (info.changelogUrl) {
-      result.changelogUrl = info.changelogUrl;
+    if (gemMetadata.changelogUrl) {
+      result.changelogUrl = gemMetadata.changelogUrl;
     }
 
-    if (info.homepage) {
-      result.homepage = info.homepage;
+    if (gemMetadata.homepage) {
+      result.homepage = gemMetadata.homepage;
     }
 
-    if (info.sourceUrl) {
-      result.sourceUrl = info.sourceUrl;
+    if (gemMetadata.sourceUrl) {
+      result.sourceUrl = gemMetadata.sourceUrl;
     }
 
     return result;
