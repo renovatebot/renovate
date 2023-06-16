@@ -342,7 +342,9 @@ const config: JestConfig = {
   cacheDirectory: '.cache/jest',
   clearMocks: true,
   collectCoverage: true,
-  coverageReporters: ci ? ['json', 'text-summary'] : ['html', 'text-summary'],
+  coverageReporters: ci
+    ? ['lcovonly', 'text-summary']
+    : ['html', 'text-summary'],
   transform: {
     '\\.ts$': [
       'ts-jest',
@@ -567,7 +569,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
    * Output will be consumed by `codecov` GitHub Action.
    */
   const testCoverageFiels = shardKeys
-    .map((shard) => `./coverage-reports/${shard}.json`)
+    .map((shard) => `./coverage-reports/${shard}.txt`)
     .join(',');
   // eslint-disable-next-line no-console
   console.log(`test-coverage-files=${testCoverageFiels}`);
