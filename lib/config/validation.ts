@@ -56,7 +56,7 @@ function isIgnored(key: string): boolean {
 
 function validateAliasObject(val: Record<string, unknown>): true | string {
   for (const [key, value] of Object.entries(val)) {
-    if (!is.urlString(value)) {
+    if (!is.nonEmptyStringAndNotWhitespace(value)) {
       return key;
     }
   }
