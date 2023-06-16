@@ -1,5 +1,7 @@
 import { Marshal } from '@qnighy/marshal';
+import hasha from 'hasha';
 import { logger } from '../../../logger';
+import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
@@ -49,6 +51,23 @@ export class RubyGemsDatasource extends Datasource {
 
       if (cachedVersions.type === 'success') {
         const { versions } = cachedVersions;
+        const hash = hasha(versions, { algorithm: 'sha256' });
+        const cacheNs = `datasource-${RubyGemsDatasource.id}`;
+        const cacheKey = `long-term:${registryUrl}:${packageName}:${hash}`;
+        const cachedResult = await packageCache.get<ReleaseResult>(
+          cacheNs,
+          cacheKey
+        );
+        if (cachedResult) {
+          return cachedResult;
+        }
+
+        const newResult = await this.getDependency(registryUrl, packageName);
+        if (newResult) {
+          await packageCache.set(cacheNs, cacheKey, newResult, 30 * 24 * 60);
+          return newResult;
+        }
+
         return { releases: versions.map((version) => ({ version })) };
       }
 
