@@ -5,7 +5,7 @@ description: Bazel dependencies support in Renovate
 
 # Bazel
 
-Renovate can upgrade dependencies in Bazel `WORKSPACE` files and `MODULE.bazel` files.
+Renovate upgrades dependencies in Bazel `WORKSPACE` files and `MODULE.bazel` files.
 
 ## How it works
 
@@ -19,9 +19,9 @@ Renovate can upgrade dependencies in Bazel `WORKSPACE` files and `MODULE.bazel` 
 ### Bazel registry discovery
 
 Renovate searches [Bazel registries](https://bazel.build/external/registry) to find new Bazel module versions.
-You can customize the registries your Bazel workspace uses by including [`--registry`](https://bazel.build/reference/command-line-reference#flag--registry) entries in your [`.bazelrc` files](https://bazel.build/run/bazelrc).
+You customize the registries your Bazel workspace uses by including [`--registry`](https://bazel.build/reference/command-line-reference#flag--registry) entries in your [`.bazelrc` files](https://bazel.build/run/bazelrc).
 Renovate checks the workspace's `.bazelrc` files for custom registry entries.
-If no registries are found, Renovate defaults to the[Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
+If no registries are found, Renovate defaults to the [Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 
 Here are some important points about Renovate's Bazel registry searches.
 Renovate will:
@@ -66,7 +66,7 @@ build:ci --registry=https://internal.server/custom_registry
 build --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
 ```
 
-In this case the `https://internal.server/custom_registry` will be ignored.
+In this case the `https://internal.server/custom_registry` is ignored.
 The final registry list is:
 
 1. `<https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main>`
@@ -75,7 +75,7 @@ The final registry list is:
 
 #### `bazel_dep`
 
-Renovate will update the `version` value for a [`bazel_dep`](https://bazel.build/rules/lib/globals/module#bazel_dep) declaration.
+Renovate updates the `version` value for a [`bazel_dep`](https://bazel.build/rules/lib/globals/module#bazel_dep) declaration.
 
 ```python
 bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
@@ -154,7 +154,7 @@ Renovate ignores [`multiple_version_override`](https://bazel.build/rules/lib/glo
 
 ## Legacy `WORKSPACE` files
 
-Renovate will extract dependencies from:
+Renovate extracts dependencies from:
 
 - `container_pull`
 - `oci_pull`
@@ -167,9 +167,9 @@ Renovate will extract dependencies from:
 
 Renovate updates any `git_repository` declaration that has the following:
 
-1. name
-1. remote matching `https://github.com/<owner>/<repo>.git`
-1. tag using a valid SemVer
+1. `name`
+1. `remote` matching `https://github.com/<owner>/<repo>.git`
+1. `tag` using a valid SemVer
 
 e.g.:
 
@@ -187,9 +187,9 @@ Renovate uses the list of **tags** on the remote repository (GitHub) to detect a
 
 Renovate updates any `http_archive` or `http_file` declaration that has the following:
 
-1. name
-1. url matching `https://github.com/<owner>/<repo>/releases/download/<semver>/<repo>.tar.gz`
-1. sha256
+1. `name`
+1. `url` matching `https://github.com/<owner>/<repo>/releases/download/<semver>/<repo>.tar.gz`
+1. `sha256`
 
 e.g.:
 
