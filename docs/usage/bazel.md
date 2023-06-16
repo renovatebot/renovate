@@ -26,9 +26,9 @@ If no registries are found, Renovate defaults to the [Bazel Central Registry](ht
 Here are some important points about Renovate's Bazel registry searches.
 Renovate:
 
-- uses _all_ `--registry` flag values found in a workspace's `.bazelrc` file
+- uses _all_ `--registry` values found in a workspace's `.bazelrc` file
 - uses any files that are transitively imported by a `.bazelrc` file
-- only uses `--registry` flag values that are not associated with [a configuration](https://bazel.build/run/bazelrc#config)
+- only uses `--registry` values that are not associated with [a configuration](https://bazel.build/run/bazelrc#config)
 - queries the registries in the order that they are found in the `.bazelrc` file
 
 #### Example: multiple `.bazelrc` files
