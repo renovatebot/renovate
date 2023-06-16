@@ -141,14 +141,6 @@ export class RubyGemsDatasource extends Datasource {
       return null;
     }
 
-    if (info.packageName !== packageName) {
-      logger.warn(
-        { lookup: packageName, returned: info.packageName },
-        'Lookup name does not match the returned name.'
-      );
-      return null;
-    }
-
     let releases: Release[] | null = null;
     const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
     if (gemVersions?.length) {
