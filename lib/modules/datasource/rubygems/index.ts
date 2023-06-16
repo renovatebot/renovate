@@ -57,11 +57,19 @@ export class RubyGemsDatasource extends Datasource {
         cachedVersions.type === 'not-supported' &&
         registryHostname !== 'rubygems.org'
       ) {
-        const hostname = registryHostname;
-        return hostname === 'rubygems.pkg.github.com' ||
-          hostname === 'gitlab.com'
-          ? await this.getDependencyFallback(registryUrl, packageName)
-          : await this.getDependency(registryUrl, packageName);
+        if (
+          registryHostname === 'rubygems.pkg.github.com' ||
+          registryHostname === 'gitlab.com'
+        ) {
+          return await this.getDependencyFallback(registryUrl, packageName);
+        }
+
+        const result = await this.getDependency(registryUrl, packageName);
+        if (result) {
+          return result;
+        }
+
+        return await this.getDependencyFallback(registryUrl, packageName);
       }
     } catch (error) {
       this.handleGenericErrors(error);
@@ -130,7 +138,7 @@ export class RubyGemsDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const info = await this.fetchGemsInfo(registryUrl, packageName);
     if (!info) {
-      return await this.getDependencyFallback(registryUrl, packageName);
+      return null;
     }
 
     if (info.packageName !== packageName) {
