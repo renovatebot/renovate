@@ -2,7 +2,14 @@ import type { RangeStrategy } from '../../../types';
 import type { RangeConfig } from '../types';
 
 export function getRangeStrategy({
+  currentValue,
   rangeStrategy,
 }: RangeConfig): RangeStrategy {
-  return rangeStrategy === 'auto' ? 'bump' : rangeStrategy;
+  if (rangeStrategy !== 'auto') {
+    return rangeStrategy;
+  }
+  if (currentValue?.includes('<')) {
+    return 'widen';
+  }
+  return 'bump';
 }
