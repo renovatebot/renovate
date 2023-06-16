@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 
-describe('modules/manager/cpanfile/extract', () => {
+describe('modules/manager/cpanfile/index', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('', 'cpanfile')).toBeNull();
