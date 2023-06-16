@@ -21,7 +21,7 @@ Renovate can upgrade dependencies in Bazel `WORKSPACE` files and `MODULE.bazel` 
 Renovate searches [Bazel registries](https://bazel.build/external/registry) to find new Bazel module versions.
 You can customize the registries your Bazel workspace uses by including [`--registry`](https://bazel.build/reference/command-line-reference#flag--registry) entries in your [`.bazelrc` files](https://bazel.build/run/bazelrc).
 Renovate checks the workspace's `.bazelrc` files for custom registry entries.
-If no registries are specified, Renovate will default to the[Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
+If no registries are found, Renovate defaults to the[Bazel Central Registry](https://github.com/bazelbuild/bazel-central-registry).
 
 Here are some important points about Renovate's Bazel registry searches.
 Renovate will:
