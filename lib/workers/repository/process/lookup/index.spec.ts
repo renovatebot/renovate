@@ -2,6 +2,7 @@ import * as hostRules from '../../../../../lib/util/host-rules';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
@@ -22,7 +23,6 @@ import { initConfig, resetConfig } from '../../../../util/merge-confidence';
 import * as McApi from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
-import { getConfig } from '../../../../config/defaults';
 
 const fixtureRoot = '../../../../config/npm';
 const qJson = {

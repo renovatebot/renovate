@@ -8,6 +8,7 @@ import {
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -15,7 +16,6 @@ import { hashBody } from '../../../../modules/platform/pr-body';
 import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
-import { getConfig } from '../../../../config/defaults';
 
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = jest.spyOn(platform, 'massageMarkdown');

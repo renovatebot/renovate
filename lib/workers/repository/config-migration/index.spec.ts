@@ -1,11 +1,11 @@
 import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../test/fixtures';
 import { mockedFunction, partial } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { checkConfigMigrationBranch } from './branch';
 import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
 import { configMigration } from './index';
-import { getConfig } from '../../../config/defaults';
 
 jest.mock('./pr');
 jest.mock('./branch');

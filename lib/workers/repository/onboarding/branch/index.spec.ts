@@ -8,6 +8,7 @@ import {
   scm,
 } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import {
   REPOSITORY_FORKED,
@@ -23,7 +24,6 @@ import { OnboardingState } from '../common';
 import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import { checkOnboardingBranch } from '.';
-import { getConfig } from '../../../../config/defaults';
 
 const configModule: any = _config;
 

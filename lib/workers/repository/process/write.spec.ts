@@ -6,6 +6,7 @@ import {
   partial,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
@@ -25,7 +26,6 @@ import {
   syncBranchState,
   writeUpdates,
 } from './write';
-import { getConfig } from '../../../config/defaults';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/cache/repository');

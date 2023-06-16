@@ -5,6 +5,7 @@ import {
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
@@ -13,7 +14,6 @@ import * as memCache from '../../../../util/cache/memory';
 import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
-import { getConfig } from '../../../../config/defaults';
 
 jest.mock('../../../../util/git');
 

@@ -2,11 +2,11 @@ import type { Indent } from 'detect-indent';
 import JSON5 from 'json5';
 import { Fixtures } from '../../../../../test/fixtures';
 import { RenovateConfig, git, partial, scm } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
-import { getConfig } from '../../../../config/defaults';
 
 jest.mock('../../../../util/git');
 

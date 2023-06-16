@@ -8,7 +8,6 @@ import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
 } from './error-config';
-import { getConfig } from '../../config/defaults';
 
 jest.mock('../../modules/platform');
 

@@ -8,6 +8,7 @@ import {
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -15,7 +16,6 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
-import { getConfig } from '../../../../config/defaults';
 
 jest.mock('./migrated-data');
 jest.mock('./rebase');

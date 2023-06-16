@@ -6,6 +6,7 @@ import {
   platform,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta } from '../../../logger';
@@ -13,7 +14,6 @@ import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, updateRepo } from '.';
-import { getConfig } from '../../../config/defaults';
 
 jest.mock('../../../util/git');
 jest.mock('./extract-update');

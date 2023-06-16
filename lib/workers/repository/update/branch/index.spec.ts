@@ -7,6 +7,7 @@ import {
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import {
@@ -45,7 +46,6 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
-import { getConfig } from '../../../../config/defaults';
 
 jest.mock('./get-updated');
 jest.mock('./schedule');

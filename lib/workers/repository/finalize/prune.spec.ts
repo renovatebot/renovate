@@ -5,7 +5,6 @@ import {
   platform,
   scm,
 } from '../../../../test/util';
-import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import type { Pr } from '../../../modules/platform/types';
 import * as cleanup from './prune';

@@ -3,7 +3,6 @@ import { RenovateConfig, partial, platform, scm } from '../../../../test/util';
 import type { Pr } from '../../../modules/platform/types';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
-import { getConfig } from '../../../config/defaults';
 
 let config: RenovateConfig;
 
