@@ -1,4 +1,9 @@
-import { getGitAuthenticatedEnvironmentVariables } from './auth';
+import {
+  getGitAuthenticatedEnvironmentVariables,
+  getGitEnvironmentVariables,
+} from './auth';
+
+import { add, clear } from '../host-rules';
 
 describe('util/git/auth', () => {
   afterEach(() => {
@@ -304,6 +309,125 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com:89/org/repo.git',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com:89/org/repo.git',
         GIT_CONFIG_VALUE_2: 'https://github.com:89/org/repo.git',
+      });
+    });
+  });
+
+  describe('getGitEnvironmentVariables()', () => {
+    beforeEach(() => {
+      clear();
+    });
+
+    it('returns empty object if no environment variables exist', () => {
+      expect(getGitEnvironmentVariables()).toStrictEqual({});
+    });
+
+    it('returns environment variables with token if hostRule for api.github.com exists', () => {
+      add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'token123',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+    });
+
+    it('returns environment variables with token if hostRule for multiple hostsRules', () => {
+      add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'token123',
+      });
+      add({
+        hostType: 'gitlab',
+        matchHost: 'https://gitlab.example.com',
+        token: 'token234',
+      });
+      add({
+        hostType: 'github',
+        matchHost: 'https://github.example.com',
+        token: 'token345',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({
+        GIT_CONFIG_COUNT: '9',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_4:
+          'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_5:
+          'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_6:
+          'url.https://ssh:token345@github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_7:
+          'url.https://git:token345@github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_8: 'url.https://token345@github.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_3: 'ssh://git@gitlab.example.com/',
+        GIT_CONFIG_VALUE_4: 'git@gitlab.example.com:',
+        GIT_CONFIG_VALUE_5: 'https://gitlab.example.com/',
+        GIT_CONFIG_VALUE_6: 'ssh://git@github.example.com/',
+        GIT_CONFIG_VALUE_7: 'git@github.example.com:',
+        GIT_CONFIG_VALUE_8: 'https://github.example.com/',
+      });
+    });
+
+    it('returns environment variables with token if hostRule is for Gitlab', () => {
+      add({
+        hostType: 'gitlab',
+        matchHost: 'https://gitlab.example.com',
+        token: 'token123',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@gitlab.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://gitlab.example.com/',
+      });
+    });
+
+    it('returns no environment variables when hostType is not supported', () => {
+      add({
+        hostType: 'custom',
+        matchHost: 'https://custom.example.com',
+        token: 'token123',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({});
+    });
+
+    it('returns environment variables when hostType is explicatly set', () => {
+      add({
+        hostType: 'custom',
+        matchHost: 'https://custom.example.com',
+        token: 'token123',
+      });
+      expect(getGitEnvironmentVariables(['custom'])).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://ssh:token123@custom.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://git:token123@custom.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://token123@custom.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@custom.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@custom.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://custom.example.com/',
       });
     });
   });
