@@ -254,7 +254,8 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint;
+        // remove pep440 prefix
+        return constraint.replace(/^==/, '');
       }
     } else {
       logger.warn(
