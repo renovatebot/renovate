@@ -54,15 +54,6 @@ function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
 }
 
-function validateAliasObject(val: Record<string, unknown>): true | string {
-  for (const [key, value] of Object.entries(val)) {
-    if (!is.nonEmptyStringAndNotWhitespace(value)) {
-      return key;
-    }
-  }
-  return true;
-}
-
 function validatePlainObject(val: Record<string, unknown>): true | string {
   for (const [key, value] of Object.entries(val)) {
     if (!is.string(value)) {
@@ -570,11 +561,11 @@ export async function validateConfig(
         ) {
           if (is.plainObject(val)) {
             if (key === 'registryAliases') {
-              const res = validateAliasObject(val);
+              const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({
                   topic: 'Configuration Error',
-                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
             } else if (
