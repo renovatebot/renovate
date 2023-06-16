@@ -61,7 +61,7 @@ export class RubyGemsDatasource extends Datasource {
           registryHostname === 'rubygems.pkg.github.com' ||
           registryHostname === 'gitlab.com'
         ) {
-          return await this.getDependencyFallback(registryUrl, packageName);
+          return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
         }
 
         const gemMetadata = await this.fetchGemMetadata(
@@ -69,28 +69,20 @@ export class RubyGemsDatasource extends Datasource {
           packageName
         );
         if (!gemMetadata) {
-          return await this.getDependencyFallback(registryUrl, packageName);
+          return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
         }
 
-        return await this.getDependency(registryUrl, packageName, gemMetadata);
+        return await this.getReleasesViaAPI(
+          registryUrl,
+          packageName,
+          gemMetadata
+        );
       }
 
       return null;
     } catch (error) {
       this.handleGenericErrors(error);
     }
-  }
-
-  async getDependencyFallback(
-    registryUrl: string,
-    packageName: string
-  ): Promise<ReleaseResult | null> {
-    const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
-    const query = getQueryString({ gems: packageName });
-    const url = `${path}?${query}`;
-    const { body: buffer } = await this.http.getBuffer(url);
-    const data = Marshal.parse(buffer);
-    return MarshalledVersionInfo.parse(data);
   }
 
   async fetchGemMetadata(
@@ -135,7 +127,7 @@ export class RubyGemsDatasource extends Datasource {
     }
   }
 
-  async getDependency(
+  async getReleasesViaAPI(
     registryUrl: string,
     packageName: string,
     gemMetadata: GemMetadata
@@ -166,5 +158,17 @@ export class RubyGemsDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  async getReleasesViaFallbackAPI(
+    registryUrl: string,
+    packageName: string
+  ): Promise<ReleaseResult | null> {
+    const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
+    const query = getQueryString({ gems: packageName });
+    const url = `${path}?${query}`;
+    const { body: buffer } = await this.http.getBuffer(url);
+    const data = Marshal.parse(buffer);
+    return MarshalledVersionInfo.parse(data);
   }
 }
