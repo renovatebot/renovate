@@ -29,6 +29,11 @@ The Renovate team only fixes bugs in an older version if:
 If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
+## Why is the Mend hosted app using a older version compared to source?
+
+The Renovate maintainers manually update the hosted app.
+This means the hosted app can lag a few hours to a week behind the open source version.
+
 ## Renovate core features not supported on all platforms
 
 | Feature              | Platforms which lack feature                               | See Renovate issue(s)                                        |
