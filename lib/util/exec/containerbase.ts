@@ -202,7 +202,7 @@ export function supportsDynamicInstall(toolName: string): boolean {
 }
 
 export function isContainerbase(): boolean {
-  return !!process.env.CONTAINERBASE || !!process.env.BUILDPACK;
+  return !!process.env.CONTAINERBASE;
 }
 
 export function isDynamicInstall(
