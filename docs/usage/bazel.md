@@ -82,7 +82,7 @@ bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
 ```
 
 In the example above, Renovate evaluates the `0.15.0` version against the repository's registries.
-If Renovate finds a newer version, it will update `0.15.0` to match that version.
+If Renovate finds a newer version, it updates `0.15.0` to match that version.
 
 #### `git_override`
 
@@ -106,8 +106,8 @@ The [`single_version_override`](https://bazel.build/rules/lib/globals/module#sin
 Renovate only evaluates _two_ attributes from this declaration: `version` and `registry`.
 
 If a `version` is specified, it overrides the version specified in the `bazel_dep` pinning it to the specified value.
-In the following example, Renovate will note that the version has been pinned to `1.2.3`.
-This will result in `rules_foo` being ignored for update evaluation.
+In the following example, Renovate notices that the version is pinned to `1.2.3`.
+This results in `rules_foo` being ignored for update evaluation.
 
 ```python
 bazel_dep(name = "rules_foo", version = "1.2.4")
@@ -118,9 +118,9 @@ single_version_override(
 )
 ```
 
-If a `registry` is specified, Renovate will use the specified registry URL to check for a new version.
-In the following example, Renovate will only use the `https://example.com/custom_registry` registry to discover `rules_foo` versions.
-Any registry values specified in the repository's `.bazelrc` files will be ignored for the `rules_foo` module.
+If a `registry` is specified, Renovate uses the specified registry URL to check for a new version.
+In the following example, Renovate only uses the `https://example.com/custom_registry` registry to discover `rules_foo` versions.
+Any registry values specified in the repository's `.bazelrc` files are ignored for the `rules_foo` module.
 
 ```python
 bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -133,8 +133,8 @@ single_version_override(
 
 #### `archive_override` and `local_path_override`
 
-If Renovate finds an [`archive_override`](https://bazel.build/rules/lib/globals/module#archive_override) or a [`local_path_override`](https://bazel.build/rules/lib/globals/module#local_path_override), it will ignore the related `bazel_dep`.
-Because these declarations lack versionable attributes, Renovate will not update them.
+If Renovate finds an [`archive_override`](https://bazel.build/rules/lib/globals/module#archive_override) or a [`local_path_override`](https://bazel.build/rules/lib/globals/module#local_path_override), it ignores the related `bazel_dep`.
+Because these declarations lack versionable attributes, Renovate does not update them.
 
 ```python
 bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -165,7 +165,7 @@ Renovate will extract dependencies from:
 
 ### `git_repository`
 
-Renovate will update any `git_repository` declaration that has the following:
+Renovate updates any `git_repository` declaration that has the following:
 
 1. name
 1. remote matching `https://github.com/<owner>/<repo>.git`
@@ -185,7 +185,7 @@ Renovate uses the list of **tags** on the remote repository (GitHub) to detect a
 
 ### `http_archive` and `http_file`
 
-Renovate will update any `http_archive` or `http_file` declaration that has the following:
+Renovate updates any `http_archive` or `http_file` declaration that has the following:
 
 1. name
 1. url matching `https://github.com/<owner>/<repo>/releases/download/<semver>/<repo>.tar.gz`
