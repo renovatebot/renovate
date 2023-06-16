@@ -34,7 +34,7 @@ Renovate will:
 #### Example: multiple `.bazelrc` files
 
 In this example, there is a `.bazelrc` file which imports another file called `.registry.bazelrc`.
-Both those files have `--registry` values:
+Both files have `--registry` values:
 
 ```
 # -------------
