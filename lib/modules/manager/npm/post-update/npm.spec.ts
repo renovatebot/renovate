@@ -10,7 +10,7 @@ jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs');
 jest.mock('./node-version');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
@@ -265,7 +265,6 @@ describe('modules/manager/npm/post-update/npm', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'containerbase/sidecar ' +

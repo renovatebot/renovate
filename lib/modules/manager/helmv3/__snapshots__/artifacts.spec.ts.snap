@@ -468,12 +468,11 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update ''"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update ''"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
@@ -602,12 +601,11 @@ exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add stable the_stable_url && helm repo add repo1 the_repo1_url && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update ''"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add stable the_stable_url && helm repo add repo1 the_repo1_url && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update ''"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",

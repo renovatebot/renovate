@@ -17,7 +17,7 @@ jest.mock('../../datasource');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const datasource = mocked(_datasource);
 
@@ -801,7 +801,6 @@ describe('modules/manager/composer/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e COMPOSER_CACHE_DIR ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'containerbase/sidecar' +
@@ -815,7 +814,6 @@ describe('modules/manager/composer/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
           },
         },
@@ -874,7 +872,6 @@ describe('modules/manager/composer/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
           },
         },

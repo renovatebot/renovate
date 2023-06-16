@@ -21,12 +21,11 @@ exports[`modules/manager/mix/artifacts authenticates to private repositories 2`]
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix hex.organization auth renovate_test --key valid_test_token && mix deps.update private_package other_package"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix hex.organization auth renovate_test --key valid_test_token && mix deps.update private_package other_package"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -81,12 +80,11 @@ exports[`modules/manager/mix/artifacts returns updated mix.lock 1`] = `
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir 1.13.4 && mix deps.update plug"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir 1.13.4 && mix deps.update plug"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

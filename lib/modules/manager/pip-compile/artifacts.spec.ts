@@ -25,7 +25,7 @@ const adminConfig: RepoGlobalConfig = {
 };
 const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
@@ -122,7 +122,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'containerbase/sidecar ' +
@@ -239,7 +238,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'containerbase/sidecar ' +

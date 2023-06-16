@@ -163,7 +163,6 @@ describe('modules/manager/helmfile/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'containerbase/sidecar ' +

@@ -14,7 +14,7 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/http');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
@@ -172,7 +172,6 @@ describe('modules/manager/pub/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'containerbase/sidecar ' +

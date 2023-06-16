@@ -261,7 +261,6 @@ describe('modules/manager/nuget/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e NUGET_PACKAGES ' +
           '-e MSBUILDDISABLENODEREUSE ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'containerbase/sidecar ' +
@@ -272,7 +271,6 @@ describe('modules/manager/nuget/artifacts', () => {
           '"',
         options: {
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
@@ -315,7 +313,6 @@ describe('modules/manager/nuget/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
@@ -328,7 +325,6 @@ describe('modules/manager/nuget/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',

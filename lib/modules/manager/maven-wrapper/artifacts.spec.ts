@@ -201,7 +201,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "./":"./" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
           'containerbase/sidecar' +

@@ -10,7 +10,7 @@ jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
 jest.mock('../../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 function lernaPkgFile(lernaClient: string): Partial<PackageFileContent> {
   return {
@@ -153,7 +153,6 @@ describe('modules/manager/npm/post-update/lerna', () => {
           cmd:
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "some-dir" containerbase/sidecar ' +
             'bash -l -c "' +
