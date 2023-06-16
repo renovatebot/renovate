@@ -4,11 +4,11 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   partial,
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';

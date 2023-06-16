@@ -1,12 +1,12 @@
 import {
   RenovateConfig,
-  getConfig,
   git,
   logger,
   mocked,
   platform,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta } from '../../../logger';
