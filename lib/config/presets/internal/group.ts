@@ -308,6 +308,15 @@ const staticGroups = {
       },
     ],
   },
+  octokit: {
+    description: 'Group all `@octokit` packages together.',
+    packageRules: [
+      {
+        extends: 'packages:octokit',
+        groupName: 'octokit packages',
+      },
+    ],
+  },
   phpstan: {
     description: 'Group PHPStan packages together.',
     packageRules: [
@@ -366,6 +375,7 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:kubernetes',
+      'group:octokit',
       'group:phpstan',
       'group:polymer',
       'group:react',

@@ -93,6 +93,10 @@ export const presets: Record<string, Preset> = {
     description: 'All Mapbox-related packages.',
     matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
+  octokit: {
+    description: 'All Octokit packages.',
+    matchPackagePrefixes: ['@octokit/'],
+  },
   postcss: {
     description: 'All PostCSS packages.',
     matchPackageNames: ['postcss'],
