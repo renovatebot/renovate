@@ -2413,7 +2413,6 @@ const options: RenovateOptions[] = [
       'onboardingClose',
       'prEditedNotification',
       'prIgnoreNotification',
-      'dependencyLookupWarnings',
     ],
     cli: false,
     env: false,
