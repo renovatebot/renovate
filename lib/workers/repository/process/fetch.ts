@@ -102,15 +102,13 @@ async function fetchManagerPackagerFileUpdates(
   pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;
+  const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   if (pFile.extractedConstraints) {
-    pFile.constraints = {
+    packageFileConfig.constraints = {
       ...pFile.extractedConstraints,
       ...config.constraints,
-      ...pFile.constraints,
     };
-    delete pFile.extractedConstraints;
   }
-  const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => (): Promise<PackageDependency> =>
