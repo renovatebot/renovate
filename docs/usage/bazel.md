@@ -105,7 +105,7 @@ If the primary branch has a newer commit than in the list, Renovate updates the 
 The [`single_version_override`](https://bazel.build/rules/lib/globals/module#single_version_override) is a declaration with many purposes.
 Renovate only evaluates _two_ attributes from this declaration: `version` and `registry`.
 
-If a `version` is specified, it overrides the version specified in the `bazel_dep` pinning it to the specified value.
+If a `version` is specified, it overrides the version in the `bazel_dep`.
 In the following example, Renovate notices that the version is pinned to `1.2.3`.
 This results in `rules_foo` being ignored for update evaluation.
 
