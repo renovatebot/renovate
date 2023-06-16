@@ -20,6 +20,7 @@ import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
+import { FetchReleaseNotes } from './custom/fetch-release-notes-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -55,7 +56,6 @@ import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
-import { FetchReleaseNotes } from './custom/fetch-release-notes-migration';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([

@@ -34,11 +34,7 @@ import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
-import {
-  embedChangelog,
-  embedChangelogs,
-  needsChangelogs,
-} from '../../changelog';
+import { embedChangelogs } from '../../changelog';
 import { ensurePr } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
@@ -548,16 +544,6 @@ export async function processBranch(
 
       // compile commit message with body, which maybe needs changelogs
       if (config.commitBody) {
-        if (
-          // only fetch if fetchReleaseNotes=pr as we would have already
-          // fetched the notes before executing the postUpgradeTasks if fetchReleaseNotes=branch
-          config.fetchReleaseNotes === 'pr' &&
-          needsChangelogs(config, ['commitBody'])
-        ) {
-          // we only need first upgrade, the others are only needed on PR update
-          // we add it to first, so PR fetch can skip fetching for that update
-          await embedChangelog(config.upgrades[0]);
-        }
         // changelog is on first upgrade
         config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
           config.commitBody,
