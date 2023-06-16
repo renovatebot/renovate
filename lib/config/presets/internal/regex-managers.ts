@@ -41,4 +41,16 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  tfvarsVersions: {
+    description: 'Update `*_version` variables in `.tfvars` files.',
+    regexManagers: [
+      {
+        fileMatch: ['.+\\.tfvars$'],
+        matchStrings: [
+          '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
+        ],
+        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
+      },
+    ],
+  },
 };

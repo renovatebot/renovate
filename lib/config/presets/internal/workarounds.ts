@@ -17,6 +17,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
+      'workarounds:disableEclipseLifecycleMapping',
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
     ],
@@ -33,6 +34,16 @@ export const presets: Record<string, Preset> = {
           '^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$',
         ],
         versioning: 'node',
+      },
+    ],
+  },
+  disableEclipseLifecycleMapping: {
+    description: 'Disable Eclipse m2e lifecycle-mapping placeholder package.',
+    packageRules: [
+      {
+        enabled: false,
+        matchDatasources: ['maven'],
+        matchPackageNames: ['org.eclipse.m2e:lifecycle-mapping'],
       },
     ],
   },

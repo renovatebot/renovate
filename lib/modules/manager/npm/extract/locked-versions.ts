@@ -61,7 +61,13 @@ export async function getLockedVersions(
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
-        lockFileCache[npmLock] = await getNpmLock(npmLock);
+        const cache = await getNpmLock(npmLock);
+        // istanbul ignore if
+        if (!cache) {
+          logger.warn({ npmLock }, 'Npm: unable to get lockfile');
+          return;
+        }
+        lockFileCache[npmLock] = cache;
       }
 
       const { lockfileVersion } = lockFileCache[npmLock];
@@ -88,6 +94,16 @@ export async function getLockedVersions(
         } else {
           npm = '<9';
         }
+      } else if (lockfileVersion === 3) {
+        if (!packageFile.extractedConstraints?.npm) {
+          npm = '>=7';
+        }
+      } else {
+        logger.warn(
+          { lockfileVersion, npmLock },
+          'Found unsupported npm lockfile version'
+        );
+        return;
       }
       if (npm) {
         packageFile.extractedConstraints ??= {};

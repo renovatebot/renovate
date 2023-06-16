@@ -1,4 +1,4 @@
-import { getConfig, mocked } from '../../../../../test/util';
+import { mocked } from '../../../../../test/util';
 import type { Release } from '../../../../modules/datasource';
 import * as allVersioning from '../../../../modules/versioning';
 import * as _dateUtil from '../../../../util/date';
@@ -40,8 +40,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
   let sortedReleases: Release[];
 
   beforeEach(() => {
-    config = getConfig();
-    config.currentVersion = '1.0.0';
+    config = { currentVersion: '1.0.0' };
     sortedReleases = structuredClone(releases);
     jest.resetAllMocks();
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('3 days') ?? 0);
