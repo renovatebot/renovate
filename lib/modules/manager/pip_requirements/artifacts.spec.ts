@@ -19,7 +19,9 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
-const config: UpdateArtifactsConfig = { constraints: { python: '3.10.2', hashin: '0.17.0' } };
+const config: UpdateArtifactsConfig = {
+  constraints: { python: '3.10.2', hashin: '0.17.0' },
+};
 
 /*
  * Sample package file content that exhibits dependencies with and without

@@ -121,7 +121,7 @@ export async function updateArtifacts({
         {
           toolName: 'pipenv',
           constraint: pipenvConstraint,
-        }
+        },
       ],
     };
     logger.trace({ cmd }, 'pipenv lock command');
