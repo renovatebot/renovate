@@ -73,8 +73,8 @@ export async function branchifyUpgrades(
       .reverse();
 
     if (config.fetchReleaseNotes !== 'off' && config.repoIsOnboarded) {
-      const branches = branchUpgrades[branchName].filter((upg) =>
-        needsChangelogs(upg) || config.fetchReleaseNotes === 'branch'
+      const branches = branchUpgrades[branchName].filter(
+        (upg) => needsChangelogs(upg) || config.fetchReleaseNotes === 'branch'
       );
       if (branches.length) {
         logger.warn(

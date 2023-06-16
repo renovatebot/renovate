@@ -3,7 +3,6 @@ import {
   getConfig,
   git,
   mocked,
-  mockedFunction,
   partial,
   platform,
   scm,
