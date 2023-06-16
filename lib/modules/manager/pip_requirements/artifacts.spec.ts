@@ -10,7 +10,7 @@ jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -19,7 +19,7 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
-const config: UpdateArtifactsConfig = { constraints: { python: '3.10.2' } };
+const config: UpdateArtifactsConfig = { constraints: { python: '3.10.2', hashin: '0.17.0' } };
 
 /*
  * Sample package file content that exhibits dependencies with and without
@@ -222,7 +222,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'pip install --user hashin ' +
+          'install-tool hashin 0.17.0 ' +
           '&& ' +
           'hashin atomicwrites==1.4.0 -r requirements.txt' +
           '"',
@@ -253,7 +253,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
-      { cmd: 'pip install --user hashin' },
+      { cmd: 'install-tool hashin 0.17.0' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
