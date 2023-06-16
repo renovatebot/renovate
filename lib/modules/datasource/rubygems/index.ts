@@ -6,7 +6,7 @@ import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GemVersions, GemMetadata, MarshalledVersionInfo } from './schema';
+import { GemMetadata, GemVersions, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 export class RubyGemsDatasource extends Datasource {
