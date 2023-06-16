@@ -102,7 +102,7 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd: string | string[],
-  opts: ExecOptions = {}
+  opts: ExecOptions
 ): Promise<RawExecArguments> {
   const { docker } = opts;
   const { customEnvVariables, containerbaseDir, binarySource } =
@@ -165,7 +165,7 @@ async function prepareRawExec(
 
 export async function exec(
   cmd: string | string[],
-  opts: ExecOptions = {}
+  opts: ExecOptions
 ): Promise<ExecResult> {
   const { docker } = opts;
   const dockerChildPrefix =
