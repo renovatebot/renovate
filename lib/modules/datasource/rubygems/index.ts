@@ -72,22 +72,13 @@ export class RubyGemsDatasource extends Datasource {
           return await this.getDependencyFallback(registryUrl, packageName);
         }
 
-        const result = await this.getDependency(
-          registryUrl,
-          packageName,
-          gemMetadata
-        );
-        if (result) {
-          return result;
-        }
-
-        return await this.getDependencyFallback(registryUrl, packageName);
+        return await this.getDependency(registryUrl, packageName, gemMetadata);
       }
+
+      return null;
     } catch (error) {
       this.handleGenericErrors(error);
     }
-
-    return null;
   }
 
   async getDependencyFallback(
