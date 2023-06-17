@@ -1,7 +1,8 @@
 import * as hostRules from '../../../../../lib/util/host-rules';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
-import { getConfig, partial } from '../../../../../test/util';
+import { partial } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';

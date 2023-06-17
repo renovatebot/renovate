@@ -217,9 +217,12 @@ export function processModulePkgDeps(
     merge.bazelDepMergeFields.forEach((k) => (bazelDepOut[k] = merge[k]));
   }
   const overrides = packageDeps.filter(isOverride);
+  if (overrides.length === 0) {
+    return deps;
+  }
   // It is an error for more than one override to exist for a module. We will
   // ignore the overrides if there is more than one.
-  if (overrides.length !== 1) {
+  if (overrides.length > 1) {
     const depTypes = overrides.map((o) => o.depType);
     logger.debug(
       { depName: moduleName, depTypes },
