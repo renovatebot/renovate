@@ -369,7 +369,7 @@ jobs:
             --statements 100
 
   # Catch-all for all required checks
-  passing:
+  test-success:
     needs: [setup, test, coverage]
     runs-on: ubuntu-latest
     timeout-minutes: 1
@@ -479,7 +479,7 @@ jobs:
       - lint-docs
       - lint-other
       - test-e2e
-      - passing
+      - test-success
       - build-docs
       - coverage
 
