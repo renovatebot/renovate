@@ -91,7 +91,7 @@ async function fetchDepUpdates(
         });
       }
     }
-    dep.updates = dep.updates ?? [];
+    dep.updates ??= [];
   }
   return dep;
 }
