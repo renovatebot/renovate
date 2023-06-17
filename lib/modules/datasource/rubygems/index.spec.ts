@@ -1,8 +1,9 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as rubyVersioning from '../../versioning/ruby';
-import { memCache } from './versions-datasource';
+import { memCache } from './versions-endpoint-cache';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
@@ -200,32 +201,6 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('returns null if mismatched name', async () => {
-      httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, { ...railsInfo, name: 'oooops' });
-      httpMock
-        .scope('https://firstparty.com/')
-        .get('/basepath/versions')
-        .reply(404)
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200);
-      expect(
-        await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [
-            'https://thirdparty.com',
-            'https://firstparty.com/basepath/',
-          ],
-        })
-      ).toBeNull();
-    });
-
     it('falls back to info when version request fails', async () => {
       httpMock
         .scope('https://thirdparty.com/')
@@ -257,14 +232,8 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
         .reply(500, {});
-      httpMock
-        .scope('https://firstparty.com/basepath')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: rubyVersioning.id,
           datasource: RubyGemsDatasource.id,
           packageName: 'rails',
@@ -273,7 +242,7 @@ describe('modules/datasource/rubygems/index', () => {
             'https://firstparty.com/basepath/',
           ],
         })
-      ).toBeNull();
+      ).rejects.toThrow(ExternalHostError);
     });
 
     it('falls back to dependencies api', async () => {
