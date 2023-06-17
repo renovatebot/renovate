@@ -100,7 +100,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
-        { ...config, constraints: { yarn: '^1.10.0' } },
+        { ...config, extractedConstraints: { yarn: '^1.10.0' } },
         {}
       );
       expect(execSnapshots).toMatchSnapshot();

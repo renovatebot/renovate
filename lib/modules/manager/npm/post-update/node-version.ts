@@ -25,7 +25,8 @@ async function getNodeFile(filename: string): Promise<string | null> {
 function getPackageJsonConstraint(
   config: Partial<PostUpdateConfig>
 ): string | null {
-  const constraint: string = config.constraints?.node;
+  const constraint: string =
+    config.constraints?.node ?? config.extractedConstraints?.node;
   if (constraint && semver.validRange(constraint)) {
     logger.debug(`Using node constraint "${constraint}" from package.json`);
     return constraint;
