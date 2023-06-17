@@ -59,7 +59,8 @@ export async function generateLockFiles(
         toolName: 'yarn',
         constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
       };
-      const yarnCompatibility = config.constraints?.yarn;
+      const yarnCompatibility =
+        config.constraints?.yarn ?? config.extractedConstraints?.yarn;
       if (semver.validRange(yarnCompatibility)) {
         yarnTool.constraint = yarnCompatibility;
       }
@@ -71,7 +72,8 @@ export async function generateLockFiles(
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
       const npmTool: ToolConstraint = { toolName: 'npm' };
-      const npmCompatibility = config.constraints?.npm;
+      const npmCompatibility =
+        config.constraints?.npm ?? config.extractedConstraints?.npm;
       if (semver.validRange(npmCompatibility)) {
         npmTool.constraint = npmCompatibility;
       }

@@ -43,7 +43,7 @@ export async function generateLockFile(
   try {
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
-      constraint: config.constraints?.npm,
+      constraint: config.constraints?.npm ?? config.extractedConstraints?.npm,
     };
     const commands: string[] = [];
     let cmdOptions = '';
