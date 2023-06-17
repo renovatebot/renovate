@@ -299,7 +299,7 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
-type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
+export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
