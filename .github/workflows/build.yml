@@ -315,7 +315,7 @@ jobs:
           mkdir ./coverage-reports
           for shard in ${{ matrix.shards }};
           do
-            mv ./coverage/shard/$shard/coverage-final.json ./coverage-reports/$shard.json
+            mv ./coverage/shard/$shard/lcov.info ./coverage-reports/$shard.txt
           done
 
       - name: Save coverage artifacts
@@ -323,7 +323,7 @@ jobs:
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: coverage-reports
-          path: ./coverage-reports/*.json
+          path: ./coverage-reports/*.txt
 
   codecov:
     needs: [setup, test]
