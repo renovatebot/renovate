@@ -82,7 +82,10 @@ async function getBaseBranchConfig(
   return baseBranchConfig;
 }
 
-function unfoldBaseBranches(baseBranches: string[]): string[] {
+function unfoldBaseBranches(
+  defaultBranch: string,
+  baseBranches: string[]
+): string[] {
   const unfoldedList: string[] = [];
 
   const allBranches = getBranchList();
@@ -90,7 +93,13 @@ function unfoldBaseBranches(baseBranches: string[]): string[] {
     const isAllowedPred = configRegexPredicate(baseBranch);
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
+      logger.debug(
+        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`
+      );
       unfoldedList.push(...matchingBranches);
+    } else if (baseBranch === '$default') {
+      logger.debug(`baseBranches "$default" matches "${defaultBranch}"`);
+      unfoldedList.push(defaultBranch);
     } else {
       unfoldedList.push(baseBranch);
     }
@@ -109,7 +118,10 @@ export async function extractDependencies(
     packageFiles: null!,
   };
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
-    config.baseBranches = unfoldBaseBranches(config.baseBranches);
+    config.baseBranches = unfoldBaseBranches(
+      config.defaultBranch!,
+      config.baseBranches
+    );
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {

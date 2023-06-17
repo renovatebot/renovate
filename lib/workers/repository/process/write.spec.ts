@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mocked,
   partial,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';

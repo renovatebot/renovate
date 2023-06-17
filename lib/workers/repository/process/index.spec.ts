@@ -1,12 +1,12 @@
 import {
   RenovateConfig,
-  getConfig,
   git,
   logger,
   mocked,
   platform,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta } from '../../../logger';
@@ -149,6 +149,21 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v2' });
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'dev' });
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'some-other' });
+    });
+
+    it('maps $default to defaultBranch', async () => {
+      extract.mockResolvedValue({} as never);
+      config.baseBranches = ['$default'];
+      config.defaultBranch = 'master';
+      git.getBranchList.mockReturnValue(['dev', 'master']);
+      scm.branchExists.mockResolvedValue(true);
+      const res = await extractDependencies(config);
+      expect(res).toStrictEqual({
+        branchList: [undefined],
+        branches: [undefined],
+        packageFiles: undefined,
+      });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'master' });
     });
   });
 });

@@ -1,14 +1,11 @@
 import { z } from 'zod';
-import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { getElapsedMinutes } from '../../../util/date';
-import { HttpError } from '../../../util/http';
+import { Http, HttpError } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
 import { copystr } from '../../../util/string';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 interface VersionsEndpointUnsupported {
   versionsEndpointSupported: false;
@@ -40,9 +37,39 @@ function stripContentHead(content: string): string {
   return content.slice(33);
 }
 
+function reconcilePackageVersions(
+  packageVersions: PackageVersions,
+  versionLines: VersionLines
+): PackageVersions {
+  for (const line of versionLines) {
+    const packageName = copystr(line.packageName);
+    let versions = packageVersions.get(packageName) ?? [];
+
+    const { deletedVersions, addedVersions } = line;
+
+    if (deletedVersions.size > 0) {
+      versions = versions.filter((v) => !deletedVersions.has(v));
+    }
+
+    if (addedVersions.length > 0) {
+      const existingVersions = new Set(versions);
+      for (const addedVersion of addedVersions) {
+        if (!existingVersions.has(addedVersion)) {
+          const version = copystr(addedVersion);
+          versions.push(version);
+        }
+      }
+    }
+
+    packageVersions.set(packageName, versions);
+  }
+
+  return packageVersions;
+}
+
 function parseFullBody(body: string): VersionsEndpointData {
   const versionsEndpointSupported = true;
-  const packageVersions = VersionsDatasource.reconcilePackageVersions(
+  const packageVersions = reconcilePackageVersions(
     new Map<string, string[]>(),
     VersionLines.parse(body)
   );
@@ -59,9 +86,11 @@ function parseFullBody(body: string): VersionsEndpointData {
   };
 }
 
-type VersionsEndpointCache = VersionsEndpointUnsupported | VersionsEndpointData;
+type VersionsEndpointResult =
+  | VersionsEndpointUnsupported
+  | VersionsEndpointData;
 
-export const memCache = new Map<string, VersionsEndpointCache>();
+export const memCache = new Map<string, VersionsEndpointResult>();
 
 const VersionLines = z
   .string()
@@ -92,63 +121,36 @@ const VersionLines = z
   );
 type VersionLines = z.infer<typeof VersionLines>;
 
-export class VersionsDatasource extends Datasource {
-  constructor(override readonly id: string) {
-    super(id);
-  }
+function isStale(regCache: VersionsEndpointData): boolean {
+  return getElapsedMinutes(regCache.syncedAt) >= 15;
+}
 
-  static isStale(regCache: VersionsEndpointData): boolean {
-    return getElapsedMinutes(regCache.syncedAt) >= 15;
-  }
+export type VersionsResult =
+  | { type: 'success'; versions: string[] }
+  | { type: 'not-supported' }
+  | { type: 'not-found' };
 
-  static reconcilePackageVersions(
-    packageVersions: PackageVersions,
-    versionLines: VersionLines
-  ): PackageVersions {
-    for (const line of versionLines) {
-      const packageName = copystr(line.packageName);
-      let versions = packageVersions.get(packageName) ?? [];
+export class VersionsEndpointCache {
+  constructor(private readonly http: Http) {}
 
-      const { deletedVersions, addedVersions } = line;
-
-      if (deletedVersions.size > 0) {
-        versions = versions.filter((v) => !deletedVersions.has(v));
-      }
-
-      if (addedVersions.length > 0) {
-        const existingVersions = new Set(versions);
-        for (const addedVersion of addedVersions) {
-          if (!existingVersions.has(addedVersion)) {
-            const version = copystr(addedVersion);
-            versions.push(version);
-          }
-        }
-      }
-
-      packageVersions.set(packageName, versions);
-    }
-
-    return packageVersions;
-  }
-
-  private cacheRequests = new Map<string, Promise<VersionsEndpointCache>>();
+  private cacheRequests = new Map<string, Promise<VersionsEndpointResult>>();
 
   /**
    * At any given time, there should only be one request for a given registryUrl.
    */
-  private async getCache(registryUrl: string): Promise<VersionsEndpointCache> {
+  private async getCache(registryUrl: string): Promise<VersionsEndpointResult> {
     const cacheKey = `rubygems-versions-cache:${registryUrl}`;
 
     const oldCache = memCache.get(cacheKey);
     memCache.delete(cacheKey); // If no error is thrown, we'll re-set the cache
 
-    let newCache: VersionsEndpointCache;
+    let newCache: VersionsEndpointResult;
 
     if (!oldCache) {
       newCache = await this.fullSync(registryUrl);
     } else if (oldCache.versionsEndpointSupported === false) {
       newCache = oldCache;
-    } else if (VersionsDatasource.isStale(oldCache)) {
+    } else if (isStale(oldCache)) {
       newCache = await this.deltaSync(oldCache, registryUrl);
     } else {
       newCache = oldCache;
@@ -157,15 +159,10 @@ export class VersionsDatasource extends Datasource {
     return newCache;
   }
 
-  async getReleases({
-    registryUrl,
-    packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
-    if (!registryUrl) {
-      return null;
-    }
-
+  async getVersions(
+    registryUrl: string,
+    packageName: string
+  ): Promise<VersionsResult> {
     /**
      * Ensure that only one request for a given registryUrl is in flight at a time.
      */
@@ -174,7 +171,7 @@ export class VersionsDatasource extends Datasource {
       cacheRequest = this.getCache(registryUrl);
       this.cacheRequests.set(registryUrl, cacheRequest);
     }
-    let cache: VersionsEndpointCache;
+    let cache: VersionsEndpointResult;
     try {
       cache = await cacheRequest;
     } finally {
@@ -186,23 +183,22 @@ export class VersionsDatasource extends Datasource {
         { packageName, registryUrl },
         'Rubygems: endpoint not supported'
       );
-      throw new Error(PAGE_NOT_FOUND_ERROR);
+      return { type: 'not-supported' };
     }
 
-    const packageVersions = cache.packageVersions.get(packageName);
-    if (!packageVersions?.length) {
+    const versions = cache.packageVersions.get(packageName);
+    if (!versions?.length) {
       logger.debug(
         { packageName, registryUrl },
         'Rubygems: versions not found'
       );
-      return null;
+      return { type: 'not-found' };
     }
 
-    const releases = packageVersions.map((version) => ({ version }));
-    return { releases };
+    return { type: 'success', versions };
   }
 
-  async fullSync(registryUrl: string): Promise<VersionsEndpointCache> {
+  private async fullSync(registryUrl: string): Promise<VersionsEndpointResult> {
     try {
       const url = `${registryUrl}/versions`;
       const opts: HttpOptions = { headers: { 'Accept-Encoding': 'gzip' } };
@@ -213,14 +209,14 @@ export class VersionsDatasource extends Datasource {
         return { versionsEndpointSupported: false };
       }
 
-      this.handleGenericErrors(err);
+      throw err;
     }
   }
 
-  async deltaSync(
+  private async deltaSync(
     oldCache: VersionsEndpointData,
     registryUrl: string
-  ): Promise<VersionsEndpointCache> {
+  ): Promise<VersionsEndpointResult> {
     try {
       const url = `${registryUrl}/versions`;
       const startByte = oldCache.contentLength - oldCache.contentTail.length;
@@ -256,7 +252,7 @@ export class VersionsDatasource extends Datasource {
        */
       const versionsEndpointSupported = true;
       const delta = stripContentHead(body);
-      const packageVersions = VersionsDatasource.reconcilePackageVersions(
+      const packageVersions = reconcilePackageVersions(
         oldCache.packageVersions,
         VersionLines.parse(delta)
       );
@@ -292,7 +288,7 @@ export class VersionsDatasource extends Datasource {
         }
       }
 
-      this.handleGenericErrors(err);
+      throw err;
     }
   }
 }
