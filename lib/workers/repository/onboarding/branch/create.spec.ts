@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig, scm } from '../../../../../test/util';
+import { RenovateConfig, scm } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { createOnboardingBranch } from './create';
 
 jest.mock('./config', () => ({

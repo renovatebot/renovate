@@ -182,8 +182,6 @@ function getLockedVersions(
   // monorepo
   if (is.nonEmptyObject(lockParsed.importers)) {
     for (const [importer, imports] of Object.entries(lockParsed.importers)) {
-      // eslint-disable-next-line
-      console.log(imports);
       lockedVersions[importer] = getLockedDependencyVersions(imports);
     }
   }
