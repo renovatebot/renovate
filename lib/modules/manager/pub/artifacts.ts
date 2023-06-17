@@ -96,7 +96,7 @@ export async function updateArtifacts({
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    logger.warn({ lofkfile: lockFileName, err }, `Failed to update lock file`);
+    logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
     return [
       {
         artifactError: {

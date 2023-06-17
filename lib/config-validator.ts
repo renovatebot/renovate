@@ -34,13 +34,13 @@ async function validate(
   const massagedConfig = massageConfig(migratedConfig);
   const res = await validateConfig(massagedConfig, isPreset);
   if (res.errors.length) {
-    logger.error({ file: desc, errors: res.errors }, 'Config contains errors');
+    logger.error({ file: desc, errors: res.errors }, 'Found errors in configuration');
     returnVal = 1;
   }
   if (res.warnings.length) {
     logger.warn(
       { file: desc, warnings: res.warnings },
-      'Config contains warnings'
+      'Found errors in configuration'
     );
     returnVal = 1;
   }
