@@ -34,7 +34,7 @@ For example:
 ```console
 $ npm install --global renovate
 added 750 packages, and audited 751 packages in 51s
-$ renovate-config-validator ///// insert CLI arguments here
+$ renovate-config-validator first_config.json second_config.json
 ```
 
 ## Validate your config automatically
