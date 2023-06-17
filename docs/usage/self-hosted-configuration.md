@@ -160,11 +160,10 @@ For this to work, `docker` needs to be installed and the Docker socket available
 Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
 Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
-This mode means that Renovate will dynamically install the version of tools available, if supported. // I think we now support install-mode for all tools???
+This mode means that Renovate will dynamically install the desired version of each tool needed.
 
 If all projects are managed by Hermit, you can tell Renovate to use the tool versions specified in each project via Hermit by setting `binarySource=hermit`.
 
-Tools not on this list fall back to `binarySource=global`.
 
 ## cacheDir
 
