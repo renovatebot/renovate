@@ -164,7 +164,6 @@ This mode means that Renovate will dynamically install the desired version of ea
 
 If all projects are managed by Hermit, you can tell Renovate to use the tool versions specified in each project via Hermit by setting `binarySource=hermit`.
 
-
 ## cacheDir
 
 By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
