@@ -354,6 +354,7 @@ jobs:
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
           files: ${{ steps.codecov-lines.outputs.codecov-files }}
+          verbose: true
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
