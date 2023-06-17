@@ -312,6 +312,8 @@ jobs:
       - name: Move coverage files
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
         run: |
+          mkdir -p ./coverage/lcov
+          mkdir -p ./coverage/json
           for shard in ${{ matrix.shards }};
           do
             mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.txt
