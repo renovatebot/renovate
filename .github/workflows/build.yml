@@ -259,7 +259,7 @@ jobs:
         run: yarn test-schema
 
   test:
-    needs: [prefetch]
+    needs: [setup, prefetch]
 
     if: |
       !(github.event.pull_request.draft == true &&
@@ -370,9 +370,9 @@ jobs:
             --lines 100 \
             --statements 100
 
-  # Catch-all for all required checks
+  # Catch-all required check for test matrix and coverage
   test-success:
-    needs: [test, coverage]
+    needs: [setup, test, coverage]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
