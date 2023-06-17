@@ -52,7 +52,7 @@ export function isOCIRegistry(repository: Repository): boolean {
 export function generateRegistryLoginCmd(
   repositoryName: string,
   repositoryBaseURL: string,
-  repositoryHost: string,
+  repositoryHost: string
 ): string | null {
   const repositoryRule: RepositoryRule = {
     name: repositoryName,
