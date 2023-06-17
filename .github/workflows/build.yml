@@ -317,7 +317,7 @@ jobs:
           for shard in ${{ matrix.shards }};
           do
             mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.txt
-            mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
+            mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.info
           done
 
       - name: Save coverage artifacts
@@ -346,14 +346,10 @@ jobs:
           name: coverage
           path: coverage
 
-      - name: List codecov files
-        id: codecov-lines
-        run: echo "codecov-files=$(find coverage/lcov -name '*.txt' | paste -sd ',' -)"
-
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
-          working-directory: coverage/lcov
+          directory: coverage/lcov
           verbose: true
 
       - name: Setup Node.js
