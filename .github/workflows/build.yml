@@ -312,12 +312,10 @@ jobs:
       - name: Move coverage files
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
         run: |
-          mkdir -p ./coverage/lcov
-          mkdir -p ./coverage/json
+          mkdir -p ./coverage/reports
           for shard in ${{ matrix.shards }};
           do
-            mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.info
-            mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
+            mv ./coverage/shard/$shard/coverage-final.json ./coverage/reports/$shard.json
           done
 
       - name: Save coverage artifacts
@@ -325,9 +323,7 @@ jobs:
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: coverage
-          path: |
-            ./coverage/lcov
-            ./coverage/json
+          path: ./coverage/reports
 
   coverage:
     needs: [test]
@@ -340,30 +336,30 @@ jobs:
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
-      - name: Download coverage reports
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
-        with:
-          name: coverage
-          path: coverage
-
-      - name: Codecov
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
-        with:
-          directory: coverage/lcov
-          verbose: true
-
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
+      - name: Download coverage reports
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: coverage
+          path: coverage
+
       - name: Merge coverage reports
-        run: yarn -s nyc merge ./coverage/json ./coverage/nyc/coverage.json
+        run: yarn -s nyc merge ./coverage ./coverage-final/report.json
+
+      - name: Codecov
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+        with:
+          file: ./coverage-final/report.json
+          verbose: true
 
       - name: Check coverage threshold
         run: |
-          yarn -s nyc check-coverage -t ./coverage/nyc \
+          yarn -s nyc check-coverage -t ./coverage-final \
             --branches 98 \
             --functions 100 \
             --lines 100 \
