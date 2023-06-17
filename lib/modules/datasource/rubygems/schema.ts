@@ -14,7 +14,7 @@ export const MarshalledVersionInfo = LooseArray(
   .nullable()
   .catch(null);
 
-export const GemsInfo = z
+export const GemMetadata = z
   .object({
     name: z.string().transform((x) => x.toLowerCase()),
     version: z.string().nullish().catch(null),
@@ -31,13 +31,13 @@ export const GemsInfo = z
       source_code_uri: sourceUrl,
     }) => ({
       packageName,
-      version,
+      latestVersion: version,
       changelogUrl,
       homepage,
       sourceUrl,
     })
   );
-export type GemsInfo = z.infer<typeof GemsInfo>;
+export type GemMetadata = z.infer<typeof GemMetadata>;
 
 export const GemVersions = LooseArray(
   z
