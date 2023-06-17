@@ -348,7 +348,7 @@ jobs:
 
       - name: List codecov files
         id: codecov-lines
-        run: echo "codecov-files=$(find ./coverage/lcov -name '*.txt' | paste -sd ',' -)"
+        run: echo "codecov-files=$(find coverage/lcov -name '*.txt' | paste -sd ',' -)"
 
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
