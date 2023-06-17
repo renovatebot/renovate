@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';

@@ -274,6 +274,7 @@ const orgGroups = {
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
+  octokit: 'https://github.com/octokit/',
   'semantic-release': 'https://github.com/semantic-release/',
   swc: 'https://github.com/swc-project/',
 };

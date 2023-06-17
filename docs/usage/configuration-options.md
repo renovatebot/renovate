@@ -300,6 +300,14 @@ With a negation, all branches except those matching the regex will be added to t
 }
 ```
 
+You can also use the special `"$default"` string to denote the repository's default branch, which is useful if you have it in an org preset, e.g.:
+
+```json
+{
+  "baseBranches": ["$default", "/^release\\/.*/"]
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
     Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
