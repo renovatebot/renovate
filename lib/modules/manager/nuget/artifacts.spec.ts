@@ -222,7 +222,11 @@ describe('modules/manager/nuget/artifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     git.getFiles.mockResolvedValueOnce({
@@ -249,7 +253,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/containerbase/sidecar',
       },
       {
         cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -264,7 +268,7 @@ describe('modules/manager/nuget/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool dotnet 7.0.100' +
           ' && ' +
