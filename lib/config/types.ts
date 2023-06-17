@@ -50,6 +50,7 @@ export interface RenovateSharedConfig {
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
+  includeMirrors?: boolean;
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];

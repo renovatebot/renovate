@@ -71,6 +71,7 @@ let config: {
   cloneSubmodules: boolean | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
+  includeMirrors: boolean;
 } = {} as any;
 
 const defaults = {
@@ -266,7 +267,7 @@ export async function initRepo({
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
-    if (res.body.mirror) {
+    if (res.body.mirror && !config.includeMirrors) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );

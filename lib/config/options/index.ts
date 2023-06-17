@@ -436,6 +436,14 @@ const options: RenovateOptions[] = [
     default: 'auto',
   },
   {
+    name: 'includeMirrors',
+    description:
+      'Whether to process mirrored repositories. By default, all mirrored repositories are skipped.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitea', 'gitlab'],
+  },
+  {
     name: 'forkToken',
     description: 'Set a personal access token here to enable "fork mode".',
     stage: 'repository',
