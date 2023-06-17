@@ -226,11 +226,14 @@ describe('util/exec/docker/index', () => {
       (opts ? `${opts} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `containerbase/${img} ` +
+      `ghcr.io/containerbase/sidecar ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
-      GlobalConfig.set({ dockerUser: 'some-user' });
+      GlobalConfig.set({
+        dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
     });
 
     it('returns executable command', async () => {
@@ -268,6 +271,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -288,6 +292,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/cache/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
