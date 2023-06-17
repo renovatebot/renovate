@@ -10,7 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
-import { replaceUrlPath } from '../../../util/url';
+import { regEx } from '../../../util/regex';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
@@ -76,7 +76,8 @@ export async function updateArtifacts({
     for (const value of repositories.filter(isOCIRegistry)) {
       const loginCmd = generateRegistryLoginCmd(
         value.name,
-        replaceUrlPath(`https://${value.url}`, '')
+        `https://${value.url}`,
+        value.url.replace(regEx(/\/.*/), '')
       );
 
       if (loginCmd) {
