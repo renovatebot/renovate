@@ -123,7 +123,7 @@ export async function getDockerTag(
       return version;
     }
   } else {
-    logger.error(`No ${packageName} releases found`);
+    logger.error({ packageName }, `No releases found`);
     return 'latest';
   }
   logger.warn(

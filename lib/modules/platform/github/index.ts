@@ -1192,7 +1192,7 @@ export async function ensureIssue({
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
-          logger.warn(`Closing duplicate issue ${i.number}`);
+          logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
           // TODO #7154
           await closeIssue(i.number!);
         }
@@ -1688,7 +1688,10 @@ export async function mergePr({
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${config.mergeMethod} merge PR`);
+        logger.warn(
+          { mergeMethod: config.mergeMethod, err },
+          'Failed to merge PR'
+        );
         return false;
       }
     }
