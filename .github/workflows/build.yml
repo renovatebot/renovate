@@ -316,7 +316,7 @@ jobs:
           mkdir -p ./coverage/json
           for shard in ${{ matrix.shards }};
           do
-            mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.info
+            mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.lcov
             mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
           done
 
