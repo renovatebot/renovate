@@ -312,10 +312,12 @@ jobs:
       - name: Move coverage files
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
         run: |
-          mkdir -p ./coverage/reports
+          mkdir -p ./coverage/lcov
+          mkdir -p ./coverage/json
           for shard in ${{ matrix.shards }};
           do
-            mv ./coverage/shard/$shard/coverage-final.json ./coverage/reports/$shard.json
+            mv ./coverage/shard/$shard/lcov.info ./coverage/lcov/$shard.info
+            mv ./coverage/shard/$shard/coverage-final.json ./coverage/json/$shard.json
           done
 
       - name: Save coverage artifacts
@@ -323,7 +325,9 @@ jobs:
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: coverage
-          path: ./coverage/reports
+          path: |
+            ./coverage/lcov
+            ./coverage/json
 
   coverage:
     needs: [test]
@@ -336,29 +340,29 @@ jobs:
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
-      - name: Setup Node.js
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          os: ${{ runner.os }}
-
       - name: Download coverage reports
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: coverage
           path: coverage
 
-      - name: Merge coverage reports
-        run: yarn -s nyc merge ./coverage ./coverage-final/report.json
-
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
-          file: ./coverage-final/report.json
+          directory: coverage/lcov
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Merge coverage reports
+        run: yarn -s nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
       - name: Check coverage threshold
         run: |
-          yarn -s nyc check-coverage -t ./coverage-final \
+          yarn -s nyc check-coverage -t ./coverage/nyc \
             --branches 98 \
             --functions 100 \
             --lines 100 \
