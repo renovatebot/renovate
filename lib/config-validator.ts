@@ -34,7 +34,10 @@ async function validate(
   const massagedConfig = massageConfig(migratedConfig);
   const res = await validateConfig(massagedConfig, isPreset);
   if (res.errors.length) {
-    logger.error({ file: desc, errors: res.errors }, 'Found errors in configuration');
+    logger.error(
+      { file: desc, errors: res.errors },
+      'Found errors in configuration'
+    );
     returnVal = 1;
   }
   if (res.warnings.length) {
