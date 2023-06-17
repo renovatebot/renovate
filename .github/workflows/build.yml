@@ -346,10 +346,14 @@ jobs:
           name: coverage
           path: coverage
 
+      - name: List codecov files
+        id: codecov-lines
+        run: echo "codecov-files=$(find ./coverage/lcov -name '*.txt' | paste -sd ',' -)"
+
       - name: Codecov
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
-          files: ./coverage/lcov/*.txt
+          files: ${{ steps.codecov-lines.outputs.codecov-files }}
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
