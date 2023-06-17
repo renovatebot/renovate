@@ -259,7 +259,7 @@ jobs:
         run: yarn test-schema
 
   test:
-    needs: [setup, prefetch]
+    needs: [prefetch]
 
     if: |
       !(github.event.pull_request.draft == true &&
@@ -330,7 +330,7 @@ jobs:
             ./coverage/json
 
   coverage:
-    needs: [setup, test]
+    needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
@@ -372,7 +372,7 @@ jobs:
 
   # Catch-all for all required checks
   test-success:
-    needs: [setup, test, coverage]
+    needs: [test, coverage]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -423,7 +423,7 @@ jobs:
           path: renovate-v0.0.0-semantic-release.tgz
 
   build-docs:
-    needs: [setup, lint-docs]
+    needs: [lint-docs]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event.pull_request.draft != true
@@ -447,7 +447,7 @@ jobs:
           path: tmp/docs/
 
   test-e2e:
-    needs: [setup, build]
+    needs: [build]
     runs-on: 'ubuntu-latest'
     timeout-minutes: 7
 
