@@ -2588,10 +2588,10 @@
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.17.tgz#0dc619a05dff425205b18c7103b323cd4b7601c6"
   integrity sha512-DemYbeE224nT7Rn3y5FjOI///031awjlFebpO2+e3NLBRx0yuZhga8Ogf9jJKCLMmwkEF/ndhQ0QCaWDv6M4bw==
 
-"@renovatebot/ruby-semver@3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-3.0.2.tgz#1c83c4c3c39fafbe1f23e4b1c008ecdc4833a6cc"
-  integrity sha512-GwmcQThzOQGAn/iiEBhavikp0R9jOT0MWRwTcZQXM89Ghl0HUZUf8R9XjckPYT+WvZL6qgAB4CA/Ydfegh079g==
+"@renovatebot/ruby-semver@3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-3.0.3.tgz#cfa37ee65617ac7dbe705070c5edc1e6d8a3525e"
+  integrity sha512-MnuGEeQNFCklD5OgrvPBMAhHwJ9KfPTEoaKbmx3At0gdL71O4hf39ERy0sKIr4svEG3e+125Ccasr9rjOwfq4A==
 
 "@seald-io/binary-search-tree@^1.0.3":
   version "1.0.3"
