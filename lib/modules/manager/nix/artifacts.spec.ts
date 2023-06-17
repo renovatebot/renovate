@@ -24,7 +24,11 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
-const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
+const dockerAdminConfig = {
+  ...adminConfig,
+  binarySource: 'docker',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+};
 
 process.env.BUILDPACK = 'true';
 
@@ -177,7 +181,7 @@ describe('modules/manager/nix/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -187,7 +191,7 @@ describe('modules/manager/nix/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool nix 2.10.0 ' +
           '&& ' +
@@ -308,7 +312,7 @@ describe('modules/manager/nix/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -318,7 +322,7 @@ describe('modules/manager/nix/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool nix 2.10.0 ' +
           '&& ' +
