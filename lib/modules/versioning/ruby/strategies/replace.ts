@@ -31,7 +31,7 @@ export function replacePart(part: Range, to: string): Range {
       return part;
     // istanbul ignore next
     default:
-      logger.warn({ operator }, `Unsupported operator`);
+      logger.warn({ operator }, `Unsupported ruby versioning operator`);
       return { operator: '', delimiter: ' ', version: '' };
   }
 }
