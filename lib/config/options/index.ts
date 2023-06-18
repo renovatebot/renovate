@@ -747,6 +747,14 @@ const options: RenovateOptions[] = [
     type: 'boolean',
   },
   {
+    name: 'skipInstalls',
+    description:
+      'Skip installing modules/dependencies if lock file updating is possible without a full install.',
+    type: 'boolean',
+    default: null,
+    globalOnly: true,
+  },
+  {
     name: 'autodiscover',
     description: 'Autodiscover all repositories.',
     stage: 'global',
