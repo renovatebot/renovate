@@ -92,7 +92,7 @@ export const presets: Record<string, Preset> = {
       {
         automerge: true,
         matchCurrentVersion: '>= 1.0.0',
-        matchUpdateTypes: ['minor'],
+        matchUpdateTypes: ['minor', 'patch'],
       },
     ],
   },
