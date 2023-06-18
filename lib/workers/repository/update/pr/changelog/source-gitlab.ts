@@ -1,5 +1,5 @@
 // TODO #7154
-import URL from 'url';
+import URL from 'node:url';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
@@ -38,7 +38,7 @@ export async function getChangeLogJSON(
   const currentVersion = config.currentVersion!;
   const newVersion = config.newVersion!;
   const sourceUrl = config.sourceUrl!;
-  const depName = config.depName!;
+  const packageName = config.packageName!;
   const sourceDirectory = config.sourceDirectory!;
 
   logger.trace('getChangeLogJSON for gitlab');
@@ -81,7 +81,7 @@ export async function getChangeLogJSON(
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, versioning, repository);
     }
-    const regex = regEx(`(?:${depName}|release)[@-]`, undefined, false);
+    const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
     const tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), release.version));
@@ -95,7 +95,7 @@ export async function getChangeLogJSON(
   }
 
   function getCacheKey(prev: string, next: string): string {
-    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];
@@ -137,14 +137,14 @@ export async function getChangeLogJSON(
     }
   }
 
-  let res: ChangeLogResult = {
+  let res: ChangeLogResult | null = {
     project: {
       apiBaseUrl,
       baseUrl,
       type: 'gitlab',
       repository,
       sourceUrl,
-      depName,
+      packageName,
       sourceDirectory,
     },
     versions: changelogReleases,

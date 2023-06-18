@@ -19,7 +19,7 @@ export function updateLockedDependency(
     }
     return { status: 'unsupported' };
   } catch (err) {
-    logger.debug({ err }, 'bundler.updateLockedDependency() error');
+    logger.debug({ err }, 'terraform.updateLockedDependency() error');
     return { status: 'update-failed' };
   }
 }

@@ -1,6 +1,8 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { partial } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
+import type { GithubTagItem } from '../../../util/github/graphql/types';
 import * as hostRules from '../../../util/host-rules';
 import { GithubTagsDatasource } from '.';
 
@@ -68,6 +70,24 @@ describe('modules/datasource/github-tags/index', () => {
       expect(res).toBe('abc');
     });
 
+    it('returns null for missing hash', async () => {
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01',
+          hash: '123',
+        },
+        partial<GithubTagItem>({
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+        }),
+      ]);
+      const res = await github.getDigest({ packageName }, 'v2.0.0');
+      expect(res).toBeNull();
+    });
+
     it('returns null for missing tagged commit digest', async () => {
       jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
         {
@@ -95,7 +115,7 @@ describe('modules/datasource/github-tags/index', () => {
   });
 
   describe('getReleases', () => {
-    const depName = 'some/dep2';
+    const packageName = 'some/dep2';
 
     it('returns tags', async () => {
       jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
@@ -133,7 +153,7 @@ describe('modules/datasource/github-tags/index', () => {
         },
       ]);
 
-      const res = await getPkgReleases({ datasource: github.id, depName });
+      const res = await getPkgReleases({ datasource: github.id, packageName });
 
       expect(res).toEqual({
         registryUrl: 'https://github.com',

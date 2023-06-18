@@ -2,7 +2,7 @@ import _findUp from 'find-up';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { join, resolve } from 'upath';
-import { git, mockedFunction } from '../../../test/util';
+import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   cachePathExists,
@@ -14,9 +14,10 @@ import {
   ensureLocalDir,
   findLocalSiblingOrParent,
   findUpLocal,
-  getFileContentMap,
+  getLocalFiles,
   getParentDir,
   getSiblingFileName,
+  isValidLocalPath,
   listCacheDir,
   localPathExists,
   localPathIsFile,
@@ -70,7 +71,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getParentDir', () => {
-    test.each`
+    it.each`
       dir            | expected
       ${'/foo/bar/'} | ${'/foo'}
       ${'/foo/bar'}  | ${'/foo'}
@@ -91,7 +92,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getSiblingFileName', () => {
-    test.each`
+    it.each`
       file          | sibling  | expected
       ${'/foo/bar'} | ${'baz'} | ${'/foo/baz'}
       ${'foo/bar'}  | ${'baz'} | ${'foo/baz'}
@@ -133,6 +134,11 @@ describe('util/fs/index', () => {
   });
 
   describe('deleteLocalFile', () => {
+    it('throws if platform is local', async () => {
+      GlobalConfig.set({ platform: 'local' });
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+    });
+
     it('deletes file', async () => {
       const filePath = `${localDir}/foo/bar/file.txt`;
       await fs.outputFile(filePath, 'foobar');
@@ -205,7 +211,17 @@ describe('util/fs/index', () => {
     });
 
     it('returns false', async () => {
-      expect(await localPathExists('file.txt')).toBe(false);
+      expect(await localPathExists('file.txt')).toBeFalse();
+    });
+  });
+
+  describe('isLocalPath', () => {
+    it('returns true for valid local path', () => {
+      expect(isValidLocalPath('./foo/...')).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(isValidLocalPath('/file.txt')).toBeFalse();
     });
   });
 
@@ -464,7 +480,7 @@ describe('util/fs/index', () => {
     });
   });
 
-  describe('getFileContentMap', () => {
+  describe('getLocalFiles', () => {
     it('reads list of files from local fs', async () => {
       const fileContentMap = {
         file1: 'foobar',
@@ -473,22 +489,12 @@ describe('util/fs/index', () => {
 
       await fs.outputFile(`${localDir}/file1`, fileContentMap.file1);
       await fs.outputFile(`${localDir}/file2`, fileContentMap.file2);
-      const res = await getFileContentMap(Object.keys(fileContentMap), true);
-      expect(res).toStrictEqual(fileContentMap);
-    });
-
-    it('reads list of files from git', async () => {
-      const fileContentMap = {
-        file1: 'foobar',
-      };
-
-      git.getFile.mockResolvedValueOnce('foobar');
-      const res = await getFileContentMap(Object.keys(fileContentMap));
+      const res = await getLocalFiles(Object.keys(fileContentMap));
       expect(res).toStrictEqual(fileContentMap);
     });
 
     it('returns null as content if file is not found', async () => {
-      const res = await getFileContentMap(['invalidfile'], true);
+      const res = await getLocalFiles(['invalidfile']);
       expect(res).toStrictEqual({
         invalidfile: null,
       });

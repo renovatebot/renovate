@@ -2,7 +2,8 @@
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account, select `repo` scope.
+First, [create a classic Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) for the bot account, select `repo` scope.
+Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.
 
 Let Renovate use your PAT by doing _one_ of the following:
 
@@ -18,6 +19,11 @@ You can choose where you want to set `endpoint`:
 - In your `config.js` file
 - In a environment variable
 - In a CLI parameter
+
+<!-- prettier-ignore -->
+!!! tip "Labels and forking mode"
+    If you're self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
+    The `triage` level allows the PAT to apply/dismiss existing labels.
 
 ## Running as a GitHub App
 
@@ -65,6 +71,12 @@ Any tokens that do not start with `ghs_` (for example tokens from GitHub Enterpr
 !!! note
     The installation tokens expire after 1 hour and need to be regenerated regularly.
     Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+
+<!-- prettier-ignore -->
+!!! tip "Third-party tools to regenerate installation tokens"
+    If you're self-hosting Renovate within a GitHub Actions workflow, then you can use the [`jnwng/github-app-installation-token-action`](https://github.com/jnwng/github-app-installation-token-action) or [`tibdex/github-app-token`](https://github.com/tibdex/github-app-token) actions.
+    If you use Node.js/CLI, then you can use the [`github-app-installation-token`](https://github.com/gagoar/github-app-installation-token) package.
+    If you use Docker, then you can use the [`mshekow/github-app-installation-token`](https://github.com/MShekow/github-app-installation-token) image.
 
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 

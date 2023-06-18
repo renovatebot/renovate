@@ -1,21 +1,8 @@
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
-import {
-  cleanupTempVars,
-  qConcatExpr,
-  qPropertyAccessIdentifier,
-  qTemplateString,
-  qVariableAccessIdentifier,
-  storeInTokenMap,
-} from './common';
+import { cleanupTempVars, qValueMatcher, storeInTokenMap } from './common';
 import { handleApplyFrom } from './handlers';
-
-const qFilePath = qConcatExpr(
-  qTemplateString,
-  qPropertyAccessIdentifier,
-  qVariableAccessIdentifier
-);
 
 // apply from: 'foo.gradle'
 // apply(from = property("foo"))
@@ -36,13 +23,13 @@ const qApplyFromFile = q
           .begin<Ctx>()
           .opt(
             q
-              .join(qFilePath, q.op(','))
+              .join(qValueMatcher, q.op(','))
               .handler((ctx) => storeInTokenMap(ctx, 'parentPath'))
           )
-          .join(qFilePath)
+          .join(qValueMatcher)
           .end(),
       }),
-    qFilePath
+    qValueMatcher
   )
   .handler((ctx) => storeInTokenMap(ctx, 'scriptFile'));
 

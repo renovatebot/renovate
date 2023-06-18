@@ -13,7 +13,7 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 
 ### Hosted GitHub.com App
 
-Installing/enabling Mend's Renovate GitHub App is simple.
+Follow these steps to install and enable Mend's Renovate GitHub App:
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 
@@ -133,14 +133,8 @@ If you want to make config edits directly, follow these steps:
 1. Create a new Git branch to work on
 1. Install or update the `renovate` package globally (`npm i -g renovate` or `yarn global add renovate`) to get the `renovate-config-validator` program
 1. Edit your Renovate configuration file
-1. Validate your config by running `renovate-config-validator`
+1. [Validate your config](../config-validation.md)
 1. If the improved config passes the validation, merge the branch into your mainline branch
-
-The validator program checks files passed as CLI arguments.
-If no argument is given, all [default locations](../configuration-options.md) (if files exist) and the `RENOVATE_CONFIG_FILE` environment variable are checked.
-
-You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
-Please check out the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
 
 ### Nuke config and re-onboard
 

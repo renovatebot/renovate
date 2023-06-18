@@ -1,7 +1,8 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
-import type { PackageDependency } from '../types';
+import type { ExtractConfig, PackageDependency } from '../types';
+import type { TerraformDefinitionFile } from './hcl/types';
 import type { ProviderLock } from './lockfile/types';
 import { getLockedVersion, massageProviderLookupName } from './util';
 
@@ -17,7 +18,11 @@ export abstract class DependencyExtractor {
    * @param hclRoot HCL parsing artifact.
    * @param locks currently existing locks
    */
-  abstract extract(hclRoot: any, locks: ProviderLock[]): PackageDependency[];
+  abstract extract(
+    hclRoot: TerraformDefinitionFile,
+    locks: ProviderLock[],
+    config: ExtractConfig
+  ): PackageDependency[];
 }
 
 export abstract class TerraformProviderExtractor extends DependencyExtractor {
@@ -57,7 +62,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
     dep.lockedVersion = getLockedVersion(dep, locks);
 
     if (!dep.currentValue) {
-      dep.skipReason = 'no-version';
+      dep.skipReason = 'unspecified-version';
     }
 
     return dep;

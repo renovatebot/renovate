@@ -12,7 +12,7 @@ export interface SpanParameters {
   /**
    * Attributes which should be added to the span
    */
-  attributes?: Attributes;
+  attributes?: Attributes | undefined;
 
   /**
    * Should this span be added to the root span or to the current active span

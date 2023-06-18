@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { UrlPathParsedResult } from './types';
 import { isSpace, removeComments, skip } from './util';
 
@@ -129,7 +129,7 @@ function extractClassName(content: string): string | null {
 }
 
 // TODO: Maybe check if quotes/double-quotes are balanced (#9591)
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('extractPackageFile()');
   /*
     1. match "class className < Formula"

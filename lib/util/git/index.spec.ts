@@ -344,6 +344,12 @@ describe('util/git/index', () => {
       expect(merged.all).toContain('renovate/future_branch');
     });
 
+    it('does not push if localOnly=true', async () => {
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      await git.mergeBranch('renovate/future_branch', true);
+      expect(pushSpy).toHaveBeenCalledTimes(0);
+    });
+
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
@@ -382,6 +388,16 @@ describe('util/git/index', () => {
 
     it('returns null for 404', async () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
+    });
+  });
+
+  describe('getFiles(filePath)', () => {
+    it('gets the file', async () => {
+      const res = await git.getFiles(['master_file', 'some_missing_path']);
+      expect(res).toEqual({
+        master_file: defaultBranch,
+        some_missing_path: null,
+      });
     });
   });
 
@@ -484,12 +500,13 @@ describe('util/git/index', () => {
         },
       ];
       const commitConfig = {
+        baseBranch: 'renovate/something',
         branchName: 'renovate/something',
         files,
         message: 'Update something',
       };
       const commitSha = await git.commitFiles(commitConfig);
-      const remoteSha = await git.fetchCommit(commitConfig);
+      const remoteSha = await git.fetchBranch(commitConfig.branchName);
       expect(commitSha).toEqual(remoteSha);
     });
 

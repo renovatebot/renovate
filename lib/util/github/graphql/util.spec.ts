@@ -3,7 +3,7 @@ import { parse as graphqlParse } from 'graphql';
 import { DateTime } from 'luxon';
 import { isDateExpired, prepareQuery } from './util';
 
-const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
+const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO()!;
 
 describe('util/github/graphql/util', () => {
   describe('prepareQuery', () => {
@@ -32,7 +32,7 @@ describe('util/github/graphql/util', () => {
     });
   });
 
-  test.each`
+  it.each`
     currentTime           | initialTimestamp      | duration        | expected
     ${'2022-11-25 15:58'} | ${'2022-11-25 15:00'} | ${{ hours: 1 }} | ${false}
     ${'2022-11-25 15:59'} | ${'2022-11-25 15:00'} | ${{ hours: 1 }} | ${false}

@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
+import { once, reset as onceReset } from './once';
 import { RenovateStream } from './pretty-stdout';
 import type { BunyanRecord, Logger } from './types';
 import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
@@ -61,7 +62,7 @@ const bunyanLogger = bunyan.createLogger({
 });
 
 const logFactory =
-  (level: bunyan.LogLevelString): any =>
+  (level: bunyan.LogLevelString) =>
   (p1: any, p2: any): void => {
     if (p2) {
       // meta and msg provided
@@ -84,10 +85,22 @@ const loggerLevels: bunyan.LogLevelString[] = [
   'fatal',
 ];
 
-export const logger: Logger = {} as any;
+export const logger: Logger = { once: { reset: onceReset } } as any;
 
 loggerLevels.forEach((loggerLevel) => {
-  logger[loggerLevel] = logFactory(loggerLevel);
+  logger[loggerLevel] = logFactory(loggerLevel) as never;
+
+  const logOnceFn = (p1: any, p2: any): void => {
+    once(() => {
+      const logFn = logger[loggerLevel];
+      if (is.undefined(p2)) {
+        logFn(p1);
+      } else {
+        logFn(p1, p2);
+      }
+    }, logOnceFn);
+  };
+  logger.once[loggerLevel] = logOnceFn as never;
 });
 
 export function setContext(value: string): void {

@@ -1,9 +1,13 @@
-import { AdoptiumJavaDatasource } from '../../datasource/adoptium-java';
+import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
-import { NodeDatasource } from '../../datasource/node';
+import { JavaVersionDatasource } from '../../datasource/java-version';
+import { NodeVersionDatasource } from '../../datasource/node-version';
+import { NpmDatasource } from '../../datasource/npm';
+import { PypiDatasource } from '../../datasource/pypi';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 
 export { extractPackageFile } from './extract';
@@ -15,11 +19,15 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
-  AdoptiumJavaDatasource.id,
+  DartVersionDatasource.id,
   DockerDatasource.id,
+  FlutterVersionDatasource.id,
   GithubReleasesDatasource.id,
   GithubTagsDatasource.id,
   HexpmBobDatasource.id,
-  NodeDatasource.id,
+  JavaVersionDatasource.id,
+  NodeVersionDatasource.id,
+  NpmDatasource.id,
+  PypiDatasource.id,
   RubyVersionDatasource.id,
 ];

@@ -84,8 +84,6 @@ const stateMap = {
 
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
-  // TODO: types (#7154)
-  const displayNumber = `Pull Request #${number!}`;
 
   const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.sourceRefName
@@ -107,7 +105,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     sourceBranch,
     state,
     number,
-    displayNumber,
     bodyStruct,
     sourceRefName,
     targetBranch,

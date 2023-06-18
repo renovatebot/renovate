@@ -6,6 +6,7 @@ import { autodiscoverRepositories } from './autodiscover';
 
 jest.mock('../../modules/platform/github');
 jest.unmock('../../modules/platform');
+jest.unmock('../../modules/platform/scm');
 
 // imports are readonly
 const hostRules = _hostRules;
@@ -22,6 +23,19 @@ describe('workers/global/autodiscover', () => {
       token: '123test',
       endpoint: 'endpoint',
     });
+  });
+
+  it('throws if local and repositories defined', async () => {
+    config.platform = 'local';
+    config.repositories = ['a'];
+    await expect(autodiscoverRepositories(config)).rejects.toThrow();
+  });
+
+  it('returns local', async () => {
+    config.platform = 'local';
+    expect((await autodiscoverRepositories(config)).repositories).toEqual([
+      'local',
+    ]);
   });
 
   it('returns if not autodiscovering', async () => {

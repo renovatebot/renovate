@@ -11,7 +11,13 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
-import type { PnpmWorkspaceFile } from './types';
+import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
+import type { NpmManagerData } from '../types';
+import type { LockFile, PnpmWorkspaceFile } from './types';
+
+function isPnpmLockfile(obj: any): obj is PnpmLockFile {
+  return is.plainObject(obj) && 'lockfileVersion' in obj;
+}
 
 export async function extractPnpmFilters(
   fileName: string
@@ -74,13 +80,14 @@ export async function findPnpmWorkspace(
 }
 
 export async function detectPnpmWorkspaces(
-  packageFiles: Partial<PackageFile>[]
+  packageFiles: Partial<PackageFile<NpmManagerData>>[]
 ): Promise<void> {
   logger.debug(`Detecting pnpm Workspaces`);
   const packagePathCache = new Map<string, string[] | null>();
 
   for (const p of packageFiles) {
-    const { packageFile, pnpmShrinkwrap } = p;
+    const { packageFile, managerData } = p;
+    const { pnpmShrinkwrap } = managerData as NpmManagerData;
 
     // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
@@ -105,7 +112,11 @@ export async function detectPnpmWorkspaces(
       const { localDir } = GlobalConfig.get();
       const packages = await findPackages(
         upath.dirname(upath.join(localDir, workspaceYamlPath)),
-        { patterns: filters }
+        {
+          patterns: filters,
+          // Match the ignores used in @pnpm/find-workspace-packages
+          ignore: ['**/node_modules/**', '**/bower_components/**'],
+        }
       );
       const packagePaths = packages.map((pkg) =>
         upath.join(pkg.dir, 'package.json')
@@ -119,7 +130,8 @@ export async function detectPnpmWorkspaces(
     );
 
     if (isPackageInWorkspace) {
-      p.pnpmShrinkwrap = lockFilePath;
+      p.managerData ??= {};
+      p.managerData.pnpmShrinkwrap = lockFilePath;
     } else {
       logger.trace(
         { packageFile, workspaceYamlPath },
@@ -127,4 +139,86 @@ export async function detectPnpmWorkspaces(
       );
     }
   }
+}
+
+export async function getPnpmLock(filePath: string): Promise<LockFile> {
+  try {
+    const pnpmLockRaw = await readLocalFile(filePath, 'utf8');
+    if (!pnpmLockRaw) {
+      throw new Error('Unable to read pnpm-lock.yaml');
+    }
+
+    const lockParsed = load(pnpmLockRaw);
+    if (!isPnpmLockfile(lockParsed)) {
+      throw new Error('Invalid or empty lockfile');
+    }
+    logger.trace({ lockParsed }, 'pnpm lockfile parsed');
+
+    // field lockfileVersion is type string in lockfileVersion = 6 and type number in < 6
+    const lockfileVersion: number = is.number(lockParsed.lockfileVersion)
+      ? lockParsed.lockfileVersion
+      : parseFloat(lockParsed.lockfileVersion);
+
+    const lockedVersions = getLockedVersions(lockParsed);
+
+    return {
+      lockedVersionsWithPath: lockedVersions,
+      lockfileVersion,
+    };
+  } catch (err) {
+    logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
+    return { lockedVersions: {} };
+  }
+}
+
+function getLockedVersions(
+  lockParsed: PnpmLockFile
+): Record<string, Record<string, Record<string, string>>> {
+  const lockedVersions: Record<
+    string,
+    Record<string, Record<string, string>>
+  > = {};
+
+  // monorepo
+  if (is.nonEmptyObject(lockParsed.importers)) {
+    for (const [importer, imports] of Object.entries(lockParsed.importers)) {
+      lockedVersions[importer] = getLockedDependencyVersions(imports);
+    }
+  }
+  // normal repo
+  else {
+    lockedVersions['.'] = getLockedDependencyVersions(lockParsed);
+  }
+
+  return lockedVersions;
+}
+
+function getLockedDependencyVersions(
+  obj: PnpmLockFile | Record<string, PnpmDependencySchema>
+): Record<string, Record<string, string>> {
+  const dependencyTypes = [
+    'dependencies',
+    'devDependencies',
+    'optionalDependencies',
+  ] as const;
+
+  const res: Record<string, Record<string, string>> = {};
+  for (const depType of dependencyTypes) {
+    res[depType] = {};
+    for (const [pkgName, versionCarrier] of Object.entries(
+      obj[depType] ?? {}
+    )) {
+      let version: string;
+      if (is.object(versionCarrier)) {
+        version = versionCarrier['version'];
+      } else {
+        version = versionCarrier;
+      }
+
+      const pkgVersion = version.split('(')[0].trim();
+      res[depType][pkgName] = pkgVersion;
+    }
+  }
+
+  return res;
 }

@@ -1,5 +1,6 @@
 import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
+import { partial } from '../../../../test/util';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
@@ -44,11 +45,14 @@ const adapter: GithubGraphqlDatasourceAdapter<
     version,
     releaseTimestamp,
     foo,
-  }: TestAdapterInput): TestAdapterOutput => ({
-    version,
-    releaseTimestamp,
-    bar: foo,
-  }),
+  }: TestAdapterInput): TestAdapterOutput | null =>
+    version && releaseTimestamp && foo
+      ? {
+          version,
+          releaseTimestamp,
+          bar: foo,
+        }
+      : null,
 };
 
 function resp(
@@ -208,6 +212,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
           resp(false, [
             { version: v3, releaseTimestamp: t3, foo: '3' },
             { version: v2, releaseTimestamp: t2, foo: '2' },
+            partial<TestAdapterInput>(),
             { version: v1, releaseTimestamp: t1, foo: '1' },
           ])
         );
@@ -378,7 +383,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         { version: v1, releaseTimestamp: t1, foo: '1' },
       ];
 
-      test.each`
+      it.each`
         isPrivate    | isCacheable
         ${undefined} | ${false}
         ${true}      | ${false}

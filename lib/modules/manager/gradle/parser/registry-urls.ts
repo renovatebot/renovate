@@ -6,10 +6,7 @@ import { qAssignments } from './assignments';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
-  qConcatExpr,
-  qPropertyAccessIdentifier,
-  qTemplateString,
-  qVariableAccessIdentifier,
+  qValueMatcher,
   storeInTokenMap,
   storeVarToken,
 } from './common';
@@ -18,12 +15,6 @@ import {
   handlePredefinedRegistryUrl,
 } from './handlers';
 import { qPlugins } from './plugins';
-
-const qValueMatcher = qConcatExpr(
-  qTemplateString,
-  qPropertyAccessIdentifier,
-  qVariableAccessIdentifier
-);
 
 // uri("https://foo.bar/baz")
 // "https://foo.bar/baz"

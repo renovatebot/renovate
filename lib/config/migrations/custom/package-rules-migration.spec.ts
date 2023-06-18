@@ -30,7 +30,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
       originalConfig.packageRules![0]
     ).map((key) => renameMap[key as keyof typeof renameMap] ?? key);
 
-    expect(expectedMappedProperties).toEqual(mappedProperties);
+    expect(mappedProperties).toEqual(expectedMappedProperties);
   });
 
   it('should not migrate nested packageRules', () => {

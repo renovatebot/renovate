@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import { z } from 'zod';
 import * as httpMock from '../../../test/http-mock';
 import { logger } from '../../../test/util';
 import {
@@ -7,7 +7,6 @@ import {
 } from '../../constants/error-messages';
 import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
-import { reportErrors } from '../schema';
 import * as queue from './queue';
 import * as throttle from './throttle';
 import type { HttpResponse } from './types';
@@ -316,8 +315,9 @@ describe('util/http/index', () => {
   });
 
   describe('Schema support', () => {
-    const testSchema = z.object({ test: z.boolean() });
-    type TestType = z.infer<typeof testSchema>;
+    const SomeSchema = z
+      .object({ x: z.number(), y: z.number() })
+      .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
 
     beforeEach(() => {
       jest.resetAllMocks();
@@ -329,7 +329,7 @@ describe('util/http/index', () => {
     });
 
     describe('getJson', () => {
-      it('infers body type', async () => {
+      it('uses schema for response body', async () => {
         httpMock
           .scope(baseUrl, {
             reqheaders: {
@@ -337,21 +337,19 @@ describe('util/http/index', () => {
             },
           })
           .get('/')
-          .reply(200, JSON.stringify({ test: true }));
+          .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<TestType> = await http.getJson(
+        const { body }: HttpResponse<string> = await http.getJson(
           'http://renovate.com',
-          testSchema
+          { headers: { accept: 'application/json' } },
+          SomeSchema
         );
 
-        expect(body).toEqual({ test: true });
-
-        reportErrors();
-        expect(logger.logger.warn).not.toHaveBeenCalled();
+        expect(body).toBe('2 + 2 = 4');
+        expect(logger.logger.once.info).not.toHaveBeenCalled();
       });
 
-      it('reports warnings', async () => {
-        memCache.init();
+      it('throws on schema mismatch', async () => {
         httpMock
           .scope(baseUrl, {
             reqheaders: {
@@ -359,98 +357,39 @@ describe('util/http/index', () => {
             },
           })
           .get('/')
-          .reply(200, JSON.stringify({ test: 'foobar' }));
-
-        const res = await http.getJson(
-          'http://renovate.com',
-          { onSchemaError: 'warn' },
-          testSchema
-        );
-
-        expect(res.body).toEqual({ test: 'foobar' });
-
-        expect(logger.logger.warn).not.toHaveBeenCalled();
-        reportErrors();
-        expect(logger.logger.warn).toHaveBeenCalled();
-      });
-
-      it('throws', async () => {
-        httpMock
-          .scope(baseUrl, {
-            reqheaders: {
-              accept: 'application/json',
-            },
-          })
-          .get('/')
-          .reply(200, JSON.stringify({ test: 'foobar' }));
+          .reply(200, JSON.stringify({ foo: 'bar' }));
 
         await expect(
-          http.getJson(
-            'http://renovate.com',
-            { onSchemaError: 'throw' },
-            testSchema
-          )
-        ).rejects.toThrow();
-
-        reportErrors();
-        expect(logger.logger.warn).not.toHaveBeenCalled();
+          http.getJson('http://renovate.com', SomeSchema)
+        ).rejects.toThrow(z.ZodError);
       });
     });
 
     describe('postJson', () => {
-      it('infers body type', async () => {
+      it('uses schema for response body', async () => {
         httpMock
           .scope(baseUrl)
           .post('/')
-          .reply(200, JSON.stringify({ test: true }));
+          .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<TestType> = await http.postJson(
+        const { body }: HttpResponse<string> = await http.postJson(
           'http://renovate.com',
-          testSchema
+          SomeSchema
         );
 
-        expect(body).toEqual({ test: true });
-
-        reportErrors();
-        expect(logger.logger.warn).not.toHaveBeenCalled();
+        expect(body).toBe('2 + 2 = 4');
+        expect(logger.logger.once.info).not.toHaveBeenCalled();
       });
 
-      it('reports warnings', async () => {
-        memCache.init();
+      it('throws on schema mismatch', async () => {
         httpMock
           .scope(baseUrl)
           .post('/')
-          .reply(200, JSON.stringify({ test: 'foobar' }));
-
-        const res = await http.postJson(
-          'http://renovate.com',
-          { onSchemaError: 'warn' },
-          testSchema
-        );
-
-        expect(res.body).toEqual({ test: 'foobar' });
-
-        expect(logger.logger.warn).not.toHaveBeenCalled();
-        reportErrors();
-        expect(logger.logger.warn).toHaveBeenCalled();
-      });
-
-      it('throws', async () => {
-        httpMock
-          .scope(baseUrl)
-          .post('/')
-          .reply(200, JSON.stringify({ test: 'foobar' }));
+          .reply(200, JSON.stringify({ foo: 'bar' }));
 
         await expect(
-          http.postJson(
-            'http://renovate.com',
-            { onSchemaError: 'throw' },
-            testSchema
-          )
-        ).rejects.toThrow();
-
-        reportErrors();
-        expect(logger.logger.warn).not.toHaveBeenCalled();
+          http.postJson('http://renovate.com', SomeSchema)
+        ).rejects.toThrow(z.ZodError);
       });
     });
   });
@@ -484,6 +423,80 @@ describe('util/http/index', () => {
       const t2 = Date.now();
 
       expect(t2 - t1).toBeGreaterThanOrEqual(4000);
+    });
+  });
+
+  describe('Etag caching', () => {
+    it('returns cached data for status=304', async () => {
+      type FooBar = { foo: string; bar: string };
+      const data: FooBar = { foo: 'foo', bar: 'bar' };
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(304);
+
+      const res = await http.getJson<FooBar>(`/foo`, {
+        baseUrl,
+        etagCache: {
+          etag: 'foobar',
+          data,
+        },
+      });
+
+      expect(res.statusCode).toBe(304);
+      expect(res.body).toEqual(data);
+      expect(res.body).not.toBe(data);
+    });
+
+    it('bypasses schema parsing', async () => {
+      const FooBar = z
+        .object({ foo: z.string(), bar: z.string() })
+        .transform(({ foo, bar }) => ({
+          foobar: `${foo}${bar}`.toUpperCase(),
+        }));
+      const data = FooBar.parse({ foo: 'foo', bar: 'bar' });
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(304);
+
+      const res = await http.getJson(
+        `/foo`,
+        {
+          baseUrl,
+          etagCache: {
+            etag: 'foobar',
+            data,
+          },
+        },
+        FooBar
+      );
+
+      expect(res.statusCode).toBe(304);
+      expect(res.body).toEqual(data);
+      expect(res.body).not.toBe(data);
+    });
+
+    it('returns new data for status=200', async () => {
+      type FooBar = { foo: string; bar: string };
+      const oldData: FooBar = { foo: 'foo', bar: 'bar' };
+      const newData: FooBar = { foo: 'FOO', bar: 'BAR' };
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(200, newData);
+
+      const res = await http.getJson<FooBar>(`/foo`, {
+        baseUrl,
+        etagCache: {
+          etag: 'foobar',
+          data: oldData,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual(newData);
+      expect(res.body).not.toBe(newData);
     });
   });
 });

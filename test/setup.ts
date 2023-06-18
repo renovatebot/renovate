@@ -13,15 +13,21 @@ import type {
   MockedObject as JestMockedObject,
   SpyInstance as JestSpyInstance,
 } from 'jest-mock';
+import { mockDeep } from 'jest-mock-extended';
 import type { SnapshotMatchers } from 'jest-snapshot';
 import type { Plugin } from 'pretty-format';
+import type { PlatformScm } from '../lib/modules/platform';
 
 jest.mock('../lib/modules/platform', () => ({
   platform: jest.createMockFromModule('../lib/modules/platform/github'),
   initPlatform: jest.fn(),
   getPlatformList: jest.fn(),
 }));
-jest.mock('../lib/logger');
+jest.mock('../lib/modules/platform/scm', () => ({
+  scm: mockDeep<PlatformScm>(),
+}));
+
+jest.mock('../lib/logger', () => jest.createMockFromModule('../lib/logger'));
 
 //------------------------------------------------
 // Required global jest types

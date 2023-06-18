@@ -93,7 +93,7 @@ export class GalaxyCollectionDatasource extends Datasource {
             try {
               const release: Release = {
                 version: basicRelease.version,
-                isDeprecated: basicRelease.isDeprecated,
+                isDeprecated: !!basicRelease.isDeprecated,
                 downloadUrl: versionDetails.download_url,
                 newDigest: versionDetails.artifact.sha256,
                 dependencies: versionDetails.metadata.dependencies,
@@ -118,7 +118,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     // extract base information which are only provided on the release from the newest release
     const result: ReleaseResult = {
       releases: filteredReleases,
-      sourceUrl: newestVersionDetails?.metadata.repository,
+      sourceUrl: newestVersionDetails?.metadata.repository ?? null,
       homepage: newestVersionDetails?.metadata.homepage,
       tags: newestVersionDetails?.metadata.tags,
     };

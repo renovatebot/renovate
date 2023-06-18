@@ -7,7 +7,10 @@ export const language: ProgrammingLanguage = 'docker';
 export { extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
+  fileMatch: [
+    '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
+    '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
+  ],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

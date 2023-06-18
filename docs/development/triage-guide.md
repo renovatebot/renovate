@@ -18,7 +18,7 @@ Take the following steps on an incoming bug report:
 1. Determine if this is a duplicate of an open issue, if duplicate: link to earlier issue, apply `duplicate` label and close the issue.
 1. Check if the _relevant_ logs are provided. If not apply the `logs:problem` label.
 1. If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
-1. If it's an easy issue for somebody new to Renovate to help us with apply the `good first issue` label.
+1. If it's an easy issue for somebody new to Renovate to help us with: apply the `good first issue` label.
 1. If the issue is hard to fix without outside help apply the `help wanted` label.
 
 ### Triaging feature requests workflow
@@ -31,14 +31,14 @@ Take the following steps on an incoming feature request:
 1. Make a best-effort judgement if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
 1. Make an initial judgement of the priority, and add the correct priority label.
 1. If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
-1. If it's an easy feature for somebody new to Renovate to help us with apply the `good first issue` label.
+1. If it's an easy feature for somebody new to Renovate to help us with: apply the `good first issue` label.
 1. If the feature is hard to start work on without outside help apply the `help wanted` label.
 
 ## What a triagist is allowed to do
 
 If you've been given triage rights, you are allowed to do the following things:
 
-- Apply labels to issues
+- Apply labels to issues/discussions
 - Close, reopen, and assign all issues and pull requests
 - Mark duplicate issues and pull requests
 - Request pull request reviews
@@ -50,7 +50,7 @@ If you've been given triage rights, you are allowed to do the following things:
 ## Guidelines for triage workflow
 
 The following are guidelines as we cannot cover all situations.
-Use common sense, and just do your best, and you'll do all right.
+Use common sense, do your best, and you'll do all right.
 Don't be afraid to ask for help.
 
 ### Apply labels to issues

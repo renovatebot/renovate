@@ -6,12 +6,13 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
-  getFileContentMap,
+  getLocalFiles,
   getSiblingFileName,
   outputCacheFile,
   privateCacheDir,
   writeLocalFile,
 } from '../../../util/fs';
+import { getFiles } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -37,7 +38,7 @@ async function addSourceCmds(
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
   const result: string[] = [];
   for (const registry of registries) {
-    const { username, password } = hostRules.find({
+    const { password, username } = hostRules.find({
       hostType: NugetDatasource.id,
       url: registry.url,
     });
@@ -49,9 +50,14 @@ async function addSourceCmds(
       // Add name for registry, if known.
       addSourceCmd += ` --name ${quote(registry.name)}`;
     }
-    if (username && password) {
-      // Add registry credentials from host rules, if configured.
-      addSourceCmd += ` --username ${quote(username)} --password ${quote(
+    // Add registry credentials from host rules, if configured.
+    if (username) {
+      // Add username from host rules, if configured.
+      addSourceCmd += ` --username ${quote(username)}`;
+    }
+    if (password) {
+      // Add password from host rules, if configured.
+      addSourceCmd += ` --password ${quote(
         password
       )} --store-password-in-clear-text`;
     }
@@ -145,7 +151,7 @@ export async function updateArtifacts({
     getSiblingFileName(f.name, 'packages.lock.json')
   );
 
-  const existingLockFileContentMap = await getFileContentMap(lockFileNames);
+  const existingLockFileContentMap = await getFiles(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
     (val) => !!val
@@ -170,7 +176,7 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getFileContentMap(lockFileNames, true);
+    const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
     const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {

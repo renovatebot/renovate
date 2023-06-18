@@ -24,6 +24,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
@@ -87,6 +89,8 @@ export const allowedFields = {
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
+  indentation: 'The indentation of the dependency being updated',
+  isGroup: 'true if the upgrade is part of a group',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
@@ -97,6 +101,7 @@ export const allowedFields = {
   isRange: 'true if the new value is a range',
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
+  isVulnerabilityAlert: 'true if the upgrade is a vulnerability alert',
   logJSON: 'ChangeLogResult object for the upgrade',
   manager: 'The (package) manager which detected the dependency',
   newDigest: 'The new digest value',
@@ -140,6 +145,8 @@ export const allowedFields = {
   version: 'The version number of the changelog',
   versioning: 'The versioning scheme in use',
   versions: 'An array of ChangeLogRelease objects in the upgrade',
+  vulnerabilitySeverity:
+    'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
 const prBodyFields = [
@@ -182,9 +189,11 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
     const value = target[prop];
 
     if (is.array(value)) {
-      return value
-        .filter(is.plainObject)
-        .map((element) => proxyCompileInput(element as CompileInput));
+      return value.map((element) =>
+        is.primitive(element)
+          ? element
+          : proxyCompileInput(element as CompileInput)
+      );
     }
 
     if (is.plainObject(value)) {
