@@ -128,7 +128,9 @@ describe('workers/global/config/parse/file', () => {
     });
 
     it('removes the config file if RENOVATE_CONFIG_FILE & RENOVATE_X_DELETE_CONFIG_FILE are set', async () => {
-      fsRemoveSpy.mockImplementationOnce(() => undefined as never);
+      fsRemoveSpy.mockImplementationOnce(() => {
+        // no-op
+      });
       processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, './config.json');
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
@@ -180,7 +182,7 @@ describe('workers/global/config/parse/file', () => {
     );
 
     it('removes the specified config file', async () => {
-      fsRemoveSpy.mockImplementationOnce((dir: string): void => {
+      fsRemoveSpy.mockImplementationOnce(() => {
         // no-op
       });
       fsPathExistsSpy.mockResolvedValueOnce(true as never);
@@ -200,7 +202,7 @@ describe('workers/global/config/parse/file', () => {
     });
 
     it('fails silently when attempting to delete the config file', async () => {
-      fsRemoveSpy.mockImplementationOnce((dir: string): void => {
+      fsRemoveSpy.mockImplementationOnce(() => {
         throw new Error();
       });
       fsPathExistsSpy.mockResolvedValueOnce(true as never);
