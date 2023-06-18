@@ -2540,9 +2540,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Controls if release notes are fetched.',
-    type: 'boolean',
-    default: true,
+    description: 'Controls if and when release notes are fetched.',
+    type: 'string',
+    allowedValues: ['off', 'branch', 'pr'],
+    default: 'pr',
     cli: false,
     env: false,
   },
