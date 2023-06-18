@@ -29,7 +29,7 @@ Be careful, and consider creating a new "config help" post at the [discussions t
 
 ## Commit Message
 
-Renovate will use one commit per branch, this makes it easy for you to merge.
+Renovate uses one commit per branch.
 The `commitMessage` reflects the contents of the branch and is usually the same as the PR title.
 
 `commitMessage` has a default value of `{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}`, with the intention that you only edit some of those subcomponents.
@@ -37,7 +37,7 @@ The `commitMessage` reflects the contents of the branch and is usually the same 
 You usually don't need to edit `commitMessagePrefix`, this option is used by Renovate if it needs to add a prefix to conform to the Semantic Commit convention.
 Avoid editing the commit message, unless you know what you're doing.
 
-`commitMessageAction` is usually just one word, e.g. 'Update', 'Pin', 'Refresh', etc.
+`commitMessageAction` is usually one word, like 'Update', 'Pin', 'Refresh', etc.
 You're probably fine leaving this setting alone, though you can change it.
 e.g. if you prefer that Renovate uses the term 'Upgrade' instead of 'Update' then you could configure `"commitMessageAction": "Upgrade"`.
 

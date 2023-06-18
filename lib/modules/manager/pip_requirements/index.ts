@@ -8,7 +8,7 @@ export { extractPackageFile } from './extract';
 export const language: ProgrammingLanguage = 'python';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)([\\w-]*)requirements\\.(txt|pip)$'],
+  fileMatch: ['(^|/)[\\w-]*requirements(-\\w+)?\\.(txt|pip)$'],
 };
 
 export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];

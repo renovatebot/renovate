@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { parse } from '../../../util/html';
@@ -53,7 +54,8 @@ export class RubyVersionDatasource extends Datasource {
         }
       });
       if (!res.releases.length) {
-        throw new Error('Missing ruby releases');
+        logger.warn({ registryUrl }, 'Missing ruby releases');
+        return null;
       }
     } catch (err) {
       this.handleGenericErrors(err);
@@ -62,7 +64,7 @@ export class RubyVersionDatasource extends Datasource {
     return res;
   }
 
-  override handleSpecificErrors(err: HttpError): never | void {
+  override handleHttpErrors(err: HttpError): never | void {
     throw new ExternalHostError(err);
   }
 }

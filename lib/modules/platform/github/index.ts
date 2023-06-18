@@ -9,6 +9,8 @@ import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -394,6 +396,16 @@ export async function initRepo({
         name: config.repositoryName,
       },
     });
+
+    if (res?.errors) {
+      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
+        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+      }
+      logger.debug({ res }, 'Unexpected Graph QL errors');
+      throw new Error(PLATFORM_UNKNOWN_ERROR);
+    }
+
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
@@ -409,7 +421,7 @@ export async function initRepo({
       repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
     ) {
       logger.debug(
-        { repository, this_repository: repo.nameWithOwner },
+        { desiredRepo: repository, foundRepo: repo.nameWithOwner },
         'Repository has been renamed'
       );
       throw new Error(REPOSITORY_RENAMED);
@@ -739,8 +751,15 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
-  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
+  try {
+    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    await githubApi.head(commitUrl, { memCache: false });
+  } catch (err) {
+    logger.error({ err, sha, branchName }, 'Commit not found');
+    throw err;
+  }
 
+  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
   let branchExists = false;
   let branchResult: undefined | HttpResponse<string>;
   try {
@@ -811,7 +830,10 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       await ensureBranchSha(branchName, sha!);
       logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
-      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      logger.debug(
+        { err, branchName, sha, autoclosedPr },
+        'Could not recreate autoclosed branch - skipping reopen'
+      );
       return null;
     }
     try {
@@ -1580,12 +1602,16 @@ export async function updatePr({
   prTitle: title,
   prBody: rawBody,
   state,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
+  }
+  if (targetBranch) {
+    patchBody.base = targetBranch;
   }
   if (state) {
     patchBody.state = state;

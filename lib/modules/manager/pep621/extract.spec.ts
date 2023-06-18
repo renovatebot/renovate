@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
@@ -26,6 +26,11 @@ describe('modules/manager/pep621/extract', () => {
     it('should return dependencies for valid content', function () {
       const result = extractPackageFile(pdmPyProject, 'pyproject.toml');
 
+      expect(result).toMatchObject({
+        extractedConstraints: {
+          python: '>=3.7',
+        },
+      });
       const dependencies = result?.deps.filter(
         (dep) => dep.depType === 'project.dependencies'
       );
