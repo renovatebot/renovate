@@ -399,6 +399,7 @@ export async function getPkgReleases(
   res.releases = uniq(res.releases, (x, y) => x.version === y.version);
 
   if (config?.constraintsFiltering === 'strict') {
+    const filteredReleases: string[] = [];
     // Filter releases for compatibility
     for (const [constraintName, constraintValue] of Object.entries(
       config.constraints ?? {}
@@ -411,7 +412,7 @@ export async function getPkgReleases(
             return true;
           }
 
-          return constraint.some(
+          const satisfiesConstraints = constraint.some(
             // If the constraint value is a subset of any release's constraints, then it's OK
             // fallback to release's constraint match if subset is not supported by versioning
             (releaseConstraint) =>
@@ -419,8 +420,21 @@ export async function getPkgReleases(
               (version.subset?.(constraintValue, releaseConstraint) ??
                 version.matches(constraintValue, releaseConstraint))
           );
+          if (!satisfiesConstraints) {
+            filteredReleases.push(release.version);
+          }
+          return satisfiesConstraints;
         });
       }
+    }
+    if (filteredReleases.length) {
+      logger.debug(
+        `Filtered ${
+          filteredReleases.length
+        } releases for ${packageName} due to constraintsFiltering=strict: ${filteredReleases.join(
+          ', '
+        )}`
+      );
     }
   }
   // Strip constraints from releases result
