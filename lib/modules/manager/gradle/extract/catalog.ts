@@ -55,8 +55,22 @@ function isVersionPointer(
   return hasKey('ref', obj);
 }
 
-function normalizeVersionPointer(versionPointer: string): string {
-  return versionPointer.replace(regEx(/[._]/g), '-');
+function normalizeAlias(alias: string): string {
+  return alias.replace(regEx(/[-_]/g), '.');
+}
+
+function findOriginalAlias(
+  versions: Record<string, GradleVersionPointerTarget>,
+  alias: string
+): string {
+  const normalizedAlias = normalizeAlias(alias);
+  for (const sectionKey of Object.keys(versions)) {
+    if (normalizeAlias(sectionKey) === normalizedAlias) {
+      return sectionKey;
+    }
+  }
+
+  return alias;
 }
 
 interface VersionExtract {
@@ -83,13 +97,12 @@ function extractVersion({
   versionSubContent: string;
 }): VersionExtract {
   if (isVersionPointer(version)) {
-    const parsedVersion = normalizeVersionPointer(version.ref);
-    // everything else is ignored
+    const originalAlias = findOriginalAlias(versions, version.ref);
     return extractLiteralVersion({
-      version: versions[parsedVersion],
+      version: versions[originalAlias],
       depStartIndex: versionStartIndex,
       depSubContent: versionSubContent,
-      sectionKey: parsedVersion,
+      sectionKey: originalAlias,
     });
   } else {
     return extractLiteralVersion({
@@ -210,7 +223,7 @@ function extractDependency({
     };
   }
   const versionRef = isVersionPointer(descriptor.version)
-    ? normalizeVersionPointer(descriptor.version.ref)
+    ? normalizeAlias(descriptor.version.ref)
     : null;
   if (isArtifactDescriptor(descriptor)) {
     const { group, name } = descriptor;
@@ -289,7 +302,7 @@ export function parseCatalog(
       dependency.skipReason = skipReason;
     }
     if (isVersionPointer(version) && dependency.commitMessageTopic) {
-      dependency.groupName = normalizeVersionPointer(version.ref);
+      dependency.groupName = normalizeAlias(version.ref);
       delete dependency.commitMessageTopic;
     }
 

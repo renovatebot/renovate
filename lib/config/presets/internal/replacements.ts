@@ -566,7 +566,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
         replacementNameTemplate:
-          "{{{replace 'k8s\\.gcr\\.io/' 'registry\\.k8s\\.io/' packageName}}}",
+          "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}",
       },
     ],
   },
