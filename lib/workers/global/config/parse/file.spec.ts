@@ -7,6 +7,10 @@ import customConfig from './__fixtures__/config';
 import * as file from './file';
 
 describe('workers/global/config/parse/file', () => {
+  const processExitSpy = jest.spyOn(process, 'exit');
+  const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
+  const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
+
   let tmp: DirectoryResult;
 
   beforeAll(async () => {
@@ -71,32 +75,26 @@ describe('workers/global/config/parse/file', () => {
     ])(
       'fatal error and exit if error in parsing %s',
       async (fileName, fileContent) => {
-        const mockProcessExit = jest
-          .spyOn(process, 'exit')
-          .mockImplementationOnce(() => undefined as never);
+        processExitSpy.mockImplementationOnce(() => undefined as never);
         const configFile = upath.resolve(tmp.path, fileName);
         fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
-        expect(mockProcessExit).toHaveBeenCalledWith(1);
+        expect(processExitSpy).toHaveBeenCalledWith(1);
         fs.unlinkSync(configFile);
       }
     );
 
     it('fatal error and exit if custom config file does not exist', async () => {
-      const mockProcessExit = jest
-        .spyOn(process, 'exit')
-        .mockImplementation(() => undefined as never);
+      processExitSpy.mockImplementation(() => undefined as never);
 
       const configFile = upath.resolve(tmp.path, './file4.js');
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
 
-      expect(mockProcessExit).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
     it('fatal error and exit if config.js contains unresolved env var', async () => {
-      const mockProcessExit = jest
-        .spyOn(process, 'exit')
-        .mockImplementation(() => undefined as never);
+      processExitSpy.mockImplementation(() => undefined as never);
 
       const configFile = upath.resolve(
         __dirname,
@@ -113,31 +111,25 @@ describe('workers/global/config/parse/file', () => {
       expect(logger.fatal).toHaveBeenCalledWith(
         `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`
       );
-      expect(mockProcessExit).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
     it.each([
       ['invalid config file type', './file.txt'],
       ['missing config file type', './file'],
     ])('fatal error and exit if %s', async (fileType, filePath) => {
-      const mockProcessExit = jest
-        .spyOn(process, 'exit')
-        .mockImplementationOnce(() => undefined as never);
+      processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, filePath);
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
-      expect(mockProcessExit).toHaveBeenCalledWith(1);
+      expect(processExitSpy).toHaveBeenCalledWith(1);
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
 
     it('removes the config file if RENOVATE_CONFIG_FILE & RENOVATE_X_DELETE_CONFIG_FILE are set', async () => {
-      const fsRemoveSpy = jest
-        .spyOn(fsExtra, 'remove')
-        .mockImplementationOnce(() => undefined as never);
-      const mockProcessExit = jest
-        .spyOn(process, 'exit')
-        .mockImplementationOnce(() => undefined as never);
+      fsRemoveSpy.mockImplementationOnce(() => undefined as never);
+      processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, './config.json');
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
 
@@ -146,7 +138,7 @@ describe('workers/global/config/parse/file', () => {
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
       });
 
-      expect(mockProcessExit).not.toHaveBeenCalled();
+      expect(processExitSpy).not.toHaveBeenCalled();
       expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
       expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
       fs.unlinkSync(configFile);
@@ -154,9 +146,6 @@ describe('workers/global/config/parse/file', () => {
   });
 
   describe('deleteConfigFile()', () => {
-    const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
-    const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
-
     beforeEach(() => {
       jest.resetAllMocks();
     });
