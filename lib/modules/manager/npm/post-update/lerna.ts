@@ -108,12 +108,16 @@ export async function generateLockFiles(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     const lernaVersion = getLernaVersion(lernaPackageFile);
-    logger.debug(`Using lerna version ${lernaVersion ?? 'latest'}`);
-    toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
-    cmd.push('lerna info || echo "Ignoring lerna info failure"');
-    cmd.push(`${lernaClient} install ${cmdOptions}`);
-    cmd.push(lernaCommand);
-    await exec(cmd, execOptions);
+    if (lernaVersion && semver.lt(lernaVersion, '7.0.0')) {
+      logger.debug(`Using lerna version ${lernaVersion ?? 'latest'}`);
+      toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
+      cmd.push('lerna info || echo "Ignoring lerna info failure"');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
+      cmd.push(lernaCommand);
+      await exec(cmd, execOptions);
+    } else {
+      logger.debug('Skipping lerna bootstrap');
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
