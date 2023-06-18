@@ -154,12 +154,11 @@ describe('workers/global/config/parse/file', () => {
 
     describe('deleteConfigFile()', () => {
       const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
+      const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
 
       it.each([[undefined], [' ']])(
         'skip when RENOVATE_CONFIG_FILE is not set ("%s")',
         async (configFile) => {
-          const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
-
           await file.deleteConfigFile({ RENOVATE_CONFIG_FILE: configFile });
 
           expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
@@ -167,7 +166,6 @@ describe('workers/global/config/parse/file', () => {
       );
 
       it('skip when config file does not exist', async () => {
-        const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
         fsPathExistsSpy.mockResolvedValueOnce(false as never);
 
         await file.deleteConfigFile({ RENOVATE_CONFIG_FILE: 'path' });
@@ -178,8 +176,6 @@ describe('workers/global/config/parse/file', () => {
       it.each([['false'], [' ']])(
         'skip if RENOVATE_X_DELETE_CONFIG_FILE is not set ("%s")',
         async (xDeleteConfig) => {
-          const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
-
           await file.deleteConfigFile({
             RENOVATE_CONFIG_FILE: './config.js',
             RENOVATE_X_DELETE_CONFIG_FILE: xDeleteConfig,
@@ -190,9 +186,7 @@ describe('workers/global/config/parse/file', () => {
       );
 
       it('removes the specified config file', async () => {
-        const fsRemoveSpy = jest
-          .spyOn(fsExtra, 'remove')
-          .mockImplementationOnce(() => undefined as never);
+        fsRemoveSpy.mockImplementationOnce(() => undefined as never);
         const configFile = './config.js';
         await file.deleteConfigFile({
           RENOVATE_CONFIG_FILE: configFile,
@@ -208,11 +202,7 @@ describe('workers/global/config/parse/file', () => {
       });
 
       it('fails silently when attempting to delete the config file', async () => {
-        const fsRemoveSpy = jest
-          .spyOn(fsExtra, 'remove')
-          .mockImplementationOnce(() => {
-            throw new Error();
-          });
+        fsRemoveSpy.mockRejectedValueOnce(new Error() as never);
         const configFile = './config.js';
 
         await file.deleteConfigFile({
