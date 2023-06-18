@@ -172,6 +172,8 @@ describe('workers/global/config/parse/file', () => {
     it.each([['false'], [' ']])(
       'skip if RENOVATE_X_DELETE_CONFIG_FILE is not set ("%s")',
       async (deleteConfig) => {
+        fsPathExistsSpy.mockResolvedValueOnce(true as never);
+
         await file.deleteConfigFile({
           RENOVATE_X_DELETE_CONFIG_FILE: deleteConfig,
           RENOVATE_CONFIG_FILE: '/path/to/config.js',
