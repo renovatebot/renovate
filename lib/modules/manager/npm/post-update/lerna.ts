@@ -109,7 +109,7 @@ export async function generateLockFiles(
     }
     const lernaVersion = getLernaVersion(lernaPackageFile);
     if (lernaVersion && semver.lt(lernaVersion, '7.0.0')) {
-      logger.debug(`Using lerna version ${lernaVersion ?? 'latest'}`);
+      logger.debug(`Using lerna version ${lernaVersion}`);
       toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
       cmd.push('lerna info || echo "Ignoring lerna info failure"');
       cmd.push(`${lernaClient} install ${cmdOptions}`);
