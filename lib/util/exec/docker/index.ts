@@ -5,7 +5,6 @@ import { logger } from '../../../logger';
 import { getPkgReleases } from '../../../modules/datasource';
 import * as versioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
-import { ensureTrailingSlash } from '../../url';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
@@ -222,7 +221,7 @@ export async function generateDockerCommand(
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
-    dockerImagePrefix,
+    dockerSidecarImage,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
@@ -259,9 +258,8 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  image = `${ensureTrailingSlash(
-    dockerImagePrefix ?? 'containerbase'
-  )}${image}`;
+  // TODO: #7154
+  image = dockerSidecarImage!;
 
   // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
   logger.debug(

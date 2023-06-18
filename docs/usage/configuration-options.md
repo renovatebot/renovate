@@ -300,6 +300,14 @@ With a negation, all branches except those matching the regex will be added to t
 }
 ```
 
+You can also use the special `"$default"` string to denote the repository's default branch, which is useful if you have it in an org preset, e.g.:
+
+```json
+{
+  "baseBranches": ["$default", "/^release\\/.*/"]
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
     Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
@@ -923,7 +931,14 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Set this to `false` if you want to disable release notes fetching.
+Use this config option to configure release notes fetching.
+The available options are:
+
+- `off` - disable release notes fetching
+- `branch` - fetch release notes while creating/updating branch
+- `pr`(default) - fetches release notes while creating/updating pull-request
+
+It is not recommended to set fetchReleaseNotes=branch unless you are embedding release notes in commit information, because it results in a performance decrease.
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 
@@ -2823,7 +2838,7 @@ Defaults to `true`.
 
 ## python
 
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files, or any file that matches the pattern `requirements-*.(txt|pip)` - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
@@ -2880,18 +2895,27 @@ It is also recommended to avoid `rebaseWhen=never` as it can result in conflicte
 
 Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` as this can prevent creation of PRs.
 
-## recreateClosed
+## recreateWhen
 
-By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
-For example the Webpack 3.x case described above.
-This field lets you customize this behavior down to a per-package level.
-For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
+This feature used to be called `recreateClosed`.
+
+By default, Renovate detects if it proposed an update to a project before, and will not propose the same update again.
+For example the Webpack 3.x case described in the [`separateMajorMinor`](#separatemajorminor) documentation.
+You can use `recreateWhen` to customize this behavior down to a per-package level.
+For example we override it to `always` in the following cases where branch names and PR titles must be reused:
 
 - Package groups
 - When pinning versions
 - Lock file maintenance
 
-Typically you shouldn't need to modify this setting.
+You can select which behavior you want from Renovate:
+
+- `always`: Recreates all closed or blocking PRs
+- `auto`: The default option. Recreates only immortal PRs (default)
+- `never`: No PR is recreated, doesn't matter if it is immortal or not
+
+We recommend that you stick with the default setting for this option.
+Only change this setting if you really need to.
 
 ## regexManagers
 
@@ -3175,16 +3199,17 @@ You can use the `registryAliases` object to set registry aliases.
 
 This feature works with the following managers:
 
-- [`helm-requirements`](/modules/manager/helm-requirements/)
-- [`helmv3`](/modules/manager/helmv3/)
-- [`helmfile`](/modules/manager/helmfile/)
-- [`gitlabci`](/modules/manager/gitlabci/)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`kubernetes`](/modules/manager/kubernetes)
 - [`ansible`](/modules/manager/ansible)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`dockerfile`](/modules/manager/dockerfile)
 - [`droneci`](/modules/manager/droneci)
+- [`gitlabci`](/modules/manager/gitlabci/)
+- [`helm-requirements`](/modules/manager/helm-requirements/)
+- [`helmfile`](/modules/manager/helmfile/)
+- [`helmv3`](/modules/manager/helmv3/)
+- [`kubernetes`](/modules/manager/kubernetes)
 - [`terraform`](/modules/manager/terraform)
+- [`woodpecker`](/modules/manager/woodpecker)
 
 ## registryUrls
 

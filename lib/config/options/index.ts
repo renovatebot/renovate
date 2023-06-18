@@ -344,11 +344,11 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
-    name: 'dockerImagePrefix',
+    name: 'dockerSidecarImage',
     description:
-      'Change this value to override the default Renovate Docker sidecar image name prefix.',
+      'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'docker.io/containerbase',
+    default: 'ghcr.io/containerbase/sidecar:8.0.2',
     globalOnly: true,
   },
   {
@@ -1563,10 +1563,11 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'recreateClosed',
+    name: 'recreateWhen',
     description: 'Recreate PRs even if same ones were closed previously.',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    default: 'auto',
+    allowedValues: ['auto', 'always', 'never'],
   },
   {
     name: 'rebaseWhen',
@@ -1888,7 +1889,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       enabled: false,
-      recreateClosed: true,
+      recreateWhen: 'always',
       rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
@@ -2394,6 +2395,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'branchAutomergeFailure',
       'configErrorIssue',
+      'dependencyLookupWarnings',
       'deprecationWarningIssues',
       'lockFileErrors',
       'missingCredentialsError',
@@ -2538,9 +2540,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Controls if release notes are fetched.',
-    type: 'boolean',
-    default: true,
+    description: 'Controls if and when release notes are fetched.',
+    type: 'string',
+    allowedValues: ['off', 'branch', 'pr'],
+    default: 'pr',
     cli: false,
     env: false,
   },

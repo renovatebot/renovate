@@ -326,17 +326,17 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 !!! note
     Dangling containers are only removed when Renovate runs again with the same prefix.
 
-## dockerImagePrefix
+## dockerSidecarImage
 
-By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
-You can use the `dockerImagePrefix` option to override this default.
+By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+You can use the `dockerSidecarImage` option to override this default.
 
-Say you want to pull your images from `ghcr.io/containerbase` to bypass Docker Hub limits.
+Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
 ```json
 {
-  "dockerImagePrefix": "ghcr.io/containerbase"
+  "dockerSidecarImage": "ghcr.io/your_company/sidecar"
 }
 ```
 
