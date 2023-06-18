@@ -85,16 +85,18 @@ describe('workers/global/config/parse/file', () => {
     );
 
     it('fatal error and exit if custom config file does not exist', async () => {
-      processExitSpy.mockImplementation(() => undefined as never);
-
+      processExitSpy
+        .mockImplementationOnce(() => undefined as never)
+        .mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, './file4.js');
+
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
 
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
     it('fatal error and exit if config.js contains unresolved env var', async () => {
-      processExitSpy.mockImplementation(() => undefined as never);
+      processExitSpy.mockImplementationOnce(() => undefined as never);
 
       const configFile = upath.resolve(
         __dirname,
@@ -148,10 +150,6 @@ describe('workers/global/config/parse/file', () => {
   });
 
   describe('deleteConfigFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it.each([[undefined], [' ']])(
       'skip when RENOVATE_CONFIG_FILE is not set ("%s")',
       async (configFile) => {
