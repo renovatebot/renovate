@@ -7,7 +7,8 @@ export class RubygemsHttp extends Http {
     const host = parseUrl(url)?.host;
 
     if (host === 'rubygems.org') {
-      const intervalMs = 100;
+      // rubygems.org has a rate limit of 10 per second, so we use a more conservative 8
+      const intervalMs = 125;
       return new Throttle(intervalMs);
     }
 
