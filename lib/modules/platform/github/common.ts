@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
-import * as schema from '../../../util/schema';
 import { getPrBodyStruct } from '../pr-body';
-import * as platformSchemas from '../schemas';
 import type { GhPr, GhRestPr } from './types';
 
 /**
@@ -10,7 +8,6 @@ import type { GhPr, GhRestPr } from './types';
 export function coerceRestPr(pr: GhRestPr): GhPr {
   const bodyStruct = pr.bodyStruct ?? getPrBodyStruct(pr.body);
   const result: GhPr = {
-    displayNumber: `Pull Request #${pr.number}`,
     number: pr.number,
     sourceBranch: pr.head?.ref,
     title: pr.title,
@@ -38,7 +35,9 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
   }
 
   if (pr.requested_reviewers) {
-    result.hasReviewers = true;
+    result.reviewers = pr.requested_reviewers
+      .map(({ login }) => login)
+      .filter(is.nonEmptyString);
   }
 
   if (pr.created_at) {
@@ -49,6 +48,9 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.closedAt = pr.closed_at;
   }
 
-  schema.match(platformSchemas.Pr, result, 'warn');
+  if (pr.base?.ref) {
+    result.targetBranch = pr.base.ref;
+  }
+
   return result;
 }

@@ -2,13 +2,13 @@ import { join } from 'upath';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { parseUrl } from '../../../util/url';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { Dependency, JsonnetFile } from './types';
 
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace({ packageFile }, 'jsonnet-bundler.extractPackageFile()');
 
   if (packageFile.match(/vendor\//)) {
@@ -20,7 +20,7 @@ export function extractPackageFile(
   try {
     jsonnetFile = JSON.parse(content) as JsonnetFile;
   } catch (err) {
-    logger.debug(`Invalid JSON ${packageFile}`);
+    logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }
 

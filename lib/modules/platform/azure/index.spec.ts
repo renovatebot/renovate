@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
@@ -378,8 +378,6 @@ describe('modules/platform/azure/index', () => {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
         createdAt: undefined,
-        displayNumber: 'Pull Request #1',
-        hasReviewers: false,
         labels: [],
         number: 1,
         pullRequestId: 1,
@@ -571,11 +569,34 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -587,7 +608,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -600,7 +621,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -613,7 +634,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => []),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
   });
@@ -674,7 +695,6 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
@@ -696,7 +716,6 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
@@ -716,7 +735,6 @@ describe('modules/platform/azure/index', () => {
       const prResult = {
         pullRequestId: 456,
         title: 'The Title',
-        displayNumber: `Pull Request #456`,
         createdBy: {
           id: 123,
         },
@@ -759,7 +777,6 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
-        displayNumber: 'Pull Request #456',
         createdBy: {
           id: 123,
           url: 'user-url',
@@ -788,14 +805,14 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { azureAutoApprove: true },
+        platformOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
   });
 
-  describe('updatePr(prNo, title, body)', () => {
+  describe('updatePr(prNo, title, body, platformOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = jest.fn();
@@ -863,6 +880,43 @@ describe('modules/platform/azure/index', () => {
         state: 'open',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
+    });
+
+    it('should re-approve the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      };
+      const updateFn = jest.fn(() => prUpdateResult);
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            updatePullRequest: jest.fn(() => prResult),
+            createPullRequestReviewer: updateFn,
+            getPullRequestById: jest.fn(() => ({
+              pullRequestId: prResult.pullRequestId,
+              createdBy: prResult.createdBy,
+            })),
+          } as any)
+      );
+      const pr = await azure.updatePr({
+        number: prResult.pullRequestId,
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        platformOptions: { autoApprove: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
     });
   });
 
@@ -1329,13 +1383,6 @@ describe('modules/platform/azure/index', () => {
       );
       expect(logger.warn).toHaveBeenCalled();
       expect(res).toBeTrue();
-    });
-  });
-
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await azure.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
     });
   });
 

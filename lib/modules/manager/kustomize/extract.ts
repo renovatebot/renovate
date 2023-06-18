@@ -8,7 +8,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { splitImageParts } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
@@ -71,7 +71,7 @@ export function extractImage(image: Image): PackageDependency | null {
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
-    logger.warn(
+    logger.debug(
       { newTag, digest },
       'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`'
     );
@@ -146,11 +146,15 @@ export function extractHelmChart(
   };
 }
 
-export function parseKustomize(content: string): Kustomize | null {
+export function parseKustomize(
+  content: string,
+  packageFile?: string
+): Kustomize | null {
   let pkg: Kustomize | null = null;
   try {
     pkg = load(content, { json: true }) as Kustomize;
   } catch (e) /* istanbul ignore next */ {
+    logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;
   }
 
@@ -167,17 +171,20 @@ export function parseKustomize(content: string): Kustomize | null {
   return pkg;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.trace('kustomize.extractPackageFile()');
+export function extractPackageFile(
+  content: string,
+  packageFile?: string // TODO: fix tests
+): PackageFileContent | null {
+  logger.trace(`kustomize.extractPackageFile(${packageFile!})`);
   const deps: PackageDependency[] = [];
 
-  const pkg = parseKustomize(content);
+  const pkg = parseKustomize(content, packageFile);
   if (!pkg) {
     return null;
   }
 
   // grab the remote bases
-  for (const base of coerceArray(pkg.bases)) {
+  for (const base of coerceArray(pkg.bases).filter(is.string)) {
     const dep = extractResource(base);
     if (dep) {
       deps.push({
@@ -188,7 +195,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote resources
-  for (const resource of coerceArray(pkg.resources)) {
+  for (const resource of coerceArray(pkg.resources).filter(is.string)) {
     const dep = extractResource(resource);
     if (dep) {
       deps.push({
@@ -199,7 +206,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote components
-  for (const component of coerceArray(pkg.components)) {
+  for (const component of coerceArray(pkg.components).filter(is.string)) {
     const dep = extractResource(component);
     if (dep) {
       deps.push({

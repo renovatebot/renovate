@@ -1,21 +1,29 @@
 {
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
   "hostRequirements": {
     "cpus": 4,
-    "memory": "8gb",
+    "memory": "7gb",
     "storage": "32gb"
   },
   "name": "Renovate",
   "dockerFile": "Dockerfile",
-  "settings": {
-    "terminal.integrated.profiles.linux": { "bash": { "path": "/bin/bash" } },
-    "terminal.integrated.defaultProfile.linux": "bash"
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.profiles.linux": {
+          "bash": { "path": "/bin/bash" }
+        },
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "orta.vscode-jest",
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions"
+      ]
+    }
   },
-  "extensions": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "orta.vscode-jest",
-    "EditorConfig.editorconfig"
-  ],
   "runArgs": [
     "--cap-add=SYS_PTRACE",
     "--security-opt",

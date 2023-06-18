@@ -6,13 +6,12 @@ import type {
   RenovateSharedConfig,
 } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { clone } from '../../../../util/clone';
 import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 
 async function getOnboardingConfig(
   config: RenovateConfig
-): Promise<RenovateSharedConfig> {
-  let onboardingConfig = clone(config.onboardingConfig);
+): Promise<RenovateSharedConfig | undefined> {
+  let onboardingConfig = structuredClone(config.onboardingConfig);
 
   let orgPreset: string | undefined;
 

@@ -10,6 +10,8 @@ interface Ctx {
   results: RecordFragment[];
   stack: NestedFragment[];
   recordKey?: string;
+  subRecordKey?: string;
+  argIndex?: number;
 }
 
 function emptyCtx(source: string): Ctx {
@@ -45,9 +47,20 @@ function extractTreeValue(
  * - `tag = "1.2.3"`
  * - `name = "foobar"`
  * - `deps = ["foo", "bar"]`
+ * - `
+ *     artifacts = [
+         maven.artifact(
+           group = "com.example1",
+           artifact = "foobar",
+           version = "1.2.3",
+         )
+       ]
+     `
  **/
 const kwParams = q
-  .sym<Ctx>((ctx, { value: recordKey }) => ({ ...ctx, recordKey }))
+  .sym<Ctx>((ctx, { value: recordKey }) => {
+    return { ...ctx, recordKey };
+  })
   .op('=')
   .alt(
     // string
@@ -59,10 +72,12 @@ const kwParams = q
       }
       return ctx;
     }),
-    // array of strings
+    // array of strings or calls
     q.tree({
       type: 'wrapped-tree',
       maxDepth: 1,
+      startsWith: '[',
+      endsWith: ']',
       preHandler: (ctx, tree) => {
         const parentRecord = currentFragment(ctx) as RecordFragment;
         if (
@@ -80,17 +95,101 @@ const kwParams = q
         }
         return ctx;
       },
-      search: q.str<Ctx>((ctx, { value, offset }) => {
-        const parentRecord = currentFragment(ctx);
-        if (parentRecord.type === 'record' && ctx.recordKey) {
-          const key = ctx.recordKey;
-          const array = parentRecord.children[key];
-          if (array.type === 'array') {
-            array.children.push({ type: 'string', value, offset });
+      search: q.alt(
+        q.str<Ctx>((ctx, { value, offset }) => {
+          const parentRecord = currentFragment(ctx);
+          if (parentRecord.type === 'record' && ctx.recordKey) {
+            const key = ctx.recordKey;
+            const array = parentRecord.children[key];
+            if (array.type === 'array') {
+              array.children.push({ type: 'string', value, offset });
+            }
           }
-        }
-        return ctx;
-      }),
+          return ctx;
+        }),
+        q
+          .sym<Ctx>()
+          .handler(recordStartHandler)
+          .handler((ctx, { value, offset }) => {
+            const ruleFragment = currentFragment(ctx);
+            if (ruleFragment.type === 'record') {
+              ruleFragment.children._function = {
+                type: 'string',
+                value,
+                offset,
+              };
+            }
+            return ctx;
+          })
+          .many(
+            q.op<Ctx>('.').sym((ctx, { value }) => {
+              const ruleFragment = currentFragment(ctx);
+              if (
+                ruleFragment.type === 'record' &&
+                ruleFragment.children._function
+              ) {
+                ruleFragment.children._function.value += `.${value}`;
+              }
+              return ctx;
+            }),
+            0,
+            3
+          )
+          .tree({
+            type: 'wrapped-tree',
+            maxDepth: 1,
+            startsWith: '(',
+            endsWith: ')',
+            search: q
+              .opt(
+                q
+                  .sym<Ctx>((ctx, { value: subRecordKey }) => ({
+                    ...ctx,
+                    subRecordKey,
+                  }))
+                  .op('=')
+              )
+              .str((ctx, { value: subRecordValue, offset }) => {
+                const argIndex = ctx.argIndex ?? 0;
+
+                const subRecordKey = ctx.subRecordKey! ?? argIndex.toString();
+                const ruleFragment = currentFragment(ctx);
+                if (ruleFragment.type === 'record') {
+                  ruleFragment.children[subRecordKey] = {
+                    type: 'string',
+                    value: subRecordValue,
+                    offset,
+                  };
+                }
+                delete ctx.subRecordKey;
+                ctx.argIndex = argIndex + 1;
+                return ctx;
+              }),
+            postHandler: (ctx, tree) => {
+              delete ctx.argIndex;
+
+              const callFrag = currentFragment(ctx);
+              ctx.stack.pop();
+              if (callFrag.type === 'record' && tree.type === 'wrapped-tree') {
+                callFrag.value = extractTreeValue(
+                  ctx.source,
+                  tree,
+                  callFrag.offset
+                );
+
+                const parentRecord = currentFragment(ctx);
+                if (parentRecord.type === 'record' && ctx.recordKey) {
+                  const key = ctx.recordKey;
+                  const array = parentRecord.children[key];
+                  if (array.type === 'array') {
+                    array.children.push(callFrag);
+                  }
+                }
+              }
+              return ctx;
+            },
+          })
+      ),
       postHandler: (ctx, tree) => {
         const parentRecord = currentFragment(ctx);
         if (
@@ -140,7 +239,7 @@ function ruleCall(
   });
 }
 
-function ruleStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
+function recordStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
   ctx.stack.push({
     type: 'record',
     value: '',
@@ -166,7 +265,7 @@ function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
  */
 const regularRule = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) =>
-    ruleNameHandler(ruleStartHandler(ctx, token), token)
+    ruleNameHandler(recordStartHandler(ctx, token), token)
   )
   .join(ruleCall(kwParams));
 
@@ -176,7 +275,7 @@ const regularRule = q
  * - `maybe(go_repository, ...)`
  */
 const maybeRule = q
-  .sym<Ctx>('maybe', ruleStartHandler)
+  .sym<Ctx>('maybe', recordStartHandler)
   .join(
     ruleCall(
       q.alt(

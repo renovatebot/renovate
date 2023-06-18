@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
@@ -248,8 +249,37 @@ describe('modules/manager/composer/extract', () => {
       });
     });
 
+    it('skips path dependencies', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          {
+            "name": "acme/path-sources",
+            "description": "Fetch Packages via path",
+            "repositories": {
+              "acme/path1": {
+                "type": "path",
+                "url": "packages/acme/path1"
+              }
+            },
+            "require": {
+              "acme/path1": "*"
+            }
+          }
+        `,
+        packageFile
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '*',
+          depName: 'acme/path1',
+          depType: 'require',
+          skipReason: 'path-dependency',
+        },
+      ]);
+    });
+
     it('extracts dependencies with lock file', async () => {
-      fs.readLocalFile.mockResolvedValue('some content');
+      fs.readLocalFile.mockResolvedValue('{}');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(33);

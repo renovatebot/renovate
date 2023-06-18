@@ -5,12 +5,12 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?@?(?<tag>v?\d+(?:\.\d+(?:\.\d+)?)?))?)/
+  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?@?(?<tag>v?\d+(?:\.\d+(?:\.\d+)?)?))?)/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -88,7 +88,7 @@ function extractContainer(container: unknown): PackageDependency | undefined {
 
 function extractWithYAMLParser(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageDependency[] {
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
@@ -98,7 +98,7 @@ function extractWithYAMLParser(
     pkg = load(content, { json: true }) as Workflow;
   } catch (err) {
     logger.debug(
-      { filename, err },
+      { packageFile, err },
       'Failed to parse GitHub Actions Workflow YAML'
     );
     return [];
@@ -125,12 +125,12 @@ function extractWithYAMLParser(
 
 export function extractPackageFile(
   content: string,
-  filename: string
-): PackageFile | null {
-  logger.trace('github-actions.extractPackageFile()');
+  packageFile: string
+): PackageFileContent | null {
+  logger.trace(`github-actions.extractPackageFile(${packageFile})`);
   const deps = [
     ...extractWithRegex(content),
-    ...extractWithYAMLParser(content, filename),
+    ...extractWithYAMLParser(content, packageFile),
   ];
   if (!deps.length) {
     return null;

@@ -4,7 +4,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { MultiLineParseResult } from './types';
 
 function getDep(
@@ -46,11 +46,13 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
     versioning: 'go-mod-directive',
-    rangeStrategy: 'replace',
   };
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
   try {
@@ -107,7 +109,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting go modules');
+    logger.warn({ err, packageFile }, 'Error extracting go modules');
   }
   if (!deps.length) {
     return null;

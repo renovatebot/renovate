@@ -99,7 +99,10 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     ).toEqual({
       enabled: true,
       fileList: [],
-      fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
+      fileMatch: [
+        '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
+        '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
+      ],
       ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
       includePaths: [],
       manager: 'dockerfile',

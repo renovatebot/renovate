@@ -145,7 +145,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.scalatest:scalatest',
+          packageName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toBeNull();
@@ -153,7 +153,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.scalatest:scalaz',
+          packageName: 'org.scalatest:scalaz',
           registryUrls: [],
         })
       ).toBeNull();
@@ -164,7 +164,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.foundweekends:sbt-bintray',
+          packageName: 'org.foundweekends:sbt-bintray',
           registryUrls: [],
         })
       ).toEqual({
@@ -180,7 +180,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.foundweekends:sbt-bintray_2.12',
+          packageName: 'org.foundweekends:sbt-bintray_2.12',
           registryUrls: [],
         })
       ).toEqual({
@@ -196,7 +196,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'io.get-coursier:sbt-coursier',
+          packageName: 'io.get-coursier:sbt-coursier',
           registryUrls: [MAVEN_REPO],
         })
       ).toEqual({

@@ -32,6 +32,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
+- Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
 
 ```ts
@@ -67,12 +68,15 @@ Function expressions may only be used if dynamically rebinding `this` is needed.
 
 Source: [Google TypeScript Style Guide, function declarations](https://google.github.io/styleguide/tsguide.html#function-declarations).
 
-## Code simplicity
+## Code style
 
-### Write simple code
+### Write understandable code
 
-Simple code is easy to read, review and maintain.
-Choose to write verbose and understandable code instead of "clever" code which might take someone a few attempts to understand what it does.
+Write code that is easier to read, review and maintain.
+Avoid "clever" code that's hard to understand.
+
+Prefer verbose code which is easier for others to read and maintain than concise code which may be hard or slower for others to understand.
+For example, Array `reduce()` functions are often hard to understand first time, and can be replaced with simpler `for` loops which run just as fast but are simpler to understand and maintain.
 
 #### Write single purpose functions
 

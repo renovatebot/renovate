@@ -1,4 +1,4 @@
-import { BitBucketTagsDatasource } from '../modules/datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import { GitlabPackagesDatasource } from '../modules/datasource/gitlab-packages';
@@ -58,7 +58,7 @@ describe('constants/platform', () => {
 
   it('should be part of the BITBUCKET_API_USING_HOST_TYPES ', () => {
     expect(
-      BITBUCKET_API_USING_HOST_TYPES.includes(BitBucketTagsDatasource.id)
+      BITBUCKET_API_USING_HOST_TYPES.includes(BitbucketTagsDatasource.id)
     ).toBeTrue();
     expect(BITBUCKET_API_USING_HOST_TYPES.includes('bitbucket')).toBeTrue();
   });

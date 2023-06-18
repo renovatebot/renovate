@@ -67,28 +67,39 @@ function normalizeVersion(input: string): string {
 }
 
 function composer2npm(input: string): string {
-  const cleanInput = normalizeVersion(input);
-  if (npm.isVersion(cleanInput)) {
-    return cleanInput;
-  }
-  if (npm.isVersion(padZeroes(cleanInput))) {
-    return padZeroes(cleanInput);
-  }
-  const [versionId, stability] = getVersionParts(cleanInput);
-  let output = versionId;
+  return input
+    .split(regEx(/\s*\|\|?\s*/g))
+    .map((part): string => {
+      const cleanInput = normalizeVersion(part);
+      if (npm.isVersion(cleanInput)) {
+        return cleanInput;
+      }
+      if (npm.isVersion(padZeroes(cleanInput))) {
+        return padZeroes(cleanInput);
+      }
+      const [versionId, stability] = getVersionParts(cleanInput);
+      let output = versionId;
 
-  // ~4 to ^4 and ~4.1 to ^4.1
-  output = output.replace(
-    regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
-    '^$1'
-  );
-  // ~0.4 to >=0.4 <1
-  output = output.replace(
-    regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
-    '>=$1 <1'
-  );
+      // ~4 to ^4 and ~4.1 to ^4.1
+      output = output.replace(
+        regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
+        '^$1'
+      );
+      // ~0.4 to >=0.4 <1
+      output = output.replace(
+        regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
+        '>=$1 <1'
+      );
 
-  return output + stability;
+      // add extra digits to <8-DEV and <8.0-DEV
+      output = output
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0')
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0');
+
+      return output + stability;
+    })
+    .map((part) => part.replace(/([a-z])([0-9])/gi, '$1.$2'))
+    .join(' || ');
 }
 
 function equals(a: string, b: string): boolean {
@@ -142,20 +153,35 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.getSatisfyingVersion(
-    versions.map(composer2npm),
-    composer2npm(range)
-  );
+  const npmVersions = versions.map(composer2npm);
+  const npmVersion = npm.getSatisfyingVersion(npmVersions, composer2npm(range));
+  if (!npmVersion) {
+    return null;
+  }
+  // get index of npmVersion in npmVersions
+  return versions[npmVersions.indexOf(npmVersion)] ?? npmVersion;
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.minSatisfyingVersion(
-    versions.map(composer2npm),
-    composer2npm(range)
-  );
+  const npmVersions = versions.map(composer2npm);
+  const npmVersion = npm.minSatisfyingVersion(npmVersions, composer2npm(range));
+  if (!npmVersion) {
+    return null;
+  }
+  // get index of npmVersion in npmVersions
+  return versions[npmVersions.indexOf(npmVersion)] ?? npmVersion;
+}
+
+function subset(subRange: string, superRange: string): boolean | undefined {
+  try {
+    return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+  } catch (err) {
+    logger.trace({ err }, 'composer.subset error');
+    return false;
+  }
 }
 
 function getNewValue({
@@ -299,5 +325,6 @@ export const api: VersioningApi = {
   minSatisfyingVersion,
   getNewValue,
   sortVersions,
+  subset,
 };
 export default api;

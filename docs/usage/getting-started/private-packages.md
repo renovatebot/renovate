@@ -155,7 +155,7 @@ It can be confusing for people who host their own source code privately to be as
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
 
-- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, it might be better to create an "empty" account just for this purpose.
+- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, but we recommend you create an "empty" account for this purpose.
 - Add the PAT to Renovate using the environment variable `GITHUB_COM_TOKEN`
 
 ## Package Manager Credentials for Artifact Updating
@@ -231,7 +231,7 @@ The recommended approaches in order of preference are:
 
 1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
 1. **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
-1. **Renovate App with a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
+1. **Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
 
 These approaches are described in full below.
 
@@ -286,7 +286,7 @@ This merge approach is similar to how `npm` itself behaves if `.npmrc` is found 
 
 #### Add npmToken to Renovate config
 
-If you are using the main npmjs registry then you can configure just the `npmToken` instead:
+If you are using the main npmjs registry then you can configure only the `npmToken` instead:
 
 ```json
 {
@@ -296,7 +296,7 @@ If you are using the main npmjs registry then you can configure just the `npmTok
 
 #### Add an encrypted npm token to Renovate config
 
-If you don't want all users of the repository to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
+If you don't want all users of the repository to see the plaintext token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
 Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, select "Encrypt", then copy the encrypted result.
 
@@ -427,7 +427,7 @@ hostRules: [
 
 ### pip
 
-If a `requirements.txt` file has a index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+If a `requirements.txt` file has an index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
 To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
 This is because `packageRules` are applied _after_ package file extraction.
 
@@ -497,7 +497,7 @@ The preferred approach to secrets is that the bot administrator configures them 
 If you need to provide credentials to the hosted Renovate App, please do this:
 
 - Encrypt each secret string using <https://app.renovatebot.com/encrypt>. Note: this encrypts using the app's public key fully in the browser and does not send the original secret to any server. You can download this file and perform the encryption fully offline if you like.
-- Wrap each secret field in an [encrypted](https://docs.renovatebot.com/configuration-options/#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
+- Wrap each secret field in an [encrypted](../configuration-options.md#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
 
 ```json
 {
@@ -537,7 +537,7 @@ If per-repository config must be done within the repository, it is still recomme
 For instructions on this, see the above section on encrypting secrets for the Mend Renovate App but instead:
 
 - Save a copy of the <https://app.renovatebot.com/encrypt> HTML file locally, or host it locally
-- Generate a public/private key pair for the app using the instructions in [privateKey](https://docs.renovatebot.com/self-hosted-configuration/#privatekey)
+- Generate a public/private key pair for the app using the instructions in [privateKey](../self-hosted-configuration.md#privatekey)
 - Replace the existing public key in the HTML with the public key you generated in the step prior
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above

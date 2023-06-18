@@ -1,6 +1,10 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { extractTFLintPlugin } from './plugins';
 import type { ExtractionResult } from './types';
 import { checkFileContainsPlugins } from './util';
@@ -11,13 +15,13 @@ const dependencyBlockExtractionRegex = regEx(
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  config: ExtractConfig
-): PackageFile | null {
-  logger.trace({ content }, 'tflint.extractPackageFile()');
+  packageFile: string,
+  _config: ExtractConfig
+): PackageFileContent | null {
+  logger.trace({ content }, `tflint.extractPackageFile(${packageFile})`);
   if (!checkFileContainsPlugins(content)) {
-    logger.trace(
-      { fileName },
+    logger.debug(
+      { packageFile },
       'preflight content check has not found any relevant content'
     );
     return null;
@@ -47,7 +51,7 @@ export function extractPackageFile(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting TFLint plugins');
+    logger.debug({ err, packageFile }, 'Error extracting TFLint plugins');
   }
 
   return deps.length ? { deps } : null;
