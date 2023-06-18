@@ -384,7 +384,7 @@ jobs:
       - name: Fail for skipped tests when PR is ready for review
         if: |
           github.event_name == 'pull_request' &&
-          github.event.pull_request.draft == false &&
+          github.event.pull_request.draft != true &&
           needs.test.result == 'skipped'
         run: exit 1
 
@@ -397,7 +397,7 @@ jobs:
       - name: Fail for skipped coverage when PR is ready for review
         if: |
           github.event_name == 'pull_request' &&
-          github.event.pull_request.draft == false &&
+          github.event.pull_request.draft != true &&
           needs.coverage.result == 'skipped'
         run: exit 1
 
