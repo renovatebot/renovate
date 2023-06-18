@@ -90,7 +90,11 @@ function firstRegistry(
 ): Promise<ReleaseResult | null> {
   if (registryUrls.length > 1) {
     logger.warn(
-      { datasource: datasource.id, depName: config.depName, registryUrls },
+      {
+        datasource: datasource.id,
+        packageName: config.packageName,
+        registryUrls,
+      },
       'Excess registryUrls found for datasource lookup - using first configured only'
     );
   }
@@ -139,20 +143,21 @@ async function mergeRegistries(
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
-      if (res) {
-        if (combinedRes) {
-          for (const existingRelease of combinedRes.releases || []) {
-            existingRelease.registryUrl = combinedRes.registryUrl;
-          }
-          for (const additionalRelease of res.releases || []) {
-            additionalRelease.registryUrl = res.registryUrl;
-          }
-          combinedRes = { ...res, ...combinedRes };
-          delete combinedRes.registryUrl;
-          combinedRes.releases = [...combinedRes.releases, ...res.releases];
-        } else {
-          combinedRes = res;
+      if (!res) {
+        continue;
+      }
+      if (combinedRes) {
+        for (const existingRelease of combinedRes.releases || []) {
+          existingRelease.registryUrl ??= combinedRes.registryUrl;
         }
+        for (const additionalRelease of res.releases || []) {
+          additionalRelease.registryUrl = res.registryUrl;
+        }
+        combinedRes = { ...res, ...combinedRes };
+        delete combinedRes.registryUrl;
+        combinedRes.releases = [...combinedRes.releases, ...res.releases];
+      } else {
+        combinedRes = res;
       }
     } catch (err) {
       if (err instanceof ExternalHostError) {
@@ -277,6 +282,7 @@ async function fetchReleases(
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: needs test
   if (!datasource) {
+    logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
   registryUrls = resolveRegistryUrls(
@@ -341,7 +347,7 @@ export async function getPkgReleases(
     logger.warn('No datasource found');
     return null;
   }
-  const packageName = config.packageName ?? config.depName;
+  const packageName = config.packageName;
   if (!packageName) {
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
@@ -394,26 +400,29 @@ export async function getPkgReleases(
         (findRelease) => findRelease.version === filterRelease.version
       ) === filterIndex
   );
-  // Filter releases for compatibility
-  for (const [constraintName, constraintValue] of Object.entries(
-    config.constraints ?? {}
-  )) {
-    // Currently we only support if the constraint is a plain version
-    // TODO: Support range/range compatibility filtering #8476
-    if (version.isVersion(constraintValue)) {
-      res.releases = res.releases.filter((release) => {
-        const constraint = release.constraints?.[constraintName];
-        if (!is.nonEmptyArray(constraint)) {
-          // A release with no constraints is OK
-          return true;
-        }
-        return constraint.some(
-          // If any of the release's constraints match, then it's OK
-          (releaseConstraint) =>
-            !releaseConstraint ||
-            version.matches(constraintValue, releaseConstraint)
-        );
-      });
+  if (config?.constraintsFiltering === 'strict') {
+    // Filter releases for compatibility
+    for (const [constraintName, constraintValue] of Object.entries(
+      config.constraints ?? {}
+    )) {
+      if (version.isValid(constraintValue)) {
+        res.releases = res.releases.filter((release) => {
+          const constraint = release.constraints?.[constraintName];
+          if (!is.nonEmptyArray(constraint)) {
+            // A release with no constraints is OK
+            return true;
+          }
+
+          return constraint.some(
+            // If the constraint value is a subset of any release's constraints, then it's OK
+            // fallback to release's constraint match if subset is not supported by versioning
+            (releaseConstraint) =>
+              !releaseConstraint ||
+              (version.subset?.(constraintValue, releaseConstraint) ??
+                version.matches(constraintValue, releaseConstraint))
+          );
+        });
+      }
     }
   }
   // Strip constraints from releases result
@@ -433,8 +442,7 @@ function getDigestConfig(
   config: GetDigestInputConfig
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
-  const packageName =
-    config.replacementName ?? config.packageName ?? config.depName;
+  const packageName = config.replacementName ?? config.packageName;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,

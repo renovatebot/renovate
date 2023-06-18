@@ -13,16 +13,12 @@ const pathFor = (s: string): string =>
 
 describe('modules/datasource/cdnjs/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('throws for empty result', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(200, '}');
       await expect(
         getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'foo/bar',
+          packageName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -32,7 +28,7 @@ describe('modules/datasource/cdnjs/index', () => {
       await expect(
         getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'foo/bar',
+          packageName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -42,7 +38,7 @@ describe('modules/datasource/cdnjs/index', () => {
       expect(
         await getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'foo/bar',
+          packageName: 'foo/bar',
         })
       ).toBeNull();
     });
@@ -55,7 +51,7 @@ describe('modules/datasource/cdnjs/index', () => {
       expect(
         await getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'doesnotexist/doesnotexist',
+          packageName: 'doesnotexist/doesnotexist',
         })
       ).toBeNull();
     });
@@ -65,7 +61,7 @@ describe('modules/datasource/cdnjs/index', () => {
       await expect(
         getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'foo/bar',
+          packageName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -75,7 +71,7 @@ describe('modules/datasource/cdnjs/index', () => {
       await expect(
         getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'foo/bar',
+          packageName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -85,7 +81,7 @@ describe('modules/datasource/cdnjs/index', () => {
       await expect(
         getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'foo/bar',
+          packageName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -95,7 +91,7 @@ describe('modules/datasource/cdnjs/index', () => {
       await expect(
         getPkgReleases({
           datasource: CdnJsDatasource.id,
-          depName: 'foo/bar',
+          packageName: 'foo/bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -107,7 +103,7 @@ describe('modules/datasource/cdnjs/index', () => {
         .reply(200, Fixtures.get('d3-force.json'));
       const res = await getPkgReleases({
         datasource: CdnJsDatasource.id,
-        depName: 'd3-force/d3-force.js',
+        packageName: 'd3-force/d3-force.js',
       });
       expect(res).toMatchSnapshot();
     });
@@ -119,7 +115,7 @@ describe('modules/datasource/cdnjs/index', () => {
         .reply(200, Fixtures.get('bulma.json'));
       const res = await getPkgReleases({
         datasource: CdnJsDatasource.id,
-        depName: 'bulma/only/0.7.5/style.css',
+        packageName: 'bulma/only/0.7.5/style.css',
       });
       expect(res).toMatchSnapshot();
     });

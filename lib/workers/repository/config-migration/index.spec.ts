@@ -1,5 +1,7 @@
+import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../test/fixtures';
-import { getConfig, mockedFunction } from '../../../../test/util';
+import { mockedFunction, partial } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { checkConfigMigrationBranch } from './branch';
 import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
@@ -23,6 +25,7 @@ describe('workers/repository/config-migration/index', () => {
     mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
       filename,
       content,
+      indent: partial<Indent>(),
     });
   });
 

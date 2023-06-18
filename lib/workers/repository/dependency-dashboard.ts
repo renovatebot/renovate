@@ -1,4 +1,3 @@
-// TODO #7154
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
@@ -9,9 +8,11 @@ import { platform } from '../../modules/platform';
 import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
-import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
+import type { BranchConfig, SelectAllConfig } from '../types';
 import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
+import type { Vulnerability } from './process/types';
+import { Vulnerabilities } from './process/vulnerabilities';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -114,7 +115,22 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      Object.assign(config, parseDashboardIssue(issue.body!));
+      const dashboardChecks = parseDashboardIssue(issue.body!);
+
+      if (config.checkedBranches) {
+        const checkedBranchesRec: Record<string, string> = Object.fromEntries(
+          config.checkedBranches.map((branchName) => [
+            branchName,
+            'global-config',
+          ])
+        );
+        dashboardChecks.dependencyDashboardChecks = {
+          ...dashboardChecks.dependencyDashboardChecks,
+          ...checkedBranchesRec,
+        };
+      }
+
+      Object.assign(config, dashboardChecks);
     }
   }
 }
@@ -152,6 +168,10 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       )
   );
   if (repoProblems.size) {
+    logger.debug(
+      { repoProblems: Array.from(repoProblems) },
+      'repository problems'
+    );
     newIssueBody += '## Repository problems\n\n';
     newIssueBody +=
       'These problems occurred while renovating this repository.\n\n';
@@ -172,7 +192,7 @@ export async function ensureDependencyDashboard(
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
     (branch) =>
-      branch.result !== BranchResult.Automerged &&
+      branch.result !== 'automerged' &&
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible)
   );
   if (
@@ -226,7 +246,7 @@ export async function ensureDependencyDashboard(
   issueBody = appendRepoProblems(config, issueBody);
 
   const pendingApprovals = branches.filter(
-    (branch) => branch.result === BranchResult.NeedsApproval
+    (branch) => branch.result === 'needs-approval'
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -242,7 +262,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    (branch) => branch.result === BranchResult.NotScheduled
+    (branch) => branch.result === 'not-scheduled'
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
@@ -255,9 +275,9 @@ export async function ensureDependencyDashboard(
   }
   const rateLimited = branches.filter(
     (branch) =>
-      branch.result === BranchResult.BranchLimitReached ||
-      branch.result === BranchResult.PrLimitReached ||
-      branch.result === BranchResult.CommitLimitReached
+      branch.result === 'branch-limit-reached' ||
+      branch.result === 'pr-limit-reached' ||
+      branch.result === 'commit-limit-reached'
   );
   if (rateLimited.length) {
     issueBody += '## Rate-Limited\n\n';
@@ -273,9 +293,7 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
-  const errorList = branches.filter(
-    (branch) => branch.result === BranchResult.Error
-  );
+  const errorList = branches.filter((branch) => branch.result === 'error');
   if (errorList.length) {
     issueBody += '## Errored\n\n';
     issueBody +=
@@ -286,7 +304,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    (branch) => branch.result === BranchResult.NeedsPrApproval
+    (branch) => branch.result === 'needs-pr-approval'
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -297,9 +315,7 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
-  const prEdited = branches.filter(
-    (branch) => branch.result === BranchResult.PrEdited
-  );
+  const prEdited = branches.filter((branch) => branch.result === 'pr-edited');
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
     issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.\n\n`;
@@ -308,9 +324,7 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
-  const prPending = branches.filter(
-    (branch) => branch.result === BranchResult.Pending
-  );
+  const prPending = branches.filter((branch) => branch.result === 'pending');
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
     issueBody += `These updates await pending status checks. To force their creation now, click the checkbox below.\n\n`;
@@ -331,24 +345,24 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  const warn = getDepWarningsDashboard(packageFiles);
+  const warn = getDepWarningsDashboard(packageFiles, config);
   if (warn) {
     issueBody += warn;
     issueBody += '\n';
   }
 
   const otherRes = [
-    BranchResult.Pending,
-    BranchResult.NeedsApproval,
-    BranchResult.NeedsPrApproval,
-    BranchResult.NotScheduled,
-    BranchResult.PrLimitReached,
-    BranchResult.CommitLimitReached,
-    BranchResult.BranchLimitReached,
-    BranchResult.AlreadyExisted,
-    BranchResult.Error,
-    BranchResult.Automerged,
-    BranchResult.PrEdited,
+    'pending',
+    'needs-approval',
+    'needs-pr-approval',
+    'not-scheduled',
+    'pr-limit-reached',
+    'commit-limit-reached',
+    'branch-limit-reached',
+    'already-existed',
+    'error',
+    'automerged',
+    'pr-edited',
   ];
   let inProgress = branches.filter(
     (branch) =>
@@ -386,7 +400,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) => branch.result === BranchResult.AlreadyExisted
+    (branch) => branch.result === 'already-existed'
   );
   if (alreadyExisted.length) {
     issueBody += '## Ignored or Blocked\n\n';
@@ -402,6 +416,9 @@ export async function ensureDependencyDashboard(
     issueBody +=
       'This repository currently has no open or pending branches.\n\n';
   }
+
+  // add CVE section
+  issueBody += await getDashboardMarkdownVulnerabilities(config, packageFiles);
 
   // fit the detected dependencies section
   const footer = getFooter(config);
@@ -459,4 +476,104 @@ function getFooter(config: RenovateConfig): string {
   }
 
   return footer;
+}
+
+export async function getDashboardMarkdownVulnerabilities(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>
+): Promise<string> {
+  let result = '';
+
+  if (
+    is.nullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
+    config.dependencyDashboardOSVVulnerabilitySummary === 'none'
+  ) {
+    return result;
+  }
+
+  result += '## Vulnerabilities\n\n';
+
+  const vulnerabilityFetcher = await Vulnerabilities.create();
+  const vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
+    config,
+    packageFiles
+  );
+
+  if (vulnerabilities.length === 0) {
+    result +=
+      'Renovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n';
+    return result;
+  }
+
+  const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
+    is.nullOrUndefined(value.fixedVersion)
+  );
+  const resolvedVulnerabilitiesLength =
+    vulnerabilities.length - unresolvedVulnerabilities.length;
+
+  result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
+  if (is.truthy(config.osvVulnerabilityAlerts)) {
+    result += ' CVEs have Renovate fixes.\n';
+  } else {
+    result +=
+      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n';
+  }
+
+  let renderedVulnerabilities: Vulnerability[];
+  switch (config.dependencyDashboardOSVVulnerabilitySummary) {
+    // filter vulnerabilities to display based on configuration
+    case 'unresolved':
+      renderedVulnerabilities = unresolvedVulnerabilities;
+      break;
+    default:
+      renderedVulnerabilities = vulnerabilities;
+  }
+
+  const managerRecords: Record<
+    string,
+    Record<string, Record<string, Vulnerability[]>>
+  > = {};
+  for (const vulnerability of renderedVulnerabilities) {
+    const { manager, packageFile } = vulnerability.packageFileConfig;
+    if (is.nullOrUndefined(managerRecords[manager!])) {
+      managerRecords[manager!] = {};
+    }
+    if (is.nullOrUndefined(managerRecords[manager!][packageFile])) {
+      managerRecords[manager!][packageFile] = {};
+    }
+    if (
+      is.nullOrUndefined(
+        managerRecords[manager!][packageFile][vulnerability.packageName]
+      )
+    ) {
+      managerRecords[manager!][packageFile][vulnerability.packageName] = [];
+    }
+    managerRecords[manager!][packageFile][vulnerability.packageName].push(
+      vulnerability
+    );
+  }
+
+  for (const [manager, packageFileRecords] of Object.entries(managerRecords)) {
+    result += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
+    for (const [packageFile, packageNameRecords] of Object.entries(
+      packageFileRecords
+    )) {
+      result += `<details><summary>${packageFile}</summary>\n<blockquote>\n\n`;
+      for (const [packageName, cves] of Object.entries(packageNameRecords)) {
+        result += `<details><summary>${packageName}</summary>\n<blockquote>\n\n`;
+        for (const vul of cves) {
+          const id = vul.vulnerability.id;
+          const suffix = is.nonEmptyString(vul.fixedVersion)
+            ? ` (fixed in ${vul.fixedVersion})`
+            : '';
+          result += `- [${id}](https://osv.dev/vulnerability/${id})${suffix}\n`;
+        }
+        result += `</blockquote>\n</details>\n\n`;
+      }
+      result += `</blockquote>\n</details>\n\n`;
+    }
+    result += `</blockquote>\n</details>\n\n`;
+  }
+
+  return result;
 }

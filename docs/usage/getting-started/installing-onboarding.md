@@ -13,9 +13,9 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 
 ### Hosted GitHub.com App
 
-Installing/enabling Mend's Renovate GitHub App is simple.
+Follow these steps to install and enable Mend's Renovate GitHub App:
 
-First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
+First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 
 ![Github App Install button](../assets/images/github-app-install.png){ loading=lazy }
 
@@ -27,7 +27,7 @@ Renovate will ignore any repositories that don't have known package files, as we
 That said, most people run Renovate on selected repositories.
 Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
-Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
+Once you're done selecting repositories for Renovate to run on, select the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
 <!-- prettier-ignore -->
 !!! note
@@ -81,6 +81,7 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `.gitlab/renovate.json5`
 - `.renovaterc`
 - `.renovaterc.json`
+- `.renovaterc.json5`
 - `package.json` (deprecated)
 
 #### package.json
@@ -132,14 +133,8 @@ If you want to make config edits directly, follow these steps:
 1. Create a new Git branch to work on
 1. Install or update the `renovate` package globally (`npm i -g renovate` or `yarn global add renovate`) to get the `renovate-config-validator` program
 1. Edit your Renovate configuration file
-1. Validate your config by running `renovate-config-validator`
+1. [Validate your config](../config-validation.md)
 1. If the improved config passes the validation, merge the branch into your mainline branch
-
-The validator program checks files passed as CLI arguments.
-If no argument is given, all [default locations](../configuration-options.md) (if files exist) and the `RENOVATE_CONFIG_FILE` environment variable are checked.
-
-You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
-Please check out the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
 
 ### Nuke config and re-onboard
 

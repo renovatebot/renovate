@@ -29,7 +29,7 @@ expect.extend({
     isMigrated: boolean = true
   ) {
     class CustomMigrationsService extends MigrationsService {
-      protected static override getMigrations(
+      public static override getMigrations(
         original: RenovateConfig,
         migrated: RenovateConfig
       ): ReadonlyArray<Migration> {

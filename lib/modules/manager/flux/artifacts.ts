@@ -24,9 +24,7 @@ export async function updateArtifacts({
     }
     const cmd = `flux install ${args.join(' ')} > ${quote(packageFileName)}`;
     const execOptions: ExecOptions = {
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints: [
         {
           toolName: 'flux',

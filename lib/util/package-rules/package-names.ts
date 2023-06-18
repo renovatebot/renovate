@@ -4,7 +4,7 @@ import { Matcher } from './base';
 
 export class PackageNameMatcher extends Matcher {
   override matches(
-    { depName }: PackageRuleInputConfig,
+    { depName, packageName }: PackageRuleInputConfig,
     { matchPackageNames }: PackageRule
   ): boolean | null {
     if (is.undefined(matchPackageNames)) {
@@ -13,7 +13,19 @@ export class PackageNameMatcher extends Matcher {
     if (is.undefined(depName)) {
       return false;
     }
-    return matchPackageNames.includes(depName);
+
+    if (matchPackageNames.includes(depName)) {
+      return true;
+    }
+
+    if (
+      is.string(packageName) &&
+      process.env.RENOVATE_X_MATCH_PACKAGE_NAMES_MORE
+    ) {
+      return matchPackageNames.includes(packageName);
+    }
+
+    return false;
   }
 
   override excludes(

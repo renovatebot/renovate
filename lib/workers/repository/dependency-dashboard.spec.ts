@@ -1,13 +1,14 @@
 import { ERROR, WARN } from 'bunyan';
+import { codeBlock } from 'common-tags';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mockedFunction,
   platform,
 } from '../../../test/util';
+import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
   PackageDependency,
@@ -19,9 +20,22 @@ import {
   massageMarkdown,
 } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
-import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
+import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+
+const createVulnerabilitiesMock = jest.fn();
+jest.mock('./process/vulnerabilities', () => {
+  return {
+    __esModule: true,
+    Vulnerabilities: class {
+      static create() {
+        return createVulnerabilitiesMock();
+      }
+    },
+  };
+});
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -31,7 +45,6 @@ const getIssueSpy = platform.getIssue;
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.clearAllMocks();
   massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
   config.platform = 'github';
@@ -66,10 +79,9 @@ function genRandPackageFile(
 async function dryRun(
   branches: BranchConfig[],
   platform: jest.MockedObject<Platform>,
-  ensureIssueClosingCalls = 0,
-  ensureIssueCalls = 0
+  ensureIssueClosingCalls: number,
+  ensureIssueCalls: number
 ) {
-  jest.clearAllMocks();
   GlobalConfig.set({ dryRun: 'full' });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
@@ -101,6 +113,31 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: true,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
+    it('reads dashboard body and apply checkedBranches', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      conf.checkedBranches = ['branch1', 'branch2'];
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt'),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+          branch2: 'global-config',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
       });
@@ -163,6 +200,7 @@ describe('workers/repository/dependency-dashboard', () => {
     beforeEach(() => {
       PackageFiles.add('main', null);
       GlobalConfig.reset();
+      logger.getProblems.mockReturnValue([]);
     });
 
     it('do nothing if dependencyDashboard is disabled', async () => {
@@ -172,7 +210,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('do nothing if it has no dependencyDashboardApproval branches', async () => {
@@ -192,7 +230,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('closes Dependency Dashboard when there is 0 PR opened and dependencyDashboardAutoclose is true', async () => {
@@ -207,7 +245,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true', async () => {
@@ -215,12 +253,12 @@ describe('workers/repository/dependency-dashboard', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          result: BranchResult.Automerged,
+          result: 'automerged',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          result: BranchResult.Automerged,
+          result: 'automerged',
           dependencyDashboardApproval: false,
         },
       ];
@@ -234,7 +272,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
@@ -251,7 +289,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('open or update Dependency Dashboard when rules contain approvals', async () => {
@@ -282,7 +320,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
@@ -291,63 +329,63 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName4',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr5',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName5',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr6',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName6',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr7',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
-          result: BranchResult.Error,
+          result: 'error',
           branchName: 'branchName7',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr8',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
-          result: BranchResult.Error,
+          result: 'error',
           branchName: 'branchName8',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr9',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
-          result: BranchResult.Done,
+          result: 'done',
           prBlockedBy: 'BranchAutomerge',
           branchName: 'branchName9',
         },
@@ -364,7 +402,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 PR pr-edited', async () => {
@@ -374,7 +412,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prNo: 1,
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.PrEdited,
+          result: 'pr-edited',
           branchName: 'branchName1',
         },
         {
@@ -385,7 +423,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.PrEdited,
+          result: 'pr-edited',
           branchName: 'branchName2',
         },
       ];
@@ -401,7 +439,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 3 PR in progress and rebase all option', async () => {
@@ -410,7 +448,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           prNo: 1,
           branchName: 'branchName1',
         },
@@ -422,7 +460,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           branchName: 'branchName2',
         },
         {
@@ -430,7 +468,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           prNo: 3,
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           branchName: 'branchName3',
         },
       ];
@@ -446,7 +484,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 PR closed / ignored', async () => {
@@ -455,7 +493,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.AlreadyExisted,
+          result: 'already-existed',
           branchName: 'branchName1',
         },
         {
@@ -465,7 +503,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.AlreadyExisted,
+          result: 'already-existed',
           branchName: 'branchName2',
         },
       ];
@@ -481,7 +519,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 3 PR in approval', async () => {
@@ -490,7 +528,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName1',
         },
         {
@@ -500,21 +538,21 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          result: BranchResult.Pending,
+          result: 'pending',
           branchName: 'branchName4',
         },
       ];
@@ -531,7 +569,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('contains logged problems', async () => {
@@ -542,7 +580,7 @@ describe('workers/repository/dependency-dashboard', () => {
           upgrades: [
             { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
           ],
-          result: BranchResult.Pending,
+          result: 'pending',
           branchName: 'branchName1',
         },
       ];
@@ -589,14 +627,14 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
       ];
@@ -651,14 +689,14 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.BranchLimitReached,
+          result: 'branch-limit-reached',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName2',
         },
       ];
@@ -706,21 +744,21 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName3',
         },
       ];
@@ -763,7 +801,7 @@ describe('workers/repository/dependency-dashboard', () => {
       ]);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     describe('checks detected dependencies section', () => {
@@ -792,7 +830,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when packageFiles is empty', async () => {
@@ -804,7 +842,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when when packageFiles is null', async () => {
@@ -816,7 +854,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('shows different combinations of version+digest for a given dependency', async () => {
@@ -827,7 +865,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 
@@ -845,7 +883,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when packageFiles is empty', async () => {
@@ -856,7 +894,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when when packageFiles is null', async () => {
@@ -867,7 +905,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('truncates the body of a really big repo', async () => {
@@ -883,7 +921,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ).toBeTrue();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 
@@ -918,7 +956,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 
@@ -993,6 +1031,177 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(post.includes('dev')).toBeTrue();
         });
       });
+    });
+  });
+
+  describe('getDashboardMarkdownVulnerabilities()', () => {
+    const packageFiles = Fixtures.getJson<Record<string, PackageFile[]>>(
+      './package-files.json'
+    );
+
+    it('return empty string if summary is empty', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        config,
+        packageFiles
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return empty string if summary is set to none', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'none',
+        },
+        packageFiles
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return no data section if summary is set to all and no vulnerabilities', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+        },
+        {}
+      );
+      expect(result).toBe(
+        `## Vulnerabilities\n\nRenovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n`
+      );
+    });
+
+    it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+          osvVulnerabilityAlerts: true,
+        },
+        packageFiles
+      );
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+\`1\`/\`2\` CVEs have Renovate fixes.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>express</summary>
+<blockquote>
+
+- [GHSA-29mw-wpgm-hmr9](https://osv.dev/vulnerability/GHSA-29mw-wpgm-hmr9) (fixed in 4.18.1)
+</blockquote>
+</details>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
+    });
+
+    it('return unresolved vulnerabilities if set to "unresolved"', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'unresolved',
+        },
+        packageFiles
+      );
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+\`1\`/\`2\` CVEs have possible Renovate fixes.
+See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
     });
   });
 });

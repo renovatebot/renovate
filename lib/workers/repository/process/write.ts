@@ -2,24 +2,20 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
+import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
-import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
-import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import {
-  BranchConfig,
-  BranchResult,
-  UpgradeFingerprintConfig,
-} from '../../types';
+import { incLimitedValue, setMaxLimit } from '../../global/limits';
+import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
-export function generateBranchFingerprintConfig(
+export function generateCommitFingerprintConfig(
   branch: BranchConfig
 ): UpgradeFingerprintConfig[] {
   const res = branch.upgrades.map((upgrade) => {
@@ -35,14 +31,14 @@ export function generateBranchFingerprintConfig(
 
 export function canSkipBranchUpdateCheck(
   branchState: BranchCache,
-  branchFingerprint: string
+  commitFingerprint: string
 ): boolean {
-  if (!branchState.branchFingerprint) {
+  if (!branchState.commitFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
     return false;
   }
 
-  if (branchFingerprint !== branchState.branchFingerprint) {
+  if (commitFingerprint !== branchState.commitFingerprint) {
     logger.debug('branch.isUpToDate(): needs recalculation');
     return false;
   }
@@ -51,13 +47,13 @@ export function canSkipBranchUpdateCheck(
   return true;
 }
 
-export function syncBranchState(
+export async function syncBranchState(
   branchName: string,
   baseBranch: string
-): BranchCache {
+): Promise<BranchCache> {
   logger.debug('syncBranchState()');
-  const branchSha = getBranchCommit(branchName)!;
-  const baseBranchSha = getBranchCommit(baseBranch)!;
+  const branchSha = await scm.getBranchCommit(branchName)!;
+  const baseBranchSha = await scm.getBranchCommit(baseBranch)!;
 
   const cache = getCache();
   cache.branches ??= [];
@@ -82,6 +78,7 @@ export function syncBranchState(
     logger.debug('syncBranchState(): update baseBranch name');
     branchState.baseBranch = baseBranch;
     delete branchState.isModified;
+    branchState.pristine = false;
   }
 
   // if base branch sha has changed invalidate cached isBehindBase state
@@ -92,6 +89,7 @@ export function syncBranchState(
 
     // update cached branchSha
     branchState.baseBranchSha = baseBranchSha;
+    branchState.pristine = false;
   }
 
   // if branch sha has changed invalidate all cached states
@@ -100,10 +98,11 @@ export function syncBranchState(
     delete branchState.isBehindBase;
     delete branchState.isConflicted;
     delete branchState.isModified;
-    delete branchState.branchFingerprint;
+    delete branchState.commitFingerprint;
 
     // update cached branchSha
     branchState.sha = branchSha;
+    branchState.pristine = false;
   }
 
   return branchState;
@@ -124,13 +123,13 @@ export async function writeUpdates(
   );
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug(`Calculated maximum PRs remaining this run: ${prsRemaining}`);
-  setMaxLimit(Limit.PullRequests, prsRemaining);
+  setMaxLimit('PullRequests', prsRemaining);
 
   const branchesRemaining = await getBranchesRemaining(config, branches);
   logger.debug(
     `Calculated maximum branches remaining this run: ${branchesRemaining}`
   );
-  setMaxLimit(Limit.Branches, branchesRemaining);
+  setMaxLimit('Branches', branchesRemaining);
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
@@ -139,8 +138,8 @@ export async function writeUpdates(
       meta['baseBranch'] = baseBranch;
     }
     addMeta(meta);
-    const branchExisted = branchExists(branchName);
-    const branchState = syncBranchState(branchName, baseBranch);
+    const branchExisted = await scm.branchExists(branchName);
+    const branchState = await syncBranchState(branchName, baseBranch);
 
     const managers = [
       ...new Set(
@@ -149,34 +148,34 @@ export async function writeUpdates(
           .filter(is.string)
       ),
     ].sort();
-    const branchFingerprint = fingerprint({
-      branchFingerprintConfig: generateBranchFingerprintConfig(branch),
+    const commitFingerprint = fingerprint({
+      commitFingerprintConfig: generateCommitFingerprintConfig(branch),
       managers,
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
       branchState,
-      branchFingerprint
+      commitFingerprint
     );
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    branch.branchFingerprint = res?.updatesVerified
-      ? branchFingerprint
-      : branchState.branchFingerprint;
+    branch.commitFingerprint = res?.updatesVerified
+      ? commitFingerprint
+      : branchState.commitFingerprint;
 
     if (res?.commitSha) {
       setBranchNewCommit(branchName, baseBranch, res.commitSha);
     }
     if (
-      branch.result === BranchResult.Automerged &&
+      branch.result === 'automerged' &&
       branch.automergeType !== 'pr-comment'
     ) {
       // Stop processing other branches because base branch has been changed
       return 'automerged';
     }
-    if (!branchExisted && branchExists(branch.branchName)) {
-      incLimitedValue(Limit.Branches);
+    if (!branchExisted && (await scm.branchExists(branch.branchName))) {
+      incLimitedValue('Branches');
     }
   }
   removeMeta(['branch', 'baseBranch']);

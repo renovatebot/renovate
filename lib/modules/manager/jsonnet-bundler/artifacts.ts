@@ -41,9 +41,7 @@ export async function updateArtifacts(
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     toolConstraints: [jsonnetBundlerToolConstraint],
   };
 

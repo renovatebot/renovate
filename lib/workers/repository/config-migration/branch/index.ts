@@ -3,12 +3,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { PrState } from '../../../../types';
-import {
-  branchExists,
-  checkoutBranch,
-  deleteBranch,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { createConfigMigrationBranch } from './create';
@@ -37,7 +32,7 @@ export async function checkConfigMigrationBranch(
     const closedPrConfig: FindPRConfig = {
       branchName: configMigrationBranch,
       prTitle,
-      state: PrState.Closed,
+      state: 'closed',
     };
 
     // handles closed PR
@@ -71,7 +66,7 @@ export async function checkConfigMigrationBranch(
     await createConfigMigrationBranch(config, migratedConfigData);
   }
   if (!GlobalConfig.get('dryRun')) {
-    await checkoutBranch(configMigrationBranch);
+    await scm.checkoutBranch(configMigrationBranch);
   }
   return configMigrationBranch;
 }
@@ -82,7 +77,7 @@ export async function migrationPrExists(branchName: string): Promise<boolean> {
 
 async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
   if (
-    pr.state === PrState.Closed &&
+    pr.state === 'closed' &&
     !config.suppressNotifications!.includes('prIgnoreNotification')
   ) {
     if (GlobalConfig.get('dryRun')) {
@@ -91,18 +86,18 @@ async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
       );
     } else {
       const content =
-        '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+        '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
       await ensureComment({
         number: pr.number,
         topic: 'Renovate Ignore Notification',
         content,
       });
     }
-    if (branchExists(pr.sourceBranch)) {
+    if (await scm.branchExists(pr.sourceBranch)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
       } else {
-        await deleteBranch(pr.sourceBranch);
+        await scm.deleteBranch(pr.sourceBranch);
       }
     }
   }

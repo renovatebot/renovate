@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
@@ -12,7 +12,6 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
@@ -232,7 +231,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(res).toMatchSnapshot();
     });
@@ -259,7 +258,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.NotOpen,
+        state: '!open',
       });
       expect(res).toMatchSnapshot();
     });
@@ -286,7 +285,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.Closed,
+        state: 'closed',
       });
       expect(res).toMatchSnapshot();
     });
@@ -379,8 +378,6 @@ describe('modules/platform/azure/index', () => {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
         createdAt: undefined,
-        displayNumber: 'Pull Request #1',
-        hasReviewers: false,
         labels: [],
         number: 1,
         pullRequestId: 1,
@@ -413,7 +410,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should return green if status is not applicable', async () => {
@@ -434,7 +431,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should return red if status is failed', async () => {
@@ -455,7 +452,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('should return red if context status is error', async () => {
@@ -476,7 +473,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('should return yellow if status is pending', async () => {
@@ -497,7 +494,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should return yellow if status is not set', async () => {
@@ -518,7 +515,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should return yellow if status is unknown', async () => {
@@ -540,7 +537,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should return null if status not found', async () => {
@@ -572,11 +569,34 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      const res = await azure.getBranchStatus('somebranch', true);
+      expect(res).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -588,8 +608,8 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      const res = await azure.getBranchStatus('somebranch', true);
+      expect(res).toBe('red');
     });
 
     it('should pass through pending', async () => {
@@ -601,8 +621,8 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      const res = await azure.getBranchStatus('somebranch', true);
+      expect(res).toBe('yellow');
     });
 
     it('should fall back to yellow if no statuses returned', async () => {
@@ -614,8 +634,8 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => []),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      const res = await azure.getBranchStatus('somebranch', true);
+      expect(res).toBe('yellow');
     });
   });
 
@@ -675,7 +695,6 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
@@ -697,7 +716,6 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
@@ -717,7 +735,6 @@ describe('modules/platform/azure/index', () => {
       const prResult = {
         pullRequestId: 456,
         title: 'The Title',
-        displayNumber: `Pull Request #456`,
         createdBy: {
           id: 123,
         },
@@ -760,7 +777,6 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
-        displayNumber: 'Pull Request #456',
         createdBy: {
           id: 123,
           url: 'user-url',
@@ -789,14 +805,14 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { azureAutoApprove: true },
+        platformOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
   });
 
-  describe('updatePr(prNo, title, body)', () => {
+  describe('updatePr(prNo, title, body, platformOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = jest.fn();
@@ -843,7 +859,7 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
-        state: PrState.Closed,
+        state: 'closed',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -861,9 +877,46 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
+    });
+
+    it('should re-approve the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      };
+      const updateFn = jest.fn(() => prUpdateResult);
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            updatePullRequest: jest.fn(() => prResult),
+            createPullRequestReviewer: updateFn,
+            getPullRequestById: jest.fn(() => ({
+              pullRequestId: prResult.pullRequestId,
+              createdBy: prResult.createdBy,
+            })),
+          } as any)
+      );
+      const pr = await azure.updatePr({
+        number: prResult.pullRequestId,
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        platformOptions: { autoApprove: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
     });
   });
 
@@ -1111,7 +1164,7 @@ describe('modules/platform/azure/index', () => {
         branchName: 'test',
         context: 'test',
         description: 'test',
-        state: BranchStatus.yellow,
+        state: 'yellow',
         url: 'test.com',
       });
       expect(createCommitStatusMock).toHaveBeenCalledWith(
@@ -1143,7 +1196,7 @@ describe('modules/platform/azure/index', () => {
         branchName: 'test',
         context: 'renovate/artifact/test',
         description: 'test',
-        state: BranchStatus.green,
+        state: 'green',
         url: 'test.com',
       });
       expect(createCommitStatusMock).toHaveBeenCalledWith(
@@ -1330,13 +1383,6 @@ describe('modules/platform/azure/index', () => {
       );
       expect(logger.warn).toHaveBeenCalled();
       expect(res).toBeTrue();
-    });
-  });
-
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await azure.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
     });
   });
 

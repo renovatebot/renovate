@@ -1,6 +1,9 @@
 import is from '@sindresorhus/is';
+import semver from 'semver';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
+import type { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -8,6 +11,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
+  isValidLocalPath,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -30,6 +34,8 @@ const githubApiUrls = new Set([
   'https://api.github.com',
   'https://api.github.com/',
 ]);
+
+const { major, valid } = semver;
 
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
@@ -61,11 +67,11 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     'gitea',
     'github',
     'gitlab',
-  ]);
+  ] satisfies PlatformId[]);
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
-    if (!hostRule.hostType) {
+    if (hostRule.hostType === 'go' || !hostRule.hostType) {
       environmentVariables = addAuthFromHostRule(
         hostRule,
         environmentVariables
@@ -112,14 +118,36 @@ function addAuthFromHostRule(
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints, newMajor }: UpdateArtifactsConfig
+  { constraints }: UpdateArtifactsConfig
 ): string[] {
+  // Check if we fail to parse any major versions and log that they're skipped
+  const invalidMajorDeps = updatedDeps.filter(
+    ({ newVersion }) => !valid(newVersion)
+  );
+  if (invalidMajorDeps.length > 0) {
+    invalidMajorDeps.forEach(({ depName }) =>
+      logger.warn(`Could not get major version of ${depName!}. Ignoring`)
+    );
+  }
+
   const updateImportCommands = updatedDeps
-    .map((dep) => dep.depName!)
-    .filter((x) => !x.startsWith('gopkg.in'))
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
+    .filter(
+      ({ newVersion }) =>
+        valid(newVersion) && !newVersion!.endsWith('+incompatible')
+    )
+    .map(({ depName, newVersion }) => ({
+      depName: depName!,
+      newMajor: major(newVersion!),
+    }))
+    // Skip path updates going from v0 to v1
+    .filter(
+      ({ depName, newMajor }) => depName.startsWith('gopkg.in/') || newMajor > 1
+    )
+
+    .map(
+      ({ depName, newMajor }) =>
+        `mod upgrade --mod-name=${depName} -t=${newMajor}`
+    );
 
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
@@ -259,24 +287,44 @@ export async function updateArtifacts({
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
-      docker: {
-        image: 'go',
-        tagConstraint: goConstraints,
-        tagScheme: 'npm',
-      },
+      docker: {},
+      toolConstraints: [
+        {
+          toolName: 'golang',
+          constraint: goConstraints,
+        },
+      ],
     };
 
     const execCommands: string[] = [];
 
-    let args = 'get -d -t ./...';
+    let goGetDirs: string | undefined;
+    if (config.goGetDirs) {
+      goGetDirs = config.goGetDirs
+        .filter((dir) => {
+          const isValid = isValidLocalPath(dir);
+          if (!isValid) {
+            logger.warn({ dir }, 'Invalid path in goGetDirs');
+          }
+          return isValid;
+        })
+        .map(quote)
+        .join(' ');
+
+      if (goGetDirs === '') {
+        throw new Error('Invalid goGetDirs');
+      }
+    }
+
+    let args = `get -d -t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
-    // Update import paths on major updates above v1
+    // Update import paths on major updates
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
-      config.updateType === 'major' &&
-      config.newMajor! > 1;
+      config.updateType === 'major';
+
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
       if (updateImportCmds.length > 0) {
@@ -293,13 +341,19 @@ export async function updateArtifacts({
       logger.debug('go mod tidy command skipped');
     }
 
-    const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
-      ? ' -compat=1.17'
-      : '';
+    let tidyOpts = '';
+    if (config.postUpdateOptions?.includes('gomodTidy1.17')) {
+      tidyOpts += ' -compat=1.17';
+    }
+    if (config.postUpdateOptions?.includes('gomodTidyE')) {
+      tidyOpts += ' -e';
+    }
+
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') ||
         config.postUpdateOptions?.includes('gomodTidy1.17') ||
+        config.postUpdateOptions?.includes('gomodTidyE') ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
@@ -328,20 +382,24 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
-    if (!status.modified.includes(sumFileName)) {
+    if (
+      !status.modified.includes(sumFileName) &&
+      !status.modified.includes(goModFileName)
+    ) {
       return null;
     }
 
-    logger.debug('Returning updated go.sum');
-    const res: UpdateArtifactsResult[] = [
-      {
+    const res: UpdateArtifactsResult[] = [];
+    if (status.modified.includes(sumFileName)) {
+      logger.debug('Returning updated go.sum');
+      res.push({
         file: {
           type: 'addition',
           path: sumFileName,
           contents: await readLocalFile(sumFileName),
         },
-      },
-    ];
+      });
+    }
 
     // Include all the .go file import changes
     if (isImportPathUpdateRequired) {

@@ -2,7 +2,6 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
-  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -17,7 +16,7 @@ import type {
 } from '../modules/manager/types';
 import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
-import type { MergeConfidence } from '../util/merge-confidence';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 import type {
   ChangeLogRelease,
   ChangeLogResult,
@@ -39,6 +38,7 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+  depIndex?: number;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
@@ -56,12 +56,13 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
-  minimumConfidence?: MergeConfidence;
+  minimumConfidence?: MergeConfidence | undefined;
   sourceDirectory?: string;
 
   updatedPackageFiles?: FileChange[];
@@ -86,25 +87,23 @@ export type PrBlockedBy =
   | 'RateLimited'
   | 'Error';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum BranchResult {
-  AlreadyExisted = 'already-existed',
-  Automerged = 'automerged',
-  Done = 'done',
-  Error = 'error',
-  NeedsApproval = 'needs-approval',
-  NeedsPrApproval = 'needs-pr-approval',
-  NotScheduled = 'not-scheduled',
-  NoWork = 'no-work',
-  Pending = 'pending',
-  PrCreated = 'pr-created',
-  PrEdited = 'pr-edited',
-  PrLimitReached = 'pr-limit-reached',
-  CommitLimitReached = 'commit-limit-reached',
-  BranchLimitReached = 'branch-limit-reached',
-  Rebase = 'rebase',
-  UpdateNotScheduled = 'update-not-scheduled',
-}
+export type BranchResult =
+  | 'already-existed'
+  | 'automerged'
+  | 'done'
+  | 'error'
+  | 'needs-approval'
+  | 'needs-pr-approval'
+  | 'not-scheduled'
+  | 'no-work'
+  | 'pending'
+  | 'pr-created'
+  | 'pr-edited'
+  | 'pr-limit-reached'
+  | 'commit-limit-reached'
+  | 'branch-limit-reached'
+  | 'rebase'
+  | 'update-not-scheduled';
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
@@ -112,6 +111,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
+  automergedPreviously?: boolean;
   baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
@@ -126,17 +126,18 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
-  branchFingerprint?: string;
+  commitFingerprint?: string;
   skipBranchUpdate?: boolean;
 }
 
 export interface BranchMetadata {
   branchName: string;
-  branchSha: string | null;
-  baseBranch: string | undefined;
-  baseBranchSha: string | null | undefined;
-  automerge: boolean;
-  isModified: boolean | undefined;
+  branchSha?: string | null;
+  baseBranch?: string;
+  baseBranchSha?: string | null;
+  automerge?: boolean;
+  isModified?: boolean;
+  isPristine?: boolean;
 }
 
 export interface BaseBranchMetadata {
@@ -145,9 +146,10 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  cacheModified: boolean | undefined;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
+  cacheModified?: boolean;
+  defaultBranch?: string;
   inactiveBranches: string[];
 }
 
@@ -155,11 +157,8 @@ export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   fileMatch?: string[];
-  updateInternalDeps?: boolean;
   includePaths?: string[];
   ignorePaths?: string[];
-  regexManagers?: RegExManager[];
-  enabledManagers?: string[];
   enabled?: boolean;
 }
 
@@ -190,4 +189,9 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+}
+
+export interface ExtractResult {
+  extractionFingerprints: Record<string, string | undefined>;
+  packageFiles: Record<string, PackageFile[]>;
 }

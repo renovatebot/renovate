@@ -1,4 +1,4 @@
-import { isAlias, resolveAlias } from './utils';
+import { isAlias, isOCIRegistry, resolveAlias } from './utils';
 
 describe('modules/manager/helmv3/utils', () => {
   describe('.resolveAlias()', () => {
@@ -67,6 +67,18 @@ describe('modules/manager/helmv3/utils', () => {
     it('return false if repository is undefined', () => {
       // TODO #7154
       const repository = isAlias(undefined as never);
+      expect(repository).toBeFalse();
+    });
+  });
+
+  describe('.isOCIRegistry()', () => {
+    it('return false if repository is null', () => {
+      const repository = isOCIRegistry(null);
+      expect(repository).toBeFalse();
+    });
+
+    it('return false if repository is undefined', () => {
+      const repository = isOCIRegistry(undefined);
       expect(repository).toBeFalse();
     });
   });

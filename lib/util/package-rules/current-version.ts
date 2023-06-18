@@ -39,6 +39,7 @@ export class CurrentVersionMatcher extends Matcher {
           isUnconstrainedValue ||
           !!(
             currentValue &&
+            version.isValid(currentValue) &&
             version.matches(matchCurrentVersionStr, currentValue)
           )
         );

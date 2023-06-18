@@ -1,6 +1,6 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
@@ -70,7 +70,7 @@ export async function postUpgradeCommandsExecutor(
               ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 
-            logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
+            logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: GlobalConfig.get('localDir'),
             });

@@ -3,12 +3,13 @@ import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_FORK,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
@@ -37,7 +38,6 @@ describe('modules/platform/github/index', () => {
 
     setBaseUrl(githubApiHost);
 
-    git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
@@ -54,6 +54,14 @@ describe('modules/platform/github/index', () => {
     it('should throw if no token', async () => {
       await expect(github.initPlatform({})).rejects.toThrow(
         'Init: You must configure a GitHub token'
+      );
+    });
+
+    it('should throw if fine-grained token', async () => {
+      await expect(
+        github.initPlatform({ token: 'github_pat_XXXXXX' })
+      ).rejects.toThrow(
+        'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
       );
     });
 
@@ -169,9 +177,15 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             full_name: 'a/b',
+            archived: false,
           },
           {
             full_name: 'c/d',
+            archived: false,
+          },
+          {
+            full_name: 'e/f',
+            archived: true,
           },
           null,
         ]);
@@ -203,7 +217,7 @@ describe('modules/platform/github/index', () => {
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
 
     it('should return an array of repos when using GitHub App Installation Token', async () => {
@@ -222,16 +236,22 @@ describe('modules/platform/github/index', () => {
           repositories: [
             {
               full_name: 'a/b',
+              archived: false,
             },
             {
               full_name: 'c/d',
+              archived: false,
+            },
+            {
+              full_name: 'e/f',
+              archived: true,
             },
             null,
           ],
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
 
@@ -267,7 +287,8 @@ describe('modules/platform/github/index', () => {
     scope: httpMock.Scope,
     repository: string,
     forkExisted: boolean,
-    forkDefaulBranch = 'master'
+    forkResult = 200,
+    forkDefaultBranch = 'master'
   ): void {
     scope
       // repo info
@@ -294,13 +315,13 @@ describe('modules/platform/github/index', () => {
       // getForks
       .get(`/repos/${repository}/forks?per_page=100`)
       .reply(
-        200,
+        forkResult,
         forkExisted
           ? [
               {
                 full_name: 'forked/repo',
                 owner: { login: 'forked' },
-                default_branch: forkDefaulBranch,
+                default_branch: forkDefaultBranch,
               },
             ]
           : []
@@ -352,13 +373,37 @@ describe('modules/platform/github/index', () => {
       const repo = 'some/repo';
       const branch = 'master';
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, repo, false, branch);
+      forkInitRepoMock(scope, repo, false, 200, branch);
       scope.get('/user').reply(404);
       await expect(
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
           forkCreate: true,
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when listing forks with 404', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 404);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when listing forks with 500', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 500);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -397,7 +442,7 @@ describe('modules/platform/github/index', () => {
 
     it('detects fork default branch mismatch', async () => {
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      forkInitRepoMock(scope, 'some/repo', true, 200, 'not_master');
       scope.get('/user').reply(200, {
         login: 'forked',
       });
@@ -518,6 +563,40 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
 
+    it('throws unexpected graphql errors', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'SOME_ERROR_TYPE',
+              message: 'Some error message',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_UNKNOWN_ERROR);
+    });
+
+    it('throws graphql rate limit error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMITED',
+              message: 'API rate limit exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
     it('should throw error if renamed', async () => {
       httpMock
         .scope(githubApiHost)
@@ -576,6 +655,7 @@ describe('modules/platform/github/index', () => {
           required_pull_request_reviews: {
             dismiss_stale_reviews: false,
             require_code_owner_reviews: false,
+            required_approving_review_count: 1,
           },
           required_status_checks: {
             strict: true,
@@ -628,16 +708,16 @@ describe('modules/platform/github/index', () => {
 
   describe('getPrList()', () => {
     const t = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
-    const t1 = t.plus({ minutes: 1 }).toISO();
-    const t2 = t.plus({ minutes: 2 }).toISO();
-    const t3 = t.plus({ minutes: 3 }).toISO();
-    const t4 = t.plus({ minutes: 4 }).toISO();
+    const t1 = t.plus({ minutes: 1 }).toISO()!;
+    const t2 = t.plus({ minutes: 2 }).toISO()!;
+    const t3 = t.plus({ minutes: 3 }).toISO()!;
+    const t4 = t.plus({ minutes: 4 }).toISO()!;
 
     const pr1: GhRestPr = {
       number: 1,
       head: { ref: 'branch-1', sha: '111', repo: { full_name: 'some/repo' } },
-      base: { repo: { pushed_at: '' } },
-      state: PrState.Open,
+      base: { repo: { pushed_at: '' }, ref: 'repo/fork_branch' },
+      state: 'open',
       title: 'PR #1',
       created_at: t1,
       updated_at: t1,
@@ -649,7 +729,7 @@ describe('modules/platform/github/index', () => {
       ...pr1,
       number: 2,
       head: { ref: 'branch-2', sha: '222', repo: { full_name: 'some/repo' } },
-      state: PrState.Open,
+      state: 'open',
       title: 'PR #2',
       updated_at: t2,
     };
@@ -658,7 +738,7 @@ describe('modules/platform/github/index', () => {
       ...pr1,
       number: 3,
       head: { ref: 'branch-3', sha: '333', repo: { full_name: 'some/repo' } },
-      state: PrState.Open,
+      state: 'open',
       title: 'PR #3',
       updated_at: t3,
     };
@@ -802,7 +882,7 @@ describe('modules/platform/github/index', () => {
           {
             number: 90,
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: PrState.Open,
+            state: 'open',
             title: 'PR from another repo',
             updated_at: '01-09-2022',
           },
@@ -810,7 +890,7 @@ describe('modules/platform/github/index', () => {
             number: 91,
             base: { sha: '1234' },
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: PrState.Open,
+            state: 'open',
             title: 'Some title',
             updated_at: '01-09-2022',
           },
@@ -835,18 +915,26 @@ describe('modules/platform/github/index', () => {
           {
             number: 90,
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: PrState.Open,
+            state: 'open',
             updated_at: '01-09-2022',
           },
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
-            state: PrState.Closed,
+            state: 'closed',
             closed_at: DateTime.now().minus({ days: 6 }).toISO(),
             updated_at: '01-09-2022',
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/somebranch')
+        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
@@ -854,7 +942,7 @@ describe('modules/platform/github/index', () => {
           number: 91,
           base: { sha: '1234' },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-          state: PrState.Open,
+          state: 'open',
           title: 'old title',
           updated_at: '01-09-2022',
         });
@@ -880,7 +968,7 @@ describe('modules/platform/github/index', () => {
             number: 1,
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             title: 'old title - autoclosed',
-            state: PrState.Closed,
+            state: 'closed',
             closed_at: DateTime.now().minus({ days: 6 }).toISO(),
           },
         ]);
@@ -904,13 +992,13 @@ describe('modules/platform/github/index', () => {
           {
             number: 90,
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: PrState.Open,
+            state: 'open',
           },
           {
             number: 91,
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
             title: 'old title - autoclosed',
-            state: PrState.Closed,
+            state: 'closed',
             closed_at: DateTime.now().minus({ days: 7 }).toISO(),
           },
         ]);
@@ -930,12 +1018,20 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              repo: { full_name: 'some/repo' },
+              sha: '123',
+            },
             title: 'old title - autoclosed',
-            state: PrState.Closed,
+            state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/somebranch')
+        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
@@ -956,13 +1052,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
-            state: PrState.Closed,
+            state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
-        .post('/repos/some/repo/git/refs')
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(422);
 
       await github.initRepo({ repository: 'some/repo' });
@@ -984,8 +1086,30 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
 
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('green');
+    });
+
+    it('should not consider internal statuses as success', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/commits/somebranch/status')
+        .reply(200, {
+          state: 'success',
+          statuses: [
+            {
+              context: 'renovate/stability-days',
+              state: 'success',
+            },
+          ],
+        })
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
+        .reply(200, []);
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -1000,8 +1124,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
 
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('red');
     });
 
     it('defaults to pending', async () => {
@@ -1015,8 +1139,8 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('yellow');
     });
 
     it('should fail if a check run has failed', async () => {
@@ -1047,8 +1171,8 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('red');
     });
 
     it('should succeed if no status and all passed check runs', async () => {
@@ -1085,8 +1209,8 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('green');
     });
 
     it('should fail if a check run is pending', async () => {
@@ -1116,8 +1240,8 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('yellow');
     });
   });
 
@@ -1148,7 +1272,7 @@ describe('modules/platform/github/index', () => {
         'renovate/future_branch',
         'context-2'
       );
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('returns null', async () => {
@@ -1198,7 +1322,7 @@ describe('modules/platform/github/index', () => {
           branchName: 'some-branch',
           context: 'some-context',
           description: 'some-description',
-          state: BranchStatus.yellow,
+          state: 'yellow',
           url: 'some-url',
         })
       ).toResolve();
@@ -1242,7 +1366,7 @@ describe('modules/platform/github/index', () => {
           branchName: 'some-branch',
           context: 'some-context',
           description: 'some-description',
-          state: BranchStatus.green,
+          state: 'green',
           url: 'some-url',
         })
       ).toResolve();
@@ -1988,7 +2112,7 @@ describe('modules/platform/github/index', () => {
               repo: { full_name: 'some/repo' },
             },
             title: 'branch a pr',
-            state: PrState.Open,
+            state: 'open',
             user: { login: 'not-me' },
           },
           {
@@ -1998,7 +2122,7 @@ describe('modules/platform/github/index', () => {
               repo: { full_name: 'some/repo' },
             },
             title: 'branch a pr',
-            state: PrState.Open,
+            state: 'open',
             user: { login: 'me' },
           },
         ]);
@@ -2028,14 +2152,14 @@ describe('modules/platform/github/index', () => {
             number: 1,
             head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
             title: 'branch a pr',
-            state: PrState.Closed,
+            state: 'closed',
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.findPr({
         branchName: 'branch-a',
-        state: PrState.NotOpen,
+        state: '!open',
       });
 
       expect(res).toMatchObject({
@@ -2057,10 +2181,10 @@ describe('modules/platform/github/index', () => {
             number: 1,
             head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
             title: 'foo',
-            state: PrState.Closed,
+            state: 'closed',
           },
         ]);
-      await github.initRepo({ repository: 'some/repo' } as never);
+      await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -2082,7 +2206,7 @@ describe('modules/platform/github/index', () => {
             number: 1,
             head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
             title: 'branch a pr',
-            state: PrState.Open,
+            state: 'open',
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
@@ -2098,7 +2222,7 @@ describe('modules/platform/github/index', () => {
       res = await github.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(res).toBeDefined();
       res = await github.findPr({ branchName: 'branch-b' });
@@ -2164,6 +2288,96 @@ describe('modules/platform/github/index', () => {
         draftPR: true,
       });
       expect(pr).toMatchObject({ number: 123 });
+    });
+
+    describe('with forkToken', () => {
+      let scope: httpMock.Scope;
+
+      beforeEach(async () => {
+        scope = httpMock.scope(githubApiHost);
+        forkInitRepoMock(scope, 'some/repo', false);
+        scope.get('/user').reply(200, {
+          login: 'forked',
+        });
+        scope.post('/repos/some/repo/forks').reply(200, {
+          full_name: 'forked/repo',
+          default_branch: 'master',
+        });
+
+        await github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        });
+      });
+
+      it('should allow maintainer edits if explicitly enabled via options', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is set in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR can be edited by maintainers.',
+          labels: null,
+          platformOptions: {
+            forkModeDisallowMaintainerEdits: false,
+          },
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should allow maintainer edits if not explicitly set', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should disallow maintainer edits if explicitly disabled', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === false
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+          platformOptions: {
+            forkModeDisallowMaintainerEdits: true,
+          },
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
     });
 
     describe('automerge', () => {
@@ -2348,8 +2562,7 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).toHaveBeenNthCalledWith(
           11,
-          { prNumber: 123 },
-          'GitHub-native automerge: success'
+          'GitHub-native automerge: success...PrNo: 123'
         );
       });
 
@@ -2417,7 +2630,7 @@ describe('modules/platform/github/index', () => {
               repo: { full_name: 'some/repo' },
             },
             title: 'build(deps): update dependency delay to v4.0.1',
-            state: PrState.Closed,
+            state: 'closed',
             updated_at: '01-09-2022',
           },
           {
@@ -2426,7 +2639,7 @@ describe('modules/platform/github/index', () => {
               ref: 'renovate/jest-monorepo',
               repo: { full_name: 'some/repo' },
             },
-            state: PrState.Open,
+            state: 'open',
             title: 'chore(deps): update dependency jest to v23.6.0',
             updated_at: '01-09-2022',
           },
@@ -2437,7 +2650,6 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({
         number: 2500,
         bodyStruct: { hash: expect.any(String) },
-        displayNumber: 'Pull Request #2500',
         sourceBranch: 'renovate/jest-monorepo',
         sourceRepo: 'some/repo',
         state: 'open',
@@ -2461,14 +2673,14 @@ describe('modules/platform/github/index', () => {
               repo: { full_name: 'some/repo' },
             },
             title: 'chore(deps): update dependency jest to v23.6.0',
-            state: PrState.Closed,
+            state: 'closed',
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
 
       const pr = await github.getPr(2500);
 
-      expect(pr).toMatchObject({ number: 2500, state: PrState.Closed });
+      expect(pr).toMatchObject({ number: 2500, state: 'closed' });
     });
 
     it('should return merged PR', async () => {
@@ -2486,7 +2698,7 @@ describe('modules/platform/github/index', () => {
               repo: { full_name: 'some/repo' },
             },
             title: 'chore(deps): update dependency jest to v23.6.0',
-            state: PrState.Closed,
+            state: 'closed',
             merged_at: DateTime.now().toISO(),
           },
         ]);
@@ -2494,7 +2706,7 @@ describe('modules/platform/github/index', () => {
 
       const pr = await github.getPr(2500);
 
-      expect(pr).toMatchObject({ number: 2500, state: PrState.Merged });
+      expect(pr).toMatchObject({ number: 2500, state: 'merged' });
     });
 
     it('should return null if no PR is returned from GitHub', async () => {
@@ -2523,7 +2735,7 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
           number: 1234,
-          state: PrState.Closed,
+          state: 'closed',
           base: { sha: 'abc' },
           head: { sha: 'def', ref: 'some/branch' },
           merged_at: 'sometime',
@@ -2549,7 +2761,7 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
           number: 1234,
-          state: PrState.Open,
+          state: 'open',
           mergeable_state: 'dirty',
           base: { sha: '1234' },
           head: { ref: 'some/branch' },
@@ -2565,9 +2777,7 @@ describe('modules/platform/github/index', () => {
         bodyStruct: {
           hash: expect.any(String),
         },
-        displayNumber: 'Pull Request #1234',
         hasAssignees: true,
-        hasReviewers: true,
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',
@@ -2587,7 +2797,7 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
           number: 1234,
-          state: PrState.Open,
+          state: 'open',
           base: { sha: '5678' },
           head: { ref: 'some/branch' },
           commits: 1,
@@ -2600,7 +2810,6 @@ describe('modules/platform/github/index', () => {
         bodyStruct: {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        displayNumber: 'Pull Request #1234',
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',
@@ -2630,7 +2839,23 @@ describe('modules/platform/github/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
-        state: PrState.Closed,
+        state: 'closed',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
+
+    it('should update target branch', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: 'closed',
+        targetBranch: 'new_base',
       };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -2654,7 +2879,7 @@ describe('modules/platform/github/index', () => {
             number: 1234,
             base: { sha: '1234' },
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: PrState.Open,
+            state: 'open',
             title: 'Some PR',
           },
         ])
@@ -2670,8 +2895,8 @@ describe('modules/platform/github/index', () => {
       const prAfter = await github.getPr(1234); // obtained from cache
 
       expect(mergeResult).toBeTrue();
-      expect(prBefore?.state).toBe(PrState.Open);
-      expect(prAfter?.state).toBe(PrState.Merged);
+      expect(prBefore?.state).toBe('open');
+      expect(prAfter?.state).toBe('merged');
     });
 
     it('should handle merge error', async () => {
@@ -2680,6 +2905,48 @@ describe('modules/platform/github/index', () => {
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .replyWithError('merge error');
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle merge block', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Required status check "build" is expected.' });
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle approvers required', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
+        message: 'Waiting on code owner review from org/team.',
+      });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1234,
@@ -2853,7 +3120,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },
@@ -2898,7 +3165,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },
@@ -3060,7 +3327,7 @@ describe('modules/platform/github/index', () => {
           files,
         })
       );
-      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
+      git.fetchBranch.mockImplementation(() => Promise.resolve('0abcdef'));
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -3101,7 +3368,6 @@ describe('modules/platform/github/index', () => {
     it('commits and returns SHA string', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(false);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -3113,6 +3379,10 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(200);
 
@@ -3128,7 +3398,6 @@ describe('modules/platform/github/index', () => {
     it('performs rebase', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(true);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -3140,6 +3409,10 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
 
@@ -3150,6 +3423,94 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBe('0abcdef');
+    });
+
+    it('continues if rebase fails due to 422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(422)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+
+    it('aborts if rebase fails due to non-422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it("aborts if commit SHA doesn't exist", async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
     });
   });
 });

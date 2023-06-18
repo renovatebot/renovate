@@ -1,7 +1,7 @@
 // TODO #7154
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
 
@@ -55,12 +55,6 @@ describe('modules/manager/maven/index', () => {
     it('should return package files info', async () => {
       fs.readLocalFile.mockResolvedValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
-      // windows path fix
-      for (const p of packages) {
-        if (p.parent) {
-          p.parent = p.parent.replace(/\\/g, '/');
-        }
-      }
       expect(packages).toMatchObject([
         {
           deps: [
@@ -129,9 +123,88 @@ describe('modules/manager/maven/index', () => {
             },
           ],
           packageFile: 'random.pom.xml',
-          parent: '../pom.xml',
         },
       ]);
+    });
+
+    describe('root pom handling', () => {
+      it('should skip root pom.xml', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>root</artifactId>
+            <version>1.0.0</version>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <parent>
+              <groupId>org.example</groupId>
+              <artifactId>root</artifactId>
+              <version>1.0.0</version>
+            </parent>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>child</artifactId>
+          </project>
+        `);
+        const packages = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'foo.bar/pom.xml',
+        ]);
+        expect(packages).toMatchObject([
+          { packageFile: 'pom.xml', deps: [] },
+          {
+            packageFile: 'foo.bar/pom.xml',
+            deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
+          },
+        ]);
+      });
+
+      it('handles cross-referencing', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>foo</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>bar</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>bar</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>foo</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        const packages = await extractAllPackageFiles({}, [
+          'foo.xml',
+          'bar.xml',
+        ]);
+        expect(packages).toMatchObject([
+          { packageFile: 'foo.xml', deps: [{ depName: 'org.example:bar' }] },
+          { packageFile: 'bar.xml', deps: [{ depName: 'org.example:foo' }] },
+        ]);
+        const [foo, bar] = packages;
+        expect(foo.deps[0].skipReason).toBeUndefined();
+        expect(bar.deps[0].skipReason).toBeUndefined();
+      });
     });
   });
 
@@ -139,14 +212,16 @@ describe('modules/manager/maven/index', () => {
     it('should update an existing dependency', () => {
       const newValue = '9.9.9.9-final';
 
-      const { deps } = extractPackage(pomContent)!;
+      const { deps } = extractPackage(pomContent, 'some-file')!;
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency({
         fileContent: pomContent,
         upgrade,
       })!;
-      const updatedDep = selectDep(extractPackage(updatedContent)!.deps);
+      const updatedDep = selectDep(
+        extractPackage(updatedContent, 'some-file')!.deps
+      );
 
       expect(updatedDep?.currentValue).toEqual(newValue);
     });
@@ -179,7 +254,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should apply props recursively', () => {
       const [{ deps }] = resolveParents([
-        extractPackage(Fixtures.get('recursive_props.pom.xml'))!,
+        extractPackage(Fixtures.get('recursive_props.pom.xml'), 'some-file')!,
       ]);
       expect(deps).toMatchObject([
         {
@@ -191,7 +266,10 @@ describe('modules/manager/maven/index', () => {
 
     it('should apply props multiple times', () => {
       const [{ deps }] = resolveParents([
-        extractPackage(Fixtures.get('multiple_usages_props.pom.xml'))!,
+        extractPackage(
+          Fixtures.get('multiple_usages_props.pom.xml'),
+          'some-file'
+        )!,
       ]);
       expect(deps).toMatchObject([
         {
@@ -203,7 +281,10 @@ describe('modules/manager/maven/index', () => {
 
     it('should detect props infinitely recursing props', () => {
       const [{ deps }] = resolveParents([
-        extractPackage(Fixtures.get('infinite_recursive_props.pom.xml'))!,
+        extractPackage(
+          Fixtures.get('infinite_recursive_props.pom.xml'),
+          'some-file'
+        )!,
       ]);
       expect(deps).toMatchObject([
         {
@@ -244,7 +325,7 @@ describe('modules/manager/maven/index', () => {
     it('should not touch content if new and old versions are equal', () => {
       const newValue = '1.2.3';
 
-      const { deps } = extractPackage(pomContent)!;
+      const { deps } = extractPackage(pomContent, 'some-file')!;
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency({
@@ -315,7 +396,7 @@ describe('modules/manager/maven/index', () => {
       const currentValue = '1.2.2';
       const newValue = '1.2.4';
 
-      const { deps } = extractPackage(pomContent)!;
+      const { deps } = extractPackage(pomContent, 'some-file')!;
       const dep = selectDep(deps);
       const upgrade = { ...dep, currentValue, newValue };
       const updatedContent = updateDependency({
@@ -328,13 +409,14 @@ describe('modules/manager/maven/index', () => {
 
     it('should update ranges', () => {
       const newValue = '[1.2.3]';
-      const select = (depSet: PackageFile) =>
+      const select = (depSet: PackageFileContent) =>
         selectDep(depSet.deps, 'org.example:hard-range');
-      const oldContent = extractPackage(pomContent);
+      const oldContent = extractPackage(pomContent, 'some-file');
       const dep = select(oldContent!);
       const upgrade = { ...dep, newValue };
       const newContent = extractPackage(
-        updateDependency({ fileContent: pomContent, upgrade })!
+        updateDependency({ fileContent: pomContent, upgrade })!,
+        'some-file'
       );
       const newDep = select(newContent!);
       expect(newDep?.currentValue).toEqual(newValue);
@@ -342,9 +424,9 @@ describe('modules/manager/maven/index', () => {
 
     it('should preserve ranges', () => {
       const newValue = '[1.0.0]';
-      const select = (depSet: PackageFile) =>
+      const select = (depSet: PackageFileContent) =>
         depSet?.deps ? selectDep(depSet.deps, 'org.example:hard-range') : null;
-      const oldContent = extractPackage(pomContent);
+      const oldContent = extractPackage(pomContent, 'some-file');
       const dep = select(oldContent!);
       expect(dep).not.toBeNull();
       const upgrade = { ...dep, newValue };

@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
@@ -9,7 +9,8 @@ import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { Limit, setMaxLimit } from './limits';
+import { initMergeConfidence } from '../../util/merge-confidence';
+import { setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -45,7 +46,7 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
 function limitCommitsPerRun(config: RenovateConfig): void {
   let limit = config.prCommitsPerRunLimit;
   limit = typeof limit === 'number' && limit > 0 ? limit : null;
-  setMaxLimit(Limit.Commits, limit);
+  setMaxLimit('Commits', limit);
 }
 
 async function checkVersions(): Promise<void> {
@@ -74,6 +75,7 @@ export async function globalInitialize(
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   setGlobalHostRules(config);
+  await initMergeConfidence();
   return config;
 }
 

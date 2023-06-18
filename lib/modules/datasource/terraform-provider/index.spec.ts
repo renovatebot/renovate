@@ -5,7 +5,9 @@ import { TerraformProviderDatasource } from '.';
 
 const azurermData = Fixtures.get('azurerm-provider.json');
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
-const hashicorpReleases = Fixtures.get('releaseBackendIndex.json');
+const hashicorpGoogleBetaReleases = Fixtures.get(
+  'releaseBackendIndexGoogleBeta.json'
+);
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const telmateProxmocVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json'
@@ -24,11 +26,14 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(200, {})
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
-      httpMock.scope(secondaryUrl).get('/index.json').reply(200, {});
+      httpMock
+        .scope(secondaryUrl)
+        .get('/terraform-provider-azurerm/index.json')
+        .reply(200, {});
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });
@@ -40,11 +45,14 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(404)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
-      httpMock.scope(secondaryUrl).get('/index.json').reply(404);
+      httpMock
+        .scope(secondaryUrl)
+        .get('/terraform-provider-azurerm/index.json')
+        .reply(404);
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });
@@ -56,11 +64,14 @@ describe('modules/datasource/terraform-provider/index', () => {
         .replyWithError('')
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
-      httpMock.scope(secondaryUrl).get('/index.json').replyWithError('');
+      httpMock
+        .scope(secondaryUrl)
+        .get('/terraform-provider-azurerm/index.json')
+        .replyWithError('');
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });
@@ -74,7 +85,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'azurerm',
+        packageName: 'azurerm',
       });
       expect(res).toEqual({
         homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
@@ -103,7 +114,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
         })
       ).toBeNull();
@@ -119,7 +130,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
         })
       ).toBeNull();
@@ -135,7 +146,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
         })
       ).toBeNull();
@@ -150,7 +161,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'azure',
         packageName: 'hashicorp/azurerm',
         registryUrls: ['https://registry.company.com'],
       });
@@ -181,12 +191,12 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(200, serviceDiscoveryResult);
       httpMock
         .scope(secondaryUrl)
-        .get('/index.json')
-        .reply(200, hashicorpReleases);
+        .get('/terraform-provider-google-beta/index.json')
+        .reply(200, hashicorpGoogleBetaReleases);
 
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'google-beta',
+        packageName: 'google-beta',
       });
       expect(res).toEqual({
         registryUrl: 'https://releases.hashicorp.com',
@@ -215,22 +225,28 @@ describe('modules/datasource/terraform-provider/index', () => {
         })
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
-      httpMock.scope(secondaryUrl).get('/index.json').reply(404);
+      httpMock
+        .scope(secondaryUrl)
+        .get('/terraform-provider-datadog/index.json')
+        .reply(404);
 
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'datadog',
+        packageName: 'datadog',
       });
       expect(res).toBeNull();
     });
 
     it('returns null for error in service discovery', async () => {
       httpMock.scope(primaryUrl).get('/.well-known/terraform.json').reply(404);
-      httpMock.scope(secondaryUrl).get('/index.json').replyWithError('');
+      httpMock
+        .scope(secondaryUrl)
+        .get('/terraform-provider-azurerm/index.json')
+        .replyWithError('');
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });

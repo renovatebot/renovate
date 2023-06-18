@@ -69,6 +69,10 @@ terraform {
       source  = "terraform.example.com/hashicorp/kubernetes"
       version = ">= 1.0"
     }
+    oci = {
+      source  = "terraform-company_special.example.com/oracle/oci"
+      version = ">= 4.0"
+    }
   }
   required_version = ">= 0.13"
 }

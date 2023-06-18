@@ -1,73 +1,8 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { extractPackageFile } from '.';
-
-const configNormal = `
-plugin "foo" {
-  enabled = true
-  version = "0.1.0"
-  source  = "github.com/org/tflint-ruleset-foo"
-}
-
-plugin "bar" {
-  enabled = true
-  version = "1.42.0"
-  source  = "github.com/org2/tflint-ruleset-bar"
-}
-`;
-
-const configNoVersion = `
-plugin "bundled" {}
-`;
-
-const configFull = `
-config {
-  format = "compact"
-  plugin_dir = "~/.tflint.d/plugins"
-
-  module = true
-  force = false
-  disabled_by_default = false
-
-  ignore_module = {
-    "terraform-aws-modules/vpc/aws"            = true
-    "terraform-aws-modules/security-group/aws" = true
-  }
-
-  varfile = ["example1.tfvars", "example2.tfvars"]
-}
-
-plugin "aws" {
-  enabled = true
-  version = "0.4.0"
-  source  = "github.com/terraform-linters/tflint-ruleset-aws"
-}
-
-rule "aws_instance_invalid_type" {
-  enabled = false
-}
-`;
-
-const noSource = `
-plugin "aws" {
-  enabled = true
-  version = "0.4.0"
-}
-
-plugin "bundled" {
-  # A bundled plugin, probably.
-  enabled = true
-}
-`;
-
-const notGithub = `
-plugin "aws" {
-  enabled = true
-  version = "0.4.0"
-  source  = "gitlab.com/terraform-linters/tflint-ruleset-aws"
-}
-`;
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
@@ -91,12 +26,29 @@ describe('modules/manager/tflint-plugin/extract', () => {
     });
 
     it('returns null when there are no version', () => {
+      const configNoVersion = codeBlock`
+        plugin "bundled" {}
+      `;
+
       expect(
         extractPackageFile(configNoVersion, 'doesnt-exist.hcl', {})
       ).toBeNull();
     });
 
     it('extracts plugins', () => {
+      const configNormal = codeBlock`
+        plugin "foo" {
+          enabled = true
+          version = "0.1.0"
+          source  = "github.com/org/tflint-ruleset-foo"
+        }
+
+        plugin "bar" {
+          enabled = true
+          version = "1.42.0"
+          source  = "github.com/org2/tflint-ruleset-bar"
+        }
+      `;
       const res = extractPackageFile(configNormal, 'tflint-1.hcl', {});
       expect(res).toEqual({
         deps: [
@@ -117,6 +69,33 @@ describe('modules/manager/tflint-plugin/extract', () => {
     });
 
     it('extracts from full configuration', () => {
+      const configFull = codeBlock`
+        config {
+          format = "compact"
+          plugin_dir = "~/.tflint.d/plugins"
+
+          module = true
+          force = false
+          disabled_by_default = false
+
+          ignore_module = {
+            "terraform-aws-modules/vpc/aws"            = true
+            "terraform-aws-modules/security-group/aws" = true
+          }
+
+          varfile = ["example1.tfvars", "example2.tfvars"]
+        }
+
+        plugin "aws" {
+          enabled = true
+          version = "0.4.0"
+          source  = "github.com/terraform-linters/tflint-ruleset-aws"
+        }
+
+        rule "aws_instance_invalid_type" {
+          enabled = false
+        }
+      `;
       const res = extractPackageFile(configFull, 'tflint-full.hcl', {});
       expect(res).toEqual({
         deps: [
@@ -131,6 +110,18 @@ describe('modules/manager/tflint-plugin/extract', () => {
     });
 
     it('extracts no source', () => {
+      const noSource = codeBlock`
+        plugin "aws" {
+          enabled = true
+          version = "0.4.0"
+        }
+
+        plugin "bundled" {
+          # A bundled plugin, probably.
+          enabled = true
+        }
+      `;
+
       const res = extractPackageFile(noSource, 'tflint-no-source.hcl', {});
       expect(res).toEqual({
         deps: [
@@ -145,6 +136,13 @@ describe('modules/manager/tflint-plugin/extract', () => {
     });
 
     it('extracts nothing if not from github', () => {
+      const notGithub = codeBlock`
+        plugin "aws" {
+          enabled = true
+          version = "0.4.0"
+          source  = "gitlab.com/terraform-linters/tflint-ruleset-aws"
+        }
+      `;
       const res = extractPackageFile(notGithub, 'tflint-not-github.hcl', {});
       expect(res).toEqual({
         deps: [

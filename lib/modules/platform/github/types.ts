@@ -26,6 +26,7 @@ export interface GhRestRepo {
   owner: {
     login: string;
   };
+  archived: boolean;
 }
 
 export interface GhRestPr {
@@ -41,6 +42,7 @@ export interface GhRestPr {
     repo: {
       pushed_at?: string;
     };
+    ref: string;
   };
   mergeable_state: string;
   number: number;

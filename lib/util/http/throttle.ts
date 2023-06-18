@@ -5,7 +5,7 @@ import { getThrottleIntervalMs } from './host-rules';
 
 const hostThrottles = new Map<string, Throttle | null>();
 
-class Throttle {
+export class Throttle {
   private throttle: ReturnType<typeof pThrottle>;
 
   constructor(interval: number) {
@@ -26,7 +26,7 @@ export function getThrottle(url: string): Throttle | null {
   const host = parseUrl(url)?.host;
   if (!host) {
     // should never happen
-    logger.debug({ url }, 'No host');
+    logger.debug(`No host on ${url}`);
     return null;
   }
 
@@ -36,7 +36,7 @@ export function getThrottle(url: string): Throttle | null {
     const throttleOptions = getThrottleIntervalMs(url);
     if (throttleOptions) {
       const intervalMs = throttleOptions;
-      logger.debug({ intervalMs, host }, 'Using throttle');
+      logger.debug(`Using throttle ${intervalMs} intervalMs for host ${host}`);
       throttle = new Throttle(intervalMs);
     } else {
       logger.trace({ host }, 'No throttle');

@@ -19,6 +19,7 @@ export async function updateArtifacts({
   packageFileName,
   updatedDeps,
   newPackageFileContent,
+  config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`mix.getArtifacts(${packageFileName})`);
   if (updatedDeps.length < 1) {
@@ -75,17 +76,16 @@ export async function updateArtifacts({
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     toolConstraints: [
       {
         toolName: 'erlang',
-        // https://hexdocs.pm/elixir/1.13.4/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: '^24',
+        // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
+        constraint: config.constraints?.erlang ?? '^26',
       },
       {
         toolName: 'elixir',
+        constraint: config.constraints?.elixir,
       },
     ],
     preCommands,

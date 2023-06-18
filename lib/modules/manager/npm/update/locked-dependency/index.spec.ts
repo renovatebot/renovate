@@ -1,7 +1,6 @@
 import { updateLockedDependency } from '../..';
 import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
-import { clone } from '../../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 
 const packageFileContent = Fixtures.get('package.json', './package-lock');
@@ -114,7 +113,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
     });
 
     it('fails to remediate if parent dep cannot support', async () => {
-      const acceptsModified = clone(acceptsJson);
+      const acceptsModified = structuredClone(acceptsJson);
       acceptsModified.versions['2.0.0'] = {};
       httpMock
         .scope('https://registry.npmjs.org')

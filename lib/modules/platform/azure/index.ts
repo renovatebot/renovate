@@ -16,7 +16,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -83,6 +83,8 @@ const defaults: {
   hostType: 'azure',
 };
 
+export const id = 'azure';
+
 export function initPlatform({
   endpoint,
   token,
@@ -141,7 +143,7 @@ export async function getRawFile(
 
   const versionDescriptor: GitVersionDescriptor = {
     version: branchOrTag,
-  } as GitVersionDescriptor;
+  } satisfies GitVersionDescriptor;
 
   const buf = await azureApiGit.getItemContent(
     repoId,
@@ -260,7 +262,7 @@ export async function getPrList(): Promise<AzurePr[]> {
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(getRenovatePRFormat);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
   }
   return config.prList;
 }
@@ -288,14 +290,13 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     .filter((label) => label.active)
     .map((label) => label.name)
     .filter(is.string);
-  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
 
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
@@ -306,15 +307,17 @@ export async function findPr({
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+      );
     }
 
     switch (state) {
-      case PrState.All:
+      case 'all':
         // no more filter needed, we can go further...
         break;
-      case PrState.NotOpen:
-        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
+      case '!open':
+        prsFiltered = prsFiltered.filter((item) => item.state !== 'open');
         break;
       default:
         prsFiltered = prsFiltered.filter((item) => item.state === state);
@@ -333,7 +336,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -359,12 +362,12 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
 }
 
 const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
-  [GitStatusState.Succeeded]: BranchStatus.green,
-  [GitStatusState.NotApplicable]: BranchStatus.green,
-  [GitStatusState.NotSet]: BranchStatus.yellow,
-  [GitStatusState.Pending]: BranchStatus.yellow,
-  [GitStatusState.Error]: BranchStatus.red,
-  [GitStatusState.Failed]: BranchStatus.red,
+  [GitStatusState.Succeeded]: 'green',
+  [GitStatusState.NotApplicable]: 'green',
+  [GitStatusState.NotSet]: 'yellow',
+  [GitStatusState.Pending]: 'yellow',
+  [GitStatusState.Error]: 'red',
+  [GitStatusState.Failed]: 'red',
 };
 
 export async function getBranchStatusCheck(
@@ -375,39 +378,53 @@ export async function getBranchStatusCheck(
   for (const check of res) {
     if (getGitStatusContextCombinedName(check.context) === context) {
       // TODO #7154
-      return azureToRenovateStatusMapping[check.state!] ?? BranchStatus.yellow;
+      return azureToRenovateStatusMapping[check.state!] ?? 'yellow';
     }
   }
   return null;
 }
 
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatusCheck(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   const noOfFailures = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.Error ||
       status.state === GitStatusState.Failed
   ).length;
   if (noOfFailures) {
-    return BranchStatus.red;
+    return 'red';
   }
   const noOfPending = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.NotSet ||
       status.state === GitStatusState.Pending
   ).length;
   if (noOfPending) {
-    return BranchStatus.yellow;
+    return 'yellow';
   }
-  return BranchStatus.green;
+  if (
+    !internalChecksAsSuccess &&
+    statuses.every(
+      (status) =>
+        status.state === GitStatusState.Succeeded &&
+        status.context?.genre === 'renovate'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
+    return 'yellow';
+  }
+  return 'green';
 }
 
 export async function createPr({
@@ -457,7 +474,7 @@ export async function createPr({
       pr.pullRequestId!
     );
   }
-  if (platformOptions?.azureAutoApprove) {
+  if (platformOptions?.autoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
@@ -491,6 +508,7 @@ export async function updatePr({
   prTitle: title,
   prBody: body,
   state,
+  platformOptions,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -503,14 +521,29 @@ export async function updatePr({
     objToUpdate.description = max4000Chars(sanitize(body));
   }
 
-  if (state === PrState.Open) {
+  if (state === 'open') {
     await azureApiGit.updatePullRequest(
       { status: PullRequestStatus.Active },
       config.repoId,
       prNo
     );
-  } else if (state === PrState.Closed) {
+  } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
+  }
+  if (platformOptions?.autoApprove) {
+    const pr = await azureApiGit.getPullRequestById(prNo, config.project);
+    await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy!.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      // TODO #7154
+      pr.pullRequestId!,
+      pr.createdBy!.id!
+    );
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
@@ -623,10 +656,9 @@ export async function ensureCommentRemoval(
 }
 
 const renovateToAzureStatusMapping: Record<BranchStatus, GitStatusState> = {
-  [BranchStatus.green]: [GitStatusState.Succeeded],
-  [BranchStatus.green]: GitStatusState.Succeeded,
-  [BranchStatus.yellow]: GitStatusState.Pending,
-  [BranchStatus.red]: GitStatusState.Failed,
+  ['green']: GitStatusState.Succeeded,
+  ['yellow']: GitStatusState.Pending,
+  ['red']: GitStatusState.Failed,
 };
 
 export async function setBranchStatus({
@@ -744,6 +776,10 @@ export function massageMarkdown(input: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -894,8 +930,4 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }

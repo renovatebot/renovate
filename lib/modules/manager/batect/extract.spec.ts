@@ -78,7 +78,7 @@ describe('modules/manager/batect/extract', () => {
 
       // TODO: #7154
       expect(
-        result?.sort((a, b) => a.packageFile!.localeCompare(b.packageFile!))
+        result?.sort((a, b) => a.packageFile.localeCompare(b.packageFile))
       ).toEqual([
         {
           packageFile: `${fixturesDir}/valid/another-include.yml`,

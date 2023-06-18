@@ -5,7 +5,7 @@ For example, if you want to reference a tag like `module-v1.2.5`, a block like t
 
 ```json
 {
-  "terraform": {
+  "terragrunt": {
     "versioning": "regex:^((?<compatibility>.*)-v|v*)(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
   }
 }
@@ -18,3 +18,8 @@ terraform {
   source = "github.com/hashicorp/example?ref=v1.0.0"
 }
 ```
+
+### Terraform lockfiles
+
+The Terragrunt manager supports [lock file maintenance](https://docs.renovatebot.com/configuration-options/#lockfilemaintenance) for `.terraform.lock.hcl` artifacts.
+These artifacts will be updated if and only if the update type is `lockFileMaintenance`.

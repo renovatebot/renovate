@@ -41,8 +41,18 @@ module.exports = {
     ],
     'import/prefer-default-export': 0, // no benefit
 
+    'import/no-cycle': 2, // cycles don't work when moving to esm
+
+    /*
+     * This rule is not needed since the project uses typescript and the rule
+     * `@typescript-eslint/explicit-function-return-type`.
+     *
+     * Any non-exhaustive definition of the function will therefore result in a
+     * typescript TS2366 error.
+     */
+    'consistent-return': 0,
+
     // other rules
-    'consistent-return': 'error',
     eqeqeq: 'error',
     'no-console': 'error',
     'no-negated-condition': 'error',
@@ -127,7 +137,7 @@ module.exports = {
       },
     ],
 
-    '@typescript-eslint/unbound-method': 2,
+    '@typescript-eslint/unbound-method': [2, { ignoreStatic: true }],
     '@typescript-eslint/ban-types': 2,
     '@renovate/jest-root-describe': 2,
 
@@ -198,6 +208,7 @@ module.exports = {
           'error',
           { devDependencies: true },
         ],
+        'no-console': 'off',
       },
     },
     {

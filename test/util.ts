@@ -1,15 +1,16 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { expect, jest } from '@jest/globals';
 import type { Plugin } from 'pretty-format';
 import upath from 'upath';
-import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
 import { Platform, platform as _platform } from '../lib/modules/platform';
+import { scm as _scm } from '../lib/modules/platform/scm';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
+import { regEx } from '../lib/util/regex';
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -33,9 +34,10 @@ export function mockedFunction<T extends (...args: any[]) => any>(
  * Simply wrapper to create partial mocks.
  * @param obj Object to cast to final type
  */
+export function partial<T>(): T;
 export function partial<T>(obj: Partial<T>): T;
 export function partial<T>(obj: Partial<T>[]): T[];
-export function partial(obj: unknown): unknown {
+export function partial(obj: unknown = {}): unknown {
   return obj;
 }
 
@@ -44,13 +46,12 @@ export const git = mocked(_git);
 
 // TODO: fix types, jest / typescript is using wrong overload (#7154)
 export const platform = mocked(partial<Required<Platform>>(_platform));
+export const scm = mocked(_scm);
 export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);
 export const logger = mocked(_logger);
 
 export type { RenovateConfig };
-
-export { getConfig };
 
 function getCallerFileName(): string | null {
   let result: string | null = null;
@@ -68,7 +69,7 @@ function getCallerFileName(): string | null {
 
     let currentFile: string | null = null;
     for (const frame of stack) {
-      const fileName = frame.getFileName();
+      const fileName = frame.getFileName() ?? null;
       if (!currentFile) {
         currentFile = fileName;
       } else if (currentFile !== fileName) {
@@ -127,4 +128,11 @@ const bufferSerializer: Plugin = {
 
 export function addBufferSerializer(): void {
   expect.addSnapshotSerializer(bufferSerializer);
+}
+
+export function regexMatches(target: string, patterns: string[]): boolean {
+  return patterns.some((patt: string) => {
+    const re = regEx(patt);
+    return re.test(target);
+  });
 }

@@ -5,23 +5,29 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  findUpLocal,
-  getFileContentMap,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
-import { getFileList, getRepoStatus } from '../../../util/git';
+import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
+import { getFiles, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
+import { scm } from '../../platform/scm';
 import {
   extraEnv,
   extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
+  nullRedirectionCommand,
   prepareGradleCommand,
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import {
+  isGcvLockFile,
+  isGcvPropsFile,
+} from './extract/consistent-versions-plugin';
 import { isGradleBuildFile } from './utils';
+
+// .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
+function isLockFile(fileName: string): boolean {
+  return fileName.endsWith('.lockfile') || isGcvLockFile(fileName);
+}
 
 async function getUpdatedLockfiles(
   oldLockFileContentMap: Record<string, string | null>
@@ -31,7 +37,7 @@ async function getUpdatedLockfiles(
   const status = await getRepoStatus();
 
   for (const modifiedFile of status.modified) {
-    if (modifiedFile.endsWith('.lockfile')) {
+    if (isLockFile(modifiedFile)) {
       const newContent = await readLocalFile(modifiedFile, 'utf8');
       if (oldLockFileContentMap[modifiedFile] !== newContent) {
         res.push({
@@ -89,8 +95,8 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gradle.updateArtifacts(${packageFileName})`);
 
-  const fileList = await getFileList();
-  const lockFiles = fileList.filter((file) => file.endsWith('.lockfile'));
+  const fileList = await scm.getFileList();
+  const lockFiles = fileList.filter((file) => isLockFile(file));
   if (!lockFiles.length) {
     logger.debug('No Gradle dependency lockfiles found - skipping update');
     return null;
@@ -119,17 +125,13 @@ export async function updateArtifacts({
   logger.debug('Updating found Gradle dependency lockfiles');
 
   try {
-    const oldLockFileContentMap = await getFileContentMap(lockFiles);
-
-    await writeLocalFile(packageFileName, newPackageFileContent);
+    const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
     let cmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       extraEnv,
       toolConstraints: [
         {
@@ -147,7 +149,7 @@ export async function updateArtifacts({
       .map(quote)
       .join(' ')}`;
 
-    if (config.isLockFileMaintenance) {
+    if (config.isLockFileMaintenance || isGcvPropsFile(packageFileName)) {
       cmd += ' --write-locks';
     } else {
       const updatedDepNames = updatedDeps
@@ -157,6 +159,15 @@ export async function updateArtifacts({
       cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
 
+    // `./gradlew :dependencies` command can output huge text due to `:dependencies`
+    // that renders dependency graphs. Given the output can exceed `ExecOptions.maxBuffer` size,
+    // drop stdout from the command.
+    //
+    // Note: Windows without docker doesn't supported this yet
+    const nullRedirection = nullRedirectionCommand();
+    cmd += nullRedirection;
+
+    await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(cmd, execOptions);
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);

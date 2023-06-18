@@ -123,7 +123,7 @@ You should now be able to pick `renovate` under in the field `service` field.
 
 ![service picker](../assets/images/opentelemetry_pick_service.png)
 
-Press `Find Traces` to search for all Renovate traces and then click on one of the found traces to open the trace view.
+Select `Find Traces` to search for all Renovate traces and then select one of the found traces to open the trace view.
 
 ![pick trace](../assets/images/opentelemetry_choose_trace.png)
 

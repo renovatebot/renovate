@@ -7,10 +7,6 @@ afterAll(disableInstrumentations);
 describe('instrumentation/decorator', () => {
   const spy = jest.fn(() => Promise.resolve());
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should instrument async function', async () => {
     class MyClass {
       @instrument({ name: 'getNumber' })

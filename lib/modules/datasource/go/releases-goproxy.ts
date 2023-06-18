@@ -14,6 +14,8 @@ import type { GoproxyItem, VersionInfo } from './types';
 
 const parsedGoproxy: Record<string, GoproxyItem[]> = {};
 
+const modRegex = regEx(`^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\\d+))?$`);
+
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
 
@@ -30,8 +32,10 @@ export class GoProxyDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-
-    const goproxy = process.env.GOPROXY;
+    const goproxy = process.env.GOPROXY ?? 'https://proxy.golang.org,direct';
+    if (goproxy === 'direct') {
+      return this.direct.getReleases(config);
+    }
     const proxyList = this.parseGoproxy(goproxy);
     const noproxy = GoProxyDatasource.parseNoproxy();
 
@@ -43,6 +47,12 @@ export class GoProxyDatasource extends Datasource {
       return result;
     }
 
+    const isGopkgin = packageName.startsWith('gopkg.in/');
+    const majorSuffixSeparator = isGopkgin ? '.' : '/';
+    const modParts = packageName.match(modRegex);
+    const baseMod = modParts?.groups?.baseMod ?? packageName;
+    const currentMajor = parseInt(modParts?.groups?.majorVersion ?? '0');
+
     for (const { url, fallback } of proxyList) {
       try {
         if (url === 'off') {
@@ -52,27 +62,37 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const releasesIndex = await this.listVersions(url, packageName);
-        const releases = await p.map(releasesIndex, async (versionInfo) => {
-          const { version, releaseTimestamp } = versionInfo;
-
-          if (releaseTimestamp) {
-            return { version, releaseTimestamp };
-          }
-
+        const releases: Release[] = [];
+        for (let i = 0; ; i++) {
           try {
-            return await this.versionInfo(url, packageName, version);
+            const major = currentMajor + i;
+            let mod: string;
+            if (major < 2 && !isGopkgin) {
+              mod = baseMod;
+              i++; // v0 and v1 are the same module
+            } else {
+              mod = `${baseMod}${majorSuffixSeparator}v${major}`;
+            }
+            const result = await this.getVersionsWithInfo(url, mod);
+            if (result.length === 0) {
+              break;
+            }
+            releases.push(...result);
           } catch (err) {
-            logger.trace({ err }, `Can't obtain data from ${url}`);
-            return { version };
+            const statusCode = err?.response?.statusCode;
+            if (i > 0 && statusCode === 404) {
+              break;
+            }
+            throw err;
           }
-        });
+        }
+
         if (releases.length) {
           try {
             const datasource = await BaseGoDatasource.getDatasource(
               packageName
             );
-            const sourceUrl = getSourceUrl(datasource);
+            const sourceUrl = getSourceUrl(datasource) ?? null;
             result = { releases, sourceUrl };
           } catch (err) {
             logger.trace({ err }, `Can't get datasource for ${packageName}`);
@@ -141,11 +161,11 @@ export class GoProxyDatasource extends Datasource {
       },
       asterisk: {
         match: '*',
-        value: (_: string) => '[^\\/]*',
+        value: (_: string) => '[^/]*',
       },
       qmark: {
         match: '?',
-        value: (_: string) => '[^\\/]',
+        value: (_: string) => '[^/]',
       },
       characterRangeOpen: {
         match: '[',
@@ -238,6 +258,28 @@ export class GoProxyDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  async getVersionsWithInfo(
+    baseUrl: string,
+    packageName: string
+  ): Promise<Release[]> {
+    const releasesIndex = await this.listVersions(baseUrl, packageName);
+    const releases = await p.map(releasesIndex, async (versionInfo) => {
+      const { version, releaseTimestamp } = versionInfo;
+
+      if (releaseTimestamp) {
+        return { version, releaseTimestamp };
+      }
+
+      try {
+        return await this.versionInfo(baseUrl, packageName, version);
+      } catch (err) {
+        logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
+        return { version };
+      }
+    });
+    return releases;
   }
 
   static getCacheKey({ packageName }: GetReleasesConfig): string {

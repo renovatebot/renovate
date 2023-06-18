@@ -3,100 +3,25 @@ import * as monorepos from './monorepo';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 const staticGroups = {
   all: {
     description: 'Group all updates together.',
     groupName: 'all dependencies',
-    separateMajorMinor: false,
     groupSlug: 'all',
-    packageRules: [
-      {
-        matchPackagePatterns: ['*'],
-        groupName: 'all dependencies',
-        groupSlug: 'all',
-      },
-    ],
     lockFileMaintenance: {
       enabled: false,
     },
-  },
-  allNonMajor: {
-    description: 'Group all `minor` and `patch` updates together.',
     packageRules: [
       {
+        groupName: 'all dependencies',
+        groupSlug: 'all',
         matchPackagePatterns: ['*'],
-        matchUpdateTypes: ['minor', 'patch'],
-        groupName: 'all non-major dependencies',
-        groupSlug: 'all-minor-patch',
       },
     ],
-  },
-  nodeJs: {
-    description:
-      "Group anything that looks like Node.js together so that it's updated together.",
-    packageRules: [
-      {
-        matchDatasources: ['docker'],
-        matchPackageNames: ['node'],
-        matchPackagePatterns: ['/node$'],
-        excludePackageNames: ['calico/node', 'kindest/node'],
-        commitMessageTopic: 'Node.js',
-      },
-    ],
-  },
-  recommended: {
-    description:
-      'Use curated list of recommended non-monorepo package groupings.',
-    extends: [
-      'group:nodeJs',
-      'group:allApollographql',
-      'group:codemirror',
-      'group:fortawesome',
-      'group:fusionjs',
-      'group:glimmer',
-      'group:goOpenapi',
-      'group:hibernateCore',
-      'group:hibernateValidator',
-      'group:hibernateOgm',
-      'group:hibernateCommons',
-      'group:illuminate',
-      'group:jekyllEcosystem',
-      'group:jestPlusTSJest',
-      'group:jestPlusTypes',
-      'group:jwtFramework',
-      'group:kubernetes',
-      'group:phpstan',
-      'group:polymer',
-      'group:resilience4j',
-      'group:rubyOnRails',
-      'group:rubyOmniauth',
-      'group:socketio',
-      'group:springAmqp',
-      'group:springAndroid',
-      'group:springBatch',
-      'group:springBoot',
-      'group:springCloud',
-      'group:springCore',
-      'group:springData',
-      'group:springHateoas',
-      'group:springIntegration',
-      'group:springKafka',
-      'group:springLdap',
-      'group:springMobile',
-      'group:springOsgi',
-      'group:springRestDocs',
-      'group:springRoo',
-      'group:springScala',
-      'group:springSecurity',
-      'group:springSession',
-      'group:springShell',
-      'group:springSocial',
-      'group:springStatemachine',
-      'group:springWebflow',
-      'group:springWs',
-      'group:symfony',
-    ],
-    ignoreDeps: [],
+
+    separateMajorMinor: false,
   },
   allApollographql: {
     description: 'Group all packages published by Apollo GraphQL together.',
@@ -104,6 +29,17 @@ const staticGroups = {
       {
         extends: 'packages:apollographql',
         groupName: 'Apollo GraphQL packages',
+      },
+    ],
+  },
+  allNonMajor: {
+    description: 'Group all `minor` and `patch` updates together.',
+    packageRules: [
+      {
+        groupName: 'all non-major dependencies',
+        groupSlug: 'all-minor-patch',
+        matchPackagePatterns: ['*'],
+        matchUpdateTypes: ['minor', 'patch'],
       },
     ],
   },
@@ -129,9 +65,9 @@ const staticGroups = {
     description: '.NET Core Docker containers.',
     packageRules: [
       {
+        groupName: '.NET Core Docker containers',
         matchDatasources: ['docker'],
         matchPackagePrefixes: ['mcr.microsoft.com/dotnet/'],
-        groupName: '.NET Core Docker containers',
       },
     ],
   },
@@ -164,23 +100,211 @@ const staticGroups = {
       },
     ],
   },
+  googleapis: {
+    description: 'Group `googleapis` packages together.',
+    packageRules: [
+      {
+        extends: 'packages:googleapis',
+        groupName: 'googleapis packages',
+      },
+    ],
+  },
+  goOpenapi: {
+    description: 'Group `go-openapi` packages together.',
+    packageRules: [
+      {
+        groupName: 'go-openapi packages',
+        groupSlug: 'go-openapi',
+        matchDatasources: ['go'],
+        matchPackagePrefixes: ['github.com/go-openapi/'],
+      },
+    ],
+  },
+  hibernateCommons: {
+    description: 'Group Java Hibernate Commons packages.',
+    packageRules: [
+      {
+        groupName: 'hibernate commons',
+        matchPackagePrefixes: ['org.hibernate.common:'],
+      },
+    ],
+  },
+  hibernateCore: {
+    description: 'Group Java Hibernate Core packages.',
+    packageRules: [
+      {
+        groupName: 'hibernate core',
+        matchPackagePrefixes: ['org.hibernate:'],
+      },
+    ],
+  },
+  hibernateOgm: {
+    description: 'Group Java Hibernate OGM packages.',
+    packageRules: [
+      {
+        groupName: 'hibernate ogm',
+        matchPackagePrefixes: ['org.hibernate.ogm:'],
+      },
+    ],
+  },
+  hibernateValidator: {
+    description: 'Group Java Hibernate Validator packages.',
+    packageRules: [
+      {
+        groupName: 'hibernate validator',
+        matchPackagePrefixes: ['org.hibernate.validator:'],
+      },
+    ],
+  },
   illuminate: {
     description: 'Group PHP Illuminate packages together.',
     packageRules: [
       {
-        matchPackagePrefixes: ['illuminate/'],
         groupName: 'illuminate packages',
         groupSlug: 'illuminate',
+        matchPackagePrefixes: ['illuminate/'],
       },
     ],
   },
-  symfony: {
-    description: 'Group PHP Symfony packages together.',
+  jekyllEcosystem: {
+    description: 'Group Jekyll and related Ruby packages together.',
     packageRules: [
       {
-        matchPackagePrefixes: ['symfony/'],
-        groupName: 'symfony packages',
-        groupSlug: 'symfony',
+        groupName: 'jekyll ecosystem packages',
+        matchSourceUrlPrefixes: [
+          'https://github.com/jekyll/',
+          'https://github.com/github/pages-gem',
+        ],
+      },
+    ],
+  },
+  jestPlusTSJest: {
+    description: 'Add `ts-jest` `major` update to Jest monorepo.',
+    packageRules: [
+      {
+        groupName: 'jest monorepo',
+        matchSourceUrls: ['https://github.com/kulshekhar/ts-jest'],
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
+  jestPlusTypes: {
+    description: 'Add `@types/jest` update to Jest monorepo.',
+    packageRules: [
+      {
+        groupName: 'jest monorepo',
+        matchPackageNames: ['@types/jest'],
+        matchUpdateTypes: nonPinUpdateTypes,
+      },
+    ],
+  },
+  jsTest: {
+    description: 'Group JS test packages together.',
+    packageRules: [
+      {
+        extends: 'packages:jsTest',
+        groupName: 'JS test packages',
+      },
+    ],
+  },
+  jsTestNonMajor: {
+    description: 'Group non-major JS test package updates together.',
+    packageRules: [
+      {
+        extends: 'packages:jsTest',
+        groupName: 'JS test packages',
+        matchUpdateTypes: ['minor', 'patch'],
+      },
+    ],
+  },
+  jsUnitTest: {
+    description: 'Group JavaScript unit test packages together.',
+    packageRules: [
+      {
+        extends: 'packages:jsUnitTest',
+        groupName: 'JS unit test packages',
+      },
+    ],
+  },
+  jsUnitTestNonMajor: {
+    description:
+      'Group JavaScipt unit test packages together for non-major updates.',
+    packageRules: [
+      {
+        extends: 'packages:jsUnitTest',
+        groupName: 'JS unit test packages',
+        matchUpdateTypes: ['minor', 'patch'],
+      },
+    ],
+  },
+  jwtFramework: {
+    description: 'Group JWT Framework packages together.',
+    packageRules: [
+      {
+        groupName: 'JWT Framework packages',
+        matchDatasources: ['packagist'],
+        matchPackagePrefixes: ['web-token/'],
+      },
+    ],
+  },
+  kubernetes: {
+    description: 'Group Kubernetes packages together.',
+    packageRules: [
+      {
+        groupName: 'kubernetes packages',
+        groupSlug: 'kubernetes-go',
+        matchDatasources: ['go'],
+        matchPackagePrefixes: [
+          'k8s.io/api',
+          'k8s.io/apiextensions-apiserver',
+          'k8s.io/apimachinery',
+          'k8s.io/apiserver',
+          'k8s.io/cli-runtime',
+          'k8s.io/client-go',
+          'k8s.io/cloud-provider',
+          'k8s.io/cluster-bootstrap',
+          'k8s.io/code-generator',
+          'k8s.io/component-base',
+          'k8s.io/controller-manager',
+          'k8s.io/cri-api',
+          // 'k8s.io/csi-api', has not go.mod set up and does not follow the versioning of other repos
+          'k8s.io/csi-translation-lib',
+          'k8s.io/kube-aggregator',
+          'k8s.io/kube-controller-manager',
+          'k8s.io/kube-proxy',
+          'k8s.io/kube-scheduler',
+          'k8s.io/kubectl',
+          'k8s.io/kubelet',
+          'k8s.io/legacy-cloud-providers',
+          'k8s.io/metrics',
+          'k8s.io/mount-utils',
+          'k8s.io/pod-security-admission',
+          'k8s.io/sample-apiserver',
+          'k8s.io/sample-cli-plugin',
+          'k8s.io/sample-controller',
+        ],
+      },
+    ],
+  },
+  linters: {
+    description: 'Group various lint packages together.',
+    packageRules: [
+      {
+        extends: 'packages:linters',
+        groupName: 'linters',
+      },
+    ],
+  },
+  nodeJs: {
+    description:
+      "Group anything that looks like Node.js together so that it's updated together.",
+    packageRules: [
+      {
+        commitMessageTopic: 'Node.js',
+        excludePackageNames: ['calico/node', 'kindest/node'],
+        matchDatasources: ['docker'],
+        matchPackageNames: ['node'],
+        matchPackagePatterns: ['/node$'],
       },
     ],
   },
@@ -188,9 +312,9 @@ const staticGroups = {
     description: 'Group PHPStan packages together.',
     packageRules: [
       {
-        matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan\\/phpstan$', '\\/phpstan-'],
         groupName: 'PHPStan packages',
+        matchDatasources: ['packagist'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
       },
     ],
   },
@@ -203,48 +327,128 @@ const staticGroups = {
       },
     ],
   },
-  hibernateCore: {
-    description: 'Group Java Hibernate Core packages.',
+  postcss: {
+    description: 'Group PostCSS packages together.',
     packageRules: [
       {
-        matchPackagePrefixes: ['org.hibernate:'],
-        groupName: 'hibernate core',
+        extends: 'packages:postcss',
+        groupName: 'postcss packages',
       },
     ],
   },
-  hibernateValidator: {
-    description: 'Group Java Hibernate Validator packages.',
+  react: {
+    description: 'Group React and corresponding `@types` packages together.',
     packageRules: [
       {
-        matchPackagePrefixes: ['org.hibernate.validator:'],
-        groupName: 'hibernate validator',
+        groupName: 'react monorepo',
+        matchPackageNames: ['@types/react', '@types/react-dom'],
       },
     ],
   },
-  hibernateOgm: {
-    description: 'Group Java Hibernate OGM packages.',
-    packageRules: [
-      {
-        matchPackagePrefixes: ['org.hibernate.ogm:'],
-        groupName: 'hibernate ogm',
-      },
+  recommended: {
+    description:
+      'Use curated list of recommended non-monorepo package groupings.',
+    extends: [
+      'group:nodeJs',
+      'group:allApollographql',
+      'group:codemirror',
+      'group:fortawesome',
+      'group:fusionjs',
+      'group:glimmer',
+      'group:goOpenapi',
+      'group:hibernateCore',
+      'group:hibernateValidator',
+      'group:hibernateOgm',
+      'group:hibernateCommons',
+      'group:illuminate',
+      'group:jekyllEcosystem',
+      'group:jestPlusTSJest',
+      'group:jestPlusTypes',
+      'group:jwtFramework',
+      'group:kubernetes',
+      'group:phpstan',
+      'group:polymer',
+      'group:react',
+      'group:resilience4j',
+      'group:rubyOnRails',
+      'group:rubyOmniauth',
+      'group:socketio',
+      'group:springAmqp',
+      'group:springAndroid',
+      'group:springBatch',
+      'group:springBoot',
+      'group:springCloud',
+      'group:springCore',
+      'group:springData',
+      'group:springHateoas',
+      'group:springIntegration',
+      'group:springKafka',
+      'group:springLdap',
+      'group:springMobile',
+      'group:springOsgi',
+      'group:springRestDocs',
+      'group:springRoo',
+      'group:springScala',
+      'group:springSecurity',
+      'group:springSession',
+      'group:springShell',
+      'group:springSocial',
+      'group:springStatemachine',
+      'group:springWebflow',
+      'group:springWs',
+      'group:symfony',
     ],
-  },
-  hibernateCommons: {
-    description: 'Group Java Hibernate Commons packages.',
-    packageRules: [
-      {
-        matchPackagePrefixes: ['org.hibernate.common:'],
-        groupName: 'hibernate commons',
-      },
-    ],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
     packageRules: [
       {
-        matchPackagePrefixes: ['io.github.resilience4j:'],
         groupName: 'resilience4j',
+        matchPackagePrefixes: ['io.github.resilience4j:'],
+      },
+    ],
+  },
+  rubyOmniauth: {
+    description: 'Group OmniAuth packages together.',
+    packageRules: [
+      {
+        groupName: 'omniauth packages',
+        matchDatasources: ['rubygems'],
+        matchPackagePrefixes: ['omniauth'],
+      },
+    ],
+  },
+  rubyOnRails: {
+    description: 'Group Ruby on Rails packages together.',
+    packageRules: [
+      {
+        groupName: 'Ruby on Rails packages',
+        matchDatasources: ['rubygems'],
+        matchPackageNames: [
+          'actioncable',
+          'actionmailbox',
+          'actionmailer',
+          'actionpack',
+          'actiontext',
+          'actionview',
+          'activejob',
+          'activemodel',
+          'activerecord',
+          'activestorage',
+          'activesupport',
+          'railties',
+          'rails',
+        ],
+      },
+    ],
+  },
+  socketio: {
+    description: 'Group socket.io packages.',
+    packageRules: [
+      {
+        groupName: 'socket.io packages',
+        matchPackagePrefixes: ['socket.io'],
       },
     ],
   },
@@ -280,8 +484,8 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'spring boot',
-        matchPackagePrefixes: ['org.springframework.boot:'],
         matchPackageNames: ['org.springframework.boot'],
+        matchPackagePrefixes: ['org.springframework.boot:'],
       },
     ],
   },
@@ -456,193 +660,13 @@ const staticGroups = {
       },
     ],
   },
-  socketio: {
-    description: 'Group socket.io packages.',
+  symfony: {
+    description: 'Group PHP Symfony packages together.',
     packageRules: [
       {
-        groupName: 'socket.io packages',
-        matchPackagePrefixes: ['socket.io'],
-      },
-    ],
-  },
-  postcss: {
-    description: 'Group PostCSS packages together.',
-    packageRules: [
-      {
-        extends: 'packages:postcss',
-        groupName: 'postcss packages',
-      },
-    ],
-  },
-  jekyllEcosystem: {
-    description: 'Group Jekyll and related Ruby packages together.',
-    packageRules: [
-      {
-        matchSourceUrlPrefixes: [
-          'https://github.com/jekyll/',
-          'https://github.com/github/pages-gem',
-        ],
-        groupName: 'jekyll ecosystem packages',
-      },
-    ],
-  },
-  rubyOnRails: {
-    description: 'Group Ruby on Rails packages together.',
-    packageRules: [
-      {
-        matchDatasources: ['rubygems'],
-        matchPackageNames: [
-          'actioncable',
-          'actionmailbox',
-          'actionmailer',
-          'actionpack',
-          'actiontext',
-          'actionview',
-          'activejob',
-          'activemodel',
-          'activerecord',
-          'activestorage',
-          'activesupport',
-          'railties',
-          'rails',
-        ],
-        groupName: 'Ruby on Rails packages',
-      },
-    ],
-  },
-  rubyOmniauth: {
-    description: 'Group OmniAuth packages together.',
-    packageRules: [
-      {
-        matchDatasources: ['rubygems'],
-        matchPackagePrefixes: ['omniauth'],
-        groupName: 'omniauth packages',
-      },
-    ],
-  },
-  goOpenapi: {
-    description: 'Group `go-openapi` packages together.',
-    packageRules: [
-      {
-        matchDatasources: ['go'],
-        groupName: 'go-openapi packages',
-        groupSlug: 'go-openapi',
-        matchPackagePrefixes: ['github.com/go-openapi/'],
-      },
-    ],
-  },
-  kubernetes: {
-    description: 'Group Kubernetes packages together.',
-    packageRules: [
-      {
-        matchDatasources: ['go'],
-        groupName: 'kubernetes packages',
-        groupSlug: 'kubernetes-go',
-        matchPackagePrefixes: [
-          'k8s.io/api',
-          'k8s.io/apiextensions-apiserver',
-          'k8s.io/apimachinery',
-          'k8s.io/apiserver',
-          'k8s.io/cli-runtime',
-          'k8s.io/client-go',
-          'k8s.io/cloud-provider',
-          'k8s.io/cluster-bootstrap',
-          'k8s.io/code-generator',
-          'k8s.io/component-base',
-          'k8s.io/controller-manager',
-          'k8s.io/cri-api',
-          // 'k8s.io/csi-api', has not go.mod set up and does not follow the versioning of other repos
-          'k8s.io/csi-translation-lib',
-          'k8s.io/kube-aggregator',
-          'k8s.io/kube-controller-manager',
-          'k8s.io/kube-proxy',
-          'k8s.io/kube-scheduler',
-          'k8s.io/kubectl',
-          'k8s.io/kubelet',
-          'k8s.io/legacy-cloud-providers',
-          'k8s.io/metrics',
-          'k8s.io/mount-utils',
-          'k8s.io/pod-security-admission',
-          'k8s.io/sample-apiserver',
-          'k8s.io/sample-cli-plugin',
-          'k8s.io/sample-controller',
-        ],
-      },
-    ],
-  },
-  googleapis: {
-    description: 'Group `googleapis` packages together.',
-    packageRules: [
-      {
-        extends: 'packages:googleapis',
-        groupName: 'googleapis packages',
-      },
-    ],
-  },
-  linters: {
-    description: 'Group various lint packages together.',
-    packageRules: [
-      {
-        extends: 'packages:linters',
-        groupName: 'linters',
-      },
-    ],
-  },
-  jsUnitTest: {
-    description: 'Group JavaScript unit test packages together.',
-    packageRules: [
-      {
-        extends: 'packages:jsUnitTest',
-        groupName: 'JS unit test packages',
-      },
-    ],
-  },
-  jsUnitTestNonMajor: {
-    description:
-      'Group JavaScipt unit test packages together for non-major updates.',
-    packageRules: [
-      {
-        extends: 'packages:jsUnitTest',
-        matchUpdateTypes: ['minor', 'patch'],
-        groupName: 'JS unit test packages',
-      },
-    ],
-  },
-  unitTest: {
-    description: 'Group all unit test packages together.',
-    packageRules: [
-      {
-        extends: 'packages:unitTest',
-        groupName: 'unit test packages',
-      },
-    ],
-  },
-  unitTestNonMajor: {
-    description: 'Group all unit test packages together for non-major updates.',
-    packageRules: [
-      {
-        extends: 'packages:unitTest',
-        matchUpdateTypes: ['minor', 'patch'],
-        groupName: 'unit test packages',
-      },
-    ],
-  },
-  jsTest: {
-    description: 'Group JS test packages together.',
-    packageRules: [
-      {
-        extends: 'packages:jsTest',
-        groupName: 'JS test packages',
-      },
-    ],
-  },
-  jsTestMonMajor: {
-    description: 'Group non-major JS test package updates together.',
-    packageRules: [
-      {
-        extends: 'packages:jsTest',
-        matchUpdateTypes: ['minor', 'patch'],
-        groupName: 'JS test packages',
+        groupName: 'symfony packages',
+        groupSlug: 'symfony',
+        matchPackagePrefixes: ['symfony/'],
       },
     ],
   },
@@ -660,38 +684,27 @@ const staticGroups = {
     packageRules: [
       {
         extends: 'packages:test',
-        matchUpdateTypes: ['minor', 'patch'],
         groupName: 'test packages',
+        matchUpdateTypes: ['minor', 'patch'],
       },
     ],
   },
-  jestPlusTSJest: {
-    description: 'Add `ts-jest` `major` update to Jest monorepo.',
+  unitTest: {
+    description: 'Group all unit test packages together.',
     packageRules: [
       {
-        matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
-        matchUpdateTypes: ['major'],
-        groupName: 'jest monorepo',
+        extends: 'packages:unitTest',
+        groupName: 'unit test packages',
       },
     ],
   },
-  jestPlusTypes: {
-    description: 'Add `@types/jest` update to Jest monorepo.',
+  unitTestNonMajor: {
+    description: 'Group all unit test packages together for non-major updates.',
     packageRules: [
       {
-        matchPackageNames: ['@types/jest'],
-        matchUpdateTypes: nonPinUpdateTypes,
-        groupName: 'jest monorepo',
-      },
-    ],
-  },
-  jwtFramework: {
-    description: 'Group JWT Framework packages together.',
-    packageRules: [
-      {
-        matchDatasources: ['packagist'],
-        matchPackagePrefixes: ['web-token/'],
-        groupName: 'JWT Framework packages',
+        extends: 'packages:unitTest',
+        groupName: 'unit test packages',
+        matchUpdateTypes: ['minor', 'patch'],
       },
     ],
   },
@@ -708,16 +721,16 @@ for (const monorepo of Object.keys(monorepos.presets)) {
       {
         description: `Group packages from ${monorepo} monorepo together.`,
         extends: `monorepo:${monorepo}`,
-        matchUpdateTypes: nonPinUpdateTypes,
         groupName: `${monorepo} monorepo`,
+        matchUpdateTypes: nonPinUpdateTypes,
       },
     ],
   };
 }
 config.monorepos = {
   description: 'Group known monorepo packages together.',
-  ignoreDeps: [],
   extends: monorepoNames,
+  ignoreDeps: [], // Hack to improve onboarding PR description
 };
 
 export const presets: Record<string, Preset> = config;

@@ -2,7 +2,7 @@ import semver from '../semver';
 import docker from '.';
 
 describe('modules/versioning/docker/index', () => {
-  test.each`
+  it.each`
     version                                        | expected
     ${null}                                        | ${false}
     ${'1.2.3'}                                     | ${true}
@@ -18,12 +18,13 @@ describe('modules/versioning/docker/index', () => {
     ${'0z1b2c3'}                                   | ${true}
     ${'0A1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d'}  | ${true}
     ${'123098140293'}                              | ${true}
+    ${'01aecc#v2.1.0'}                             | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     const res = docker.isValid(version);
     expect(!!res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | major   | minor   | patch
     ${'1.2.3'} | ${1}    | ${2}    | ${3}
     ${'18.04'} | ${18}   | ${4}    | ${null}
@@ -39,7 +40,7 @@ describe('modules/versioning/docker/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a          | b           | expected
     ${'1.2.3'} | ${'1.2'}    | ${false}
     ${'18.04'} | ${'18.1'}   | ${true}
@@ -50,7 +51,7 @@ describe('modules/versioning/docker/index', () => {
     expect(docker.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | range       | expected
     ${'1.2.3'} | ${'2.0'}    | ${true}
     ${'18.04'} | ${'18.1'}   | ${false}
@@ -64,7 +65,7 @@ describe('modules/versioning/docker/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a          | b           | expected
     ${'1.2.3'} | ${'1.2.3'}  | ${true}
     ${'18.04'} | ${'18.4'}   | ${true}
@@ -88,7 +89,7 @@ describe('modules/versioning/docker/index', () => {
       '2',
     ];
 
-    test.each`
+    it.each`
       version    | expected
       ${'1.2.3'} | ${'1.2.3'}
       ${'1.2'}   | ${'1.2'}
@@ -104,7 +105,7 @@ describe('modules/versioning/docker/index', () => {
   });
 
   describe('sortVersions(v1, v2)', () => {
-    test.each`
+    it.each`
       a          | b
       ${'1.1.1'} | ${'1.2.3'}
       ${'1.2.3'} | ${'1.3.4'}
@@ -144,7 +145,7 @@ describe('modules/versioning/docker/index', () => {
     });
   });
 
-  test.each`
+  it.each`
     currentValue | rangeStrategy | currentVersion | newVersion | expected
     ${null}      | ${null}       | ${null}        | ${'1.2.3'} | ${'1.2.3'}
   `(
@@ -160,7 +161,7 @@ describe('modules/versioning/docker/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version             | expected
     ${'3.7.0'}          | ${true}
     ${'3.7.0b1'}        | ${false}
@@ -173,7 +174,7 @@ describe('modules/versioning/docker/index', () => {
     expect(!!res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version             | range             | expected
     ${'3.7.0'}          | ${'3.7.0'}        | ${true}
     ${'3.7.0b1'}        | ${'3.7.0'}        | ${true}
@@ -195,7 +196,7 @@ describe('modules/versioning/docker/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     value               | expected
     ${'3.7.0'}          | ${'3.7.0'}
     ${'3.7.0b1'}        | ${'3.7.0b1'}

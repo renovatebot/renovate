@@ -31,6 +31,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "variableName": "abcVersion",
     },
   ],
   "packageFileVersion": undefined,
@@ -68,6 +69,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -78,6 +80,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -88,6 +91,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -98,6 +102,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "variableName": "abcVersion",
     },
   ],
   "packageFileVersion": undefined,
@@ -223,6 +228,21 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       ],
     },
     {
+      "currentValue": "0.0.42",
+      "datasource": "sbt-package",
+      "depName": "org.example:abc",
+      "depType": "test",
+      "packageName": "org.example:abc_2.9.10",
+      "registryUrls": [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    {
       "currentValue": "0.0.7",
       "datasource": "sbt-package",
       "depName": "org.example:corge",
@@ -252,6 +272,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
+      "variableName": "versionExample",
     },
     {
       "currentValue": "0.0.9",
@@ -266,7 +287,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
-        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+        "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases",
       ],
     },
     {
@@ -421,6 +442,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
+      "variableName": "versionExample",
     },
     {
       "currentValue": "0.0.9",
@@ -435,7 +457,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
-        "https://dl.bintray.com/sbt/sbt-plugin-releases",
+        "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases",
       ],
     },
   ],

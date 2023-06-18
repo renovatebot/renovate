@@ -1,7 +1,7 @@
 ```mermaid
 flowchart TB
     subgraph Start
-    A[lib/renovate.ts] --> B[getConfig ordered by cli->env->file->default]
+    A[lib/renovate.ts] --> B[getConfig ordered by priority useBaseBranchConfig > Cli > ENV > file > default]
     A --> C[global initialize]
     A --> D[init platform]
     A --> E[set and ensure dir]

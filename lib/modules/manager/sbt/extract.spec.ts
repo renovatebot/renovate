@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile as extract } from '.';
 
@@ -54,6 +55,7 @@ describe('modules/manager/sbt/extract', () => {
           },
           { packageName: 'org.example:quux', currentValue: '0.0.5' },
           { packageName: 'org.example:quuz_2.9.10', currentValue: '0.0.6' },
+          { packageName: 'org.example:abc_2.9.10', currentValue: '0.0.42' },
           { packageName: 'org.example:corge', currentValue: '0.0.7' },
           { packageName: 'org.example:grault', currentValue: '0.0.8' },
           { packageName: 'org.example:waldo', currentValue: '0.0.9' },
@@ -99,6 +101,21 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('extracts typed variables', () => {
+      const content = `
+        val version: String = "1.2.3"
+        libraryDependencies += "foo" % "bar" % version
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.2.3',
+            groupName: 'version',
+          },
+        ],
+      });
+    });
+
     it('skips deps when scala version is missing', () => {
       expect(extractPackageFile(sbtMissingScalaVersion)).toEqual({
         deps: [
@@ -118,8 +135,9 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'com.github.gseitz:sbt-release',
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
-              'https://dl.bintray.com/sbt/sbt-plugin-releases',
+              'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
             ],
+            variableName: 'sbtReleaseVersion',
           },
         ],
         packageFileVersion: '1.0.1',
@@ -202,6 +220,21 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts correct scala library when dealing with scala 3', () => {
+      const content = `
+        scalaVersion := "3.1.1"
+      `;
+
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala3-library_3',
+            currentValue: '3.1.1',
           },
         ],
       });
@@ -345,6 +378,64 @@ describe('modules/manager/sbt/extract', () => {
         ],
         packageFileVersion: undefined,
       });
+    });
+
+    it('extract sbt version', () => {
+      expect(
+        extract(
+          codeBlock`
+            sbt.version=1.6.0
+          `,
+          'project/build.properties'
+        )
+      ).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt/sbt',
+            currentValue: '1.6.0',
+            replaceString: 'sbt.version=1.6.0',
+            versioning: 'semver',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+        ],
+      });
+    });
+
+    it('extract sbt version if the file contains other properties', () => {
+      expect(
+        extract(
+          codeBlock`
+            sbt.version=1.6.0
+            another.conf=1.4.0
+          `,
+          'project/build.properties'
+        )
+      ).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt/sbt',
+            currentValue: '1.6.0',
+            replaceString: 'sbt.version=1.6.0',
+            versioning: 'semver',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+        ],
+      });
+    });
+
+    it('ignores build.properties file if does not contain sbt version', () => {
+      expect(
+        extract(
+          codeBlock`
+            another.conf=1.4.0
+          `,
+          'project/build.properties'
+        )
+      ).toBeNull();
     });
   });
 });

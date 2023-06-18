@@ -55,7 +55,7 @@ export function updateDependency({
           /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
         );
       }
-    } else if (depType === 'require') {
+    } else if (depType === 'require' || depType === 'indirect') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
@@ -105,7 +105,8 @@ export function updateDependency({
         );
       } else if (
         upgrade.newMajor! > 1 &&
-        !newLine.includes(`/v${upgrade.newMajor}`)
+        !newLine.includes(`/v${upgrade.newMajor}`) &&
+        !upgrade.newValue!.endsWith('+incompatible')
       ) {
         if (depName === depNameNoVersion) {
           // If package currently has no version, pin to latest one.
@@ -135,6 +136,14 @@ export function updateDependency({
       logger.debug('No changes necessary');
       return fileContent;
     }
+
+    if (depType === 'indirect') {
+      newLine = newLine.replace(
+        regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
+        ' // indirect'
+      );
+    }
+
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {

@@ -9,8 +9,8 @@ import { logger } from '../../../../logger';
 const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
-  'every month': 'before 3am on the first day of the month',
-  monthly: 'before 3am on the first day of the month',
+  'every month': 'before 5am on the first day of the month',
+  monthly: 'before 5am on the first day of the month',
 };
 
 export function hasValidTimezone(timezone: string): [true] | [false, string] {
@@ -98,7 +98,7 @@ function cronMatches(cron: string, now: DateTime): boolean {
     return false;
   }
 
-  if (parsedCron.weekDays.indexOf(now.weekday) === -1) {
+  if (!parsedCron.weekDays.includes(now.weekday % 7)) {
     // Weekdays mismatch
     return false;
   }
@@ -142,10 +142,10 @@ export function isScheduledNow(
     return true;
   }
   let now = DateTime.local();
-  logger.trace(`now=${now.toISO()}`);
+  logger.trace(`now=${now.toISO()!}`);
   // Adjust the time if repo is in a different timezone to renovate
   if (config.timezone) {
-    logger.debug({ timezone: config.timezone }, 'Found timezone');
+    logger.debug(`Found timezone: ${config.timezone}`);
     const validTimezone = hasValidTimezone(config.timezone);
     if (!validTimezone[0]) {
       logger.warn(validTimezone[1]);
@@ -153,7 +153,7 @@ export function isScheduledNow(
     }
     logger.debug('Adjusting now for timezone');
     now = now.setZone(config.timezone);
-    logger.trace(`now=${now.toISO()}`);
+    logger.trace(`now=${now.toISO()!}`);
   }
   const currentDay = now.weekday;
   logger.trace(`currentDay=${currentDay}`);

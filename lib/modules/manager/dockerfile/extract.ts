@@ -4,7 +4,11 @@ import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 const variableMarker = '$';
 
@@ -88,6 +92,10 @@ function processDepForAutoReplace(
   dep.replaceString = unfoldedLineNumbers
     .map((lineNumber) => lines[lineNumber])
     .join(linefeed);
+
+  if (!dep.currentDigest) {
+    dep.replaceString += linefeed;
+  }
 
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
@@ -174,7 +182,7 @@ export function getDep(
         ...getDep(`${value}/${groups.depName}`),
         replaceString: currentFrom,
       };
-      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep)!;
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
       return dep;
     }
   }
@@ -231,9 +239,9 @@ export function getDep(
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  _packageFile: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};

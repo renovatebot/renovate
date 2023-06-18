@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import {
   GetObjectCommand,
   HeadObjectCommand,
@@ -18,10 +18,10 @@ const datasource = MavenDatasource.id;
 const baseUrlS3 = 's3://repobucket';
 
 function get(
-  depName = 'org.example:package',
+  packageName = 'org.example:package',
   ...registryUrls: string[]
 ): Promise<ReleaseResult | null> {
-  const conf = { versioning, datasource, depName };
+  const conf = { versioning, datasource, packageName };
   return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
 }
 
@@ -51,7 +51,7 @@ describe('modules/datasource/maven/s3', () => {
           Bucket: 'repobucket',
           Key: 'org/example/package/maven-metadata.xml',
         })
-        .resolvesOnce({ Body: meta })
+        .resolvesOnce({ Body: meta as never })
         .on(HeadObjectCommand, {
           Bucket: 'repobucket',
           Key: 'org/example/package/0.0.1/package-0.0.1.pom',

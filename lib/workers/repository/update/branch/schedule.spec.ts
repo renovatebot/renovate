@@ -115,7 +115,7 @@ describe('workers/repository/update/branch/schedule', () => {
     it('massages schedules', () => {
       expect(
         schedule.hasValidSchedule([
-          'before 3am on the first day of the month',
+          'before 5am on the first day of the month',
         ])[0]
       ).toBeTrue();
       expect(schedule.hasValidSchedule(['every month'])[0]).toBeTrue();
@@ -239,25 +239,38 @@ describe('workers/repository/update/branch/schedule', () => {
       expect(res).toBeFalse();
     });
 
-    describe('supports timezone', () => {
-      const cases: [string, string, string, boolean][] = [
-        ['after 4pm', 'Asia/Singapore', '2017-06-30T15:59:00.000+0800', false],
-        ['after 4pm', 'Asia/Singapore', '2017-06-30T16:01:00.000+0800', true],
-        [
-          'before 3am on Monday',
-          'Asia/Tokyo',
-          '2017-06-26T02:59:00.000+0900',
-          true,
-        ],
-        [
-          'before 3am on Monday',
-          'Asia/Tokyo',
-          '2017-06-26T03:01:00.000+0900',
-          false,
-        ],
-      ];
+    describe('supports cron syntax on Sundays', () => {
+      beforeEach(() => {
+        mockDate.set('2023-01-08T10:50:00.000'); // Locally Sunday 8 January 2023 10:50am
+      });
 
-      test.each(cases)('%p, %p, %p', (sched, tz, datetime, expected) => {
+      it('approves if the weekday is *', () => {
+        config.schedule = ['* * * * *'];
+        const res = schedule.isScheduledNow(config);
+        expect(res).toBeTrue();
+      });
+
+      it('approves if the weekday is 0', () => {
+        config.schedule = ['* * * * 0'];
+        const res = schedule.isScheduledNow(config);
+        expect(res).toBeTrue();
+      });
+
+      it('rejects if the weekday is 1', () => {
+        config.schedule = ['* * * * 1'];
+        const res = schedule.isScheduledNow(config);
+        expect(res).toBeFalse();
+      });
+    });
+
+    describe('supports timezone', () => {
+      it.each`
+        sched                     | tz                  | datetime                          | expected
+        ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T15:59:00.000+0800'} | ${false}
+        ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T16:01:00.000+0800'} | ${true}
+        ${'before 4am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T03:59:00.000+0900'} | ${true}
+        ${'before 4am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T04:01:00.000+0900'} | ${false}
+      `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
         config.timezone = tz;
         mockDate.set(datetime);

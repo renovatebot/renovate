@@ -64,7 +64,7 @@ export async function getInRangeReleases(
     return releases;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getInRangeReleases err');
-    logger.debug({ datasource, depName }, 'Error getting releases');
+    logger.debug(`Error getting releases for ${depName} from ${datasource}`);
     return null;
   }
 }

@@ -23,6 +23,7 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
       onClose: true,
       onExit: false,
     },
+    config: ['core.quotePath=false'],
   };
   // https://github.com/steveukx/git-js/pull/591
   const gitTimeout = GlobalConfig.get('gitTimeout');

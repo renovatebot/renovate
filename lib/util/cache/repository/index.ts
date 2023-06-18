@@ -1,3 +1,5 @@
+import { GlobalConfig } from '../../../config/global';
+import { logger } from '../../../logger';
 import { RepoCacheNull } from './impl/null';
 import type { RepoCache, RepoCacheData } from './types';
 
@@ -18,7 +20,11 @@ export function getCache(): RepoCacheData {
 }
 
 export async function saveCache(): Promise<void> {
-  await repoCache.save();
+  if (GlobalConfig.get('dryRun')) {
+    logger.info(`DRY-RUN: Would save repository cache.`);
+  } else {
+    await repoCache.save();
+  }
 }
 
 export function isCacheModified(): boolean | undefined {

@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { GlobalConfig } from '../../../config/global';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import {
   extractAzurePipelinesTasks,
@@ -19,6 +20,10 @@ const azurePipelinesJobs = Fixtures.get('azure-pipelines-jobs.yaml');
 const azurePipelinesSteps = Fixtures.get('azure-pipelines-steps.yaml');
 
 describe('modules/manager/azure-pipelines/extract', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines, azurePipelinesFilename);
     expect(file).not.toBeNull();
@@ -69,6 +74,53 @@ describe('modules/manager/azure-pipelines/extract', () => {
           type: 'github',
           name: 'user/repo',
           ref: 'refs/head/master',
+        })
+      ).toBeNull();
+    });
+
+    it('should extract Azure repository information if project in name', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/renovate-org',
+      });
+
+      expect(
+        extractRepository({
+          type: 'git',
+          name: 'project/repo',
+          ref: 'refs/tags/v1.0.0',
+        })
+      ).toMatchObject({
+        depName: 'project/repo',
+        packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
+      });
+    });
+
+    it('should return null if repository type is git and project not in name', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/renovate-org',
+      });
+
+      expect(
+        extractRepository({
+          type: 'git',
+          name: 'repo',
+          ref: 'refs/tags/v1.0.0',
+        })
+      ).toBeNull();
+    });
+
+    it('should extract return null for git repo type if platform not Azure', () => {
+      GlobalConfig.set({
+        platform: 'github',
+      });
+
+      expect(
+        extractRepository({
+          type: 'git',
+          name: 'project/repo',
+          ref: 'refs/tags/v1.0.0',
         })
       ).toBeNull();
     });

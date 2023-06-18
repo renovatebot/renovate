@@ -1,9 +1,10 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { delimiters, extractRubyVersion } from './common';
 import { extractLockFileEntries } from './locked-version';
 
@@ -13,9 +14,9 @@ function formatContent(input: string): string {
 
 export async function extractPackageFile(
   content: string,
-  fileName?: string
-): Promise<PackageFile | null> {
-  const res: PackageFile = {
+  packageFile?: string
+): Promise<PackageFileContent | null> {
+  const res: PackageFileContent = {
     registryUrls: [],
     deps: [],
   };
@@ -72,8 +73,16 @@ export async function extractPackageFile(
       while (lineNumber < lines.length && groupLine !== 'end') {
         lineNumber += 1;
         groupLine = lines[lineNumber];
+        // istanbul ignore if
+        if (!is.string(groupLine)) {
+          logger.debug(
+            { content, packageFile, type: 'groupLine' },
+            'Bundler parsing error'
+          );
+          groupLine = 'end';
+        }
         if (groupLine !== 'end') {
-          groupContent += formatContent(groupLine || '');
+          groupContent += formatContent(groupLine);
         }
       }
       const groupRes = await extractPackageFile(groupContent);
@@ -103,8 +112,11 @@ export async function extractPackageFile(
           lineNumber += 1;
           sourceLine = lines[lineNumber];
           // istanbul ignore if
-          if (sourceLine === null || sourceLine === undefined) {
-            logger.info({ content, fileName }, 'Undefined sourceLine');
+          if (!is.string(sourceLine)) {
+            logger.debug(
+              { content, packageFile, type: 'sourceLine' },
+              'Bundler parsing error'
+            );
             sourceLine = 'end';
           }
           if (sourceLine !== 'end') {
@@ -134,6 +146,14 @@ export async function extractPackageFile(
       while (lineNumber < lines.length && platformsLine !== 'end') {
         lineNumber += 1;
         platformsLine = lines[lineNumber];
+        // istanbul ignore if
+        if (!is.string(platformsLine)) {
+          logger.debug(
+            { content, packageFile, type: 'platformsLine' },
+            'Bundler parsing error'
+          );
+          platformsLine = 'end';
+        }
         if (platformsLine !== 'end') {
           platformsContent += formatContent(platformsLine);
         }
@@ -159,6 +179,14 @@ export async function extractPackageFile(
       while (lineNumber < lines.length && ifLine !== 'end') {
         lineNumber += 1;
         ifLine = lines[lineNumber];
+        // istanbul ignore if
+        if (!is.string(ifLine)) {
+          logger.debug(
+            { content, packageFile, type: 'ifLine' },
+            'Bundler parsing error'
+          );
+          ifLine = 'end';
+        }
         if (ifLine !== 'end') {
           ifContent += formatContent(ifLine);
         }
@@ -181,11 +209,11 @@ export async function extractPackageFile(
     return null;
   }
 
-  if (fileName) {
-    const gemfileLock = fileName + '.lock';
+  if (packageFile) {
+    const gemfileLock = `${packageFile}.lock`;
     const lockContent = await readLocalFile(gemfileLock, 'utf8');
     if (lockContent) {
-      logger.debug(`Found Gemfile.lock file packageFile: ${fileName}`);
+      logger.debug(`Found Gemfile.lock file packageFile: ${packageFile}`);
       res.lockFiles = [gemfileLock];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {

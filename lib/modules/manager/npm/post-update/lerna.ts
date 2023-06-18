@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -9,13 +10,18 @@ import type {
   ExtraEnv,
   ToolConstraint,
 } from '../../../../util/exec/types';
-import type { PackageFile, PostUpdateConfig } from '../../types';
+import type {
+  PackageFile,
+  PackageFileContent,
+  PostUpdateConfig,
+} from '../../types';
+import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 // Exported for testability
 export function getLernaVersion(
-  lernaPackageFile: Partial<PackageFile>
+  lernaPackageFile: Partial<PackageFile<NpmManagerData>>
 ): string | null {
   const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
   if (!lernaDep?.currentValue || !semver.validRange(lernaDep.currentValue)) {
@@ -30,20 +36,20 @@ export function getLernaVersion(
 }
 
 export async function generateLockFiles(
-  lernaPackageFile: Partial<PackageFile>,
+  lernaPackageFile: Partial<PackageFileContent<NpmManagerData>>,
   lockFileDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
-  skipInstalls?: boolean
+  skipInstalls?: boolean | null
 ): Promise<GenerateLockFileResult> {
-  const lernaClient = lernaPackageFile.lernaClient;
-  if (!lernaClient) {
+  const lernaClient = lernaPackageFile.managerData?.lernaClient;
+  if (!is.nonEmptyString(lernaClient)) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
   const toolConstraints: ToolConstraint[] = [
-    await getNodeToolConstraint(config, []),
+    await getNodeToolConstraint(config, [], lockFileDir),
   ];
   const cmd: string[] = [];
   let cmdOptions = '';
@@ -53,7 +59,8 @@ export async function generateLockFiles(
         toolName: 'yarn',
         constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
       };
-      const yarnCompatibility = config.constraints?.yarn;
+      const yarnCompatibility =
+        config.constraints?.yarn ?? config.extractedConstraints?.yarn;
       if (semver.validRange(yarnCompatibility)) {
         yarnTool.constraint = yarnCompatibility;
       }
@@ -65,7 +72,8 @@ export async function generateLockFiles(
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
       const npmTool: ToolConstraint = { toolName: 'npm' };
-      const npmCompatibility = config.constraints?.npm;
+      const npmCompatibility =
+        config.constraints?.npm ?? config.extractedConstraints?.npm;
       if (semver.validRange(npmCompatibility)) {
         npmTool.constraint = npmCompatibility;
       }
@@ -91,9 +99,7 @@ export async function generateLockFiles(
     const execOptions: ExecOptions = {
       cwdFile: upath.join(lockFileDir, 'package.json'),
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints,
     };
     // istanbul ignore if
@@ -102,11 +108,16 @@ export async function generateLockFiles(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     const lernaVersion = getLernaVersion(lernaPackageFile);
-    logger.debug(`Using lerna version ${lernaVersion ?? 'latest'}`);
-    toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
-    cmd.push('lerna info || echo "Ignoring lerna info failure"');
-    cmd.push(`${lernaClient} install ${cmdOptions}`);
-    cmd.push(lernaCommand);
+    if (lernaVersion && semver.lt(lernaVersion, '7.0.0')) {
+      logger.debug(`Using lerna version ${lernaVersion}`);
+      toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
+      cmd.push('lerna info || echo "Ignoring lerna info failure"');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
+      cmd.push(lernaCommand);
+    } else {
+      logger.debug('Skipping lerna bootstrap');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
+    }
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {

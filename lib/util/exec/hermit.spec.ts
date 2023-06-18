@@ -1,8 +1,8 @@
-import os from 'os';
+import os from 'node:os';
 import _findUp from 'find-up';
 import upath from 'upath';
 import { mockExecAll } from '../../../test/exec-util';
-import { mockedFunction } from '../../../test/util';
+import { mockedFunction, partial } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
 import type { RawExecOptions } from './types';
@@ -27,7 +27,7 @@ describe('util/exec/hermit', () => {
       findUp.mockClear();
     });
 
-    test.each`
+    it.each`
       dir                         | hermitLocation         | expected
       ${'nested/other/directory'} | ${'nested/bin/hermit'} | ${'nested/bin'}
       ${'nested'}                 | ${'nested/bin/hermit'} | ${'nested/bin'}
@@ -73,9 +73,11 @@ describe('util/exec/hermit', () => {
       const relativeCwd = 'nested/other/bin';
       const fullCwd = upath.join(localDir, relativeCwd);
 
-      const resp = await getHermitEnvs({
-        cwd: fullCwd,
-      } as RawExecOptions);
+      const resp = await getHermitEnvs(
+        partial<RawExecOptions>({
+          cwd: fullCwd,
+        })
+      );
 
       expect(findUp.mock.calls[0][1]?.cwd).toEqual(fullCwd);
 

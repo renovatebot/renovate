@@ -6,6 +6,7 @@ import {
 import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
+import { detectSemanticCommits } from '../../../util/git/semantic';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -90,10 +91,12 @@ export async function flattenUpdates(
         packageFileConfig.parentDir = '';
         packageFileConfig.packageFileDir = '';
       }
+      let depIndex = 0;
       for (const dep of packageFile.deps) {
         if (dep.updates.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
           delete depConfig.deps;
+          depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
@@ -127,6 +130,7 @@ export async function flattenUpdates(
             updates.push(updateConfig);
           }
         }
+        depIndex += 1;
       }
       if (
         get(manager, 'supportsLockFileMaintenance') &&
@@ -185,6 +189,12 @@ export async function flattenUpdates(
           }
         }
       }
+    }
+  }
+  if (config.semanticCommits === 'auto') {
+    const semanticCommits = await detectSemanticCommits();
+    for (const update of updates) {
+      update.semanticCommits = semanticCommits;
     }
   }
   return updates

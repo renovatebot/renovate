@@ -1,6 +1,10 @@
+import { hostRules } from '../../../test/util';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
+import { MISSING_API_CREDENTIALS } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import { OrbDatasource } from '../../modules/datasource/orb';
+import type { HostRule } from '../../types';
+import type { MergeConfidence } from '../merge-confidence/types';
 import { applyPackageRules } from './index';
 
 type TestConfig = PackageRuleInputConfig & {
@@ -625,6 +629,97 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
+  describe('matchConfidence', () => {
+    const hostRule: HostRule = {
+      hostType: 'merge-confidence',
+      token: 'some-token',
+    };
+
+    beforeEach(() => {
+      hostRules.clear();
+      hostRules.add(hostRule);
+    });
+
+    it('matches matchConfidence', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+        mergeConfidenceLevel: 'high' as MergeConfidence,
+      };
+      const res = applyPackageRules({ ...config, ...dep });
+      expect(res.x).toBe(1);
+    });
+
+    it('non-matches matchConfidence', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+        mergeConfidenceLevel: 'low' as MergeConfidence,
+      };
+      const res = applyPackageRules({ ...config, ...dep });
+      expect(res.x).toBeUndefined();
+    });
+
+    it('does not match matchConfidence when there is no mergeConfidenceLevel', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+        mergeConfidenceLevel: undefined,
+      };
+      const res = applyPackageRules({ ...config, ...dep });
+      expect(res.x).toBeUndefined();
+    });
+
+    it('throws when unauthenticated', () => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchConfidence: ['high'],
+            x: 1,
+          },
+        ],
+      };
+      hostRules.clear();
+
+      let error = new Error();
+      try {
+        applyPackageRules(config);
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).toStrictEqual(new Error(MISSING_API_CREDENTIALS));
+      expect(error.validationMessage).toBe('Missing credentials');
+      expect(error.validationError).toBe(
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.'
+      );
+    });
+  });
+
   it('filters naked depType', () => {
     const config: TestConfig = {
       packageRules: [
@@ -662,6 +757,7 @@ describe('util/package-rules/index', () => {
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
     const config: TestConfig = {
+      versioning: 'semver',
       packageRules: [
         {
           matchPackageNames: ['test'],
@@ -699,6 +795,7 @@ describe('util/package-rules/index', () => {
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
     const config: TestConfig = {
+      versioning: 'semver',
       packageRules: [
         {
           matchPackageNames: ['test'],
@@ -727,6 +824,7 @@ describe('util/package-rules/index', () => {
           x: 1,
         },
       ],
+      versioning: 'npm',
     };
     const res1 = applyPackageRules({
       ...config,
@@ -1015,5 +1113,142 @@ describe('util/package-rules/index', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
+  });
+
+  it('matches matchDepNames(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchDepNames: ['test1'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test2',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBe(1);
+    expect(res2.x).toBeUndefined();
+  });
+
+  it('matches excludeDepNames(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          excludeDepNames: ['test1'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test2',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBe(1);
+  });
+
+  it('matches matchDepPatterns(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchDepPatterns: ['^test$'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBe(1);
+    expect(res2.x).toBeUndefined();
+  });
+
+  it('matches excludeDepPatterns(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          excludeDepPatterns: ['^test$'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBe(1);
+  });
+
+  describe('test matchers supporting RENOVATE_X_MATCH_PACKAGE_NAMES_MORE', () => {
+    const processEnvOrg: NodeJS.ProcessEnv = process.env;
+
+    afterEach(() => {
+      process.env = processEnvOrg;
+    });
+
+    it.each`
+      matcherName               | isXEnvEnabled | expected
+      ${'matchPackageNames'}    | ${false}      | ${undefined}
+      ${'matchPackagePatterns'} | ${false}      | ${undefined}
+      ${'matchPackageNames'}    | ${true}       | ${1}
+      ${'matchPackagePatterns'} | ${true}       | ${1}
+    `(
+      'tests $matcherName selector when experimental env is $isXEnvEnabled (expected res=$expected)',
+      ({ matcherName, isXEnvEnabled, expected }) => {
+        if (isXEnvEnabled) {
+          process.env.RENOVATE_X_MATCH_PACKAGE_NAMES_MORE = 'true';
+        }
+        const config: TestConfig = {
+          packageRules: [
+            {
+              [matcherName]: ['does-match'],
+              x: 1,
+            },
+          ],
+        };
+
+        const res = applyPackageRules({
+          ...config,
+          depName: 'does-not-match',
+          packageName: 'does-match',
+        });
+
+        applyPackageRules(config); // coverage
+
+        expect(res.x).toBe(expected);
+      }
+    );
   });
 });

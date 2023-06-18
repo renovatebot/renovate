@@ -4,10 +4,6 @@ import { CurrentVersionMatcher } from './current-version';
 describe('util/package-rules/current-version', () => {
   const matcher = new CurrentVersionMatcher();
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('match', () => {
     it('return false on version exception', () => {
       const spy = jest.spyOn(pep440, 'matches').mockImplementationOnce(() => {

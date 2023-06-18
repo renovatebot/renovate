@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import { GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { DateTime } from 'luxon';
 import { XmlDocument } from 'xmldoc';
@@ -405,8 +405,7 @@ export async function getDependencyInfo(
       .replace(regEx(/^scm:/), '')
       .replace(regEx(/^git:/), '')
       .replace(regEx(/^git@github.com:/), 'https://github.com/')
-      .replace(regEx(/^git@github.com\//), 'https://github.com/')
-      .replace(regEx(/\.git$/), '');
+      .replace(regEx(/^git@github.com\//), 'https://github.com/');
 
     if (result.sourceUrl.startsWith('//')) {
       // most likely the result of us stripping scm:, git: etc

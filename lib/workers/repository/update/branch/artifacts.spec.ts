@@ -1,6 +1,5 @@
-import { getConfig, platform } from '../../../../../test/util';
+import { platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import { setArtifactErrorStatus } from './artifacts';
 
@@ -10,14 +9,13 @@ describe('workers/repository/update/branch/artifacts', () => {
   beforeEach(() => {
     GlobalConfig.set({});
     jest.resetAllMocks();
-    // TODO #7154 incompatible types
     config = {
-      ...getConfig(),
+      baseBranch: 'base-branch',
       manager: 'some-manager',
       branchName: 'renovate/pin',
       upgrades: [],
       artifactErrors: [{ lockFile: 'some' }],
-    } as BranchConfig;
+    } satisfies BranchConfig;
   });
 
   describe('setArtifactsErrorStatus', () => {
@@ -28,7 +26,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     });
 
     it('skips status', async () => {
-      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.red);
+      platform.getBranchStatusCheck.mockResolvedValueOnce('red');
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });

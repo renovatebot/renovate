@@ -39,7 +39,7 @@ export function bumpPackageVersion(
       throw new Error('semver inc failed');
     }
 
-    logger.debug({ newProjVersion });
+    logger.debug(`newProjVersion: ${newProjVersion}`);
     bumpedContent = replaceAt(
       content,
       versionPosition,

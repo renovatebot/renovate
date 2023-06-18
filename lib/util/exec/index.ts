@@ -5,7 +5,11 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { rawExec } from './common';
 import { generateInstallCommands, isDynamicInstall } from './containerbase';
-import { generateDockerCommand, removeDockerContainer } from './docker';
+import {
+  generateDockerCommand,
+  removeDockerContainer,
+  sideCarImage,
+} from './docker';
 import { getChildProcessEnv } from './env';
 import { getHermitEnvs, isHermit } from './hermit';
 import type {
@@ -17,7 +21,7 @@ import type {
   RawExecOptions,
 } from './types';
 
-function getChildEnv({
+export function getChildEnv({
   extraEnv,
   env: forcedEnv = {},
 }: ExecOptions): Record<string, string> {
@@ -116,7 +120,7 @@ async function prepareRawExec(
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
   if (isDocker(docker)) {
-    logger.debug({ image: docker.image }, 'Using docker to execute');
+    logger.debug({ image: sideCarImage }, 'Using docker to execute');
     const extraEnv = {
       ...opts.extraEnv,
       ...customEnvVariables,
@@ -176,16 +180,17 @@ export async function exec(
   for (const rawCmd of rawCommands) {
     const startTime = Date.now();
     if (useDocker) {
-      await removeDockerContainer(docker.image, dockerChildPrefix);
+      await removeDockerContainer(sideCarImage, dockerChildPrefix);
     }
     logger.debug({ command: rawCmd }, 'Executing command');
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);
     } catch (err) {
-      logger.debug({ err }, 'rawExec err');
+      const durationMs = Math.round(Date.now() - startTime);
+      logger.debug({ err, durationMs }, 'rawExec err');
       if (useDocker) {
-        await removeDockerContainer(docker.image, dockerChildPrefix).catch(
+        await removeDockerContainer(sideCarImage, dockerChildPrefix).catch(
           (removeErr: Error) => {
             const message: string = err.message;
             throw new Error(
@@ -206,7 +211,6 @@ export async function exec(
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
       {
-        cmd: rawCmd,
         durationMs,
         stdout: res.stdout,
         stderr: res.stderr,

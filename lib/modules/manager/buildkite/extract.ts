@@ -3,9 +3,12 @@ import type { SkipReason } from '../../../types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { isVersion } from '../../versioning/semver';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -70,7 +73,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting BuildKite plugins');
+    logger.debug({ err, packageFile }, 'Error extracting BuildKite plugins');
   }
 
   if (!deps.length) {

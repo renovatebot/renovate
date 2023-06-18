@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // istanbul ignore file
+import 'source-map-support/register';
 import { dequal } from 'dequal';
 import { pathExists, readFile } from 'fs-extra';
 import { configFileNames } from './config/app-strings';
@@ -14,8 +15,6 @@ import {
 } from './workers/global/config/parse/file';
 
 let returnVal = 0;
-
-/* eslint-disable no-console */
 
 async function validate(
   desc: string,
@@ -130,6 +129,7 @@ type PackageJson = {
   }
   logger.info('Config validated successfully');
 })().catch((e) => {
+  // eslint-disable-next-line no-console
   console.error(e);
   process.exit(99);
 });

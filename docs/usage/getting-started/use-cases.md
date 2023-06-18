@@ -8,7 +8,7 @@ The original use case, and the most popular one, is for developers to automate d
 
 ### Updating of package files
 
-We use the term "package file" to describe files which have references to dependencies.
+We use the term "package file" to describe files which reference dependencies.
 Package files are managed by a "package manager".
 
 Example package files include:
@@ -21,7 +21,7 @@ Example package files include:
 
 Renovate:
 
-1. Scans your repositories to detect package files and their dependencies
+1. Scans your repositories to find package files and their dependencies
 1. Checks if any newer versions exist
 1. Raises Pull Requests for available updates
 
@@ -38,7 +38,7 @@ Many package managers support "lock files", which "freeze" the entire dependency
 npm, Yarn, Bundler, Composer, Poetry, Pipenv, and Cargo all support or use lock files.
 
 If you use a lock file then changes to your package file must come with a compatible change to the lock file.
-Renovate can patch/update package files directly, but a lock file is too complex to "reverse engineer".
+Renovate can patch/update package files directly, but can't "reverse engineer" lock files.
 This is why Renovate lets the package manager do the lock file update.
 A simplified example:
 
@@ -52,12 +52,13 @@ A simplified example:
 ### Custom dependency extraction
 
 Renovate supports 60+ types of package files.
-Not all dependencies are detected by default, this can be because:
+By default, Renovate finds most dependencies, but there are exceptions.
+This can be because:
 
 - The package manager/file format is not supported, or
 - The file format is not a standard or is proprietary
 
-If your dependencies are not detected by default, you can use our "regex" manager to set your own custom patterns to extract dependencies.
+If your dependencies are not found by default, you can use our "regex" manager to set your own custom patterns to extract dependencies.
 You configure the regex manager by telling it:
 
 - Which file pattern(s) to match
@@ -74,7 +75,7 @@ Renovate is increasingly used for purposes which are traditionally described as 
 
 It's common for repositories to have DevOps-related files like CI/CD configs, or "Infrastructure as Code" (IaC) files.
 Examples of IaC files are Docker, Kubernetes or Terraform files.
-Renovate handles IaC files as "package managers" and "package files" and can detect and update them.
+Renovate handles IaC files as "package managers" and "package files" and can find and update them.
 
 #### Docker-compatible images
 
@@ -107,7 +108,7 @@ When you're using tag+digest based images, you'll have immutable builds.
 ### Internal package updates
 
 Your company typically has dozens of repositories, if not hundreds or thousands.
-These repositories usually rely on other repositories and may have upstream or downstream internal dependencies.
+These repositories often rely on other repositories and may have upstream or downstream internal dependencies.
 In such cases, it is best practice to:
 
 - Update downstream links as soon as possible, and
@@ -120,15 +121,15 @@ Renovate finds and updates internal dependencies just like external or Open Sour
 
 Renovate's automerge feature is really useful for internal dependencies where you can say "if it passes tests let's merge it".
 
-To learn more about "automerge" read the [key concepts, automerge](https://docs.renovatebot.com/key-concepts/automerge/) documentation.
+To learn more about "automerge" read the [key concepts, automerge](../key-concepts/automerge.md) documentation.
 
 #### Example of automerging internal dependencies
 
 We use these Renovate features to automerge an internal dependency:
 
 - [Git submodule support](https://docs.renovatebot.com/modules/manager/git-submodules/)
-- [`automerge`](https://docs.renovatebot.com/configuration-options/#automerge) set to `true
-- [`automergeType`](https://docs.renovatebot.com/configuration-options/#automergetype) set to `branch`
+- [`automerge`](../configuration-options.md#automerge) set to `true`
+- [`automergeType`](../configuration-options.md#automergetype) set to `branch`
 
 ##### Background information
 
@@ -177,14 +178,14 @@ You can set the time ranges during which Renovate creates updates in the `schedu
 
 You can use Renovate's "Dependency Dashboard" on platforms which support dynamic Markdown checkboxes:
 
+- Gitea and Forgejo
 - GitHub
 - GitLab
-- Gitea
 
 When you enable the Dependency Dashboard, Renovate creates a "Dependency Dashboard" issue.
 This issue lists all updates which are pending, in progress, or were previously closed ignored.
 
-If you want to get an update ahead of schedule, or want to retry a previously closed update, you can click on the update's checkbox in the Dependency Dashboard.
+If you want to get an update ahead of schedule, or want to retry a previously closed update: select the update's checkbox in the Dependency Dashboard.
 
 ### Dependency Dashboard Approval
 
@@ -194,7 +195,7 @@ We call this the "Dependency Dashboard Approval" workflow.
 Here's how it works:
 
 - You tell Renovate which package updates need "Dashboard Approval" by setting a custom `packageRule`
-- Renovate only raises updates for packages that need "Dashboard Approval" after you click on the corresponding checkbox on the dashboard
+- Renovate only raises updates for packages that need "Dashboard Approval" after you select the corresponding checkbox on the dashboard
 
 #### Benefits of using Dependency Dashboard Approval
 

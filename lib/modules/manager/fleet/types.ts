@@ -19,11 +19,18 @@ export interface GitRepo {
  */
 export interface FleetFile {
   helm: FleetFileHelm;
+  targetCustomizations?: {
+    name: string;
+    helm: FleetHelmBlock;
+  }[];
 }
 
-export interface FleetFileHelm {
+export interface FleetHelmBlock {
   chart: string;
   repo?: string;
-  version: string;
+  version?: string;
+}
+
+export interface FleetFileHelm extends FleetHelmBlock {
   releaseName: string;
 }

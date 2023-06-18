@@ -31,7 +31,7 @@ export interface GithubGraphqlDatasourceAdapter<
 
 export type RawQueryResponse<Payload> = [Payload, null] | [null, Error];
 
-export interface GithubGraphqlRepoResponsePayload<T> {
+export interface GithubGraphqlPayload<T> {
   nodes: T[];
   pageInfo?: {
     hasNextPage?: boolean;
@@ -42,17 +42,9 @@ export interface GithubGraphqlRepoResponsePayload<T> {
 export interface GithubGraphqlRepoResponse<T> {
   repository: {
     isRepoPrivate?: boolean;
-    payload: GithubGraphqlRepoResponsePayload<T>;
+    payload: GithubGraphqlPayload<T>;
   };
 }
-
-/**
- * Payload data unified with `isRepoPrivate` flag moved from upper level
- */
-export type GithubGraphqlPayload<T> =
-  GithubGraphqlRepoResponse<T>['repository']['payload'] & {
-    isRepoPrivate: GithubGraphqlRepoResponse<T>['repository']['isRepoPrivate'];
-  };
 
 export interface GithubPackageConfig {
   /**
@@ -63,21 +55,7 @@ export interface GithubPackageConfig {
   /**
    * Default: https://api.github.com
    */
-  registryUrl?: string;
-}
-
-/**
- * GraphQL shape for releases
- */
-export interface GithubGraphqlRelease {
-  version: string;
-  releaseTimestamp: string;
-  isDraft: boolean;
-  isPrerelease: boolean;
-  url: string;
-  id: number;
-  name: string;
-  description: string;
+  registryUrl?: string | undefined;
 }
 
 /**
@@ -86,38 +64,16 @@ export interface GithubGraphqlRelease {
 export interface GithubReleaseItem extends GithubDatasourceItem {
   isStable?: boolean;
   url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
-/**
- * GraphQL shape for tags
- */
-export interface GithubGraphqlTag {
-  version: string;
-  target:
-    | {
-        type: 'Commit';
-        newDigest: string;
-        releaseTimestamp: string;
-      }
-    | {
-        type: 'Tag';
-        target: {
-          newDigest: string;
-        };
-        tagger: {
-          releaseTimestamp: string;
-        };
-      };
+  id?: number;
+  name?: string;
+  description?: string;
 }
 
 /**
  * Result of GraphQL response transformation for tags (via tags)
  */
 export interface GithubTagItem extends GithubDatasourceItem {
-  newDigest: string;
+  hash: string;
   gitRef: string;
 }
 
@@ -129,4 +85,18 @@ export interface GithubGraphqlRepoParams {
   name: string;
   cursor: string | null;
   count: number;
+}
+
+export interface GithubGraphqlCacheRecord<
+  GithubItem extends GithubDatasourceItem
+> {
+  items: Record<string, GithubItem>;
+  createdAt: string;
+}
+
+export interface GithubGraphqlCacheStrategy<
+  GithubItem extends GithubDatasourceItem
+> {
+  reconcile(items: GithubItem[]): Promise<boolean>;
+  finalize(): Promise<GithubItem[]>;
 }

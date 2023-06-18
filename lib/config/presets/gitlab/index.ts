@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import type { GitLabBranch } from '../../../types/platform/gitlab';
+import type { GitlabProject } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import type { Preset, PresetConfig } from '../types';
@@ -14,26 +14,17 @@ async function getDefaultBranchName(
   urlEncodedPkgName: string,
   endpoint: string
 ): Promise<string> {
-  const branchesUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/branches`;
-
-  const res = await gitlabApi.getJson<GitLabBranch[]>(branchesUrl);
-  const branches = res.body;
-  let defaultBranchName = 'master';
-  for (const branch of branches) {
-    if (branch.default) {
-      defaultBranchName = branch.name;
-      break;
-    }
-  }
-
-  return defaultBranchName;
+  const res = await gitlabApi.getJson<GitlabProject>(
+    `${endpoint}projects/${urlEncodedPkgName}`
+  );
+  return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
 }
 
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string | null
+  tag?: string | undefined
 ): Promise<Preset> {
   let url = endpoint;
   let ref = '';
@@ -69,7 +60,7 @@ export function getPresetFromEndpoint(
   presetName: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string | null
+  tag?: string | undefined
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

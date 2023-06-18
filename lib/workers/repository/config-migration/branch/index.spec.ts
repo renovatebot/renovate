@@ -2,16 +2,16 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   git,
   mockedFunction,
   partial,
   platform,
+  scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
-import { PrState } from '../../../../types';
 import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
@@ -56,7 +56,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists'
@@ -72,7 +72,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
@@ -83,7 +83,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
@@ -98,23 +98,23 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
     describe('handle closed PR', () => {
       const title = 'PR title';
-      const pr = partial<Pr>({ title, state: PrState.Closed, number: 1 });
+      const pr = partial<Pr>({ title, state: 'closed', number: 1 });
 
       it('skips branch when there is a closed one delete it and add an ignore PR message', async () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
-        git.branchExists.mockReturnValueOnce(true);
+        scm.branchExists.mockResolvedValueOnce(true);
         const res = await checkConfigMigrationBranch(config, migratedData);
         expect(res).toBeNull();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
-        expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+        expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledWith(
           { prTitle: title },
           'Closed PR already exists. Skipping branch.'
@@ -122,7 +122,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.ensureComment).toHaveBeenCalledWith({
           content:
-            '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.',
+            '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.',
           topic: 'Renovate Ignore Notification',
           number: 1,
         });
@@ -132,7 +132,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         GlobalConfig.set({ dryRun: 'full' });
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
-        git.branchExists.mockReturnValueOnce(true);
+        scm.branchExists.mockResolvedValueOnce(true);
         const res = await checkConfigMigrationBranch(config, migratedData);
         expect(res).toBeNull();
         expect(logger.info).toHaveBeenCalledWith(

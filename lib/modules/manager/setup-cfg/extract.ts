@@ -3,7 +3,7 @@ import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { PackageDependency, PackageFile, Result } from '../types';
+import type { PackageDependency, PackageFileContent, Result } from '../types';
 
 function getSectionName(str: string): string {
   const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) ?? [];
@@ -11,7 +11,7 @@ function getSectionName(str: string): string {
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) ?? [];
+  const [, sectionRecord] = regEx(/^([^\s]+)\s*=/).exec(str) ?? [];
   return sectionRecord;
 }
 
@@ -87,7 +87,7 @@ function parseDep(
 
 export function extractPackageFile(
   content: string
-): Result<PackageFile | null> {
+): Result<PackageFileContent | null> {
   logger.trace('setup-cfg.extractPackageFile()');
 
   let sectionName: string | null = null;
