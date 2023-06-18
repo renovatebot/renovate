@@ -6,7 +6,7 @@ import { GitTagsDatasource } from '.';
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
-const depName = 'https://github.com/example/example.git';
+const packageName = 'https://github.com/example/example.git';
 
 const lsRemote1 = Fixtures.get('ls-remote-1.txt', '../git-refs');
 
@@ -21,7 +21,7 @@ describe('modules/datasource/git-tags/index', () => {
           return Promise.resolve('') as Response<string>;
         },
       });
-      const versions = await getPkgReleases({ datasource, depName });
+      const versions = await getPkgReleases({ datasource, packageName });
       expect(versions).toBeNull();
     });
 
@@ -31,7 +31,7 @@ describe('modules/datasource/git-tags/index', () => {
           throw new Error();
         },
       });
-      const versions = await getPkgReleases({ datasource, depName });
+      const versions = await getPkgReleases({ datasource, packageName });
       expect(versions).toBeNull();
     });
 
@@ -44,7 +44,7 @@ describe('modules/datasource/git-tags/index', () => {
 
       const versions = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
       expect(versions).toMatchSnapshot();
     });

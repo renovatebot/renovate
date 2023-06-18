@@ -5,7 +5,7 @@ import type { Preset } from '../types';
 export const presets: Record<string, Preset> = {
   all: {
     description: [
-      'A collection of workarounds for known problems with packages.',
+      'Apply crowd-sourced workarounds for known problems with packages.',
     ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
@@ -17,9 +17,35 @@ export const presets: Record<string, Preset> = {
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
+      'workarounds:disableEclipseLifecycleMapping',
       'workarounds:disableMavenParentRoot',
+      'workarounds:containerbase',
     ],
-    ignoreDeps: [],
+    ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  containerbase: {
+    description: 'Add some containerbase overrides',
+    packageRules: [
+      {
+        description:
+          'Use node versioning for `(containerbase|renovate)/node` images',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        versioning: 'node',
+      },
+    ],
+  },
+  disableEclipseLifecycleMapping: {
+    description: 'Disable Eclipse m2e lifecycle-mapping placeholder package.',
+    packageRules: [
+      {
+        enabled: false,
+        matchDatasources: ['maven'],
+        matchPackageNames: ['org.eclipse.m2e:lifecycle-mapping'],
+      },
+    ],
   },
   disableMavenParentRoot: {
     description:

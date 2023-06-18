@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { trimTrailingSlash } from '../../../util/url';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -10,22 +11,37 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { ApplicationDefinition, ApplicationSource } from './types';
+import type {
+  ApplicationDefinition,
+  ApplicationSource,
+  ApplicationSpec,
+} from './types';
 import { fileTestRegex } from './util';
 
-function createDependency(
-  definition: ApplicationDefinition
-): PackageDependency | null {
-  let source: ApplicationSource;
-  switch (definition.kind) {
-    case 'Application':
-      source = definition?.spec?.source;
-      break;
-    case 'ApplicationSet':
-      source = definition?.spec?.template?.spec?.source;
-      break;
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+  _config?: ExtractConfig
+): PackageFileContent | null {
+  // check for argo reference. API version for the kind attribute is used
+  if (fileTestRegex.test(content) === false) {
+    return null;
   }
 
+  let definitions: ApplicationDefinition[];
+  try {
+    definitions = loadAll(content) as ApplicationDefinition[];
+  } catch (err) {
+    logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
+    return null;
+  }
+
+  const deps = definitions.filter(is.plainObject).flatMap(processAppSpec);
+
+  return deps.length ? { deps } : null;
+}
+
+function processSource(source: ApplicationSource): PackageDependency | null {
   if (
     !source ||
     !is.nonEmptyString(source.repoURL) ||
@@ -66,28 +82,27 @@ function createDependency(
   };
 }
 
-export function extractPackageFile(
-  content: string,
-  fileName: string,
-  _config?: ExtractConfig
-): PackageFileContent | null {
-  // check for argo reference. API version for the kind attribute is used
-  if (fileTestRegex.test(content) === false) {
-    return null;
+function processAppSpec(
+  definition: ApplicationDefinition
+): PackageDependency[] {
+  const spec: ApplicationSpec | null | undefined =
+    definition.kind === 'Application'
+      ? definition?.spec
+      : definition?.spec?.template?.spec;
+
+  if (is.nullOrUndefined(spec)) {
+    return [];
   }
 
-  let definitions: ApplicationDefinition[];
-  try {
-    definitions = loadAll(content) as ApplicationDefinition[];
-  } catch (err) {
-    logger.debug({ err, fileName }, 'Failed to parse ArgoCD definition.');
-    return null;
+  const deps: (PackageDependency | null)[] = [];
+
+  if (is.nonEmptyObject(spec.source)) {
+    deps.push(processSource(spec.source));
   }
 
-  const deps = definitions
-    .filter(is.plainObject)
-    .map((definition) => createDependency(definition))
-    .filter(is.truthy);
+  for (const source of coerceArray(spec.sources)) {
+    deps.push(processSource(source));
+  }
 
-  return deps.length ? { deps } : null;
+  return deps.filter(is.truthy);
 }

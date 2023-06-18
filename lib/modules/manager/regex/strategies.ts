@@ -44,7 +44,10 @@ export function handleCombination(
   const extraction = matches
     .map((match) => ({
       groups: match.groups ?? {},
-      replaceString: match?.groups?.currentValue ? match[0] : undefined,
+      replaceString:
+        match?.groups?.currentValue ?? match?.groups?.currentDigest
+          ? match[0]
+          : undefined,
     }))
     .reduce((base, addition) => mergeExtractionTemplate(base, addition));
   return [createDependency(extraction, config)]

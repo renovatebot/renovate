@@ -1,8 +1,5 @@
-import url from 'url';
 import type { MergeStrategy } from '../../../config/types';
 import type { BranchStatus } from '../../../types';
-import { BitbucketHttp } from '../../../util/http/bitbucket';
-import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import type {
@@ -13,8 +10,6 @@ import type {
   RepoInfo,
   RepoInfoBody,
 } from './types';
-
-const bitbucketHttp = new BitbucketHttp();
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
@@ -62,60 +57,6 @@ export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
   red: 'FAILED',
   yellow: 'INPROGRESS',
 };
-
-const addMaxLength = (inputUrl: string, pagelen = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true);
-  const maxedUrl = url.format({
-    ...parsedUrl,
-    query: { ...parsedUrl.query, pagelen },
-  });
-  return maxedUrl;
-};
-
-function callApi<T>(
-  apiUrl: string,
-  method: string,
-  options?: HttpOptions
-): Promise<HttpResponse<T>> {
-  /* istanbul ignore next */
-  switch (method.toLowerCase()) {
-    case 'post':
-      return bitbucketHttp.postJson<T>(apiUrl, options);
-    case 'put':
-      return bitbucketHttp.putJson<T>(apiUrl, options);
-    case 'patch':
-      return bitbucketHttp.patchJson<T>(apiUrl, options);
-    case 'head':
-      return bitbucketHttp.headJson<T>(apiUrl, options);
-    case 'delete':
-      return bitbucketHttp.deleteJson<T>(apiUrl, options);
-    case 'get':
-    default:
-      return bitbucketHttp.getJson<T>(apiUrl, options);
-  }
-}
-
-export async function accumulateValues<T = any>(
-  reqUrl: string,
-  method = 'get',
-  options?: HttpOptions,
-  pagelen?: number
-): Promise<T[]> {
-  let accumulator: T[] = [];
-  let nextUrl = addMaxLength(reqUrl, pagelen);
-
-  while (typeof nextUrl !== 'undefined') {
-    const { body } = await callApi<{ values: T[]; next: string }>(
-      nextUrl,
-      method,
-      options
-    );
-    accumulator = [...accumulator, ...body.values];
-    nextUrl = body.next;
-  }
-
-  return accumulator;
-}
 
 export function prInfo(pr: PrResponse): Pr {
   return {

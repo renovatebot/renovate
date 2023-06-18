@@ -182,7 +182,7 @@ export function getDep(
         ...getDep(`${value}/${groups.depName}`),
         replaceString: currentFrom,
       };
-      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep)!;
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
       return dep;
     }
   }
@@ -239,7 +239,7 @@ export function getDep(
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  _packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];

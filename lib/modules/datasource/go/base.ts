@@ -1,13 +1,13 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import URL from 'url';
+import URL from 'node:url';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { trimLeadingSlash, trimTrailingSlash } from '../../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
@@ -53,7 +53,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = split[1] + '/' + split[2];
       return {
-        datasource: BitBucketTagsDatasource.id,
+        datasource: BitbucketTagsDatasource.id,
         packageName,
         registryUrl: 'https://bitbucket.org',
       };
@@ -172,7 +172,7 @@ export class BaseGoDatasource {
     goModule: string
   ): DataSource | null {
     const importMatch = regEx(
-      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
+      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)"\\s*\\/?>`
     ).exec(res);
 
     if (!importMatch) {
@@ -199,27 +199,34 @@ export class BaseGoDatasource {
     }
     // fall back to old behaviour if detection did not work
 
-    if (detectPlatform(goImportURL) === 'github') {
-      // split the go module from the URL: host/go/module -> go/module
-      // TODO: `parsedUrl.pathname` can be undefined
-      const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
-        .replace(regEx(/\.git$/), '')
-        .split('/')
-        .slice(-2)
-        .join('/');
+    switch (detectPlatform(goImportURL)) {
+      case 'github': {
+        // split the go module from the URL: host/go/module -> go/module
+        // TODO: `parsedUrl.pathname` can be undefined
+        const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
+          .replace(regEx(/\.git$/), '')
+          .split('/')
+          .slice(-2)
+          .join('/');
 
-      return {
-        datasource: GithubTagsDatasource.id,
-        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-        packageName,
-      };
+        return {
+          datasource: GithubTagsDatasource.id,
+          registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+          packageName,
+        };
+      }
+      case 'azure': {
+        return {
+          datasource: GitTagsDatasource.id,
+          packageName: goImportURL.replace(regEx(/\.git$/), ''),
+        };
+      }
+      default: {
+        return {
+          datasource: GitTagsDatasource.id,
+          packageName: goImportURL,
+        };
+      }
     }
-
-    // Fall back to git tags
-
-    return {
-      datasource: GitTagsDatasource.id,
-      packageName: goImportURL,
-    };
   }
 }

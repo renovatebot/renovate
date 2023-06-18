@@ -1,8 +1,7 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { expect, jest } from '@jest/globals';
 import type { Plugin } from 'pretty-format';
 import upath from 'upath';
-import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
 import { Platform, platform as _platform } from '../lib/modules/platform';
@@ -54,8 +53,6 @@ export const logger = mocked(_logger);
 
 export type { RenovateConfig };
 
-export { getConfig };
-
 function getCallerFileName(): string | null {
   let result: string | null = null;
 
@@ -72,7 +69,7 @@ function getCallerFileName(): string | null {
 
     let currentFile: string | null = null;
     for (const frame of stack) {
-      const fileName = frame.getFileName();
+      const fileName = frame.getFileName() ?? null;
       if (!currentFile) {
         currentFile = fileName;
       } else if (currentFile !== fileName) {

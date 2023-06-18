@@ -8,7 +8,6 @@ import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { checkoutBranch } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
@@ -137,7 +136,7 @@ export async function extract(
       logger.info({ err }, 'Error deleting cached dep updates');
     }
   } else {
-    await checkoutBranch(baseBranch!);
+    await scm.checkoutBranch(baseBranch!);
     const extractResult = (await extractAllDependencies(config)) || {};
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
@@ -173,9 +172,13 @@ async function fetchVulnerabilities(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   if (config.osvVulnerabilityAlerts) {
+    logger.debug('fetchVulnerabilities() - osvVulnerabilityAlerts=true');
     try {
       const vulnerabilities = await Vulnerabilities.create();
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
     } catch (err) {
       logger.warn({ err }, 'Unable to read vulnerability information');
     }

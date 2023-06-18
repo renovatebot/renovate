@@ -54,7 +54,7 @@ Grouping dependencies versus single PRs:
 
 ## Scheduling Renovate
 
-For a high level overview of scheduling when Renovate bot runs, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
+For a high level overview of scheduling when Renovate bot runs, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 
 On its own, the Renovate CLI tool runs once and then exits.
 Hence, it only runs as often as its administrator sets it to (e.g. via `cron`).
@@ -107,7 +107,7 @@ Or perhaps at least weekly:
     {
       "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
-      "schedule": ["before 2am on monday"]
+      "schedule": ["before 4am on monday"]
     }
   ]
 }
@@ -123,7 +123,7 @@ Granularity must be at least one hour.
 Automerging is a Renovate feature that can save you a lot of time/noise directly, while also benefiting grouping and scheduling.
 In short: it means that Renovate can merge PRs or even branches itself if they pass your tests.
 
-We recommend that you enable automerge for any type of dependency update where you would just select Merge anyway.
+We recommend that you enable automerge for any type of dependency update where you would select Merge anyway.
 We all know that there are some types of updates that we (nearly) always verify manually before merging, and plenty of others that we don't bother looking at unless tests fail.
 Every time you select Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in future.
 
@@ -167,7 +167,7 @@ Let's automerge it if all the linting updates pass:
     {
       "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
-      "schedule": ["before 2am on monday"],
+      "schedule": ["before 4am on monday"],
       "automerge": true,
       "automergeType": "branch"
     }
@@ -176,7 +176,8 @@ Let's automerge it if all the linting updates pass:
 ```
 
 Have you come up with a rule that you think others would benefit from?
-How about a PR back to [renovate-config](https://github.com/singapore/renovate-config) with the above rule named `":automergeEslintWeekly"` ?
+How about a PR to [our presets](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal)?
+For example the above rule could be named `":automergeEslintWeekly"` in `schedule.ts`.
 
 ## Lock file considerations
 

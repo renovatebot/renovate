@@ -42,34 +42,34 @@ const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
 
 export async function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): Promise<PackageFileContent<NpmManagerData> | null> {
-  logger.trace(`npm.extractPackageFile(${fileName})`);
+  logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
   const deps: PackageDependency[] = [];
   let packageJson: NpmPackage;
   try {
     packageJson = JSON.parse(content);
   } catch (err) {
-    logger.debug(`Invalid JSON in ${fileName}`);
+    logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }
 
   if (packageJson._id && packageJson._args && packageJson._from) {
-    logger.debug('Ignoring vendorised package.json');
+    logger.debug({ packageFile }, 'Ignoring vendorised package.json');
     return null;
   }
-  if (fileName !== 'package.json' && packageJson.renovate) {
+  if (packageFile !== 'package.json' && packageJson.renovate) {
     const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = fileName;
+    error.validationSource = packageFile;
     error.validationError =
       'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
   }
   const packageJsonName = packageJson.name;
   logger.debug(
-    `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
+    `npm file ${packageFile} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
   let workspacesPackages: string[] | undefined;
@@ -90,7 +90,7 @@ export async function extractPackageFile(
     'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
     string
   ][]) {
-    const filePath = getSiblingFileName(fileName, val);
+    const filePath = getSiblingFileName(packageFile, val);
     if (await readLocalFile(filePath, 'utf8')) {
       lockFiles[key] = filePath;
     } else {
@@ -102,7 +102,7 @@ export async function extractPackageFile(
   delete lockFiles.shrinkwrapJson;
 
   let npmrc: string | undefined;
-  const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
+  const npmrcFileName = getSiblingFileName(packageFile, '.npmrc');
   let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
   if (is.string(repoNpmrc)) {
     if (is.string(config.npmrc) && !config.npmrcMerge) {
@@ -141,7 +141,7 @@ export async function extractPackageFile(
     npmrc = config.npmrc;
   }
 
-  const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
+  const yarnrcYmlFileName = getSiblingFileName(packageFile, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
   let yarnConfig: YarnConfig | null = null;
@@ -150,7 +150,7 @@ export async function extractPackageFile(
     yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
 
-  const legacyYarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
+  const legacyYarnrcFileName = getSiblingFileName(packageFile, '.yarnrc');
   const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
   if (is.string(repoLegacyYarnrc)) {
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
@@ -168,11 +168,11 @@ export async function extractPackageFile(
       }
     | undefined;
   try {
-    lernaJsonFile = getSiblingFileName(fileName, 'lerna.json');
+    lernaJsonFile = getSiblingFileName(packageFile, 'lerna.json');
     // TODO #7154
     lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Could not parse lerna.json');
+    logger.debug({ err, lernaJsonFile }, 'Could not parse lerna.json');
   }
   if (lernaJson && !lernaJson.useWorkspaces) {
     lernaPackages = lernaJson.packages;
@@ -233,6 +233,7 @@ export async function extractPackageFile(
       } else if (depName === 'pnpm') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'pnpm';
+        extractedConstraints.pnpm = dep.currentValue;
       } else if (depName === 'vscode') {
         dep.datasource = GithubTagsDatasource.id;
         dep.packageName = 'microsoft/vscode';
@@ -241,7 +242,7 @@ export async function extractPackageFile(
         dep.skipReason = 'unknown-engines';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = 'unspecified-version';
       }
       return dep;
     }
@@ -266,7 +267,7 @@ export async function extractPackageFile(
         dep.skipReason = 'unknown-volta';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = 'unspecified-version';
       }
       return dep;
     }
@@ -282,7 +283,10 @@ export async function extractPackageFile(
         dep.packageName = valSplit[0] + '@' + valSplit[1];
         dep.currentValue = valSplit[2];
       } else {
-        logger.debug('Invalid npm package alias: ' + dep.currentValue);
+        logger.debug(
+          { packageFile },
+          'Invalid npm package alias: ' + dep.currentValue
+        );
       }
     }
     if (dep.currentValue.startsWith('file:')) {
@@ -305,7 +309,7 @@ export async function extractPackageFile(
     }
     const hashSplit = dep.currentValue.split('#');
     if (hashSplit.length !== 2) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
@@ -322,7 +326,7 @@ export async function extractPackageFile(
         .replace(regEx(/\.git$/), '');
       const githubRepoSplit = githubOwnerRepo.split('/');
       if (githubRepoSplit.length !== 2) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = 'unspecified-version';
         return dep;
       }
       [githubOwner, githubRepo] = githubRepoSplit;
@@ -336,7 +340,7 @@ export async function extractPackageFile(
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
     ) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
       return dep;
     }
     if (isVersion(depRefPart)) {
@@ -446,7 +450,10 @@ export async function extractPackageFile(
           }
         }
       } catch (err) /* istanbul ignore next */ {
-        logger.debug({ fileName, depType, err }, 'Error parsing package.json');
+        logger.debug(
+          { fileName: packageFile, depType, err },
+          'Error parsing package.json'
+        );
         return null;
       }
     }
@@ -526,7 +533,7 @@ export async function extractAllPackageFiles(
         });
       }
     } else {
-      logger.debug(`No content found in ${packageFile}`);
+      logger.debug({ packageFile }, `No content found`);
     }
   }
 

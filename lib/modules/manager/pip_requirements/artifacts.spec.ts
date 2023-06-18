@@ -207,7 +207,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -218,7 +218,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar ' +
+          'containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +

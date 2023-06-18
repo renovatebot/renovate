@@ -139,6 +139,14 @@ For example:
 }
 ```
 
+## bbUseDevelopmentBranch
+
+By default, Renovate will use a repository's "main branch" (typically called `main` or `master`) as the "default branch".
+
+Configuring this to `true` means that Renovate will detect and use the Bitbucket [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as defined by the repository's branching model.
+
+If the "development branch" is configured but the branch itself does not exist (e.g. it was deleted), Renovate will fall back to using the repository's "main branch". This fall back behavior matches that of the Bitbucket Cloud web interface.
+
 ## binarySource
 
 Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
@@ -211,6 +219,15 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## checkedBranches
+
+This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
+
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+
 ## containerbaseDir
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
@@ -282,7 +299,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 ### Datasource and credentials only
 
-You can skip the host part, and use just the datasource and credentials.
+You can skip the host part, and use only the datasource and credentials.
 
 `DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
 
@@ -302,9 +319,9 @@ You can skip the host part, and use just the datasource and credentials.
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `renovate/node` is:
+For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
 
-- called `myprefix_node` instead of `renovate_node`
+- called `myprefix_sidecar` instead of `renovate_sidecar`
 - labeled `myprefix_child` instead of `renovate_child`
 
 <!-- prettier-ignore -->
@@ -313,19 +330,19 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 
 ## dockerImagePrefix
 
-By default Renovate pulls the sidecar Docker containers from `docker.io/renovate`.
+By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
 You can use the `dockerImagePrefix` option to override this default.
 
-Say you want to pull your images from `ghcr.io/renovatebot`.
+Say you want to pull your images from `ghcr.io/containerbase` to bypass Docker Hub limits.
 You would put this in your configuration file:
 
 ```json
 {
-  "dockerImagePrefix": "ghcr.io/renovatebot"
+  "dockerImagePrefix": "ghcr.io/containerbase"
 }
 ```
 
-If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
 
 ## dockerUser
 
@@ -382,7 +399,7 @@ If you must expose all environment variables to package managers, you can set th
     Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
-Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
+Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -462,6 +479,12 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+<!-- prettier-ignore -->
+!!! warning
+    `globalExtends` presets can't be private.
+    When Renovate resolves `globalExtends` it does not fully process the configuration.
+    This means that Renovate does not have the authentication it needs to fetch private things.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -518,7 +541,7 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 ## onboardingConfigFileName
 
-If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
+If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
@@ -567,7 +590,7 @@ Default is no limit.
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
+If you want a UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
 To create the key pair with GPG use the following commands:
 
@@ -636,7 +659,9 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 
 <!-- prettier-ignore -->
 !!! note
-    Simple public key encryption was previously used to encrypt secrets, but this approach has been deprecated and is no longer documented.
+    You could use public key encryption with earlier versions of Renovate.
+    We deprecated this approach and removed the documentation for it.
+    If you're _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## privateKeyOld
 
@@ -708,6 +733,10 @@ Set this to an S3 URI to enable S3 backed repository cache.
 !!! tip
     If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
     For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+
+<!-- prettier-ignore -->
+!!! note
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 

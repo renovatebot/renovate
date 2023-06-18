@@ -13,7 +13,7 @@ jest.mock('../../../../../modules/datasource/npm');
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  depName: 'renovate',
+  packageName: 'renovate',
   endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
@@ -97,7 +97,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -122,7 +122,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -141,14 +141,14 @@ describe('workers/repository/update/pr/changelog/github', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          depName: '@renovate/no',
+          packageName: '@renovate/no',
         })
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: '@renovate/no',
+          packageName: '@renovate/no',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -174,7 +174,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -251,7 +251,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -284,7 +284,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'sindresorhus/got',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/sindresorhus/got',
@@ -312,7 +312,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
@@ -348,7 +348,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'sindresorhus/got',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/sindresorhus/got',
@@ -366,19 +366,24 @@ describe('workers/repository/update/pr/changelog/github', () => {
           { version: '1.0.1' },
           { version: 'correctPrefix/target@1.0.1' },
           { version: 'wrongPrefix/target-1.0.1' },
+          { version: 'v1.0.2' },
+          { version: '1.0.2' },
+          { version: 'correctPrefix/target-1.0.2' },
+          { version: 'wrongPrefix/target@1.0.2' },
         ])
       );
 
       const upgradeData = partial<BranchUpgradeConfig>({
         manager: 'some-manager',
         branchName: '',
-        depName: 'correctPrefix/target',
+        packageName: 'correctPrefix/target',
         endpoint: 'https://api.github.com/',
         versioning: 'npm',
         currentVersion: '1.0.0',
-        newVersion: '1.0.1',
+        newVersion: '1.0.2',
         sourceUrl: 'https://github.com/chalk/chalk',
         releases: [
+          { version: '1.0.2', gitRef: '789012' },
           { version: '1.0.1', gitRef: '123456' },
           { version: '0.1.1', gitRef: 'npm_1.0.0' },
         ],
@@ -395,9 +400,21 @@ describe('workers/repository/update/pr/changelog/github', () => {
           repository: 'chalk/chalk',
           sourceUrl: 'https://github.com/chalk/chalk',
           sourceDirectory: undefined,
-          depName: 'correctPrefix/target',
+          packageName: 'correctPrefix/target',
         },
         versions: [
+          {
+            version: '1.0.2',
+            date: undefined,
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/correctPrefix/target@1.0.1...correctPrefix/target-1.0.2',
+            },
+            releaseNotes: {
+              url: 'https://github.com/chalk/chalk/compare/correctPrefix/target@1.0.1...correctPrefix/target-1.0.2',
+              notesSourceUrl: '',
+            },
+          },
           {
             version: '1.0.1',
             date: undefined,

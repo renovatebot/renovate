@@ -344,6 +344,12 @@ describe('util/git/index', () => {
       expect(merged.all).toContain('renovate/future_branch');
     });
 
+    it('does not push if localOnly=true', async () => {
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      await git.mergeBranch('renovate/future_branch', true);
+      expect(pushSpy).toHaveBeenCalledTimes(0);
+    });
+
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
@@ -500,7 +506,7 @@ describe('util/git/index', () => {
         message: 'Update something',
       };
       const commitSha = await git.commitFiles(commitConfig);
-      const remoteSha = await git.fetchCommit(commitConfig);
+      const remoteSha = await git.fetchBranch(commitConfig.branchName);
       expect(commitSha).toEqual(remoteSha);
     });
 

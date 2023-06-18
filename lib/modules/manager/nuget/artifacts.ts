@@ -38,7 +38,7 @@ async function addSourceCmds(
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
   const result: string[] = [];
   for (const registry of registries) {
-    const { username, password } = hostRules.find({
+    const { password, username } = hostRules.find({
       hostType: NugetDatasource.id,
       url: registry.url,
     });
@@ -50,9 +50,14 @@ async function addSourceCmds(
       // Add name for registry, if known.
       addSourceCmd += ` --name ${quote(registry.name)}`;
     }
-    if (username && password) {
-      // Add registry credentials from host rules, if configured.
-      addSourceCmd += ` --username ${quote(username)} --password ${quote(
+    // Add registry credentials from host rules, if configured.
+    if (username) {
+      // Add username from host rules, if configured.
+      addSourceCmd += ` --username ${quote(username)}`;
+    }
+    if (password) {
+      // Add password from host rules, if configured.
+      addSourceCmd += ` --password ${quote(
         password
       )} --store-password-in-clear-text`;
     }

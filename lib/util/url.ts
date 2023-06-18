@@ -30,6 +30,10 @@ export function trimLeadingSlash(path: string): string {
   return path.replace(/^\/+/, '');
 }
 
+export function trimSlashes(path: string): string {
+  return trimLeadingSlash(trimTrailingSlash(path));
+}
+
 /**
  * Resolves an input path against a base URL
  *
@@ -68,7 +72,7 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
 export function getQueryString(params: Record<string, any>): string {
   const usp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
-    if (Array.isArray(v)) {
+    if (is.array<object>(v)) {
       for (const item of v) {
         usp.append(k, item.toString());
       }
@@ -76,8 +80,7 @@ export function getQueryString(params: Record<string, any>): string {
       usp.append(k, v.toString());
     }
   }
-  const res = usp.toString();
-  return res;
+  return usp.toString();
 }
 
 export function validateUrl(url?: string, httpOnly = true): boolean {
