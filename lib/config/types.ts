@@ -258,7 +258,7 @@ export interface RenovateConfig
   vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
-  fetchReleaseNotes?: boolean;
+  fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
@@ -298,6 +298,8 @@ export type UpdateType =
   | 'rollback'
   | 'bump'
   | 'replacement';
+
+export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
