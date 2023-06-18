@@ -151,80 +151,80 @@ describe('workers/global/config/parse/file', () => {
       expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
       fs.unlinkSync(configFile);
     });
+  });
 
-    // describe('deleteConfigFile()', () => {
-    //   const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
-    //   const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
-    //
-    //   beforeEach(() => {
-    //     jest.resetAllMocks();
-    //   });
-    //
-    //   it.each([[undefined], [' ']])(
-    //     'skip when RENOVATE_CONFIG_FILE is not set ("%s")',
-    //     async (configFile) => {
-    //       await file.deleteConfigFile({ RENOVATE_CONFIG_FILE: configFile });
-    //
-    //       expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
-    //     }
-    //   );
-    //
-    //   it('skip when config file does not exist', async () => {
-    //     fsPathExistsSpy.mockResolvedValueOnce(false as never);
-    //
-    //     await file.deleteConfigFile({ RENOVATE_CONFIG_FILE: 'path' });
-    //
-    //     expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
-    //   });
-    //
-    //   it.each([['false'], [' ']])(
-    //     'skip if RENOVATE_X_DELETE_CONFIG_FILE is not set ("%s")',
-    //     async (xDeleteConfig) => {
-    //       await file.deleteConfigFile({
-    //         RENOVATE_CONFIG_FILE: './config.js',
-    //         RENOVATE_X_DELETE_CONFIG_FILE: xDeleteConfig,
-    //       });
-    //
-    //       expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
-    //     }
-    //   );
-    //
-    //   it('removes the specified config file', async () => {
-    //     fsRemoveSpy.mockImplementationOnce((dir: string): void => {
-    //       // no-op
-    //     });
-    //     const configFile = './config.js';
-    //     await file.deleteConfigFile({
-    //       RENOVATE_CONFIG_FILE: configFile,
-    //       RENOVATE_X_DELETE_CONFIG_FILE: 'true',
-    //     });
-    //
-    //     expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-    //     expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
-    //     expect(logger.trace).toHaveBeenCalledWith(
-    //       expect.anything(),
-    //       'config file successfully deleted'
-    //     );
-    //   });
-    //
-    //   it('fails silently when attempting to delete the config file', async () => {
-    //     fsRemoveSpy.mockImplementationOnce((dir: string): void => {
-    //       throw new Error();
-    //     });
-    //     const configFile = './config.js';
-    //
-    //     await file.deleteConfigFile({
-    //       RENOVATE_CONFIG_FILE: configFile,
-    //       RENOVATE_X_DELETE_CONFIG_FILE: 'true',
-    //     });
-    //
-    //     expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
-    //     expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
-    //     expect(logger.warn).toHaveBeenCalledWith(
-    //       expect.anything(),
-    //       'error deleting config file'
-    //     );
-    //   });
-    // });
+  describe('deleteConfigFile()', () => {
+    const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
+    const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it.each([[undefined], [' ']])(
+      'skip when RENOVATE_CONFIG_FILE is not set ("%s")',
+      async (configFile) => {
+        await file.deleteConfigFile({ RENOVATE_CONFIG_FILE: configFile });
+
+        expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
+      }
+    );
+
+    it('skip when config file does not exist', async () => {
+      fsPathExistsSpy.mockResolvedValueOnce(false as never);
+
+      await file.deleteConfigFile({ RENOVATE_CONFIG_FILE: 'path' });
+
+      expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it.each([['false'], [' ']])(
+      'skip if RENOVATE_X_DELETE_CONFIG_FILE is not set ("%s")',
+      async (xDeleteConfig) => {
+        await file.deleteConfigFile({
+          RENOVATE_CONFIG_FILE: './config.js',
+          RENOVATE_X_DELETE_CONFIG_FILE: xDeleteConfig,
+        });
+
+        expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
+      }
+    );
+
+    it('removes the specified config file', async () => {
+      fsRemoveSpy.mockImplementationOnce((dir: string): void => {
+        // no-op
+      });
+      const configFile = './config.js';
+      await file.deleteConfigFile({
+        RENOVATE_CONFIG_FILE: configFile,
+        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
+      });
+
+      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
+      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(logger.trace).toHaveBeenCalledWith(
+        expect.anything(),
+        'config file successfully deleted'
+      );
+    });
+
+    it('fails silently when attempting to delete the config file', async () => {
+      fsRemoveSpy.mockImplementationOnce((dir: string): void => {
+        throw new Error();
+      });
+      const configFile = './config.js';
+
+      await file.deleteConfigFile({
+        RENOVATE_CONFIG_FILE: configFile,
+        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
+      });
+
+      expect(fsRemoveSpy).toHaveBeenCalledTimes(1);
+      expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'error deleting config file'
+      );
+    });
   });
 });
