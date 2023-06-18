@@ -112,6 +112,7 @@ export interface UpdatePrConfig {
   prTitle: string;
   prBody?: string;
   state?: 'open' | 'closed';
+  targetBranch?: string;
 }
 export interface EnsureIssueConfig {
   title: string;

@@ -29,7 +29,7 @@ export abstract class TerraformDatasource extends Datasource {
     return `${ensureTrailingSlash(registryUrl)}.well-known/terraform.json`;
   }
 
-  override handleSpecificErrors(err: HttpError): void {
+  override handleHttpErrors(err: HttpError): void {
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {

@@ -1,11 +1,14 @@
-import { RenovateConfig, getConfig } from '../../../test/util';
+import { RenovateConfig, partial } from '../../../test/util';
 import { checkIfConfigured } from './configured';
 
 let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({
+    enabled: true,
+    forkProcessing: 'auto',
+  });
 });
 
 describe('workers/repository/configured', () => {
@@ -22,7 +25,6 @@ describe('workers/repository/configured', () => {
     it('throws if unconfigured fork', () => {
       config.enabled = true;
       config.isFork = true;
-      config.renovateJsonPresent = false;
       expect(() => checkIfConfigured(config)).toThrow();
     });
   });

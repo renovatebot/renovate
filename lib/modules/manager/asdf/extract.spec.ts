@@ -548,8 +548,8 @@ dummy 1.2.3
     });
 
     it('can handle java jre / jdk', () => {
-      const jdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
-      expect(jdkRes).toEqual({
+      const adoptOpenJdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
+      expect(adoptOpenJdkRes).toEqual({
         deps: [
           {
             currentValue: '16.0.0+36',
@@ -559,8 +559,32 @@ dummy 1.2.3
           },
         ],
       });
-      const jreRes = extractPackageFile('java adoptopenjdk-jre-16.0.0+36');
-      expect(jreRes).toEqual({
+      const adoptOpenJreRes = extractPackageFile(
+        'java adoptopenjdk-jre-16.0.0+36'
+      );
+      expect(adoptOpenJreRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jre',
+          },
+        ],
+      });
+      const temurinJdkRes = extractPackageFile('java temurin-16.0.0+36');
+      expect(temurinJdkRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jdk',
+          },
+        ],
+      });
+      const temurinJreRes = extractPackageFile('java temurin-jre-16.0.0+36');
+      expect(temurinJreRes).toEqual({
         deps: [
           {
             currentValue: '16.0.0+36',
