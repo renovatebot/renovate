@@ -114,10 +114,11 @@ export async function generateLockFiles(
       cmd.push('lerna info || echo "Ignoring lerna info failure"');
       cmd.push(`${lernaClient} install ${cmdOptions}`);
       cmd.push(lernaCommand);
-      await exec(cmd, execOptions);
     } else {
       logger.debug('Skipping lerna bootstrap');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
     }
+    await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
