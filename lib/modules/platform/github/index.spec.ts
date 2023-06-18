@@ -358,7 +358,7 @@ describe('modules/platform/github/index', () => {
       const repo = 'some/repo';
       const branch = 'master';
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, repo, false, branch);
+      forkInitRepoMock(scope, repo, false, 200, branch);
       await expect(
         github.initRepo({
           repository: 'some/repo',
@@ -2307,6 +2307,7 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreate: true,
         });
       });
 
