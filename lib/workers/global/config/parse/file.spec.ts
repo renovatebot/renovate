@@ -156,6 +156,10 @@ describe('workers/global/config/parse/file', () => {
       const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
       const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
 
+      beforeEach(() => {
+        jest.resetAllMocks();
+      });
+
       it.each([[undefined], [' ']])(
         'skip when RENOVATE_CONFIG_FILE is not set ("%s")',
         async (configFile) => {
