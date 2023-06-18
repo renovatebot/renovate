@@ -107,7 +107,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       expect(res.error).toBeFalse();
     });
 
-    it('defaults to latest and skipps bootstrap if lerna version unspecified', async () => {
+    it('defaults to latest and skips bootstrap if lerna version unspecified', async () => {
       const execSnapshots = mockExecAll();
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
