@@ -47,6 +47,12 @@ export const GemVersions = LooseArray(
       platform: z.string().nullable().catch(null),
       ruby_version: z.string().nullable().catch(null),
       rubygems_version: z.string().nullable().catch(null),
+      metadata: z
+        .object({
+          changelog_uri: z.string().optional().catch(undefined),
+          source_code_uri: z.string().optional().catch(undefined),
+        })
+        .catch({}),
     })
     .transform(
       ({
@@ -55,6 +61,7 @@ export const GemVersions = LooseArray(
         platform,
         ruby_version: rubyVersion,
         rubygems_version: rubygemsVersion,
+        metadata,
       }): Release => {
         const result: Release = { version, releaseTimestamp };
         const constraints: Record<string, string[]> = {};
@@ -73,6 +80,14 @@ export const GemVersions = LooseArray(
 
         if (!is.emptyObject(constraints)) {
           result.constraints = constraints;
+        }
+
+        if (metadata.changelog_uri) {
+          result.changelogUrl = metadata.changelog_uri;
+        }
+
+        if (metadata.source_code_uri) {
+          result.sourceUrl = metadata.source_code_uri;
         }
 
         return result;
