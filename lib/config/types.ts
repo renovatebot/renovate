@@ -125,7 +125,7 @@ export interface RepoGlobalConfig {
   cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
-  dockerImagePrefix?: string;
+  dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
   executionTimeout?: number;
@@ -258,7 +258,7 @@ export interface RenovateConfig
   vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
-  fetchReleaseNotes?: boolean;
+  fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
@@ -299,6 +299,8 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
+export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
+
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
 export type MergeStrategy =
@@ -315,8 +317,7 @@ export interface PackageRule
     Record<string, unknown> {
   description?: string | string[];
   isVulnerabilityAlert?: boolean;
-  matchFiles?: string[];
-  matchPaths?: string[];
+  matchFileNames?: string[];
   matchLanguages?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
@@ -461,6 +462,7 @@ export type RenovateOptions =
 export interface PackageRuleInputConfig extends Record<string, unknown> {
   versioning?: string;
   packageFile?: string;
+  lockFiles?: string[];
   depType?: string;
   depTypes?: string[];
   depName?: string;

@@ -24,9 +24,9 @@ const options: RenovateOptions[] = [
   {
     name: 'allowPostUpgradeCommandTemplating',
     description:
-      'Set this to `true` to allow templating for post-upgrade commands.',
+      'Set this to `false` to disable template compilation for post-upgrade commands.',
     type: 'boolean',
-    default: false,
+    default: true,
     globalOnly: true,
   },
   {
@@ -344,11 +344,11 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
-    name: 'dockerImagePrefix',
+    name: 'dockerSidecarImage',
     description:
-      'Change this value to override the default Renovate Docker sidecar image name prefix.',
+      'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'docker.io/containerbase',
+    default: 'ghcr.io/containerbase/sidecar:8.0.2',
     globalOnly: true,
   },
   {
@@ -1294,20 +1294,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchFiles',
+    name: 'matchFileNames',
     description:
       'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    stage: 'repository',
-    parent: 'packageRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'matchPaths',
-    description:
-      'List of strings or glob patterns to match against package files. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -2551,9 +2540,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Controls if release notes are fetched.',
-    type: 'boolean',
-    default: true,
+    description: 'Controls if and when release notes are fetched.',
+    type: 'string',
+    allowedValues: ['off', 'branch', 'pr'],
+    default: 'pr',
     cli: false,
     env: false,
   },
@@ -2613,7 +2603,7 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
-    default: false,
+    default: true,
   },
   {
     name: 'userStrings',
