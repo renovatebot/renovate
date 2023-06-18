@@ -99,13 +99,6 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
         },
       ],
     });
-
-    expect(packageCache.set).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.any(String),
-      expect.anything(),
-      100 * 24 * 60
-    );
   });
 
   it('returns cached data', async () => {

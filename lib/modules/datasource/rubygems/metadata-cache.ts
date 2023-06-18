@@ -52,7 +52,13 @@ export class MetadataCache {
 
     const newCache: CacheRecord = { hash, data };
     const ttlMinutes = 100 * 24 * 60;
-    await packageCache.set(cacheNs, cacheKey, newCache, ttlMinutes);
+    const ttlRandomDelta = Math.floor(Math.random() * 10 * 24 * 60);
+    await packageCache.set(
+      cacheNs,
+      cacheKey,
+      newCache,
+      ttlMinutes + ttlRandomDelta
+    );
 
     return data;
   }
