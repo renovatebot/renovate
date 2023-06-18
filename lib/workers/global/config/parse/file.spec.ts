@@ -169,10 +169,10 @@ describe('workers/global/config/parse/file', () => {
 
     it.each([['false'], [' ']])(
       'skip if RENOVATE_X_DELETE_CONFIG_FILE is not set ("%s")',
-      async (xDeleteConfig) => {
+      async (deleteConfig) => {
         await file.deleteConfigFile({
-          RENOVATE_CONFIG_FILE: './config.js',
-          RENOVATE_X_DELETE_CONFIG_FILE: xDeleteConfig,
+          RENOVATE_X_DELETE_CONFIG_FILE: deleteConfig,
+          RENOVATE_CONFIG_FILE: '/path/to/config.js',
         });
 
         expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
@@ -183,7 +183,9 @@ describe('workers/global/config/parse/file', () => {
       fsRemoveSpy.mockImplementationOnce((dir: string): void => {
         // no-op
       });
-      const configFile = './config.js';
+      fsPathExistsSpy.mockResolvedValueOnce(true as never);
+      const configFile = '/path/to/config.js';
+
       await file.deleteConfigFile({
         RENOVATE_CONFIG_FILE: configFile,
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
@@ -201,7 +203,8 @@ describe('workers/global/config/parse/file', () => {
       fsRemoveSpy.mockImplementationOnce((dir: string): void => {
         throw new Error();
       });
-      const configFile = './config.js';
+      fsPathExistsSpy.mockResolvedValueOnce(true as never);
+      const configFile = '/path/to/config.js';
 
       await file.deleteConfigFile({
         RENOVATE_CONFIG_FILE: configFile,
