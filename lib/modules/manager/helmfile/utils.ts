@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import upath from 'upath';
 
@@ -35,14 +34,6 @@ export async function localChartHasKustomizationsYaml(
 export function parseDoc(packageFileContent: string): Doc {
   const doc = yaml.load(packageFileContent);
   return DocSchema.parse(doc);
-}
-
-export function getRepositories(doc: Doc): Repository[] {
-  if (is.nullOrUndefined(doc.repositories)) {
-    return [];
-  }
-
-  return doc.repositories;
 }
 
 export function isOCIRegistry(repository: Repository): boolean {

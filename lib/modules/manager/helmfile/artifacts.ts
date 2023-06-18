@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ToolConstraint } from '../../../util/exec/types';
 import {
@@ -13,12 +14,7 @@ import { getFile } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import {
-  generateRegistryLoginCmd,
-  getRepositories,
-  isOCIRegistry,
-  parseDoc,
-} from './utils';
+import { generateRegistryLoginCmd, isOCIRegistry, parseDoc } from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -71,12 +67,11 @@ export async function updateArtifacts({
     const cmd: string[] = [];
     const doc = parseDoc(newPackageFileContent);
 
-    const repositories = getRepositories(doc);
-
-    for (const value of repositories.filter(isOCIRegistry)) {
+    for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
       const loginCmd = generateRegistryLoginCmd(
         value.name,
         `https://${value.url}`,
+        // this extracts the hostname from url like format ghcr.ip/helm-charts
         value.url.replace(regEx(/\/.*/), '')
       );
 
