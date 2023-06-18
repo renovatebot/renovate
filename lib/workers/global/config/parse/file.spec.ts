@@ -190,7 +190,9 @@ describe('workers/global/config/parse/file', () => {
       );
 
       it('removes the specified config file', async () => {
-        fsRemoveSpy.mockImplementationOnce(() => undefined as never);
+        fsRemoveSpy.mockImplementationOnce((dir: string): void => {
+          // no-op
+        });
         const configFile = './config.js';
         await file.deleteConfigFile({
           RENOVATE_CONFIG_FILE: configFile,
@@ -206,7 +208,9 @@ describe('workers/global/config/parse/file', () => {
       });
 
       it('fails silently when attempting to delete the config file', async () => {
-        fsRemoveSpy.mockRejectedValueOnce(new Error() as never);
+        fsRemoveSpy.mockImplementationOnce((dir: string): void => {
+          throw new Error();
+        });
         const configFile = './config.js';
 
         await file.deleteConfigFile({
