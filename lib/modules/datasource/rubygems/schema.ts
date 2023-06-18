@@ -16,7 +16,7 @@ export const MarshalledVersionInfo = LooseArray(
 
 export const GemMetadata = z
   .object({
-    name: z.string().transform((x) => x.toLowerCase()),
+    name: z.string(),
     version: z.string().nullish().catch(null),
     changelog_uri: z.string().nullish().catch(null),
     homepage_uri: z.string().nullish().catch(null),
