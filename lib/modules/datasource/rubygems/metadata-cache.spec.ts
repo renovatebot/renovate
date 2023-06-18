@@ -1,4 +1,3 @@
-import os from 'os';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
@@ -9,26 +8,19 @@ jest.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 describe('modules/datasource/rubygems/metadata-cache', () => {
-  const cache: Map<string, Map<string, unknown>> = new Map();
+  const cache: Map<string, unknown> = new Map();
 
   packageCache.get.mockImplementation(
-    (ns, key) => Promise.resolve(cache.get(ns)?.get(key)) as never
+    (ns, key) => Promise.resolve(cache.get(`${ns}::${key}`)) as never
   );
 
   packageCache.set.mockImplementation((ns, key, value) => {
-    const nsCache = cache.get(ns) ?? new Map();
-    nsCache.set(key, value);
-    cache.set(ns, nsCache);
+    cache.set(`${ns}::${key}`, value);
     return Promise.resolve() as never;
   });
 
-  beforeEach(async () => {
-    await packageCache.init({ cacheDir: os.tmpdir() });
+  beforeEach(() => {
     cache.clear();
-  });
-
-  afterEach(async () => {
-    await packageCache.cleanup({});
   });
 
   it('fetches data', async () => {
