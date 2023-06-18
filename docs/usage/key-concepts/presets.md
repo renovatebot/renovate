@@ -16,6 +16,21 @@ Use presets to:
 - Share your configuration with others
 - Use somebody else's configuration and extend it with your own rules
 
+## How to use presets
+
+Let's say you're using the `config:base` preset, and want to pin your GitHub Action digests.
+Instead of writing your own Renovate config, you search through Renovate's built-in presets.
+You find the the `helpers:pinGitHubActionDigests` preset and add it to the `extends` array:
+
+```json
+{
+  "extends": ["config:base", "helpers:pinGitHubActionDigests"]
+}
+```
+
+Renovate now follows the rules for `config:base` plus the rules for `helpers:pinGitHubActionDigests`.
+If there is a logical conflict between presets, then the last preset in the array wins.
+
 ## Managing config for many repositories
 
 If you manage Renovate for many repositories, then you should create a global preset configuration.
@@ -24,13 +39,20 @@ This way you have all global configuration in a single file, in a single reposit
 
 ## Presets are modular
 
-Preset configs are modular, they can be as small as a single package rule or as large as an entire configuration, just like an ESLint config.
+Preset configs are modular, they can be as small as a single package rule or as large as an entire configuration.
+This is similar to the way you can share ESLint configurations.
 
 ## Built-in presets
 
 Renovate comes with a lot of built-in presets that you can use.
 Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you.
 Once you find a preset you like, put it in an `extends` array in your config file.
+
+### Contributing a new built-in preset
+
+If you have a Renovate config that may help others, you can put it into Renovate's built-in presets.
+
+Read [Contributing to presets](../config-presets.md#contributing-to-presets) to learn how.
 
 ## Summary
 

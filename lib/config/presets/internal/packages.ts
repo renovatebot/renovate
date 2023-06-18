@@ -32,6 +32,7 @@ export const presets: Record<string, Preset> = {
   googleapis: {
     description: 'All `googleapis` packages.',
     matchDatasources: ['npm'],
+    matchPackageNames: ['google-auth-library'],
     matchPackagePrefixes: ['@google-cloud/'],
   },
   jsTest: {
@@ -65,9 +66,11 @@ export const presets: Record<string, Preset> = {
       'supertest',
       'ts-auto-mock',
       'ts-jest',
+      'vitest',
     ],
     matchPackagePrefixes: [
       '@testing-library',
+      '@vitest',
       'chai',
       'jest',
       'mocha',
@@ -84,7 +87,7 @@ export const presets: Record<string, Preset> = {
       'packages:stylelint',
       'packages:tslint',
     ],
-    matchPackageNames: ['remark-lint'],
+    matchPackageNames: ['prettier', 'remark-lint', 'standard'],
   },
   mapbox: {
     description: 'All Mapbox-related packages.',

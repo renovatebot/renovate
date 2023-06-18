@@ -64,7 +64,7 @@ function infoMock(
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
-    } as BbsRestRepo;
+    };
   } else {
     // This mimics the behavior of bb-server which does not include the clone property at all
     // if ssh and https are both turned off
@@ -73,7 +73,7 @@ function infoMock(
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links: { clone: undefined },
-    } as BbsRestRepo;
+    };
   }
 }
 

@@ -1,6 +1,6 @@
 import RE2 from 're2';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { regEx } from './regex';
+import { isUUID, regEx } from './regex';
 
 describe('util/regex', () => {
   beforeEach(() => {
@@ -36,5 +36,12 @@ describe('util/regex', () => {
 
     const regex = require('./regex');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
+  });
+
+  describe('isUUID', () => {
+    it('proper checks valid and invalid UUID strings', () => {
+      expect(isUUID('{90b6646d-1724-4a64-9fd9-539515fe94e9}')).toBe(true);
+      expect(isUUID('not-a-uuid')).toBe(false);
+    });
   });
 });

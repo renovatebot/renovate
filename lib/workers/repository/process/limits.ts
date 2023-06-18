@@ -2,8 +2,8 @@ import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../modules/platform';
+import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { branchExists } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 
 export async function getPrHourlyRemaining(
@@ -90,10 +90,10 @@ export async function getPrsRemaining(
   return Math.min(hourlyRemaining, concurrentRemaining);
 }
 
-export function getConcurrentBranchesRemaining(
+export async function getConcurrentBranchesRemaining(
   config: RenovateConfig,
   branches: BranchConfig[]
-): number {
+): Promise<number> {
   const { branchConcurrentLimit, prConcurrentLimit } = config;
   const limit =
     typeof branchConcurrentLimit === 'number'
@@ -104,7 +104,7 @@ export function getConcurrentBranchesRemaining(
     try {
       const existingBranches: string[] = [];
       for (const branch of branches) {
-        if (branchExists(branch.branchName)) {
+        if (await scm.branchExists(branch.branchName)) {
           existingBranches.push(branch.branchName);
         }
       }
@@ -132,6 +132,9 @@ export async function getBranchesRemaining(
   branches: BranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
-  const concurrentRemaining = getConcurrentBranchesRemaining(config, branches);
+  const concurrentRemaining = await getConcurrentBranchesRemaining(
+    config,
+    branches
+  );
   return Math.min(hourlyRemaining, concurrentRemaining);
 }

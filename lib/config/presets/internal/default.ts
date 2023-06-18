@@ -2,6 +2,15 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
+  approveMajorUpdates: {
+    description: 'Require dependency dashboard approval for `major` updates.',
+    packageRules: [
+      {
+        dependencyDashboardApproval: true,
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
   assignAndReview: {
     description: 'Set `{{arg0}}` as assignee and reviewer of PRs.',
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
@@ -9,10 +18,6 @@ export const presets: Record<string, Preset> = {
   assignee: {
     assignees: ['{{arg0}}'],
     description: 'Assign PRs to `{{arg0}}`.',
-  },
-  autodetectPinVersions: {
-    description: 'Autodetect whether to pin dependencies or maintain ranges.',
-    rangeStrategy: 'auto',
   },
   automergeAll: {
     automerge: true,
@@ -540,7 +545,7 @@ export const presets: Record<string, Preset> = {
   },
   semanticPrefixFixDepsChoreOthers: {
     description:
-      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.',
+      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],

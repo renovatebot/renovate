@@ -48,9 +48,9 @@ function cleanBranchName(
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {
-    logger.debug('Using group branchName template');
+    logger.trace('Using group branchName template');
     // TODO: types (#7154)
-    logger.debug(
+    logger.trace(
       `Dependency ${update.depName!} is part of group ${update.groupName}`
     );
     update.groupSlug = slugify(update.groupSlug ?? update.groupName, {

@@ -38,7 +38,7 @@ describe('modules/datasource/pypi/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'something',
+          packageName: 'something',
         })
       ).toBeNull();
     });
@@ -49,7 +49,7 @@ describe('modules/datasource/pypi/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'something',
+          packageName: 'something',
         })
       ).toBeNull();
     });
@@ -59,7 +59,7 @@ describe('modules/datasource/pypi/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'azure-cli-monitor',
+          packageName: 'azure-cli-monitor',
         })
       ).toMatchSnapshot();
     });
@@ -76,7 +76,7 @@ describe('modules/datasource/pypi/index', () => {
         await getPkgReleases({
           ...config,
           datasource,
-          depName: 'azure-cli-monitor',
+          packageName: 'azure-cli-monitor',
         })
       ).toMatchObject({
         registryUrl: 'https://custom.pypi.net/foo',
@@ -97,7 +97,7 @@ describe('modules/datasource/pypi/index', () => {
       const res = await getPkgReleases({
         ...config,
         datasource,
-        depName: 'azure-cli-monitor',
+        packageName: 'azure-cli-monitor',
       });
       expect(res?.isPrivate).toBeTrue();
     });
@@ -125,7 +125,7 @@ describe('modules/datasource/pypi/index', () => {
       const res = await getPkgReleases({
         ...config,
         datasource,
-        depName: 'azure-cli-monitor',
+        packageName: 'azure-cli-monitor',
       });
       expect(res?.releases.pop()).toMatchObject({
         version: '0.2.15',
@@ -148,7 +148,7 @@ describe('modules/datasource/pypi/index', () => {
         (
           await getPkgReleases({
             datasource,
-            depName: 'something',
+            packageName: 'something',
           })
         )?.homepage
       ).toBe('https://microsoft.com');
@@ -172,7 +172,7 @@ describe('modules/datasource/pypi/index', () => {
         .reply(200, { ...JSON.parse(res1), info });
       const result = await getPkgReleases({
         datasource,
-        depName: 'flexget',
+        packageName: 'flexget',
       });
       expect(result?.sourceUrl).toBe(info.project_urls.Repository);
       expect(result?.changelogUrl).toBe(info.project_urls.changelog);
@@ -192,7 +192,7 @@ describe('modules/datasource/pypi/index', () => {
         .reply(200, { ...JSON.parse(res1), info });
       const result = await getPkgReleases({
         datasource,
-        depName: 'flexget',
+        packageName: 'flexget',
       });
       expect(result?.sourceUrl).toBeUndefined();
     });
@@ -206,7 +206,7 @@ describe('modules/datasource/pypi/index', () => {
       await getPkgReleases({
         datasource,
         registryUrls: [baseUrl],
-        depName: 'not_normalized.Package',
+        packageName: 'not_normalized.Package',
       });
 
       expect(expectedHttpCall.isDone()).toBeTrue();
@@ -225,7 +225,7 @@ describe('modules/datasource/pypi/index', () => {
       await getPkgReleases({
         datasource,
         registryUrls: [baseUrl],
-        depName: 'not_normalized.Package',
+        packageName: 'not_normalized.Package',
       });
 
       expect(expectedFallbackHttpCall.isDone()).toBeTrue();
@@ -241,7 +241,7 @@ describe('modules/datasource/pypi/index', () => {
       await getPkgReleases({
         datasource,
         registryUrls: [simpleRegistryUrl],
-        depName: 'not_normalized.Package',
+        packageName: 'not_normalized.Package',
       });
 
       expect(expectedHttpCall.isDone()).toBeTrue();
@@ -270,7 +270,8 @@ describe('modules/datasource/pypi/index', () => {
         await getPkgReleases({
           datasource,
           constraints: { python: '2.7' },
-          depName: 'doit',
+          packageName: 'doit',
+          constraintsFiltering: 'strict',
         })
       ).toMatchSnapshot();
     });
@@ -288,7 +289,7 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           ...config,
           constraints: { python: '2.7' },
-          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
         })
       ).toMatchSnapshot();
     });
@@ -306,7 +307,7 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           ...config,
           constraints: { python: '2.7' },
-          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
         })
       ).toMatchSnapshot();
     });
@@ -327,7 +328,7 @@ describe('modules/datasource/pypi/index', () => {
         datasource,
         ...config,
         constraints: { python: '2.7' },
-        depName: 'dj-database-url',
+        packageName: 'dj-database-url',
       });
       expect(res?.isPrivate).toBeTrue();
     });
@@ -343,7 +344,7 @@ describe('modules/datasource/pypi/index', () => {
       const res = await getPkgReleases({
         datasource,
         ...config,
-        depName: 'package--with-hyphens',
+        packageName: 'package--with-hyphens',
       });
       expect(res?.releases).toMatchObject([
         { version: '2.0.0' },
@@ -365,7 +366,7 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           ...config,
           constraints: { python: '2.7' },
-          depName: 'image-collector',
+          packageName: 'image-collector',
         })
       ).toMatchSnapshot();
     });
@@ -381,7 +382,7 @@ describe('modules/datasource/pypi/index', () => {
       const res = await getPkgReleases({
         datasource,
         ...config,
-        depName: 'PackageWithMixedCase',
+        packageName: 'PackageWithMixedCase',
       });
       expect(res?.releases).toMatchObject([
         { version: '2.0.0' },
@@ -401,7 +402,7 @@ describe('modules/datasource/pypi/index', () => {
       const res = await getPkgReleases({
         datasource,
         ...config,
-        depName: 'packagewithmixedcase',
+        packageName: 'packagewithmixedcase',
       });
       expect(res?.releases).toMatchObject([
         { version: '2.0.0' },
@@ -421,7 +422,7 @@ describe('modules/datasource/pypi/index', () => {
       const res = await getPkgReleases({
         datasource,
         ...config,
-        depName: 'package.with.periods',
+        packageName: 'package.with.periods',
       });
       expect(res?.releases).toMatchObject([
         { version: '2.0.0' },
@@ -443,7 +444,7 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           ...config,
           constraints: { python: '2.7' },
-          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
         })
       ).toBeNull();
     });
@@ -461,7 +462,7 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           ...config,
           constraints: { python: '2.7' },
-          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
         })
       ).toBeNull();
     });
@@ -479,7 +480,7 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           ...config,
           constraints: { python: '2.7' },
-          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
         })
       ).toBeNull();
     });
@@ -499,7 +500,7 @@ describe('modules/datasource/pypi/index', () => {
       const result = await getPkgReleases({
         datasource,
         ...config,
-        depName: 'dj-database-url',
+        packageName: 'dj-database-url',
       });
       expect(result).toMatchSnapshot();
     });
@@ -517,7 +518,8 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           constraints: { python: '2.7' },
           ...config,
-          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
+          constraintsFiltering: 'strict',
         })
       ).toMatchSnapshot();
     });
@@ -533,7 +535,7 @@ describe('modules/datasource/pypi/index', () => {
         datasource,
         ...config,
         constraints: { python: '2.7' },
-        depName: 'azure-cli-monitor',
+        packageName: 'azure-cli-monitor',
       })
     ).toMatchSnapshot();
   });

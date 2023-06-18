@@ -4,6 +4,7 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
 import { RepoParams, RepoResult, platform } from '../../../modules/platform';
 
 // TODO: fix types (#7154)
@@ -37,11 +38,15 @@ async function validateOptimizeForDisabled(
 }
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
-  if (!config.includeForks && config.isFork) {
+  if (config.forkProcessing !== 'enabled' && config.isFork) {
     const renovateConfig = await getJsonFile(defaultConfigFile(config));
-    if (!renovateConfig?.includeForks) {
+    if (
+      renovateConfig?.includeForks !== true &&
+      renovateConfig?.forkProcessing !== 'enabled'
+    ) {
       throw new Error(REPOSITORY_FORKED);
     }
+    logger.debug('Repository config enables forks - continuing');
   }
 }
 

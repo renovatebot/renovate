@@ -400,6 +400,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
+      "packageName": "extra-dep1",
       "versioning": "poetry",
     },
     {
@@ -410,6 +411,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
+      "packageName": "extra-dep2",
       "versioning": "poetry",
     },
     {
@@ -420,6 +422,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
+      "packageName": "extra-dep3",
       "versioning": "poetry",
     },
   ],
@@ -438,6 +441,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "dep1-",
     "versioning": "pep440",
   },
   {
@@ -478,6 +482,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "dev-dep1",
     "versioning": "poetry",
   },
   {
@@ -488,7 +493,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "skipReason": "unknown-version",
+    "packageName": "dev-dep2",
+    "skipReason": "unspecified-version",
   },
   {
     "currentValue": "^0.8.3",
@@ -498,6 +504,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "extra-dep1",
     "versioning": "poetry",
   },
   {
@@ -508,6 +515,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "extra-dep2",
     "versioning": "poetry",
   },
   {
@@ -518,6 +526,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "extra-dep3",
     "versioning": "poetry",
   },
 ]

@@ -13,4 +13,4 @@ export const programmingLanguages = [
   'rust',
 ] as const;
 
-export type ProgrammingLanguage = typeof programmingLanguages[number];
+export type ProgrammingLanguage = (typeof programmingLanguages)[number];

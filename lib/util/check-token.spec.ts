@@ -2,7 +2,7 @@ import { hostRules, logger } from '../../test/util';
 import { GlobalConfig } from '../config/global';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFile } from '../modules/manager/types';
+import type { PackageFileContent } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
 import { checkGithubToken } from './check-token';
 
@@ -91,7 +91,7 @@ describe('util/check-token', () => {
 
   it('logs warning once', () => {
     hostRules.find.mockReturnValueOnce({});
-    const packageFiles: Record<string, PackageFile[]> = {
+    const packageFiles: Record<string, PackageFileContent[]> = {
       npm: [
         {
           deps: [

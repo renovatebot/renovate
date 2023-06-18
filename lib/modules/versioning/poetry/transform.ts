@@ -144,5 +144,5 @@ export function npm2poetry(range: string): string {
       res.splice(i, 2, newValue);
     }
   }
-  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
+  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/g, ' || ');
 }

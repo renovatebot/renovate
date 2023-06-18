@@ -3,7 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -36,9 +36,7 @@ export class GoDatasource extends Datasource {
     key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return process.env.GOPROXY
-      ? this.goproxy.getReleases(config)
-      : this.direct.getReleases(config);
+    return this.goproxy.getReleases(config);
   }
 
   /**
@@ -65,8 +63,11 @@ export class GoDatasource extends Datasource {
     }
 
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
+    // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      value && !GoDatasource.pversionRegexp.test(value) ? value : undefined;
+      value && !GoDatasource.pversionRegexp.test(value) && value !== 'v0.0.0'
+        ? value
+        : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {
@@ -75,7 +76,7 @@ export class GoDatasource extends Datasource {
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
-      case BitBucketTagsDatasource.id: {
+      case BitbucketTagsDatasource.id: {
         return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
       }
       case GitlabTagsDatasource.id: {

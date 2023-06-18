@@ -884,7 +884,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file updates using y
     },
   },
   {
-    "cmd": "yarn up some-dep@^1.0.0",
+    "cmd": "yarn up -R some-dep",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -934,7 +934,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file updates using y
     },
   },
   {
-    "cmd": "yarn up some-dep@^1.0.0 --mode=update-lockfile",
+    "cmd": "yarn up -R some-dep --mode=update-lockfile",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",

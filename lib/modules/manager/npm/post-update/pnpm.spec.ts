@@ -69,6 +69,27 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('performs dedupe', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const postUpdateOptions = ['pnpmDedupe'];
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, postUpdateOptions }
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm dedupe',
+      },
+    ]);
+  });
+
   it('uses the new version if packageManager is updated', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -77,6 +98,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         depType: 'packageManager',
         depName: 'pnpm',
         newValue: '6.16.1',
+        newVersion: '6.16.1',
       },
     ]);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -87,7 +109,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses constraint version if parent json has constraints', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('parent/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -129,7 +151,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses packageManager version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('manager-field/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -171,7 +193,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses skips pnpm v7 if lockfileVersion indicates <7', async () => {
     mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     fs.readLocalFile
       .mockResolvedValueOnce('{}') // package.json
       .mockResolvedValue('lockfileVersion: 5.3\n'); // pnpm-lock.yaml
@@ -202,7 +224,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -211,7 +233,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'renovate/sidecar ' +
+          'containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +
@@ -243,5 +265,43 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
+  });
+
+  describe('getConstraintsFromLockFile()', () => {
+    it('returns null if no lock file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns null when error reading lock file', async () => {
+      fs.readLocalFile.mockRejectedValueOnce(new Error('foo'));
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns null if no lockfileVersion', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('foo: bar\n');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns null if lockfileVersion is not a number', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: foo\n');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBeNull();
+    });
+
+    it('returns default if lockfileVersion is 1', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 1\n');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=3 <3.5.0');
+    });
+
+    it('maps supported versions', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 5.3\n');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=6 <7');
+    });
   });
 });

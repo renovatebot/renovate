@@ -1,5 +1,5 @@
-import type { Stats } from 'fs';
-import os from 'os';
+import type { Stats } from 'node:fs';
+import os from 'node:os';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -26,7 +26,7 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -39,12 +39,11 @@ const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
 
-jest.spyOn(os, 'platform').mockReturnValue('linux');
+const osPlatformSpy = jest.spyOn(os, 'platform');
 
 describe('modules/manager/gradle-wrapper/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
+    osPlatformSpy.mockReturnValue('linux');
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -199,7 +198,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull renovate/sidecar' },
+        { cmd: 'docker pull containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -210,7 +209,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'renovate/sidecar' +
+            'containerbase/sidecar' +
             ' bash -l -c "' +
             'install-tool java 11.0.1' +
             ' && ' +

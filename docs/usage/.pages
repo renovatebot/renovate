@@ -1,15 +1,18 @@
 nav:
   - Home: 'index.md'
+  - Reading List: 'reading-list.md'
   - ... | getting-started
   - Troubleshooting: 'troubleshooting.md'
   - Configuration:
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Repository': 'configuration-options.md'
       - 'Presets': 'config-presets.md'
+      - 'Validation': 'config-validation.md'
   - ... | key-concepts
   - ... | modules
   - Language Support:
       - 'Bazel': 'bazel.md'
+      - 'Bicep': 'bicep.md'
       - 'Docker': 'docker.md'
       - 'Golang': 'golang.md'
       - 'Java': 'java.md'

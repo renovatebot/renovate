@@ -2,14 +2,14 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFileContent } from '../types';
 import type { WoodpeckerConfig } from './types';
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   extractConfig: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   logger.debug('woodpecker.extractPackageFile()');
   let config: WoodpeckerConfig;
   try {
@@ -17,21 +17,21 @@ export function extractPackageFile(
     config = load(content, { json: true }) as WoodpeckerConfig;
     if (!config) {
       logger.debug(
-        { fileName },
+        { packageFile },
         'Null config when parsing Woodpecker Configuration content'
       );
       return null;
     }
     if (typeof config !== 'object') {
       logger.debug(
-        { fileName, type: typeof config },
+        { packageFile, type: typeof config },
         'Unexpected type for Woodpecker Configuration content'
       );
       return null;
     }
   } catch (err) {
     logger.debug(
-      { fileName, err },
+      { packageFile, err },
       'Error parsing Woodpecker Configuration config YAML'
     );
     return null;

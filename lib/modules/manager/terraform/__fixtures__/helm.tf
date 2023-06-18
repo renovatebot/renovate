@@ -38,3 +38,26 @@ resource "helm_release" "invalid_3" {
   chart      = "redis"
   version    = "6.0.1"
 }
+
+## chart in OCI registry
+resource "helm_release" "karpenter" {
+  name  = "karpenter"
+  chart = "oci://public.ecr.aws/karpenter/karpenter"
+  version = "v0.22.1"
+}
+
+## chart in OCI registry
+resource "helm_release" "karpenter_oci_repo" {
+  name  = "karpenter"
+  repository = "oci://public.ecr.aws/karpenter"
+  chart = "karpenter"
+  version = "v0.22.1"
+}
+
+## chart in OCI registry
+resource "helm_release" "proxy_oci_repo" {
+  name  = "kube-prometheus"
+  repository = "oci://hub.proxy.test/bitnamicharts"
+  chart = "kube-prometheus"
+  version = "8.9.1"
+}

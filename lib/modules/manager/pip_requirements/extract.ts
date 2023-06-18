@@ -7,7 +7,7 @@ import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -46,7 +46,7 @@ export function cleanRegistryUrls(registryUrls: string[]): string[] {
   });
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
   let registryUrls: string[] = [];
@@ -126,7 +126,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  const res: PackageFile = { deps };
+  const res: PackageFileContent = { deps };
   if (registryUrls.length > 0) {
     res.registryUrls = cleanRegistryUrls(registryUrls);
   }

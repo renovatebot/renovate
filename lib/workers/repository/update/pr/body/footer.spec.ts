@@ -22,7 +22,7 @@ describe('workers/repository/update/pr/body/footer', () => {
   });
 
   it('renders prFooter', () => {
-    template.compile.mockImplementation((x) => x);
+    template.safeCompile.mockImplementation((x) => x);
     expect(
       getPrFooter({
         manager: 'some-manager',

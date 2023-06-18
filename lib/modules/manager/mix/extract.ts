@@ -4,7 +4,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexDatasource } from '../../datasource/hex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
@@ -19,9 +19,9 @@ const commentMatchRegExp = regEx(/#.*$/);
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
-): Promise<PackageFile | null> {
-  logger.trace('mix.extractPackageFile()');
+  packageFile: string
+): Promise<PackageFileContent | null> {
+  logger.trace(`mix.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
   const contentArr = content
     .split(newlineRegex)
@@ -59,6 +59,9 @@ export async function extractPackageFile(
             datasource: HexDatasource.id,
             packageName: organization ? `${app}:${organization}` : app,
           };
+          if (requirement?.startsWith('==')) {
+            dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
+          }
         }
 
         deps.push(dep);
@@ -66,9 +69,9 @@ export async function extractPackageFile(
       }
     }
   }
-  const res: PackageFile = { deps };
+  const res: PackageFileContent = { deps };
   const lockFileName =
-    (await findLocalSiblingOrParent(fileName, 'mix.lock')) ?? 'mix.lock';
+    (await findLocalSiblingOrParent(packageFile, 'mix.lock')) ?? 'mix.lock';
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];

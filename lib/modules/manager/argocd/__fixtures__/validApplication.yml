@@ -75,3 +75,55 @@ spec:
     chart: some/image3
     repoURL: somecontainer.registry.io:443/
     targetRevision: 1.0.0
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  sources:
+    - chart: some/image3
+      repoURL: somecontainer.registry.io:443/
+      targetRevision: 1.0.0
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  sources:
+    - ref: foo
+      repoURL: https://git.example.com/foo/bar.git
+      targetRevision: v1.2.0
+    - chart: some/image3
+      repoURL: somecontainer.registry.io:443/
+      targetRevision: 1.0.0
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  sources:
+    - ref: foo
+      repoURL: https://git.example.com/foo/bar.git
+      targetRevision: v1.2.0
+      path: bar
+    - chart: traefik
+      repoURL: gs://helm-charts-internal
+      targetRevision: 0.0.2
+      helm:
+        valueFiles:
+          - $foo/values.yaml
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  sources:
+    - ref: foo
+      repoURL: https://git.example.com/foo/bar.git
+      targetRevision: v1.2.0
+      path: bar
+    - chart: somechart
+      repoURL: https://foo.io/repo
+      targetRevision: 0.0.2
+      helm:
+        valueFiles:
+          - $foo/values.yaml
+

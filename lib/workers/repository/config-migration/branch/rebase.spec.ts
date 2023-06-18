@@ -1,14 +1,9 @@
 import type { Indent } from 'detect-indent';
+import JSON5 from 'json5';
 import { Fixtures } from '../../../../../test/fixtures';
-import {
-  RenovateConfig,
-  getConfig,
-  git,
-  partial,
-  platform,
-} from '../../../../../test/util';
+import { RenovateConfig, git, partial, scm } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
-import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
@@ -25,29 +20,27 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     'applyPrettierFormatting'
   );
 
-  beforeAll(() => {
+  beforeEach(() => {
     GlobalConfig.set({
       localDir: '',
     });
   });
 
   describe('rebaseMigrationBranch()', () => {
-    const raw = Fixtures.getJson('./renovate.json');
+    const repoConfig = Fixtures.getJson('./renovate.json');
     const indent = '  ';
-    const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
-    const filename = 'renovate.json';
-
+    const renovateConfigJson =
+      JSON.stringify(repoConfig, undefined, indent) + '\n';
+    const renovateConfigJson5 =
+      JSON5.stringify(repoConfig, undefined, indent) + '\n';
     let config: RenovateConfig;
-    let migratedConfigData: MigratedData;
+    const migratedConfigData: MigratedData = {
+      content: '',
+      filename: '',
+      indent: partial<Indent>(),
+    };
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      GlobalConfig.reset();
-      migratedConfigData = {
-        content: renovateConfig,
-        filename,
-        indent: partial<Indent>({}),
-      };
       config = {
         ...getConfig(),
         repository: 'some/repo',
@@ -57,66 +50,98 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     });
 
     it('does not rebase modified branch', async () => {
-      git.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
+
       await rebaseMigrationBranch(config, migratedConfigData);
-      expect(checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
-    it('does nothing if branch is up to date', async () => {
-      git.getFile
-        .mockResolvedValueOnce(renovateConfig)
-        .mockResolvedValueOnce(renovateConfig);
+    it.each([
+      ['renovate.json', renovateConfigJson],
+      ['renovate.json5', renovateConfigJson5],
+    ])(
+      'does nothing if branch is up to date (%s)',
+      async (filename, rawConfig) => {
+        git.getFile.mockResolvedValueOnce(rawConfig);
+        migratedConfigData.filename = filename;
+        migratedConfigData.content = rawConfig;
+
+        await rebaseMigrationBranch(config, migratedConfigData);
+
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+        expect(git.getFile).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it.each([
+      ['renovate.json', renovateConfigJson],
+      ['renovate.json5', renovateConfigJson5],
+    ])('rebases migration branch (%s)', async (filename, rawConfig) => {
+      scm.isBranchBehindBase.mockResolvedValueOnce(true);
+      prettierSpy.mockResolvedValueOnce('');
+      migratedConfigData.filename = filename;
+      migratedConfigData.content = rawConfig;
+
       await rebaseMigrationBranch(config, migratedConfigData);
-      expect(checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+
+      expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
     });
 
-    it('rebases migration branch', async () => {
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseMigrationBranch(config, migratedConfigData);
-      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-    });
+    it.each([
+      ['renovate.json', renovateConfigJson],
+      ['renovate.json5', renovateConfigJson5],
+    ])(
+      'applies prettier formatting when rebasing the migration branch (%s)',
+      async (filename, rawConfig) => {
+        const formatted = formattedMigratedData.content;
+        prettierSpy.mockResolvedValueOnce(formattedMigratedData.content);
+        scm.isBranchBehindBase.mockResolvedValueOnce(true);
+        migratedConfigData.filename = filename;
+        migratedConfigData.content = rawConfig;
 
-    it('applies prettier formatting when rebasing the migration branch ', async () => {
-      const formatted = formattedMigratedData.content;
-      prettierSpy.mockResolvedValueOnce(formattedMigratedData.content);
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseMigrationBranch(config, migratedConfigData);
-      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-      expect(commitFiles).toHaveBeenCalledWith({
-        branchName: 'renovate/migrate-config',
-        files: [
-          {
-            type: 'addition',
-            path: 'renovate.json',
-            contents: formatted,
-          },
-        ],
-        message: 'Migrate config renovate.json',
-        platformCommit: false,
-      });
-    });
+        await rebaseMigrationBranch(config, migratedConfigData);
 
-    it('does not rebases migration branch when in dryRun is on', async () => {
-      GlobalConfig.set({
-        dryRun: 'full',
-      });
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseMigrationBranch(config, migratedConfigData);
-      expect(checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
-    });
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
+          branchName: 'renovate/migrate-config',
+          files: [
+            {
+              type: 'addition',
+              path: filename,
+              contents: formatted,
+            },
+          ],
+          message: `Migrate config ${filename}`,
+          platformCommit: false,
+          baseBranch: 'dev',
+        });
+      }
+    );
 
-    it('rebases via platform', async () => {
-      config.platformCommit = true;
-      git.isBranchBehindBase.mockResolvedValueOnce(true);
-      await rebaseMigrationBranch(config, migratedConfigData);
-      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-    });
+    it.each([
+      ['renovate.json', renovateConfigJson],
+      ['renovate.json5', renovateConfigJson5],
+    ])(
+      'does not rebases migration branch when in dryRun is on (%s)',
+      async (filename, rawConfig) => {
+        GlobalConfig.set({
+          dryRun: 'full',
+        });
+        scm.isBranchBehindBase.mockResolvedValueOnce(true);
+        migratedConfigData.filename = filename;
+        migratedConfigData.content = rawConfig;
+
+        await rebaseMigrationBranch(config, migratedConfigData);
+
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      }
+    );
   });
 
   describe('jsonStripWhiteSpaces()', () => {

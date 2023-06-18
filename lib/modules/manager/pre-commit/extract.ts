@@ -6,7 +6,7 @@ import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
@@ -50,7 +50,6 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    ['gitea', GitlabTagsDatasource.id],
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
@@ -64,7 +63,7 @@ function determineDatasource(
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
+    'Provided hostname did not match any of the hostRules of hostType github nor gitlab'
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
@@ -84,7 +83,7 @@ function extractDependency(
 
   const urlMatchers = [
     // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo
-    regEx('^https?:\\/\\/(?<hostname>[^\\/]+)\\/(?<depName>\\S*)'),
+    regEx('^https?://(?<hostname>[^/]+)/(?<depName>\\S*)'),
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
     // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
@@ -147,26 +146,29 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  filename: string
-): PackageFile | null {
+  packageFile: string
+): PackageFileContent | null {
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
   try {
     parsedContent = load(content, { json: true }) as ParsedContent;
   } catch (err) {
-    logger.debug({ filename, err }, 'Failed to parse pre-commit config YAML');
+    logger.debug(
+      { filename: packageFile, err },
+      'Failed to parse pre-commit config YAML'
+    );
     return null;
   }
   if (!is.plainObject<Record<string, unknown>>(parsedContent)) {
-    logger.warn(
-      { filename },
+    logger.debug(
+      { packageFile },
       `Parsing of pre-commit config YAML returned invalid result`
     );
     return null;
   }
   if (!matchesPrecommitConfigHeuristic(parsedContent)) {
     logger.debug(
-      { filename },
+      { packageFile },
       `File does not look like a pre-commit config file`
     );
     return null;
@@ -178,7 +180,10 @@ export function extractPackageFile(
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ filename, err }, 'Error scanning parsed pre-commit config');
+    logger.debug(
+      { packageFile, err },
+      'Error scanning parsed pre-commit config'
+    );
   }
   return null;
 }

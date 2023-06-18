@@ -1,5 +1,6 @@
-import { URL } from 'url';
+import { URL } from 'node:url';
 import is from '@sindresorhus/is';
+import { migrateDatasource } from '../../../config/migrations/custom/datasource-migration';
 import type { RegexManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
@@ -16,9 +17,10 @@ export const validMatchFields = [
   'extractVersion',
   'registryUrl',
   'depType',
+  'indentation',
 ] as const;
 
-type ValidMatchFields = typeof validMatchFields[number];
+type ValidMatchFields = (typeof validMatchFields)[number];
 
 function updateDependency(
   dependency: PackageDependency,
@@ -34,6 +36,12 @@ function updateDependency(
       } catch (err) {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }
+      break;
+    case 'datasource':
+      dependency.datasource = migrateDatasource(value);
+      break;
+    case 'indentation':
+      dependency.indentation = is.emptyStringOrWhitespace(value) ? value : '';
       break;
     default:
       dependency[field] = value;
@@ -77,12 +85,18 @@ export function regexMatchAll(
 ): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
   let matchResult: RegExpMatchArray | null;
+  let iterations = 0;
+  const maxIterations = 10000;
   do {
     matchResult = regex.exec(content);
     if (matchResult) {
       matches.push(matchResult);
     }
-  } while (matchResult);
+    iterations += 1;
+  } while (matchResult && iterations < maxIterations);
+  if (iterations === maxIterations) {
+    logger.warn('Max iterations reached for matchStrings');
+  }
   return matches;
 }
 

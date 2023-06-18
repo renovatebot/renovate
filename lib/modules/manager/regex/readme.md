@@ -20,7 +20,7 @@ Before Renovate can look up a dependency and decide about updates, it needs this
 
 - The dependency's name
 - Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](https://docs.renovatebot.com/modules/datasource/#supported-datasources)
-- Which version scheme to use: defaults to `semver`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
+- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
 
 Configuration-wise, it works like this:
 
@@ -29,11 +29,11 @@ Configuration-wise, it works like this:
 - You can optionally have a `packageName` capture group or a `packageNameTemplate` if it differs from `depName`
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
 - You can optionally have a `depType` capture group or a `depTypeTemplate` config field
-- You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default
+- You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver-coerced` will be used as the default
 - You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
 - You can optionally have a `currentDigest` capture group.
-- You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field
-  - If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array.
+- You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array.
+- You can optionally have an `indentation` capture group. It must be either empty or whitespace only, otherwise it will be reset to an empty string.
 
 ### Regular Expression Capture Groups
 
@@ -119,7 +119,7 @@ You could configure Renovate to update the `Dockerfile` like this:
 }
 ```
 
-We could drop the `versioningTemplate` because Renovate defaults to `semver` versioning.
+We could drop the `versioningTemplate` because Renovate defaults to `∆semver-coerced` versioning.
 But we included the `versioningTemplate` config option to show you why we call these fields _templates_: because they are compiled using Handlebars and so can be composed from values you collect in named capture groups.
 
 You should use triple brace `{{{ }}}` templates like `{{{versioning}}}` to be safe.
@@ -128,8 +128,38 @@ This is because Handlebars escapes special characters with double braces (by def
 By adding `renovate: datasource=` and `depName=` comments to the `Dockerfile` you only need _one_ `regexManager` instead of _four_.
 The `Dockerfile` is documented better as well.
 
-The syntax in the example is arbitrary and you can set your own syntax.
+The syntax in the example is arbitrary, and you can set your own syntax.
 If you do, update your `matchStrings` regex!
+
+For example the `appVersion` property in a `Chart.yaml` of a Helm chart is always referenced to an Docker image.
+In such scenarios, some values can be hard-coded.
+For example:
+
+```yaml
+apiVersion: v2
+name: amazon-eks-pod-identity-webhook
+description: A Kubernetes webhook for pods that need AWS IAM access
+version: 1.0.3
+type: application
+# renovate: image=amazon/amazon-eks-pod-identity-webhook
+appVersion: 'v0.4.0'
+```
+
+Using the `regexManagers` below, Renovate looks for available Docker tags of the image `amazon/amazon-eks-pod-identity-webhook`.
+
+```json
+{
+  "regexManagers": [
+    {
+      "datasourceTemplate": "docker",
+      "fileMatch": ["(^|/)Chart\\.yaml$"],
+      "matchStrings": [
+        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
+      ]
+    }
+  ]
+}
+```
 
 ### Using regexManager to update the dependency name in addition to version
 
@@ -148,8 +178,8 @@ For example:
       "fileMatch": [".*y[a]?ml$"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
-        "['\"]?(?<depName>/pipeline-fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
-        "['\"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
+        "['\"]?(?<depName>/pipeline-fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
+        "['\"]?(?<depName>pipeline-solutions/gitlab/fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
       ],
       "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
       "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",

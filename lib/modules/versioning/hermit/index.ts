@@ -1,3 +1,4 @@
+import { satisfies } from 'semver';
 import { RegExpVersion, RegExpVersioningApi } from '../regex';
 import type { VersioningApiConstructor } from '../types';
 
@@ -173,7 +174,14 @@ export class HermitVersioning extends RegExpVersioningApi {
   }
 
   override matches(version: string, range: string): boolean {
-    return this.equals(version, range);
+    if (
+      HermitVersioning._isChannel(version) ||
+      HermitVersioning._isChannel(range)
+    ) {
+      return this.equals(version, range);
+    }
+
+    return satisfies(version, range);
   }
 }
 

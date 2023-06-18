@@ -1,4 +1,6 @@
+import { ZodError } from 'zod';
 import * as httpMock from '../../../../test/http-mock';
+import { logger } from '../../../../test/util';
 import { DenoDatasource } from '.';
 
 describe('modules/datasource/deno/index', () => {
@@ -10,7 +12,7 @@ describe('modules/datasource/deno/index', () => {
         .scope(deno.defaultRegistryUrls[0])
         .get('/v2/modules/std')
         .reply(200, {
-          versions: ['0.163.0', '0.162.0'],
+          versions: ['0.163.0', '0.162.0', '0.161.0'],
           tags: [{ value: 'top_5_percent', kind: 'popularity' }],
         })
         .get('/v2/modules/std/0.163.0')
@@ -32,7 +34,9 @@ describe('modules/datasource/deno/index', () => {
             type: 'github',
           },
           uploaded_at: '2022-10-20T12:10:21.592Z',
-        });
+        })
+        .get('/v2/modules/std/0.161.0')
+        .reply(200, { foo: 'bar' });
 
       const result = await deno.getReleases({
         packageName: 'https://deno.land/std',
@@ -50,11 +54,21 @@ describe('modules/datasource/deno/index', () => {
             sourceUrl: 'https://github.com/denoland/deno_std',
             releaseTimestamp: '2022-10-20T12:10:21.592Z',
           },
+          {
+            version: '0.161.0',
+          },
         ],
         tags: {
           popularity: 'top_5_percent',
         },
       });
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          err: expect.any(ZodError),
+        }),
+        `Deno: failed to get version details for 0.161.0`
+      );
     });
 
     it('throws error if module endpoint fails', async () => {
