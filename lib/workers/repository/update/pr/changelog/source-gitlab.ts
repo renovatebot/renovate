@@ -7,6 +7,7 @@ import * as allVersioning from '../../../../../modules/versioning';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
+import { trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { slugifyUrl } from './common';
 import { getTags } from './gitlab';
@@ -52,12 +53,10 @@ export async function getChangeLogJSON(
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = `${protocol}//${host}/`;
   const apiBaseUrl = `${baseUrl}api/v4/`;
-  const repository = pathname
-    .slice(1)
-    .replace(regEx(/\/$/), '')
-    .replace(regEx(/\.git$/), '');
-  if (repository.split('/').length < 2) {
-    logger.info({ sourceUrl }, 'Invalid gitlab URL found');
+  const repository = trimSlashes(pathname).replace(regEx(/\.git$/), '');
+
+  if (repository.split('/').length !== 2) {
+    logger.debug(`Invalid gitlab URL found: ${sourceUrl}`);
     return null;
   }
 

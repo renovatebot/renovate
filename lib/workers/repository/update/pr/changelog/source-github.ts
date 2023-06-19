@@ -9,6 +9,7 @@ import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
+import { trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { slugifyUrl } from './common';
 import { getTags } from './github';
@@ -89,10 +90,8 @@ export async function getChangeLogJSON(
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
-  const repository = pathname
-    .slice(1)
-    .replace(regEx(/\/$/), '')
-    .replace(regEx(/\.git$/), '');
+  const repository = trimSlashes(pathname).replace(regEx(/\.git$/), '');
+
   if (repository.split('/').length !== 2) {
     logger.debug(`Invalid github URL found: ${sourceUrl}`);
     return null;

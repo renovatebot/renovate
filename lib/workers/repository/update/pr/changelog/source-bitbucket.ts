@@ -48,13 +48,14 @@ export async function getChangeLogJSON(
   const protocol = parsedUrl.protocol!;
   const host = parsedUrl.host!;
   const pathname = parsedUrl.pathname!;
+
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = `${protocol}//${host}/`;
   const apiBaseUrl = `${protocol}//api.${host}/`;
   const repository = trimSlashes(pathname).replace(regEx(/\.git$/), '');
 
-  if (repository.split('/').length < 2) {
-    logger.info({ sourceUrl }, 'Invalid bitbucket URL found');
+  if (repository.split('/').length !== 2) {
+    logger.debug(`Invalid bitbucket URL found: ${sourceUrl}`);
     return null;
   }
 
