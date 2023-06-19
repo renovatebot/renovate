@@ -1,6 +1,5 @@
 import {
   fs,
-  getConfig,
   git,
   mocked,
   mockedFunction,
@@ -8,6 +7,7 @@ import {
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import {

@@ -13,7 +13,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { getThrottle } from './throttle';
+import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -125,6 +125,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
+  protected getThrottle(url: string): Throttle | null {
+    return getThrottle(url);
+  }
+
   protected async request<T>(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & HttpRequestOptions<T> = {}
@@ -204,7 +208,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         });
       };
 
-      const throttle = getThrottle(url);
+      const throttle = this.getThrottle(url);
       const throttledTask: Task<T> = throttle
         ? () => throttle.add<HttpResponse<T>>(httpTask)
         : httpTask;

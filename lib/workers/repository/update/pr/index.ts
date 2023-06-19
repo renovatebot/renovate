@@ -346,6 +346,7 @@ export async function ensurePr(
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
       if (
+        existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
@@ -357,6 +358,16 @@ export async function ensurePr(
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
+      if (existingPr?.targetBranch !== config.baseBranch) {
+        logger.debug(
+          {
+            branchName,
+            oldBaseBranch: existingPr?.targetBranch,
+            newBaseBranch: config.baseBranch,
+          },
+          'PR base branch has changed'
+        );
+      }
       if (existingPrTitle !== newPrTitle) {
         logger.debug(
           {
@@ -374,6 +385,7 @@ export async function ensurePr(
           'PR body changed'
         );
       }
+
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
         return { type: 'with-pr', pr: existingPr };
@@ -383,6 +395,7 @@ export async function ensurePr(
           prTitle,
           prBody,
           platformOptions: getPlatformPrOptions(config),
+          targetBranch: config.baseBranch,
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
         setPrCache(branchName, prBodyFingerprint, true);
@@ -393,6 +406,7 @@ export async function ensurePr(
           ...existingPr,
           bodyStruct: getPrBodyStruct(prBody),
           title: prTitle,
+          targetBranch: config.baseBranch,
         },
       };
     }
@@ -416,7 +430,7 @@ export async function ensurePr(
         }
         pr = await platform.createPr({
           sourceBranch: branchName,
-          targetBranch: config.baseBranch ?? '',
+          targetBranch: config.baseBranch,
           prTitle,
           prBody,
           labels: prepareLabels(config),
