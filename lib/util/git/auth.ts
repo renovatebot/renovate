@@ -15,7 +15,7 @@ const githubApiUrls = new Set([
   'https://api.github.com/',
 ]);
 
-const standardGitAllowedHostTypes = new Set<string>([
+const standardGitAllowedHostTypes = [
   // All known git platforms
   'azure',
   'bitbucket',
@@ -23,7 +23,7 @@ const standardGitAllowedHostTypes = new Set<string>([
   'gitea',
   'github',
   'gitlab',
-] satisfies PlatformId[]);
+] satisfies PlatformId[];
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
@@ -195,7 +195,7 @@ function addAuthFromHostRule(
   let environmentVariables = env;
   const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
   if (validateUrl(httpUrl)) {
-    logger.debug(
+    logger.trace(
       // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `Adding Git authentication for ${httpUrl} using token auth.`
@@ -206,7 +206,7 @@ function addAuthFromHostRule(
       environmentVariables
     );
   } else {
-    logger.warn(
+    logger.debug(
       `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`
     );
   }
