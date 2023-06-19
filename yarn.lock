@@ -3106,10 +3106,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/breejs__later@4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@types/breejs__later/-/breejs__later-4.1.1.tgz#53d327dd49d438b5e3ef73d1ec81c84a12c52b88"
-  integrity sha512-0NEKFRmlXnIQdyQPi1wnm3tywX4SeTXveZFbsCybfz6NFU3I0DNbGeDj79eXpBL5X8wxRKH7Ygc30y9yNyRZmw==
+"@types/breejs__later@4.1.2":
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/@types/breejs__later/-/breejs__later-4.1.2.tgz#30a3f377e955609c9fa05d802a1095299eac389f"
+  integrity sha512-qTLhBWIdaFcBhYu/2eg2B4bjXXtGKzKfN+Hpmr3A2fyXJx4hx1nMcP84NpfYAjZ8ktKsXhu37/P41W3x/cP7jg==
 
 "@types/bunyan@1.8.7":
   version "1.8.7"
