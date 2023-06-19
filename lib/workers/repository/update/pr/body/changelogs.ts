@@ -13,7 +13,9 @@ export function getChangelogs(config: BranchConfig): string {
 
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes && upgrade.repoName) {
-      upgrade.releaseNotesSummaryTitle = `${upgrade.repoName} (${upgrade.depName!})`
+      upgrade.releaseNotesSummaryTitle = `${
+        upgrade.repoName
+      } (${upgrade.depName!})`;
     }
   }
 
