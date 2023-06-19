@@ -445,28 +445,6 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
-    name: 'forkOrgs',
-    description:
-      'The preferred organizations to create or find forked repositories, when in fork mode.',
-    stage: 'repository',
-    type: 'array',
-    subType: 'string',
-    globalOnly: true,
-    supportedPlatforms: ['github'],
-    experimental: true,
-  },
-  {
-    name: 'forkCreate',
-    description:
-      'Decide if Renovate creates a fork at runtime when in fork mode.',
-    stage: 'repository',
-    type: 'boolean',
-    default: true,
-    globalOnly: true,
-    supportedPlatforms: ['github'],
-    experimental: true,
-  },
-  {
     name: 'githubTokenWarn',
     description: 'Display warnings about GitHub token not being set.',
     type: 'boolean',
