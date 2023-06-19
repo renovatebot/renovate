@@ -146,20 +146,20 @@ export async function initPlatform({
 export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
 
-  let topicString = '';
+  const queryParams: Record<string, any> = {
+    membership: true,
+    per_page: 100,
+    with_merge_requests_enabled: true,
+    min_access_level: 30,
+    archived: false,
+  };
   if (config?.topics?.length) {
-    topicString = `&topic=${encodeURIComponent(config.topics.join(','))}`;
+    queryParams['topic'] = config.topics.join(',');
   }
 
+  const url = 'projects?' + getQueryString(queryParams);
+
   try {
-    const url =
-      'projects' +
-      '?membership=true' +
-      '&per_page=100' +
-      '&with_merge_requests_enabled=true' +
-      '&min_access_level=30' +
-      '&archived=false' +
-      topicString;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });

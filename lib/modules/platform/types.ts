@@ -194,7 +194,7 @@ export interface Platform {
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
-  getRepos(param?: AutodiscoverConfig): Promise<string[]>;
+  getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
