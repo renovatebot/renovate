@@ -20,6 +20,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_FORK,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -257,18 +258,29 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-export async function getForkOrgs(token: string): Promise<string[]> {
-  // This function will be adapted later to support configured forkOrgs
-  if (!config.renovateForkUser) {
-    try {
-      logger.debug('Determining fork user from API');
-      const userDetails = await getUserDetails(platformConfig.endpoint, token);
-      config.renovateForkUser = userDetails.username;
-    } catch (err) {
-      logger.debug({ err }, 'Error getting username for forkToken');
+export async function getForkOrgs(
+  token: string,
+  forkOrgs?: string[]
+): Promise<string[]> {
+  const destinationOrgs = forkOrgs ?? [];
+  if (!destinationOrgs.length) {
+    if (!config.renovateForkUser) {
+      try {
+        logger.debug('Determining fork user from API');
+        const userDetails = await getUserDetails(
+          platformConfig.endpoint,
+          token
+        );
+        config.renovateForkUser = userDetails.username;
+      } catch (err) {
+        logger.debug({ err }, 'Error getting username for forkToken');
+      }
+    }
+    if (config.renovateForkUser) {
+      destinationOrgs.push(config.renovateForkUser);
     }
   }
-  return config.renovateForkUser ? [config.renovateForkUser] : [];
+  return destinationOrgs;
 }
 
 export async function listForks(
@@ -299,10 +311,11 @@ export async function listForks(
 
 export async function findFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrgs?: string[]
 ): Promise<GhRestRepo | null> {
   const forks = await listForks(token, repository);
-  const orgs = await getForkOrgs(token);
+  const orgs = await getForkOrgs(token, forkOrgs);
   if (!orgs.length) {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
@@ -320,14 +333,17 @@ export async function findFork(
 
 export async function createFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrgs?: string[]
 ): Promise<GhRestRepo> {
   let forkedRepo: GhRestRepo | undefined;
   try {
+    const organization = (await getForkOrgs(token, forkOrgs))[0];
     forkedRepo = (
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
+          organization,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
@@ -348,6 +364,8 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkCreate,
+  forkOrgs,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -489,7 +507,7 @@ export async function initRepo({
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
-    let forkedRepo = await findFork(forkToken, repository);
+    let forkedRepo = await findFork(forkToken, repository, forkOrgs);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
       const forkDefaultBranch = forkedRepo.default_branch;
@@ -565,10 +583,15 @@ export async function initRepo({
         }
         throw new ExternalHostError(err);
       }
-    } else {
+    } else if (forkCreate) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository);
       config.repository = forkedRepo.full_name;
+    } else {
+      logger.debug(
+        'Forked repo is not found and forkCreate=false so need to abort'
+      );
+      throw new Error(REPOSITORY_NO_FORK);
     }
   }
 
@@ -1602,12 +1625,16 @@ export async function updatePr({
   prTitle: title,
   prBody: rawBody,
   state,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
+  }
+  if (targetBranch) {
+    patchBody.base = targetBranch;
   }
   if (state) {
     patchBody.state = state;

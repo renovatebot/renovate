@@ -60,7 +60,7 @@ export async function prepareGradleCommand(
  */
 export function getJavaConstraint(
   gradleVersion: string | null | undefined
-): string | null {
+): string {
   const major = gradleVersion ? gradleVersioning.getMajor(gradleVersion) : null;
   const minor = gradleVersion ? gradleVersioning.getMinor(gradleVersion) : null;
   if (major && (major > 7 || (major >= 7 && minor && minor >= 3))) {
