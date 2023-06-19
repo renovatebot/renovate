@@ -8,6 +8,23 @@ import { createURLFromHostOrURL, validateUrl } from '../url';
 import type { AuthenticationRule } from './types';
 import { parseGitUrl } from './url';
 
+const githubApiUrls = new Set([
+  'github.com',
+  'api.github.com',
+  'https://api.github.com',
+  'https://api.github.com/',
+]);
+
+const standardGitAllowedHostTypes = new Set<string>([
+  // All known git platforms
+  'azure',
+  'bitbucket',
+  'bitbucket-server',
+  'gitea',
+  'github',
+  'gitlab',
+] satisfies PlatformId[]);
+
 /**
  * Add authorization to a Git Url and returns a new environment variables object
  * @returns a new NodeJS.ProcessEnv object without modifying any input parameters
@@ -133,13 +150,6 @@ export function getGitEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
-  const githubApiUrls = new Set([
-    'github.com',
-    'api.github.com',
-    'https://api.github.com',
-    'https://api.github.com/',
-  ]);
-
   // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
   const githubToken = find({
     hostType: 'github',
@@ -153,31 +163,22 @@ export function getGitEnvironmentVariables(
     );
   }
 
-  // get extra host rules for other git-based Go Module hosts
+  // construct the Set of allowed hostTypes consisting of the standard Git provides
+  // plus additionalHostTypes, which are provided as parameter
+  const gitAllowedHostTypes = new Set<string>([
+    ...standardGitAllowedHostTypes,
+    ...additionalHostTypes,
+  ]);
+
   // filter rules without `matchHost` and `token` and github api github rules
   const hostRules = getAll()
     .filter((r) => r.matchHost && r.token)
     .filter((r) => !githubToken || !githubApiUrls.has(r.matchHost!));
 
-  const gitAllowedHostType = new Set<string>([
-    // All known git platforms
-    'azure',
-    'bitbucket',
-    'bitbucket-server',
-    'gitea',
-    'github',
-    'gitlab',
-  ] satisfies PlatformId[]);
-
-  additionalHostTypes.forEach((item) => gitAllowedHostType.add(item));
-
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   // for each hostRule with hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
-    if (
-      !hostRule.hostType ||
-      (hostRule.hostType && gitAllowedHostType.has(hostRule.hostType))
-    ) {
+    if (!hostRule.hostType || gitAllowedHostTypes.has(hostRule.hostType)) {
       environmentVariables = addAuthFromHostRule(
         hostRule,
         environmentVariables
