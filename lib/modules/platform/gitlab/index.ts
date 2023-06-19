@@ -31,6 +31,7 @@ import {
 } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type {
+  AutodiscoverParams,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -142,10 +143,23 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
+export async function getRepos(params?: AutodiscoverParams): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
+
+  let topicString = '';
+  if (params?.topics?.length) {
+    topicString = `&topic=${encodeURIComponent(params.topics.join(','))}`;
+  }
+
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false`;
+    const url =
+      'projects' +
+      '?membership=true' +
+      '&per_page=100' +
+      '&with_merge_requests_enabled=true' +
+      '&min_access_level=30' +
+      '&archived=false' +
+      topicString;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });
