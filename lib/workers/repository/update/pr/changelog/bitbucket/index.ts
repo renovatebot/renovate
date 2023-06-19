@@ -3,8 +3,8 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
 import { BitbucketTagsDatasource } from '../../../../../../modules/datasource/bitbucket-tags';
 import type {
-  BitbucketSourceResults,
   PagedResult,
+  SourceResults,
 } from '../../../../../../modules/platform/bitbucket/types';
 import { BitbucketHttp } from '../../../../../../util/http/bitbucket';
 import { joinUrlParts } from '../../../../../../util/url';
@@ -34,7 +34,7 @@ export async function getReleaseNotesMd(
   );
 
   const rootFiles = (
-    await bitbucketHttp.getJson<PagedResult<BitbucketSourceResults>>(
+    await bitbucketHttp.getJson<PagedResult<SourceResults>>(
       repositorySourceURl,
       {
         paginate: true,

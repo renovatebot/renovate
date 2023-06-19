@@ -103,7 +103,7 @@ export interface EffectiveReviewer {
   user: Account;
 }
 
-export interface BitbucketSourceResults {
+export interface SourceResults {
   path: string;
   type: BitbucketSourceType;
   commit: {
