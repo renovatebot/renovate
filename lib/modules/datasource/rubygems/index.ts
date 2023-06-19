@@ -7,16 +7,20 @@ import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { RubygemsHttp } from './http';
+import { MetadataCache } from './metadata-cache';
 import { GemMetadata, GemVersions, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
 
+  private metadataCache: MetadataCache;
+
   constructor() {
     super(RubyGemsDatasource.id);
     this.http = new RubygemsHttp(RubyGemsDatasource.id);
     this.versionsEndpointCache = new VersionsEndpointCache(this.http);
+    this.metadataCache = new MetadataCache(this.http);
   }
 
   override readonly defaultRegistryUrls = ['https://rubygems.org'];
@@ -27,13 +31,6 @@ export class RubyGemsDatasource extends Datasource {
 
   private readonly versionsEndpointCache: VersionsEndpointCache;
 
-  @cache({
-    namespace: `datasource-${RubyGemsDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      /* eslint-disable @typescript-eslint/restrict-template-expressions */
-      `${registryUrl}/${packageName}`,
-  })
   async getReleases({
     packageName,
     registryUrl,
@@ -51,7 +48,12 @@ export class RubyGemsDatasource extends Datasource {
 
       if (cachedVersions.type === 'success') {
         const { versions } = cachedVersions;
-        return { releases: versions.map((version) => ({ version })) };
+        const result = await this.metadataCache.getRelease(
+          registryUrl,
+          packageName,
+          versions
+        );
+        return result;
       }
 
       const registryHostname = parseUrl(registryUrl)?.hostname;
@@ -87,6 +89,13 @@ export class RubyGemsDatasource extends Datasource {
     }
   }
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `metadata:${registryUrl}/${packageName}`,
+  })
   async fetchGemMetadata(
     registryUrl: string,
     packageName: string
@@ -106,6 +115,13 @@ export class RubyGemsDatasource extends Datasource {
     }
   }
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `versions:${registryUrl}/${packageName}`,
+  })
   async fetchGemVersions(
     registryUrl: string,
     packageName: string
@@ -162,6 +178,13 @@ export class RubyGemsDatasource extends Datasource {
     return result;
   }
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `dependencies:${registryUrl}/${packageName}`,
+  })
   async getReleasesViaFallbackAPI(
     registryUrl: string,
     packageName: string

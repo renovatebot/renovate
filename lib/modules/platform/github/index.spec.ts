@@ -7,6 +7,7 @@ import {
   PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_FORK,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import * as repository from '../../../util/cache/repository';
@@ -348,8 +349,24 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkCreate: true,
       });
       expect(config).toMatchSnapshot();
+    });
+
+    it('throws when no forking allowed', async () => {
+      const repo = 'some/repo';
+      const branch = 'master';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 200, branch);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+          forkOrgs: ['renovate-bot'],
+          forkCreate: false,
+        })
+      ).rejects.toThrow(REPOSITORY_NO_FORK);
     });
 
     it('throws when cannot fork due to username error', async () => {
@@ -362,6 +379,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreate: true,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -397,12 +415,13 @@ describe('modules/platform/github/index', () => {
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      // getBranchCommit
       scope.post(`/repos/${repo}/forks`).reply(500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkOrgs: ['forked'],
+          forkCreate: true,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -410,10 +429,10 @@ describe('modules/platform/github/index', () => {
     it('should update fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
+      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
@@ -2288,6 +2307,7 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreate: true,
         });
       });
 
