@@ -14,7 +14,7 @@ import { parseUrl } from './url';
  */
 export function detectPlatform(
   url: string
-): 'azure' | 'bitbucket' | 'github' | 'gitlab' | null {
+): 'bitbucket' | 'github' | 'gitlab' | 'azure' | null {
   const { hostname } = parseUrl(url) ?? {};
 
   if (hostname === 'bitbucket.org' || hostname?.includes('bitbucket')) {
