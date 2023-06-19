@@ -4,6 +4,7 @@ body:
     attributes:
       label: How are you running Renovate?
       options:
+        - 'Placeholder value, please select the correct response from the dropdown'
         - 'Mend Renovate hosted app on github.com'
         - 'Self-hosted'
     validations:
@@ -31,23 +32,6 @@ body:
         - 'GitHub Enterprise Server'
         - 'gitlab.com'
         - 'GitLab self-hosted'
-    validations:
-      required: false
-
-  - type: input
-    id: platform-version-if-selfhosting
-    attributes:
-      label: If you're self-hosting Renovate, tell us what version of the platform you run.
-      description: |
-        This field is for the version number of your _platform_, so one of these:
-          - AWS CodeCommit
-          - Azure DevOps
-          - Bitbucket Cloud
-          - Bitbucket Server
-          - Azure DevOps
-          - Gitea
-          - GitHub (.com and Enterprise Server)
-          - GitLab (.com and CE/EE)
     validations:
       required: false
 

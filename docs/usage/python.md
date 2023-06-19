@@ -26,6 +26,9 @@ Legacy versions with the `===` prefix are ignored.
 ## Alternative file names
 
 For the `pip_requirements` manager, the default file matching regex for `requirements.txt` follows common file name conventions.
+
+It will match `requirements.txt` and `requirements.pip`, and any file in the format `requirements-*.txt` or `requirements-*.pip`, to allow for common filename patterns such as `requirements-dev.txt`.
+
 But Renovate may not find all your files.
 
 You can tell Renovate where to find your file(s) by setting your own `fileMatch` regex:
@@ -47,6 +50,7 @@ There are three ways to do this:
 
 - index-url in `requirements.txt`
 - sources in `Pipfile`
+- sources in `pyproject.toml`
 - set URL in Renovate configuration
 
 ### index-url in `requirements.txt`

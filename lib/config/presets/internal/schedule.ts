@@ -2,9 +2,9 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
-const daily = ['before 2am'];
-const earlyMondays = ['before 3am on Monday'];
-const monthly = ['before 3am on the first day of the month'];
+const daily = ['before 4am'];
+const earlyMondays = ['before 4am on Monday'];
+const monthly = ['before 4am on the first day of the month'];
 const nonOfficeHours = [
   'after 10pm every weekday',
   'before 5am every weekday',

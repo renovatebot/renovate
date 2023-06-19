@@ -299,7 +299,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 ### Datasource and credentials only
 
-You can skip the host part, and use just the datasource and credentials.
+You can skip the host part, and use only the datasource and credentials.
 
 `DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
 
@@ -399,7 +399,7 @@ If you must expose all environment variables to package managers, you can set th
     Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
-Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
+Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -415,9 +415,25 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkToken
+## forkCreate
 
-You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+If you're using an app token which is _not_ allowed to fork, set this to `false`.
+
+## forkOrgs
+
+This configuration option lets you choose which organization or account you want repositories forked into when "fork mode" is enabled.
+
+You may set more than one organization or account.
+This can be handy if you're migrating from user-based forks to organization-based forks.
+
+If you've set multiple `forkOrgs` then Renovate will:
+
+1. Check if a fork exists in the preferred organization
+1. If no fork exists in the preferred org: Renovate checks the fallback organizations
+
+Renovate always creates the new fork in the _first_ organization in the `forkOrgs` list.
+
+## forkToken
 
 If this value is configured then Renovate:
 
@@ -541,7 +557,7 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 ## onboardingConfigFileName
 
-If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
+If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
@@ -590,7 +606,7 @@ Default is no limit.
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
+If you want a UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
 To create the key pair with GPG use the following commands:
 
@@ -659,7 +675,9 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 
 <!-- prettier-ignore -->
 !!! note
-    Simple public key encryption was previously used to encrypt secrets, but this approach has been deprecated and is no longer documented.
+    You could use public key encryption with earlier versions of Renovate.
+    We deprecated this approach and removed the documentation for it.
+    If you're _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## privateKeyOld
 

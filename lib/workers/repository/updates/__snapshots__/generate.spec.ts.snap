@@ -178,6 +178,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
+  "recreateClosed": true,
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
   "upgrades": [
@@ -191,6 +192,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
       "manager": "some-manager",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "recreateClosed": true,
     },
   ],
 }

@@ -2011,7 +2011,6 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports ghcr', async () => {
-      hostRules.find.mockResolvedValue({} as never);
       httpMock
         .scope('https://ghcr.io/v2', {
           badheaders: ['authorization'],

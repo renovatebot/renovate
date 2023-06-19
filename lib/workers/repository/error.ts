@@ -24,6 +24,7 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
+  REPOSITORY_NO_FORK,
   REPOSITORY_NO_PACKAGE_FILES,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
@@ -68,6 +69,11 @@ export default async function handleError(
     delete config.branchList;
     return err.message;
   }
+  if (err.message === REPOSITORY_NO_FORK) {
+    logger.info('Repository has no fork - skipping');
+    delete config.branchList;
+    return err.message;
+  }
   if (err.message === REPOSITORY_MIRRORED) {
     logger.info('Repository is a mirror - skipping');
     delete config.branchList;
@@ -94,7 +100,9 @@ export default async function handleError(
     return err.message;
   }
   if (err.message === REPOSITORY_FORKED) {
-    logger.info('Repository is a fork and not manually configured - skipping');
+    logger.info(
+      'Repository is a fork and not manually configured - skipping - did you want to run with flag --include-forks?'
+    );
     return err.message;
   }
   if (err.message === REPOSITORY_CANNOT_FORK) {

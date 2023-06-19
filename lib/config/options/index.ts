@@ -445,6 +445,28 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'forkOrgs',
+    description:
+      'The preferred organizations to create or find forked repositories, when in fork mode.',
+    stage: 'repository',
+    type: 'array',
+    subType: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+  },
+  {
+    name: 'forkCreate',
+    description:
+      'Decide if Renovate creates a fork at runtime when in fork mode.',
+    stage: 'repository',
+    type: 'boolean',
+    default: true,
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+  },
+  {
     name: 'githubTokenWarn',
     description: 'Display warnings about GitHub token not being set.',
     type: 'boolean',
@@ -1296,7 +1318,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchFiles',
     description:
-      'List of strings to do an exact match against package files with full path. Only works inside a `packageRules` object.',
+      'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1574,10 +1596,11 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'recreateClosed',
+    name: 'recreateWhen',
     description: 'Recreate PRs even if same ones were closed previously.',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    default: 'auto',
+    allowedValues: ['auto', 'always', 'never'],
   },
   {
     name: 'rebaseWhen',
@@ -1899,13 +1922,13 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       enabled: false,
-      recreateClosed: true,
+      recreateWhen: 'always',
       rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
       commitMessageExtra: null,
-      schedule: ['before 5am on monday'],
+      schedule: ['before 4am on monday'],
       groupName: null,
       prBodyDefinitions: {
         Change: 'All locks refreshed',
@@ -2176,6 +2199,7 @@ const options: RenovateOptions[] = [
       'composer',
       'gomod',
       'npm',
+      'pep621',
       'pipenv',
       'poetry',
     ],
@@ -2404,6 +2428,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'branchAutomergeFailure',
       'configErrorIssue',
+      'dependencyLookupWarnings',
       'deprecationWarningIssues',
       'lockFileErrors',
       'missingCredentialsError',

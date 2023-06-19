@@ -29,6 +29,10 @@ sudo apt-get update
 sudo apt-get install -y git build-essential nodejs yarn
 ```
 
+#### Nix
+
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs yarn`.
+
 #### Windows
 
 Follow these steps to set up your development environment on Windows 10.
@@ -139,8 +143,8 @@ Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 ### Jest
 
-You can run just the Jest unit tests by running `yarn jest`.
-You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/repository/update/branch`.
+Run the Jest unit tests with the `yarn jest` command.
+You can also run a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
 e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
@@ -201,7 +205,7 @@ Also create documentation for the option in the `docs/usage/configuration-option
 
 ### Chrome's inspect tool
 
-It's really easy to debug Renovate with the help of Chrome's inspect tool.
+You can debug Renovate with Chrome's inspect tool.
 Here's an example:
 
 1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
@@ -211,7 +215,7 @@ Here's an example:
 
 ### VS Code
 
-You can also debug with VS Code.
+You can also debug Renovate with VS Code.
 Here's an example:
 
 1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token

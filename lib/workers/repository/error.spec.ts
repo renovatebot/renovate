@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../test/util';
+import { RenovateConfig, partial } from '../../../test/util';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -20,6 +20,7 @@ import {
   REPOSITORY_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_FORK,
   REPOSITORY_NO_PACKAGE_FILES,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
@@ -37,7 +38,7 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({ branchList: [] });
 });
 
 describe('workers/repository/error', () => {
@@ -53,6 +54,7 @@ describe('workers/repository/error', () => {
       CONFIG_VALIDATION,
       REPOSITORY_ARCHIVED,
       REPOSITORY_MIRRORED,
+      REPOSITORY_NO_FORK,
       REPOSITORY_RENAMED,
       REPOSITORY_BLOCKED,
       REPOSITORY_NOT_FOUND,

@@ -3,8 +3,11 @@ import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_FORK,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import * as repository from '../../../util/cache/repository';
@@ -346,8 +349,24 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkCreate: true,
       });
       expect(config).toMatchSnapshot();
+    });
+
+    it('throws when no forking allowed', async () => {
+      const repo = 'some/repo';
+      const branch = 'master';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 200, branch);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+          forkOrgs: ['renovate-bot'],
+          forkCreate: false,
+        })
+      ).rejects.toThrow(REPOSITORY_NO_FORK);
     });
 
     it('throws when cannot fork due to username error', async () => {
@@ -360,6 +379,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreate: true,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -395,12 +415,13 @@ describe('modules/platform/github/index', () => {
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      // getBranchCommit
       scope.post(`/repos/${repo}/forks`).reply(500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkOrgs: ['forked'],
+          forkCreate: true,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -408,10 +429,10 @@ describe('modules/platform/github/index', () => {
     it('should update fork when using forkToken', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
+      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
@@ -540,6 +561,40 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.initRepo({ repository: 'some/repo' })
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
+    });
+
+    it('throws unexpected graphql errors', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'SOME_ERROR_TYPE',
+              message: 'Some error message',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_UNKNOWN_ERROR);
+    });
+
+    it('throws graphql rate limit error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMITED',
+              message: 'API rate limit exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
     it('should throw error if renamed', async () => {
@@ -865,13 +920,19 @@ describe('modules/platform/github/index', () => {
           },
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ days: 6 }).toISO(),
             updated_at: '01-09-2022',
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -957,12 +1018,18 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              repo: { full_name: 'some/repo' },
+              sha: '123',
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -985,12 +1052,18 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(422);
 
@@ -2111,7 +2184,7 @@ describe('modules/platform/github/index', () => {
             state: 'closed',
           },
         ]);
-      await github.initRepo({ repository: 'some/repo' } as never);
+      await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -2234,6 +2307,7 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreate: true,
         });
       });
 
@@ -2775,6 +2849,22 @@ describe('modules/platform/github/index', () => {
 
       await expect(github.updatePr(pr)).toResolve();
     });
+
+    it('should update target branch', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: 'closed',
+        targetBranch: 'new_base',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
   });
 
   describe('mergePr(prNo)', () => {
@@ -2856,8 +2946,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
-        message:
-          'At least 1 approving review is required by reviewers with write access.',
+        message: 'Waiting on code owner review from org/team.',
       });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
@@ -3291,6 +3380,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -3319,6 +3410,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
@@ -3331,6 +3424,94 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBe('0abcdef');
+    });
+
+    it('continues if rebase fails due to 422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(422)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+
+    it('aborts if rebase fails due to non-422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it("aborts if commit SHA doesn't exist", async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
     });
   });
 });

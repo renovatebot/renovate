@@ -9,6 +9,8 @@ import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -18,6 +20,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_FORK,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -255,18 +258,29 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-export async function getForkOrgs(token: string): Promise<string[]> {
-  // This function will be adapted later to support configured forkOrgs
-  if (!config.renovateForkUser) {
-    try {
-      logger.debug('Determining fork user from API');
-      const userDetails = await getUserDetails(platformConfig.endpoint, token);
-      config.renovateForkUser = userDetails.username;
-    } catch (err) {
-      logger.debug({ err }, 'Error getting username for forkToken');
+export async function getForkOrgs(
+  token: string,
+  forkOrgs?: string[]
+): Promise<string[]> {
+  const destinationOrgs = forkOrgs ?? [];
+  if (!destinationOrgs.length) {
+    if (!config.renovateForkUser) {
+      try {
+        logger.debug('Determining fork user from API');
+        const userDetails = await getUserDetails(
+          platformConfig.endpoint,
+          token
+        );
+        config.renovateForkUser = userDetails.username;
+      } catch (err) {
+        logger.debug({ err }, 'Error getting username for forkToken');
+      }
+    }
+    if (config.renovateForkUser) {
+      destinationOrgs.push(config.renovateForkUser);
     }
   }
-  return config.renovateForkUser ? [config.renovateForkUser] : [];
+  return destinationOrgs;
 }
 
 export async function listForks(
@@ -297,10 +311,11 @@ export async function listForks(
 
 export async function findFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrgs?: string[]
 ): Promise<GhRestRepo | null> {
   const forks = await listForks(token, repository);
-  const orgs = await getForkOrgs(token);
+  const orgs = await getForkOrgs(token, forkOrgs);
   if (!orgs.length) {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
@@ -318,14 +333,17 @@ export async function findFork(
 
 export async function createFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrgs?: string[]
 ): Promise<GhRestRepo> {
   let forkedRepo: GhRestRepo | undefined;
   try {
+    const organization = (await getForkOrgs(token, forkOrgs))[0];
     forkedRepo = (
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
+          organization,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
@@ -346,6 +364,8 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkCreate,
+  forkOrgs,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -394,6 +414,16 @@ export async function initRepo({
         name: config.repositoryName,
       },
     });
+
+    if (res?.errors) {
+      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
+        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+      }
+      logger.debug({ res }, 'Unexpected Graph QL errors');
+      throw new Error(PLATFORM_UNKNOWN_ERROR);
+    }
+
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
@@ -409,7 +439,7 @@ export async function initRepo({
       repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
     ) {
       logger.debug(
-        { repository, this_repository: repo.nameWithOwner },
+        { desiredRepo: repository, foundRepo: repo.nameWithOwner },
         'Repository has been renamed'
       );
       throw new Error(REPOSITORY_RENAMED);
@@ -477,7 +507,7 @@ export async function initRepo({
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
-    let forkedRepo = await findFork(forkToken, repository);
+    let forkedRepo = await findFork(forkToken, repository, forkOrgs);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
       const forkDefaultBranch = forkedRepo.default_branch;
@@ -553,10 +583,15 @@ export async function initRepo({
         }
         throw new ExternalHostError(err);
       }
-    } else {
+    } else if (forkCreate) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository);
       config.repository = forkedRepo.full_name;
+    } else {
+      logger.debug(
+        'Forked repo is not found and forkCreate=false so need to abort'
+      );
+      throw new Error(REPOSITORY_NO_FORK);
     }
   }
 
@@ -739,11 +774,19 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
-  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
-
-  let branchExists = false;
   try {
-    await githubApi.head(refUrl, { memCache: false });
+    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    await githubApi.head(commitUrl, { memCache: false });
+  } catch (err) {
+    logger.error({ err, sha, branchName }, 'Commit not found');
+    throw err;
+  }
+
+  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
+  let branchExists = false;
+  let branchResult: undefined | HttpResponse<string>;
+  try {
+    branchResult = await githubApi.head(refUrl, { memCache: false });
     branchExists = true;
   } catch (err) {
     if (err.statusCode !== 404) {
@@ -752,8 +795,20 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   if (branchExists) {
-    await githubApi.patchJson(refUrl, { body: { sha, force: true } });
-    return;
+    try {
+      await githubApi.patchJson(refUrl, { body: { sha, force: true } });
+      return;
+    } catch (err) {
+      if (err.err?.response?.statusCode === 422) {
+        logger.debug(
+          { branchResult, err },
+          'Branch update failed due to reference not existing - will try to create'
+        );
+      } else {
+        logger.warn({ refUrl, err, branchResult }, 'Error updating branch');
+        throw err;
+      }
+    }
   }
 
   await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
@@ -798,7 +853,10 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       await ensureBranchSha(branchName, sha!);
       logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
-      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      logger.debug(
+        { err, branchName, sha, autoclosedPr },
+        'Could not recreate autoclosed branch - skipping reopen'
+      );
       return null;
     }
     try {
@@ -1567,12 +1625,16 @@ export async function updatePr({
   prTitle: title,
   prBody: rawBody,
   state,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
+  }
+  if (targetBranch) {
+    patchBody.base = targetBranch;
   }
   if (state) {
     patchBody.state = state;
@@ -1639,7 +1701,8 @@ export async function mergePr({
         }
         if (
           is.nonEmptyString(body?.message) &&
-          body.message.includes('approving review')
+          (body.message.includes('approving review') ||
+            body.message.includes('code owner review'))
         ) {
           logger.debug(
             { response: body },

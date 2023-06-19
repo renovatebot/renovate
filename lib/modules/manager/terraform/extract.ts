@@ -1,6 +1,11 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import type { ExtractConfig, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
+import type { DependencyExtractor } from './base';
 import { resourceExtractors } from './extractors';
 import * as hcl from './hcl';
 import {
@@ -10,12 +15,12 @@ import {
 
 export async function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  logger.trace({ content }, 'terraform.extractPackageFile()');
+  logger.trace({ content }, `terraform.extractPackageFile(${packageFile})`);
 
-  const passedExtractors = [];
+  const passedExtractors: DependencyExtractor[] = [];
   for (const extractor of resourceExtractors) {
     if (checkFileContainsDependency(content, extractor.getCheckList())) {
       passedExtractors.push(extractor);
@@ -23,27 +28,27 @@ export async function extractPackageFile(
   }
 
   if (!passedExtractors.length) {
-    logger.trace(
-      { fileName },
+    logger.debug(
+      { packageFile },
       'preflight content check has not found any relevant content'
     );
     return null;
   }
   logger.trace(
-    { fileName },
+    { packageFile },
     `preflight content check passed for extractors: [${passedExtractors
       .map((value) => value.constructor.name)
       .toString()}]`
   );
 
-  const dependencies = [];
-  const hclMap = await hcl.parseHCL(content, fileName);
+  const dependencies: PackageDependency[] = [];
+  const hclMap = await hcl.parseHCL(content, packageFile);
   if (is.nullOrUndefined(hclMap)) {
-    logger.trace({ fileName }, 'failed to parse HCL file');
+    logger.debug({ packageFile }, 'failed to parse HCL file');
     return null;
   }
 
-  const locks = await extractLocksForPackageFile(fileName);
+  const locks = await extractLocksForPackageFile(packageFile);
 
   for (const extractor of passedExtractors) {
     const deps = extractor.extract(hclMap, locks, config);
@@ -51,5 +56,5 @@ export async function extractPackageFile(
   }
 
   dependencies.forEach((value) => delete value.managerData);
-  return { deps: dependencies };
+  return dependencies.length ? { deps: dependencies } : null;
 }

@@ -9,6 +9,7 @@ export const PLATFORM_GPG_FAILED = 'gpg-failed';
 export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
+export const PLATFORM_UNKNOWN_ERROR = 'platform-unknown-error';
 
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';
@@ -22,6 +23,7 @@ export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
 export const REPOSITORY_ARCHIVED = 'archived';
 export const REPOSITORY_BLOCKED = 'blocked';
 export const REPOSITORY_CANNOT_FORK = 'cannot-fork';
+export const REPOSITORY_NO_FORK = 'no-fork';
 export const REPOSITORY_DISABLED = 'disabled';
 export const REPOSITORY_CLOSED_ONBOARDING = 'disabled-closed-onboarding';
 export const REPOSITORY_DISABLED_BY_CONFIG = 'disabled-by-config';

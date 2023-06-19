@@ -143,7 +143,7 @@ export async function getRawFile(
 
   const versionDescriptor: GitVersionDescriptor = {
     version: branchOrTag,
-  } as GitVersionDescriptor;
+  } satisfies GitVersionDescriptor;
 
   const buf = await azureApiGit.getItemContent(
     repoId,
