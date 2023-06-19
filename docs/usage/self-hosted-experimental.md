@@ -73,7 +73,10 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 ## `RENOVATE_X_DELETE_CONFIG_FILE`
 
-If set, Renovate will attempt to remove the self-hosted config file specified via the `RENOVATE_CONFIG_FILE` environment variable. The process running Renovate should have the necessary permissions to delete the config file.
+If `true` Renovate tries to delete the self-hosted config file after reading it.
+You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
+
+The process that runs Renovate must have the correct permissions to delete the config file.
 
 ## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
 
