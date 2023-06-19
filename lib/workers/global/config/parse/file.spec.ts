@@ -162,7 +162,10 @@ describe('workers/global/config/parse/file', () => {
     it('skip when config file does not exist', async () => {
       fsPathExistsSpy.mockResolvedValueOnce(false as never);
 
-      await file.deleteConfigFile({ RENOVATE_CONFIG_FILE: 'path' });
+      await file.deleteConfigFile({
+        RENOVATE_CONFIG_FILE: 'path',
+        RENOVATE_X_DELETE_CONFIG_FILE: 'true',
+      });
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
     });

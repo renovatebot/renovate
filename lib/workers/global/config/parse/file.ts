@@ -99,11 +99,11 @@ export async function deleteConfigFile(env: NodeJS.ProcessEnv): Promise<void> {
     return;
   }
 
-  if (!(await fs.pathExists(configFile))) {
+  if (env.RENOVATE_X_DELETE_CONFIG_FILE !== 'true') {
     return;
   }
 
-  if (env.RENOVATE_X_DELETE_CONFIG_FILE !== 'true') {
+  if (!(await fs.pathExists(configFile))) {
     return;
   }
 
