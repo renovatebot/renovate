@@ -31,7 +31,7 @@ import {
 } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type {
-  AutodiscoverParams,
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -143,12 +143,12 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(params?: AutodiscoverParams): Promise<string[]> {
+export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
 
   let topicString = '';
-  if (params?.topics?.length) {
-    topicString = `&topic=${encodeURIComponent(params.topics.join(','))}`;
+  if (config?.topics?.length) {
+    topicString = `&topic=${encodeURIComponent(config.topics.join(','))}`;
   }
 
   try {

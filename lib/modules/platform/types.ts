@@ -163,7 +163,7 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
-export interface AutodiscoverParams {
+export interface AutodiscoverConfig {
   topics?: string[];
 }
 
@@ -194,7 +194,7 @@ export interface Platform {
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
-  getRepos(param?: AutodiscoverParams): Promise<string[]>;
+  getRepos(param?: AutodiscoverConfig): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;

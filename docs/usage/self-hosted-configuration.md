@@ -131,10 +131,6 @@ If using negations, all repositories except those who match the regex are added 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
 topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
 
-<!-- Github and gitea, at least, have the notion of topics, but server-side filtering for those is less straightforward. -->
-
-The only platform currently supported is GitLab.
-
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
