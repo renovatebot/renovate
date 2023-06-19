@@ -18,16 +18,15 @@ const cacheNamespace = 'changelog-bitbucket-release';
 
 function getCachedTags(
   endpoint: string,
-  versionScheme: string,
   repository: string
 ): Promise<string[]> {
-  const cacheKey = `getTags-${endpoint}-${versionScheme}-${repository}`;
+  const cacheKey = `getTags-${endpoint}-${repository}`;
   const cachedResult = memCache.get<Promise<string[]>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getTags(repository);
+  const promisedRes = getTags(endpoint, repository);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -49,7 +48,6 @@ export async function getChangeLogJSON(
   const protocol = parsedUrl.protocol!;
   const host = parsedUrl.host!;
   const pathname = parsedUrl.pathname!;
-
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = `${protocol}//${host}/`;
   const apiBaseUrl = `${protocol}//api.${host}/`;
@@ -65,13 +63,13 @@ export async function getChangeLogJSON(
     logger.debug('No releases');
     return null;
   }
-
+  // This extra filter/sort should not be necessary, but better safe than sorry
   const validReleases = [...releases]
     .filter((release) => version.isVersion(release.version))
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   if (validReleases.length < 2) {
-    logger.debug('Not enough valid releases');
+    logger.debug(`Not enough valid releases for dep ${packageName}`);
     return null;
   }
 
@@ -79,12 +77,14 @@ export async function getChangeLogJSON(
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getCachedTags(apiBaseUrl, versioning, repository);
+      tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
-    const tagName = tags
-      .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
+    const tagName = findTagOfRelease(
+      version,
+      packageName,
+      release.version,
+      tags
+    );
     if (is.nonEmptyString(tagName)) {
       return tagName;
     }
@@ -126,7 +126,12 @@ export async function getChangeLogJSON(
       const prevHead = await getRef(prev);
       const nextHead = await getRef(next);
       if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
-        release.compare.url = `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
+        release.compare.url = getCompareURL(
+          baseUrl,
+          repository,
+          prevHead,
+          nextHead
+        );
       }
       const cacheMinutes = 55;
       await packageCache.set(
@@ -146,8 +151,8 @@ export async function getChangeLogJSON(
       type: 'bitbucket',
       repository,
       sourceUrl,
-      packageName,
       sourceDirectory,
+      packageName,
     },
     versions: changelogReleases,
   };
@@ -155,4 +160,26 @@ export async function getChangeLogJSON(
   res = await addReleaseNotes(res, config);
 
   return res;
+}
+
+function getCompareURL(
+  baseUrl: string,
+  repository: string,
+  prevHead: string,
+  nextHead: string
+): string {
+  return `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
+}
+
+function findTagOfRelease(
+  version: allVersioning.VersioningApi,
+  packageName: string,
+  depNewVersion: string,
+  tags: string[]
+): string | undefined {
+  const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
+  const tagName = tags
+    .filter((tag) => version.isVersion(tag.replace(regex, '')))
+    .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+  return tagName;
 }

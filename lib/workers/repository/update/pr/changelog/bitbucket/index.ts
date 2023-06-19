@@ -70,7 +70,10 @@ export async function getReleaseNotesMd(
   return { changelogFile: changelogFile.path, changelogMd };
 }
 
-export async function getTags(repository: string): Promise<string[]> {
+export async function getTags(
+  endpoint: string,
+  repository: string
+): Promise<string[]> {
   logger.trace('bitbucket.getTags()');
   try {
     const tags = (

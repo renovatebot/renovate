@@ -1,5 +1,6 @@
 // TODO #7154
 import URL from 'node:url';
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../../config/global';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
@@ -14,6 +15,8 @@ import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import type { ChangeLogRelease, ChangeLogResult } from './types';
+
+const cacheNamespace = 'changelog-github-release';
 
 function getCachedTags(
   endpoint: string,
@@ -37,17 +40,23 @@ export async function getChangeLogJSON(
   const currentVersion = config.currentVersion!;
   const newVersion = config.newVersion!;
   const sourceUrl = config.sourceUrl!;
-  const sourceDirectory = config.sourceDirectory!;
   const packageName = config.packageName!;
+  const sourceDirectory = config.sourceDirectory!;
   const manager = config.manager;
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
     logger.trace('No release notes for @types');
     return null;
   }
   const version = allVersioning.get(versioning);
-  const { protocol, host, pathname } = URL.parse(sourceUrl);
+
+  const parsedUrl = URL.parse(sourceUrl);
+  const protocol = parsedUrl.protocol!;
+  const host = parsedUrl.host!;
+  const pathname = parsedUrl.pathname!;
+  logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
+
   // TODO: types (#7154)
-  const baseUrl = `${protocol!}//${host!}/`;
+  const baseUrl = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
@@ -57,7 +66,7 @@ export async function getChangeLogJSON(
   });
   // istanbul ignore if
   if (!token) {
-    if (host!.endsWith('.github.com') || host === 'github.com') {
+    if (host.endsWith('.github.com') || host === 'github.com') {
       if (!GlobalConfig.get('githubTokenWarn')) {
         logger.debug(
           { manager, packageName, sourceUrl },
@@ -80,7 +89,7 @@ export async function getChangeLogJSON(
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : baseUrl + 'api/v3/';
-  const repository = pathname!
+  const repository = pathname
     .slice(1)
     .replace(regEx(/\/$/), '')
     .replace(regEx(/\.git$/), '');
@@ -88,6 +97,7 @@ export async function getChangeLogJSON(
     logger.debug(`Invalid github URL found: ${sourceUrl}`);
     return null;
   }
+
   const releases = config.releases ?? (await getInRangeReleases(config));
   if (!releases?.length) {
     logger.debug('No releases');
@@ -115,16 +125,14 @@ export async function getChangeLogJSON(
       release.version,
       tags
     );
-    if (tagName) {
+    if (is.nonEmptyString(tagName)) {
       return tagName;
     }
-    if (release.gitRef) {
+    if (is.nonEmptyString(release.gitRef)) {
       return release.gitRef;
     }
     return null;
   }
-
-  const cacheNamespace = 'changelog-github-release';
 
   function getCacheKey(prev: string, next: string): string {
     return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
@@ -135,39 +143,45 @@ export async function getChangeLogJSON(
   const include = (v: string): boolean =>
     version.isGreaterThan(v, currentVersion) &&
     !version.isGreaterThan(v, newVersion);
+
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
     const next = validReleases[i];
-    if (include(next.version)) {
-      let release = await packageCache.get(
-        cacheNamespace,
-        getCacheKey(prev.version, next.version)
-      );
-      // istanbul ignore else
-      if (!release) {
-        release = {
-          version: next.version,
-          gitRef: next.gitRef,
-          date: next.releaseTimestamp,
-          // put empty changes so that existing templates won't break
-          changes: [],
-          compare: {},
-        };
-        const prevHead = await getRef(prev);
-        const nextHead = await getRef(next);
-        if (prevHead && nextHead) {
-          release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
-        }
-        const cacheMinutes = 55;
-        await packageCache.set(
-          cacheNamespace,
-          getCacheKey(prev.version, next.version),
-          release,
-          cacheMinutes
+    if (!include(next.version)) {
+      continue;
+    }
+    let release = await packageCache.get(
+      cacheNamespace,
+      getCacheKey(prev.version, next.version)
+    );
+    if (!release) {
+      release = {
+        version: next.version,
+        date: next.releaseTimestamp,
+        gitRef: next.gitRef,
+        // put empty changes so that existing templates won't break
+        changes: [],
+        compare: {},
+      };
+      const prevHead = await getRef(prev);
+      const nextHead = await getRef(next);
+      if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
+        release.compare.url = getCompareURL(
+          baseUrl,
+          repository,
+          prevHead,
+          nextHead
         );
       }
-      changelogReleases.unshift(release);
+      const cacheMinutes = 55;
+      await packageCache.set(
+        cacheNamespace,
+        getCacheKey(prev.version, next.version),
+        release,
+        cacheMinutes
+      );
     }
+    changelogReleases.unshift(release);
   }
 
   let res: ChangeLogResult | null = {
@@ -186,6 +200,15 @@ export async function getChangeLogJSON(
   res = await addReleaseNotes(res, config);
 
   return res;
+}
+
+function getCompareURL(
+  baseUrl: string,
+  repository: string,
+  prevHead: string,
+  nextHead: string
+): string {
+  return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
 }
 
 function findTagOfRelease(
