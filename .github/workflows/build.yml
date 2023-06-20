@@ -177,14 +177,28 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Cache eslint
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      - name: Restore eslint cache
+        id: eslint-cache-restore
+        uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/eslint
           key: eslint-cache
 
+      - name: Calculate old hash value of eslint cache
+        run: echo "OLD_HASH=${{ hashFiles('.cache/eslint') }}" >> "$GITHUB_ENV"
+
       - name: Lint
         run: yarn -s eslint-ci
+
+      - name: Calculate new hash value of eslint cache
+        run: echo "NEW_HASH=${{ hashFiles('.cache/eslint') }}" >> "$GITHUB_ENV"
+
+      - name: Save eslint cache
+        if: env.OLD_HASH != env.NEW_HASH
+        uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .cache/eslint
+          key: eslint-cache
 
   lint-prettier:
     needs: [setup]
