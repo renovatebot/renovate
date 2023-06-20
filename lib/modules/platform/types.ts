@@ -37,6 +37,7 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
+  forkOrg?: string;
   forkToken?: string;
   forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
@@ -112,6 +113,7 @@ export interface UpdatePrConfig {
   prTitle: string;
   prBody?: string;
   state?: 'open' | 'closed';
+  targetBranch?: string;
 }
 export interface EnsureIssueConfig {
   title: string;

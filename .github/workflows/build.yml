@@ -375,22 +375,30 @@ jobs:
     timeout-minutes: 1
     if: always()
     steps:
-      - if: |
+      - name: Fail for failed or cancelled tests
+        if: |
           needs.test.result == 'failure' ||
-          needs.test.result == 'cancelled' ||
-          (needs.test.result == 'skipped' &&
-            !(github.event.pull_request.draft &&
-              needs.setup.outputs.test-matrix-empty == 'true')
-          )
+          needs.test.result == 'cancelled'
         run: exit 1
 
-      - if: |
+      - name: Fail for skipped tests when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.test.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled coverage
+        if: |
           needs.coverage.result == 'failure' ||
-          needs.coverage.result == 'cancelled' ||
-          (needs.coverage.result == 'skipped' &&
-            !(github.event.pull_request.draft &&
-              needs.setup.outputs.test-matrix-empty == 'true')
-          )
+          needs.coverage.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped coverage when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.coverage.result == 'skipped'
         run: exit 1
 
   build:
