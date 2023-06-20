@@ -259,7 +259,7 @@
     "@renovate/eslint-plugin": "file:./tools/eslint",
     "@semantic-release/exec": "6.0.3",
     "@types/auth-header": "1.0.2",
-    "@types/aws4": "1.11.2",
+    "@types/aws4": "1.11.3",
     "@types/breejs__later": "4.1.2",
     "@types/bunyan": "1.8.8",
     "@types/cacache": "15.0.1",
