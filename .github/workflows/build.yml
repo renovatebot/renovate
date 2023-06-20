@@ -167,6 +167,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    permissions:
+      actions: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -187,7 +190,7 @@ jobs:
         run: yarn -s eslint-ci
 
       - name: Remove cache
-        if: github.event_name == 'push'
+        # if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
@@ -205,6 +208,9 @@ jobs:
     needs: [setup]
     runs-on: ubuntu-latest
     timeout-minutes: 7
+
+    permissions:
+      actions: write
 
     steps:
       - name: Checkout code
@@ -226,7 +232,7 @@ jobs:
         run: yarn -s prettier --cache-location .cache/prettier
 
       - name: Remove cache
-        if: github.event_name == 'push'
+        # if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
