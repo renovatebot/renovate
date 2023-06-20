@@ -190,7 +190,7 @@ jobs:
         run: yarn -s eslint-ci
 
       - name: Remove cache
-        # if: github.event_name == 'push'
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
@@ -232,7 +232,7 @@ jobs:
         run: yarn -s prettier --cache-location .cache/prettier
 
       - name: Remove cache
-        # if: github.event_name == 'push'
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
