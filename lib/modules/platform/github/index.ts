@@ -20,7 +20,6 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_NOT_FOUND,
-  REPOSITORY_NO_FORK,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -588,14 +587,14 @@ export async function initRepo({
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       if (!forkedRepo) {
-        throw new Error(REPOSITORY_NO_FORK);
+        throw new Error(REPOSITORY_CANNOT_FORK);
       }
       config.repository = forkedRepo.full_name;
     } else {
       logger.debug(
         'Forked repo is not found and forkCreate=false so need to abort'
       );
-      throw new Error(REPOSITORY_NO_FORK);
+      throw new Error(REPOSITORY_CANNOT_FORK);
     }
   }
 

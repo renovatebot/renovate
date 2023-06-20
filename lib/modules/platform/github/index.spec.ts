@@ -7,7 +7,6 @@ import {
   PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
-  REPOSITORY_NO_FORK,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import * as repository from '../../../util/cache/repository';
@@ -366,7 +365,7 @@ describe('modules/platform/github/index', () => {
           forkOrg: 'renovate-bot',
           forkCreate: false,
         })
-      ).rejects.toThrow(REPOSITORY_NO_FORK);
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
 
     it('throws when cannot fork due to username error', async () => {
