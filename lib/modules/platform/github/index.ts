@@ -258,20 +258,15 @@ export async function getJsonFile(
 }
 
 export async function getForkUser(token: string): Promise<string | null> {
-  if (config.renovateForkUser) {
-    return config.renovateForkUser;
-  }
-  if (token.startsWith('ghs_')) {
-    logger.debug('Cannot determine fork user for GitHub App');
-    return null;
-  }
   try {
     logger.debug('Determining fork user from API');
     const userDetails = await getUserDetails(platformConfig.endpoint, token);
     config.renovateForkUser = userDetails.username;
     return config.renovateForkUser;
   } catch (err) {
-    logger.debug({ err }, 'Error getting username for forkToken');
+    if (!token.startsWith('ghs_')) {
+      logger.debug({ err }, 'Error getting username for forkToken');
+    }
     return null;
   }
 }

@@ -352,20 +352,6 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('throws when no forking allowed', async () => {
-      const repo = 'some/repo';
-      const branch = 'master';
-      const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, repo, false, 200, branch);
-      await expect(
-        github.initRepo({
-          repository: 'some/repo',
-          forkToken: 'ghs_true',
-          forkOrg: 'renovate-bot',
-        })
-      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
-    });
-
     it('throws when cannot fork due to username error', async () => {
       const repo = 'some/repo';
       const branch = 'master';
@@ -422,16 +408,14 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
 
-    it('should update fork when using forkToken', async () => {
+    it('should update fork when using forkToken and forkOrg', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
-      scope.get('/user').reply(200, {
-        login: 'forked',
-      });
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkOrg: 'forked',
       });
       expect(config).toMatchSnapshot();
     });
