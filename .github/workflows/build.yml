@@ -227,14 +227,14 @@ jobs:
         id: prettier-cache-restore
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
-          path: .prettier-cache
+          path: .cache/prettier
           key: prettier-cache
 
       - name: Calculate old hash value of prettier cache
         run: echo "OLD_HASH=${{ hashFiles('.cache/prettier') }}" >> "$GITHUB_ENV"
 
       - name: Lint
-        run: yarn prettier --cache-location .prettier-cache
+        run: yarn -s prettier --cache-location .cache/prettier
 
       - name: Calculate new hash value of prettier cache
         run: echo "NEW_HASH=${{ hashFiles('.cache/prettier') }}" >> "$GITHUB_ENV"
@@ -251,7 +251,7 @@ jobs:
         if: env.OLD_HASH != env.NEW_HASH
         uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
-          path: .prettier-cache
+          path: .cache/prettier
           key: prettier-cache
 
   lint-docs:
