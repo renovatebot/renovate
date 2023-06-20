@@ -184,17 +184,11 @@ jobs:
           path: .cache/eslint
           key: eslint-cache
 
-      - name: Calculate old hash value of eslint cache
-        run: echo "OLD_HASH=${{ hashFiles('.cache/eslint') }}" >> "$GITHUB_ENV"
-
       - name: Lint
         run: yarn -s eslint-ci
 
-      - name: Calculate new hash value of eslint cache
-        run: echo "NEW_HASH=${{ hashFiles('.cache/eslint') }}" >> "$GITHUB_ENV"
-
       - name: Save eslint cache
-        if: env.OLD_HASH != env.NEW_HASH
+        if: ${{ github.event_name == 'push' }}
         uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/eslint
@@ -215,14 +209,22 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Cache prettier
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      - name: Restore prettier cache
+        id: eslint-cache-restore
+        uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .prettier-cache
           key: prettier-cache
 
       - name: Lint
         run: yarn prettier --cache-location .prettier-cache
+
+      - name: Save prettier cache
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: .prettier-cache
+          key: prettier-cache
 
   lint-docs:
     needs: [setup]
