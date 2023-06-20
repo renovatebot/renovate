@@ -98,7 +98,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   let configFileRaw: string | undefined | null;
 
   if (OnboardingState.onboardingCacheValid) {
-    const parsedConfig = JSON.parse(getParsedOnboardingFileFromCache() ?? '');
+    const cachedConfig = getParsedOnboardingFileFromCache();
+    const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
     if (parsedConfig) {
       setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
       return { configFileName, configFileRaw, configFileParsed: parsedConfig };

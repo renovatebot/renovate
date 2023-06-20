@@ -87,6 +87,29 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('clones, if onboarding cache is valid but parsed config is undefined', async () => {
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'package.json'
+      );
+      onboardingCache.getParsedOnboardingFileFromCache.mockReturnValueOnce(
+        undefined as never
+      );
+      scm.getFileList.mockResolvedValue(['package.json']);
+      const pJson = JSON.stringify({
+        name: 'something',
+        renovate: {
+          prHourlyLimit: 10,
+        },
+      });
+      fs.readLocalFile.mockResolvedValue(pJson);
+      platform.getRawFile.mockResolvedValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { prHourlyLimit: 10 },
+      });
+    });
+
     it('returns cache config from onboarding cache - renovate.json', async () => {
       const configParsed = JSON.stringify({
         schema: 'https://docs.renovate.com',
