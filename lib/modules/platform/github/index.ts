@@ -317,7 +317,7 @@ export async function createFork(
   token: string,
   repository: string,
   forkOrg?: string
-): Promise<GhRestRepo | null> {
+): Promise<GhRestRepo> {
   let forkedRepo: GhRestRepo | undefined;
   try {
     forkedRepo = (
@@ -566,9 +566,6 @@ export async function initRepo({
     } else {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
-      if (!forkedRepo) {
-        throw new Error(REPOSITORY_CANNOT_FORK);
-      }
       config.repository = forkedRepo.full_name;
     }
   }
