@@ -330,7 +330,7 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 
 ## dockerCliOptions
 
-Adds command-line docker CLI options to Renovate sidecar Docker containers.
+You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar Docker containers.
 
 For example, `--memory=1g --cpus="1.5"`.
 
