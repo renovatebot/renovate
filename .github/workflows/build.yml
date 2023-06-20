@@ -199,7 +199,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
         run: |
-          gh api --method DELETE /repos/OWNER/REPO/actions/caches?key=eslint-cache
+          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-cache
 
       - name: Save eslint cache
         if: env.OLD_HASH != env.NEW_HASH
@@ -245,7 +245,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
         run: |
-          gh api --method DELETE /repos/OWNER/REPO/actions/caches?key=prettier-cache
+          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-cache
 
       - name: Save prettier cache
         if: env.OLD_HASH != env.NEW_HASH
