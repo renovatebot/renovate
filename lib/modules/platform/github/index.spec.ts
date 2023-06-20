@@ -363,7 +363,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
-          forkOrgs: ['renovate-bot'],
+          forkOrg: 'renovate-bot',
           forkCreate: false,
         })
       ).rejects.toThrow(REPOSITORY_NO_FORK);
@@ -420,7 +420,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
-          forkOrgs: ['forked'],
+          forkOrg: 'forked',
           forkCreate: true,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);

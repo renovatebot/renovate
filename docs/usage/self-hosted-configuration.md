@@ -419,19 +419,16 @@ It will also override any settings in `packageRules`.
 
 If you're using an app token which is _not_ allowed to fork, set this to `false`.
 
-## forkOrgs
+## forkOrg
 
 This configuration option lets you choose which organization or account you want repositories forked into when "fork mode" is enabled.
 
-You may set more than one organization or account.
 This can be handy if you're migrating from user-based forks to organization-based forks.
 
-If you've set multiple `forkOrgs` then Renovate will:
+If you've set a `forkOrg` then Renovate will:
 
 1. Check if a fork exists in the preferred organization
-1. If no fork exists in the preferred org: Renovate checks the fallback organizations
-
-Renovate always creates the new fork in the _first_ organization in the `forkOrgs` list.
+1. If no fork exists in the preferred org: Renovate checks the user's own account (if using PAT)
 
 ## forkToken
 

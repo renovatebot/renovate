@@ -258,29 +258,23 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-export async function getForkOrgs(
-  token: string,
-  forkOrgs?: string[]
-): Promise<string[]> {
-  const destinationOrgs = forkOrgs ?? [];
-  if (!destinationOrgs.length) {
-    if (!config.renovateForkUser) {
-      try {
-        logger.debug('Determining fork user from API');
-        const userDetails = await getUserDetails(
-          platformConfig.endpoint,
-          token
-        );
-        config.renovateForkUser = userDetails.username;
-      } catch (err) {
-        logger.debug({ err }, 'Error getting username for forkToken');
-      }
-    }
-    if (config.renovateForkUser) {
-      destinationOrgs.push(config.renovateForkUser);
-    }
+export async function getForkUser(token: string): Promise<string | null> {
+  if (config.renovateForkUser) {
+    return config.renovateForkUser;
   }
-  return destinationOrgs;
+  if (token.startsWith('ghs_')) {
+    logger.debug('Cannot determine fork user for GitHub App');
+    return null;
+  }
+  try {
+    logger.debug('Determining fork user from API');
+    const userDetails = await getUserDetails(platformConfig.endpoint, token);
+    config.renovateForkUser = userDetails.username;
+    return config.renovateForkUser;
+  } catch (err) {
+    logger.debug({ err }, 'Error getting username for forkToken');
+    return null;
+  }
 }
 
 export async function listForks(
@@ -312,38 +306,45 @@ export async function listForks(
 export async function findFork(
   token: string,
   repository: string,
-  forkOrgs?: string[]
+  forkOrg?: string
 ): Promise<GhRestRepo | null> {
   const forks = await listForks(token, repository);
-  const orgs = await getForkOrgs(token, forkOrgs);
-  if (!orgs.length) {
-    throw new Error(REPOSITORY_CANNOT_FORK);
-  }
-  let forkedRepo: GhRestRepo | undefined;
-  for (const forkOrg of orgs) {
-    logger.debug(`Searching for forked repo in ${forkOrg}`);
-    forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
+  if (forkOrg) {
+    logger.debug(`Searching for forked repo in forkOrg (${forkOrg})`);
+    const forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
     if (forkedRepo) {
-      logger.debug(`Found existing forked repo: ${forkedRepo.full_name}`);
-      break;
+      logger.debug(`Found repo in forkOrg: ${forkedRepo.full_name}`);
+      return forkedRepo;
     }
+    logger.debug(`No repo found in forkOrg`);
   }
-  return forkedRepo ?? null;
+  const forkUser = await getForkUser(token);
+  if (forkUser) {
+    logger.debug(`Searching for forked repo in user account`);
+    const forkedRepo = forks.find(
+      (repo) => repo.owner.login === config.renovateForkUser
+    );
+    if (forkedRepo) {
+      logger.debug(`Found repo in user account: ${forkedRepo.full_name}`);
+      return forkedRepo;
+    }
+    logger.debug(`No repo found in user account`);
+  }
+  return null;
 }
 
 export async function createFork(
   token: string,
   repository: string,
-  forkOrgs?: string[]
-): Promise<GhRestRepo> {
+  forkOrg?: string
+): Promise<GhRestRepo | null> {
   let forkedRepo: GhRestRepo | undefined;
   try {
-    const organization = (await getForkOrgs(token, forkOrgs))[0];
     forkedRepo = (
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
-          organization,
+          organization: forkOrg ? forkOrg : undefined,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
@@ -365,7 +366,7 @@ export async function initRepo({
   endpoint,
   repository,
   forkCreate,
-  forkOrgs,
+  forkOrg,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -507,7 +508,7 @@ export async function initRepo({
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
-    let forkedRepo = await findFork(forkToken, repository, forkOrgs);
+    let forkedRepo = await findFork(forkToken, repository, forkOrg);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
       const forkDefaultBranch = forkedRepo.default_branch;
@@ -585,7 +586,10 @@ export async function initRepo({
       }
     } else if (forkCreate) {
       logger.debug('Forked repo is not found - attempting to create it');
-      forkedRepo = await createFork(forkToken, repository);
+      forkedRepo = await createFork(forkToken, repository, forkOrg);
+      if (!forkedRepo) {
+        throw new Error(REPOSITORY_NO_FORK);
+      }
       config.repository = forkedRepo.full_name;
     } else {
       logger.debug(

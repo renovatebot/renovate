@@ -445,12 +445,11 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
-    name: 'forkOrgs',
+    name: 'forkOrg',
     description:
-      'The preferred organizations to create or find forked repositories, when in fork mode.',
+      'The preferred organization to create or find forked repositories, when in fork mode.',
     stage: 'repository',
-    type: 'array',
-    subType: 'string',
+    type: 'string',
     globalOnly: true,
     supportedPlatforms: ['github'],
     experimental: true,

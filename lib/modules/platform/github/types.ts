@@ -90,7 +90,7 @@ export interface LocalRepoConfig {
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
   parentRepo: string | null;
-  forkOrgs?: string[];
+  forkOrg?: string;
   forkToken?: string;
   prList: GhPr[] | null;
   issueList: any[] | null;
