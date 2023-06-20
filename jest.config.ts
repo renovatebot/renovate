@@ -214,7 +214,7 @@ const config: JestConfig = {
   clearMocks: true,
   collectCoverage: true,
   coverageReporters: ci
-    ? ['lcovonly', 'json', 'text-summary']
+    ? ['lcovonly', 'json']
     : ['html', 'text-summary'],
   transform: {
     '\\.ts$': [
