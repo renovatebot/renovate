@@ -257,20 +257,6 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-export async function getForkUser(token: string): Promise<string | null> {
-  try {
-    logger.debug('Determining fork user from API');
-    const userDetails = await getUserDetails(platformConfig.endpoint, token);
-    config.renovateForkUser = userDetails.username;
-    return config.renovateForkUser;
-  } catch (err) {
-    if (!token.startsWith('ghs_')) {
-      logger.debug({ err }, 'Error getting username for forkToken');
-    }
-    return null;
-  }
-}
-
 export async function listForks(
   token: string,
   repository: string
@@ -312,18 +298,18 @@ export async function findFork(
     }
     logger.debug(`No repo found in forkOrg`);
   }
-  const forkUser = await getForkUser(token);
-  if (forkUser) {
-    logger.debug(`Searching for forked repo in user account`);
-    const forkedRepo = forks.find(
-      (repo) => repo.owner.login === config.renovateForkUser
-    );
+  logger.debug(`Searching for forked repo in user account`);
+  try {
+    const { username } = await getUserDetails(platformConfig.endpoint, token);
+    const forkedRepo = forks.find((repo) => repo.owner.login === username);
     if (forkedRepo) {
       logger.debug(`Found repo in user account: ${forkedRepo.full_name}`);
       return forkedRepo;
     }
-    logger.debug(`No repo found in user account`);
+  } catch (err) {
+    throw new Error(REPOSITORY_CANNOT_FORK);
   }
+  logger.debug(`No repo found in user account`);
   return null;
 }
 
