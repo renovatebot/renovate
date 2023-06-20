@@ -74,10 +74,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 
   // Avoid deleting the default config
   // Attempt deletion only if RENOVATE_CONFIG_FILE is specified
-  if (
-    env.RENOVATE_CONFIG_FILE &&
-    env.RENOVATE_X_DELETE_CONFIG_FILE === 'true'
-  ) {
+  if (env.RENOVATE_CONFIG_FILE) {
     await deleteConfigFile(env);
   }
 
