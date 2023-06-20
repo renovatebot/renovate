@@ -126,6 +126,11 @@ If using negations, all repositories except those who match the regex are added 
 }
 ```
 
+## autodiscoverTopics
+
+Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
+topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
@@ -423,9 +428,20 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkToken
+## forkOrg
 
-You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
+It must be set to a GitHub Organization name and not a GitHub user account.
+When set, "allow edits by maintainers" will be false for PRs because GitHub does not allow this setting for organizations.
+
+This can be used if you're migrating from user-based forks to organization-based forks.
+
+If you've set a `forkOrg` then Renovate will:
+
+1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
+1. If no fork exists: it will be created in the `forkOrg`, not the user account
+
+## forkToken
 
 If this value is configured then Renovate:
 

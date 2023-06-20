@@ -1,8 +1,9 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as rubyVersioning from '../../versioning/ruby';
-import { memCache } from './versions-datasource';
+import { memCache } from './versions-endpoint-cache';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
@@ -67,66 +68,39 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
-        .reply(200, rubygemsOrgVersions);
+        .reply(200, rubygemsOrgVersions)
+        .get('/api/v1/gems/1pass.json')
+        .reply(200, { name: '1pass' })
+        .get('/api/v1/versions/1pass.json')
+        .reply(200, [
+          { number: '0.1.0', created_at: '2020-01-01' },
+          { number: '0.1.1', created_at: '2021-01-01' },
+        ]);
+
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
         packageName: '1pass',
         registryUrls: [],
       });
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(2);
-      expect(res).toMatchSnapshot();
-      expect(
-        res?.releases.find((release) => release.version === '0.1.1')
-      ).toBeDefined();
-      expect(
-        res?.releases.find((release) => release.version === '0.1.2')
-      ).toBeUndefined();
-    });
 
-    it('returns a dep for a package hit on an arbitrary registry that only supports old format endpoints', async () => {
-      const contribsysComVersions = `
-        created_at: 2022-06-15T17:10:25+00:00
-        ---
-        sidekiq-ent 0.7.10,1.0.0,1.0.1,1.2.4,2.0.0,2.1.2 4c0f62a49b15b4775b7fb6824ec34d45
-      `;
-      httpMock
-        .scope('https://enterprise.contribsys.com')
-        .get('/versions')
-        .reply(200, contribsysComVersions);
-      const res = await getPkgReleases({
-        versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
-        packageName: 'sidekiq-ent',
-        registryUrls: ['https://enterprise.contribsys.com'],
-      });
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(6);
       expect(res).toMatchObject({
-        registryUrl: 'https://enterprise.contribsys.com',
-        releases: expect.arrayContaining([
-          {
-            version: '0.7.10',
-          },
-          {
-            version: '1.0.0',
-          },
-        ]),
+        releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
       });
-      expect(
-        res?.releases.find((release) => release.version === '2.1.2')
-      ).toBeDefined();
-      expect(
-        res?.releases.find((release) => release.version === '2.1.3')
-      ).toBeUndefined();
     });
 
     it('uses rubygems.org if no registry urls were provided', async () => {
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
-        .reply(200, rubygemsOrgVersions);
+        .reply(200, rubygemsOrgVersions)
+        .get('/api/v1/gems/1pass.json')
+        .reply(200, { name: '1pass' })
+        .get('/api/v1/versions/1pass.json')
+        .reply(200, [
+          { number: '0.1.0', created_at: '2020-01-01' },
+          { number: '0.1.1', created_at: '2021-01-01' },
+        ]);
 
       expect(
         await getPkgReleases({
@@ -143,9 +117,10 @@ describe('modules/datasource/rubygems/index', () => {
         packageName: '1pass',
         registryUrls: [],
       });
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(2);
-      expect(res).toMatchSnapshot();
+
+      expect(res).toMatchObject({
+        releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
+      });
     });
 
     it('works with real data', async () => {
@@ -200,32 +175,6 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('returns null if mismatched name', async () => {
-      httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, { ...railsInfo, name: 'oooops' });
-      httpMock
-        .scope('https://firstparty.com/')
-        .get('/basepath/versions')
-        .reply(404)
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200);
-      expect(
-        await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [
-            'https://thirdparty.com',
-            'https://firstparty.com/basepath/',
-          ],
-        })
-      ).toBeNull();
-    });
-
     it('falls back to info when version request fails', async () => {
       httpMock
         .scope('https://thirdparty.com/')
@@ -257,14 +206,8 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
         .reply(500, {});
-      httpMock
-        .scope('https://firstparty.com/basepath')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: rubyVersioning.id,
           datasource: RubyGemsDatasource.id,
           packageName: 'rails',
@@ -273,7 +216,7 @@ describe('modules/datasource/rubygems/index', () => {
             'https://firstparty.com/basepath/',
           ],
         })
-      ).toBeNull();
+      ).rejects.toThrow(ExternalHostError);
     });
 
     it('falls back to dependencies api', async () => {

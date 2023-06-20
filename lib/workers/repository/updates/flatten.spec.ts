@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import { RenovateConfig, getConfig } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { flattenUpdates } from './flatten';
 
 jest.mock('../../../util/git/semantic');
