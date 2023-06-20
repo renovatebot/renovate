@@ -167,6 +167,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    permissions:
+      actions: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -192,7 +195,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
         run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-main-cache
+          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-main-cache ||
+            echo "Cache not found"
 
       - name: Save eslint cache
         if: github.event_name == 'push'
@@ -205,6 +209,9 @@ jobs:
     needs: [setup]
     runs-on: ubuntu-latest
     timeout-minutes: 7
+
+    permissions:
+      actions: write
 
     steps:
       - name: Checkout code
@@ -231,7 +238,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
         run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-main-cache
+          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-main-cache ||
+            echo "Cache not found"
 
       - name: Save prettier cache
         if: github.event_name == 'push'
