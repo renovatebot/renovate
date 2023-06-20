@@ -348,7 +348,6 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
-        forkCreate: true,
       });
       expect(config).toMatchSnapshot();
     });
@@ -363,7 +362,6 @@ describe('modules/platform/github/index', () => {
           repository: 'some/repo',
           forkToken: 'ghs_true',
           forkOrg: 'renovate-bot',
-          forkCreate: false,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -379,7 +377,6 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
-          forkCreate: true,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -421,7 +418,6 @@ describe('modules/platform/github/index', () => {
           repository: 'some/repo',
           forkToken: 'true',
           forkOrg: 'forked',
-          forkCreate: true,
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -2307,7 +2303,6 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
-          forkCreate: true,
         });
       });
 

@@ -364,7 +364,6 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
-  forkCreate,
   forkOrg,
   forkToken,
   renovateUsername,
@@ -583,18 +582,13 @@ export async function initRepo({
         }
         throw new ExternalHostError(err);
       }
-    } else if (forkCreate) {
+    } else {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       if (!forkedRepo) {
         throw new Error(REPOSITORY_CANNOT_FORK);
       }
       config.repository = forkedRepo.full_name;
-    } else {
-      logger.debug(
-        'Forked repo is not found and forkCreate=false so need to abort'
-      );
-      throw new Error(REPOSITORY_CANNOT_FORK);
     }
   }
 
