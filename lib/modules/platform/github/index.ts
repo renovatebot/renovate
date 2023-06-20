@@ -336,7 +336,8 @@ export async function createFork(
   if (!forkedRepo) {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
-  logger.debug(`Created forked repo ${forkedRepo.full_name}, now sleeping 30s`);
+  logger.info({ forkedRepo: forkedRepo.full_name }, 'Created forked repo');
+  logger.debug(`Sleeping 30s after creating fork`);
   await delay(30000);
   return forkedRepo;
 }
