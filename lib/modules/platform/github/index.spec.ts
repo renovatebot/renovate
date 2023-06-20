@@ -397,26 +397,24 @@ describe('modules/platform/github/index', () => {
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      // getBranchCommit
       scope.post(`/repos/${repo}/forks`).reply(500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkOrg: 'forked',
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
 
-    it('should update fork when using forkToken', async () => {
+    it('should update fork when using forkToken and forkOrg', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
-      scope.get('/user').reply(200, {
-        login: 'forked',
-      });
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkOrg: 'forked',
       });
       expect(config).toMatchSnapshot();
     });
