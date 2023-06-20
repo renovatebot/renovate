@@ -361,7 +361,7 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
+          forkToken: 'ghs_true',
           forkOrg: 'renovate-bot',
           forkCreate: false,
         })
@@ -374,6 +374,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, repo, false, 200, branch);
       scope.get('/user').reply(404);
+      scope.post(`/repos/${repo}/forks`).reply(400);
       await expect(
         github.initRepo({
           repository: 'some/repo',
