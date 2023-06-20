@@ -126,6 +126,11 @@ If using negations, all repositories except those who match the regex are added 
 }
 ```
 
+## autodiscoverTopics
+
+Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
+topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
