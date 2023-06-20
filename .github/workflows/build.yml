@@ -178,23 +178,16 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        id: eslint-cache-restore
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/eslint
-          key: eslint-cache
-
-      - name: Calculate old hash value of eslint cache
-        run: echo "OLD_HASH=${{ hashFiles('.cache/eslint') }}" >> "$GITHUB_ENV"
+          key: eslint-main-cache
 
       - name: Lint
         run: yarn -s eslint-ci
 
-      - name: Calculate new hash value of eslint cache
-        run: echo "NEW_HASH=${{ hashFiles('.cache/eslint') }}" >> "$GITHUB_ENV"
-
       - name: Remove cache
-        if: env.OLD_HASH != env.NEW_HASH
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
@@ -202,11 +195,11 @@ jobs:
           gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-cache
 
       - name: Save eslint cache
-        if: env.OLD_HASH != env.NEW_HASH
+        if: github.event_name == 'push'
         uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/eslint
-          key: eslint-cache
+          key: eslint-main-cache
 
   lint-prettier:
     needs: [setup]
@@ -224,23 +217,16 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        id: prettier-cache-restore
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/prettier
-          key: prettier-cache
-
-      - name: Calculate old hash value of prettier cache
-        run: echo "OLD_HASH=${{ hashFiles('.cache/prettier') }}" >> "$GITHUB_ENV"
+          key: prettier-main-cache
 
       - name: Lint
         run: yarn -s prettier --cache-location .cache/prettier
 
-      - name: Calculate new hash value of prettier cache
-        run: echo "NEW_HASH=${{ hashFiles('.cache/prettier') }}" >> "$GITHUB_ENV"
-
       - name: Remove cache
-        if: env.OLD_HASH != env.NEW_HASH
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
@@ -248,11 +234,11 @@ jobs:
           gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-cache
 
       - name: Save prettier cache
-        if: env.OLD_HASH != env.NEW_HASH
+        if: github.event_name == 'push'
         uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/prettier
-          key: prettier-cache
+          key: prettier-main-cache
 
   lint-docs:
     needs: [setup]
