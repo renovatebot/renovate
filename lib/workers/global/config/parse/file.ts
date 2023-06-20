@@ -72,11 +72,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     }
   }
 
-  // Avoid deleting the default config
-  // Attempt deletion only if RENOVATE_CONFIG_FILE is specified
-  if (env.RENOVATE_CONFIG_FILE) {
-    await deleteConfigFile(env);
-  }
+  await deleteNonDefaultConfig(env); // Attempt deletion only if RENOVATE_CONFIG_FILE is specified
 
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -89,7 +85,9 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   return config;
 }
 
-export async function deleteConfigFile(env: NodeJS.ProcessEnv): Promise<void> {
+export async function deleteNonDefaultConfig(
+  env: NodeJS.ProcessEnv
+): Promise<void> {
   const configFile = env.RENOVATE_CONFIG_FILE;
 
   if (is.undefined(configFile) || is.emptyStringOrWhitespace(configFile)) {
