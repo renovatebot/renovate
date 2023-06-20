@@ -1025,20 +1025,6 @@ exports[`modules/datasource/rubygems/index getReleases returns a dep for GitHub 
 }
 `;
 
-exports[`modules/datasource/rubygems/index getReleases returns a dep for rubygems.org package hit 1`] = `
-{
-  "registryUrl": "https://rubygems.org",
-  "releases": [
-    {
-      "version": "0.1.0",
-    },
-    {
-      "version": "0.1.1",
-    },
-  ],
-}
-`;
-
 exports[`modules/datasource/rubygems/index getReleases uses multiple source urls 1`] = `
 {
   "changelogUrl": "https://www.railschangelog.com/",
@@ -2403,20 +2389,6 @@ exports[`modules/datasource/rubygems/index getReleases uses multiple source urls
     },
   ],
   "sourceUrl": "https://github.com/rails/rails",
-}
-`;
-
-exports[`modules/datasource/rubygems/index getReleases uses rubygems.org if no registry urls were provided 1`] = `
-{
-  "registryUrl": "https://rubygems.org",
-  "releases": [
-    {
-      "version": "0.1.0",
-    },
-    {
-      "version": "0.1.1",
-    },
-  ],
 }
 `;
 
