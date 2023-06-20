@@ -195,7 +195,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
         run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-main-cache
+          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-main-cache ||
+            echo "Cache not found"
 
       - name: Save eslint cache
         if: github.event_name == 'push'
@@ -237,7 +238,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.event.repository.full_name }}
         run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-main-cache
+          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-main-cache ||
+            echo "Cache not found"
 
       - name: Save prettier cache
         if: github.event_name == 'push'
