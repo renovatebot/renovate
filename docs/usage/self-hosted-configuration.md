@@ -419,6 +419,7 @@ It will also override any settings in `packageRules`.
 
 This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
 It must be set to a GitHub Organization name and not a GitHub user account.
+When set, "allow edits by maintainers" will be false for PRs because GitHub does not allow this setting for organizations.
 
 This can be used if you're migrating from user-based forks to organization-based forks.
 
