@@ -421,14 +421,15 @@ If you're using an app token which is _not_ allowed to fork, set this to `false`
 
 ## forkOrg
 
-This configuration option lets you choose which organization or account you want repositories forked into when "fork mode" is enabled.
+This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
+It must be set to a GitHub Organization name and not a GitHub user account.
 
-This can be handy if you're migrating from user-based forks to organization-based forks.
+This can be used if you're migrating from user-based forks to organization-based forks.
 
 If you've set a `forkOrg` then Renovate will:
 
-1. Check if a fork exists in the preferred organization
-1. If no fork exists in the preferred org: Renovate checks the user's own account (if using PAT)
+1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
+1. If no fork exists: it will be created in the `forkOrg`, not the user account
 
 ## forkToken
 
