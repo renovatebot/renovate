@@ -332,9 +332,9 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 
 You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar Docker containers.
 
-For example, `--memory=1g --cpus="1.5"`.
+For example, `{"dockerCliOptions": "--memory=4g"}` will add a cli flag to the docker run command that will cap the maximum amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
 
-Read the [Docker runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) for more information.
+Click here to learn more about [Docker runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/).
 
 ## dockerImagePrefix
 

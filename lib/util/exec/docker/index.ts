@@ -234,7 +234,7 @@ export async function generateDockerCommand(
     result.push(`--user=${dockerUser}`);
   }
   if (dockerCliOptions) {
-    result.push(dockerCliOptions)
+    result.push(dockerCliOptions);
   }
 
   const volumeDirs: VolumeOption[] = [localDir, cacheDir];
