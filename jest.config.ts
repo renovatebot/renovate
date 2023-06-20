@@ -213,9 +213,7 @@ const config: JestConfig = {
   cacheDirectory: '.cache/jest',
   clearMocks: true,
   collectCoverage: true,
-  coverageReporters: ci
-    ? ['lcovonly', 'json']
-    : ['html', 'text-summary'],
+  coverageReporters: ci ? ['lcovonly', 'json'] : ['html', 'text-summary'],
   transform: {
     '\\.ts$': [
       'ts-jest',
