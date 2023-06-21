@@ -102,7 +102,7 @@ describe('workers/repository/init/merge', () => {
           prHourlyLimit: 10,
         },
       });
-      fs.readLocalFile.mockResolvedValue(pJson);
+      fs.readLocalFile.mockResolvedValueOnce(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'package.json',
