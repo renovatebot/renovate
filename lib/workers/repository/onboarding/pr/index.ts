@@ -33,6 +33,7 @@ export async function ensureOnboardingPr(
 ): Promise<void> {
   if (
     config.repoIsOnboarded ||
+    OnboardingState.onboardingCacheValid ||
     (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
   ) {
     return;
