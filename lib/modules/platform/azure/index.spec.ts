@@ -820,9 +820,9 @@ describe('modules/platform/azure/index', () => {
           .fn(() => prUpdateResults.shift())
           .mockName('updatePullRequest');
 
-        azureHelper.getMergeMethod = jest
-          .fn()
-          .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+        azureHelper.getMergeMethod.mockReturnValue(
+          Promise.resolve(GitPullRequestMergeStrategy.Squash)
+        );
 
         azureApi.gitApi.mockImplementation(
           () =>
