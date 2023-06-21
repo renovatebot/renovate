@@ -484,6 +484,7 @@ export async function initRepo({
 
   if (forkToken) {
     logger.debug('Bot is in fork mode');
+    config.forkOrg = forkOrg;
     config.forkToken = forkToken;
     // save parent name then delete
     config.parentRepo = config.repository;
@@ -1572,6 +1573,7 @@ export async function createPr({
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
+      !config.forkOrg &&
       platformOptions?.forkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');

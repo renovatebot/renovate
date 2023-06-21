@@ -163,6 +163,24 @@ describe('modules/platform/gitlab/index', () => {
       const repos = await gitlab.getRepos();
       expect(repos).toEqual(['a/b', 'c/d']);
     });
+
+    it('should encode the requested topics into the URL', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&topic=one%2Ctwo'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'c/d',
+          },
+        ]);
+      const repos = await gitlab.getRepos({ topics: ['one', 'two'] });
+      expect(repos).toEqual(['a/b', 'c/d']);
+    });
   });
 
   async function initRepo(

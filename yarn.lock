@@ -3077,10 +3077,10 @@
   resolved "https://registry.yarnpkg.com/@types/auth-header/-/auth-header-1.0.2.tgz#45879542c5c754debbb753b1491bbf690888b4ef"
   integrity sha512-KWpTfyz+F5GtURfp7W9c4ubFSXaPAvb1dUN5MlU3xSvlNIYhFrmrTNE7vd6SUOfSOO7FI/ePe03Y/KCPM/YOoA==
 
-"@types/aws4@1.11.2":
-  version "1.11.2"
-  resolved "https://registry.yarnpkg.com/@types/aws4/-/aws4-1.11.2.tgz#7700aabe4646f8868b5d2b20820d9583225e7b78"
-  integrity sha512-x0f96eBPrCCJzJxdPbUvDFRva4yPpINJzTuXXpmS2j9qLUpF2nyGzvXPlRziuGbCsPukwY4JfuO+8xwsoZLzGw==
+"@types/aws4@1.11.3":
+  version "1.11.3"
+  resolved "https://registry.yarnpkg.com/@types/aws4/-/aws4-1.11.3.tgz#a7856fe4e30a7b6411335a73d5440e8b91afc662"
+  integrity sha512-Ka2xKf04xZUH0N7wIYpqcNdavgfPQnaJ1T6GieZs1ydo21vao93aCbHyrA6uKXnaTXzvBcMJkgMsBfT9XvypFQ==
   dependencies:
     "@types/node" "*"
 

@@ -766,6 +766,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'autodiscoverTopics',
+    description: '',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'prCommitsPerRunLimit',
     description:
       'Set the maximum number of commits per Renovate run. By default there is no limit.',
