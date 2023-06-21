@@ -85,7 +85,7 @@ export function getOnboardingFileNameFromCache(): string | undefined {
   return cache.onboardingBranchCache?.configFileName;
 }
 
-export function getParsedOnboardingFileFromCache(): string | undefined {
+export function getOnboardingFileFromCache(): string | undefined {
   const cache = getCache();
   return cache.onboardingBranchCache?.configFileParsed;
 }

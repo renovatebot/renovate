@@ -78,9 +78,7 @@ describe('workers/repository/init/merge', () => {
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
         'package.json'
       );
-      onboardingCache.getParsedOnboardingFileFromCache.mockReturnValueOnce(
-        pJson
-      );
+      onboardingCache.getOnboardingFileFromCache.mockReturnValueOnce(pJson);
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'package.json',
         configFileParsed: { schema: 'https://docs.renovate.com' },
@@ -92,7 +90,7 @@ describe('workers/repository/init/merge', () => {
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
         'package.json'
       );
-      onboardingCache.getParsedOnboardingFileFromCache.mockReturnValueOnce(
+      onboardingCache.getOnboardingFileFromCache.mockReturnValueOnce(
         undefined as never
       );
       scm.getFileList.mockResolvedValueOnce(['package.json']);
@@ -118,7 +116,7 @@ describe('workers/repository/init/merge', () => {
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
         'renovate.json'
       );
-      onboardingCache.getParsedOnboardingFileFromCache.mockReturnValueOnce(
+      onboardingCache.getOnboardingFileFromCache.mockReturnValueOnce(
         configParsed
       );
       expect(await detectRepoFileConfig()).toEqual({

@@ -7,7 +7,7 @@ import type {
 import {
   deleteOnboardingCache,
   getOnboardingFileNameFromCache,
-  getParsedOnboardingFileFromCache,
+  getOnboardingFileFromCache,
   hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
   isOnboardingBranchModified,
@@ -255,7 +255,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
     });
   });
 
-  describe('getParsedOnboardingFileFromCache()', () => {
+  describe('getOnboardingFileFromCache()', () => {
     it('returns cached value', () => {
       const dummyCache = {
         onboardingBranchCache: partial<OnboardingBranchCache>({
@@ -263,11 +263,11 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         }),
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValueOnce(dummyCache);
-      expect(getParsedOnboardingFileFromCache()).toBe('parsed');
+      expect(getOnboardingFileFromCache()).toBe('parsed');
     });
 
     it('returns undefined', () => {
-      expect(getParsedOnboardingFileFromCache()).toBeUndefined();
+      expect(getOnboardingFileFromCache()).toBeUndefined();
     });
   });
 

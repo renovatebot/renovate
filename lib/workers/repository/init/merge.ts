@@ -26,7 +26,7 @@ import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import {
   getOnboardingFileNameFromCache,
-  getParsedOnboardingFileFromCache,
+  getOnboardingFileFromCache,
   setOnboardingConfigDetails,
 } from '../onboarding/branch/onboarding-branch-cache';
 import { OnboardingState } from '../onboarding/common';
@@ -98,7 +98,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   let configFileRaw: string | undefined | null;
 
   if (OnboardingState.onboardingCacheValid) {
-    const cachedConfig = getParsedOnboardingFileFromCache();
+    const cachedConfig = getOnboardingFileFromCache();
     const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
     if (parsedConfig) {
       setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
