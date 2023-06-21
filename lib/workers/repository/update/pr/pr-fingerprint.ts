@@ -24,6 +24,7 @@ export interface FilteredBranchUpgradeConfig {
 export interface PrBodyFingerprintConfig {
   // BranchConfig - filtered
   automerge?: boolean;
+  baseBranch?: string;
   automergeSchedule?: string[];
   hasReleaseNotes?: boolean;
   isPin?: boolean;
@@ -63,6 +64,7 @@ export function generatePrBodyFingerprintConfig(
   return {
     automerge: config.automerge,
     automergeSchedule: config.automergeSchedule,
+    baseBranch: config.baseBranch,
     filteredUpgrades,
     hasReleaseNotes: config.hasReleaseNotes,
     isPin: config.isPin,

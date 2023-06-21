@@ -152,6 +152,157 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
   });
 
+  it('returns updated helmfile.lock if repositories were defined in ../helmfile-defaults.yaml.', async () => {
+    const helmfileYamlWithoutRepositories = codeBlock`
+    bases:
+      - ../helmfile-defaults.yaml
+    releases:
+      - name: backstage
+        chart: backstage/backstage
+        version: 0.12.0
+    `;
+    const lockFileWithoutRepositories = codeBlock`
+    version: 0.151.0
+    dependencies:
+    - name: backstage
+      repository: https://backstage.github.io/charts
+      version: 0.11.0
+    digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
+    generated: "2023-03-08T21:32:06.122276997+01:00"
+    `;
+    const lockFileTwoWithoutRepositories = codeBlock`
+    version: 0.151.0
+    dependencies:
+    - name: backstage
+      repository: https://backstage.github.io/charts
+      version: 0.12.0
+    digest: sha256:9d83889176d005effb86041d30c20361625561cbfb439cbd16d7243225bac17c
+    generated: "2023-03-08T21:30:48.273709455+01:00"
+    `;
+
+    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories as never);
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(
+      lockFileTwoWithoutRepositories as never
+    );
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
+    expect(
+      await helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps,
+        newPackageFileContent: helmfileYamlWithoutRepositories,
+        config,
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'helmfile.lock',
+          contents: lockFileTwoWithoutRepositories,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'helmfile deps -f helmfile.yaml' },
+    ]);
+  });
+
+  it('log into private OCI registries, returns updated helmfile.lock', async () => {
+    const helmfileYamlOCIPrivateRepo = codeBlock`
+    repositories:
+      - name: private-charts
+        url: ghcr.io/charts
+        oci: true
+    releases:
+      - name: chart
+        chart: private-charts/chart
+        version: 0.12.0
+    `;
+    const lockFileOCIPrivateRepo = codeBlock`
+    version: 0.151.0
+    dependencies:
+    - name: chart
+      repository: oci://ghcr.io/private-charts
+      version: 0.11.0
+    digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
+    generated: "2023-03-08T21:32:06.122276997+01:00"
+    `;
+    const lockFileOCIPrivateRepoTwo = codeBlock`
+    version: 0.151.0
+    dependencies:
+    - name: chart
+      repository: oci://ghcr.io/private-charts
+      version: 0.12.0
+    digest: sha256:9d83889176d005effb86041d30c20361625561cbfb439cbd16d7243225bac17c
+    generated: "2023-03-08T21:30:48.273709455+01:00"
+    `;
+    hostRules.add({
+      username: 'test',
+      password: 'password',
+      hostType: 'docker',
+      matchHost: 'ghcr.io',
+    });
+
+    git.getFile.mockResolvedValueOnce(lockFileOCIPrivateRepo as never);
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(lockFileOCIPrivateRepoTwo as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
+    expect(
+      await helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps,
+        newPackageFileContent: helmfileYamlOCIPrivateRepo,
+        config,
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'helmfile.lock',
+          contents: lockFileOCIPrivateRepoTwo,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm registry login --username test --password password ghcr.io',
+        options: {
+          env: {
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
+      },
+      {
+        cmd: 'helmfile deps -f helmfile.yaml',
+        options: {
+          env: {
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
+      },
+    ]);
+  });
+
   it.each([
     {
       binarySource: 'docker',
@@ -163,6 +314,10 @@ describe('modules/manager/helmfile/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+            '-e HELM_EXPERIMENTAL_OCI ' +
+            '-e HELM_REGISTRY_CONFIG ' +
+            '-e HELM_REPOSITORY_CONFIG ' +
+            '-e HELM_REPOSITORY_CACHE ' +
             '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +

@@ -397,26 +397,24 @@ describe('modules/platform/github/index', () => {
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      // getBranchCommit
       scope.post(`/repos/${repo}/forks`).reply(500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkOrg: 'forked',
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
 
-    it('should update fork when using forkToken', async () => {
+    it('should update fork when using forkToken and forkOrg', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
-      scope.get('/user').reply(200, {
-        login: 'forked',
-      });
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkOrg: 'forked',
       });
       expect(config).toMatchSnapshot();
     });
@@ -2821,6 +2819,22 @@ describe('modules/platform/github/index', () => {
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: 'closed',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
+
+    it('should update target branch', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: 'closed',
+        targetBranch: 'new_base',
       };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

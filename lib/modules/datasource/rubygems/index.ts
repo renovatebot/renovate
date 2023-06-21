@@ -6,15 +6,21 @@ import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { GemVersions, GemsInfo, MarshalledVersionInfo } from './schema';
+import { RubygemsHttp } from './http';
+import { MetadataCache } from './metadata-cache';
+import { GemMetadata, GemVersions, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
 
+  private metadataCache: MetadataCache;
+
   constructor() {
     super(RubyGemsDatasource.id);
+    this.http = new RubygemsHttp(RubyGemsDatasource.id);
     this.versionsEndpointCache = new VersionsEndpointCache(this.http);
+    this.metadataCache = new MetadataCache(this.http);
   }
 
   override readonly defaultRegistryUrls = ['https://rubygems.org'];
@@ -25,13 +31,6 @@ export class RubyGemsDatasource extends Datasource {
 
   private readonly versionsEndpointCache: VersionsEndpointCache;
 
-  @cache({
-    namespace: `datasource-${RubyGemsDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      /* eslint-disable @typescript-eslint/restrict-template-expressions */
-      `${registryUrl}/${packageName}`,
-  })
   async getReleases({
     packageName,
     registryUrl,
@@ -49,7 +48,12 @@ export class RubyGemsDatasource extends Datasource {
 
       if (cachedVersions.type === 'success') {
         const { versions } = cachedVersions;
-        return { releases: versions.map((version) => ({ version })) };
+        const result = await this.metadataCache.getRelease(
+          registryUrl,
+          packageName,
+          versions
+        );
+        return result;
       }
 
       const registryHostname = parseUrl(registryUrl)?.hostname;
@@ -57,39 +61,49 @@ export class RubyGemsDatasource extends Datasource {
         cachedVersions.type === 'not-supported' &&
         registryHostname !== 'rubygems.org'
       ) {
-        const hostname = registryHostname;
-        return hostname === 'rubygems.pkg.github.com' ||
-          hostname === 'gitlab.com'
-          ? await this.getDependencyFallback(registryUrl, packageName)
-          : await this.getDependency(registryUrl, packageName);
+        if (
+          registryHostname === 'rubygems.pkg.github.com' ||
+          registryHostname === 'gitlab.com'
+        ) {
+          return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
+        }
+
+        const gemMetadata = await this.fetchGemMetadata(
+          registryUrl,
+          packageName
+        );
+        if (!gemMetadata) {
+          return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
+        }
+
+        return await this.getReleasesViaAPI(
+          registryUrl,
+          packageName,
+          gemMetadata
+        );
       }
+
+      return null;
     } catch (error) {
       this.handleGenericErrors(error);
     }
-
-    return null;
   }
 
-  async getDependencyFallback(
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `metadata:${registryUrl}/${packageName}`,
+  })
+  async fetchGemMetadata(
     registryUrl: string,
     packageName: string
-  ): Promise<ReleaseResult | null> {
-    const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
-    const query = getQueryString({ gems: packageName });
-    const url = `${path}?${query}`;
-    const { body: buffer } = await this.http.getBuffer(url);
-    const data = Marshal.parse(buffer);
-    return MarshalledVersionInfo.parse(data);
-  }
-
-  async fetchGemsInfo(
-    registryUrl: string,
-    packageName: string
-  ): Promise<GemsInfo | null> {
+  ): Promise<GemMetadata | null> {
     try {
       const { body } = await this.http.getJson(
         joinUrlParts(registryUrl, '/api/v1/gems', `${packageName}.json`),
-        GemsInfo
+        GemMetadata
       );
       return body;
     } catch (err) {
@@ -101,6 +115,13 @@ export class RubyGemsDatasource extends Datasource {
     }
   }
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `versions:${registryUrl}/${packageName}`,
+  })
   async fetchGemVersions(
     registryUrl: string,
     packageName: string
@@ -124,41 +145,55 @@ export class RubyGemsDatasource extends Datasource {
     }
   }
 
-  async getDependency(
+  async getReleasesViaAPI(
     registryUrl: string,
-    packageName: string
+    packageName: string,
+    gemMetadata: GemMetadata
   ): Promise<ReleaseResult | null> {
-    const info = await this.fetchGemsInfo(registryUrl, packageName);
-    if (!info) {
-      return await this.getDependencyFallback(registryUrl, packageName);
-    }
+    const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
 
     let releases: Release[] | null = null;
-    const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
     if (gemVersions?.length) {
       releases = gemVersions;
-    } else if (info.version) {
-      releases = [{ version: info.version }];
-    }
-
-    if (!releases) {
+    } else if (gemMetadata.latestVersion) {
+      releases = [{ version: gemMetadata.latestVersion }];
+    } else {
       return null;
     }
 
     const result: ReleaseResult = { releases };
 
-    if (info.changelogUrl) {
-      result.changelogUrl = info.changelogUrl;
+    if (gemMetadata.changelogUrl) {
+      result.changelogUrl = gemMetadata.changelogUrl;
     }
 
-    if (info.homepage) {
-      result.homepage = info.homepage;
+    if (gemMetadata.homepage) {
+      result.homepage = gemMetadata.homepage;
     }
 
-    if (info.sourceUrl) {
-      result.sourceUrl = info.sourceUrl;
+    if (gemMetadata.sourceUrl) {
+      result.sourceUrl = gemMetadata.sourceUrl;
     }
 
     return result;
+  }
+
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      // TODO: types (#7154)
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      `dependencies:${registryUrl}/${packageName}`,
+  })
+  async getReleasesViaFallbackAPI(
+    registryUrl: string,
+    packageName: string
+  ): Promise<ReleaseResult | null> {
+    const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
+    const query = getQueryString({ gems: packageName });
+    const url = `${path}?${query}`;
+    const { body: buffer } = await this.http.getBuffer(url);
+    const data = Marshal.parse(buffer);
+    return MarshalledVersionInfo.parse(data);
   }
 }
