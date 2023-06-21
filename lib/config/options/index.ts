@@ -346,7 +346,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dockerCliOptions',
     description:
-      'Docker run command options for use when `binarySource=docker`.',
+      'Pass CLI flags to `docker run` command when `binarySource=docker`.',
     type: 'string',
     globalOnly: true,
   },
