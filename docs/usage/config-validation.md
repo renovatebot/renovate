@@ -21,8 +21,8 @@ For example:
 $ npm install --global renovate
 added 750 packages, and audited 751 packages in 51s
 $ renovate-config-validator
-INFO: Validating renovate.json
-INFO: Config validated successfully
+ INFO: Validating renovate.json
+ INFO: Config validated successfully
 ```
 
 ### Pass files to check as CLI arguments
@@ -35,6 +35,9 @@ For example:
 $ npm install --global renovate
 added 750 packages, and audited 751 packages in 51s
 $ renovate-config-validator first_config.json second_config.json
+ INFO: Validating first_config_.json
+ INFO: Validating second_config.json
+ INFO: Config validated successfully
 ```
 
 ## Validate your config automatically
