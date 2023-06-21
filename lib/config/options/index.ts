@@ -445,6 +445,16 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'forkOrg',
+    description:
+      'The preferred organization to create or find forked repositories, when in fork mode.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+  },
+  {
     name: 'githubTokenWarn',
     description: 'Display warnings about GitHub token not being set.',
     type: 'boolean',
@@ -754,6 +764,16 @@ const options: RenovateOptions[] = [
     allowString: true,
     default: null,
     globalOnly: true,
+  },
+  {
+    name: 'autodiscoverTopics',
+    description: '',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
