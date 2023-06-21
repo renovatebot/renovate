@@ -49,7 +49,6 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const helmfileVersion = parseLock(existingLockFileContent).version;
     const toolConstraints: ToolConstraint[] = [
       {
         toolName: 'helm',
@@ -57,7 +56,9 @@ export async function updateArtifacts({
       },
       {
         toolName: 'helmfile',
-        constraint: config.constraints?.helmfile ?? helmfileVersion,
+        constraint:
+          config.constraints?.helmfile ??
+          parseLock(existingLockFileContent).version,
       },
     ];
     const needKustomize = updatedDeps.some(
