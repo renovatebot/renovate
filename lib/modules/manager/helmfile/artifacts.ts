@@ -14,7 +14,12 @@ import { getFile } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { generateRegistryLoginCmd, isOCIRegistry, parseDoc } from './utils';
+import {
+  generateRegistryLoginCmd,
+  isOCIRegistry,
+  parseDoc,
+  parseLock,
+} from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -44,6 +49,8 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
+    // we need to prefix version with v to install helmfile.
+    const helmfileVersion = `v${parseLock(existingLockFileContent).version}`;
     const toolConstraints: ToolConstraint[] = [
       {
         toolName: 'helm',
@@ -51,7 +58,7 @@ export async function updateArtifacts({
       },
       {
         toolName: 'helmfile',
-        constraint: config.constraints?.helmfile,
+        constraint: config.constraints?.helmfile ?? helmfileVersion,
       },
     ];
     const needKustomize = updatedDeps.some(
