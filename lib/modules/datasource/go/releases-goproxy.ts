@@ -6,6 +6,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
+import goVersioning from '../../versioning/go-mod-directive';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
@@ -232,6 +233,20 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
+  async getLatestVersion(
+    baseUrl: string,
+    packageName: string
+  ): Promise<string | null> {
+    try {
+      const url = `${baseUrl}/${this.encodeCase(packageName)}/@latest`;
+      const res = await this.http.getJson<VersionInfo>(url);
+      return res.body.Version;
+    } catch (err) {
+      logger.debug({ err }, 'Failed to get latest version');
+      return null;
+    }
+  }
+
   async getVersionsWithInfo(
     baseUrl: string,
     packageName: string
@@ -277,6 +292,15 @@ export class GoProxyDatasource extends Datasource {
         }
 
         throw err;
+      }
+
+      const latestVersion = await this.getLatestVersion(baseUrl, pkg);
+      if (latestVersion) {
+        result.tags ??= {};
+        result.tags.latest ??= latestVersion;
+        if (goVersioning.isGreaterThan(latestVersion, result.tags.latest)) {
+          result.tags.latest = latestVersion;
+        }
       }
     }
 

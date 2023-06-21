@@ -348,6 +348,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
         )
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.1' })
         .get('/v2/@v/list')
         .reply(404);
 
@@ -361,6 +363,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
         ],
         sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.1' },
       });
     });
 
@@ -381,9 +384,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .replyWithError('unknown')
         .get('/@v/v1.0.1.info')
         .reply(410)
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.1' })
         .get('/v2/@v/list')
-        .reply(200)
-        .get('/v3/@v/list')
         .reply(404);
 
       const res = await datasource.getReleases({
@@ -393,6 +396,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       expect(res).toEqual({
         releases: [{ version: 'v1.0.0' }, { version: 'v1.0.1' }],
         sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.1' },
       });
     });
 
@@ -418,6 +422,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.1' })
         .get('/v2/@v/list')
         .reply(404);
 
@@ -431,6 +437,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
         ],
         sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.1' },
       });
     });
 
@@ -465,6 +472,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.1' })
         .get('/v2/@v/list')
         .reply(404);
 
@@ -478,6 +487,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
         ],
         sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.1' },
       });
     });
 
@@ -579,6 +589,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, ['v1.0.0 2018-08-13T15:31:12Z', 'v1.0.1'].join('\n'))
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.1' })
         .get('/v2/@v/list')
         .reply(404);
       httpMock
@@ -595,6 +607,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
           { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
         ],
+        tags: { latest: 'v1.0.1' },
       });
     });
 
@@ -615,6 +628,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.1' })
         .get('/v2/@v/list')
         .reply(
           200,
@@ -624,6 +639,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
         )
         .get('/v2/@v/v2.0.0.info')
         .reply(200, { Version: 'v2.0.0', Time: '2020-10-16T16:15:28Z' })
+        .get('/v2/@latest')
+        .reply(200, { Version: 'v2.0.0' })
         .get('/v3/@v/list')
         .reply(404);
 
@@ -638,6 +655,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           { releaseTimestamp: '2020-10-16T16:15:28Z', version: 'v2.0.0' },
         ],
         sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v2.0.0' },
       });
     });
 
@@ -652,12 +670,16 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v2.3.0', Time: '2020-05-06T23:08:38Z' })
         .get('.v2/@v/v2.4.0.info')
         .reply(200, { Version: 'v2.4.0', Time: '2020-11-17T15:46:20Z' })
+        .get('.v2/@latest')
+        .reply(200, { Version: 'v2.4.0' })
         .get('.v3/@v/list')
         .reply(200, ['v3.0.0', 'v3.0.1', '  \n'].join('\n'))
         .get('.v3/@v/v3.0.0.info')
         .reply(200, { Version: 'v3.0.0', Time: '2022-05-21T10:33:21Z' })
         .get('.v3/@v/v3.0.1.info')
         .reply(200, { Version: 'v3.0.1', Time: '2022-05-27T08:35:30Z' })
+        .get('.v3/@latest')
+        .reply(200, { Version: 'v3.0.1' })
         .get('.v4/@v/list')
         .reply(404);
 
@@ -673,6 +695,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           { releaseTimestamp: '2022-05-27T08:35:30Z', version: 'v3.0.1' },
         ],
         sourceUrl: 'https://github.com/go-yaml/yaml',
+        tags: { latest: 'v3.0.1' },
       });
     });
 
@@ -687,10 +710,14 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(200, { Version: 'v0.1.0', Time: '2017-01-01T00:00:00Z' })
         .get('.v0/@v/v0.2.0.info')
         .reply(200, { Version: 'v0.2.0', Time: '2017-02-01T00:00:00Z' })
+        .get('.v0/@latest')
+        .reply(200, { Version: 'v0.2.0' })
         .get('.v1/@v/list')
         .reply(200, ['v1.0.0', '\n'].join('\n'))
         .get('.v1/@v/v1.0.0.info')
         .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' })
+        .get('.v1/@latest')
+        .reply(200, { Version: 'v1.0.0' })
         .get('.v2/@v/list')
         .reply(404);
 
@@ -705,6 +732,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           { releaseTimestamp: '2018-01-01T00:00:00Z', version: 'v1.0.0' },
         ],
         sourceUrl: 'https://github.com/go-foo/foo',
+        tags: { latest: 'v1.0.0' },
       });
     });
 
@@ -715,6 +743,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .scope(`${baseUrl}/github.com/google/btree`)
         .get('/@v/list')
         .reply(200)
+        .get('/@latest')
+        .reply(404)
         .get('/v2/@v/list')
         .reply(404);
 
