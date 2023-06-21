@@ -420,7 +420,6 @@ export async function getBranchStatus(
 async function getMergeStrategy(
   targetRefName: string
 ): Promise<GitPullRequestMergeStrategy> {
-  // TODO #7154
   return (
     config.mergeMethods[targetRefName] ??
     (config.mergeMethods[targetRefName] = await azureHelper.getMergeMethod(
