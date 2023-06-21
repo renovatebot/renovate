@@ -49,8 +49,7 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    // we need to prefix version with v to install helmfile.
-    const helmfileVersion = `v${parseLock(existingLockFileContent).version}`;
+    const helmfileVersion = parseLock(existingLockFileContent).version;
     const toolConstraints: ToolConstraint[] = [
       {
         toolName: 'helm',
