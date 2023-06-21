@@ -99,6 +99,7 @@ export interface GlobalOnlyConfig {
   cacheDir?: string;
   containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
+  dockerCliOptions?: string;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -126,6 +127,7 @@ export interface RepoGlobalConfig {
   cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
+  dockerCliOptions?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
