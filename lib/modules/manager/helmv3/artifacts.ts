@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { quote } from 'shlex';
-import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -9,7 +8,6 @@ import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
   getParentDir,
   getSiblingFileName,
-  privateCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -18,6 +16,7 @@ import * as hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { generateHelmEnvs, generateLoginCmd } from './common';
 import type { ChartDefinition, Repository, RepositoryRule } from './types';
 import {
   aliasRecordToRepositories,
@@ -32,13 +31,6 @@ async function helmCommands(
   repositories: Repository[]
 ): Promise<void> {
   const cmd: string[] = [];
-  // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-  const helmConfigParameters = [
-    `--registry-config ${upath.join(privateCacheDir(), 'registry.json')}`,
-    `--repository-config ${upath.join(privateCacheDir(), 'repositories.yaml')}`,
-    `--repository-cache ${upath.join(privateCacheDir(), 'repositories')}`,
-  ];
-
   // get OCI registries and detect host rules
   const registries: RepositoryRule[] = repositories
     .filter(isOCIRegistry)
@@ -55,15 +47,9 @@ async function helmCommands(
 
   // if credentials for the registry have been found, log into it
   registries.forEach((value) => {
-    const { username, password } = value.hostRule;
-    const parameters = [...helmConfigParameters];
-    if (username && password) {
-      parameters.push(`--username ${quote(username)}`);
-      parameters.push(`--password ${quote(password)}`);
-
-      cmd.push(
-        `helm registry login ${parameters.join(' ')} ${value.repository}`
-      );
+    const loginCmd = generateLoginCmd(value, 'helm registry login');
+    if (loginCmd) {
+      cmd.push(loginCmd);
     }
   });
 
@@ -83,23 +69,17 @@ async function helmCommands(
   // add helm repos if an alias or credentials for the url are defined
   classicRepositories.forEach((value) => {
     const { username, password } = value.hostRule;
-    const parameters = [...helmConfigParameters];
+    const parameters = [`${value.repository}`];
     const isPrivateRepo = username && password;
     if (isPrivateRepo) {
       parameters.push(`--username ${quote(username)}`);
       parameters.push(`--password ${quote(password)}`);
     }
 
-    cmd.push(
-      `helm repo add ${value.name} ${parameters.join(' ')} ${value.repository}`
-    );
+    cmd.push(`helm repo add ${value.name} ${parameters.join(' ')}`);
   });
 
-  cmd.push(
-    `helm dependency update ${helmConfigParameters.join(' ')} ${quote(
-      getParentDir(manifestPath)
-    )}`
-  );
+  cmd.push(`helm dependency update ${quote(getParentDir(manifestPath))}`);
 
   await exec(cmd, execOptions);
 }
@@ -158,9 +138,7 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       docker: {},
-      extraEnv: {
-        HELM_EXPERIMENTAL_OCI: '1',
-      },
+      extraEnv: generateHelmEnvs(),
       toolConstraints: [helmToolConstraint],
     };
     await helmCommands(execOptions, packageFileName, repositories);

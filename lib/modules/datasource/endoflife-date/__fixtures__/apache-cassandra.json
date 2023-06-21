@@ -1,0 +1,40 @@
+[
+  {
+    "cycle": "4.1",
+    "eol": "2025-05-01",
+    "support": true,
+    "releaseDate": "2022-12-13",
+    "latest": "4.1.1",
+    "latestReleaseDate": "2023-03-21",
+    "lts": false
+  },
+  {
+    "cycle": "4.0",
+    "eol": "2024-05-01",
+    "support": true,
+    "releaseDate": "2021-07-26",
+    "latest": "4.0.9",
+    "latestReleaseDate": "2023-04-14",
+    "lts": false
+  },
+  {
+    "cycle": "3.11",
+    "eol": "2023-05-01",
+    "support": true,
+    "releaseDate": "2017-06-23",
+    "latest": "3.11.15",
+    "discontinued": true,
+    "latestReleaseDate": "2023-05-05",
+    "lts": false
+  },
+  {
+    "cycle": "3.0",
+    "eol": "2023-05-01",
+    "support": true,
+    "releaseDate": "2015-11-09",
+    "latest": "3.0.29",
+    "discontinued": true,
+    "latestReleaseDate": "2023-05-15",
+    "lts": false
+  }
+]

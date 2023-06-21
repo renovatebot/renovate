@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { RenovateConfig, partial } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getPrList } from './pr-list';
 
@@ -8,7 +8,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      config = getConfig();
+      config = partial<RenovateConfig>({
+        prHourlyLimit: 2, // default
+      });
     });
 
     it('handles empty', () => {
@@ -35,7 +37,8 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             {
               manager: 'some-manager',
               updateType: 'lockFileMaintenance',
-            } as never,
+              branchName: 'some-branch',
+            },
           ],
         },
       ];
@@ -98,7 +101,8 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               depType: 'devDependencies',
               newValue: '2.0.1',
               isLockfileUpdate: true,
-            } as never,
+              branchName: 'some-branch',
+            },
           ],
         },
       ];

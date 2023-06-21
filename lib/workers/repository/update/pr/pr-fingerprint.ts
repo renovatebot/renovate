@@ -1,7 +1,11 @@
 // fingerprint config is based on the old skip pr update logic
 // https://github.com/renovatebot/renovate/blob/3d85b6048d6a8c57887b64ed4929e2e02ea41aa0/lib/workers/repository/update/pr/index.ts#L294-L306
 
-import type { UpdateType, ValidationMessage } from '../../../../config/types';
+import type {
+  RecreateWhen,
+  UpdateType,
+  ValidationMessage,
+} from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PrCache } from '../../../../util/cache/repository/types';
 import { getElapsedHours } from '../../../../util/date';
@@ -17,9 +21,10 @@ export interface FilteredBranchUpgradeConfig {
   repoName?: string;
 }
 
-export interface PrFingerprintConfig {
+export interface PrBodyFingerprintConfig {
   // BranchConfig - filtered
   automerge?: boolean;
+  baseBranch?: string;
   automergeSchedule?: string[];
   hasReleaseNotes?: boolean;
   isPin?: boolean;
@@ -28,7 +33,7 @@ export interface PrFingerprintConfig {
   prHeader?: string;
   prTitle?: string;
   rebaseWhen?: string;
-  recreateClosed?: boolean;
+  recreateWhen?: RecreateWhen;
   schedule?: string[];
   stopUpdating?: boolean;
   timezone?: string;
@@ -39,9 +44,9 @@ export interface PrFingerprintConfig {
   filteredUpgrades?: FilteredBranchUpgradeConfig[];
 }
 
-export function generatePrFingerprintConfig(
+export function generatePrBodyFingerprintConfig(
   config: BranchConfig
-): PrFingerprintConfig {
+): PrBodyFingerprintConfig {
   const filteredUpgrades = config.upgrades.map((upgrade) => {
     return {
       depName: upgrade.depName,
@@ -59,6 +64,7 @@ export function generatePrFingerprintConfig(
   return {
     automerge: config.automerge,
     automergeSchedule: config.automergeSchedule,
+    baseBranch: config.baseBranch,
     filteredUpgrades,
     hasReleaseNotes: config.hasReleaseNotes,
     isPin: config.isPin,
@@ -67,7 +73,7 @@ export function generatePrFingerprintConfig(
     prHeader: config.prHeader,
     prTitle: config.prTitle,
     rebaseWhen: config.rebaseWhen,
-    recreateClosed: config.recreateClosed,
+    recreateWhen: config.recreateWhen,
     schedule: config.schedule,
     stopUpdating: config.stopUpdating,
     timezone: config.timezone,
@@ -79,9 +85,9 @@ export function generatePrFingerprintConfig(
 
 export function validatePrCache(
   prCache: PrCache,
-  prFingerprint: string
+  bodyFingerprint: string
 ): boolean {
-  if (prCache.fingerprint !== prFingerprint) {
+  if (prCache.bodyFingerprint !== bodyFingerprint) {
     logger.debug('PR fingerprints mismatch, processing PR');
     return false;
   }

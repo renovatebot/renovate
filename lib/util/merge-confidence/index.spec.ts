@@ -15,7 +15,7 @@ import {
 
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
-  const defaultApiBaseUrl = 'https://badges.renovateapi.com/';
+  const defaultApiBaseUrl = 'https://developer.mend.io/';
 
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {

@@ -104,7 +104,7 @@ export async function generateLockFile(
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
-      : config.constraints?.yarn;
+      : config.constraints?.yarn ?? config.extractedConstraints?.yarn;
     const minYarnVersion =
       semver.validRange(yarnCompatibility) &&
       semver.minVersion(yarnCompatibility);

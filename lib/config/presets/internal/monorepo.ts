@@ -96,7 +96,10 @@ const repoGroups = {
   fela: 'https://github.com/robinweser/fela',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
-  fontsource: 'https://github.com/fontsource/fontsource',
+  fontsource: [
+    'https://github.com/fontsource/fontsource', // old repo
+    'https://github.com/fontsource/font-files',
+  ],
   formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
@@ -257,6 +260,7 @@ const repoGroups = {
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   workbox: 'https://github.com/googlechrome/workbox',
+  xstate: 'https://github.com/statelyai/xstate',
   xterm: 'https://github.com/xtermjs/xterm.js',
   'xunit-dotnet': 'https://github.com/xunit/xunit',
   yarn: 'https://github.com/yarnpkg/berry',
@@ -270,6 +274,7 @@ const orgGroups = {
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
+  octokit: 'https://github.com/octokit/',
   'semantic-release': 'https://github.com/semantic-release/',
   swc: 'https://github.com/swc-project/',
 };
