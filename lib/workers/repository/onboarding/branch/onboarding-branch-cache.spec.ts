@@ -6,8 +6,8 @@ import type {
 } from '../../../../util/cache/repository/types';
 import {
   deleteOnboardingCache,
+  getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
-  getOnboardingFileFromCache,
   hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
   isOnboardingBranchModified,
@@ -255,7 +255,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
     });
   });
 
-  describe('getOnboardingFileFromCache()', () => {
+  describe('getOnboardingConfigFromCache()', () => {
     it('returns cached value', () => {
       const dummyCache = {
         onboardingBranchCache: partial<OnboardingBranchCache>({
@@ -263,11 +263,11 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         }),
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValueOnce(dummyCache);
-      expect(getOnboardingFileFromCache()).toBe('parsed');
+      expect(getOnboardingConfigFromCache()).toBe('parsed');
     });
 
     it('returns undefined', () => {
-      expect(getOnboardingFileFromCache()).toBeUndefined();
+      expect(getOnboardingConfigFromCache()).toBeUndefined();
     });
   });
 
