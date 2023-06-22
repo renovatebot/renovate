@@ -6,6 +6,7 @@ import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
 import { copystr } from '../../../util/string';
+import { parseUrl } from '../../../util/url';
 
 interface VersionsEndpointUnsupported {
   versionsEndpointSupported: false;
@@ -155,7 +156,11 @@ export class VersionsEndpointCache {
     } else {
       newCache = oldCache;
     }
-    memCache.set(cacheKey, newCache);
+
+    const registryHostname = parseUrl(registryUrl)?.hostname;
+    if (registryHostname === 'rubygems.org') {
+      memCache.set(cacheKey, newCache);
+    }
     return newCache;
   }
 

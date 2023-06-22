@@ -1,6 +1,6 @@
 import hasha from 'hasha';
 import * as packageCache from '../../../util/cache/package';
-import type { Http } from '../../../util/http';
+import { Http, HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import type { ReleaseResult } from '../types';
 import { GemMetadata, GemVersions } from './schema';
@@ -26,40 +26,48 @@ export class MetadataCache {
       return oldCache.data;
     }
 
-    const { body: releases } = await this.http.getJson(
-      joinUrlParts(registryUrl, '/api/v1/versions', `${packageName}.json`),
-      GemVersions
-    );
+    try {
+      const { body: releases } = await this.http.getJson(
+        joinUrlParts(registryUrl, '/api/v1/versions', `${packageName}.json`),
+        GemVersions
+      );
 
-    const { body: metadata } = await this.http.getJson(
-      joinUrlParts(registryUrl, '/api/v1/gems', `${packageName}.json`),
-      GemMetadata
-    );
+      const { body: metadata } = await this.http.getJson(
+        joinUrlParts(registryUrl, '/api/v1/gems', `${packageName}.json`),
+        GemMetadata
+      );
 
-    const data: ReleaseResult = { releases };
+      const data: ReleaseResult = { releases };
 
-    if (metadata.changelogUrl) {
-      data.changelogUrl = metadata.changelogUrl;
+      if (metadata.changelogUrl) {
+        data.changelogUrl = metadata.changelogUrl;
+      }
+
+      if (metadata.sourceUrl) {
+        data.sourceUrl = metadata.sourceUrl;
+      }
+
+      if (metadata.homepage) {
+        data.homepage = metadata.homepage;
+      }
+
+      const newCache: CacheRecord = { hash, data };
+      const ttlMinutes = 100 * 24 * 60;
+      const ttlRandomDelta = Math.floor(Math.random() * 10 * 24 * 60);
+      await packageCache.set(
+        cacheNs,
+        cacheKey,
+        newCache,
+        ttlMinutes + ttlRandomDelta
+      );
+      return data;
+    } catch (err) {
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        const releases = versions.map((version) => ({ version }));
+        return { releases };
+      }
+
+      throw err;
     }
-
-    if (metadata.sourceUrl) {
-      data.sourceUrl = metadata.sourceUrl;
-    }
-
-    if (metadata.homepage) {
-      data.homepage = metadata.homepage;
-    }
-
-    const newCache: CacheRecord = { hash, data };
-    const ttlMinutes = 100 * 24 * 60;
-    const ttlRandomDelta = Math.floor(Math.random() * 10 * 24 * 60);
-    await packageCache.set(
-      cacheNs,
-      cacheKey,
-      newCache,
-      ttlMinutes + ttlRandomDelta
-    );
-
-    return data;
   }
 }

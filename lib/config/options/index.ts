@@ -344,6 +344,13 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
+    name: 'dockerCliOptions',
+    description:
+      'Pass CLI flags to `docker run` command when `binarySource=docker`.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'dockerImagePrefix',
     description:
       'Change this value to override the default Renovate Docker sidecar image name prefix.',
@@ -772,6 +779,16 @@ const options: RenovateOptions[] = [
     allowString: true,
     default: null,
     globalOnly: true,
+  },
+  {
+    name: 'autodiscoverTopics',
+    description: '',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',

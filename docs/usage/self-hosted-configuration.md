@@ -126,6 +126,11 @@ If using negations, all repositories except those who match the regex are added 
 }
 ```
 
+## autodiscoverTopics
+
+Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
+topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
@@ -328,6 +333,14 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 !!! note
     Dangling containers are only removed when Renovate runs again with the same prefix.
 
+## dockerCliOptions
+
+You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar Docker containers.
+
+For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
+
+Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+
 ## dockerImagePrefix
 
 By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
@@ -419,6 +432,7 @@ It will also override any settings in `packageRules`.
 
 This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
 It must be set to a GitHub Organization name and not a GitHub user account.
+When set, "allow edits by maintainers" will be false for PRs because GitHub does not allow this setting for organizations.
 
 This can be used if you're migrating from user-based forks to organization-based forks.
 
