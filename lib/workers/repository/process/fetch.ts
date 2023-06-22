@@ -16,7 +16,6 @@ import * as memCache from '../../../util/cache/memory';
 import type { LookupStats } from '../../../util/cache/memory/types';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
-import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
@@ -96,61 +95,53 @@ async function fetchDepUpdates(
   return dep;
 }
 
-async function fetchManagerPackagerFileUpdates(
-  config: RenovateConfig,
-  managerConfig: RenovateConfig,
-  pFile: PackageFile
-): Promise<void> {
-  const { packageFile } = pFile;
-  const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  if (pFile.extractedConstraints) {
-    packageFileConfig.constraints = {
-      ...pFile.extractedConstraints,
-      ...config.constraints,
-    };
-  }
-  const { manager } = packageFileConfig;
-  const queue = pFile.deps.map(
-    (dep) => (): Promise<PackageDependency> =>
-      fetchDepUpdates(packageFileConfig, dep)
-  );
-  logger.trace(
-    { manager, packageFile, queueLength: queue.length },
-    'fetchManagerPackagerFileUpdates starting with concurrency'
-  );
-
-  pFile.deps = await p.all(queue);
-  logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
+interface DepUpdateFetchRequest {
+  config: RenovateConfig & PackageFile;
+  deps: PackageDependency[];
+  idx: number;
 }
 
-async function fetchManagerUpdates(
+export function depUpdateRequests(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>,
-  manager: string
-): Promise<void> {
-  const managerConfig = getManagerConfig(config, manager);
-  const queue = packageFiles[manager].map(
-    (pFile) => (): Promise<void> =>
-      fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
-  );
-  logger.trace(
-    { manager, queueLength: queue.length },
-    'fetchManagerUpdates starting'
-  );
-  await p.all(queue);
-  logger.trace({ manager }, 'fetchManagerUpdates finished');
+  packageFiles: Record<string, PackageFile[]>
+): DepUpdateFetchRequest[] {
+  const results: DepUpdateFetchRequest[] = [];
+
+  for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
+    const managerConfig = getManagerConfig(config, manager);
+
+    for (const pFile of managerPackageFiles) {
+      const config = mergeChildConfig(managerConfig, pFile);
+      if (pFile.extractedConstraints) {
+        config.constraints = {
+          ...pFile.extractedConstraints,
+          ...config.constraints,
+        };
+      }
+      const { deps } = pFile;
+      for (let idx = 0; idx < pFile.deps.length; idx += 1) {
+        results.push({ config, deps, idx });
+      }
+    }
+  }
+
+  return results;
 }
 
 export async function fetchUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
-  const managers = Object.keys(packageFiles);
-  const allManagerJobs = managers.map((manager) =>
-    fetchManagerUpdates(config, packageFiles, manager)
+  const requests = depUpdateRequests(config, packageFiles);
+  const tasks = requests.map(({ config, deps, idx }) => async () => {
+    const dep = deps[idx];
+    deps[idx] = await fetchDepUpdates(config, dep);
+  });
+  logger.debug(
+    { baseBranch: config.baseBranch },
+    'Package releases lookups started'
   );
-  await Promise.all(allManagerJobs);
-  PackageFiles.add(config.baseBranch!, { ...packageFiles });
+  await p.all(tasks, { concurrency: 20 });
   logger.debug(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete'
