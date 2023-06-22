@@ -30,7 +30,7 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function getDatasourceFor(datasource: string): DatasourceApi | null {
+export function getDatasourceFor(datasource: string): DatasourceApi | null {
   return datasources.get(datasource) ?? null;
 }
 
