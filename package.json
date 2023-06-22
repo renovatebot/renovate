@@ -181,7 +181,6 @@
     "clean-git-ref": "2.0.1",
     "commander": "10.0.1",
     "conventional-commits-detector": "1.0.3",
-    "crypto-random-string": "3.3.1",
     "deepmerge": "4.3.1",
     "delay": "5.0.0",
     "dequal": "2.0.3",
