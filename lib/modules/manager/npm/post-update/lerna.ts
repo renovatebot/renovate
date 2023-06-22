@@ -59,7 +59,8 @@ export async function generateLockFiles(
         toolName: 'yarn',
         constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
       };
-      const yarnCompatibility = config.constraints?.yarn;
+      const yarnCompatibility =
+        config.constraints?.yarn ?? config.extractedConstraints?.yarn;
       if (semver.validRange(yarnCompatibility)) {
         yarnTool.constraint = yarnCompatibility;
       }
@@ -71,7 +72,8 @@ export async function generateLockFiles(
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
       const npmTool: ToolConstraint = { toolName: 'npm' };
-      const npmCompatibility = config.constraints?.npm;
+      const npmCompatibility =
+        config.constraints?.npm ?? config.extractedConstraints?.npm;
       if (semver.validRange(npmCompatibility)) {
         npmTool.constraint = npmCompatibility;
       }
@@ -106,11 +108,16 @@ export async function generateLockFiles(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
     const lernaVersion = getLernaVersion(lernaPackageFile);
-    logger.debug(`Using lerna version ${lernaVersion ?? 'latest'}`);
-    toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
-    cmd.push('lerna info || echo "Ignoring lerna info failure"');
-    cmd.push(`${lernaClient} install ${cmdOptions}`);
-    cmd.push(lernaCommand);
+    if (lernaVersion && semver.lt(lernaVersion, '7.0.0')) {
+      logger.debug(`Using lerna version ${lernaVersion}`);
+      toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
+      cmd.push('lerna info || echo "Ignoring lerna info failure"');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
+      cmd.push(lernaCommand);
+    } else {
+      logger.debug('Skipping lerna bootstrap');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
+    }
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {

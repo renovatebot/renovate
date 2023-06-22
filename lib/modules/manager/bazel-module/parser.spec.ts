@@ -136,5 +136,36 @@ describe('modules/manager/bazel-module/parser', () => {
         ),
       ]);
     });
+
+    it('finds single_version_override', () => {
+      const input = codeBlock`
+        bazel_dep(name = "rules_foo", version = "1.2.3")
+        single_version_override(
+          module_name = "rules_foo",
+          version = "1.2.3",
+          registry = "https://example.com/custom_registry",
+        )
+      `;
+      const res = parse(input);
+      expect(res).toEqual([
+        fragments.record(
+          {
+            rule: fragments.string('bazel_dep'),
+            name: fragments.string('rules_foo'),
+            version: fragments.string('1.2.3'),
+          },
+          true
+        ),
+        fragments.record(
+          {
+            rule: fragments.string('single_version_override'),
+            module_name: fragments.string('rules_foo'),
+            version: fragments.string('1.2.3'),
+            registry: fragments.string('https://example.com/custom_registry'),
+          },
+          true
+        ),
+      ]);
+    });
   });
 });
