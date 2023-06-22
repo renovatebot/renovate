@@ -48,18 +48,20 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
-  let dependency: ReleaseResult | null = null;
+  config.versioning ??= getDefaultVersioning(datasource);
+
+  const versioning = allVersioning.get(config.versioning);
   const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
+
+  let dependency: ReleaseResult | null = null;
   const res: UpdateResult = {
+    versioning: config.versioning,
     updates: [],
     warnings: [],
   };
+
   try {
     logger.trace({ dependency: packageName, currentValue }, 'lookupUpdates');
-    // Use the datasource's default versioning if none is configured
-    config.versioning ??= getDefaultVersioning(datasource);
-    const versioning = allVersioning.get(config.versioning);
-    res.versioning = config.versioning;
     // istanbul ignore if
     if (
       !isGetPkgReleasesConfig(config) ||
