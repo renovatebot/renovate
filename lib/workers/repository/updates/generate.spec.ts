@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -67,6 +67,7 @@ describe('workers/repository/updates/generate', () => {
             branchName: 'some-branch',
             prTitle: 'some-title',
             isLockFileMaintenance: true,
+            recreateClosed: true,
           },
         ],
       });
@@ -216,7 +217,7 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
-    it('groups major updates with different versions but same newValue, no recreateClosed', () => {
+    it('groups major updates with different versions but same newValue, no recreateWhen', () => {
       const branch = [
         {
           manager: 'some-manager',
@@ -282,7 +283,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('Grouped pin & pinDigest can be recreated', () => {
+    it('recreates grouped pin & pinDigest', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -304,7 +305,31 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('Grouped pin can be recreated', () => {
+    it('does not recreate grouped pin & pinDigest when closed if recreateWhen=never', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v2',
+          newDigest: 'dc323e67f16fb5f7663d20ff7941f27f5809e9b6',
+          recreateWhen: 'never',
+        },
+        {
+          ...requiredDefaultOptions,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+          recreateWhen: 'never',
+        },
+      ] as BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeFalse();
+    });
+
+    it('recreates grouped pin', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -331,7 +356,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('grouped pinDigest can be recreated', () => {
+    it('recreates grouped pinDigest', () => {
       const branch = [
         {
           ...requiredDefaultOptions,

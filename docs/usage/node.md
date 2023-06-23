@@ -20,6 +20,7 @@ Renovate can manage the Node.js version in the following files:
 - The [`volta`](https://docs.volta.sh/guide/understanding#managing-your-project) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`.nvmrc`](https://github.com/creationix/nvm#nvmrc) file for the [Node Version Manager](https://github.com/creationix/nvm)
 - The [`.node-version`](https://github.com/nodenv/nodenv#choosing-the-node-version) file for the [nodenv](https://github.com/nodenv/nodenv) environment manager
+- The [`.tool-versions`](https://asdf-vm.com/manage/configuration.html#tool-versions) file for the [asdf](https://github.com/asdf-vm/asdf) version manager
 - The [`node_js`](https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Specifying-Node.js-versions) field in [`.travis.yml`](https://docs.travis-ci.com/user/customizing-the-build/)
 
 ## Configuring which version of npm Renovate uses

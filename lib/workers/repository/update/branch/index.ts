@@ -155,8 +155,7 @@ export async function processBranch(
         config.automerge = false;
         config.automergedPreviously = true;
       }
-    }
-    if (!branchPr && existingPr && !dependencyDashboardCheck) {
+    } else if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'

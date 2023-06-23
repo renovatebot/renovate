@@ -128,18 +128,18 @@ export async function extractPackageFile(
     return null;
   }
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pipfile.requires?.python_version)) {
-    constraints.python = `== ${pipfile.requires!.python_version}.*`;
+    extractedConstraints.python = `== ${pipfile.requires!.python_version}.*`;
   } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
-    constraints.python = `== ${pipfile.requires!.python_full_version}`;
+    extractedConstraints.python = `== ${pipfile.requires!.python_full_version}`;
   }
 
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
-    constraints.pipenv = pipfile.packages!.pipenv;
+    extractedConstraints.pipenv = pipfile.packages!.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    constraints.pipenv = pipfile['dev-packages']!.pipenv;
+    extractedConstraints.pipenv = pipfile['dev-packages']!.pipenv;
   }
 
   const lockFileName = `${packageFile}.lock`;
@@ -147,6 +147,6 @@ export async function extractPackageFile(
     res.lockFiles = [lockFileName];
   }
 
-  res.extractedConstraints = constraints;
+  res.extractedConstraints = extractedConstraints;
   return res;
 }

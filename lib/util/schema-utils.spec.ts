@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Json, Json5, LooseArray, LooseRecord } from './schema-utils';
+import { Json, Json5, LooseArray, LooseRecord, UtcDate } from './schema-utils';
 
 describe('util/schema-utils', () => {
   describe('LooseArray', () => {
@@ -256,6 +256,18 @@ describe('util/schema-utils', () => {
         },
         success: false,
       });
+    });
+  });
+
+  describe('UtcDate', () => {
+    it('parses date', () => {
+      expect(UtcDate.parse('2020-04-04').toString()).toBe(
+        '2020-04-04T00:00:00.000Z'
+      );
+    });
+
+    it('rejects invalid date', () => {
+      expect(() => UtcDate.parse('foobar')).toThrow();
     });
   });
 });

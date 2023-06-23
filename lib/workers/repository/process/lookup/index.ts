@@ -53,7 +53,7 @@ export async function lookupUpdates(
   const res: UpdateResult = {
     updates: [],
     warnings: [],
-  } as any;
+  };
   try {
     logger.trace({ dependency: packageName, currentValue }, 'lookupUpdates');
     // Use the datasource's default versioning if none is configured

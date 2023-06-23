@@ -1,6 +1,7 @@
 import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, getConfig, partial } from '../../../../../test/util';
+import { RenovateConfig, partial } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { scm } from '../../../../modules/platform/scm';
 import { createConfigMigrationBranch } from './create';
 import { MigratedDataFactory } from './migrated-data';
