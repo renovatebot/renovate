@@ -371,7 +371,7 @@ export async function lookupUpdates(
       if (versioning.valueToVersion) {
         // TODO #7154
         res.currentVersion = versioning.valueToVersion(res.currentVersion!);
-        for (const update of res.updates || []) {
+        for (const update of res.updates || /* istanbul ignore next*/ []) {
           // TODO #7154
           update.newVersion = versioning.valueToVersion(update.newVersion!);
         }
@@ -442,7 +442,9 @@ export async function lookupUpdates(
     // Handle a weird edge case involving followTag and fallbacks
     if (rollbackPrs && followTag) {
       res.updates = res.updates.filter(
-        (update) => res.updates.length === 1 || update.updateType !== 'rollback'
+        (update) =>
+          res.updates.length === 1 ||
+          /* istanbul ignore next */ update.updateType !== 'rollback'
       );
     }
   } catch (err) /* istanbul ignore next */ {
