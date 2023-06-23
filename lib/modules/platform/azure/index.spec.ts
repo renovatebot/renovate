@@ -737,7 +737,7 @@ describe('modules/platform/azure/index', () => {
           pullRequestId: 456,
           title: 'The Title',
           createdBy: {
-            id: 123,
+            id: '123',
           },
         };
         const prUpdateResult = {
@@ -752,15 +752,15 @@ describe('modules/platform/azure/index', () => {
           },
         };
         const updateFn = jest
-          .fn(() => prUpdateResult)
+          .fn()
+          .mockResolvedValue(prUpdateResult)
           .mockName('updatePullRequest');
-        azureApi.gitApi.mockImplementationOnce(
-          () =>
-            ({
-              createPullRequest: jest.fn(() => prResult),
-              createPullRequestLabel: jest.fn(() => ({})),
-              updatePullRequest: updateFn,
-            } as any)
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            createPullRequest: jest.fn().mockResolvedValue(prResult),
+            createPullRequestLabel: jest.fn().mockResolvedValue({}),
+            updatePullRequest: updateFn,
+          })
         );
         const pr = await azure.createPr({
           sourceBranch: 'some-branch',
@@ -781,14 +781,14 @@ describe('modules/platform/azure/index', () => {
             pullRequestId: 456,
             title: 'The Title',
             createdBy: {
-              id: 123,
+              id: '123',
             },
           },
           {
             pullRequestId: 457,
             title: 'The Second Title',
             createdBy: {
-              id: 123,
+              id: '123',
             },
           },
         ];
@@ -817,20 +817,21 @@ describe('modules/platform/azure/index', () => {
           },
         ];
         const updateFn = jest
-          .fn(() => prUpdateResults.shift())
+          .fn(() => Promise.resolve(prUpdateResults.shift()!))
           .mockName('updatePullRequest');
 
-        azureHelper.getMergeMethod.mockReturnValue(
-          Promise.resolve(GitPullRequestMergeStrategy.Squash)
+        azureHelper.getMergeMethod.mockResolvedValueOnce(
+          GitPullRequestMergeStrategy.Squash
         );
 
-        azureApi.gitApi.mockImplementation(
-          () =>
-            ({
-              createPullRequest: jest.fn(() => prResult.shift()),
-              createPullRequestLabel: jest.fn(() => ({})),
-              updatePullRequest: updateFn,
-            } as any)
+        azureApi.gitApi.mockResolvedValue(
+          partial<IGitApi>({
+            createPullRequest: jest.fn(() =>
+              Promise.resolve(prResult.shift()!)
+            ),
+            createPullRequestLabel: jest.fn().mockResolvedValue({}),
+            updatePullRequest: updateFn,
+          })
         );
         await azure.createPr({
           sourceBranch: 'some-branch',

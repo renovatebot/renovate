@@ -33,7 +33,7 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
 exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
 {
   "autoCompleteSetBy": {
-    "id": 123,
+    "id": "123",
   },
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -45,7 +45,7 @@ exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is se
   },
   "createdAt": undefined,
   "createdBy": {
-    "id": 123,
+    "id": "123",
   },
   "number": 456,
   "pullRequestId": 456,
