@@ -751,10 +751,7 @@ describe('modules/platform/azure/index', () => {
             mergeCommitMessage: 'The Title',
           },
         };
-        const updateFn = jest
-          .fn()
-          .mockResolvedValue(prUpdateResult)
-          .mockName('updatePullRequest');
+        const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
         azureApi.gitApi.mockResolvedValueOnce(
           partial<IGitApi>({
             createPullRequest: jest.fn().mockResolvedValue(prResult),
@@ -816,9 +813,9 @@ describe('modules/platform/azure/index', () => {
             },
           },
         ];
-        const updateFn = jest
-          .fn(() => Promise.resolve(prUpdateResults.shift()!))
-          .mockName('updatePullRequest');
+        const updateFn = jest.fn(() =>
+          Promise.resolve(prUpdateResults.shift()!)
+        );
 
         azureHelper.getMergeMethod.mockResolvedValueOnce(
           GitPullRequestMergeStrategy.Squash
