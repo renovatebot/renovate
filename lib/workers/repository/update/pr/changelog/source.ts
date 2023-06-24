@@ -15,12 +15,12 @@ import { getInRangeReleases } from './releases';
 import type { ChangeLogRelease, ChangeLogResult } from './types';
 
 export abstract class ChangeLogSource {
-  private source: 'bitbucket' | 'github' | 'gitlab';
+  private platform: 'bitbucket' | 'github' | 'gitlab';
   private cacheNamespace: string;
 
-  constructor(source: 'bitbucket' | 'github' | 'gitlab') {
-    this.source = source;
-    this.cacheNamespace = `changelog-${source}-release`;
+  constructor(platform: 'bitbucket' | 'github' | 'gitlab') {
+    this.platform = platform;
+    this.cacheNamespace = `changelog-${platform}-release`;
   }
 
   private getCachedTags(
@@ -41,7 +41,7 @@ export abstract class ChangeLogSource {
   public async getChangeLogJSON(
     config: BranchUpgradeConfig
   ): Promise<ChangeLogResult | null> {
-    logger.trace(`getChangeLogJSON for ${this.source}`);
+    logger.trace(`getChangeLogJSON for ${this.platform}`);
 
     const versioning = config.versioning!;
     const currentVersion = config.currentVersion!;
@@ -58,7 +58,7 @@ export abstract class ChangeLogSource {
     this.validateToken(sourceUrl, config);
 
     if (repository.split('/').length !== 2) {
-      logger.debug(`Invalid ${this.source} URL found: ${sourceUrl}`);
+      logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
       return null;
     }
 
@@ -139,7 +139,7 @@ export abstract class ChangeLogSource {
       project: {
         apiBaseUrl,
         baseUrl,
-        type: this.source,
+        type: this.platform,
         repository,
         sourceUrl,
         sourceDirectory,
