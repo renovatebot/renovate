@@ -112,31 +112,6 @@ export async function getChangeLogJSON(
     return null;
   }
 
-  let tags: string[];
-
-  async function getRef(release: Release): Promise<string | null> {
-    if (!tags) {
-      tags = await getCachedTags(apiBaseUrl, repository);
-    }
-    const tagName = findTagOfRelease(
-      version,
-      packageName,
-      release.version,
-      tags
-    );
-    if (is.nonEmptyString(tagName)) {
-      return tagName;
-    }
-    if (is.nonEmptyString(release.gitRef)) {
-      return release.gitRef;
-    }
-    return null;
-  }
-
-  function getCacheKey(prev: string, next: string): string {
-    return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
-  }
-
   const changelogReleases: ChangeLogRelease[] = [];
   // compare versions
   const include = (v: string): boolean =>
@@ -151,7 +126,7 @@ export async function getChangeLogJSON(
     }
     let release = await packageCache.get(
       cacheNamespace,
-      getCacheKey(prev.version, next.version)
+      getCacheKey(sourceUrl, packageName, prev.version, next.version)
     );
     if (!release) {
       release = {
@@ -162,8 +137,20 @@ export async function getChangeLogJSON(
         changes: [],
         compare: {},
       };
-      const prevHead = await getRef(prev);
-      const nextHead = await getRef(next);
+      const prevHead = await getRef(
+        version,
+        packageName,
+        prev,
+        apiBaseUrl,
+        repository
+      );
+      const nextHead = await getRef(
+        version,
+        packageName,
+        next,
+        apiBaseUrl,
+        repository
+      );
       if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
         release.compare.url = getCompareURL(
           baseUrl,
@@ -175,7 +162,7 @@ export async function getChangeLogJSON(
       const cacheMinutes = 55;
       await packageCache.set(
         cacheNamespace,
-        getCacheKey(prev.version, next.version),
+        getCacheKey(sourceUrl, packageName, prev.version, next.version),
         release,
         cacheMinutes
       );
@@ -232,4 +219,32 @@ function findTagOfRelease(
       .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
   }
   return tagName;
+}
+
+async function getRef(
+  version: allVersioning.VersioningApi,
+  packageName: string,
+  release: Release,
+  apiBaseUrl: string,
+  repository: string
+): Promise<string | null> {
+  const tags = await getCachedTags(apiBaseUrl, repository);
+
+  const tagName = findTagOfRelease(version, packageName, release.version, tags);
+  if (is.nonEmptyString(tagName)) {
+    return tagName;
+  }
+  if (is.nonEmptyString(release.gitRef)) {
+    return release.gitRef;
+  }
+  return null;
+}
+
+function getCacheKey(
+  sourceUrl: string,
+  packageName: string,
+  prev: string,
+  next: string
+): string {
+  return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
 }
