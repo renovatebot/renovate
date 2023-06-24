@@ -36,7 +36,10 @@ function getUpdateImportPathCmds(
   );
   if (invalidMajorDeps.length > 0) {
     invalidMajorDeps.forEach(({ depName }) =>
-      logger.warn(`Could not get major version of ${depName!}. Ignoring`)
+      logger.warn(
+        { depName },
+        'Ignoring dependency: Could not get major version'
+      )
     );
   }
 
