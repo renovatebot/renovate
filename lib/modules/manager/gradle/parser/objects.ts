@@ -49,6 +49,8 @@ const qKotlinMultiObjectExpr = (
 
 export const qKotlinMultiObjectVarAssignment = qKotlinMultiObjectExpr(
   qKotlinMultiObjectExpr(
-    qKotlinMultiObjectExpr(qKotlinSingleObjectVarAssignment)
+    qKotlinMultiObjectExpr(
+      qKotlinMultiObjectExpr(qKotlinSingleObjectVarAssignment)
+    )
   )
 ).handler(cleanupTempVars);
