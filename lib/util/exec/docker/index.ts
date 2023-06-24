@@ -123,7 +123,7 @@ export async function getDockerTag(
       return version;
     }
   } else {
-    logger.error(`No ${packageName} releases found`);
+    logger.error({ packageName }, `Docker exec: no releases found`);
     return 'latest';
   }
   logger.warn(
@@ -222,6 +222,7 @@ export async function generateDockerCommand(
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
+    dockerCliOptions,
     dockerImagePrefix,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
@@ -231,6 +232,9 @@ export async function generateDockerCommand(
   result.push(`--label=${containerLabel}`);
   if (dockerUser) {
     result.push(`--user=${dockerUser}`);
+  }
+  if (dockerCliOptions) {
+    result.push(dockerCliOptions);
   }
 
   const volumeDirs: VolumeOption[] = [localDir, cacheDir];

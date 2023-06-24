@@ -34,7 +34,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
     // istanbul ignore if: this should never happen
     if (is.nullOrUndefined(resolvedURL)) {
-      logger.error(`Bitbucket: cannot parse path ${path}`);
+      logger.error({ path }, 'Bitbucket: cannot parse path');
       throw new Error(`Bitbucket: cannot parse path ${path}`);
     }
 

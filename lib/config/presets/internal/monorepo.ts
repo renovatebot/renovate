@@ -53,6 +53,7 @@ const repoGroups = {
   baset: 'https://github.com/igmat/baset',
   brave: 'https://github.com/openzipkin/brave',
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
+  cake: 'https://github.com/cake-build/cake',
   capacitor: 'https://github.com/ionic-team/capacitor',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   chromely: 'https://github.com/chromelyapps/Chromely',
@@ -274,6 +275,7 @@ const orgGroups = {
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
+  octokit: 'https://github.com/octokit/',
   'semantic-release': 'https://github.com/semantic-release/',
   swc: 'https://github.com/swc-project/',
 };
