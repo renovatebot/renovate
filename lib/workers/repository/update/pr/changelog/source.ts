@@ -19,15 +19,15 @@ import type {
 
 export abstract class ChangeLogSource {
   private platform;
-  private tagsDatasource;
+  private datasource;
   private cacheNamespace: string;
 
   constructor(
     platform: 'bitbucket' | 'github' | 'gitlab',
-    tagsDatasource: 'bitbucket-tags' | 'github-tags' | 'gitlab-tags'
+    datasource: 'bitbucket-tags' | 'github-tags' | 'gitlab-tags'
   ) {
     this.platform = platform;
-    this.tagsDatasource = tagsDatasource;
+    this.datasource = datasource;
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -38,18 +38,20 @@ export abstract class ChangeLogSource {
     nextHead: string
   ): string;
 
-  abstract getAPIBaseUrl(sourceUrl: string): string;
+  abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
 
-  async getTags(endpoint: string, repository: string): Promise<string[]> {
+  async getTags(repository: string): Promise<string[]> {
     const releases = await getPkgReleases({
-      datasource: this.tagsDatasource,
+      datasource: this.datasource,
       packageName: repository,
     });
 
     const tags = releases?.releases;
 
     if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
-      logger.debug(`No Bitbucket tags found for repository:${repository}`);
+      logger.debug(
+        `No ${this.datasource} tags found for repository:${repository}`
+      );
 
       return [];
     }
@@ -70,15 +72,15 @@ export abstract class ChangeLogSource {
     const sourceDirectory = config.sourceDirectory!;
     const version = allVersioning.get(versioning);
 
-    if (this.shouldSkipSource(sourceUrl)) {
+    if (this.shouldSkipPackage(config)) {
       return null;
     }
 
-    const baseUrl = this.getBaseUrl(sourceUrl);
-    const apiBaseUrl = this.getAPIBaseUrl(sourceUrl);
-    const repository = this.getRepositoryFromUrl(sourceUrl);
+    const baseUrl = this.getBaseUrl(config);
+    const apiBaseUrl = this.getAPIBaseUrl(config);
+    const repository = this.getRepositoryFromUrl(config);
 
-    const tokenResponse = this.hasValidToken(sourceUrl, config);
+    const tokenResponse = this.hasValidToken(config);
     if (!tokenResponse.isValid) {
       if (tokenResponse.error) {
         return {
@@ -204,7 +206,7 @@ export abstract class ChangeLogSource {
     apiBaseUrl: string,
     repository: string
   ): Promise<string | null> {
-    const tags = await this.getTags(apiBaseUrl, repository);
+    const tags = await this.getTags(repository);
 
     const tagName = this.findTagOfRelease(
       version,
@@ -230,27 +232,27 @@ export abstract class ChangeLogSource {
     return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
   }
 
-  protected getBaseUrl(sourceUrl: string): string {
-    const parsedUrl = URL.parse(sourceUrl);
+  protected getBaseUrl(config: BranchUpgradeConfig): string {
+    const parsedUrl = URL.parse(config.sourceUrl!);
     const protocol = parsedUrl.protocol!;
     const host = parsedUrl.host!;
     return `${protocol}//${host}/`;
   }
 
-  private getRepositoryFromUrl(sourceUrl: string): string {
-    const parsedUrl = URL.parse(sourceUrl);
+  private getRepositoryFromUrl(config: BranchUpgradeConfig): string {
+    const parsedUrl = URL.parse(config.sourceUrl!);
     const pathname = parsedUrl.pathname!;
     return trimSlashes(pathname).replace(regEx(/\.git$/), '');
   }
 
-  protected hasValidToken(
-    sourceUrl: string,
-    config: BranchUpgradeConfig
-  ): { isValid: boolean; error?: ChangeLogError } {
+  protected hasValidToken(config: BranchUpgradeConfig): {
+    isValid: boolean;
+    error?: ChangeLogError;
+  } {
     return { isValid: true };
   }
 
-  protected shouldSkipSource(sourceUrl: string): boolean {
+  protected shouldSkipPackage(config: BranchUpgradeConfig): boolean {
     return false;
   }
 }

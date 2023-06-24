@@ -1,9 +1,8 @@
 import * as httpMock from '../../../../../../test/http-mock';
 import { partial } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
+import { GithubTagsDatasource } from '../../../../../modules/datasource/github-tags';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
-import * as githubGraphql from '../../../../../util/github/graphql';
-import type { GithubTagItem } from '../../../../../util/github/graphql/types';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getChangeLogJSON } from '.';
@@ -359,9 +358,13 @@ describe('workers/repository/update/pr/changelog/github', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
-      githubTagsMock.mockResolvedValue(
-        partial<GithubTagItem>([
+      const githubGetTags = jest.spyOn(
+        GithubTagsDatasource.prototype,
+        'getReleases'
+      );
+      // const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
+      githubGetTags.mockResolvedValue({
+        releases: [
           { version: 'v1.0.1' },
           { version: '1.0.1' },
           { version: 'correctPrefix/target@1.0.1' },
@@ -370,8 +373,8 @@ describe('workers/repository/update/pr/changelog/github', () => {
           { version: '1.0.2' },
           { version: 'correctPrefix/target-1.0.2' },
           { version: 'wrongPrefix/target@1.0.2' },
-        ])
-      );
+        ],
+      });
 
       const upgradeData = partial<BranchUpgradeConfig>({
         manager: 'some-manager',

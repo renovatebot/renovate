@@ -2,11 +2,9 @@ import URL from 'node:url';
 import { GlobalConfig } from '../../../../../config/global';
 import { logger } from '../../../../../logger';
 import type * as allVersioning from '../../../../../modules/versioning';
-import { cache } from '../../../../../util/cache/package/decorator';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
-import { getTags } from './github';
 import { ChangeLogSource } from './source';
 import type { ChangeLogError } from './types';
 export class GitHubChangeLogSource extends ChangeLogSource {
@@ -14,10 +12,10 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     super('github', 'github-tags');
   }
 
-  getAPIBaseUrl(sourceUrl: string): string {
-    return sourceUrl.startsWith('https://github.com/')
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return config.sourceUrl!.startsWith('https://github.com/')
       ? 'https://api.github.com/'
-      : this.getBaseUrl(sourceUrl) + 'api/v3/';
+      : this.getBaseUrl(config) + 'api/v3/';
   }
 
   getCompareURL(
@@ -29,17 +27,10 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
   }
 
-  @cache({
-    namespace: `changelog-github-release`,
-    key: (endpoint: string, repository: string) =>
-      `getTags-${endpoint}-${repository}`,
-  })
-  override getTags(endpoint: string, repository: string): Promise<string[]> {
-    return getTags(endpoint, repository);
-  }
-
-  protected override shouldSkipSource(sourceUrl: string): boolean {
-    if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
+  protected override shouldSkipPackage(config: BranchUpgradeConfig): boolean {
+    if (
+      config.sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped'
+    ) {
       logger.trace('No release notes for @types');
       return true;
     }
@@ -71,10 +62,11 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     return tagName;
   }
 
-  protected override hasValidToken(
-    sourceUrl: string,
-    config: BranchUpgradeConfig
-  ): { isValid: boolean; error?: ChangeLogError } {
+  protected override hasValidToken(config: BranchUpgradeConfig): {
+    isValid: boolean;
+    error?: ChangeLogError;
+  } {
+    const sourceUrl = config.sourceUrl!;
     const parsedUrl = URL.parse(sourceUrl);
     const host = parsedUrl.host!;
     const manager = config.manager;

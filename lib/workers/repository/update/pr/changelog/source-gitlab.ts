@@ -1,3 +1,4 @@
+import type { BranchUpgradeConfig } from '../../../../types';
 import { ChangeLogSource } from './source';
 
 export class GitLabChangeLogSource extends ChangeLogSource {
@@ -5,8 +6,8 @@ export class GitLabChangeLogSource extends ChangeLogSource {
     super('gitlab', 'gitlab-tags');
   }
 
-  getAPIBaseUrl(sourceUrl: string): string {
-    return this.getBaseUrl(sourceUrl) + 'api/v4/';
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return this.getBaseUrl(config) + 'api/v4/';
   }
 
   getCompareURL(
