@@ -315,12 +315,16 @@ export async function ensurePr(
     }
   }
 
-  const prBody = getPrBody(config, {
-    debugData: updatePrDebugData(
-      config.baseBranch,
-      existingPr?.bodyStruct?.debugData
-    ),
-  });
+  const prBody = getPrBody(
+    config,
+    {
+      debugData: updatePrDebugData(
+        config.baseBranch,
+        existingPr?.bodyStruct?.debugData
+      ),
+    },
+    config
+  );
 
   try {
     if (existingPr) {

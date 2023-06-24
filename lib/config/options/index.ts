@@ -344,6 +344,13 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
+    name: 'dockerCliOptions',
+    description:
+      'Pass CLI flags to `docker run` command when `binarySource=docker`.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'dockerImagePrefix',
     description:
       'Change this value to override the default Renovate Docker sidecar image name prefix.',
@@ -445,23 +452,11 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
-    name: 'forkOrgs',
+    name: 'forkOrg',
     description:
-      'The preferred organizations to create or find forked repositories, when in fork mode.',
+      'The preferred organization to create or find forked repositories, when in fork mode.',
     stage: 'repository',
-    type: 'array',
-    subType: 'string',
-    globalOnly: true,
-    supportedPlatforms: ['github'],
-    experimental: true,
-  },
-  {
-    name: 'forkCreate',
-    description:
-      'Decide if Renovate creates a fork at runtime when in fork mode.',
-    stage: 'repository',
-    type: 'boolean',
-    default: true,
+    type: 'string',
     globalOnly: true,
     supportedPlatforms: ['github'],
     experimental: true,
@@ -776,6 +771,16 @@ const options: RenovateOptions[] = [
     allowString: true,
     default: null,
     globalOnly: true,
+  },
+  {
+    name: 'autodiscoverTopics',
+    description: '',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
