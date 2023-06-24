@@ -1,3 +1,4 @@
+import { getTags } from './gitlab';
 import { ChangeLogSource } from './source';
 
 export class GitLabChangeLogSource extends ChangeLogSource {
@@ -15,6 +16,10 @@ export class GitLabChangeLogSource extends ChangeLogSource {
     prevHead: string,
     nextHead: string
   ): string {
-    return `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
+    return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
+  }
+
+  getTags(endpoint: string, repository: string): Promise<string[]> {
+    return getTags(endpoint, repository);
   }
 }

@@ -1,4 +1,5 @@
 import URL from 'node:url';
+import { getTags } from './bitbucket';
 import { ChangeLogSource } from './source';
 
 export class BitbucketChangeLogSource extends ChangeLogSource {
@@ -20,5 +21,9 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
     const protocol = parsedUrl.protocol!;
     const host = parsedUrl.host!;
     return `${protocol}//api.${host}/`;
+  }
+
+  getTags(endpoint: string, repository: string): Promise<string[]> {
+    return getTags(endpoint, repository);
   }
 }

@@ -8,7 +8,6 @@ import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
 import { trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
-import { getTags } from './bitbucket';
 import { slugifyUrl } from './common';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
@@ -23,6 +22,17 @@ export abstract class ChangeLogSource {
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
+  abstract getCompareURL(
+    baseUrl: string,
+    repository: string,
+    prevHead: string,
+    nextHead: string
+  ): string;
+
+  abstract getAPIBaseUrl(sourceUrl: string): string;
+
+  abstract getTags(endpoint: string, repository: string): Promise<string[]>;
+
   private getCachedTags(
     endpoint: string,
     repository: string
@@ -33,7 +43,7 @@ export abstract class ChangeLogSource {
     if (cachedResult !== undefined) {
       return cachedResult;
     }
-    const promisedRes = getTags(endpoint, repository);
+    const promisedRes = this.getTags(endpoint, repository);
     memCache.set(cacheKey, promisedRes);
     return promisedRes;
   }
@@ -51,11 +61,18 @@ export abstract class ChangeLogSource {
     const sourceDirectory = config.sourceDirectory!;
     const version = allVersioning.get(versioning);
 
+    if (this.shouldSkipSource(sourceUrl)) {
+      return null;
+    }
+
     const baseUrl = this.getBaseUrl(sourceUrl);
     const apiBaseUrl = this.getAPIBaseUrl(sourceUrl);
     const repository = this.getRepositoryFromUrl(sourceUrl);
 
-    this.validateToken(sourceUrl, config);
+    const isValid = this.validateToken(sourceUrl, config);
+    if (!is.nullOrUndefined(isValid)) {
+      return isValid;
+    }
 
     if (repository.split('/').length !== 2) {
       logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
@@ -153,13 +170,6 @@ export abstract class ChangeLogSource {
     return res;
   }
 
-  abstract getCompareURL(
-    baseUrl: string,
-    repository: string,
-    prevHead: string,
-    nextHead: string
-  ): string;
-
   protected findTagOfRelease(
     version: allVersioning.VersioningApi,
     packageName: string,
@@ -213,8 +223,6 @@ export abstract class ChangeLogSource {
     return `${protocol}//${host}/`;
   }
 
-  abstract getAPIBaseUrl(sourceUrl: string): string;
-
   private getRepositoryFromUrl(sourceUrl: string): string {
     const parsedUrl = URL.parse(sourceUrl);
     const pathname = parsedUrl.pathname!;
@@ -227,5 +235,9 @@ export abstract class ChangeLogSource {
     config: BranchUpgradeConfig
   ): ChangeLogResult | null {
     return null;
+  }
+
+  protected shouldSkipSource(sourceUrl: string): boolean {
+    return false;
   }
 }

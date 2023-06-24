@@ -5,9 +5,9 @@ import type * as allVersioning from '../../../../../modules/versioning';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { getTags } from './github';
 import { ChangeLogSource } from './source';
 import type { ChangeLogResult } from './types';
-
 export class GitHubChangeLogSource extends ChangeLogSource {
   constructor() {
     super('github');
@@ -25,7 +25,20 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     prevHead: string,
     nextHead: string
   ): string {
-    return `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
+    return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
+  }
+
+  getTags(endpoint: string, repository: string): Promise<string[]> {
+    return getTags(endpoint, repository);
+  }
+
+  protected override shouldSkipSource(sourceUrl: string): boolean {
+    if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
+      logger.trace('No release notes for @types');
+      return true;
+    }
+
+    return false;
   }
 
   // TODO - Should this be the common logic?
