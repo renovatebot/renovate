@@ -2,7 +2,7 @@ import { logger } from '../../../../../logger';
 import * as allVersioning from '../../../../../modules/versioning';
 import { detectPlatform } from '../../../../../util/common';
 import type { BranchUpgradeConfig } from '../../../../types';
-import * as sourceBitbucket from './source-bitbucket';
+import { BitbucketChangeLogSource } from './source-bitbucket';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';
 import type { ChangeLogResult } from './types';
@@ -31,6 +31,8 @@ export async function getChangeLogJSON(
 
     const platform = detectPlatform(sourceUrl);
 
+    const source = new BitbucketChangeLogSource();
+
     switch (platform) {
       case 'gitlab':
         res = await sourceGitlab.getChangeLogJSON(config);
@@ -39,7 +41,7 @@ export async function getChangeLogJSON(
         res = await sourceGithub.getChangeLogJSON(config);
         break;
       case 'bitbucket':
-        res = await sourceBitbucket.getChangeLogJSON(config);
+        res = await source.getChangeLogJSON(config);
         break;
 
       default:
