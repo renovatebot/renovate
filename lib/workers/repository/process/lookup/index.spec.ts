@@ -1011,7 +1011,11 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = GithubTagsDatasource.id;
       config.versioning = nodeVersioningId;
       getGithubTags.mockResolvedValueOnce({
-        releases: [{ version: '20.3.0' }, { version: '20.3.1' }],
+        releases: [
+          { version: '20.3.0' },
+          { version: '20.3.1' },
+          { version: '21.0.0' },
+        ],
       });
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '20.3.1', updateType: 'patch' },
