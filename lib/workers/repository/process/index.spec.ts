@@ -71,7 +71,9 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = jest.fn().mockResolvedValue({});
+      platform.getJsonFile = jest
+        .fn()
+        .mockResolvedValue({ extends: [':approveMajorUpdates'] });
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       getCache().configFileName = 'renovate.json';
