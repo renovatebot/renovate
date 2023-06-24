@@ -15,7 +15,7 @@ export class PackageNameMatcher extends Matcher {
       return false;
     }
 
-    if (matchPackageNames.includes(packageName || depName)) {
+    if (is.string(packageName) && matchPackageNames.includes(packageName)) {
       return true;
     }
 

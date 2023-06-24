@@ -32,7 +32,8 @@ export class PackagePatternsMatcher extends Matcher {
     }
 
     if (
-      matchPatternsAgainstName(matchPackagePatterns, packageName || depName)
+      is.string(packageName) &&
+      matchPatternsAgainstName(matchPackagePatterns, packageName)
     ) {
       return true;
     }
