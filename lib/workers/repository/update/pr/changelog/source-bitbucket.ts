@@ -13,7 +13,7 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
     prevHead: string,
     nextHead: string
   ): string {
-    return `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
+    return `${baseUrl}${repository}/branches/compare/${nextHead}%0D${prevHead}`;
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
