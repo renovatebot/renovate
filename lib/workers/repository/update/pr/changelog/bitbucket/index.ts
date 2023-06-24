@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import { BitbucketTagsDatasource } from '../../../../../../modules/datasource/bitbucket-tags';
 import type {
   PagedResult,
   SourceResults,
@@ -17,7 +16,6 @@ import type {
 
 export const id = 'bitbucket-changelog';
 const bitbucketHttp = new BitbucketHttp(id);
-const bitbucketTags = new BitbucketTagsDatasource();
 
 export async function getReleaseNotesMd(
   repository: string,
@@ -68,35 +66,6 @@ export async function getReleaseNotesMd(
 
   const changelogMd = `${fileRes.body}\n#\n##`;
   return { changelogFile: changelogFile.path, changelogMd };
-}
-
-export async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
-  logger.trace('bitbucket.getTags()');
-  try {
-    const tags = (
-      await bitbucketTags.getReleases({
-        packageName: repository,
-      })
-    )?.releases;
-
-    if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
-      logger.debug(`No Bitbucket tags found for repository:${repository}`);
-
-      return [];
-    }
-
-    return tags.map(({ version }) => version);
-  } catch (err) {
-    logger.debug(
-      { sourceRepo: repository, err },
-      'Failed to fetch Bitbucket tags'
-    );
-
-    return [];
-  }
 }
 
 export function getReleaseList(

@@ -1,6 +1,7 @@
 import URL from 'node:url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
+import { getPkgReleases } from '../../../../../modules/datasource';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as packageCache from '../../../../../util/cache/package';
@@ -17,11 +18,16 @@ import type {
 } from './types';
 
 export abstract class ChangeLogSource {
-  private platform: 'bitbucket' | 'github' | 'gitlab';
+  private platform;
+  private tagsDatasource;
   private cacheNamespace: string;
 
-  constructor(platform: 'bitbucket' | 'github' | 'gitlab') {
+  constructor(
+    platform: 'bitbucket' | 'github' | 'gitlab',
+    tagsDatasource: 'bitbucket-tags' | 'github-tags' | 'gitlab-tags'
+  ) {
     this.platform = platform;
+    this.tagsDatasource = tagsDatasource;
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -34,7 +40,22 @@ export abstract class ChangeLogSource {
 
   abstract getAPIBaseUrl(sourceUrl: string): string;
 
-  abstract getTags(endpoint: string, repository: string): Promise<string[]>;
+  async getTags(repository: string): Promise<string[]> {
+    const releases = await getPkgReleases({
+      datasource: this.tagsDatasource,
+      packageName: repository,
+    });
+
+    const tags = releases?.releases;
+
+    if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
+      logger.debug(`No Bitbucket tags found for repository:${repository}`);
+
+      return [];
+    }
+
+    return tags.map(({ version }) => version);
+  }
 
   public async getChangeLogJSON(
     config: BranchUpgradeConfig
@@ -183,7 +204,7 @@ export abstract class ChangeLogSource {
     apiBaseUrl: string,
     repository: string
   ): Promise<string | null> {
-    const tags = await this.getTags(apiBaseUrl, repository);
+    const tags = await this.getTags(repository);
 
     const tagName = this.findTagOfRelease(
       version,

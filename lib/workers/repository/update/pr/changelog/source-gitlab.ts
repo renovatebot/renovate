@@ -1,10 +1,8 @@
-import { cache } from '../../../../../util/cache/package/decorator';
-import { getTags } from './gitlab';
 import { ChangeLogSource } from './source';
 
 export class GitLabChangeLogSource extends ChangeLogSource {
   constructor() {
-    super('gitlab');
+    super('gitlab', 'gitlab-tags');
   }
 
   getAPIBaseUrl(sourceUrl: string): string {
@@ -18,14 +16,5 @@ export class GitLabChangeLogSource extends ChangeLogSource {
     nextHead: string
   ): string {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
-  }
-
-  @cache({
-    namespace: `changelog-gitlab-release`,
-    key: (endpoint: string, repository: string) =>
-      `getTags-${endpoint}-${repository}`,
-  })
-  getTags(endpoint: string, repository: string): Promise<string[]> {
-    return getTags(endpoint, repository);
   }
 }
