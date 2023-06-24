@@ -2,6 +2,7 @@ import URL from 'node:url';
 import { GlobalConfig } from '../../../../../config/global';
 import { logger } from '../../../../../logger';
 import type * as allVersioning from '../../../../../modules/versioning';
+import { cache } from '../../../../../util/cache/package/decorator';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -28,6 +29,11 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
   }
 
+  @cache({
+    namespace: `changelog-github-release`,
+    key: (endpoint: string, repository: string) =>
+      `getTags-${endpoint}-${repository}`,
+  })
   getTags(endpoint: string, repository: string): Promise<string[]> {
     return getTags(endpoint, repository);
   }

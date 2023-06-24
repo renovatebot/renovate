@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
-import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
 import { trimSlashes } from '../../../../../util/url';
@@ -36,21 +35,6 @@ export abstract class ChangeLogSource {
   abstract getAPIBaseUrl(sourceUrl: string): string;
 
   abstract getTags(endpoint: string, repository: string): Promise<string[]>;
-
-  private getCachedTags(
-    endpoint: string,
-    repository: string
-  ): Promise<string[]> {
-    const cacheKey = `getTags-${endpoint}-${repository}`;
-    const cachedResult = memCache.get<Promise<string[]>>(cacheKey);
-    // istanbul ignore if
-    if (cachedResult !== undefined) {
-      return cachedResult;
-    }
-    const promisedRes = this.getTags(endpoint, repository);
-    memCache.set(cacheKey, promisedRes);
-    return promisedRes;
-  }
 
   public async getChangeLogJSON(
     config: BranchUpgradeConfig
@@ -199,7 +183,7 @@ export abstract class ChangeLogSource {
     apiBaseUrl: string,
     repository: string
   ): Promise<string | null> {
-    const tags = await this.getCachedTags(apiBaseUrl, repository);
+    const tags = await this.getTags(apiBaseUrl, repository);
 
     const tagName = this.findTagOfRelease(
       version,
