@@ -84,7 +84,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('works without Github', async () => {
-      githubTagsMock.mockRejectedValueOnce(new Error('Unknown'));
+      githubTagsMock.mockRejectedValue(new Error('Unknown'));
       // 4 versions, so 4 calls without cache
       githubReleasesMock
         .mockRejectedValueOnce(new Error('Unknown'))
@@ -156,7 +156,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('filters unnecessary warns', async () => {
-      githubTagsMock.mockRejectedValueOnce(new Error('Unknown Github Repo'));
+      githubTagsMock.mockRejectedValue(new Error('Unknown Github Repo'));
       githubReleasesMock.mockRejectedValueOnce(
         new Error('Unknown Github Repo')
       );
@@ -261,8 +261,8 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports github enterprise and github.com changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock.scope(githubApiHost).persist().get(/.*/).reply(200, []);
       hostRules.add({
         hostType: 'github',
@@ -295,8 +295,8 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock
         .scope('https://github-enterprise.example.com')
         .persist()
@@ -335,8 +335,8 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports github.com and github enterprise changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock
         .scope('https://github-enterprise.example.com')
         .persist()
