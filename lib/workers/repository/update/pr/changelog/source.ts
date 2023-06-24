@@ -11,7 +11,11 @@ import type { BranchUpgradeConfig } from '../../../../types';
 import { slugifyUrl } from './common';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
-import type { ChangeLogRelease, ChangeLogResult } from './types';
+import type {
+  ChangeLogError,
+  ChangeLogRelease,
+  ChangeLogResult,
+} from './types';
 
 export abstract class ChangeLogSource {
   private platform: 'bitbucket' | 'github' | 'gitlab';
@@ -69,9 +73,14 @@ export abstract class ChangeLogSource {
     const apiBaseUrl = this.getAPIBaseUrl(sourceUrl);
     const repository = this.getRepositoryFromUrl(sourceUrl);
 
-    const isValid = this.validateToken(sourceUrl, config);
-    if (!is.nullOrUndefined(isValid)) {
-      return isValid;
+    const tokenResponse = this.hasValidToken(sourceUrl, config);
+    if (!tokenResponse.isValid) {
+      if (tokenResponse.error) {
+        return {
+          error: tokenResponse.error,
+        };
+      }
+      return null;
     }
 
     if (repository.split('/').length !== 2) {
@@ -229,12 +238,11 @@ export abstract class ChangeLogSource {
     return trimSlashes(pathname).replace(regEx(/\.git$/), '');
   }
 
-  // TODO Fix this
-  protected validateToken(
+  protected hasValidToken(
     sourceUrl: string,
     config: BranchUpgradeConfig
-  ): ChangeLogResult | null {
-    return null;
+  ): { isValid: boolean; error?: ChangeLogError } {
+    return { isValid: true };
   }
 
   protected shouldSkipSource(sourceUrl: string): boolean {

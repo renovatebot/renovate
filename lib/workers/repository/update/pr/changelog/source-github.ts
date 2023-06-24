@@ -7,7 +7,7 @@ import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './github';
 import { ChangeLogSource } from './source';
-import type { ChangeLogResult } from './types';
+import type { ChangeLogError } from './types';
 export class GitHubChangeLogSource extends ChangeLogSource {
   constructor() {
     super('github');
@@ -41,7 +41,6 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     return false;
   }
 
-  // TODO - Should this be the common logic?
   protected override findTagOfRelease(
     version: allVersioning.VersioningApi,
     packageName: string,
@@ -66,10 +65,10 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     return tagName;
   }
 
-  protected override validateToken(
+  protected override hasValidToken(
     sourceUrl: string,
     config: BranchUpgradeConfig
-  ): ChangeLogResult | null {
+  ): { isValid: boolean; error?: ChangeLogError } {
     const parsedUrl = URL.parse(sourceUrl);
     const host = parsedUrl.host!;
     const manager = config.manager;
@@ -90,21 +89,20 @@ export class GitHubChangeLogSource extends ChangeLogSource {
             { manager, packageName, sourceUrl },
             'GitHub token warning has been suppressed. Skipping release notes retrieval'
           );
-          return null;
+          return { isValid: false };
         }
         logger.warn(
           { manager, packageName, sourceUrl },
           'No github.com token has been configured. Skipping release notes retrieval'
         );
-        return { error: 'MissingGithubToken' };
+        return { isValid: false, error: 'MissingGithubToken' };
       }
       logger.debug(
         { manager, packageName, sourceUrl },
         'Repository URL does not match any known github hosts - skipping changelog retrieval'
       );
-      return null;
+      return { isValid: false };
     }
-
-    return null;
+    return { isValid: true };
   }
 }
