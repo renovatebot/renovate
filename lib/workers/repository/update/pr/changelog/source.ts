@@ -40,7 +40,7 @@ export abstract class ChangeLogSource {
 
   abstract getAPIBaseUrl(sourceUrl: string): string;
 
-  async getTags(repository: string): Promise<string[]> {
+  async getTags(endpoint: string, repository: string): Promise<string[]> {
     const releases = await getPkgReleases({
       datasource: this.tagsDatasource,
       packageName: repository,
@@ -204,7 +204,7 @@ export abstract class ChangeLogSource {
     apiBaseUrl: string,
     repository: string
   ): Promise<string | null> {
-    const tags = await this.getTags(repository);
+    const tags = await this.getTags(apiBaseUrl, repository);
 
     const tagName = this.findTagOfRelease(
       version,

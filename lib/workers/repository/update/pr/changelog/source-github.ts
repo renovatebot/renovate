@@ -2,9 +2,11 @@ import URL from 'node:url';
 import { GlobalConfig } from '../../../../../config/global';
 import { logger } from '../../../../../logger';
 import type * as allVersioning from '../../../../../modules/versioning';
+import { cache } from '../../../../../util/cache/package/decorator';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { getTags } from './github';
 import { ChangeLogSource } from './source';
 import type { ChangeLogError } from './types';
 export class GitHubChangeLogSource extends ChangeLogSource {
@@ -25,6 +27,15 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     nextHead: string
   ): string {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
+  }
+
+  @cache({
+    namespace: `changelog-github-release`,
+    key: (endpoint: string, repository: string) =>
+      `getTags-${endpoint}-${repository}`,
+  })
+  override getTags(endpoint: string, repository: string): Promise<string[]> {
+    return getTags(endpoint, repository);
   }
 
   protected override shouldSkipSource(sourceUrl: string): boolean {
