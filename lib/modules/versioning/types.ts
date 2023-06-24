@@ -106,6 +106,11 @@ export interface VersioningApi {
    * @param superRange - the dom range
    */
   subset?(subRange: string, superRange: string): boolean | undefined;
+
+  /**
+   * Return whether unstable-to-unstable upgrades within the same major version are allowed.
+   */
+  allowUnstableMajorUpgrades?: boolean;
 }
 
 export interface VersioningApiConstructor {
