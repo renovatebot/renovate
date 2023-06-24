@@ -14,7 +14,7 @@ import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import type { ChangeLogRelease, ChangeLogResult } from './types';
 
-export class ChangeLogSource {
+export abstract class ChangeLogSource {
   private source: 'bitbucket' | 'github' | 'gitlab';
   private cacheNamespace: string;
 
@@ -41,25 +41,21 @@ export class ChangeLogSource {
   public async getChangeLogJSON(
     config: BranchUpgradeConfig
   ): Promise<ChangeLogResult | null> {
+    logger.trace(`getChangeLogJSON for ${this.source}`);
+
     const versioning = config.versioning!;
     const currentVersion = config.currentVersion!;
     const newVersion = config.newVersion!;
     const sourceUrl = config.sourceUrl!;
     const packageName = config.packageName!;
     const sourceDirectory = config.sourceDirectory!;
-
-    logger.trace(`getChangeLogJSON for ${this.source}`);
     const version = allVersioning.get(versioning);
 
-    const parsedUrl = URL.parse(sourceUrl);
-    const protocol = parsedUrl.protocol!;
-    const host = parsedUrl.host!;
-    const pathname = parsedUrl.pathname!;
+    const baseUrl = this.getBaseUrl(sourceUrl);
+    const apiBaseUrl = this.getAPIBaseUrl(sourceUrl);
+    const repository = this.getRepositoryFromUrl(sourceUrl);
 
-    logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
-    const baseUrl = `${protocol}//${host}/`;
-    const apiBaseUrl = `${protocol}//api.${host}/`;
-    const repository = trimSlashes(pathname).replace(regEx(/\.git$/), '');
+    this.validateToken(sourceUrl, config);
 
     if (repository.split('/').length !== 2) {
       logger.debug(`Invalid ${this.source} URL found: ${sourceUrl}`);
@@ -157,16 +153,14 @@ export class ChangeLogSource {
     return res;
   }
 
-  protected getCompareURL(
+  abstract getCompareURL(
     baseUrl: string,
     repository: string,
     prevHead: string,
     nextHead: string
-  ): string {
-    return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
-  }
+  ): string;
 
-  private findTagOfRelease(
+  protected findTagOfRelease(
     version: allVersioning.VersioningApi,
     packageName: string,
     depNewVersion: string,
@@ -210,5 +204,28 @@ export class ChangeLogSource {
     next: string
   ): string {
     return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
+  }
+
+  protected getBaseUrl(sourceUrl: string): string {
+    const parsedUrl = URL.parse(sourceUrl);
+    const protocol = parsedUrl.protocol!;
+    const host = parsedUrl.host!;
+    return `${protocol}//${host}/`;
+  }
+
+  abstract getAPIBaseUrl(sourceUrl: string): string;
+
+  private getRepositoryFromUrl(sourceUrl: string): string {
+    const parsedUrl = URL.parse(sourceUrl);
+    const pathname = parsedUrl.pathname!;
+    return trimSlashes(pathname).replace(regEx(/\.git$/), '');
+  }
+
+  // TODO Fix this
+  protected validateToken(
+    sourceUrl: string,
+    config: BranchUpgradeConfig
+  ): ChangeLogResult | null {
+    return null;
   }
 }
