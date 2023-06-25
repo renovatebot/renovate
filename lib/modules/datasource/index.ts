@@ -7,6 +7,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
