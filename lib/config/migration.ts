@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger';
-import { clone } from '../util/clone';
 import { regEx } from '../util/regex';
 import { MigrationsService } from './migrations';
 import { getOptions } from './options';
@@ -30,7 +29,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       });
     }
     const newConfig = MigrationsService.run(config);
-    const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
+    const migratedConfig = structuredClone(newConfig) as MigratedRenovateConfig;
 
     for (const [key, val] of Object.entries(newConfig)) {
       if (is.string(val) && val.includes('{{baseDir}}')) {

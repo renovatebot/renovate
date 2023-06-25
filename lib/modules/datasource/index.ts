@@ -5,7 +5,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
@@ -353,9 +352,9 @@ export async function getPkgReleases(
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
   }
-  let res: ReleaseResult;
+  let res: ReleaseResult | null = null;
   try {
-    res = clone(
+    res = structuredClone(
       await getRawReleases({
         ...config,
         packageName,

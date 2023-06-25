@@ -7,7 +7,6 @@ import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
-import { clone } from '../clone';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -50,8 +49,11 @@ function copyResponse<T extends Buffer | string | any>(
   return deep
     ? {
         statusCode,
-        body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
-        headers: clone(headers),
+        body:
+          body instanceof Buffer
+            ? (body.slice() as T)
+            : structuredClone<T>(body),
+        headers: structuredClone(headers),
       }
     : {
         statusCode,
@@ -287,7 +289,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     const etagCacheHit =
       httpOptions.etagCache && res.statusCode === 304
-        ? clone(httpOptions.etagCache.data)
+        ? structuredClone(httpOptions.etagCache.data)
         : null;
 
     if (!schema) {
