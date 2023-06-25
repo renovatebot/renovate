@@ -1,7 +1,6 @@
 import * as httpMock from '../../../../../../test/http-mock';
 import { partial } from '../../../../../../test/util';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getChangeLogJSON } from '.';
 
