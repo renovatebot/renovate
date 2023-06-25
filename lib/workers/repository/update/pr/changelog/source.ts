@@ -40,17 +40,19 @@ export abstract class ChangeLogSource {
 
   abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
 
-  async getTags(repository: string): Promise<string[]> {
-    const releases = await getPkgReleases({
-      datasource: this.datasource,
-      packageName: repository,
-    });
-
-    const tags = releases?.releases;
+  async getAllTags(endpoint: string, repository: string): Promise<string[]> {
+    const tags = (
+      await getPkgReleases({
+        datasource: this.datasource,
+        packageName: repository,
+        versioning:
+          'regex:(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?',
+      })
+    )?.releases;
 
     if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
       logger.debug(
-        `No ${this.datasource} tags found for repository:${repository}`
+        `No ${this.datasource} tags found for repository: ${repository}`
       );
 
       return [];
@@ -186,16 +188,27 @@ export abstract class ChangeLogSource {
     return res;
   }
 
-  protected findTagOfRelease(
+  private findTagOfRelease(
     version: allVersioning.VersioningApi,
     packageName: string,
     depNewVersion: string,
     tags: string[]
   ): string | undefined {
     const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
-    const tagName = tags
-      .filter((tag) => version.isVersion(tag.replace(regex, '')))
-      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+    const exactReleaseRegex = regEx(`${packageName}[@\\-_]v?${depNewVersion}`);
+    const exactTagsList = tags.filter((tag) => {
+      return exactReleaseRegex.test(tag);
+    });
+    let tagName: string | undefined;
+    if (exactTagsList.length) {
+      tagName = exactTagsList
+        .filter((tag) => version.isVersion(tag.replace(regex, '')))
+        .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+    } else {
+      tagName = tags
+        .filter((tag) => version.isVersion(tag.replace(regex, '')))
+        .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+    }
     return tagName;
   }
 
@@ -206,7 +219,7 @@ export abstract class ChangeLogSource {
     apiBaseUrl: string,
     repository: string
   ): Promise<string | null> {
-    const tags = await this.getTags(repository);
+    const tags = await this.getAllTags(apiBaseUrl, repository);
 
     const tagName = this.findTagOfRelease(
       version,
