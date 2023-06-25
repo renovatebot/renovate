@@ -1,7 +1,7 @@
 import { regEx } from '../../../util/regex';
 
 export const systemManifestFileNameRegex =
-  '(^|/)flux-system/(?:.+/)?gotk-components\\.ya?ml$';
+  '^(?:.+/)?gotk-components\\.ya?ml$';
 
 export const systemManifestHeaderRegex =
   '#\\s*Flux\\s+Version:\\s*(\\S+)(?:\\s*#\\s*Components:\\s*([A-Za-z,-]+))?'

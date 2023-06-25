@@ -57,7 +57,7 @@ describe('modules/manager/flux/extract', () => {
     it('extracts version and components from system manifests', () => {
       const result = extractPackageFile(
         Fixtures.get('flux-system/gotk-components.yaml'),
-        'clusters/my-cluster/flux-system/gotk-components.yaml'
+        'clusters/my-cluster/gotk-components.yaml'
       );
       expect(result).toEqual({
         deps: [
@@ -77,8 +77,9 @@ describe('modules/manager/flux/extract', () => {
     it('considers components optional in system manifests', () => {
       const result = extractPackageFile(
         `# Flux Version: v0.27.0`,
-        'clusters/my-cluster/flux-system/gotk-components.yaml'
+        'clusters/my-cluster/gotk-components.yaml'
       );
+      expect(result).not.toBeNull()
       expect(result?.deps[0].managerData?.components).toBeUndefined();
     });
 
