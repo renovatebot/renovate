@@ -509,6 +509,7 @@ export async function updatePr({
   prBody: body,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -522,11 +523,19 @@ export async function updatePr({
   }
 
   if (state === 'open') {
-    await azureApiGit.updatePullRequest(
-      { status: PullRequestStatus.Active },
-      config.repoId,
-      prNo
-    );
+    try {
+      await azureApiGit.updatePullRequest(
+        {
+          status: PullRequestStatus.Active,
+          targetRefName: getNewBranchName(targetBranch),
+        },
+        config.repoId,
+        prNo
+      );
+    } catch (err) {
+      // eslint-disable-next-line
+      console.log(err);
+    }
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
