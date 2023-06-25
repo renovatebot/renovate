@@ -981,8 +981,10 @@ describe('modules/manager/gradle/parser', () => {
             const val core = "androidx.test:core:\${Deps.Test.version}"
 
             object Espresso {
-              private const val version = "3.3.0-rc01"
-              const val espressoCore = "androidx.test.espresso:espresso-core:$version"
+              object Release {
+                private const val version = "3.3.0-rc01"
+                const val espressoCore = "androidx.test.espresso:espresso-core:$version"
+              }
             }
 
             object Androidx {
@@ -1003,8 +1005,8 @@ describe('modules/manager/gradle/parser', () => {
             key: 'Deps.Test.version',
             value: '1.3.0-rc01',
           },
-          'Deps.Test.Espresso.version': {
-            key: 'Deps.Test.Espresso.version',
+          'Deps.Test.Espresso.Release.version': {
+            key: 'Deps.Test.Espresso.Release.version',
             value: '3.3.0-rc01',
           },
         },
@@ -1022,7 +1024,7 @@ describe('modules/manager/gradle/parser', () => {
           {
             depName: 'androidx.test.espresso:espresso-core',
             currentValue: '3.3.0-rc01',
-            groupName: 'Deps.Test.Espresso.version',
+            groupName: 'Deps.Test.Espresso.Release.version',
           },
           {
             depName: 'androidx.test:core-ktx',
