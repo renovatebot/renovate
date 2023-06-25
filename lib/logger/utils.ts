@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { clone } from '../util/clone';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -132,7 +133,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
-      headers: structuredClone(err.options.headers),
+      headers: clone(err.options.headers),
       url: err.options.url?.toString(),
       hostType: err.options.context.hostType,
     };
@@ -150,10 +151,8 @@ export default function prepareError(err: Error): Record<string, unknown> {
         statusMessage: err.response?.statusMessage,
         body:
           // istanbul ignore if: not easily testable
-          err.name === 'TimeoutError'
-            ? undefined
-            : structuredClone(err.response.body),
-        headers: structuredClone(err.response.headers),
+          err.name === 'TimeoutError' ? undefined : clone(err.response.body),
+        headers: clone(err.response.headers),
         httpVersion: err.response.httpVersion,
         retryCount: err.response.retryCount,
       };
