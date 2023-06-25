@@ -7,6 +7,13 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
     super('bitbucket', 'bitbucket-tags');
   }
 
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    const parsedUrl = URL.parse(config.sourceUrl!);
+    const protocol = parsedUrl.protocol!;
+    const host = parsedUrl.host!;
+    return `${protocol}//api.${host}/`;
+  }
+
   getCompareURL(
     baseUrl: string,
     repository: string,
@@ -14,12 +21,5 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
     nextHead: string
   ): string {
     return `${baseUrl}${repository}/branches/compare/${nextHead}%0D${prevHead}`;
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    const parsedUrl = URL.parse(config.sourceUrl!);
-    const protocol = parsedUrl.protocol!;
-    const host = parsedUrl.host!;
-    return `${protocol}//api.${host}/`;
   }
 }
