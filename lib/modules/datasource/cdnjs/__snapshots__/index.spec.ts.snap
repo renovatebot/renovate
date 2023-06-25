@@ -6,6 +6,7 @@ exports[`modules/datasource/cdnjs/index getReleases filters releases by asset pr
   "registryUrl": "https://api.cdnjs.com/",
   "releases": [
     {
+      "newDigest": undefined,
       "version": "0.7.5",
     },
   ],
