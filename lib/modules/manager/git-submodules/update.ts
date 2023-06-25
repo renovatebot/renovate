@@ -8,7 +8,7 @@ export default async function updateDependency({
   fileContent,
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const git = Git(localDir);
   const submoduleGit = Git(upath.join(localDir, upgrade.depName));
 
