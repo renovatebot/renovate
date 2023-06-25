@@ -395,12 +395,8 @@ export async function getPkgReleases(
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   // Filter versions for uniqueness
-  res.releases = res.releases.filter(
-    (filterRelease, filterIndex) =>
-      res.releases.findIndex(
-        (findRelease) => findRelease.version === filterRelease.version
-      ) === filterIndex
-  );
+  res.releases = uniq(res.releases, (x, y) => x.version === y.version);
+
   if (config?.constraintsFiltering === 'strict') {
     // Filter releases for compatibility
     for (const [constraintName, constraintValue] of Object.entries(
