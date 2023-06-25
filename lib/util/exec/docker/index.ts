@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import { getPkgReleases } from '../../../modules/datasource';
 import * as versioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
+import { uniq } from '../../uniq';
 import { ensureTrailingSlash } from '../../url';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
@@ -56,13 +57,6 @@ function volumesEql(x: VolumesPair, y: VolumesPair): boolean {
   const [xFrom, xTo] = x;
   const [yFrom, yTo] = y;
   return xFrom === yFrom && xTo === yTo;
-}
-
-function uniq<T = unknown>(
-  array: T[],
-  eql = (x: T, y: T): boolean => x === y
-): T[] {
-  return array.filter((x, idx, arr) => arr.findIndex((y) => eql(x, y)) === idx);
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
