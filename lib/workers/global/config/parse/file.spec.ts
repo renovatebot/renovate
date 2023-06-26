@@ -35,6 +35,7 @@ describe('workers/global/config/parse/file', () => {
         'custom js config file exporting an async function',
         'config-async-function.js',
       ],
+      ['.renovaterc', '.renovaterc'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
     ])('parses %s', async (fileType, filePath) => {
