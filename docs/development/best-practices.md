@@ -265,11 +265,11 @@ Use `UTC` to be time zone independent.
 :
 
 ```ts
-    if (end) {
-      const now = DateTime.now().toUTC();
-      const eol = DateTime.fromISO(end, { zone: 'utc' });
-      return eol < now;
-    }
+if (end) {
+  const now = DateTime.now().toUTC();
+  const eol = DateTime.fromISO(end, { zone: 'utc' });
+  return eol < now;
+}
 ```
 
 ## Unit testing
