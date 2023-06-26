@@ -1,11 +1,11 @@
-import _simpleGit, { Response, SimpleGit } from 'simple-git';
+import { SimpleGit, simpleGit } from 'simple-git';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
-import { GitTagsDatasource } from '.';
 import { add, clear } from '../../../util/host-rules';
+import { GitTagsDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
+const simpleGitFactoryMock = simpleGit as jest.Mock;
 
 const packageName = 'https://github.com/example/example.git';
 
@@ -16,6 +16,7 @@ const datasourceInstance = new GitTagsDatasource();
 
 describe('modules/datasource/git-tags/index', () => {
   let gitMock: any;
+
   beforeEach(() => {
     // clear host rules
     clear();
@@ -29,7 +30,7 @@ describe('modules/datasource/git-tags/index', () => {
       listRemote: jest.fn(),
     };
 
-    simpleGit.mockReturnValue(gitMock);
+    simpleGitFactoryMock.mockReturnValue(gitMock);
     gitMock.env.mockImplementation(() => gitMock as unknown as SimpleGit);
   });
 
