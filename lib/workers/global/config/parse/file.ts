@@ -9,16 +9,15 @@ import { logger } from '../../../../logger';
 import { readSystemFile } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
+  if (file === '.renovaterc') {
+    return JSON.parse(await readSystemFile(file, 'utf8'));
+  }
   switch (upath.extname(file)) {
     case '.yaml':
     case '.yml':
       return load(await readSystemFile(file, 'utf8'), {
         json: true,
       }) as RenovateConfig;
-    case '':
-    // .renovaterc should be parsed as JSON
-    // RENOVATE_CONFIG_FILE without file extension should be parsed as JSON
-    /* falls through */
     case '.json':
       return JSON.parse(await readSystemFile(file, 'utf8'));
     case '.json5':
