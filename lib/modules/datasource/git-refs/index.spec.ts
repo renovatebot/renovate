@@ -153,5 +153,30 @@ describe('modules/datasource/git-refs/index', () => {
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
     });
+
+    it('calls simpleGit with git envs if hostrules exist for datasource type git-refs', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      add({
+        hostType: 'git-refs',
+        matchHost: 'git.example.com',
+        token: 'token123',
+      });
+
+      const digest = await new GitRefsDatasource().getDigest(
+        { packageName: 'another tag to look up' },
+        undefined
+      );
+      expect(digest).toMatchSnapshot();
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:token123@git.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@git.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://git.example.com/',
+      });
+    });
   });
 });
