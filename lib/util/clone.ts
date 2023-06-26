@@ -9,13 +9,13 @@ import { quickStringify } from './stringify';
 export function clone<T = unknown>(input: T): T {
   try {
     return klona(input);
-  } catch (error) {
+  } catch (err) {
     const str = quickStringify(input);
     if (str) {
       return JSON.parse(str);
     }
 
     // istanbul ignore next: not easily testable
-    throw error;
+    throw err;
   }
 }
