@@ -45,6 +45,7 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
+import { getComments } from './comments';
 
 export const id = 'bitbucket';
 
@@ -309,6 +310,33 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
+
+  /**
+   * Bitbucket doesn't support renaming or reopening declined PRs.
+   * Instead, we have to use comment-driven signals.
+   */
+  if (pr && pr.state === 'closed') {
+    const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
+
+    const reviewers = await effectiveDefaultReviewers(config.repository);
+    const reviewersUuid = reviewers.map((reviewer) => reviewer.uuid);
+
+    const comments = await getComments(config, pr.number);
+
+    const authorizedReopenComments = comments.filter(
+      (comment) =>
+        reviewersUuid.includes(comment.user.uuid) &&
+        comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD)
+    );
+
+    if (is.nonEmptyArray(authorizedReopenComments)) {
+      logger.debug(
+        `Found 'reopen' comment from authorized repository member. Renovate will reopen PR ${pr.number} as a new PR`
+      );
+      return null;
+    }
+  }
+
   return pr ?? null;
 }
 
@@ -825,18 +853,7 @@ export async function createPr({
   let reviewers: Account[] = [];
 
   if (platformOptions?.bbUseDefaultReviewers) {
-    const reviewersResponse = (
-      await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
-        `/2.0/repositories/${config.repository}/effective-default-reviewers`,
-        {
-          paginate: true,
-        }
-      )
-    ).body;
-    reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
-      uuid: reviewer.user.uuid,
-      display_name: reviewer.user.display_name,
-    }));
+    reviewers = await effectiveDefaultReviewers(config.repository);
   }
 
   const body = {
@@ -898,6 +915,26 @@ export async function createPr({
       return pr;
     }
   }
+}
+
+async function effectiveDefaultReviewers(
+  repository: string
+): Promise<Account[]> {
+  const reviewersResponse = (
+    await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
+      `/2.0/repositories/${repository}/effective-default-reviewers`,
+      {
+        paginate: true,
+      }
+    )
+  ).body;
+  const reviewers = reviewersResponse.values.map(
+    (reviewer: EffectiveReviewer) => ({
+      uuid: reviewer.user.uuid,
+      display_name: reviewer.user.display_name,
+    })
+  );
+  return reviewers;
 }
 
 export async function updatePr({

@@ -1,13 +1,14 @@
 import { logger } from '../../../logger';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
-import type { Config, PagedResult } from './types';
+import type { Account, Config, PagedResult } from './types';
 
 const bitbucketHttp = new BitbucketHttp();
 
 interface Comment {
   content: { raw: string };
   id: number;
+  user: Account;
 }
 
 export type CommentsConfig = Pick<Config, 'repository'>;
@@ -16,7 +17,7 @@ interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
   config: CommentsConfig;
 }
 
-async function getComments(
+export async function getComments(
   config: CommentsConfig,
   prNo: number
 ): Promise<Comment[]> {
@@ -157,8 +158,13 @@ export async function ensureCommentRemoval(
 }
 
 function sanitizeCommentBody(body: string): string {
-  return body.replace(
-    'checking the rebase/retry box above',
-    'renaming this PR to start with "rebase!"'
-  );
+  return body
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming this PR to start with "rebase!"'
+    )
+    .replace(
+      'rename this PR to get a fresh replacement',
+      'add a comment starting with "reopen!" to get a fresh replacement'
+    );
 }
