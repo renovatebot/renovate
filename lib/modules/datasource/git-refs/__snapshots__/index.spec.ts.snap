@@ -4,9 +4,7 @@ exports[`modules/datasource/git-refs/index getDigest() calls simpleGit with empt
 
 exports[`modules/datasource/git-refs/index getDigest() calls simpleGit with git envs if hostrules exist 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
 
-exports[`modules/datasource/git-refs/index getDigest() calls simpleGit with git envs if hostrules exist for datasource type git 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
-
-exports[`modules/datasource/git-refs/index getDigest() calls simpleGit with git envs if hostrules exist for git 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
+exports[`modules/datasource/git-refs/index getDigest() calls simpleGit with git envs if hostrules exist for datasource type git-refs 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
 
 exports[`modules/datasource/git-refs/index getDigest() returns digest for HEAD 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
 
