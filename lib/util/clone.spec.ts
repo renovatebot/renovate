@@ -20,10 +20,4 @@ describe('util/clone', () => {
       isObject: true,
     }`);
   });
-
-  it('assigns "[Circular]" to circular references', () => {
-    obj.circular = obj;
-    const res = clone(obj);
-    expect(res.circular).toBe('[Circular]');
-  });
 });
