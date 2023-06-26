@@ -1,4 +1,5 @@
 import { klona } from 'klona/json';
+import { logger } from '../logger';
 import { quickStringify } from './stringify';
 
 /**
@@ -10,6 +11,7 @@ export function clone<T = unknown>(input: T): T {
   try {
     return klona(input);
   } catch (err) {
+    logger.warn({ err }, 'error cloning object');
     const str = quickStringify(input);
     if (str) {
       return JSON.parse(str);
