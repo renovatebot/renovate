@@ -58,5 +58,6 @@ exports[`modules/datasource/galaxy-collection/index getReleases returns only val
       "version": "1.2.0",
     },
   ],
+  "tags": undefined,
 }
 `;
