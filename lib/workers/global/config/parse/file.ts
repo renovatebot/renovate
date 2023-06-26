@@ -16,9 +16,9 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         json: true,
       }) as RenovateConfig;
     case '':
-      // .renovaterc should be parsed as JSON
-      // RENOVATE_CONFIG_FILE without file extension should be parsed as JSON
-      /* falls through */
+    // .renovaterc should be parsed as JSON
+    // RENOVATE_CONFIG_FILE without file extension should be parsed as JSON
+    /* falls through */
     case '.json':
       return JSON.parse(await readSystemFile(file, 'utf8'));
     case '.json5':
