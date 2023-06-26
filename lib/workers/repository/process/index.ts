@@ -1,6 +1,7 @@
 // TODO #7154
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
+import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta, logger, removeMeta } from '../../../logger';
@@ -58,6 +59,7 @@ async function getBaseBranchConfig(
       throw error;
     }
 
+    baseBranchConfig = await resolveConfigPresets(baseBranchConfig, config);
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
 
     // istanbul ignore if

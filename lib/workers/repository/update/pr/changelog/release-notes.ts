@@ -373,7 +373,10 @@ export async function getReleaseNotesMd(
             }
           }
         } catch (err) /* istanbul ignore next */ {
-          logger.warn({ err }, `Error parsing ${changelogFile}`);
+          logger.warn(
+            { file: changelogFile, err },
+            `Error parsing changelog file`
+          );
         }
       }
     }
