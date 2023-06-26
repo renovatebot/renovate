@@ -91,8 +91,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
 }
 
 function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
-  const { binarySource } = GlobalConfig.get();
-  return binarySource === 'docker' && !!docker;
+  return GlobalConfig.get('binarySource') === 'docker' && !!docker;
 }
 
 interface RawExecArguments {
@@ -170,8 +169,7 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix =
-    GlobalConfig.get('dockerChildPrefix') ?? 'renovate_';
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
 
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
   const useDocker = isDocker(docker);
