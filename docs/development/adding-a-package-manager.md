@@ -66,7 +66,7 @@ For example the npm and Yarn package manager must process the `package.json` and
 This allows features like Lerna and Workspaces to work.
 This means that for npm or Yarn we need to iterate through all package files after the initial parsing.
 
-As another example, Gradle needs to call a command via a child process in order to extract dependencies, so that must be done first. //Unclear what that must be done first refers to here...
+As another example, in order for Gradle to extract dependencies Renovate must first call a command via a child process.
 
 The `extractAllPackageFiles` function takes an array of filenames as input.
 It returns an array of filenames and dependencies.
