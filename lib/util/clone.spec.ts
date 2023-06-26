@@ -30,6 +30,11 @@ describe('util/clone', () => {
     };
     obj.circular = obj;
 
-    expect(() => clone(obj)).toThrow('Circular reference detected');
+    expect(clone(obj)).toMatchObject({
+      circular: '[Circular]',
+      isObject: true,
+      name: 'object',
+      type: 'object',
+    });
   });
 });
