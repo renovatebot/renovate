@@ -2,7 +2,6 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types';
-import type { Release } from '../../../../modules/datasource/types';
 import type {
   LookupUpdate,
   RangeConfig,
@@ -61,7 +60,6 @@ export interface UpdateResult {
   isSingleVersion?: boolean;
   skipReason?: SkipReason;
   registryUrl?: string;
-  releases: Release[];
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];

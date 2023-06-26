@@ -238,8 +238,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  const { localDir } = GlobalConfig.get();
-  git = simpleGit(localDir, simpleGitConfig()).env({
+  git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
     ...process.env,
     LANG: 'C.UTF-8',
     LC_ALL: 'C.UTF-8',
@@ -479,7 +478,7 @@ export async function syncGit(): Promise<void> {
 // istanbul ignore next
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (is.string(path)) {
-    const { localDir } = GlobalConfig.get();
+    const localDir = GlobalConfig.get('localDir');
     const localPath = upath.resolve(localDir, path);
     if (!localPath.startsWith(upath.resolve(localDir))) {
       logger.warn(

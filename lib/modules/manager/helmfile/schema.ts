@@ -19,3 +19,7 @@ export const DocSchema = z.object({
   releases: z.array(ReleaseSchema).optional(),
   repositories: z.array(RepositorySchema).optional(),
 });
+
+export const LockSchema = z.object({
+  version: z.string(),
+});

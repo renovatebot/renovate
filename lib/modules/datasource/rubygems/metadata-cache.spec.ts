@@ -171,4 +171,39 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     });
     expect(packageCache.set).toHaveBeenCalledTimes(2);
   });
+
+  it('returns fallback results on 404', async () => {
+    const cache = new MetadataCache(new Http('test'));
+
+    httpMock
+      .scope('https://rubygems.org')
+      .get('/api/v1/versions/foobar.json')
+      .reply(404);
+
+    const versions = ['1', '2', '3'];
+    const res = await cache.getRelease(
+      'https://rubygems.org',
+      'foobar',
+      versions
+    );
+
+    expect(res).toEqual({
+      releases: [{ version: '1' }, { version: '2' }, { version: '3' }],
+    });
+  });
+
+  it('throws on unknown error', async () => {
+    const cache = new MetadataCache(new Http('test'));
+
+    httpMock
+      .scope('https://rubygems.org')
+      .get('/api/v1/versions/foobar.json')
+      .reply(500);
+
+    const versions = ['1', '2', '3'];
+
+    await expect(
+      cache.getRelease('https://rubygems.org', 'foobar', versions)
+    ).rejects.toThrow();
+  });
 });
