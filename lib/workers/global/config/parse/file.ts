@@ -9,7 +9,7 @@ import { logger } from '../../../../logger';
 import { readSystemFile } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
-  if (file === '.renovaterc') {
+  if (upath.basename(file) === '.renovaterc') {
     return JSON.parse(await readSystemFile(file, 'utf8'));
   }
   switch (upath.extname(file)) {
