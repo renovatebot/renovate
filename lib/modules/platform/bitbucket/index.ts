@@ -31,6 +31,7 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
+import { getComments } from './comments';
 import type {
   Account,
   BitbucketStatus,
@@ -45,7 +46,6 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
-import { getComments } from './comments';
 
 export const id = 'bitbucket';
 
