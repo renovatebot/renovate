@@ -789,6 +789,162 @@ describe('modules/platform/bitbucket/index', () => {
         })
       ).toMatchSnapshot();
     });
+
+    it('finds closed pr with no reopen comments', async () => {
+      const bbUser = {
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+
+      const reviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'project',
+        user: bbUser,
+      };
+
+      const prComment = {
+        content: {
+          raw: 'some comment',
+        },
+        user: bbUser,
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'closed',
+            },
+          ],
+        })
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
+        .reply(200, { values: [reviewer] })
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [prComment] });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        prTitle: 'title',
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('finds closed pr with reopen comment from non-authorized user', async () => {
+      const reviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'project',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+
+      const prComment = {
+        content: {
+          raw: 'reopen! comment',
+        },
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'closed',
+            },
+          ],
+        })
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
+        .reply(200, { values: [reviewer] })
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [prComment] });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        prTitle: 'title',
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('finds closed pr with reopen comment from authorized user', async () => {
+      const bbUser = {
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+
+      const reviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'project',
+        user: bbUser,
+      };
+
+      const prComment = {
+        content: {
+          raw: 'reopen! comment',
+        },
+        user: bbUser,
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'closed',
+            },
+          ],
+        })
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
+        .reply(200, { values: [reviewer] })
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [prComment] });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        prTitle: 'title',
+      });
+      expect(pr).toBeNull();
+    });
   });
 
   describe('createPr()', () => {
