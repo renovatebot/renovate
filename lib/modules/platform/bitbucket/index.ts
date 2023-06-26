@@ -319,13 +319,13 @@ export async function findPr({
     const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
 
     const reviewers = await effectiveDefaultReviewers(config.repository);
-    const reviewersUuid = reviewers.map((reviewer) => reviewer.uuid);
+    const reviewerUuids = reviewers.map((reviewer) => reviewer.uuid);
 
     const comments = await getComments(config, pr.number);
 
     const authorizedReopenComments = comments.filter(
       (comment) =>
-        reviewersUuid.includes(comment.user.uuid) &&
+        reviewerUuids.includes(comment.user.uuid) &&
         comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD)
     );
 
