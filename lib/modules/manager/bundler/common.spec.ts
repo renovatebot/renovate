@@ -4,7 +4,7 @@ import { fs, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { UpdateArtifact } from '../types';
-import { getBundlerConstraint, getRubyConstraint } from './common';
+import { getBundlerConstraint, getLockFileName, getRubyConstraint } from './common';
 
 jest.mock('../../../util/fs');
 
@@ -93,6 +93,20 @@ describe('modules/manager/bundler/common', () => {
       });
       const version = await getRubyConstraint(config);
       expect(version).toBeNull();
+    });
+  });
+
+  describe('getLockFileName', () => {
+    it('returns packageFileName.lock', async () => {
+      fs.localPathExists.mockResolvedValueOnce(true);
+      const lockFileName = await getLockFileName('packageFileName');
+      expect(lockFileName).toBe('packageFileName.lock');
+    });
+
+    it('returns Gemfile.lock', async () => {
+      fs.localPathExists.mockResolvedValueOnce(false);
+      const lockFileName = await getLockFileName('packageFileName');
+      expect(lockFileName).toBe('Gemfile.lock');
     });
   });
 });

@@ -5,7 +5,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { delimiters, extractRubyVersion } from './common';
+import { delimiters, extractRubyVersion, getLockFileName } from './common';
 import { extractLockFileEntries } from './locked-version';
 
 function formatContent(input: string): string {
@@ -210,7 +210,7 @@ export async function extractPackageFile(
   }
 
   if (packageFile) {
-    const gemfileLock = `${packageFile}.lock`;
+    const gemfileLock = await getLockFileName(packageFile);
     const lockContent = await readLocalFile(gemfileLock, 'utf8');
     if (lockContent) {
       logger.debug(`Found Gemfile.lock file packageFile: ${packageFile}`);
