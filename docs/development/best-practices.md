@@ -77,7 +77,7 @@ Avoid "clever" code that's hard to understand.
 
 Prefer verbose code which is easier for others to read and maintain than concise code which may be hard or slower for others to understand.
 For example, Array `reduce()` functions are often hard to understand first time, and can be replaced with simpler `for` loops.
-The `for` loops are just as fast but are simpler to understand and maintain.
+A `for` loop is just as fast but is simpler to understand and maintain.
 
 #### Write single purpose functions
 
