@@ -37,4 +37,20 @@ describe('util/clone', () => {
       ['c', 'baz'],
     ]);
   });
+
+  it('assigns "[Circular]" to circular references', () => {
+    const obj: any = {
+      name: 'object',
+      type: 'object',
+      isObject: true,
+    };
+    obj.circular = obj;
+
+    expect(clone(obj)).toMatchObject({
+      circular: '[Circular]',
+      isObject: true,
+      name: 'object',
+      type: 'object',
+    });
+  });
 });
