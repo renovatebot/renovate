@@ -164,13 +164,14 @@ export async function removeDockerContainer(
 }
 
 export async function removeDanglingContainers(): Promise<void> {
-  const { binarySource, dockerChildPrefix } = GlobalConfig.get();
-  if (binarySource !== 'docker') {
+  if (GlobalConfig.get('binarySource') !== 'docker') {
     return;
   }
 
   try {
-    const containerLabel = getContainerLabel(dockerChildPrefix);
+    const containerLabel = getContainerLabel(
+      GlobalConfig.get('dockerChildPrefix')
+    );
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
       {
