@@ -54,10 +54,17 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
-    it('extracts version and components from system manifests', () => {
+    it.each`
+  filepath
+  ${'clusters/my-cluster/flux-system/gotk-components.yaml'}
+  ${'clusters/my-cluster/flux-system/gotk-components.yml'}
+  ${'clusters/my-cluster/gotk-components.yaml'}
+  ${'clusters/my-cluster/gotk-components.yml'}
+  ${'gotk-components.yaml'}
+`('extracts version and components from system manifest at $filepath', ({filepath}) => {
       const result = extractPackageFile(
         Fixtures.get('flux-system/gotk-components.yaml'),
-        'clusters/my-cluster/flux-system/gotk-components.yaml'
+        filepath
       );
       expect(result).toEqual({
         deps: [
