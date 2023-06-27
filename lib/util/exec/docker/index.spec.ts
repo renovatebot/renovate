@@ -309,6 +309,7 @@ describe('util/exec/docker/index', () => {
       GlobalConfig.set({
         dockerUser: 'some-user',
         dockerCliOptions: '--memory=4g --cpus=".5"',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
