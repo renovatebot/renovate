@@ -104,7 +104,7 @@ export async function getDependency(
   const softExpireAt = DateTime.local()
     .plus({ minutes: cacheMinutes })
     .toISO()!;
-  let { cacheHardTtlMinutes } = GlobalConfig.get();
+  let cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
   if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
     cacheHardTtlMinutes = cacheMinutes;
   }

@@ -220,7 +220,9 @@ describe('modules/manager/npm/post-update/lerna', () => {
   describe('getLernaVersion()', () => {
     it('returns specified version', () => {
       const pkg = {
-        deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+        deps: [
+          { depName: 'lerna', currentValue: '^2.0.0', currentVersion: '2.0.0' },
+        ],
       };
       expect(lernaHelper.getLernaVersion(pkg)).toBe('2.0.0');
     });
