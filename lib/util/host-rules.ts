@@ -194,5 +194,5 @@ export function getAll(): HostRule[] {
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
-  sanitize.clearSanitizedSecretsList();
+  sanitize.clearRepoSanitizedSecretsList();
 }
