@@ -27,7 +27,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { getNewBranchName, repoFingerprint } from '../util';
+import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
