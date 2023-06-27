@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type {
-  PagedResult,
-  SourceResults,
-} from '../../../../../../modules/platform/bitbucket/types';
+import { PagedSourceResultsSchema } from '../../../../../../modules/platform/bitbucket/schema';
 import { BitbucketHttp } from '../../../../../../util/http/bitbucket';
 import { joinUrlParts } from '../../../../../../util/url';
 import type {
@@ -32,11 +29,12 @@ export async function getReleaseNotesMd(
   );
 
   const rootFiles = (
-    await bitbucketHttp.getJson<PagedResult<SourceResults>>(
+    await bitbucketHttp.getJson(
       repositorySourceURl,
       {
         paginate: true,
-      }
+      },
+      PagedSourceResultsSchema
     )
   ).body.values;
 
