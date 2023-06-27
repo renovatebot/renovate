@@ -71,7 +71,7 @@ export abstract class ChangeLogSource {
     const newVersion = config.newVersion!;
     const sourceUrl = config.sourceUrl!;
     const packageName = config.packageName!;
-    const sourceDirectory = config.sourceDirectory!;
+    const sourceDirectory = config.sourceDirectory;
     const version = allVersioning.get(versioning);
 
     if (this.shouldSkipPackage(config)) {
