@@ -878,6 +878,7 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: 'open',
+        targetBranch: 'new_base',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });

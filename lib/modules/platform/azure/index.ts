@@ -516,6 +516,7 @@ export async function updatePr({
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: GitPullRequest = {
     title,
+    targetRefName: getNewBranchName(targetBranch),
   };
 
   if (body) {
