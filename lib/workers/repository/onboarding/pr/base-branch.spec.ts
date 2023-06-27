@@ -1,5 +1,4 @@
 import { RenovateConfig, partial } from '../../../../../test/util';
-
 import { getBaseBranchDesc } from './base-branch';
 
 describe('workers/repository/onboarding/pr/base-branch', () => {

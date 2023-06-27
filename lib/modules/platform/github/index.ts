@@ -257,20 +257,6 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-export async function getForkOrgs(token: string): Promise<string[]> {
-  // This function will be adapted later to support configured forkOrgs
-  if (!config.renovateForkUser) {
-    try {
-      logger.debug('Determining fork user from API');
-      const userDetails = await getUserDetails(platformConfig.endpoint, token);
-      config.renovateForkUser = userDetails.username;
-    } catch (err) {
-      logger.debug({ err }, 'Error getting username for forkToken');
-    }
-  }
-  return config.renovateForkUser ? [config.renovateForkUser] : [];
-}
-
 export async function listForks(
   token: string,
   repository: string
@@ -299,28 +285,38 @@ export async function listForks(
 
 export async function findFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrg?: string
 ): Promise<GhRestRepo | null> {
   const forks = await listForks(token, repository);
-  const orgs = await getForkOrgs(token);
-  if (!orgs.length) {
+  if (forkOrg) {
+    logger.debug(`Searching for forked repo in forkOrg (${forkOrg})`);
+    const forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
+    if (forkedRepo) {
+      logger.debug(`Found repo in forkOrg: ${forkedRepo.full_name}`);
+      return forkedRepo;
+    }
+    logger.debug(`No repo found in forkOrg`);
+  }
+  logger.debug(`Searching for forked repo in user account`);
+  try {
+    const { username } = await getUserDetails(platformConfig.endpoint, token);
+    const forkedRepo = forks.find((repo) => repo.owner.login === username);
+    if (forkedRepo) {
+      logger.debug(`Found repo in user account: ${forkedRepo.full_name}`);
+      return forkedRepo;
+    }
+  } catch (err) {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
-  let forkedRepo: GhRestRepo | undefined;
-  for (const forkOrg of orgs) {
-    logger.debug(`Searching for forked repo in ${forkOrg}`);
-    forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
-    if (forkedRepo) {
-      logger.debug(`Found existing forked repo: ${forkedRepo.full_name}`);
-      break;
-    }
-  }
-  return forkedRepo ?? null;
+  logger.debug(`No repo found in user account`);
+  return null;
 }
 
 export async function createFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrg?: string
 ): Promise<GhRestRepo> {
   let forkedRepo: GhRestRepo | undefined;
   try {
@@ -328,6 +324,7 @@ export async function createFork(
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
+          organization: forkOrg ? forkOrg : undefined,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
@@ -339,7 +336,8 @@ export async function createFork(
   if (!forkedRepo) {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
-  logger.debug(`Created forked repo ${forkedRepo.full_name}, now sleeping 30s`);
+  logger.info({ forkedRepo: forkedRepo.full_name }, 'Created forked repo');
+  logger.debug(`Sleeping 30s after creating fork`);
   await delay(30000);
   return forkedRepo;
 }
@@ -348,6 +346,7 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkOrg,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -485,11 +484,12 @@ export async function initRepo({
 
   if (forkToken) {
     logger.debug('Bot is in fork mode');
+    config.forkOrg = forkOrg;
     config.forkToken = forkToken;
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
-    let forkedRepo = await findFork(forkToken, repository);
+    let forkedRepo = await findFork(forkToken, repository, forkOrg);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
       const forkDefaultBranch = forkedRepo.default_branch;
@@ -567,7 +567,7 @@ export async function initRepo({
       }
     } else {
       logger.debug('Forked repo is not found - attempting to create it');
-      forkedRepo = await createFork(forkToken, repository);
+      forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
     }
   }
@@ -1192,7 +1192,7 @@ export async function ensureIssue({
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
-          logger.warn(`Closing duplicate issue ${i.number}`);
+          logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
           // TODO #7154
           await closeIssue(i.number!);
         }
@@ -1573,6 +1573,7 @@ export async function createPr({
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
+      !config.forkOrg &&
       platformOptions?.forkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
@@ -1602,12 +1603,16 @@ export async function updatePr({
   prTitle: title,
   prBody: rawBody,
   state,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
+  }
+  if (targetBranch) {
+    patchBody.base = targetBranch;
   }
   if (state) {
     patchBody.state = state;
@@ -1688,7 +1693,10 @@ export async function mergePr({
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${config.mergeMethod} merge PR`);
+        logger.warn(
+          { mergeMethod: config.mergeMethod, err },
+          'Failed to merge PR'
+        );
         return false;
       }
     }

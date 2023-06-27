@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { clone } from '../util/clone';
 import { getOptions } from './options';
 import type { PackageRule, RenovateConfig, UpdateType } from './types';
 
@@ -16,7 +17,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       }
     });
   }
-  const massagedConfig = structuredClone(config);
+  const massagedConfig = clone(config);
   for (const [key, val] of Object.entries(config)) {
     if (allowedStrings.includes(key) && is.string(val)) {
       massagedConfig[key] = [val];
@@ -55,7 +56,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
         PackageRule
       ][]) {
         if (updateTypes.includes(key)) {
-          let newRule = structuredClone(rule);
+          let newRule = clone(rule);
           Object.keys(newRule).forEach((newKey) => {
             if (!(newKey.startsWith(`match`) || newKey.startsWith('exclude'))) {
               delete newRule[newKey];

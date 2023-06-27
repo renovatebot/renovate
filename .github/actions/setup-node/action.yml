@@ -74,7 +74,7 @@ runs:
     - name: Generate files
       shell: bash
       run: >
-        if [ -d lib ]; then
+        if [[ -d lib ]]; then
           yarn prepare:generate;
         fi
 

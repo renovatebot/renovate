@@ -208,8 +208,7 @@ export function isContainerbase(): boolean {
 export function isDynamicInstall(
   toolConstraints?: Opt<ToolConstraint[]>
 ): boolean {
-  const { binarySource } = GlobalConfig.get();
-  if (binarySource !== 'install') {
+  if (GlobalConfig.get('binarySource') !== 'install') {
     return false;
   }
   if (!isContainerbase()) {
@@ -254,7 +253,7 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint;
+        return constraint.replace(/^=+/, '').trim();
       }
     } else {
       logger.warn(

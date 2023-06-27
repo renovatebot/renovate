@@ -344,6 +344,13 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
+    name: 'dockerCliOptions',
+    description:
+      'Pass CLI flags to `docker run` command when `binarySource=docker`.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'dockerImagePrefix',
     description:
       'Change this value to override the default Renovate Docker sidecar image name prefix.',
@@ -438,6 +445,16 @@ const options: RenovateOptions[] = [
   {
     name: 'forkToken',
     description: 'Set a personal access token here to enable "fork mode".',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+  },
+  {
+    name: 'forkOrg',
+    description:
+      'The preferred organization to create or find forked repositories, when in fork mode.',
     stage: 'repository',
     type: 'string',
     globalOnly: true,
@@ -754,6 +771,16 @@ const options: RenovateOptions[] = [
     allowString: true,
     default: null,
     globalOnly: true,
+  },
+  {
+    name: 'autodiscoverTopics',
+    description: '',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -2091,12 +2118,12 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
-      'helmUpdateSubChartArchives',
       'gomodMassage',
-      'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
       'gomodTidyE',
+      'gomodUpdateImportPaths',
+      'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
       'yarnDedupeFewer',

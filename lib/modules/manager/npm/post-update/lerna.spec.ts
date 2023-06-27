@@ -100,14 +100,14 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
-        { ...config, constraints: { yarn: '^1.10.0' } },
+        { ...config, extractedConstraints: { yarn: '^1.10.0' } },
         {}
       );
       expect(execSnapshots).toMatchSnapshot();
       expect(res.error).toBeFalse();
     });
 
-    it('defaults to latest if lerna version unspecified', async () => {
+    it('defaults to latest and skips bootstrap if lerna version unspecified', async () => {
       const execSnapshots = mockExecAll();
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
@@ -220,7 +220,9 @@ describe('modules/manager/npm/post-update/lerna', () => {
   describe('getLernaVersion()', () => {
     it('returns specified version', () => {
       const pkg = {
-        deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+        deps: [
+          { depName: 'lerna', currentValue: '^2.0.0', currentVersion: '2.0.0' },
+        ],
       };
       expect(lernaHelper.getLernaVersion(pkg)).toBe('2.0.0');
     });
