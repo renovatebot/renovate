@@ -296,7 +296,6 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
   [
     {
       "status": 1,
-      "targetRefName": undefined,
     },
     "1",
     1234,
