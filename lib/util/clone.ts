@@ -13,7 +13,7 @@ export function clone<T = unknown>(input: T): T {
     logger.warn({ err }, 'error cloning object');
     const str = quickStringify(input);
     if (str) {
-      return JSON.parse(str);
+      return JSON.parse(str) as T;
     }
 
     // istanbul ignore next: not easily testable
