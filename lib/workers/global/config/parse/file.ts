@@ -10,7 +10,7 @@ import { readSystemFile } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   if (upath.basename(file) === '.renovaterc') {
-    return JSON.parse(await readSystemFile(file, 'utf8'));
+    return JSON5.parse(await readSystemFile(file, 'utf8'));
   }
   switch (upath.extname(file)) {
     case '.yaml':
@@ -18,9 +18,8 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       return load(await readSystemFile(file, 'utf8'), {
         json: true,
       }) as RenovateConfig;
-    case '.json':
-      return JSON.parse(await readSystemFile(file, 'utf8'));
     case '.json5':
+    case '.json':
       return JSON5.parse(await readSystemFile(file, 'utf8'));
     case '.js': {
       const tmpConfig = await import(file);
