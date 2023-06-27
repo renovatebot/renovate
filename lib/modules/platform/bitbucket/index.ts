@@ -317,23 +317,24 @@ export async function findPr({
    */
   if (pr && pr.state === 'closed') {
     const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
-
-    const reviewers = await effectiveDefaultReviewers(config.repository);
-    const reviewerUuids = reviewers.map((reviewer) => reviewer.uuid);
-
     const comments = await getComments(config, pr.number);
 
-    const authorizedReopenComments = comments.filter(
-      (comment) =>
-        reviewerUuids.includes(comment.user.uuid) &&
-        comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD)
-    );
+    if (is.nonEmptyArray(comments)) {
+      const reviewers = await effectiveDefaultReviewers(config.repository);
+      const reviewerUuids = reviewers.map((reviewer) => reviewer.uuid);
 
-    if (is.nonEmptyArray(authorizedReopenComments)) {
-      logger.debug(
-        `Found 'reopen' comment from authorized repository member. Renovate will reopen PR ${pr.number} as a new PR`
+      const authorizedReopenComments = comments.filter(
+        (comment) =>
+          reviewerUuids.includes(comment.user.uuid) &&
+          comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD)
       );
-      return null;
+
+      if (is.nonEmptyArray(authorizedReopenComments)) {
+        logger.debug(
+          `Found 'reopen' comment from authorized repository member. Renovate will reopen PR ${pr.number} as a new PR`
+        );
+        return null;
+      }
     }
   }
 
