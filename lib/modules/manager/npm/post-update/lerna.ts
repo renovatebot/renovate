@@ -115,7 +115,7 @@ export async function generateLockFiles(
       logger.debug('Skipping lerna bootstrap');
       cmd.push(`${lernaClient} install ${cmdOptions}`);
     } else {
-      logger.debug(`Using lerna version ${lernaVersion ?? ''}`);
+      logger.debug(`Using lerna version ${String(lernaVersion)}`);
       toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
       cmd.push('lerna info || echo "Ignoring lerna info failure"');
       cmd.push(`${lernaClient} install ${cmdOptions}`);
