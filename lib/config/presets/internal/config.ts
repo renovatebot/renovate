@@ -12,7 +12,8 @@ export const presets: Record<string, Preset> = {
     extends: ['config:recommended', ':pinOnlyDevDependencies'],
   },
   recommended: {
-    description: 'Recommended configuration for most users. It does not matter what programming language you use.',
+    description:
+      'Recommended configuration for most users. It does not matter what programming language you use.',
     extends: [
       ':dependencyDashboard',
       ':semanticPrefixFixDepsChoreOthers',
