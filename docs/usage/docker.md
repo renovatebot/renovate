@@ -185,7 +185,7 @@ Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 
 ```json
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "ignorePaths": ["docker/old-files/"]
 }
 ```
