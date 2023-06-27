@@ -28,7 +28,7 @@ jest.mock('../../../util/fs', () => {
 });
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
@@ -323,7 +323,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
@@ -334,9 +333,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-          },
+          env: {},
         },
       },
     ]);
@@ -379,9 +376,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'go get -d -t ./...',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-          },
+          env: {},
         },
       },
     ]);
@@ -493,7 +488,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GIT_CONFIG_VALUE_4 ' +
           '-e GIT_CONFIG_KEY_5 ' +
           '-e GIT_CONFIG_VALUE_5 ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
@@ -505,7 +499,6 @@ describe('modules/manager/gomod/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             GIT_CONFIG_COUNT: '6',
             GIT_CONFIG_KEY_0:
               'url.https://ssh:some-token@github.com/.insteadOf',
@@ -1005,7 +998,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
@@ -1070,7 +1062,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
@@ -1135,7 +1126,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
@@ -1200,7 +1190,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
@@ -1858,7 +1847,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
@@ -1933,7 +1921,6 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +

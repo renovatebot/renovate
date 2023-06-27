@@ -118,7 +118,6 @@ requires-python = "<3.9"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar ' +
@@ -133,7 +132,6 @@ requires-python = "<3.9"
             cwd: '/tmp/github/some/repo',
             encoding: 'utf-8',
             env: {
-              BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
               CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             },
           },
