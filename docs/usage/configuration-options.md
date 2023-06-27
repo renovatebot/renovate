@@ -3272,10 +3272,6 @@ Renovate does not create these rollback PRs by default, with one exception: npm 
 
 You can configure the `rollbackPrs` property globally, per-language, or per-package to override the default behavior.
 
-## ruby
-
-## rust
-
 ## schedule
 
 The `schedule` option allows you to define times of week or month for Renovate updates.

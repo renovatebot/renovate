@@ -7,7 +7,6 @@ import { DepNameMatcher } from './dep-names';
 import { DepPatternsMatcher } from './dep-patterns';
 import { DepTypesMatcher } from './dep-types';
 import { FileNamesMatcher } from './files';
-import { LanguagesMatcher } from './languages';
 import { ManagersMatcher } from './managers';
 import { MergeConfidenceMatcher } from './merge-confidence';
 import { PackageNameMatcher } from './package-names';
