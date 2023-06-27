@@ -65,6 +65,7 @@ describe('workers/repository/update/pr/index', () => {
       title: prTitle,
       bodyStruct,
       state: 'open',
+      targetBranch: 'base',
     };
 
     const config: BranchConfig = {
@@ -101,7 +102,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
-        config.fetchReleaseNotes = true;
+        config.fetchReleaseNotes = 'pr';
 
         const res = await ensurePr(config);
 
@@ -302,6 +303,32 @@ describe('workers/repository/update/pr/index', () => {
           { pr: changedPr.number, prTitle },
           `PR updated`
         );
+      });
+
+      it('updates PR target branch if base branch changed in config', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, baseBranch: 'new_base' }); // user changed base branch in config
+
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
+        expect(logger.logger.info).toHaveBeenCalledWith(
+          { pr: pr.number, prTitle },
+          `PR updated`
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            oldBaseBranch: 'base',
+            newBaseBranch: 'new_base',
+          },
+          'PR base branch has changed'
+        );
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, targetBranch: 'new_base' }, // updated target branch of pr
+        });
       });
 
       it('ignores reviewable content ', async () => {
@@ -844,13 +871,13 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: true,
+              fetchReleaseNotes: 'pr',
             })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: true });
+        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: existingPr,
@@ -877,13 +904,13 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: true,
+              fetchReleaseNotes: 'pr',
             })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: true });
+        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: {
@@ -892,6 +919,7 @@ describe('workers/repository/update/pr/index', () => {
             title: prTitle,
             bodyStruct,
             state: 'open',
+            targetBranch: 'base',
           },
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(

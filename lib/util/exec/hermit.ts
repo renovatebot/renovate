@@ -7,12 +7,11 @@ import { rawExec } from './common';
 import type { RawExecOptions } from './types';
 
 export function isHermit(): boolean {
-  const { binarySource } = GlobalConfig.get();
-  return binarySource === 'hermit';
+  return GlobalConfig.get('binarySource') === 'hermit';
 }
 
 export async function findHermitCwd(cwd: string): Promise<string> {
-  const relativeCwd = upath.relative(GlobalConfig.get('localDir') ?? '', cwd);
+  const relativeCwd = upath.relative(GlobalConfig.get('localDir', ''), cwd);
   const hermitFile = await findUpLocal('bin/hermit', relativeCwd);
 
   if (hermitFile === null) {

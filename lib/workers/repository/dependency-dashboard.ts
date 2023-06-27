@@ -188,6 +188,7 @@ export async function ensureDependencyDashboard(
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
+  logger.debug('ensureDependencyDashboard()');
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
@@ -345,7 +346,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  const warn = getDepWarningsDashboard(packageFiles);
+  const warn = getDepWarningsDashboard(packageFiles, config);
   if (warn) {
     issueBody += warn;
     issueBody += '\n';

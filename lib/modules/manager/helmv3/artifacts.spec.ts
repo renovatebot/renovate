@@ -153,7 +153,11 @@ describe('modules/manager/helmv3/artifacts', () => {
   });
 
   it('returns updated Chart.lock with docker', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     const execSnapshots = mockExecAll();
@@ -585,7 +589,11 @@ describe('modules/manager/helmv3/artifacts', () => {
   });
 
   it('sets repositories from registryAliases with docker', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
     const execSnapshots = mockExecAll();

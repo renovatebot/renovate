@@ -384,6 +384,7 @@ describe('modules/datasource/packagist/schema', () => {
         providersLazyUrl: null,
         providersUrl: null,
         metadataUrl: null,
+        availablePackages: null,
       });
     });
   });

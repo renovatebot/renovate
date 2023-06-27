@@ -1,19 +1,26 @@
 # Gitea and Forgejo
 
-Renovate supports [Gitea](https://gitea.io) and the new fork [Forgejo](https://forgejo.org).
+Renovate supports [Gitea](https://gitea.io) and the [Forgejo](https://forgejo.org) fork.
 Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.gitea.io/en-us/api-usage/#authentication) for the bot account.
-Let Renovate use your PAT by doing _one_ of the following:
+First, [create a Personal Access Token (PAT)](https://docs.gitea.io/en-us/api-usage/#authentication) for the bot account.
+The bot account should have full name and email address configured.
+Then let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
 - Set your PAT as an environment variable `RENOVATE_TOKEN`
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
-Remember to set `platform=gitea` somewhere in your Renovate config file.
-Either the account should have full name and email address set to allow Renovate to estabilish Git identity, or the `gitAuthor` config option should be set.
+You must set `platform=gitea` in your Renovate config file.
+
+The PAT should have these permissions:
+
+- `repo`
+- `read:user` and `read:email`
+
+If you use Gitea packages, add the `read:packages` scope.
 
 ## Unsupported platform features/concepts
 

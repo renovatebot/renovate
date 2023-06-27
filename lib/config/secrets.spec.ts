@@ -1,8 +1,8 @@
-import { getConfig } from '../../test/util';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
 } from '../constants/error-messages';
+import { getConfig } from './defaults';
 import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 
 describe('config/secrets', () => {

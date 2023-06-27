@@ -163,6 +163,24 @@ describe('modules/platform/gitlab/index', () => {
       const repos = await gitlab.getRepos();
       expect(repos).toEqual(['a/b', 'c/d']);
     });
+
+    it('should encode the requested topics into the URL', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&topic=one%2Ctwo'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'c/d',
+          },
+        ]);
+      const repos = await gitlab.getRepos({ topics: ['one', 'two'] });
+      expect(repos).toEqual(['a/b', 'c/d']);
+    });
   });
 
   async function initRepo(
@@ -1748,6 +1766,74 @@ describe('modules/platform/gitlab/index', () => {
         .put(
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005'
         )
+        .reply(200);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            usePlatformAutomerge: true,
+            gitLabIgnoreApprovals: true,
+          },
+        })
+      ).toStrictEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
+
+    it('will remove rules of type regular, if such rules exist', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            id: 29626725,
+            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+            ref: 'patch-28',
+            status: 'success',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200, [
+          {
+            name: 'RegularApproverRule',
+            rule_type: 'regular',
+            id: 50006,
+          },
+          {
+            name: 'AnotherRegularApproverRule',
+            rule_type: 'regular',
+            id: 50007,
+          },
+        ])
+        .delete(
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50006'
+        )
+        .reply(200)
+        .delete(
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50007'
+        )
+        .reply(200)
+        .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
       expect(
         await gitlab.createPr({

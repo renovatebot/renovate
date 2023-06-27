@@ -59,9 +59,13 @@ function getDepWarnings(
 }
 
 export function getDepWarningsOnboardingPR(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
+  config: RenovateConfig
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+    return '';
+  }
   let warningText = '';
   if (!warnings.length) {
     return '';
@@ -83,9 +87,13 @@ export function getDepWarningsOnboardingPR(
 
 export function getDepWarningsPR(
   packageFiles: Record<string, PackageFile[]>,
+  config: RenovateConfig,
   dependencyDashboard?: boolean
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+    return '';
+  }
   let warningText = '';
   if (!warnings.length) {
     return '';
@@ -104,8 +112,12 @@ export function getDepWarningsPR(
 }
 
 export function getDepWarningsDashboard(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
+  config: RenovateConfig
 ): string {
+  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+    return '';
+  }
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   if (!warnings.length) {
     return '';

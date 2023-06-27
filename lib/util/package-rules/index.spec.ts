@@ -1228,45 +1228,4 @@ describe('util/package-rules/index', () => {
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBe(1);
   });
-
-  describe('test matchers supporting RENOVATE_X_MATCH_PACKAGE_NAMES_MORE', () => {
-    const processEnvOrg: NodeJS.ProcessEnv = process.env;
-
-    afterEach(() => {
-      process.env = processEnvOrg;
-    });
-
-    it.each`
-      matcherName               | isXEnvEnabled | expected
-      ${'matchPackageNames'}    | ${false}      | ${undefined}
-      ${'matchPackagePatterns'} | ${false}      | ${undefined}
-      ${'matchPackageNames'}    | ${true}       | ${1}
-      ${'matchPackagePatterns'} | ${true}       | ${1}
-    `(
-      'tests $matcherName selector when experimental env is $isXEnvEnabled (expected res=$expected)',
-      ({ matcherName, isXEnvEnabled, expected }) => {
-        if (isXEnvEnabled) {
-          process.env.RENOVATE_X_MATCH_PACKAGE_NAMES_MORE = 'true';
-        }
-        const config: TestConfig = {
-          packageRules: [
-            {
-              [matcherName]: ['does-match'],
-              x: 1,
-            },
-          ],
-        };
-
-        const res = applyPackageRules({
-          ...config,
-          depName: 'does-not-match',
-          packageName: 'does-match',
-        });
-
-        applyPackageRules(config); // coverage
-
-        expect(res.x).toBe(expected);
-      }
-    );
-  });
 });
