@@ -13,7 +13,7 @@ jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -226,7 +226,6 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar ' +

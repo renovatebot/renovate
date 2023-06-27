@@ -16,7 +16,6 @@ describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
-      delete process.env.BUILDPACK;
       delete process.env.CONTAINERBASE;
     });
 
