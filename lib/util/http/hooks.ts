@@ -5,7 +5,9 @@ import type { Hooks, Response } from 'got';
 
 function isResponseOk(response: Response): boolean {
   const { statusCode } = response;
-  const limitStatusCode = response.request.options.followRedirect ? 299 : 399;
+  const limitStatusCode = response.request.options.followRedirect
+    ? 299
+    : /* istanbul ignore next */ 399;
 
   return (
     (statusCode >= 200 && statusCode <= limitStatusCode) || statusCode === 304

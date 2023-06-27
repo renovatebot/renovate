@@ -1,6 +1,7 @@
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import hasha from 'hasha';
+import type { SetRequired } from 'type-fest';
 import { infer as Infer, ZodType } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
@@ -77,7 +78,7 @@ function applyDefaultHeaders(options: Options): void {
 // `request`.
 async function gotTask<T>(
   url: string,
-  options: GotOptions,
+  options: SetRequired<GotOptions, 'method'>,
   requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
 ): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
@@ -102,9 +103,10 @@ async function gotTask<T>(
       duration =
         error.timings?.phases.total ??
         /* istanbul ignore next: can't be tested */ -1;
-      const method = options.method?.toUpperCase() ?? 'GET';
-      const code = error.code ?? 'UNKNOWN';
-      const retryCount = error.request?.retryCount ?? -1;
+      const method = options.method?.toUpperCase();
+      const code = error.code ?? /* istanbul ignore next */ 'UNKNOWN';
+      const retryCount =
+        error.request?.retryCount ?? /* istanbul ignore next */ -1;
       logger.debug(
         `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`
       );
@@ -131,14 +133,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions: InternalHttpOptions & HttpRequestOptions<T> = {}
+    httpOptions: InternalHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
 
-    let options: GotOptions = merge<GotOptions>(
+    let options = merge<SetRequired<GotOptions, 'method'>, GotOptions>(
       {
         method: 'get',
         ...this.options,
@@ -148,8 +150,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     );
 
     const etagCache =
-      httpOptions.etagCache &&
-      (options.method === 'get' || options.method === 'head')
+      httpOptions.etagCache && options.method === 'get'
         ? httpOptions.etagCache
         : null;
     if (etagCache) {
@@ -202,7 +203,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const httpTask: Task<T> = () => {
         const queueDuration = Date.now() - startTime;
         return gotTask(url, options, {
-          method: options.method ?? 'get',
+          method: options.method,
           url,
           queueDuration,
         });
