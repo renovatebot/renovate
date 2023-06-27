@@ -32,7 +32,7 @@ export function getLernaVersion(
     );
     return null;
   }
-  return lernaDep.currentValue;
+  return lernaDep.currentVersion ?? lernaDep.currentValue;
 }
 
 export async function generateLockFiles(
