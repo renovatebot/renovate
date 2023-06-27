@@ -26,7 +26,7 @@ jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
