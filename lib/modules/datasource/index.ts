@@ -353,7 +353,7 @@ export async function getPkgReleases(
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
   }
-  let res: ReleaseResult;
+  let res: ReleaseResult | null = null;
   try {
     res = clone(
       await getRawReleases({
