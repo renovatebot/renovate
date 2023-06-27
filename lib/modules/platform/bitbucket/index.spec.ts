@@ -791,25 +791,15 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('finds closed pr with no reopen comments', async () => {
-      const bbUser = {
+      const prComment = {
+        content: {
+          raw: 'some comment',
+        },
         user: {
           display_name: 'Bob Smith',
           uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
           account_id: '123',
         },
-      };
-
-      const reviewer = {
-        type: 'default_reviewer',
-        reviewer_type: 'project',
-        user: bbUser,
-      };
-
-      const prComment = {
-        content: {
-          raw: 'some comment',
-        },
-        user: bbUser,
       };
 
       const scope = await initRepoMock();
@@ -828,10 +818,6 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         })
-        .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
-        )
-        .reply(200, { values: [reviewer] })
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, { values: [prComment] });
 

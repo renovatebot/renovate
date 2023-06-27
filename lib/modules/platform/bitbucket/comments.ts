@@ -3,6 +3,8 @@ import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
 import type { Account, Config, PagedResult } from './types';
 
+export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
+
 const bitbucketHttp = new BitbucketHttp();
 
 interface Comment {
@@ -17,7 +19,7 @@ interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
   config: CommentsConfig;
 }
 
-export async function getComments(
+async function getComments(
   config: CommentsConfig,
   prNo: number
 ): Promise<Comment[]> {
@@ -122,6 +124,19 @@ export async function ensureComment({
     logger.warn({ err }, 'Error ensuring comment');
     return false;
   }
+}
+
+export async function reopenComments(
+  config: CommentsConfig,
+  prNo: number
+): Promise<Comment[]> {
+  const comments = await getComments(config, prNo);
+
+  const reopenComments = comments.filter((comment) =>
+    comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD)
+  );
+
+  return reopenComments;
 }
 
 export async function ensureCommentRemoval(
