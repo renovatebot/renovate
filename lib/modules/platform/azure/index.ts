@@ -532,7 +532,6 @@ export async function updatePr({
     await azureApiGit.updatePullRequest(
       {
         status: PullRequestStatus.Active,
-        targetRefName: getNewBranchName(targetBranch),
       },
       config.repoId,
       prNo
