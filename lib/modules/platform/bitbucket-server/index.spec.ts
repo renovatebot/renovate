@@ -1422,6 +1422,32 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toResolve();
         });
 
+        it('closes PR', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, { state: 'OPEN', version: 42 })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`
+            )
+            .reply(200, { status: 'DECLINED' });
+
+          await expect(
+            bitbucket.updatePr({
+              number: 5,
+              prTitle: 'title',
+              prBody: 'body',
+              state: 'closed',
+            })
+          ).toResolve();
+        });
+
         it('re-opens PR', async () => {
           const scope = await initRepo();
           scope
