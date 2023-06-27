@@ -344,6 +344,13 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
+    name: 'dockerCliOptions',
+    description:
+      'Pass CLI flags to `docker run` command when `binarySource=docker`.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'dockerImagePrefix',
     description:
       'Change this value to override the default Renovate Docker sidecar image name prefix.',
@@ -2111,12 +2118,12 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
-      'helmUpdateSubChartArchives',
       'gomodMassage',
-      'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
       'gomodTidyE',
+      'gomodUpdateImportPaths',
+      'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
       'yarnDedupeFewer',

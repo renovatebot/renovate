@@ -333,6 +333,14 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 !!! note
     Dangling containers are only removed when Renovate runs again with the same prefix.
 
+## dockerCliOptions
+
+You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar Docker containers.
+
+For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
+
+Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+
 ## dockerImagePrefix
 
 By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.

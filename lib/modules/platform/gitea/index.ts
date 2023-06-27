@@ -739,7 +739,7 @@ const platform: Platform = {
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
             // TODO: types (#7154)
-            logger.warn(`Closing duplicate Issue #${issue.number!}`);
+            logger.warn({ issueNo: issue.number! }, 'Closing duplicate issue');
             // TODO #7154
             await helper.closeIssue(config.repository, issue.number!);
           }
