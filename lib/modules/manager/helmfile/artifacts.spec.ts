@@ -319,7 +319,6 @@ describe('modules/manager/helmfile/artifacts', () => {
             '-e HELM_REGISTRY_CONFIG ' +
             '-e HELM_REPOSITORY_CONFIG ' +
             '-e HELM_REPOSITORY_CACHE ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar ' +

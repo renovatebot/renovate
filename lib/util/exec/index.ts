@@ -111,7 +111,6 @@ async function prepareRawExec(
   if (binarySource === 'docker' || binarySource === 'install') {
     logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
     opts.env ??= {};
-    opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
     opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
   }
 
@@ -128,7 +127,6 @@ async function prepareRawExec(
     const childEnv = getChildEnv(opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
-      'BUILDPACK_CACHE_DIR',
       'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);

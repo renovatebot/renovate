@@ -288,7 +288,6 @@ describe('modules/manager/bundler/artifacts', () => {
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
               '-e GEM_HOME ' +
-              '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/containerbase/sidecar' +
@@ -348,7 +347,6 @@ describe('modules/manager/bundler/artifacts', () => {
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
               '-e GEM_HOME ' +
-              '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/containerbase/sidecar' +
@@ -410,7 +408,6 @@ describe('modules/manager/bundler/artifacts', () => {
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
               '-e GEM_HOME ' +
-              '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/containerbase/sidecar' +
@@ -472,7 +469,6 @@ describe('modules/manager/bundler/artifacts', () => {
               '-v "/tmp/cache":"/tmp/cache" ' +
               '-e BUNDLE_GEMS__PRIVATE__COM ' +
               '-e GEM_HOME ' +
-              '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/containerbase/sidecar' +
@@ -542,7 +538,6 @@ describe('modules/manager/bundler/artifacts', () => {
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
               '-e GEM_HOME ' +
-              '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/containerbase/sidecar' +
@@ -614,7 +609,6 @@ describe('modules/manager/bundler/artifacts', () => {
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
               '-e GEM_HOME ' +
-              '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/containerbase/sidecar' +
@@ -685,7 +679,6 @@ describe('modules/manager/bundler/artifacts', () => {
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
               '-e GEM_HOME ' +
-              '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/containerbase/sidecar' +
