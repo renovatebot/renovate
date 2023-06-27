@@ -19,7 +19,7 @@ jest.mock('../../../util/fs');
 jest.mock('../../datasource');
 jest.mock('../../../util/host-rules');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
@@ -300,7 +300,6 @@ describe('modules/manager/poetry/artifacts', () => {
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e PIP_CACHE_DIR ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar ' +
@@ -367,7 +366,6 @@ describe('modules/manager/poetry/artifacts', () => {
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e PIP_CACHE_DIR ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar ' +
