@@ -71,15 +71,6 @@ Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
-## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
-
-If set, you'll get the following behavior.
-
-When using `matchPackageNames` and `matchPackagePatterns` matchers:
-
-1. Renovate first tries to match against `depName`
-2. If `depName` doesn't match then Renovate tries to match against `packageName`
-
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 
 If set, Renovate will query this API for Merge Confidence data.
