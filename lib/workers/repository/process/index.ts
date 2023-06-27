@@ -9,6 +9,7 @@ import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
 import { configRegexPredicate } from '../../../util/regex';
 import { addSplit } from '../../../util/split';
@@ -23,7 +24,7 @@ async function getBaseBranchConfig(
 ): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
-  let baseBranchConfig: RenovateConfig = structuredClone(config);
+  let baseBranchConfig: RenovateConfig = clone(config);
 
   if (
     config.useBaseBranchConfig === 'merge' &&
