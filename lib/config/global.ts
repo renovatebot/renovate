@@ -14,7 +14,8 @@ export class GlobalConfig {
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
-    'dockerImagePrefix',
+    'dockerCliOptions',
+    'dockerSidecarImage',
     'dockerUser',
     'dryRun',
     'exposeAllEnv',
@@ -33,12 +34,17 @@ export class GlobalConfig {
 
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(
-    key?: Key
+    key: Key
   ): RepoGlobalConfig[Key];
   static get<Key extends keyof RepoGlobalConfig>(
-    key?: Key
+    key: Key,
+    defaultValue: Required<RepoGlobalConfig>[Key]
+  ): Required<RepoGlobalConfig>[Key];
+  static get<Key extends keyof RepoGlobalConfig>(
+    key?: Key,
+    defaultValue?: RepoGlobalConfig[Key]
   ): RepoGlobalConfig | RepoGlobalConfig[Key] {
-    return key ? GlobalConfig.config[key] : GlobalConfig.config;
+    return key ? GlobalConfig.config[key] ?? defaultValue : GlobalConfig.config;
   }
 
   static set(config: RenovateConfig | RepoGlobalConfig): RenovateConfig {

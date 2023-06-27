@@ -104,7 +104,7 @@ export async function getDependency(
   const softExpireAt = DateTime.local()
     .plus({ minutes: cacheMinutes })
     .toISO()!;
-  let { cacheHardTtlMinutes } = GlobalConfig.get();
+  let cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
   if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
     cacheHardTtlMinutes = cacheMinutes;
   }
@@ -175,6 +175,10 @@ export async function getDependency(
       }
       if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;
+      }
+      const nodeConstraint = res.versions?.[version].engines?.node;
+      if (is.nonEmptyString(nodeConstraint)) {
+        release.constraints = { node: [nodeConstraint] };
       }
       const source = PackageSource.parse(res.versions?.[version].repository);
       if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {

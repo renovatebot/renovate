@@ -11,7 +11,7 @@ jest.mock('../../../../util/fs');
 jest.mock('./node-version');
 
 delete process.env.NPM_CONFIG_CACHE;
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
@@ -213,6 +213,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -224,16 +225,15 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +

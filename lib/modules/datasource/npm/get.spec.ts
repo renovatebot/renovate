@@ -334,6 +334,9 @@ describe('modules/datasource/npm/get', () => {
               type: 'git',
               url: 'https://github.com/vuejs/vue-next.git',
             },
+            engines: {
+              node: '>= 8.9.0',
+            },
           },
         },
         'dist-tags': { latest: '2.0.0' },

@@ -29,8 +29,12 @@ export async function postUpgradeCommandsExecutor(
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
-    GlobalConfig.get();
+  const allowedPostUpgradeCommands = GlobalConfig.get(
+    'allowedPostUpgradeCommands'
+  );
+  const allowPostUpgradeCommandTemplating = GlobalConfig.get(
+    'allowPostUpgradeCommandTemplating'
+  );
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -158,8 +162,6 @@ export async function postUpgradeCommandsExecutor(
 export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
-  const { allowedPostUpgradeCommands } = GlobalConfig.get();
-
   const hasChangedFiles =
     (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
     (config.updatedArtifacts && config.updatedArtifacts.length > 0);
@@ -167,7 +169,7 @@ export default async function executePostUpgradeCommands(
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */
     !hasChangedFiles ||
-    is.emptyArray(allowedPostUpgradeCommands)
+    is.emptyArray(GlobalConfig.get('allowedPostUpgradeCommands'))
   ) {
     return null;
   }
