@@ -529,19 +529,14 @@ export async function updatePr({
   }
 
   if (state === 'open') {
-    try {
-      await azureApiGit.updatePullRequest(
-        {
-          status: PullRequestStatus.Active,
-          targetRefName: getNewBranchName(targetBranch),
-        },
-        config.repoId,
-        prNo
-      );
-    } catch (err) {
-      // eslint-disable-next-line
-      console.log(err);
-    }
+    await azureApiGit.updatePullRequest(
+      {
+        status: PullRequestStatus.Active,
+        targetRefName: getNewBranchName(targetBranch),
+      },
+      config.repoId,
+      prNo
+    );
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
