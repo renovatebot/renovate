@@ -103,7 +103,7 @@ async function gotTask<T>(
       duration =
         error.timings?.phases.total ??
         /* istanbul ignore next: can't be tested */ -1;
-      const method = options.method?.toUpperCase();
+      const method = options.method.toUpperCase();
       const code = error.code ?? /* istanbul ignore next */ 'UNKNOWN';
       const retryCount =
         error.request?.retryCount ?? /* istanbul ignore next */ -1;
