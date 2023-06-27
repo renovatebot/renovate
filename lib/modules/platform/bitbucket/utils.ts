@@ -19,6 +19,7 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
     uuid: repoInfoBody.uuid,
+    isPrivate: repoInfoBody.is_private,
   };
 }
 
