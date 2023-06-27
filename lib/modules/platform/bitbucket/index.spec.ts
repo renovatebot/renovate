@@ -1225,7 +1225,12 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'new_base',
+        })
       ).toResolve();
     });
 
@@ -1426,25 +1431,6 @@ describe('modules/platform/bitbucket/index', () => {
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrowErrorMatchingSnapshot();
-    });
-
-    it('updates target branch of the PR', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { values: [pr] })
-        .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200)
-        .post('/2.0/repositories/some/repo/pullrequests/5/decline')
-        .reply(200);
-
-      expect(
-        await bitbucket.updatePr({
-          number: pr.id,
-          prTitle: pr.title,
-          state: 'closed',
-        })
-      ).toBeUndefined();
     });
 
     it('closes PR', async () => {
