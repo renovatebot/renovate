@@ -199,10 +199,10 @@ export abstract class ChangeLogSource {
     const exactTagsList = tags.filter((tag) => {
       return exactReleaseRegex.test(tag);
     });
-    let tagList = exactTagsList.length ? exactTagsList : tags
+    const tagList = exactTagsList.length ? exactTagsList : tags;
     return tagList
-        .filter((tag) => version.isVersion(tag.replace(regex, '')))
-        .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
   }
 
   private async getRef(
