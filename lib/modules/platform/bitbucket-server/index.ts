@@ -803,10 +803,10 @@ export async function createPr({
     title,
     description,
     fromRef: {
-      id: getNewBranchName(sourceBranch),
+      id: `refs/heads/${sourceBranch}`,
     },
     toRef: {
-      id: getNewBranchName(base),
+      id: `refs/heads/${base}`,
     },
     reviewers,
   };
@@ -851,7 +851,6 @@ export async function updatePr({
   prBody: rawDescription,
   state,
   bitbucketInvalidReviewers,
-  targetBranch,
 }: UpdatePrConfig & {
   bitbucketInvalidReviewers: string[] | undefined;
 }): Promise<void> {
@@ -879,9 +878,6 @@ export async function updatePr({
               (name: string) => !bitbucketInvalidReviewers?.includes(name)
             )
             .map((name: string) => ({ user: { name } })),
-          toRef: {
-            id: getNewBranchName(targetBranch),
-          },
         },
       }
     );
