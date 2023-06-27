@@ -3,10 +3,8 @@ import { logger } from '../../../../../logger';
 import * as allVersioning from '../../../../../modules/versioning';
 import { detectPlatform } from '../../../../../util/common';
 import type { BranchUpgradeConfig } from '../../../../types';
+import api from './api';
 import type { ChangeLogSource } from './source';
-import { BitbucketChangeLogSource } from './source-bitbucket';
-import { GitHubChangeLogSource } from './source-github';
-import { GitLabChangeLogSource } from './source-gitlab';
 import type { ChangeLogResult } from './types';
 
 export * from './types';
@@ -56,13 +54,8 @@ export async function getChangeLogJSON(
   }
 }
 
-const changeLogSources = new Map<string, ChangeLogSource>();
-changeLogSources.set('gitlab', new GitLabChangeLogSource());
-changeLogSources.set('github', new GitHubChangeLogSource());
-changeLogSources.set('bitbucket', new BitbucketChangeLogSource());
-
 export function getChangeLogSourceFor(
   platform: string
 ): ChangeLogSource | null {
-  return changeLogSources.get(platform) ?? null;
+  return api.get(platform) ?? null;
 }
