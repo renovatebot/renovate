@@ -3,6 +3,7 @@ import parseGithubUrl from 'github-url-from-git';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
+import { clone } from '../../../util/clone';
 import { regEx } from '../../../util/regex';
 import { BazelDatasource } from '../../datasource/bazel';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -50,7 +51,7 @@ function isMerge(value: BazelModulePackageDep): value is MergePackageDep {
 export function bazelModulePackageDepToPackageDependency(
   bmpd: BazelModulePackageDep
 ): PackageDependency {
-  const copy: BazelModulePackageDep = structuredClone(bmpd);
+  const copy: BazelModulePackageDep = clone(bmpd);
   if (isOverride(copy)) {
     const partial = copy as Partial<OverridePackageDep>;
     delete partial.bazelDepSkipReason;

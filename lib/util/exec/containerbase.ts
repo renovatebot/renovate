@@ -208,8 +208,7 @@ export function isContainerbase(): boolean {
 export function isDynamicInstall(
   toolConstraints?: Opt<ToolConstraint[]>
 ): boolean {
-  const { binarySource } = GlobalConfig.get();
-  if (binarySource !== 'install') {
+  if (GlobalConfig.get('binarySource') !== 'install') {
     return false;
   }
   if (!isContainerbase()) {
@@ -269,6 +268,7 @@ export async function resolveConstraint(
   const releases = pkgReleases?.releases ?? [];
 
   if (!releases?.length) {
+    logger.warn({ toolConfig }, 'No tool releases found.');
     throw new Error('No tool releases found.');
   }
 

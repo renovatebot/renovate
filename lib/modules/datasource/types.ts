@@ -46,7 +46,7 @@ export interface Release {
   gitRef?: string;
   isDeprecated?: boolean;
   isStable?: boolean;
-  releaseTimestamp?: any;
+  releaseTimestamp?: string | null;
   version: string;
   newDigest?: string | undefined;
   constraints?: Record<string, string[]>;

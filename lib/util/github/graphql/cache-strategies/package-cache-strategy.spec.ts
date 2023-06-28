@@ -1,5 +1,6 @@
 import { DateTime, Settings } from 'luxon';
 import * as packageCache from '../../../cache/package';
+import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy';
 
@@ -30,7 +31,7 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-10-15 12:00'),
     };
-    cacheGet.mockResolvedValueOnce(structuredClone(cacheRecord));
+    cacheGet.mockResolvedValueOnce(clone(cacheRecord));
 
     const now = '2022-10-30 12:00';
     mockTime(now);

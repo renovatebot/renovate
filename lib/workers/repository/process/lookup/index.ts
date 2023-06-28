@@ -16,6 +16,7 @@ import {
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
@@ -48,18 +49,20 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
-  let dependency: ReleaseResult | null = null;
+  config.versioning ??= getDefaultVersioning(datasource);
+
+  const versioning = allVersioning.get(config.versioning);
   const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
+
+  let dependency: ReleaseResult | null = null;
   const res: UpdateResult = {
+    versioning: config.versioning,
     updates: [],
     warnings: [],
   };
+
   try {
     logger.trace({ dependency: packageName, currentValue }, 'lookupUpdates');
-    // Use the datasource's default versioning if none is configured
-    config.versioning ??= getDefaultVersioning(datasource);
-    const versioning = allVersioning.get(config.versioning);
-    res.versioning = config.versioning;
     // istanbul ignore if
     if (
       !isGetPkgReleasesConfig(config) ||
@@ -80,7 +83,7 @@ export async function lookupUpdates(
         return res;
       }
 
-      dependency = structuredClone(await getPkgReleases(config));
+      dependency = clone(await getPkgReleases(config));
       if (!dependency) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
@@ -369,7 +372,7 @@ export async function lookupUpdates(
       if (versioning.valueToVersion) {
         // TODO #7154
         res.currentVersion = versioning.valueToVersion(res.currentVersion!);
-        for (const update of res.updates || []) {
+        for (const update of res.updates || /* istanbul ignore next*/ []) {
           // TODO #7154
           update.newVersion = versioning.valueToVersion(update.newVersion!);
         }
@@ -440,7 +443,9 @@ export async function lookupUpdates(
     // Handle a weird edge case involving followTag and fallbacks
     if (rollbackPrs && followTag) {
       res.updates = res.updates.filter(
-        (update) => res.updates.length === 1 || update.updateType !== 'rollback'
+        (update) =>
+          res.updates.length === 1 ||
+          /* istanbul ignore next */ update.updateType !== 'rollback'
       );
     }
   } catch (err) /* istanbul ignore next */ {
