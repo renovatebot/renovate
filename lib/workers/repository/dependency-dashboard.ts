@@ -116,12 +116,7 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      let dashboardChecks = {
-        dependencyDashboardChecks: {},
-      };
-      if (is.string(issue.body)) {
-        dashboardChecks = parseDashboardIssue(issue.body);
-      }
+      const dashboardChecks = parseDashboardIssue(issue.body ?? '');
 
       if (config.checkedBranches) {
         const checkedBranchesRec: Record<string, string> = Object.fromEntries(
@@ -441,7 +436,7 @@ export async function ensureDependencyDashboard(
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        updatedIssue.body!
+        updatedIssue.body ?? ''
       );
       for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];

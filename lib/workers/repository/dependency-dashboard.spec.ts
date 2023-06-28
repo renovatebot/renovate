@@ -103,7 +103,10 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
         dependencyDashboardChecks: {},
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
         dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
       });
