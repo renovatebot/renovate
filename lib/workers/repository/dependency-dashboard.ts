@@ -76,7 +76,8 @@ function getAllSelectedBranches(
 
 function getCheckedBranches(issueBody: string): Record<string, string> {
   let dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
+  for (const [, type, branchName] of issueBody?.matchAll(markedBranchesRe) ??
+    []) {
     dependencyDashboardChecks[branchName] = type;
   }
   dependencyDashboardChecks = getAllSelectedBranches(
@@ -115,7 +116,12 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      const dashboardChecks = parseDashboardIssue(issue.body!);
+      let dashboardChecks = {
+        dependencyDashboardChecks: {},
+      };
+      if (is.string(issue.body)) {
+        dashboardChecks = parseDashboardIssue(issue.body);
+      }
 
       if (config.checkedBranches) {
         const checkedBranchesRec: Record<string, string> = Object.fromEntries(
