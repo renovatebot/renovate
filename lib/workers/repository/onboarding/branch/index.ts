@@ -53,6 +53,8 @@ export async function checkOnboardingBranch(
   // TODO #7154
   const branchList = [onboardingBranch!];
   const onboardingPr = await getOnboardingPr(config);
+  // TODO #7154
+  const branchList = [onboardingBranch!];
   if (onboardingPr) {
     logger.debug('Onboarding PR already exists');
     if (config.onboardingRebaseCheckbox) {
@@ -63,6 +65,18 @@ export async function checkOnboardingBranch(
         return { ...config, repoIsOnboarded, onboardingBranch, branchList };
       }
     }
+
+    if (
+      isOnboardingCacheValid(config.defaultBranch!, config.onboardingBranch!) &&
+      !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
+    ) {
+      logger.debug(
+        'Skip processing since the onboarding branch is up to date and default branch has not changed'
+      );
+      OnboardingState.onboardingCacheValid = true;
+      return { ...config, repoIsOnboarded, onboardingBranch, branchList };
+    }
+    OnboardingState.onboardingCacheValid = false;
 
     isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     if (isModified) {
@@ -141,4 +155,20 @@ function invalidateExtractCache(baseBranch: string): void {
   if (cache.scan?.[baseBranch]) {
     delete cache.scan[baseBranch];
   }
+}
+
+function isOnboardingCacheValid(
+  defaultBranch: string,
+  onboardingBranch: string
+): boolean {
+  const cache = getCache();
+  const onboardingBranchCache = cache?.onboardingBranchCache;
+  return !!(
+    onboardingBranchCache &&
+    onboardingBranchCache.defaultBranchSha === getBranchCommit(defaultBranch) &&
+    onboardingBranchCache.onboardingBranchSha ===
+      getBranchCommit(onboardingBranch) &&
+    onboardingBranchCache.configFileName &&
+    onboardingBranchCache.configFileParsed
+  );
 }

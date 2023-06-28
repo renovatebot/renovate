@@ -1,21 +1,25 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, partial } from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { constructPipCompileCmd, extractResolver } from './artifacts';
 import { updateArtifacts } from '.';
+
+const datasource = mocked(_datasource);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
+jest.mock('../../datasource');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -96,6 +100,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
+    // pip-tools
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '6.13.0' }],
+    });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -129,7 +137,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'pip install --user pip-tools ' +
+          'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
           '"',
@@ -139,6 +147,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    // pip-tools
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '6.13.0' }],
+    });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -157,7 +169,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
-      { cmd: 'pip install --user pip-tools' },
+      { cmd: 'install-tool pip-tools 6.13.0' },
       {
         cmd: 'pip-compile requirements.in',
         options: { cwd: '/tmp/github/some/repo' },
@@ -210,6 +222,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('uses pip-compile version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
+    // pip-tools
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '6.13.0' }],
+    });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -225,7 +241,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         newPackageFileContent: 'some new content',
         config: {
           ...config,
-          constraints: { python: '3.10.2', pipTools: '==1.2.3' },
+          constraints: { python: '3.10.2', pipTools: '6.13.0' },
         },
       })
     ).not.toBeNull();
@@ -246,7 +262,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'pip install --user pip-tools==1.2.3 ' +
+          'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
           '"',

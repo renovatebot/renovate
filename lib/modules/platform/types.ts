@@ -37,6 +37,7 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
+  forkOrg?: string;
   forkToken?: string;
   forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
@@ -112,6 +113,7 @@ export interface UpdatePrConfig {
   prTitle: string;
   prBody?: string;
   state?: 'open' | 'closed';
+  targetBranch?: string;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -162,6 +164,10 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export interface AutodiscoverConfig {
+  topics?: string[];
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
@@ -189,7 +195,7 @@ export interface Platform {
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
-  getRepos(): Promise<string[]>;
+  getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;

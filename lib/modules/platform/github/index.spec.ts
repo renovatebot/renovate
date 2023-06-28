@@ -3,6 +3,8 @@ import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -395,26 +397,24 @@ describe('modules/platform/github/index', () => {
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      // getBranchCommit
       scope.post(`/repos/${repo}/forks`).reply(500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkOrg: 'forked',
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
 
-    it('should update fork when using forkToken', async () => {
+    it('should update fork when using forkToken and forkOrg', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
-      scope.get('/user').reply(200, {
-        login: 'forked',
-      });
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkOrg: 'forked',
       });
       expect(config).toMatchSnapshot();
     });
@@ -540,6 +540,40 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.initRepo({ repository: 'some/repo' })
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
+    });
+
+    it('throws unexpected graphql errors', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'SOME_ERROR_TYPE',
+              message: 'Some error message',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_UNKNOWN_ERROR);
+    });
+
+    it('throws graphql rate limit error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMITED',
+              message: 'API rate limit exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
     it('should throw error if renamed', async () => {
@@ -2129,7 +2163,7 @@ describe('modules/platform/github/index', () => {
             state: 'closed',
           },
         ]);
-      await github.initRepo({ repository: 'some/repo' } as never);
+      await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -2785,6 +2819,22 @@ describe('modules/platform/github/index', () => {
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: 'closed',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
+
+    it('should update target branch', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: 'closed',
+        targetBranch: 'new_base',
       };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

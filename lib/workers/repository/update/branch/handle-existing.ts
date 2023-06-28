@@ -47,8 +47,6 @@ export async function handleClosedPr(
         await scm.deleteBranch(config.branchName);
       }
     }
-  } else if (pr.state === 'merged') {
-    logger.debug(`Merged PR with PrNo: ${pr.number} is blocking this branch`);
   }
 }
 

@@ -20,7 +20,7 @@ jobs:
   lock:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/lock-threads@c1b35aecc5cdb1a34539d14196df55838bb2f836 # v4.0.0
+      - uses: dessant/lock-threads@be8aa5be94131386884a6da4189effda9b14aa21 # v4.0.1
         if: github.repository == 'renovatebot/renovate'
         with:
           github-token: ${{ github.token }}

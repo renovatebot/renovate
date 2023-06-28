@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
+import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 
 jest.mock('../../../../util/fs');
@@ -26,12 +27,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
     it('return null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config,
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config,
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toBeNull();
     });
 
@@ -51,12 +55,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
@@ -79,7 +86,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update dep1' +
+            'pdm update --no-sync dep1' +
             '"',
         },
       ]);
@@ -94,12 +101,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toEqual([
         { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
       ]);
@@ -121,13 +131,37 @@ describe('modules/manager/pep621/processors/pdm', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const updatedDeps = [{ packageName: 'dep1' }, { packageName: 'dep2' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+        },
+        { packageName: 'dep2', depType: depTypes.dependencies },
+        {
+          depName: 'group1/dep3',
+          depType: depTypes.optionalDependencies,
+        },
+        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
+        {
+          depName: 'group2/dep5',
+          depType: depTypes.pdmDevDependencies,
+        },
+        { depName: 'group2/dep6', depType: depTypes.pdmDevDependencies },
+        {
+          depName: 'group3/dep7',
+          depType: depTypes.pdmDevDependencies,
+        },
+        { depName: 'group3/dep8', depType: depTypes.pdmDevDependencies },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toEqual([
         {
           file: {
@@ -139,7 +173,16 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update dep1 dep2',
+          cmd: 'pdm update --no-sync dep1 dep2',
+        },
+        {
+          cmd: 'pdm update --no-sync -G group1 dep3 dep4',
+        },
+        {
+          cmd: 'pdm update --no-sync -dG group2 dep5 dep6',
+        },
+        {
+          cmd: 'pdm update --no-sync -dG group3 dep7 dep8',
         },
       ]);
     });
@@ -159,14 +202,17 @@ describe('modules/manager/pep621/processors/pdm', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {
-          updateType: 'lockFileMaintenance',
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'folder/pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            updateType: 'lockFileMaintenance',
+          },
+          updatedDeps: [],
         },
-        updatedDeps: [],
-      });
+        {}
+      );
       expect(result).toEqual([
         {
           file: {
@@ -178,7 +224,10 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update',
+          cmd: 'pdm update --no-sync',
+          options: {
+            cwd: '/tmp/github/some/repo/folder',
+          },
         },
       ]);
     });

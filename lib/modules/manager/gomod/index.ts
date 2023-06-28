@@ -14,6 +14,7 @@ export const language: ProgrammingLanguage = 'golang';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)go\\.mod$'],
+  pinDigests: false,
 };
 
 export const supportedDatasources = [
