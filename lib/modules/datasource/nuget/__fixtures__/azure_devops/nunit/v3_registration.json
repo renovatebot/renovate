@@ -1,0 +1,2728 @@
+{
+  "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json",
+  "@type": [
+    "catalog:CatalogRoot",
+    "PackageRegistration",
+    "catalog:Permalink"
+  ],
+  "count": 1,
+  "items": [
+    {
+      "count": 48,
+      "items": [
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.13.2.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET Framework 3.5+\n- .NET Standard 2.0+",
+            "iconUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.3.13.2.nupkg?extract=icon.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.3.13.2.nupkg?extract=LICENSE.txt",
+            "listed": true,
+            "minClientVersion": "2.12",
+            "projectUrl": "https://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.13.2",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard2.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[2.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.3.13.2.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.13.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET Framework 3.5+\n- .NET Standard 2.0+",
+            "iconUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.1/nunit.3.13.1.nupkg?extract=icon.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.1/nunit.3.13.1.nupkg?extract=LICENSE.txt",
+            "listed": true,
+            "minClientVersion": "2.12",
+            "projectUrl": "https://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.13.1",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard2.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[2.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.1/nunit.3.13.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.13.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET Framework 3.5+\n- .NET Standard 2.0+",
+            "iconUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.0/nunit.3.13.0.nupkg?extract=icon.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.0/nunit.3.13.0.nupkg?extract=LICENSE.txt",
+            "listed": true,
+            "minClientVersion": "2.12",
+            "projectUrl": "https://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.13.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard2.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[2.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.0/nunit.3.13.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.12.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET Framework 3.5+\n- .NET Standard 1.4+\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.12.0/nunit.3.12.0.nupkg?extract=LICENSE.txt",
+            "listed": true,
+            "minClientVersion": "2.12",
+            "projectUrl": "https://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.12.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.4",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.4",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.4/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.1, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.4/system.componentmodel.typeconverter",
+                    "@type": "PackageDependency",
+                    "id": "System.ComponentModel.TypeConverter",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.componentmodel.typeconverter/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.4/system.reflection.typeextensions",
+                    "@type": "PackageDependency",
+                    "id": "System.Reflection.TypeExtensions",
+                    "range": "[4.4.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.reflection.typeextensions/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard2.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[2.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.12.0/nunit.3.12.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.11.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET Framework 2.0+\n- .NET Standard 1.4+\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
+            "listed": true,
+            "minClientVersion": "2.12",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.11.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.4",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.4",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.4/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.1, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.4/system.reflection.typeextensions",
+                    "@type": "PackageDependency",
+                    "id": "System.Reflection.TypeExtensions",
+                    "range": "[4.4.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.reflection.typeextensions/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard2.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[2.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.11.0/nunit.3.11.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.10.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET Framework 2.0+\n- .NET Standard 1.6+\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
+            "listed": true,
+            "minClientVersion": "2.12",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.10.1",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.1, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard2.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[2.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.10.1/nunit.3.10.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.10.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET Framework 2.0+\n- .NET Standard 1.6+\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
+            "listed": true,
+            "minClientVersion": "2.12",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.10.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.1, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard2.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard2.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[2.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.10.0/nunit.3.10.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.9.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET 2.0+\n- .NET Standard 1.3 and 1.6\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.9.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/xamarin.ios0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "Xamarin.iOS0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/xamarin.ios0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/monoandroid0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "MonoAndroid0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/monoandroid0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/uap0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "UAP0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/uap0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.3",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.runtime.loader",
+                    "@type": "PackageDependency",
+                    "id": "System.Runtime.Loader",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.runtime.loader/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.threading.thread",
+                    "@type": "PackageDependency",
+                    "id": "System.Threading.Thread",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.threading.thread/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.9.0/nunit.3.9.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.8.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET 2.0+\n- .NET Standard 1.3 and 1.6\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.8.1",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/xamarin.ios0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "Xamarin.iOS0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/xamarin.ios0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/monoandroid0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "MonoAndroid0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/monoandroid0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/uap0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "UAP0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/uap0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.3",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.runtime.loader",
+                    "@type": "PackageDependency",
+                    "id": "System.Runtime.Loader",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.runtime.loader/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.threading.thread",
+                    "@type": "PackageDependency",
+                    "id": "System.Threading.Thread",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.threading.thread/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.8.1/nunit.3.8.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.8.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole, Rob Prouse",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET 2.0+\n- .NET Standard 1.3 and 1.6\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.8.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/xamarin.ios0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "Xamarin.iOS0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/xamarin.ios0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/monoandroid0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "MonoAndroid0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/monoandroid0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/uap0.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": "UAP0.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/uap0.0/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.3",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.runtime.loader",
+                    "@type": "PackageDependency",
+                    "id": "System.Runtime.Loader",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.runtime.loader/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.threading.thread",
+                    "@type": "PackageDependency",
+                    "id": "System.Threading.Thread",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.threading.thread/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.8.0/nunit.3.8.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.7.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET 2.0+\n- .NET Standard 1.3 and 1.6\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.7.1",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.3",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3/system.threading.thread",
+                    "@type": "PackageDependency",
+                    "id": "System.Threading.Thread",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.threading.thread/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.runtime.loader",
+                    "@type": "PackageDependency",
+                    "id": "System.Runtime.Loader",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.runtime.loader/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.threading.thread",
+                    "@type": "PackageDependency",
+                    "id": "System.Threading.Thread",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.threading.thread/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.7.1/nunit.3.7.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.7.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n\nSupported platforms:\n- .NET 2.0+\n- .NET Standard 1.3 and 1.6\n- .NET Core",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.7.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework2.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework2.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework3.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework3.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.3",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.3/system.threading.thread",
+                    "@type": "PackageDependency",
+                    "id": "System.Threading.Thread",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.threading.thread/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.runtime.loader",
+                    "@type": "PackageDependency",
+                    "id": "System.Runtime.Loader",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.runtime.loader/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.threading.thread",
+                    "@type": "PackageDependency",
+                    "id": "System.Threading.Thread",
+                    "range": "[4.3.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.threading.thread/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.7.0/nunit.3.7.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.6.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Standard 1.6\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.6.1",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.runtime.loader",
+                    "@type": "PackageDependency",
+                    "id": "System.Runtime.Loader",
+                    "range": "[4.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.runtime.loader/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.6.1/nunit.3.6.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.6.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Standard 1.6\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.6.0",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETStandard1.6",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/netstandard.library",
+                    "@type": "PackageDependency",
+                    "id": "NETStandard.Library",
+                    "range": "[1.6.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/netstandard.library/index.json"
+                  },
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netstandard1.6/system.runtime.loader",
+                    "@type": "PackageDependency",
+                    "id": "System.Runtime.Loader",
+                    "range": "[4.0.0, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/system.runtime.loader/index.json"
+                  }
+                ]
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.6.0/nunit.3.6.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.5.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.5.0"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.5.0/nunit.3.5.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.4.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.4.1"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.4.1/nunit.3.4.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.4.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.4.0"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.4.0/nunit.3.4.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.2.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.2.1"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.2.1/nunit.3.2.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.2.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.2.0"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.2.0/nunit.3.2.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "3.0.1"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.1/nunit.3.0.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Framework",
+            "version": "3.0.0"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0/nunit.3.0.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-rc-3.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-rc-3"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-rc-3/nunit.3.0.0-rc-3.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-rc-2.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-rc-2"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-rc-2/nunit.3.0.0-rc-2.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-rc.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit3-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nSupported platforms:\n  - .NET 2.0+\n  - .NET Core (Universal Windows Apps 10+, DNX Core 5+)\n  - Windows 8\n  - Windows Phone 8 (Silverlight)\n  - Universal (Windows Phone 8.1+, Windows 8.1+)\n  - Xamarin (MonoTouch, MonoAndroid, Xamarin iOS Universal)\n  - Portable Libraries (supporting Profile259)",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-rc"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-rc/nunit.3.0.0-rc.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-beta-5.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nThis is an beta release, but is ready for production use for people with prior NUnit experience.",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-beta-5"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-beta-5/nunit.3.0.0-beta-5.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-beta-4.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nThis is an beta release, but is ready for production use for people with prior NUnit experience.",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-beta-4"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-beta-4/nunit.3.0.0-beta-4.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-beta-3.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nThis is an beta release, but is ready for production use for people with prior NUnit experience.",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-beta-3"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-beta-3/nunit.3.0.0-beta-3.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-beta-2.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\nThis is an beta release, but is ready for production use for people with prior NUnit experience.",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-beta-2",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0/microsoft.bcl.async",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Bcl.Async",
+                    "range": "[1.0.165, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/microsoft.bcl.async/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-beta-2/nunit.3.0.0-beta-2.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-beta-1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\n\nThis is an alpha release and is not intended for production use.",
+            "iconUrl": "http://nunit.org/nuget/nunitv3_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-beta-1",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0/microsoft.bcl.async",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Bcl.Async",
+                    "range": "[1.0.165, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/microsoft.bcl.async/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-beta-1/nunit.3.0.0-beta-1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-alpha-5.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\n\nThis is an alpha release and is not intended for production use.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-alpha-5",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0/microsoft.bcl.async",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Bcl.Async",
+                    "range": "[1.0.165, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/microsoft.bcl.async/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-alpha-5/nunit.3.0.0-alpha-5.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-alpha-4.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\n\nThis is an alpha release and is not intended for production use.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-alpha-4",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0/microsoft.bcl.async",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Bcl.Async",
+                    "range": "[1.0.165, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/microsoft.bcl.async/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-alpha-4/nunit.3.0.0-alpha-4.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-alpha-3.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\n\nThis is an alpha release and is not intended for production use.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-alpha-3",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0/microsoft.bcl.async",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Bcl.Async",
+                    "range": "[1.0.165, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/microsoft.bcl.async/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-alpha-3/nunit.3.0.0-alpha-3.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-alpha-2.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\n\nThis is an alpha release and is not intended for production use.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-alpha-2",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0/microsoft.bcl.async",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Bcl.Async",
+                    "range": "[1.0.165, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/microsoft.bcl.async/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-alpha-2/nunit.3.0.0-alpha-2.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.0.0-alpha.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\n\nThis package includes the NUnit 3.0 framework assembly, which is referenced by your tests. You will need to install version 3.0 of the nunit-console program or a third-party runner that supports NUnit 3.0 in order to execute tests. Runners intended for use with NUnit 2.x will not run 3.0 tests correctly.\n\n\nThis is an alpha release and is not intended for production use.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/nunit3-license.txt",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit Version 3",
+            "version": "3.0.0-alpha",
+            "dependencyGroups": [
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.0",
+                "dependencies": [
+                  {
+                    "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.0/microsoft.bcl.async",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Bcl.Async",
+                    "range": "[1.0.165, )",
+                    "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/microsoft.bcl.async/index.json"
+                  }
+                ]
+              },
+              {
+                "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000#dependencyGroup/.netframework4.5",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETFramework4.5"
+              }
+            ]
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.0.0-alpha/nunit.3.0.0-alpha.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.7.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunitsoftware.com/nunitv2/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunitsoftware.com/nunitv2/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunitsoftware.com/nunitv2",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.7.1"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.7.1/nunit.2.7.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.7.0.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunitsoftware.com/nunitv2/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunitsoftware.com/nunitv2/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunitsoftware.com/nunitv2",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.7.0"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.7.0/nunit.2.7.0.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.7.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunitsoftware.com/nunitv2/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunitsoftware.com/nunitv2/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunitsoftware.com/nunitv2",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.7"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.7/nunit.2.6.7.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.6.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunitsoftware.com/nunitv2/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunitsoftware.com/nunitv2/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunitsoftware.com/nunitv2",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.6"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.6/nunit.2.6.6.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.5.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.5"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.5/nunit.2.6.5.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.4.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.4"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.4/nunit.2.6.4.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.3.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "nunit",
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.3"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.3/nunit.2.6.3.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.2.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.2"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.2/nunit.2.6.2.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.1"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.1/nunit.2.6.1.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.0.12054.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.0.12054"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.0.12054/nunit.2.6.0.12054.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.0.12051.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible. A number of runners, both from the NUnit project and by third parties, are able to execute NUnit tests.\n\nVersion 2.6 is the seventh major release of this well-known and well-tested programming tool.\n\nThis package includes only the framework assembly. You will need to install the NUnit.Runners package unless you are using a third-party runner.",
+            "iconUrl": "http://nunit.org/nuget/nunit_32x32.png",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "http://nunit.org/nuget/license.html",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "http://nunit.org",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages with a strong TDD focus.",
+            "tags": [
+              "test",
+              "testing",
+              "tdd",
+              "framework",
+              "fluent",
+              "assert",
+              "theory",
+              "plugin",
+              "addin"
+            ],
+            "title": "NUnit",
+            "version": "2.6.0.12051"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.0.12051/nunit.2.6.0.12051.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.5.10.11092.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit is a unit-testing framework for all .Net languages. Initially ported from JUnit, the current production release, version 2.5, is the sixth major release of this xUnit based unit testing tool for Microsoft .NET.",
+            "iconUrl": "",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages. Initially ported from JUnit, the current production release, version 2.5, is the sixth major release of this xUnit based unit testing tool for Microsoft .NET.",
+            "tags": [
+              ""
+            ],
+            "title": "",
+            "version": "2.5.10.11092"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.5.10.11092/nunit.2.5.10.11092.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.5.9.10348.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit is a unit-testing framework for all .Net languages. Initially ported from JUnit, the current production release, version 2.5, is the sixth major release of this xUnit based unit testing tool for Microsoft .NET.",
+            "iconUrl": "",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages. Initially ported from JUnit, the current production release, version 2.5, is the sixth major release of this xUnit based unit testing tool for Microsoft .NET.",
+            "tags": [
+              ""
+            ],
+            "title": "",
+            "version": "2.5.9.10348"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.5.9.10348/nunit.2.5.9.10348.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.5.7.10213.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "@id": "https://pkgs.dev.azure.com/organisationName/_apis/packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/commitLog/00000000000000000000000000000000",
+            "@type": "PackageDetails",
+            "authors": "Charlie Poole",
+            "description": "NUnit is a unit-testing framework for all .Net languages. Initially ported from JUnit, the current production release, version 2.5, is the sixth major release of this xUnit based unit testing tool for Microsoft .NET.",
+            "iconUrl": "",
+            "id": "NUnit",
+            "language": "en-US",
+            "licenseUrl": "",
+            "listed": true,
+            "minClientVersion": "",
+            "projectUrl": "",
+            "published": "2021-12-03T03:20:52Z",
+            "requireLicenseAcceptance": false,
+            "summary": "NUnit is a unit-testing framework for all .Net languages. Initially ported from JUnit, the current production release, version 2.5, is the sixth major release of this xUnit based unit testing tool for Microsoft .NET.",
+            "tags": [
+              ""
+            ],
+            "title": "",
+            "version": "2.5.7.10213"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.5.7.10213/nunit.2.5.7.10213.nupkg",
+          "registration": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json"
+        }
+      ],
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/page/2.5.7.10213/3.13.2.json",
+      "@type": "catalog:CatalogPage",
+      "parent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/index.json",
+      "lower": "2.5.7.10213",
+      "upper": "3.13.2"
+    }
+  ],
+  "@context": {
+    "@vocab": "http://schema.nuget.org/schema#",
+    "catalog": "http://schema.nuget.org/catalog#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "items": {
+      "@id": "catalog:item",
+      "@container": "@set"
+    },
+    "commitTimeStamp": {
+      "@id": "catalog:commitTimeStamp",
+      "@type": "xsd:dateTime"
+    },
+    "commitId": {
+      "@id": "catalog:commitId"
+    },
+    "count": {
+      "@id": "catalog:count"
+    },
+    "parent": {
+      "@id": "catalog:parent",
+      "@type": "@id"
+    },
+    "tags": {
+      "@container": "@set",
+      "@id": "tag"
+    },
+    "packageTargetFrameworks": {
+      "@container": "@set",
+      "@id": "packageTargetFramework"
+    },
+    "dependencyGroups": {
+      "@container": "@set",
+      "@id": "dependencyGroup"
+    },
+    "dependencies": {
+      "@container": "@set",
+      "@id": "dependency"
+    },
+    "packageContent": {
+      "@type": "@id"
+    },
+    "published": {
+      "@type": "xsd:dateTime"
+    },
+    "registration": {
+      "@type": "@id"
+    }
+  }
+}

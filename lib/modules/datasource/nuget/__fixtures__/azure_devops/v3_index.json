@@ -1,0 +1,54 @@
+{
+  "@context": {
+    "@vocab": "http://schema.nuget.org/services#",
+    "comment": "http://www.w3.org/2000/01/rdf-schema#comment",
+    "label": "http://www.w3.org/2000/01/rdf-schema#label"
+  },
+  "resources": [
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v2/",
+      "@type": "PackagePublish/2.0.0"
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v2/",
+      "@type": "LegacyGallery/2.0.0"
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/",
+      "@type": "RegistrationsBaseUrl/3.0.0-beta"
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2-semver2/",
+      "@type": "RegistrationsBaseUrl/3.6.0",
+      "comment": "This base URL includes SemVer 2.0.0 packages."
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2-semver2/",
+      "@type": "RegistrationsBaseUrl/Versioned",
+      "comment": "This base URL includes SemVer 2.0.0 packages."
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/query2/",
+      "@type": "SearchQueryService/3.0.0-beta"
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/",
+      "@type": "PackageBaseAddress/3.0.0"
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/",
+      "@type": "VssBaseUrl"
+    },
+    {
+      "@id": "urn:uuid:2745c5e9-610a-4537-9032-978c66527b51",
+      "@type": "VssFeedId",
+      "label": "FeedName"
+    },
+    {
+      "@id": "com.visualstudio.feeds.feedview:2745c5e9-610a-4537-9032-978c66527b51",
+      "@type": "VssQualifiedFeedViewId",
+      "label": "FeedName"
+    }
+  ],
+  "version": "3.0.0-beta"
+}

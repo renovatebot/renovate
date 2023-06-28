@@ -52,6 +52,12 @@ const nlogMocks = [
   },
 ];
 
+const nugetIndexV3AzureDevOps = Fixtures.get('azure_devops/v3_index.json');
+const pkgListV3RegistrationAzureDevOps = Fixtures.get(
+  'azure_devops/nunit/v3_registration.json'
+);
+const pkgInfoV3FromAzureDevOps = Fixtures.get('azure_devops/nunit/nuspec.xml');
+
 const configV3V2 = {
   datasource,
   versioning,
@@ -90,6 +96,15 @@ const configV3Multiple = {
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://myprivatefeed/index.json',
+  ],
+};
+
+const configV3AzureDevOps = {
+  datasource,
+  versioning,
+  packageName: 'nunit',
+  registryUrls: [
+    'https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
   ],
 };
 
@@ -372,6 +387,30 @@ describe('modules/datasource/nuget/index', () => {
         .reply(200, pkgInfoV3FromNuget);
       const res = await getPkgReleases({
         ...configV3,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+      expect(res?.sourceUrl).toBeDefined();
+    });
+
+    it('processes real data (v3) feed is azure devops', async () => {
+      httpMock
+        .scope('https://pkgs.dev.azure.com')
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json'
+        )
+        .twice()
+        .reply(200, nugetIndexV3AzureDevOps)
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2-semver2/nunit/index.json'
+        )
+        .reply(200, pkgListV3RegistrationAzureDevOps)
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.nuspec'
+        )
+        .reply(200, pkgInfoV3FromAzureDevOps);
+      const res = await getPkgReleases({
+        ...configV3AzureDevOps,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();

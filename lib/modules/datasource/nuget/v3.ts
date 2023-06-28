@@ -8,6 +8,7 @@ import { Http, HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
+import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
 import { massageUrl, removeBuildMeta } from './common';
 import type {
@@ -121,7 +122,9 @@ export async function getReleases(
   const catalogPagesQueue = catalogPages.map(
     (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page)
   );
-  const catalogEntries = (await p.all(catalogPagesQueue)).flat();
+  const catalogEntries = (await p.all(catalogPagesQueue))
+    .flat()
+    .sort((a, b) => versioning.sortVersions(a.version, b.version));
 
   let homepage: string | null = null;
   let latestStable: string | null = null;
@@ -131,7 +134,7 @@ export async function getReleases(
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
-      if (semver.valid(version) && !semver.prerelease(version)) {
+      if (versioning.isValid(version) && versioning.isStable(version)) {
         latestStable = removeBuildMeta(version);
         homepage = projectUrl ? massageUrl(projectUrl) : homepage;
       }
