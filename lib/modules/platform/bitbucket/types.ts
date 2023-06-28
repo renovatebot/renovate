@@ -102,13 +102,3 @@ export interface EffectiveReviewer {
   reviewer_type: string;
   user: Account;
 }
-
-export interface SourceResults {
-  path: string;
-  type: BitbucketSourceType;
-  commit: {
-    hash: string;
-  };
-}
-
-export type BitbucketSourceType = 'commit_directory' | 'commit_file';

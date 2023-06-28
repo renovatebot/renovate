@@ -1,9 +1,8 @@
-import { ZodSchema, z } from 'zod';
-import type { PagedResult, SourceResults } from './types';
+import { z } from 'zod';
 
 const BitbucketSourceTypeSchema = z.enum(['commit_directory', 'commit_file']);
 
-const SourceResultsSchema: ZodSchema<SourceResults> = z.object({
+const SourceResultsSchema = z.object({
   path: z.string(),
   type: BitbucketSourceTypeSchema,
   commit: z.object({
@@ -11,17 +10,13 @@ const SourceResultsSchema: ZodSchema<SourceResults> = z.object({
   }),
 });
 
-export const PagedSourceResultsSchema =
-  createPagedResultSchema(SourceResultsSchema);
+const PagedSchema = z.object({
+  page: z.number().optional(),
+  pagelen: z.number(),
+  size: z.number().optional(),
+  next: z.string().optional(),
+});
 
-function createPagedResultSchema<T>(
-  valuesSchema: ZodSchema<T>
-): ZodSchema<PagedResult<T>> {
-  return z.object({
-    page: z.number().optional(),
-    pagelen: z.number(),
-    size: z.number().optional(),
-    next: z.string().optional(),
-    values: z.array(valuesSchema),
-  });
-}
+export const PagedSourceResultsSchema = PagedSchema.extend({
+  values: z.array(SourceResultsSchema),
+});
