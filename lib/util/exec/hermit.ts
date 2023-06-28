@@ -1,10 +1,10 @@
-import os from 'node:os';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { findUpLocal } from '../fs';
 import { rawExec } from './common';
 import type { RawExecOptions } from './types';
+import { newlineRegex } from '../regex';
 
 export function isHermit(): boolean {
   return GlobalConfig.get('binarySource') === 'hermit';
@@ -33,18 +33,16 @@ export async function getHermitEnvs(
     cwd: hermitCwd,
   });
 
-  const lines = hermitEnvResp.stdout.split(os.EOL);
-
   const out: Record<string, string> = {};
 
+  const lines = hermitEnvResp.stdout
+    .split(newlineRegex)
+    .map((line) => line.trim())
+    .filter((line) => line.includes('='));
   for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (trimmedLine === '') {
-      continue;
-    }
-    const equalIndex = trimmedLine.indexOf('=');
-    const name = trimmedLine.substring(0, equalIndex);
-    out[name] = trimmedLine.substring(equalIndex + 1);
+    const equalIndex = line.indexOf('=');
+    const name = line.substring(0, equalIndex);
+    out[name] = line.substring(equalIndex + 1);
   }
 
   return out;
