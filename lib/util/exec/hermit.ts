@@ -2,9 +2,9 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { findUpLocal } from '../fs';
+import { newlineRegex } from '../regex';
 import { rawExec } from './common';
 import type { RawExecOptions } from './types';
-import { newlineRegex } from '../regex';
 
 export function isHermit(): boolean {
   return GlobalConfig.get('binarySource') === 'hermit';
