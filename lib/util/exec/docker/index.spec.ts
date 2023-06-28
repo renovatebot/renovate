@@ -217,12 +217,13 @@ describe('util/exec/docker/index', () => {
       cwd: '/tmp/foobar',
       envVars,
     };
-    const command = (img: string, vol?: string): string =>
+    const command = (img: string, vol?: string, opts?: string): string =>
       `docker run --rm ` +
       `--name=renovate_${img} ` +
       `--label=renovate_child ` +
       `--user=some-user ` +
       (vol ? `${vol} ` : '') +
+      (opts ? `${opts} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
       `containerbase/${img} ` +
@@ -296,6 +297,18 @@ describe('util/exec/docker/index', () => {
       expect(res).toBe(
         command(image, `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`)
       );
+    });
+
+    it('add multiple docker cli option', async () => {
+      mockExecAll();
+      GlobalConfig.set({
+        dockerUser: 'some-user',
+        dockerCliOptions: '--memory=4g --cpus=".5"',
+      });
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+      });
+      expect(res).toBe(command(image, undefined, `--memory=4g --cpus=".5"`));
     });
 
     // TODO: it('handles tag constraint', async () => {
