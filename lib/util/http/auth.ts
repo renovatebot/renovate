@@ -6,7 +6,7 @@ import {
 } from '../../constants';
 import type { GotOptions } from './types';
 
-type AuthGotOptions = Pick<
+export type AuthGotOptions = Pick<
   GotOptions,
   | 'hostType'
   | 'headers'

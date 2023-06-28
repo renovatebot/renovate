@@ -12,7 +12,7 @@ import { dnsLookup } from './dns';
 import { keepaliveAgents } from './keepalive';
 import type { GotOptions } from './types';
 
-type HostRulesGotOptions = Pick<
+export type HostRulesGotOptions = Pick<
   GotOptions,
   | 'hostType'
   | 'url'
