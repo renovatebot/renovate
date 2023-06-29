@@ -18,6 +18,8 @@ export class FlutterVersionDatasource extends Datasource {
 
   override readonly caching = true;
 
+  override readonly defaultVersioning = 'semver';
+
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
