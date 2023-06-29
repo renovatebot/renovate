@@ -31,6 +31,7 @@ import {
 } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type {
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -142,10 +143,23 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
+export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
+
+  const queryParams: Record<string, any> = {
+    membership: true,
+    per_page: 100,
+    with_merge_requests_enabled: true,
+    min_access_level: 30,
+    archived: false,
+  };
+  if (config?.topics?.length) {
+    queryParams['topic'] = config.topics.join(',');
+  }
+
+  const url = 'projects?' + getQueryString(queryParams);
+
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false`;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });
@@ -538,9 +552,22 @@ async function ignoreApprovals(pr: number): Promise<void> {
       }[]
     >(url);
 
+    const ruleName = 'renovateIgnoreApprovals';
+
     const existingAnyApproverRule = rules?.find(
       ({ rule_type }) => rule_type === 'any_approver'
     );
+    const existingRegularApproverRules = rules?.filter(
+      ({ rule_type, name }) => rule_type !== 'any_approver' && name !== ruleName
+    );
+
+    if (existingRegularApproverRules?.length) {
+      await p.all(
+        existingRegularApproverRules.map((rule) => async (): Promise<void> => {
+          await gitlabApi.deleteJson(`${url}/${rule.id}`);
+        })
+      );
+    }
 
     if (existingAnyApproverRule) {
       await gitlabApi.putJson(`${url}/${existingAnyApproverRule.id}`, {
@@ -549,7 +576,6 @@ async function ignoreApprovals(pr: number): Promise<void> {
       return;
     }
 
-    const ruleName = 'renovateIgnoreApprovals';
     const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
     if (!zeroApproversRule) {
       await gitlabApi.postJson(url, {

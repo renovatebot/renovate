@@ -53,6 +53,7 @@ const repoGroups = {
   baset: 'https://github.com/igmat/baset',
   brave: 'https://github.com/openzipkin/brave',
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
+  cake: 'https://github.com/cake-build/cake',
   capacitor: 'https://github.com/ionic-team/capacitor',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   chromely: 'https://github.com/chromelyapps/Chromely',
@@ -96,7 +97,10 @@ const repoGroups = {
   fela: 'https://github.com/robinweser/fela',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
-  fontsource: 'https://github.com/fontsource/fontsource',
+  fontsource: [
+    'https://github.com/fontsource/fontsource', // old repo
+    'https://github.com/fontsource/font-files',
+  ],
   formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
@@ -271,6 +275,7 @@ const orgGroups = {
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
+  octokit: 'https://github.com/octokit/',
   'semantic-release': 'https://github.com/semantic-release/',
   swc: 'https://github.com/swc-project/',
 };

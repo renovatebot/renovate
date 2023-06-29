@@ -12,7 +12,7 @@ exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
     "Change": "All locks refreshed",
   },
   "rebaseStalePrs": true,
-  "recreateClosed": true,
+  "recreateWhen": "always",
   "schedule": [
     "on monday",
   ],

@@ -155,8 +155,7 @@ export async function processBranch(
         config.automerge = false;
         config.automergedPreviously = true;
       }
-    }
-    if (!branchPr && existingPr && !dependencyDashboardCheck) {
+    } else if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
@@ -874,7 +873,7 @@ export async function processBranch(
       throw err;
     }
     // Otherwise don't throw here - we don't want to stop the other renovations
-    logger.error({ err }, `Error ensuring PR: ${String(err.message)}`);
+    logger.error({ err }, `Error ensuring PR`);
   }
   if (!branchExists) {
     return {

@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import { getPkgReleases } from '../../../modules/datasource';
 import * as versioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
+import { uniq } from '../../uniq';
 import { ensureTrailingSlash } from '../../url';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
@@ -58,14 +59,7 @@ function volumesEql(x: VolumesPair, y: VolumesPair): boolean {
   return xFrom === yFrom && xTo === yTo;
 }
 
-function uniq<T = unknown>(
-  array: T[],
-  eql = (x: T, y: T): boolean => x === y
-): T[] {
-  return array.filter((x, idx, arr) => arr.findIndex((y) => eql(x, y)) === idx);
-}
-
-function prepareVolumes(volumes: VolumeOption[] = []): string[] {
+function prepareVolumes(volumes: VolumeOption[]): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter(
     (vol): vol is VolumesPair => vol !== null
@@ -123,7 +117,7 @@ export async function getDockerTag(
       return version;
     }
   } else {
-    logger.error(`No ${packageName} releases found`);
+    logger.error({ packageName }, `Docker exec: no releases found`);
     return 'latest';
   }
   logger.warn(
@@ -170,13 +164,14 @@ export async function removeDockerContainer(
 }
 
 export async function removeDanglingContainers(): Promise<void> {
-  const { binarySource, dockerChildPrefix } = GlobalConfig.get();
-  if (binarySource !== 'docker') {
+  if (GlobalConfig.get('binarySource') !== 'docker') {
     return;
   }
 
   try {
-    const containerLabel = getContainerLabel(dockerChildPrefix);
+    const containerLabel = getContainerLabel(
+      GlobalConfig.get('dockerChildPrefix')
+    );
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
       {
@@ -222,6 +217,7 @@ export async function generateDockerCommand(
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
+    dockerCliOptions,
     dockerImagePrefix,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
@@ -231,6 +227,9 @@ export async function generateDockerCommand(
   result.push(`--label=${containerLabel}`);
   if (dockerUser) {
     result.push(`--user=${dockerUser}`);
+  }
+  if (dockerCliOptions) {
+    result.push(dockerCliOptions);
   }
 
   const volumeDirs: VolumeOption[] = [localDir, cacheDir];

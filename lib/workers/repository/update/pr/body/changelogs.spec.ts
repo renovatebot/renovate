@@ -78,7 +78,7 @@ describe('workers/repository/update/pr/body/changelogs', () => {
       some/repo (dep-1)
       some/repo (dep-2)
       some/repo (dep-3)
-      other/repo
+      other/repo (dep-4)
 
       "
     `);

@@ -1,6 +1,7 @@
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import hasha from 'hasha';
+import type { SetRequired } from 'type-fest';
 import { infer as Infer, ZodType } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
@@ -13,7 +14,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { getThrottle } from './throttle';
+import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -77,7 +78,7 @@ function applyDefaultHeaders(options: Options): void {
 // `request`.
 async function gotTask<T>(
   url: string,
-  options: GotOptions,
+  options: SetRequired<GotOptions, 'method'>,
   requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
 ): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
@@ -102,9 +103,10 @@ async function gotTask<T>(
       duration =
         error.timings?.phases.total ??
         /* istanbul ignore next: can't be tested */ -1;
-      const method = options.method?.toUpperCase() ?? 'GET';
-      const code = error.code ?? 'UNKNOWN';
-      const retryCount = error.request?.retryCount ?? -1;
+      const method = options.method.toUpperCase();
+      const code = error.code ?? /* istanbul ignore next */ 'UNKNOWN';
+      const retryCount =
+        error.request?.retryCount ?? /* istanbul ignore next */ -1;
       logger.debug(
         `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`
       );
@@ -125,16 +127,20 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
+  protected getThrottle(url: string): Throttle | null {
+    return getThrottle(url);
+  }
+
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions: InternalHttpOptions & HttpRequestOptions<T> = {}
+    httpOptions: InternalHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
 
-    let options: GotOptions = merge<GotOptions>(
+    let options = merge<SetRequired<GotOptions, 'method'>, GotOptions>(
       {
         method: 'get',
         ...this.options,
@@ -144,8 +150,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     );
 
     const etagCache =
-      httpOptions.etagCache &&
-      (options.method === 'get' || options.method === 'head')
+      httpOptions.etagCache && options.method === 'get'
         ? httpOptions.etagCache
         : null;
     if (etagCache) {
@@ -198,13 +203,13 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const httpTask: Task<T> = () => {
         const queueDuration = Date.now() - startTime;
         return gotTask(url, options, {
-          method: options.method ?? 'get',
+          method: options.method,
           url,
           queueDuration,
         });
       };
 
-      const throttle = getThrottle(url);
+      const throttle = this.getThrottle(url);
       const throttledTask: Task<T> = throttle
         ? () => throttle.add<HttpResponse<T>>(httpTask)
         : httpTask;
@@ -308,7 +313,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ): JsonArgs<Opts, ResT> {
     const res: JsonArgs<Opts, ResT> = { url: arg1 };
 
-    if (arg2 instanceof ZodType<ResT>) {
+    if (arg2 instanceof ZodType) {
       res.schema = arg2;
     } else if (arg2) {
       res.httpOptions = arg2;

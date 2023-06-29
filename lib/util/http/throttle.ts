@@ -5,7 +5,7 @@ import { getThrottleIntervalMs } from './host-rules';
 
 const hostThrottles = new Map<string, Throttle | null>();
 
-class Throttle {
+export class Throttle {
   private throttle: ReturnType<typeof pThrottle>;
 
   constructor(interval: number) {
