@@ -3,13 +3,12 @@ import type { RenovateOptions } from './types';
 
 describe('config/defaults', () => {
   describe('getDefault()', () => {
-
     it('returns new instances of arrays when called repeatedly', () => {
       const option: RenovateOptions = {
-        type: "array",
-        description: "thing",
-        name: "thing"
-      }
+        type: 'array',
+        description: 'thing',
+        name: 'thing',
+      };
       const array1 = getDefault(option);
       const array2 = getDefault(option);
 
@@ -20,10 +19,10 @@ describe('config/defaults', () => {
 
     it('returns true for boolean values', () => {
       const option: RenovateOptions = {
-        type: "boolean",
-        description: "thing",
-        name: "thing"
-      }
+        type: 'boolean',
+        description: 'thing',
+        name: 'thing',
+      };
       const val = getDefault(option);
 
       expect(val).toBe(true);
@@ -32,10 +31,10 @@ describe('config/defaults', () => {
     ['string', 'object', 'integer'].forEach((type: unknown) => {
       it(`returns null for ${type} values`, () => {
         const option: RenovateOptions = {
-          type: type as "string" | "object" | "integer",
-          description: "thing",
-          name: "thing"
-        }
+          type: type as 'string' | 'object' | 'integer',
+          description: 'thing',
+          name: 'thing',
+        };
         const val = getDefault(option);
 
         expect(val).toBe(null);
