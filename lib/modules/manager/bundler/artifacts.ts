@@ -25,7 +25,7 @@ import type {
 } from '../types';
 import {
   getBundlerConstraint,
-  getLockFileName,
+  getLockFilePath,
   getRubyConstraint,
 } from './common';
 import {
@@ -101,7 +101,7 @@ export async function updateArtifacts(
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(existingError);
   }
-  const lockFileName = await getLockFileName(packageFileName);
+  const lockFileName = await getLockFilePath(packageFileName);
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');

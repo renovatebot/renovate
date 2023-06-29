@@ -6,7 +6,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import type { UpdateArtifact } from '../types';
 import {
   getBundlerConstraint,
-  getLockFileName,
+  getLockFilePath,
   getRubyConstraint,
 } from './common';
 
@@ -103,13 +103,13 @@ describe('modules/manager/bundler/common', () => {
   describe('getLockFileName', () => {
     it('returns packageFileName.lock', async () => {
       fs.localPathExists.mockResolvedValueOnce(true);
-      const lockFileName = await getLockFileName('packageFileName');
+      const lockFileName = await getLockFilePath('packageFileName');
       expect(lockFileName).toBe('packageFileName.lock');
     });
 
     it('returns Gemfile.lock', async () => {
       fs.localPathExists.mockResolvedValueOnce(false);
-      const lockFileName = await getLockFileName('packageFileName');
+      const lockFileName = await getLockFilePath('packageFileName');
       expect(lockFileName).toBe('Gemfile.lock');
     });
   });
