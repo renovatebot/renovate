@@ -95,7 +95,7 @@ describe('modules/datasource/git-refs/index', () => {
         { packageName: 'a tag to look up' },
         'v1.0.4'
       );
-      expect(digest).toEqual('2b52829c7c1bd65b3501c450849c53b90b11fa0e');
+      expect(digest).toBe('2b52829c7c1bd65b3501c450849c53b90b11fa0e');
     });
 
     it('ignores refs/for/', async () => {
@@ -115,7 +115,7 @@ describe('modules/datasource/git-refs/index', () => {
         { packageName: 'another tag to look up' },
         undefined
       );
-      expect(digest).toEqual('a9920c014aebc28dc1b23e7efcc006d0455cc710');
+      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
     });
 
     it('calls simpleGit with emptyEnv if no hostrules exist', async () => {
@@ -125,7 +125,7 @@ describe('modules/datasource/git-refs/index', () => {
         { packageName: 'another tag to look up' },
         undefined
       );
-      expect(digest).toEqual('a9920c014aebc28dc1b23e7efcc006d0455cc710');
+      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
       expect(gitMock.env).toHaveBeenCalledWith({});
     });
 
@@ -142,7 +142,7 @@ describe('modules/datasource/git-refs/index', () => {
         { packageName: 'another tag to look up' },
         undefined
       );
-      expect(digest).toEqual('a9920c014aebc28dc1b23e7efcc006d0455cc710');
+      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
       expect(gitMock.env).toHaveBeenCalledWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
@@ -167,7 +167,7 @@ describe('modules/datasource/git-refs/index', () => {
         { packageName: 'another tag to look up' },
         undefined
       );
-      expect(digest).toEqual('a9920c014aebc28dc1b23e7efcc006d0455cc710');
+      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
       expect(gitMock.env).toHaveBeenCalledWith({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',

@@ -128,7 +128,7 @@ describe('modules/datasource/git-tags/index', () => {
         { packageName: 'a tag to look up' },
         'v1.0.2'
       );
-      expect(digest).toMatchSnapshot();
+      expect(digest).toBe('9cb93e0b236385a4e2efd089d7c6a458f5ff321f');
     });
 
     it('returns digest for HEAD', async () => {
@@ -138,7 +138,7 @@ describe('modules/datasource/git-tags/index', () => {
         { packageName: 'another tag to look up' },
         undefined
       );
-      expect(digest).toMatchSnapshot();
+      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
     });
   });
 });
