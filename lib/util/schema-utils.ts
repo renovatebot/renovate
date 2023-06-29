@@ -223,3 +223,12 @@ export const UtcDate = z
     }
     return date;
   });
+
+export const Url = z.string().transform((str, ctx): URL => {
+  try {
+    return new URL(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid URL' });
+    return z.NEVER;
+  }
+});
