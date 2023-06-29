@@ -35,7 +35,9 @@ export async function autodiscoverRepositories(
     return config;
   }
   // Autodiscover list of repositories
-  let discovered = await platform.getRepos();
+  let discovered = await platform.getRepos({
+    topics: config.autodiscoverTopics,
+  });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug(

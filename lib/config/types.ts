@@ -21,6 +21,7 @@ export interface GroupConfig extends Record<string, unknown> {
   branchTopic?: string;
 }
 
+export type RecreateWhen = 'auto' | 'never' | 'always';
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
@@ -70,6 +71,7 @@ export interface RenovateSharedConfig {
   respectLatest?: boolean;
   stopUpdatingLabel?: string;
   rebaseWhen?: string;
+  recreateWhen?: RecreateWhen;
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
@@ -92,10 +94,12 @@ export interface RenovateSharedConfig {
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
+  autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
+  dockerCliOptions?: string;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -123,6 +127,7 @@ export interface RepoGlobalConfig {
   cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
+  dockerCliOptions?: string;
   dockerImagePrefix?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;

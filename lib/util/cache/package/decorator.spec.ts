@@ -37,7 +37,7 @@ describe('util/cache/package/decorator', () => {
     expect(await obj.fn()).toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledOnceWith(
+    expect(setCache).toHaveBeenCalledExactlyOnceWith(
       'some-namespace',
       'cache-decorator:some-key',
       { cachedAt: expect.any(String), value: '111' },
@@ -77,7 +77,7 @@ describe('util/cache/package/decorator', () => {
     expect(await obj.fn(null)).toBeNull();
 
     expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledOnceWith(
+    expect(setCache).toHaveBeenCalledExactlyOnceWith(
       'namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: null },
@@ -125,7 +125,7 @@ describe('util/cache/package/decorator', () => {
     expect(await obj.fn('some', arg)).toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledOnceWith(
+    expect(setCache).toHaveBeenCalledExactlyOnceWith(
       'some-namespace',
       'cache-decorator:some-key',
       { cachedAt: expect.any(String), value: '111' },
@@ -147,7 +147,7 @@ describe('util/cache/package/decorator', () => {
     expect(await fn.value?.()).toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledOnceWith(
+    expect(setCache).toHaveBeenCalledExactlyOnceWith(
       'namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: '111' },

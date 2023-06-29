@@ -44,7 +44,7 @@ export async function checkConfigMigrationBranch(
         { prTitle: closedPr.title },
         'Closed PR already exists. Skipping branch.'
       );
-      await handlepr(config, closedPr);
+      await handlePr(config, closedPr);
       return null;
     }
   }
@@ -75,7 +75,7 @@ export async function migrationPrExists(branchName: string): Promise<boolean> {
   return !!(await platform.getBranchPr(branchName));
 }
 
-async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
+async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
   if (
     pr.state === 'closed' &&
     !config.suppressNotifications!.includes('prIgnoreNotification')

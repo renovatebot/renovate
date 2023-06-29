@@ -53,7 +53,7 @@ export function getChildEnv({
 }
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
-  const extraEnvKeys = Object.keys(extraEnv || {});
+  const extraEnvKeys = Object.keys(extraEnv);
   return extraEnvKeys.filter((key) => is.nonEmptyString(childEnv[key]));
 }
 
@@ -91,8 +91,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
 }
 
 function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
-  const { binarySource } = GlobalConfig.get();
-  return binarySource === 'docker' && !!docker;
+  return GlobalConfig.get('binarySource') === 'docker' && !!docker;
 }
 
 interface RawExecArguments {
@@ -102,9 +101,10 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd: string | string[],
-  opts: ExecOptions = {}
+  opts: ExecOptions
 ): Promise<RawExecArguments> {
   const { docker } = opts;
+  const preCommands = opts.preCommands ?? [];
   const { customEnvVariables, containerbaseDir, binarySource } =
     GlobalConfig.get();
 
@@ -133,13 +133,12 @@ async function prepareRawExec(
     ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-    const preCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(opts.preCommands ?? []),
-    ];
     const dockerCommand = await generateDockerCommand(
       rawCommands,
-      preCommands,
+      [
+        ...(await generateInstallCommands(opts.toolConstraints)),
+        ...preCommands,
+      ],
       dockerOptions
     );
     rawCommands = [dockerCommand];
@@ -147,7 +146,7 @@ async function prepareRawExec(
     logger.debug('Using containerbase dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(opts.preCommands ?? []),
+      ...preCommands,
       ...rawCommands,
     ];
   } else if (isHermit()) {
@@ -170,8 +169,7 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix =
-    GlobalConfig.get('dockerChildPrefix') ?? 'renovate_';
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
 
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
   const useDocker = isDocker(docker);
