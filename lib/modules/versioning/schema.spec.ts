@@ -2,13 +2,18 @@ import api from './api';
 import { Versioning } from './schema';
 
 describe('modules/versioning/schema', () => {
-  it('parses valid version strings', () => {
-    const versioning = Versioning.parse('semver');
-    expect(versioning).toBeDefined();
-    expect(versioning).toEqual(api.get('semver'));
+  it('returns existing version scheme', () => {
+    const versioning1 = Versioning.parse('hermit');
+    const versioning2 = Versioning.parse('hermit:foobar');
+    expect(versioning1.isValid).toBeFunction();
+    expect(versioning2.isValid).toBeFunction();
+    expect(versioning1).not.toBe(versioning2);
   });
 
-  it('throws an error for invalid version strings', () => {
-    expect(() => Versioning.parse('foobar')).toThrow();
+  it('falls back to default version scheme', () => {
+    const defaultVersioning = api.get('semver-coerced');
+    expect(Versioning.parse('foobarbaz')).toBe(defaultVersioning);
+    expect(Versioning.parse(null)).toBe(defaultVersioning);
+    expect(Versioning.parse('')).toBe(defaultVersioning);
   });
 });

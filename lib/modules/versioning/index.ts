@@ -14,5 +14,17 @@ export const getVersionings = (): Map<
 > => versionings;
 
 export function get(versioning: string | undefined): VersioningApi {
-  return Versioning.parse(versioning);
+  const res = Versioning.safeParse(versioning);
+
+  if (!res.success) {
+    const [issue] = res.error.issues;
+    if (issue && issue.code === 'custom' && issue.params?.error) {
+      throw issue.params.error;
+    }
+
+    // istanbul ignore next: should never happen
+    throw res.error;
+  }
+
+  return res.data;
 }

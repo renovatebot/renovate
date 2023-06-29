@@ -7,7 +7,7 @@ import type { VersioningApi } from './types';
 
 export const Versioning = z
   .unknown()
-  .transform((versioningSpec): VersioningApi => {
+  .transform((versioningSpec, ctx): VersioningApi => {
     if (!is.string(versioningSpec)) {
       logger.debug(
         { versioning: versioningSpec },
@@ -31,7 +31,17 @@ export const Versioning = z
       const versioningConfig = versioningRest.length
         ? versioningRest.join(':')
         : undefined;
-      versioning = new versioning(versioningConfig);
+
+      try {
+        versioning = new versioning(versioningConfig);
+      } catch (error) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Versioning: '${versioningSpec}' failed to initialize`,
+          params: { error },
+        });
+        return z.NEVER;
+      }
     }
 
     return versioning;
