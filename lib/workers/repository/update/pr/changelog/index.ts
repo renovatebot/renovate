@@ -26,29 +26,23 @@ export async function getChangeLogJSON(
       `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${newVersion})`
     );
 
-    let res: ChangeLogResult | null = null;
-
     const platform = detectPlatform(sourceUrl);
 
-    switch (platform) {
-      case 'gitlab':
-        res = await sourceGitlab.getChangeLogJSON(config);
-        break;
-      case 'github':
-        res = await sourceGithub.getChangeLogJSON(config);
-        break;
-
-      default:
-        logger.info(
-          { sourceUrl, hostType: platform },
-          'Unknown platform, skipping changelog fetching.'
-        );
-        break;
+    if (platform === 'github') {
+      return await sourceGithub.getChangeLogJSON(config);
     }
 
-    return res;
+    if (platform === 'gitlab') {
+      return await sourceGitlab.getChangeLogJSON(config);
+    }
+
+    logger.info(
+      { sourceUrl, hostType: platform },
+      'Unknown platform, skipping changelog fetching.'
+    );
   } catch (err) /* istanbul ignore next */ {
     logger.error({ config, err }, 'getChangeLogJSON error');
-    return null;
   }
+
+  return null;
 }
