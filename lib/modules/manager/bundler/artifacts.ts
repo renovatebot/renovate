@@ -23,7 +23,11 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
-import { getBundlerConstraint, getLockFileName, getRubyConstraint } from './common';
+import {
+  getBundlerConstraint,
+  getLockFileName,
+  getRubyConstraint,
+} from './common';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,

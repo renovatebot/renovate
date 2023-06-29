@@ -4,7 +4,11 @@ import { fs, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { UpdateArtifact } from '../types';
-import { getBundlerConstraint, getLockFileName, getRubyConstraint } from './common';
+import {
+  getBundlerConstraint,
+  getLockFileName,
+  getRubyConstraint,
+} from './common';
 
 jest.mock('../../../util/fs');
 

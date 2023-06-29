@@ -1,5 +1,9 @@
 import { logger } from '../../../logger';
-import { getSiblingFileName, readLocalFile, localPathExists } from '../../../util/fs';
+import {
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact } from '../types';
 
@@ -69,6 +73,10 @@ export function getBundlerConstraint(
   return null;
 }
 
-export async function getLockFileName(packageFileName: string): Promise<string> {
-  return await localPathExists(`${packageFileName}.lock`) ? `${packageFileName}.lock` : `Gemfile.lock`;
+export async function getLockFileName(
+  packageFileName: string
+): Promise<string> {
+  return (await localPathExists(`${packageFileName}.lock`))
+    ? `${packageFileName}.lock`
+    : `Gemfile.lock`;
 }
