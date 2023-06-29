@@ -6,7 +6,7 @@ import type { VersioningApi, VersioningApiConstructor } from './types';
 
 export * from './types';
 
-const defaultVersioning = semverCoerced;
+export const defaultVersioning = semverCoerced;
 
 export const getVersioningList = (): string[] => Array.from(versionings.keys());
 /**

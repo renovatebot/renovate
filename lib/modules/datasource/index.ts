@@ -9,6 +9,7 @@ import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
+import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -240,14 +241,14 @@ export function getDefaultVersioning(
   datasourceName: string | undefined
 ): string {
   if (!datasourceName) {
-    return 'semver';
+    return defaultVersioning.id;
   }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: wrong regex manager config?
   if (!datasource) {
     logger.warn({ datasourceName }, 'Missing datasource!');
   }
-  return datasource?.defaultVersioning ?? 'semver';
+  return datasource?.defaultVersioning ?? defaultVersioning.id;
 }
 
 function applyReplacements(
