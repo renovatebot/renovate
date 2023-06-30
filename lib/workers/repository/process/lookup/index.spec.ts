@@ -89,6 +89,15 @@ describe('workers/repository/process/lookup/index', () => {
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
 
+    it('handles error result from getPkgReleasesWithResult', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'some-dep';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope('https://registry.npmjs.org').get('/some-dep').reply(500);
+      await expect(lookup.lookupUpdates(config)).rejects.toThrow();
+    });
+
     it('returns rollback for pinned version', async () => {
       config.currentValue = '0.9.99';
       config.packageName = 'q';
