@@ -30,21 +30,29 @@ export class Result<T> {
     return new Result({ ok: false, error });
   }
 
-  static wrap<T>(fn: () => T): Result<T> {
+  private static wrapCallback<T>(callback: () => T): Result<T> {
     try {
-      return Result.ok(fn());
+      return Result.ok(callback());
     } catch (error) {
       return Result.err(error);
     }
   }
 
-  static async wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T>> {
-    try {
-      const result = await fn();
-      return Result.ok(result);
-    } catch (error) {
-      return Result.err(error);
-    }
+  private static wrapPromise<T>(promise: Promise<T>): Promise<Result<T>> {
+    return promise.then(
+      (value) => Result.ok(value),
+      (error) => Result.err(error)
+    );
+  }
+
+  static wrap<T>(callback: () => T): Result<T>;
+  static wrap<T>(promise: Promise<T>): Promise<Result<T>>;
+  static wrap<T>(
+    input: (() => T) | Promise<T>
+  ): Result<T> | Promise<Result<T>> {
+    return input instanceof Promise
+      ? Result.wrapPromise(input)
+      : Result.wrapCallback(input);
   }
 
   private constructor(private res: Res<T>) {}

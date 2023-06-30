@@ -37,17 +37,15 @@ describe('util/result', () => {
       });
       expect(res.error()?.message).toBe('oops');
     });
-  });
 
-  describe('wrapAsync', () => {
-    it('returns a Promise that resolves to a Result with ok set to true and the value resolved by the provided Promise if the Promise does not reject', async () => {
-      const res = await Result.wrapAsync(() => Promise.resolve(42));
+    it('wraps promise resolving to value', async () => {
+      const res = await Result.wrap(Promise.resolve(42));
       expect(res.value()).toBe(42);
     });
 
-    it('returns a Promise that resolves to a Result with ok set to false and the error rejected by the provided Promise if the Promise rejects', async () => {
+    it('wraps promise rejecting with error', async () => {
       const err = new Error('oops');
-      const res = await Result.wrapAsync(() => Promise.reject(err));
+      const res = await Result.wrap(Promise.reject(err));
       expect(res.error()?.message).toBe('oops');
     });
   });
