@@ -28,7 +28,7 @@ describe('util/result', () => {
   describe('wrap', () => {
     it('returns a Result with ok set to true and the value returned by the provided function if the function does not throw', () => {
       const res = Result.wrap(() => 42);
-      expect(res).toEqual(Result.ok(42));
+      expect(res.value()).toBe(42);
     });
 
     it('returns a Result with ok set to false and the error thrown by the provided function if the function throws', () => {
@@ -36,7 +36,7 @@ describe('util/result', () => {
       const res = Result.wrap(() => {
         throw err;
       });
-      expect(res).toEqual(Result.err(err));
+      expect(res.error()).toBe(err);
     });
   });
 
