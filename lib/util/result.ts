@@ -30,6 +30,14 @@ export class Result<T> {
     return new Result({ ok: false, error });
   }
 
+  static wrap<T>(fn: () => T): Result<T> {
+    try {
+      return Result.ok(fn());
+    } catch (error) {
+      return Result.err(error);
+    }
+  }
+
   private constructor(private res: Res<T>) {}
 
   transform<U>(fn: (value: T) => U): Result<U> {
