@@ -6,14 +6,16 @@ import * as hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
 
 jest.mock('simple-git');
-const simpleGitFactoryMock = simpleGit as jest.Mock;
+const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const Git = jest.requireActual('simple-git') as SimpleGitFactory;
 
 describe('modules/manager/git-submodules/extract', () => {
   // flaky ci tests
   //jest.setTimeout(10 * 1000);
-  let gitMock: any;
+  let gitMock: jest.MockedObject<
+    Pick<SimpleGit, 'env' | 'listRemote' | 'subModule' | 'raw'>
+  >;
 
   beforeEach(() => {
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
@@ -38,7 +40,7 @@ describe('modules/manager/git-submodules/extract', () => {
         '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
       );
 
-      gitMock.raw.mockImplementation((options: string | string[]) => {
+      gitMock.raw.mockImplementation((options) => {
         if (
           (is.string(options) || is.array(options, is.string)) &&
           options.includes('remote.origin.url')

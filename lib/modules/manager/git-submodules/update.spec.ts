@@ -8,10 +8,12 @@ import type { Upgrade } from '../types';
 import { updateDependency } from '.';
 
 jest.mock('simple-git');
-const simpleGitFactoryMock = simpleGit as jest.Mock;
+const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
 
 describe('modules/manager/git-submodules/update', () => {
-  let gitMock: any;
+  let gitMock: jest.MockedObject<
+    Pick<SimpleGit, 'env' | 'submoduleUpdate' | 'checkout'>
+  >;
 
   beforeEach(() => {
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
