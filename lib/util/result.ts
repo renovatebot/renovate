@@ -1,12 +1,12 @@
-type Ok<T> = {
+interface Ok<T> {
   ok: true;
   value: T;
-};
+}
 
-type Err<E extends Error = Error> = {
+interface Err<E extends Error = Error> {
   ok: false;
   error: E;
-};
+}
 
 type Res<T, E extends Error = Error> = Ok<T> | Err<E>;
 
