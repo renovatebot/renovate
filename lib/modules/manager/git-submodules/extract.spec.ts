@@ -29,6 +29,9 @@ describe('modules/manager/git-submodules/extract', () => {
           'ref: refs/heads/dev  HEAD\n',
       };
       return {
+        env() {
+          return this as SimpleGit;
+        },
         subModule(): Response<string> {
           return Promise.resolve(
             '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
@@ -56,7 +59,7 @@ describe('modules/manager/git-submodules/extract', () => {
             'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
           ) as Response<string>;
         },
-        ...mock<Omit<SimpleGit, 'subModule' | 'raw' | 'listRemote'>>(),
+        ...mock<Omit<SimpleGit, 'env' | 'subModule' | 'raw' | 'listRemote'>>(),
       };
     });
   });

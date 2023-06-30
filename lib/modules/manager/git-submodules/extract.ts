@@ -4,6 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
+import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { simpleGitConfig } from '../../../util/git/config';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
@@ -37,11 +38,16 @@ async function getUrl(
 const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
 
 async function getDefaultBranch(subModuleUrl: string): Promise<string> {
-  const val = await Git(simpleGitConfig()).listRemote([
-    '--symref',
-    subModuleUrl,
-    'HEAD',
-  ]);
+  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables();
+  const gitEnv = {
+    // pass all existing env variables
+    ...process.env,
+    // add all known git Variables
+    ...gitSubmoduleAuthEnvironmentVariables,
+  };
+  const val = await Git(simpleGitConfig())
+    .env(gitEnv)
+    .listRemote(['--symref', subModuleUrl, 'HEAD']);
   return headRefRe.exec(val)?.groups?.branch ?? 'master';
 }
 

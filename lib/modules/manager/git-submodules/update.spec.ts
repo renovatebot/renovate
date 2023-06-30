@@ -33,6 +33,9 @@ describe('modules/manager/git-submodules/update', () => {
         submoduleUpdate() {
           throw new Error();
         },
+        env() {
+          return this as SimpleGit;
+        },
       });
       const update = await updateDependency({
         fileContent: '',
@@ -48,6 +51,9 @@ describe('modules/manager/git-submodules/update', () => {
         },
         checkout() {
           return Promise.resolve('') as Response<string>;
+        },
+        env() {
+          return this as SimpleGit;
         },
       });
       const update = await updateDependency({
