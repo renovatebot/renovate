@@ -76,11 +76,11 @@ export interface ReleaseResult {
 
 export interface GetPkgReleasesResultError {
   error: Error;
-  result?: undefined;
+  result?: never;
 }
 
 export interface GetPkgReleasesResultSuccess {
-  error?: undefined;
+  error?: never;
   result: ReleaseResult | null;
 }
 
