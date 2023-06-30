@@ -1,4 +1,4 @@
-import _simpleGit, { SimpleGit, simpleGit } from 'simple-git';
+import { SimpleGit, simpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { GlobalConfig } from '../../../config/global';

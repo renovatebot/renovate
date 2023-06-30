@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { mock } from 'jest-mock-extended';
-import _simpleGit, {
+import {
   Response,
   SimpleGit,
   SimpleGitFactory,
