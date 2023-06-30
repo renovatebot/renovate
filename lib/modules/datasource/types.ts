@@ -74,6 +74,16 @@ export interface ReleaseResult {
   replacementVersion?: string;
 }
 
+export interface GetPkgReleasesResultError {
+  error: Error;
+  result?: undefined;
+}
+
+export interface GetPkgReleasesResultSuccess {
+  error?: undefined;
+  result: ReleaseResult | null;
+}
+
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';
 
 export interface DatasourceApi extends ModuleApi {
