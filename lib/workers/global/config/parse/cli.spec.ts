@@ -156,10 +156,10 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it('parses json object correctly', () => {
-      argv.push(`--onboarding-config={"extends": ["config:base"]}`);
+      argv.push(`--onboarding-config={"extends": ["config:recommended"]}`);
       expect(cli.getConfig(argv)).toEqual({
         onboardingConfig: {
-          extends: ['config:base'],
+          extends: ['config:recommended'],
         },
       });
     });

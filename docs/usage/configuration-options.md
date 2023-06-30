@@ -320,7 +320,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
+The `config:recommended` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then set a value for `prConcurrentLimit` and it will be re-used for branch calculations too.
 But if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -648,13 +648,13 @@ Compare that to `registryUrls`, which are a way to _override_ registries.
 
 ## dependencyDashboard
 
-Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:base` preset.
+Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:recommended` preset.
 
 To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
 
 ```json
 {
-  "extends": ["config:base", ":disableDependencyDashboard"]
+  "extends": ["config:recommended", ":disableDependencyDashboard"]
 }
 ```
 
@@ -1545,7 +1545,7 @@ For instance if you have a project with an `"examples/"` directory you wish to i
 ```
 
 Renovate's default ignore is `node_modules` and `bower_components` only.
-If you are extending from the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
+If you are extending from the popular `config:recommended` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
 ## ignorePlugins
 
@@ -1566,12 +1566,12 @@ For example, consider this config:
 
 ```json
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "ignorePresets": [":prHourlyLimit2"]
 }
 ```
 
-It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
 ## ignoreReviewers
 
@@ -3268,9 +3268,8 @@ There are times when a dependency version in use by a project gets removed from 
 For some registries, existing releases or even whole packages can be removed or "yanked" at any time, while for some registries only very new or unused releases can be removed.
 Renovate's "rollback" feature exists to propose a downgrade to the next-highest release if the current release is no longer found in the registry.
 
-Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
-
-You can configure the `rollbackPrs` property globally, per-language, or per-package to override the default behavior.
+Renovate does not create these rollback PRs by default, so this functionality needs to be opted-into.
+We recommend you do this selectively with `packageRules` and not globally.
 
 ## schedule
 
