@@ -38,6 +38,15 @@ export class Result<T> {
     }
   }
 
+  static async wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T>> {
+    try {
+      const result = await fn();
+      return Result.ok(result);
+    } catch (error) {
+      return Result.err(error);
+    }
+  }
+
   private constructor(private res: Res<T>) {}
 
   transform<U>(fn: (value: T) => U): Result<U> {
