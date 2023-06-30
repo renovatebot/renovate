@@ -490,6 +490,7 @@ describe('modules/manager/npm/extract/index', () => {
           yarn: '1.12.3',
           npm: '5.9.0',
           pnpm: '6.11.2',
+          invalid: '1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -506,6 +507,13 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: '6.11.2',
             depName: 'pnpm',
             prettyDepType: 'volta',
+          },
+          {
+            depType: 'volta',
+            currentValue: '1.0.0',
+            depName: 'invalid',
+            prettyDepType: 'volta',
+            skipReason: 'unknown-volta',
           },
         ],
       });

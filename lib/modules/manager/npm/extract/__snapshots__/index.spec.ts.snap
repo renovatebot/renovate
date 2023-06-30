@@ -460,6 +460,13 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
       "depType": "volta",
       "prettyDepType": "volta",
     },
+    {
+      "currentValue": "1.0.0",
+      "depName": "invalid",
+      "depType": "volta",
+      "prettyDepType": "volta",
+      "skipReason": "unknown-volta",
+    },
   ],
   "extractedConstraints": {
     "node": "8.9.2",
