@@ -21,7 +21,7 @@ const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
 // First on the Enterprise Server, then on GitHub.com
-function detectGitHubRegistryUrlsForActions(): string[] {
+function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   const endpoint = GlobalConfig.get('endpoint');
   const registryUrls = ['https://github.com'];
   if (endpoint && GlobalConfig.get('platform') === 'github') {
@@ -34,13 +34,15 @@ function detectGitHubRegistryUrlsForActions(): string[] {
       registryUrls.unshift(
         `${parsedEndpoint.protocol}//${parsedEndpoint.host}`
       );
+      return { registryUrls };
     }
   }
-  return registryUrls;
+  return {};
 }
 
 function extractWithRegex(content: string): PackageDependency[] {
-  const registryUrls = detectGitHubRegistryUrlsForActions();
+  const customRegistryUrlsPackageDependency =
+    detectCustomGitHubRegistryUrlsForActions();
   logger.trace('github-actions.extractWithRegex()');
   const deps: PackageDependency[] = [];
   for (const line of content.split(newlineRegex)) {
@@ -77,11 +79,11 @@ function extractWithRegex(content: string): PackageDependency[] {
         depName,
         commitMessageTopic: '{{{depName}}} action',
         datasource: GithubTagsDatasource.id,
-        registryUrls,
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
         autoReplaceStringTemplate: `${quotes}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
+        ...customRegistryUrlsPackageDependency,
       };
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;

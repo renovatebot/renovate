@@ -47,7 +47,7 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml'
       );
-      expect(res?.deps[0].registryUrls).toEqual(['https://github.com']);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
     it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com', () => {
@@ -89,7 +89,7 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml'
       );
-      expect(res?.deps[0].registryUrls).toEqual(['https://github.com']);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
     it('use github.com only as registry when running against github.com', () => {
@@ -101,7 +101,7 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml'
       );
-      expect(res?.deps[0].registryUrls).toEqual(['https://github.com']);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
     it('use github.com only as registry when running against api.github.com', () => {
@@ -113,7 +113,7 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml'
       );
-      expect(res?.deps[0].registryUrls).toEqual(['https://github.com']);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
     it('extracts multiple action tag lines with double quotes and comments', () => {
