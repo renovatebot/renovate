@@ -26,9 +26,7 @@ export async function updateArtifacts({
       logger.info(
         'No Maven dependency version updated - skipping Artifacts update'
       );
-      throw new Error(
-        'No Maven dependency version updated - skipping Artifacts update'
-      );
+      return null;
     }
 
     // Set the current working directory for the `exec` command
@@ -48,7 +46,14 @@ export async function updateArtifacts({
     return res;
   } catch (err) {
     logger.error({ err }, 'maven-lockfile.updateArtifacts() error');
-    throw err;
+    return [
+      {
+        artifactError: {
+          lockFile: packageFileName,
+          stderr: err.message,
+        },
+      },
+    ];
   }
 }
 

@@ -4,8 +4,8 @@ const simpleContent = Fixtures.get(`simpleproject/pom.xml`);
 
 import { updateArtifacts } from './index';
 
-describe('updateArtifacts', () => {
-  it('should update artifacts in simple.pom', async () => {
+describe('modules/manager/maven-lockfile/index', () => {
+  it('should generate lockfile in simpleproject', async () => {
     const packageFileName = './simpleproject/pom.xml';
     const newPackageFileContent = simpleContent;
     const updatedDeps = [
@@ -24,6 +24,7 @@ describe('updateArtifacts', () => {
       updatedDeps,
       config,
     });
+    // no stderr check
     expect(result).toEqual([
       {
         artifactError: {
