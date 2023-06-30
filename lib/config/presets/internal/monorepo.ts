@@ -87,6 +87,7 @@ const repoGroups = {
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
+  'fabric8-kubernetes-client': 'https://github.com/fabric8io/kubernetes-client',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
   fela: 'https://github.com/robinweser/fela',
@@ -275,10 +276,6 @@ const patternGroups = {
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
-  'fabric8-kubernetes-client': [
-    'io.fabric8:kubernetes-',
-    'io.fabric8:openshift-',
-  ],
   fullcalendar: '^@fullcalendar/',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
