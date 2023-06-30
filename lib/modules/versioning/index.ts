@@ -13,7 +13,7 @@ export const getVersionings = (): Map<
   VersioningApi | VersioningApiConstructor
 > => versionings;
 
-export function get(versioning: string | undefined): VersioningApi {
+export function get(versioning = ''): VersioningApi {
   const res = Versioning.safeParse(versioning);
 
   if (!res.success) {
