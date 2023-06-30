@@ -28,7 +28,7 @@ describe('config/defaults', () => {
       expect(val).toBe(true);
     });
 
-    ['string', 'object', 'integer'].forEach((type: unknown) => {
+    ['string', 'object', 'integer'].forEach((type: string) => {
       it(`returns null for ${type} values`, () => {
         const option: RenovateOptions = {
           type: type as 'string' | 'object' | 'integer',
@@ -37,7 +37,7 @@ describe('config/defaults', () => {
         };
         const val = getDefault(option);
 
-        expect(val).toBe(null);
+        expect(val).toBeNull();
       });
     });
   });
