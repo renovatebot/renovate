@@ -19,6 +19,8 @@ import type {
   DigestConfig,
   GetDigestInputConfig,
   GetPkgReleasesConfig,
+  GetPkgReleasesResultError,
+  GetPkgReleasesResultSuccess,
   GetReleasesConfig,
   ReleaseResult,
 } from './types';
@@ -427,6 +429,17 @@ export async function getPkgReleases(
     delete release.constraints;
   });
   return res;
+}
+
+export async function getPkgReleasesWithResult(
+  config: GetPkgReleasesConfig
+): Promise<GetPkgReleasesResultSuccess | GetPkgReleasesResultError> {
+  try {
+    const result = await getPkgReleases(config);
+    return { result };
+  } catch (error) {
+    return { error };
+  }
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {
