@@ -13,7 +13,11 @@ describe('modules/versioning/schema', () => {
   it('falls back to default version scheme', () => {
     const defaultVersioning = api.get('semver-coerced');
     expect(Versioning.parse('foobarbaz')).toBe(defaultVersioning);
-    expect(Versioning.parse(null)).toBe(defaultVersioning);
     expect(Versioning.parse('')).toBe(defaultVersioning);
+  });
+
+  it('catches errors', () => {
+    const res = Versioning.safeParse('regex:foobar');
+    expect(res.success).toBeFalse();
   });
 });

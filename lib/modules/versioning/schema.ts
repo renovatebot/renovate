@@ -6,16 +6,8 @@ import * as defaultVersioning from './semver-coerced';
 import type { VersioningApi } from './types';
 
 export const Versioning = z
-  .unknown()
+  .string()
   .transform((versioningSpec, ctx): VersioningApi => {
-    if (!is.string(versioningSpec)) {
-      logger.debug(
-        { versioning: versioningSpec },
-        `Versioning: invalid name, falling back to ${defaultVersioning.id}`
-      );
-      return defaultVersioning.api;
-    }
-
     const [versioningName, ...versioningRest] = versioningSpec.split(':');
 
     let versioning = versionings.get(versioningName);
