@@ -41,7 +41,7 @@ const repoGroups = {
   ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
   'aws-lambda-powertools-typescript':
-    'https://github.com/awslabs/aws-lambda-powertools-typescript',
+    'https://github.com/aws-powertools/powertools-lambda-typescript',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
