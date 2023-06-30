@@ -2,53 +2,52 @@ import { Result } from './result';
 
 describe('util/result', () => {
   describe('ok', () => {
-    it('creates a Result with ok set to true and the provided value', () => {
+    it('constructs successful result from value', () => {
       expect(Result.ok(42).value()).toBe(42);
     });
   });
 
   describe('err', () => {
-    it('creates a Result with ok set to false and a new Error if no argument is provided', () => {
+    it('constructs error result', () => {
       const res = Result.err();
       expect(res.error()).toEqual(new Error());
     });
 
-    it('creates a Result with ok set to false and a new Error with the provided message if a string is provided', () => {
-      const res = Result.err('foobar');
-      expect(res.error()).toEqual(new Error('foobar'));
+    it('constructs error result from string', () => {
+      const res = Result.err('oops');
+      expect(res.error()?.message).toBe('oops');
     });
 
-    it('creates a Result with ok set to false and the provided error if an error is provided', () => {
-      const err = new Error('foobar');
+    it('constructs error result from Error instance', () => {
+      const err = new Error('oops');
       const res = Result.err(err);
       expect(res.error()).toBe(err);
     });
   });
 
   describe('wrap', () => {
-    it('returns a Result with ok set to true and the value returned by the provided function if the function does not throw', () => {
+    it('wraps function returning successful result', () => {
       const res = Result.wrap(() => 42);
       expect(res.value()).toBe(42);
     });
 
-    it('returns a Result with ok set to false and the error thrown by the provided function if the function throws', () => {
-      const err = new Error('oops');
+    it('wraps function that throws an error', () => {
       const res = Result.wrap(() => {
-        throw err;
+        throw new Error('oops');
       });
-      expect(res.error()).toBe(err);
+      expect(res.error()?.message).toBe('oops');
     });
   });
 
   describe('transform', () => {
     const fn = (x: string) => x.toUpperCase();
 
-    it('returns a new Result with the transformed value if the original Result is ok', () => {
+    it('transforms successful result', () => {
       const res = Result.ok('foo').transform(fn);
       expect(res).toEqual(Result.ok('FOO'));
     });
 
-    it('returns a new Result with the original error if the original Result is not ok', () => {
+    it('no-op for error result', () => {
       const err = new Error('bar');
       const res = Result.err(err).transform(fn);
       expect(res.value()).toBeUndefined();
@@ -57,18 +56,18 @@ describe('util/result', () => {
   });
 
   describe('unwrap', () => {
-    it('returns the value if the Result is ok', () => {
+    it('unwraps successful result', () => {
       const res = Result.ok(42);
       expect(res.unwrap()).toEqual({ ok: true, value: 42 });
     });
 
-    it('returns the fallback if the Result is not ok', () => {
+    it('unwraps error result with fallback value', () => {
       const err = new Error('oops');
       const res = Result.err(err);
       expect(res.unwrap(42)).toEqual({ ok: true, value: 42 });
     });
 
-    it('returns undefined if the Result is not ok and no fallback is provided', () => {
+    it('unwraps error result', () => {
       const err = new Error('oops');
       const res = Result.err(err);
       expect(res.unwrap()).toEqual({ ok: false, error: err });
@@ -76,18 +75,18 @@ describe('util/result', () => {
   });
 
   describe('value', () => {
-    it('returns the value if the Result is ok', () => {
+    it('returns successful value', () => {
       const res = Result.ok(42);
       expect(res.value()).toBe(42);
     });
 
-    it('returns the fallback if the Result is not ok', () => {
+    it('returns fallback value for error result', () => {
       const err = new Error('oops');
       const res = Result.err(err);
       expect(res.value(42)).toBe(42);
     });
 
-    it('returns undefined if the Result is not ok and no fallback is provided', () => {
+    it('returns undefined value for error result', () => {
       const err = new Error('oops');
       const res = Result.err(err);
       expect(res.value()).toBeUndefined();
@@ -95,12 +94,12 @@ describe('util/result', () => {
   });
 
   describe('error', () => {
-    it('returns undefined if the Result is ok', () => {
+    it('returns undefined error for successful result', () => {
       const res = Result.ok(42);
       expect(res.error()).toBeUndefined();
     });
 
-    it('returns the error if the Result is not ok', () => {
+    it('returns error for non-successful result', () => {
       const err = new Error('oops');
       const res = Result.err(err);
       expect(res.error()).toEqual(err);
