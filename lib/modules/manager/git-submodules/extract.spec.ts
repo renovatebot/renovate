@@ -1,11 +1,6 @@
 import is from '@sindresorhus/is';
 import { mock } from 'jest-mock-extended';
-import {
-  Response,
-  SimpleGit,
-  SimpleGitFactory,
-  simpleGit,
-} from 'simple-git';
+import { Response, SimpleGit, SimpleGitFactory, simpleGit } from 'simple-git';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
