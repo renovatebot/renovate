@@ -506,7 +506,6 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: '6.11.2',
             depName: 'pnpm',
             prettyDepType: 'volta',
-            skipReason: 'unknown-volta',
           },
         ],
       });

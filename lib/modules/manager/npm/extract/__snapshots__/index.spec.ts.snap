@@ -453,11 +453,12 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
       "prettyDepType": "volta",
     },
     {
+      "commitMessageTopic": "pnpm",
       "currentValue": "6.11.2",
+      "datasource": "npm",
       "depName": "pnpm",
       "depType": "volta",
       "prettyDepType": "volta",
-      "skipReason": "unknown-volta",
     },
   ],
   "extractedConstraints": {
