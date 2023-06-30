@@ -58,56 +58,6 @@ describe('modules/datasource/git-tags/index', () => {
       });
       expect(versions).toMatchSnapshot();
     });
-
-    it('returns versions filtered from tags with authentication environment variables', async () => {
-      gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'github',
-        matchHost: 'api.github.com',
-        token: 'token123',
-      });
-
-      const versions = await getPkgReleases({
-        datasource,
-        packageName,
-      });
-      expect(versions).toMatchSnapshot();
-      expect(gitMock.env).toHaveBeenCalledWith({
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
-      });
-    });
-
-    it('returns versions filtered from tags with authentication environment variables for datasource type git-tags', async () => {
-      gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'git-tags',
-        matchHost: 'git.example.com',
-        token: 'token123',
-      });
-
-      const versions = await getPkgReleases({
-        datasource,
-        packageName,
-      });
-      expect(versions).toMatchSnapshot();
-      expect(gitMock.env).toHaveBeenCalledWith({
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@git.example.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
-        GIT_CONFIG_VALUE_1: 'git@git.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://git.example.com/',
-      });
-    });
   });
 
   describe('getDigest()', () => {
@@ -139,6 +89,56 @@ describe('modules/datasource/git-tags/index', () => {
         undefined
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
+    });
+
+    it('returns digest for HEAD with authentication environment variables', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'token123',
+      });
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: 'another tag to look up' },
+        undefined
+      );
+      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+    });
+
+    it('returns digest for HEAD with authentication environment variables for datasource type git-tags', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      add({
+        hostType: 'git-tags',
+        matchHost: 'git.example.com',
+        token: 'token123',
+      });
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: 'another tag to look up' },
+        undefined
+      );
+      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:token123@git.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@git.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://git.example.com/',
+      });
     });
   });
 });
