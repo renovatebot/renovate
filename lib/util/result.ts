@@ -3,24 +3,22 @@ interface Ok<T> {
   value: T;
 }
 
-interface Err<E extends Error = Error> {
+interface Err {
   ok: false;
-  error: E;
+  error: Error;
 }
 
-type Res<T, E extends Error = Error> = Ok<T> | Err<E>;
+type Res<T> = Ok<T> | Err;
 
-export class Result<T, E extends Error = Error> {
-  static ok<T>(value: T): Result<T, never> {
+export class Result<T> {
+  static ok<T>(value: T): Result<T> {
     return new Result({ ok: true, value });
   }
 
-  static err(): Result<never, Error>;
-  static err<E extends Error = Error>(error: E): Result<never, E>;
-  static err(message: string): Result<never, Error>;
-  static err<E extends Error = Error>(
-    error?: E | string
-  ): Result<never, Error> {
+  static err(): Result<never>;
+  static err(error: Error): Result<never>;
+  static err(message: string): Result<never>;
+  static err(error?: Error | string): Result<never> {
     if (typeof error === 'undefined') {
       return new Result({ ok: false, error: new Error() });
     }
@@ -32,39 +30,36 @@ export class Result<T, E extends Error = Error> {
     return new Result({ ok: false, error });
   }
 
-  private constructor(private res: Res<T, E>) {}
+  private constructor(private res: Res<T>) {}
 
-  get ok(): boolean {
-    return this.res.ok;
+  transform<U>(fn: (value: T) => U): Result<U> {
+    return this.res.ok
+      ? Result.ok(fn(this.res.value))
+      : Result.err(this.res.error);
   }
 
-  value(): T;
-  value<U>(fallback: U): T | U;
-  value<U>(fallback?: U): T | U {
+  unwrap(): Res<T>;
+  unwrap<U>(fallback: U): Res<T | U>;
+  unwrap<U>(fallback?: U): Res<T | U> {
     if (this.res.ok) {
-      return this.res.value;
+      return this.res;
     }
 
     if (arguments.length) {
-      return fallback as U;
+      return { ok: true, value: fallback as U };
     }
 
-    throw this.res.error;
+    return this.res;
   }
 
-  error(): E | null {
-    if (this.res.ok) {
-      return null;
-    }
-
-    return this.res.error;
+  value(): T | undefined;
+  value<U>(fallback: U): T | U;
+  value<U>(fallback?: U): T | U | undefined {
+    const res = arguments.length ? this.unwrap(fallback as U) : this.unwrap();
+    return res.ok ? res.value : undefined;
   }
 
-  transform<U>(fn: (value: T) => U): Result<U, E> {
-    if (this.res.ok) {
-      return Result.ok(fn(this.res.value));
-    }
-
-    return Result.err(this.res.error);
+  error(): Error | undefined {
+    return this.res.ok ? undefined : this.res.error;
   }
 }
