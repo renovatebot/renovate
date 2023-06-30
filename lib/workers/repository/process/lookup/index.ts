@@ -82,11 +82,11 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-      const lookupResult = await getPkgReleasesWithResult(config);
-      if (lookupResult.error) {
+      const lookupResult = (await getPkgReleasesWithResult(config)).unwrap();
+      if (!lookupResult.ok) {
         throw lookupResult.error;
       }
-      dependency = clone(lookupResult.result);
+      dependency = clone(lookupResult.value);
       if (!dependency) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
