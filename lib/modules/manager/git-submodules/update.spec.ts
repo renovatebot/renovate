@@ -1,17 +1,18 @@
-import _simpleGit, { simpleGit, SimpleGit } from 'simple-git';
+import _simpleGit, { SimpleGit, simpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as hostRules from '../../../util/host-rules';
 import type { Upgrade } from '../types';
 import { updateDependency } from '.';
-import * as hostRules from '../../../util/host-rules';
 
 jest.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock;
 
 describe('modules/manager/git-submodules/update', () => {
   let gitMock: any;
+
   beforeEach(() => {
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
     // clear host rules

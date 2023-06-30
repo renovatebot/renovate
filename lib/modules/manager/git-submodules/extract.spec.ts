@@ -19,6 +19,7 @@ describe('modules/manager/git-submodules/extract', () => {
   // flaky ci tests
   //jest.setTimeout(10 * 1000);
   let gitMock: any;
+
   beforeEach(() => {
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
     // clear host rules
