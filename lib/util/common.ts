@@ -1,4 +1,5 @@
 import {
+  BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../constants';
@@ -34,6 +35,9 @@ export function detectPlatform(
     return null;
   }
 
+  if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'bitbucket';
+  }
   if (GITLAB_API_USING_HOST_TYPES.includes(hostType)) {
     return 'gitlab';
   }
