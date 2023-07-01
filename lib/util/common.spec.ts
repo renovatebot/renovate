@@ -15,6 +15,8 @@ describe('util/common', () => {
       ${'https://gitlab-enterprise.example.com/chalk/chalk'}                 | ${'gitlab'}
       ${'https://dev.azure.com/my-organization/my-project/_git/my-repo.git'} | ${'azure'}
       ${'https://myorg.visualstudio.com/my-project/_git/my-repo.git'}        | ${'azure'}
+      ${'https://bitbucket.org/some-org/some-repo'}                          | ${'bitbucket'}
+      ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
     `('("$url") === $hostType', ({ url, hostType }) => {
       expect(detectPlatform(url)).toBe(hostType);
     });
