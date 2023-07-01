@@ -55,6 +55,15 @@ describe('workers/repository/update/pr/changelog/index', () => {
       ).toBeNull();
     });
 
+    it('handles unsupported changelog source', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://dev.azure.com/unknown-repo',
+        })
+      ).toBeNull();
+    });
+
     it('returns null if no currentVersion', async () => {
       expect(
         await getChangeLogJSON({
