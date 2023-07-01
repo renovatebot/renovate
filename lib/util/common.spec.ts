@@ -34,11 +34,18 @@ describe('util/common', () => {
         hostType: 'gitea',
         matchHost: 'gt.example.com',
       });
+      hostRules.add({
+        hostType: 'bitbucket',
+        matchHost: 'bb.example.com',
+      });
       expect(detectPlatform('https://gl.example.com/chalk/chalk')).toBe(
         'gitlab'
       );
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
         'github'
+      );
+      expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
+        'bitbucket'
       );
       expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBeNull();
     });
