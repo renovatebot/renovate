@@ -2037,6 +2037,21 @@ Use this field to restrict rules to a particular language. e.g.
 }
 ```
 
+### matchRepositories
+
+Use this field to restrict rules to a particular repository. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchRepositories": ["org/repo"],
+      "enabled": false
+    }
+  ]
+}
+```
+
 ### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.
