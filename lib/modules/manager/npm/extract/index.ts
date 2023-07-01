@@ -263,6 +263,9 @@ export async function extractPackageFile(
         }
       } else if (depName === 'npm') {
         dep.datasource = NpmDatasource.id;
+      } else if (depName === 'pnpm') {
+        dep.datasource = NpmDatasource.id;
+        dep.commitMessageTopic = 'pnpm';
       } else {
         dep.skipReason = 'unknown-volta';
       }

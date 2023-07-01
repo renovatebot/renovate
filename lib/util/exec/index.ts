@@ -53,7 +53,7 @@ export function getChildEnv({
 }
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
-  const extraEnvKeys = Object.keys(extraEnv || {});
+  const extraEnvKeys = Object.keys(extraEnv);
   return extraEnvKeys.filter((key) => is.nonEmptyString(childEnv[key]));
 }
 
@@ -101,9 +101,10 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd: string | string[],
-  opts: ExecOptions = {}
+  opts: ExecOptions
 ): Promise<RawExecArguments> {
   const { docker } = opts;
+  const preCommands = opts.preCommands ?? [];
   const { customEnvVariables, containerbaseDir, binarySource } =
     GlobalConfig.get();
 
@@ -130,13 +131,12 @@ async function prepareRawExec(
     ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-    const preCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(opts.preCommands ?? []),
-    ];
     const dockerCommand = await generateDockerCommand(
       rawCommands,
-      preCommands,
+      [
+        ...(await generateInstallCommands(opts.toolConstraints)),
+        ...preCommands,
+      ],
       dockerOptions
     );
     rawCommands = [dockerCommand];
@@ -144,7 +144,7 @@ async function prepareRawExec(
     logger.debug('Using containerbase dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(opts.preCommands ?? []),
+      ...preCommands,
       ...rawCommands,
     ];
   } else if (isHermit()) {

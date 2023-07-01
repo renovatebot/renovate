@@ -1,8 +1,8 @@
-import os from 'node:os';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { findUpLocal } from '../fs';
+import { newlineRegex } from '../regex';
 import { rawExec } from './common';
 import type { RawExecOptions } from './types';
 
@@ -24,7 +24,7 @@ export async function findHermitCwd(cwd: string): Promise<string> {
 export async function getHermitEnvs(
   rawOptions: RawExecOptions
 ): Promise<Record<string, string>> {
-  const cwd = rawOptions.cwd ?? '';
+  const cwd = rawOptions.cwd ?? /* istanbul ignore next */ '';
   const hermitCwd = await findHermitCwd(cwd);
   logger.debug({ cwd, hermitCwd }, 'fetching hermit environment variables');
   // with -r will output the raw unquoted environment variables to consume
@@ -33,18 +33,16 @@ export async function getHermitEnvs(
     cwd: hermitCwd,
   });
 
-  const lines = hermitEnvResp.stdout.split(os.EOL);
-
   const out: Record<string, string> = {};
 
+  const lines = hermitEnvResp.stdout
+    .split(newlineRegex)
+    .map((line) => line.trim())
+    .filter((line) => line.includes('='));
   for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (trimmedLine === '') {
-      continue;
-    }
-    const equalIndex = trimmedLine.indexOf('=');
-    const name = trimmedLine.substring(0, equalIndex);
-    out[name] = trimmedLine.substring(equalIndex + 1);
+    const equalIndex = line.indexOf('=');
+    const name = line.substring(0, equalIndex);
+    out[name] = line.substring(equalIndex + 1);
   }
 
   return out;

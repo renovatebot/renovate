@@ -58,7 +58,7 @@ function volumesEql(x: VolumesPair, y: VolumesPair): boolean {
   return xFrom === yFrom && xTo === yTo;
 }
 
-function prepareVolumes(volumes: VolumeOption[] = []): string[] {
+function prepareVolumes(volumes: VolumeOption[]): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter(
     (vol): vol is VolumesPair => vol !== null

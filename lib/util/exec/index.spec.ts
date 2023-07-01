@@ -20,7 +20,7 @@ jest.mock('../../modules/datasource');
 interface TestInput {
   processEnv: Record<string, string>;
   inCmd: string | string[];
-  inOpts: ExecOptions;
+  inOpts?: ExecOptions;
   outCmd: string[];
   outOpts: RawExecOptions[];
   adminConfig?: Partial<RepoGlobalConfig>;
@@ -95,6 +95,25 @@ describe('util/exec/index', () => {
         processEnv,
         inCmd,
         inOpts: {},
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
+      'Command without options',
+      {
+        processEnv,
+        inCmd,
+        inOpts: undefined,
         outCmd,
         outOpts: [
           {
