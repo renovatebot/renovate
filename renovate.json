@@ -8,6 +8,9 @@
   "dockerfile": {
     "semanticCommitType": "build"
   },
+  {
+  "prHourlyLimit": 3
+}
   "packageRules": [
     {
       "matchPackageNames": ["containerbase/node"],
