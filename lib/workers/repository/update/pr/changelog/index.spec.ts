@@ -5,6 +5,7 @@ import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchConfig } from '../../../../types';
+import * as releases from './releases';
 import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
@@ -13,6 +14,7 @@ const githubApiHost = 'https://api.github.com';
 
 const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
 const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
+const getInRangeReleasesMock = jest.spyOn(releases, 'getInRangeReleases');
 
 const upgrade = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
@@ -267,6 +269,14 @@ describe('workers/repository/update/pr/changelog/index', () => {
           releases: [{ version: '0.9.0' }],
         })
       ).toBeNull();
+    });
+
+    it('will call getInRangeReleases when releases is undefined', async () => {
+      await getChangeLogJSON({
+        ...upgrade,
+        releases: undefined,
+      });
+      expect(getInRangeReleasesMock).toHaveBeenCalledOnce();
     });
 
     it('supports github enterprise and github.com changelog', async () => {
