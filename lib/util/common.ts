@@ -14,19 +14,19 @@ import { parseUrl } from './url';
  */
 export function detectPlatform(
   url: string
-): 'gitlab' | 'github' | 'azure' | 'bitbucket' | null {
+): 'azure' | 'bitbucket' | 'github' | 'gitlab' | null {
   const { hostname } = parseUrl(url) ?? {};
-  if (hostname === 'github.com' || hostname?.includes('github')) {
-    return 'github';
-  }
-  if (hostname === 'gitlab.com' || hostname?.includes('gitlab')) {
-    return 'gitlab';
-  }
   if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
     return 'azure';
   }
   if (hostname === 'bitbucket.org' || hostname?.includes('bitbucket')) {
     return 'bitbucket';
+  }
+  if (hostname === 'github.com' || hostname?.includes('github')) {
+    return 'github';
+  }
+  if (hostname === 'gitlab.com' || hostname?.includes('gitlab')) {
+    return 'gitlab';
   }
 
   const hostType = hostRules.hostType({ url });
@@ -38,11 +38,11 @@ export function detectPlatform(
   if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
     return 'bitbucket';
   }
-  if (GITLAB_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'gitlab';
-  }
   if (GITHUB_API_USING_HOST_TYPES.includes(hostType)) {
     return 'github';
+  }
+  if (GITLAB_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'gitlab';
   }
 
   return null;
