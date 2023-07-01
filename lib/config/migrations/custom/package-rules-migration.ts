@@ -6,7 +6,6 @@ export const renameMap = {
   matchFiles: 'matchFileNames',
   matchPaths: 'matchFileNames',
   paths: 'matchFileNames',
-  languages: 'matchLanguages',
   baseBranchList: 'matchBaseBranches',
   managers: 'matchManagers',
   datasources: 'matchDatasources',
@@ -29,6 +28,7 @@ function renameKeys(packageRule: PackageRule): PackageRule {
 function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
   const newPackageRules: PackageRule[] = [];
   const matchLanguages = packageRule.matchLanguages;
+  delete packageRule.matchLanguages;
   // no migration needed
   if (
     is.nullOrUndefined(matchLanguages) ||
@@ -40,7 +40,6 @@ function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
 
   // deep copy
   const newRule: PackageRule = structuredClone(packageRule);
-  delete newRule.matchLanguages;
 
   // are there any 1:1 migrateable languages
   newRule.matchCategories = matchLanguages;

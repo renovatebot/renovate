@@ -539,7 +539,7 @@ describe('config/migration', () => {
         packageRules: [
           {
             paths: ['package.json'],
-            languages: ['python'],
+            matchLanguages: ['python'],
             baseBranchList: ['master'],
             managers: ['dockerfile'],
             datasources: ['orb'],
