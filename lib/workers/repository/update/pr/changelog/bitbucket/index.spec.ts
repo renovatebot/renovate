@@ -6,6 +6,7 @@ import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as _hostRules from '../../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { getReleaseNotesMd } from '../release-notes';
+import { BitbucketChangeLogSource } from './source';
 
 jest.mock('../../../../../../modules/datasource/npm');
 jest.mock('../../../../../../util/host-rules');
@@ -89,7 +90,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
     httpMock.clear(false);
   });
 
-  it('works with Bitbucket', async () => {
+  it('retrieves changelog json', async () => {
     expect(
       await getChangeLogJSON({
         ...upgrade,
@@ -114,7 +115,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
     });
   });
 
-  it('bitbucket: parses changelog', async () => {
+  it('generates release notes', async () => {
     hostRules.find.mockReturnValue({ token: 'some-token' });
     jest.setTimeout(0);
     httpMock
@@ -144,7 +145,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
     );
   });
 
-  it('bitbucket: handles not found', async () => {
+  it('handles not found', async () => {
     httpMock
       .scope('https://api.bitbucket.org/')
       .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
@@ -160,5 +161,15 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       })
     );
     expect(res).toBeNull();
+  });
+
+  it('handles missing sourceUrl', () => {
+    const source = new BitbucketChangeLogSource();
+    expect(
+      source.getAPIBaseUrl({
+        ...upgrade,
+        sourceUrl: undefined,
+      })
+    ).toBeEmptyString();
   });
 });
