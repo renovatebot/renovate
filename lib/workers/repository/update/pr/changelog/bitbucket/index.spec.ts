@@ -85,9 +85,8 @@ const bitbucketProject = partial<ChangeLogProject>({
 });
 
 describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
-  afterEach(() => {
-    // FIXME: add missing http mocks
-    httpMock.clear(false);
+  beforeEach(() => {
+    hostRules.clear();
   });
 
   it('retrieves changelog json', async () => {
