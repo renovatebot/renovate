@@ -1,5 +1,5 @@
+import { BitbucketChangeLogSource } from './bitbucket/source';
 import type { ChangeLogSource } from './source';
-import { BitbucketChangeLogSource } from './source-bitbucket';
 import { GitHubChangeLogSource } from './source-github';
 import { GitLabChangeLogSource } from './source-gitlab';
 

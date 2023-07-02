@@ -1,6 +1,6 @@
 import URL from 'node:url';
-import type { BranchUpgradeConfig } from '../../../../types';
-import { ChangeLogSource } from './source';
+import type { BranchUpgradeConfig } from '../../../../../types';
+import { ChangeLogSource } from '../source';
 
 export class BitbucketChangeLogSource extends ChangeLogSource {
   constructor() {

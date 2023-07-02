@@ -47,43 +47,6 @@ const gitlabTreeResponse = [
   { path: 'README.md', name: 'README.md', type: 'blob' },
 ];
 
-const bitbucketTreeResponse = {
-  values: [
-    {
-      type: 'commit_directory',
-      path: 'lib',
-      commit: {
-        hash: '1234',
-      },
-    },
-    {
-      type: 'commit_file',
-      path: 'CHANGELOG.md',
-      commit: {
-        hash: 'abcd',
-      },
-    },
-    {
-      type: 'commit_file',
-      path: 'RELEASE_NOTES.md',
-      commit: {
-        hash: 'asdf',
-      },
-    },
-  ],
-};
-
-const bitbucketTreeResponseNoChangelogFiles = {
-  values: [
-    {
-      type: 'commit_directory',
-      path: 'lib',
-      commit: {
-        hash: '1234',
-      },
-    },
-  ],
-};
 const githubProject = partial<ChangeLogProject>({
   type: 'github',
   apiBaseUrl: 'https://api.github.com/',
@@ -94,12 +57,6 @@ const gitlabProject = partial<ChangeLogProject>({
   type: 'gitlab',
   apiBaseUrl: 'https://gitlab.com/api/v4/',
   baseUrl: 'https://gitlab.com/',
-});
-
-const bitbucketProject = partial<ChangeLogProject>({
-  type: 'bitbucket',
-  apiBaseUrl: 'https://api.bitbucket.org',
-  baseUrl: 'https://bitbucket.org/',
 });
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
@@ -1145,54 +1102,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           'https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md',
         url: 'https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md#20260---2020-05-18',
       });
-    });
-
-    it('bitbucket: parses changelog', async () => {
-      hostRules.find.mockReturnValue({ token: 'some-token' });
-      jest.setTimeout(0);
-      httpMock
-        .scope('https://api.bitbucket.org/')
-        .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
-        .reply(200, bitbucketTreeResponse)
-        .get('/2.0/repositories/some-org/some-repo/src/abcd/CHANGELOG.md')
-        .reply(200, gitterWebappChangelogMd);
-      const res = await getReleaseNotesMd(
-        {
-          ...bitbucketProject,
-          repository: 'some-org/some-repo',
-          apiBaseUrl: 'https://api.bitbucket.org/',
-          baseUrl: 'https://bitbucket.org/',
-        },
-        partial<ChangeLogRelease>({
-          version: '20.26.0',
-          gitRef: '20.26.0',
-        })
-      );
-
-      expect(res?.notesSourceUrl).toBe(
-        'https://bitbucket.org/some-org/some-repo/blob/HEAD/CHANGELOG.md'
-      );
-      expect(res?.url).toBe(
-        'https://bitbucket.org/some-org/some-repo/blob/HEAD/CHANGELOG.md#20260---2020-05-18'
-      );
-    });
-
-    it('bitbucket: handles not found', async () => {
-      httpMock
-        .scope('https://api.bitbucket.org/')
-        .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
-        .reply(200, bitbucketTreeResponseNoChangelogFiles);
-      const res = await getReleaseNotesMd(
-        {
-          ...bitbucketProject,
-          repository: 'some-org/some-repo',
-        },
-        partial<ChangeLogRelease>({
-          version: '2.0.0',
-          gitRef: '2.0.0',
-        })
-      );
-      expect(res).toBeNull();
     });
 
     it('parses jest', async () => {
