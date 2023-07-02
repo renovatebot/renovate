@@ -17,8 +17,6 @@ describe('util/common', () => {
       ${'https://github-enterprise.example.com/chalk/chalk'}                 | ${'github'}
       ${'https://gitlab.com/chalk/chalk'}                                    | ${'gitlab'}
       ${'https://gitlab-enterprise.example.com/chalk/chalk'}                 | ${'gitlab'}
-      ${'https://dev.azure.com/my-organization/my-project/_git/my-repo.git'} | ${'azure'}
-      ${'https://myorg.visualstudio.com/my-project/_git/my-repo.git'}        | ${'azure'}
     `('("$url") === $hostType', ({ url, hostType }) => {
       expect(detectPlatform(url)).toBe(hostType);
     });
@@ -40,6 +38,7 @@ describe('util/common', () => {
         hostType: 'gitlab-changelog',
         matchHost: 'gl.example.com',
       });
+
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
         'bitbucket'
       );

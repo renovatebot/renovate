@@ -250,7 +250,6 @@ export async function getReleaseNotesMdFileInner(
   const { repository, type } = project;
   const apiBaseUrl = project.apiBaseUrl!;
   const sourceDirectory = project.sourceDirectory!;
-
   try {
     switch (type) {
       case 'gitlab':
@@ -321,7 +320,6 @@ export async function getReleaseNotesMd(
     return null;
   }
   const changelog = await getReleaseNotesMdFile(project);
-
   if (!changelog) {
     return null;
   }
