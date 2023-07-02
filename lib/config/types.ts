@@ -265,6 +265,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
+  skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
 
