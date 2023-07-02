@@ -17,14 +17,16 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateBuildFile } from './artifacts';
+import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
+import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
+import { updateBuildFile, updateLockFiles } from './artifacts';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
+jest.mock('../gradle');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -409,6 +411,52 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         'build.gradle or build.gradle.kts not found'
       );
       expect(res).toBe('build.gradle.kts');
+    });
+  });
+
+  describe('updateLockFiles()', () => {
+    it('returns early if build script file not found', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const res = await updateLockFiles('', {});
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'build.gradle or build.gradle.kts not found'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('includes gradle lockfile in result', async () => {
+      const execSnapshots = mockExecAll();
+      const updatedArtifacts: UpdateArtifactsResult[] = [
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'test',
+          },
+        },
+      ];
+      mockedFunction(gradleUpdateArtifacts).mockResolvedValue(updatedArtifacts);
+
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['gradle.lockfile'],
+        })
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { ...config, newValue: '8.2' },
+      });
+
+      expect(res).toStrictEqual(updatedArtifacts);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew wrapper --gradle-version 8.2',
+        },
+      ]);
     });
   });
 });

@@ -149,7 +149,11 @@ export async function updateArtifacts({
       .map(quote)
       .join(' ')}`;
 
-    if (config.isLockFileMaintenance || isGcvPropsFile(packageFileName)) {
+    if (
+      config.isLockFileMaintenance ||
+      !updatedDeps.length ||
+      isGcvPropsFile(packageFileName)
+    ) {
       cmd += ' --write-locks';
     } else {
       const updatedDepNames = updatedDeps

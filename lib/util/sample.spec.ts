@@ -1,11 +1,12 @@
-import { sampleSize } from '.';
+import { sampleSize } from './sample';
 
-describe('util/index', () => {
+describe('util/sample', () => {
   describe('sampleSize', () => {
     const array = ['a', 'b', 'c', 'd'];
 
     it('returns correct sized array', () => {
       expect(sampleSize(array, 2)).toHaveLength(2);
+      expect(sampleSize(array, 10)).toHaveLength(4);
     });
 
     it('returns full array for undefined number', () => {
