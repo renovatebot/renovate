@@ -70,7 +70,7 @@ export function getReleaseList(
   project: ChangeLogProject,
   _release: ChangeLogRelease
 ): ChangeLogNotes[] {
-  logger.trace('github.getReleaseList()');
+  logger.trace('bitbucket.getReleaseList()');
   logger.warn('TODO: implement getReleaseList() for Bitbucket');
   return [];
 }

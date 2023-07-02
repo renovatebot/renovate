@@ -6,7 +6,6 @@ import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as _hostRules from '../../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { getReleaseNotesMd } from '../release-notes';
-import { BitbucketChangeLogSource } from './source';
 
 jest.mock('../../../../../../modules/datasource/npm');
 jest.mock('../../../../../../util/host-rules');
@@ -116,7 +115,6 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
 
   it('generates release notes', async () => {
     hostRules.find.mockReturnValue({ token: 'some-token' });
-    jest.setTimeout(0);
     httpMock
       .scope('https://api.bitbucket.org/')
       .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
@@ -136,12 +134,11 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       })
     );
 
-    expect(res?.notesSourceUrl).toBe(
-      'https://bitbucket.org/some-org/some-repo/blob/HEAD/CHANGELOG.md'
-    );
-    expect(res?.url).toBe(
-      'https://bitbucket.org/some-org/some-repo/blob/HEAD/CHANGELOG.md#20260---2020-05-18'
-    );
+    expect(res).toMatchObject({
+      notesSourceUrl:
+        'https://bitbucket.org/some-org/some-repo/blob/HEAD/CHANGELOG.md',
+      url: 'https://bitbucket.org/some-org/some-repo/blob/HEAD/CHANGELOG.md#20260---2020-05-18',
+    });
   });
 
   it('handles not found', async () => {
@@ -160,15 +157,5 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       })
     );
     expect(res).toBeNull();
-  });
-
-  it('handles missing sourceUrl', () => {
-    const source = new BitbucketChangeLogSource();
-    expect(
-      source.getAPIBaseUrl({
-        ...upgrade,
-        sourceUrl: undefined,
-      })
-    ).toBeEmptyString();
   });
 });

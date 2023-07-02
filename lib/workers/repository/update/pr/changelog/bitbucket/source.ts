@@ -1,5 +1,3 @@
-import is from '@sindresorhus/is';
-import { parseUrl } from '../../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { ChangeLogSource } from '../source';
 
@@ -9,13 +7,7 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    const parsedUrl = parseUrl(config.sourceUrl);
-    if (is.nullOrUndefined(parsedUrl)) {
-      return '';
-    }
-    const protocol = parsedUrl.protocol;
-    const host = parsedUrl.host;
-    return `${protocol}//api.${host}/`;
+    return 'https://api.bitbucket.org/';
   }
 
   getCompareURL(
