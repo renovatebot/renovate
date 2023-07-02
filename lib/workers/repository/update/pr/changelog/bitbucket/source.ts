@@ -1,4 +1,4 @@
-import URL from 'node:url';
+import { parseUrl } from '../../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { ChangeLogSource } from '../source';
 
@@ -8,9 +8,12 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    const parsedUrl = URL.parse(config.sourceUrl!);
-    const protocol = parsedUrl.protocol!;
-    const host = parsedUrl.host!;
+    const parsedUrl = parseUrl(config.sourceUrl);
+    if (!parsedUrl) {
+      return '';
+    }
+    const protocol = parsedUrl.protocol;
+    const host = parsedUrl.host;
     return `${protocol}//api.${host}/`;
   }
 
