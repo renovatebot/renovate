@@ -1,16 +1,12 @@
 import { ChangeLogProject, ChangeLogRelease, getChangeLogJSON } from '..';
 import { Fixtures } from '../../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../../test/http-mock';
-import { mocked, partial } from '../../../../../../../test/util';
+import { partial } from '../../../../../../../test/util';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
-import * as _hostRules from '../../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { getReleaseNotesMd } from '../release-notes';
 
 jest.mock('../../../../../../modules/datasource/npm');
-jest.mock('../../../../../../util/host-rules');
-
-const hostRules = mocked(_hostRules);
 
 const changelogMd = Fixtures.get('gitter-webapp.md', '../..');
 
@@ -84,8 +80,10 @@ const bitbucketProject = partial<ChangeLogProject>({
 });
 
 describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
-  beforeEach(() => {
-    hostRules.clear();
+  afterEach(() => {
+    // FIXME: add missing http mocks
+    httpMock.clear(false);
+    jest.resetAllMocks();
   });
 
   it('retrieves changelog json', async () => {
@@ -114,7 +112,6 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
   });
 
   it('generates release notes', async () => {
-    hostRules.find.mockReturnValue({ token: 'some-token' });
     httpMock
       .scope('https://api.bitbucket.org/')
       .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
