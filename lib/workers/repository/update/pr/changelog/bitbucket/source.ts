@@ -6,7 +6,7 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
     super('bitbucket', 'bitbucket-tags');
   }
 
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+  getAPIBaseUrl(_config: BranchUpgradeConfig): string {
     return 'https://api.bitbucket.org/';
   }
 

@@ -17,7 +17,7 @@ const bitbucketHttp = new BitbucketHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory?: string
+  _sourceDirectory?: string
 ): Promise<ChangeLogFile | null> {
   logger.trace('bitbucket.getReleaseNotesMd()');
 
@@ -67,10 +67,12 @@ export async function getReleaseNotesMd(
 }
 
 export function getReleaseList(
-  project: ChangeLogProject,
+  _project: ChangeLogProject,
   _release: ChangeLogRelease
 ): ChangeLogNotes[] {
   logger.trace('bitbucket.getReleaseList()');
-  logger.warn('TODO: implement getReleaseList() for Bitbucket');
+  logger.info(
+    'Unsupported Bitbucket Cloud feature.  Skipping release fetching.'
+  );
   return [];
 }
