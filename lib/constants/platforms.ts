@@ -28,6 +28,6 @@ export const GITLAB_API_USING_HOST_TYPES = [
 
 export const BITBUCKET_API_USING_HOST_TYPES = [
   'bitbucket',
-  'bitbucket-tags',
   'bitbucket-changelog',
+  'bitbucket-tags',
 ];
