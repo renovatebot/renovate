@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
 import { mocked, partial } from '../../../../../../test/util';
+import { clone } from '../../../../../util/clone';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
 import * as _hostRules from '../../../../../util/host-rules';
@@ -1225,7 +1226,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('handles github sourceDirectory', async () => {
       const sourceDirectory = 'packages/foo';
-      const subdirTree = structuredClone(githubTreeResponse);
+      const subdirTree = clone(githubTreeResponse);
       for (const file of subdirTree.tree) {
         file.path = `${sourceDirectory}/${file.path}`;
       }
@@ -1396,7 +1397,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       it('handles gitlab sourceDirectory', async () => {
         const sourceDirectory = 'packages/foo';
-        const response = structuredClone(gitlabTreeResponse).map((file) => ({
+        const response = clone(gitlabTreeResponse).map((file) => ({
           ...file,
           path: `${sourceDirectory}/${file.path}`,
         }));

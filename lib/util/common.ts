@@ -14,9 +14,11 @@ import { parseUrl } from './url';
  */
 export function detectPlatform(
   url: string
-): 'bitbucket' | 'github' | 'gitlab' | 'azure' | null {
+): 'azure' | 'bitbucket' | 'github' | 'gitlab' | null {
   const { hostname } = parseUrl(url) ?? {};
-
+  if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
+    return 'azure';
+  }
   if (hostname === 'bitbucket.org' || hostname?.includes('bitbucket')) {
     return 'bitbucket';
   }
@@ -25,9 +27,6 @@ export function detectPlatform(
   }
   if (hostname === 'gitlab.com' || hostname?.includes('gitlab')) {
     return 'gitlab';
-  }
-  if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
-    return 'azure';
   }
 
   const hostType = hostRules.hostType({ url });

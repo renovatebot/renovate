@@ -6,6 +6,6 @@ import { GitLabChangeLogSource } from './source-gitlab';
 const api = new Map<string, ChangeLogSource>();
 export default api;
 
-api.set('gitlab', new GitLabChangeLogSource());
-api.set('github', new GitHubChangeLogSource());
 api.set('bitbucket', new BitbucketChangeLogSource());
+api.set('github', new GitHubChangeLogSource());
+api.set('gitlab', new GitLabChangeLogSource());

@@ -7,6 +7,7 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import { Result } from '../../util/result';
 import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
 import * as allVersioning from '../versioning';
@@ -353,7 +354,7 @@ export async function getPkgReleases(
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
   }
-  let res: ReleaseResult;
+  let res: ReleaseResult | null = null;
   try {
     res = clone(
       await getRawReleases({
@@ -427,6 +428,12 @@ export async function getPkgReleases(
     delete release.constraints;
   });
   return res;
+}
+
+export function getPkgReleasesWithResult(
+  config: GetPkgReleasesConfig
+): Promise<Result<ReleaseResult | null>> {
+  return Result.wrap(getPkgReleases(config));
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {

@@ -64,8 +64,12 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
-      resultBody.size = page > MAX_PAGES ? undefined : resultBody.values.length;
-      resultBody.next = page > MAX_PAGES ? undefined : nextURL;
+      resultBody.size =
+        page <= MAX_PAGES
+          ? resultBody.values.length
+          : /* istanbul ignore next */ undefined;
+      resultBody.next =
+        page <= MAX_PAGES ? nextURL : /* istanbul ignore next */ undefined;
     }
 
     return result;

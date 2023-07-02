@@ -217,7 +217,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
       ).toEqual({ error: 'MissingGithubToken' });
     });
 
-    it('handles supressed Github warnings', async () => {
+    it('handles suppressed Github warnings', async () => {
       GlobalConfig.set({ githubTokenWarn: false });
       expect(
         await getChangeLogJSON({

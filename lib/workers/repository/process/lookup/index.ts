@@ -9,13 +9,14 @@ import {
   getDatasourceList,
   getDefaultVersioning,
   getDigest,
-  getPkgReleases,
+  getPkgReleasesWithResult,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../modules/datasource';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
@@ -81,8 +82,11 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-
-      dependency = structuredClone(await getPkgReleases(config));
+      const lookupResult = (await getPkgReleasesWithResult(config)).unwrap();
+      if (!lookupResult.ok) {
+        throw lookupResult.error;
+      }
+      dependency = clone(lookupResult.value);
       if (!dependency) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {

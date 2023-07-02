@@ -1015,6 +1015,56 @@ describe('modules/platform/bitbucket/index', () => {
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
 
+    it('removes reviewer if they are also the author of the pr', async () => {
+      const reviewers = [
+        {
+          user: {
+            display_name: 'Bob Smith',
+            uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+            account_id: '123',
+          },
+        },
+        {
+          user: {
+            display_name: 'Jane Smith',
+            uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+            account_id: '456',
+          },
+        },
+      ];
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
+        .reply(200, {
+          values: reviewers,
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Jane Smith is the author and cannot be included as a reviewer.',
+              ],
+            },
+          },
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
+      expect(pr?.number).toBe(5);
+    });
+
     it('rethrows exception when PR create error due to unknown reviewers error', async () => {
       const reviewer = {
         user: {
@@ -1175,7 +1225,12 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'new_base',
+        })
       ).toResolve();
     });
 
