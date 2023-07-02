@@ -19,7 +19,6 @@ export interface Config {
 }
 
 export interface PagedResult<T = any> {
-  page?: number;
   pagelen: number;
   size?: number;
   next?: string;
