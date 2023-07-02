@@ -94,7 +94,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
     expect(res).toBeEmptyArray();
   });
 
-  describe('bitbucket source', () => {
+  describe('source', () => {
     it('returns api base url', () => {
       const source = new BitbucketChangeLogSource();
       expect(source.getAPIBaseUrl(upgrade)).toBe(apiBaseUrl);
