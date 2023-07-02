@@ -37,7 +37,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { repoFingerprint } from '../util';
+import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -851,6 +851,7 @@ export async function updatePr({
   prBody: rawDescription,
   state,
   bitbucketInvalidReviewers,
+  targetBranch,
 }: UpdatePrConfig & {
   bitbucketInvalidReviewers: string[] | undefined;
 }): Promise<void> {
@@ -878,6 +879,9 @@ export async function updatePr({
               (name: string) => !bitbucketInvalidReviewers?.includes(name)
             )
             .map((name: string) => ({ user: { name } })),
+          toRef: {
+            id: getNewBranchName(targetBranch),
+          },
         },
       }
     );

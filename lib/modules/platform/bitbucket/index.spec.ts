@@ -1389,7 +1389,12 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'new_base',
+        })
       ).toResolve();
     });
 

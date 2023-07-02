@@ -92,6 +92,7 @@ const repoGroups = {
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
+  'fabric8-kubernetes-client': 'https://github.com/fabric8io/kubernetes-client',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
   fela: 'https://github.com/robinweser/fela',
@@ -117,7 +118,6 @@ const repoGroups = {
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
-  hotchocolate: 'https://github.com/ChilliCream/hotchocolate',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
@@ -291,6 +291,7 @@ const patternGroups = {
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
+  hotchocolate: '^HotChocolate\\.',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
