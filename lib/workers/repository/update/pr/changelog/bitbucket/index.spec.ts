@@ -83,7 +83,7 @@ const bitbucketProject = partial<ChangeLogProject>({
   baseUrl: 'https://bitbucket.org/',
 });
 
-describe('workers/repository/update/pr/changelog/bitbucket/bitbucket', () => {
+describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
