@@ -701,6 +701,7 @@ export async function updatePr({
   prBody: description,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   let title = prTitle;
   if ((await getPrList()).find((pr) => pr.number === iid)?.isDraft) {
@@ -718,6 +719,7 @@ export async function updatePr({
         title,
         description: sanitize(description),
         ...(newState && { state_event: newState }),
+        target_branch: targetBranch,
       },
     }
   );
