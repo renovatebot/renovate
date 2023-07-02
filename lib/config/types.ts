@@ -260,6 +260,7 @@ export interface RenovateConfig
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
+  customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
@@ -270,6 +271,13 @@ export interface RenovateConfig
   constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
+}
+
+export interface CustomDatasourceConfig {
+  registryUrlTemplate?: string;
+  format?: 'json';
+  pathTemplate?: string;
+  transform?: string;
 }
 
 export interface AllConfig

@@ -335,6 +335,12 @@ const options: RenovateOptions[] = [
     default: {},
   },
   {
+    name: 'customDatasources',
+    description: 'Defines custom datasources for usage by managers',
+    type: 'object',
+    default: {},
+  },
+  {
     name: 'dockerChildPrefix',
     description:
       'Change this value to add a prefix to the Renovate Docker sidecar container names and labels.',

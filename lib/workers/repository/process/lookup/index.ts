@@ -6,7 +6,7 @@ import { logger } from '../../../../logger';
 import {
   Release,
   ReleaseResult,
-  getDatasourceList,
+  getDatasourceFor,
   getDefaultVersioning,
   getDigest,
   getPkgReleasesWithResult,
@@ -64,10 +64,7 @@ export async function lookupUpdates(
   try {
     logger.trace({ dependency: packageName, currentValue }, 'lookupUpdates');
     // istanbul ignore if
-    if (
-      !isGetPkgReleasesConfig(config) ||
-      !getDatasourceList().includes(datasource)
-    ) {
+    if (!isGetPkgReleasesConfig(config) || !getDatasourceFor(datasource)) {
       res.skipReason = 'invalid-config';
       return res;
     }
