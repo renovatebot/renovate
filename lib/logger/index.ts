@@ -88,19 +88,10 @@ const loggerLevels: bunyan.LogLevelString[] = [
 export const logger: Logger = { once: { reset: onceReset } } as any;
 
 loggerLevels.forEach((loggerLevel) => {
-  logger[loggerLevel] = logFactory(loggerLevel) as never;
-
-  const logOnceFn = (p1: any, p2: any): void => {
-    once(() => {
-      const logFn = logger[loggerLevel];
-      if (is.undefined(p2)) {
-        logFn(p1);
-      } else {
-        logFn(p1, p2);
-      }
-    }, logOnceFn);
-  };
-  logger.once[loggerLevel] = logOnceFn as never;
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  logger[loggerLevel] = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  logger.once[loggerLevel] = () => {};
 });
 
 export function setContext(value: string): void {
