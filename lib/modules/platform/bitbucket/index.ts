@@ -211,7 +211,7 @@ export async function initRepo({
       owner: info.owner,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
-      isPrivate: info.isPrivate,
+      is_private: info.is_private,
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
@@ -315,11 +315,11 @@ export async function findPr({
    * Bitbucket doesn't support renaming or reopening declined PRs.
    * Instead, we have to use comment-driven signals.
    */
-  if (pr && pr.state === 'closed') {
+  if (pr?.state === 'closed') {
     const reopenComments = await comments.reopenComments(config, pr.number);
 
     if (is.nonEmptyArray(reopenComments)) {
-      if (config.isPrivate) {
+      if (config.is_private) {
         // Only workspace members could have commented on a private repository
         logger.debug(
           `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`

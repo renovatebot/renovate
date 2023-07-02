@@ -16,7 +16,7 @@ export interface Config {
   prList: Pr[];
   repository: string;
   ignorePrAuthor: boolean;
-  isPrivate: boolean;
+  is_private: boolean;
 }
 
 export interface PagedResult<T = any> {
@@ -33,7 +33,7 @@ export interface RepoInfo {
   mergeMethod: string;
   has_issues: boolean;
   uuid: string;
-  isPrivate: boolean;
+  is_private: boolean;
 }
 
 export interface RepoBranchingModel {
