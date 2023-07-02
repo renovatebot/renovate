@@ -2037,7 +2037,7 @@ Use this field to restrict rules to a particular language. e.g.
 }
 ```
 
-### matchRepositories
+### matchRepositoryPatterns
 
 Use this field to restrict rules to a particular repository. e.g.
 
@@ -2045,7 +2045,7 @@ Use this field to restrict rules to a particular repository. e.g.
 {
   "packageRules": [
     {
-      "matchRepositories": ["org/repo"],
+      "matchRepositoryPatterns": ["-archived$"],
       "enabled": false
     }
   ]
