@@ -72,7 +72,6 @@ let config: {
   cloneSubmodules: boolean | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
-  includeMirrors: boolean | undefined;
 } = {} as any;
 
 const defaults = {
