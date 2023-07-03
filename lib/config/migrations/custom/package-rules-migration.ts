@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
@@ -6,7 +5,8 @@ export const renameMap = {
   matchFiles: 'matchFileNames',
   matchPaths: 'matchFileNames',
   paths: 'matchFileNames',
-  languages: 'matchLanguages',
+  languages: 'matchCategories',
+  matchLanguages: 'matchCategories',
   baseBranchList: 'matchBaseBranches',
   managers: 'matchManagers',
   datasources: 'matchDatasources',
@@ -26,29 +26,6 @@ function renameKeys(packageRule: PackageRule): PackageRule {
   return newPackageRule;
 }
 
-function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
-  const newPackageRules: PackageRule[] = [];
-  const matchLanguages = packageRule.matchLanguages;
-  // no migration needed
-  if (
-    is.nullOrUndefined(matchLanguages) ||
-    !is.array<string>(matchLanguages) ||
-    matchLanguages.length === 0
-  ) {
-    return [packageRule];
-  }
-
-  // deep copy
-  const newRule: PackageRule = structuredClone(packageRule);
-  delete newRule.matchLanguages;
-
-  // are there any 1:1 migrateable languages
-  newRule.matchCategories = matchLanguages;
-  newPackageRules.push(newRule);
-
-  return newPackageRules;
-}
-
 export class PackageRulesMigration extends AbstractMigration {
   override readonly propertyName = 'packageRules';
 
@@ -57,8 +34,6 @@ export class PackageRulesMigration extends AbstractMigration {
     packageRules = Array.isArray(packageRules) ? [...packageRules] : [];
 
     packageRules = packageRules.map(renameKeys);
-
-    packageRules = packageRules.flatMap(removeMatchLanguage);
 
     this.rewrite(packageRules);
   }
