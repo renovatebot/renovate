@@ -10,7 +10,7 @@ We also explain why you should update often, and how to nudge your team to actua
 In general, we recommend that you:
 
 - Run Renovate on every repository
-- Extend from the `config:best-practices` preset
+- Extend from the `config:best-practices` preset instead of `config:base`
 - Use the Dependency Dashboard issue (it's on by default)
 - Update your dependencies often
 - Read the changelogs for the updates
@@ -18,15 +18,66 @@ In general, we recommend that you:
 - Talk with your team about the update stategy
 
 If you think Renovate is too noisy, please read our [noise reduction docs](./noise-reduction.md).
-## The `config:best-practices` preset
 
-Short introduction goes here.
+## About the `config:best-practices` preset
 
-### Why we created the `config:best-practices` preset
+The `config:base` preset is meant to work for nearly all Renovate users.
+We also want to have a preset with stronger opionions, that includes our upgrade best practices.
+That's why we created the `config:best-practices` preset.
 
-Explain the reason behind each config option in the preset.
-How to use the preset (extend it).
-Link to the config preset in the published docs.
+If you want to follow our upgrade best practices, you should extend from the `config:best-practices` preset:
+
+```json
+{
+  "extends": ["config:best-practices"]
+}
+```
+
+If you're using `config:base` then replace it with `config:best-practices`:
+
+```diff
+- "extends": ["config:base"]
++ "extends": ["config:best-practices"]
+```
+
+### What's in the `config:best-practices preset?
+
+The [`config:best-practices` preset](https://docs.renovatebot.com/presets-config/#configbest-practices) comes with this configuration:
+
+```json
+{
+  "configMigration": true,
+  "extends": [
+    "config:base",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    ":pinDevDependencies"
+  ]
+}
+```
+
+#### Config migration
+
+Renovate can create a config migration PR to replace old config option names with their new replacements.
+This means your configuration and the Renovate docs always use the same terms.
+
+#### Extends `config:base`
+
+We like the `config:base` preset, it's a good fit for nearly all users.
+So it makes sense to add our best practices on top of the base preset.
+
+#### Extends `docker:pinDigests`
+
+WIP: add reason(s) here.
+
+#### Extends `helpers:pinGitHubActionDigests`
+
+The [GitHub Docs, using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions) recommend that you pin actions to a full length commit SHA.
+We agree with this recommendation, so we use the `helpers:pinGitHubActionDigests` preset to pin GitHub Actions.
+
+#### Extends `:pinDevDependencies`
+
+WIP: add reason(s) here.
 
 ### Why updating often is easier, faster and safer
 
