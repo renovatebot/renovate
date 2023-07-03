@@ -19,7 +19,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { GitlabHttpOptions, setBaseUrl } from '../../../util/http/gitlab';
+import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';

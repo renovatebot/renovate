@@ -16,7 +16,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
-import type { HttpOptions, HttpResponse } from '../../../util/http/types';
+import type { HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';

@@ -6,11 +6,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import {
-  BitbucketHttp,
-  BitbucketHttpOptions,
-  setBaseUrl,
-} from '../../../util/http/bitbucket';
+import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { isUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
