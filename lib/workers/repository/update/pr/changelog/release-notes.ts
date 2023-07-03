@@ -10,6 +10,7 @@ import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import * as bitbucket from './bitbucket';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -35,7 +36,8 @@ export async function getReleaseList(
         return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
-
+      case 'bitbucket':
+        return bitbucket.getReleaseList(project, release);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -262,7 +264,12 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory
         );
-
+      case 'bitbucket':
+        return await bitbucket.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;

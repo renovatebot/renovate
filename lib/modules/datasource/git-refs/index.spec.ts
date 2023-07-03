@@ -5,7 +5,7 @@ import { add, clear } from '../../../util/host-rules';
 import { GitRefsDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGitFactoryMock = simpleGit as jest.Mock;
+const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
 
 const packageName = 'https://github.com/example/example.git';
 
@@ -14,7 +14,7 @@ const lsRemote1 = Fixtures.get('ls-remote-1.txt');
 const datasource = GitRefsDatasource.id;
 
 describe('modules/datasource/git-refs/index', () => {
-  let gitMock: any;
+  let gitMock: jest.MockedObject<Pick<SimpleGit, 'env' | 'listRemote'>>;
 
   beforeEach(() => {
     // clear host rules

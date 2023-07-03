@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { getPkgReleases } from '../../../../../modules/datasource';
@@ -6,7 +5,7 @@ import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
-import { trimSlashes } from '../../../../../util/url';
+import { parseUrl, trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { slugifyUrl } from './common';
 import { addReleaseNotes } from './release-notes';
@@ -23,8 +22,8 @@ export abstract class ChangeLogSource {
   private cacheNamespace: string;
 
   constructor(
-    platform: 'github' | 'gitlab',
-    datasource: 'github-tags' | 'gitlab-tags'
+    platform: 'bitbucket' | 'github' | 'gitlab',
+    datasource: 'bitbucket-tags' | 'github-tags' | 'gitlab-tags'
   ) {
     this.platform = platform;
     this.datasource = datasource;
@@ -238,16 +237,22 @@ export abstract class ChangeLogSource {
     return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
   }
 
-  protected getBaseUrl(config: BranchUpgradeConfig): string {
-    const parsedUrl = URL.parse(config.sourceUrl!);
-    const protocol = parsedUrl.protocol!;
-    const host = parsedUrl.host!;
+  getBaseUrl(config: BranchUpgradeConfig): string {
+    const parsedUrl = parseUrl(config.sourceUrl);
+    if (is.nullOrUndefined(parsedUrl)) {
+      return '';
+    }
+    const protocol = parsedUrl.protocol;
+    const host = parsedUrl.host;
     return `${protocol}//${host}/`;
   }
 
-  private getRepositoryFromUrl(config: BranchUpgradeConfig): string {
-    const parsedUrl = URL.parse(config.sourceUrl!);
-    const pathname = parsedUrl.pathname!;
+  getRepositoryFromUrl(config: BranchUpgradeConfig): string {
+    const parsedUrl = parseUrl(config.sourceUrl);
+    if (is.nullOrUndefined(parsedUrl)) {
+      return '';
+    }
+    const pathname = parsedUrl.pathname;
     return trimSlashes(pathname).replace(regEx(/\.git$/), '');
   }
 
