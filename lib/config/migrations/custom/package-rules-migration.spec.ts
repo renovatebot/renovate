@@ -69,7 +69,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
           {
             languages: ['java'],
             addLabels: ['java'],
-          }
+          },
         ],
       },
       {
@@ -81,7 +81,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
           {
             matchCategories: ['java'],
             addLabels: ['java'],
-          }
+          },
         ],
       }
     );
