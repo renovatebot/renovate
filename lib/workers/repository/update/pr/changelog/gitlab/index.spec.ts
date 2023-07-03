@@ -1,11 +1,9 @@
-import * as httpMock from '../../../../../../test/http-mock';
-import { partial } from '../../../../../../test/util';
-import * as semverVersioning from '../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../util/host-rules';
-import type { BranchUpgradeConfig } from '../../../../types';
-import { getChangeLogJSON } from '.';
-
-jest.mock('../../../../../modules/datasource/npm');
+import { getChangeLogJSON } from '..';
+import * as httpMock from '../../../../../../../test/http-mock';
+import { partial } from '../../../../../../../test/util';
+import * as semverVersioning from '../../../../../../modules/versioning/semver';
+import * as hostRules from '../../../../../../util/host-rules';
+import type { BranchUpgradeConfig } from '../../../../../types';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -31,7 +29,7 @@ const upgrade = partial<BranchUpgradeConfig>({
 
 const matchHost = 'https://gitlab.com/';
 
-describe('workers/repository/update/pr/changelog/gitlab', () => {
+describe('workers/repository/update/pr/changelog/gitlab/index', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
