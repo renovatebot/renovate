@@ -39,7 +39,7 @@ export abstract class ChangeLogSource {
 
   abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
 
-  async getAllTags(endpoint: string, repository: string): Promise<string[]> {
+  async getAllTags(repository: string): Promise<string[]> {
     const tags = (
       await getPkgReleases({
         datasource: this.datasource,
@@ -140,14 +140,12 @@ export abstract class ChangeLogSource {
           version,
           packageName,
           prev,
-          apiBaseUrl,
           repository
         );
         const nextHead = await this.getRef(
           version,
           packageName,
           next,
-          apiBaseUrl,
           repository
         );
         if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
@@ -208,10 +206,9 @@ export abstract class ChangeLogSource {
     version: allVersioning.VersioningApi,
     packageName: string,
     release: Release,
-    apiBaseUrl: string,
     repository: string
   ): Promise<string | null> {
-    const tags = await this.getAllTags(apiBaseUrl, repository);
+    const tags = await this.getAllTags(repository);
 
     const tagName = this.findTagOfRelease(
       version,
