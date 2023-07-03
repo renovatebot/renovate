@@ -633,6 +633,10 @@ When using with `npm`, we recommend you:
 - Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
 
+## customDatasources
+
+TODO implement
+
 ## defaultRegistryUrls
 
 Override a datasource's default registries with this config option.
