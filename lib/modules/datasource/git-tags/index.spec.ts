@@ -15,9 +15,7 @@ const datasource = GitTagsDatasource.id;
 const datasourceInstance = new GitTagsDatasource();
 
 describe('modules/datasource/git-tags/index', () => {
-  let gitMock: jest.MockedObject<
-  Pick<SimpleGit, 'env' | 'listRemote'>
->;
+  let gitMock: jest.MockedObject<Pick<SimpleGit, 'env' | 'listRemote'>>;
 
   beforeEach(() => {
     // clear host rules
