@@ -280,7 +280,6 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
     {
       "description": "Hello world again",
       "status": 2,
-      "targetRefName": undefined,
       "title": "The New Title",
     },
     "1",
@@ -303,7 +302,6 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
   [
     {
       "description": "Hello world again",
-      "targetRefName": undefined,
       "title": "The New Title",
     },
     "1",
@@ -330,7 +328,6 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
 [
   [
     {
-      "targetRefName": undefined,
       "title": "The New Title - autoclose",
     },
     "1",

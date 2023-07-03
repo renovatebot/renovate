@@ -19,7 +19,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { setBaseUrl } from '../../../util/http/gitlab';
+import { GitlabHttpOptions, setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -712,16 +712,19 @@ export async function updatePr({
     ['open']: 'reopen',
     // TODO: null check (#7154)
   }[state!];
+
+  const body: GitlabHttpOptions['body'] = {
+    title,
+    description: sanitize(description),
+    ...(newState && { state_event: newState }),
+  };
+  if (targetBranch) {
+    body.target_branch = targetBranch;
+  }
+
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        ...(newState && { state_event: newState }),
-        target_branch: targetBranch,
-      },
-    }
+    { body }
   );
 
   await tryPrAutomerge(iid, platformOptions);

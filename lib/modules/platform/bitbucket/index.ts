@@ -6,7 +6,11 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
-import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import {
+  BitbucketHttp,
+  BitbucketHttpOptions,
+  setBaseUrl,
+} from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { isUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -945,20 +949,22 @@ export async function updatePr({
   ).body;
 
   try {
+    const body: BitbucketHttpOptions['body'] = {
+      title,
+      description: sanitize(description),
+      reviewers: pr.reviewers,
+    };
+    if (targetBranch) {
+      body.destination = {
+        branch: {
+          name: targetBranch,
+        },
+      };
+    }
+
     await bitbucketHttp.putJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      {
-        body: {
-          title,
-          description: sanitize(description),
-          reviewers: pr.reviewers,
-          destination: {
-            branch: {
-              name: targetBranch,
-            },
-          },
-        },
-      }
+      { body }
     );
   } catch (err) {
     // Try sanitizing reviewers
