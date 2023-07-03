@@ -10,6 +10,7 @@ We also explain why you should update often, and how to nudge your team to actua
 In general, we recommend that you:
 
 - Run Renovate on every repository
+- Extend from the `config:best-practices` preset
 - Use the Dependency Dashboard issue (it's on by default)
 - Update your dependencies often
 - Read the changelogs for the updates
