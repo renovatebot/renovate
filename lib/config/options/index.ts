@@ -445,10 +445,10 @@ const options: RenovateOptions[] = [
   {
     name: 'includeMirrors',
     description:
-      'Whether to process mirrored repositories. By default, all mirrored repositories are skipped.',
+      'Whether to process repositories that are mirrors. By default, repositories that are mirrors are skipped.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['gitea', 'gitlab'],
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'forkToken',

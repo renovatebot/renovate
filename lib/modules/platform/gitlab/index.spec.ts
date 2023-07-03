@@ -258,6 +258,25 @@ describe('modules/platform/gitlab/index', () => {
       ).rejects.toThrow(REPOSITORY_MIRRORED);
     });
 
+    it('should not throw an error if repository is a mirror when includeMirrors option is set', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo')
+        .reply(200, {
+          default_branch: 'master',
+        });
+      expect(
+        await gitlab.initRepo({
+          repository: 'some/repo',
+          includeMirrors: true,
+        })
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
     it('should throw an error if repository access is disabled', async () => {
       httpMock
         .scope(gitlabApiHost)

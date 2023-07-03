@@ -63,7 +63,6 @@ interface GiteaRepoConfig {
   labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
-  includeMirrors: boolean;
 }
 
 export const id = 'gitea';
@@ -286,7 +285,7 @@ const platform: Platform = {
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
-    if (repo.mirror && !config.includeMirrors) {
+    if (repo.mirror) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );

@@ -72,7 +72,7 @@ let config: {
   cloneSubmodules: boolean | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
-  includeMirrors: boolean;
+  includeMirrors: boolean | undefined;
 } = {} as any;
 
 const defaults = {
@@ -264,11 +264,13 @@ export async function initRepo({
   ignorePrAuthor,
   gitUrl,
   endpoint,
+  includeMirrors,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.ignorePrAuthor = ignorePrAuthor;
+  config.includeMirrors = includeMirrors;
 
   let res: HttpResponse<RepoResponse>;
   try {

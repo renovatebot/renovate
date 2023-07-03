@@ -44,6 +44,7 @@ export interface RepoParams {
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
+  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
