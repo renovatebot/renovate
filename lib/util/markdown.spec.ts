@@ -53,7 +53,8 @@ describe('util/markdown', () => {
         '\n' +
         '#### New Contributors\n' +
         '* @user made their first contribution in https://github.com/foo/foo/pull/2\n' +
-        '#### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)';
+        '#### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)' +
+        '\n';
 
       const expected = Fixtures.get('release-notes.txt');
       expect(sanitizeMarkdown(input)).toEqual(expected);
