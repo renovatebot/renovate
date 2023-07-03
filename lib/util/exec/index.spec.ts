@@ -711,6 +711,29 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Discarded stdout if ignoreStdout=true',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          ignoreStdout: true,
+          cwdFile: '/somefile',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        ],
+      },
+    ],
+
+    [
       'Hermit',
       {
         processEnv: {

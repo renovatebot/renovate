@@ -87,6 +87,11 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
 
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer ?? 10 * 1024 * 1024;
+
+  if (opts.ignoreStdout) {
+    rawExecOptions.stdio = ['pipe', 'ignore', 'pipe'];
+  }
+
   return rawExecOptions;
 }
 
