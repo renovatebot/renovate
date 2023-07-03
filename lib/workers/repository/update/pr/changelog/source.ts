@@ -23,8 +23,8 @@ export abstract class ChangeLogSource {
   private cacheNamespace: string;
 
   constructor(
-    platform: 'github' | 'gitlab',
-    datasource: 'github-tags' | 'gitlab-tags'
+    platform: 'bitbucket' | 'github' | 'gitlab',
+    datasource: 'bitbucket-tags' | 'github-tags' | 'gitlab-tags'
   ) {
     this.platform = platform;
     this.datasource = datasource;
