@@ -270,7 +270,6 @@ export async function initRepo({
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.ignorePrAuthor = ignorePrAuthor;
-  config.includeMirrors = includeMirrors;
 
   let res: HttpResponse<RepoResponse>;
   try {
