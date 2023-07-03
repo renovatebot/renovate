@@ -1,7 +1,7 @@
 import { BitbucketChangeLogSource } from './bitbucket/source';
 import { GitHubChangeLogSource } from './github/source';
+import { GitLabChangeLogSource } from './gitlab/source';
 import type { ChangeLogSource } from './source';
-import { GitLabChangeLogSource } from './source-gitlab';
 
 const api = new Map<string, ChangeLogSource>();
 export default api;
