@@ -352,7 +352,10 @@ export async function getReleaseNotesMd(
               const url =
                 notesSourceUrl +
                 '#' +
-                title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), '');
+                title
+                  .filter((word) => !isUrl(word))
+                  .join('-')
+                  .replace(regEx(/[^A-Za-z0-9-]/g), '');
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {

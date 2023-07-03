@@ -1240,7 +1240,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
-          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-httpswwwgithubcomyargsyargscomparev1520v1530-2020-03-08',
+          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-2020-03-08',
         });
       });
 
@@ -1270,7 +1270,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
-          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-httpswwwgithubcomyargsyargscomparev1510v1520-2020-03-01',
+          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-2020-03-01',
         });
       });
 
