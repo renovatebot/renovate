@@ -66,6 +66,10 @@ describe('config/migrations/custom/package-rules-migration', () => {
             matchLanguages: ['docker', 'js'],
             addLabels: ['docker'],
           },
+          {
+            languages: ['java'],
+            addLabels: ['java'],
+          }
         ],
       },
       {
@@ -74,6 +78,10 @@ describe('config/migrations/custom/package-rules-migration', () => {
             matchCategories: ['docker', 'js'],
             addLabels: ['docker'],
           },
+          {
+            matchCategories: ['java'],
+            addLabels: ['java'],
+          }
         ],
       }
     );
