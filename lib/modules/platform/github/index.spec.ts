@@ -21,8 +21,6 @@ import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
 
-jest.mock('delay');
-
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http/queue');
 const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);

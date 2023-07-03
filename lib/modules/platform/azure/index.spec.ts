@@ -33,7 +33,7 @@ describe('modules/platform/azure/index', () => {
     jest.mock('../../../util/git');
     jest.mock('../../../util/host-rules');
     jest.mock('../../../logger');
-    jest.mock('delay');
+
     hostRules = require('../../../util/host-rules');
     require('../../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');

@@ -8,7 +8,7 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import delay from 'delay';
+import { setTimeout } from 'timers/promises';
 import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,
@@ -745,7 +745,7 @@ export async function mergePr({
         `Updated PR to closed status but change has not taken effect yet. Retrying...`
       );
 
-      await delay(sleepMs);
+      await setTimeout(sleepMs);
       pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
       isClosed = pr.status === PullRequestStatus.Completed;
     }

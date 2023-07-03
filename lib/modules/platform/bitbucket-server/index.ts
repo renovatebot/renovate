@@ -1,4 +1,4 @@
-import delay from 'delay';
+import { setTimeout } from 'timers/promises';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -349,7 +349,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
 // istanbul ignore next
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
-  await delay(1000);
+  await setTimeout(1000);
   // refresh cache
   await getPr(number, true);
 }

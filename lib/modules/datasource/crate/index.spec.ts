@@ -1,4 +1,3 @@
-import delay from 'delay';
 import fs from 'fs-extra';
 import _simpleGit, { SimpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
@@ -12,6 +11,7 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as memCache from '../../../util/cache/memory';
 import type { RegistryInfo } from './types';
 import { CrateDatasource } from '.';
+import { setTimeout } from 'timers/promises';
 
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
@@ -30,7 +30,7 @@ function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
     .mockImplementation(
       async (_registryUrl: string, clonePath: string, _opts) => {
         if (delayMs && delayMs > 0) {
-          await delay(delayMs);
+          await setTimeout(delayMs);
         }
 
         const path = `${clonePath}/my/pk/mypkg`;
