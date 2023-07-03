@@ -18,6 +18,15 @@ In general, we recommend that you:
 - Talk with your team about the update stategy
 
 If you think Renovate is too noisy, please read our [noise reduction docs](./noise-reduction.md).
+## The `config:best-practices` preset
+
+Short introduction goes here.
+
+### Why we created the `config:best-practices` preset
+
+Explain the reason behind each config option in the preset.
+How to use the preset (extend it).
+Link to the config preset in the published docs.
 
 ### Why updating often is easier, faster and safer
 
