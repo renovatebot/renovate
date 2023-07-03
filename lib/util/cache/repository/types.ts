@@ -38,6 +38,8 @@ export interface OnboardingBranchCache {
   onboardingBranchSha: string;
   isConflicted: boolean;
   isModified: boolean;
+  configFileName?: string;
+  configFileParsed?: string;
 }
 
 export interface PrCache {

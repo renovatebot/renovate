@@ -1,4 +1,3 @@
-import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -114,11 +113,14 @@ export async function updateArtifacts({
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
       docker: {},
-      preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
       toolConstraints: [
         {
           toolName: 'python',
           constraint: tagConstraint,
+        },
+        {
+          toolName: 'pipenv',
+          constraint: pipenvConstraint,
         },
       ],
     };

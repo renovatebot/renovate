@@ -1417,6 +1417,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
+              targetBranch: 'new_base',
             })
           ).toResolve();
         });
