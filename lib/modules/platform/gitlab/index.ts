@@ -713,7 +713,7 @@ export async function updatePr({
     // TODO: null check (#7154)
   }[state!];
 
-  const body: GitlabHttpOptions['body'] = {
+  const body: any = {
     title,
     description: sanitize(description),
     ...(newState && { state_event: newState }),

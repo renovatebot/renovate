@@ -949,7 +949,7 @@ export async function updatePr({
   ).body;
 
   try {
-    const body: BitbucketHttpOptions['body'] = {
+    const body: any = {
       title,
       description: sanitize(description),
       reviewers: pr.reviewers,

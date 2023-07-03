@@ -864,7 +864,7 @@ export async function updatePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
-    const body: HttpOptions['body'] = {
+    const body: any = {
       title,
       description,
       version: pr.version,
