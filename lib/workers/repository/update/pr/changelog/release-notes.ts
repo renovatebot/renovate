@@ -349,13 +349,11 @@ export async function getReleaseNotesMd(
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
               const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
-              const url =
-                notesSourceUrl +
-                '#' +
-                title
-                  .filter((word) => !isUrl(word))
-                  .join('-')
-                  .replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const mdHeadingLink = title
+                .filter((word) => !isUrl(word))
+                .join('-')
+                .replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const url = `${notesSourceUrl}#${mdHeadingLink}`;
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
