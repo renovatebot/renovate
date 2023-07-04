@@ -575,46 +575,39 @@ export async function validateConfig(
                 'format',
                 'transformTemplates',
               ];
-              if (is.plainObject(val)) {
-                for (const [
-                  customDatasourceName,
-                  customDatasourceValue,
-                ] of Object.entries(val)) {
-                  if (!is.plainObject(customDatasourceValue)) {
+              for (const [
+                customDatasourceName,
+                customDatasourceValue,
+              ] of Object.entries(val)) {
+                if (!is.plainObject(customDatasourceValue)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${customDatasourceName}\` configuration: customDatasource is not an object`,
+                  });
+                  continue;
+                }
+                for (const [subKey, subValue] of Object.entries(
+                  customDatasourceValue
+                )) {
+                  if (!allowedKeys.includes(subKey)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${customDatasourceName}\` configuration: customDatasource is not an object`,
+                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
                     });
-                    continue;
-                  }
-                  for (const [subKey, subValue] of Object.entries(
-                    customDatasourceValue
-                  )) {
-                    if (!allowedKeys.includes(subKey)) {
+                  } else if (subKey === 'transformTemplates') {
+                    if (!is.array(subValue, is.string)) {
                       errors.push({
                         topic: 'Configuration Error',
-                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
-                      });
-                    } else if (subKey === 'transformTemplates') {
-                      if (!is.array(subValue, is.string)) {
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
-                        });
-                      }
-                    } else if (!is.string(subValue)) {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
                       });
                     }
+                  } else if (!is.string(subValue)) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                    });
                   }
                 }
-              } else {
-                errors.push({
-                  topic: 'Configuration Error',
-                  message: `Invalid \`${currentPath}.${key}\` configuration: value is not a record`,
-                });
               }
             } else if (
               ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)

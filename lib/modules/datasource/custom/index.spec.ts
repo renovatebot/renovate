@@ -4,6 +4,26 @@ import { CustomDatasource } from './index';
 
 describe('modules/datasource/custom/index', () => {
   describe('getReleases', () => {
+    it('return null if only the prefix is supplied', async () => {
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.`,
+        packageName: '*',
+        customDatasources: {},
+      });
+      expect(result).toBeNull();
+    });
+
+    it('return null if no registryUrl is provided as well no defaultRegistryTemplate is defined', async () => {
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {},
+        },
+      });
+      expect(result).toBeNull();
+    });
+
     it('return null if no custom datasource could not be found', async () => {
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
@@ -18,6 +38,22 @@ describe('modules/datasource/custom/index', () => {
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'aPackageName',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+          },
+        },
+      });
+      expect(result).toBeNull();
+    });
+
+    it('return null if schema validation fails', async () => {
+      httpMock.scope('https://example.com').get('/v1').reply(200, {
+        version: 'v1.0.0',
+      });
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
         customDatasources: {
           foo: {
             defaultRegistryUrlTemplate: 'https://example.com/v1',
