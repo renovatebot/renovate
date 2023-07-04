@@ -274,10 +274,9 @@ export interface RenovateConfig
 }
 
 export interface CustomDatasourceConfig {
-  registryUrlTemplate?: string;
+  defaultRegistryUrlTemplate?: string;
   format?: 'json';
-  pathTemplate?: string;
-  transform?: string;
+  transformTemplates?: string[];
 }
 
 export interface AllConfig

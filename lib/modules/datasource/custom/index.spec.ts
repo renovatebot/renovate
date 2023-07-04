@@ -20,7 +20,7 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'aPackageName',
         customDatasources: {
           foo: {
-            registryUrlTemplate: 'https://example.com/v1',
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
           },
         },
       });
@@ -41,7 +41,7 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'myPackage',
         customDatasources: {
           foo: {
-            registryUrlTemplate: 'https://example.com/v1',
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
           },
         },
       });
@@ -65,7 +65,8 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'myPackage',
         customDatasources: {
           foo: {
-            registryUrlTemplate: 'https://example.com/v1/{{packageName}}',
+            defaultRegistryUrlTemplate:
+              'https://example.com/v1/{{packageName}}',
           },
         },
       });
@@ -99,8 +100,8 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'myPackage',
         customDatasources: {
           foo: {
-            registryUrlTemplate: 'https://example.com/v1',
-            pathTemplate: '{{packageName}}',
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            transformTemplates: ['{{packageName}}'],
           },
         },
       });
@@ -136,8 +137,8 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'myPackage',
         customDatasources: {
           foo: {
-            registryUrlTemplate: 'https://example.com/v1',
-            pathTemplate: 'groupName.{{packageName}}',
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            transformTemplates: ['groupName.{{packageName}}'],
           },
         },
       });

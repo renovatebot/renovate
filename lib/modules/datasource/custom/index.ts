@@ -8,7 +8,7 @@ import { massageCustomDatasourceConfig } from './utils';
 
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
-  override caching = true;
+
   override customRegistrySupport = true;
 
   constructor() {
@@ -38,29 +38,21 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
-    const { registryUrlTemplate, transform, pathTemplate } = config;
+    const { defaultRegistryUrlTemplate, transformTemplates } = config;
     // TODO add here other format options than JSON
     let response: unknown;
     try {
-      response = (await this.http.getJson(registryUrlTemplate)).body;
+      response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
     } catch (e) {
       this.handleHttpErrors(e);
       return null;
     }
 
     let data = response;
-    if (is.nonEmptyString(transform)) {
-      const expression = jsonata(transform);
-      data = await expression.evaluate(response);
-    }
 
-    if (is.nonEmptyString(pathTemplate)) {
-      const elements = pathTemplate.split('.');
-      for (const element of elements) {
-        if (is.object(data) && element in data) {
-          data = data[element as keyof typeof data];
-        }
-      }
+    for (const transformTemplate of transformTemplates) {
+      const expression = jsonata(transformTemplate);
+      data = await expression.evaluate(data);
     }
 
     try {

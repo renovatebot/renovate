@@ -22,7 +22,7 @@ export function massageCustomDatasourceConfig(
   const templateInput = { packageName };
 
   const registryUrlTemplate =
-    defaultRegistryUrl ?? customDatasource.registryUrlTemplate;
+    defaultRegistryUrl ?? customDatasource.defaultRegistryUrlTemplate;
   if (is.nullOrUndefined(registryUrlTemplate)) {
     logger.debug(
       'No registry url provided by extraction nor datasource configuration'
@@ -31,12 +31,16 @@ export function massageCustomDatasourceConfig(
   }
   const registryUrl = template.compile(registryUrlTemplate, templateInput);
 
-  const pathTemplate = customDatasource.pathTemplate ?? '';
-  const path = template.compile(pathTemplate, templateInput);
+  const transformTemplates = customDatasource.transformTemplates ?? [];
+  const transform: string[] = [];
+  for (const transformTemplate of transformTemplates) {
+    const templated = template.compile(transformTemplate, templateInput);
+    transform.push(templated);
+  }
+
   return {
     format: customDatasource.format ?? 'json',
-    registryUrlTemplate: registryUrl,
-    pathTemplate: path,
-    transform: customDatasource.transform ?? '',
+    defaultRegistryUrlTemplate: registryUrl,
+    transformTemplates: transform,
   };
 }
