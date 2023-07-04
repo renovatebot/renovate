@@ -1,5 +1,3 @@
-// TODO #7154
-import URL from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
@@ -9,6 +7,7 @@ import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
 import * as github from './github';
@@ -233,17 +232,6 @@ function sectionize(text: string, level: number): string[] {
   return result;
 }
 
-function isUrl(url: string): boolean {
-  try {
-    return !!URL.parse(url).hostname;
-  } catch (err) {
-    // istanbul ignore next
-    logger.debug({ err }, `Error parsing ${url} in URL.parse`);
-  }
-  // istanbul ignore next
-  return false;
-}
-
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
@@ -345,14 +333,15 @@ export async function getReleaseNotesMd(
             .filter(Boolean);
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
-            if (word.includes(version) && !isUrl(word)) {
+            if (word.includes(version) && !validateUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
               const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
-              const url =
-                notesSourceUrl +
-                '#' +
-                title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const mdHeadingLink = title
+                .filter((word) => !validateUrl(word))
+                .join('-')
+                .replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const url = `${notesSourceUrl}#${mdHeadingLink}`;
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
