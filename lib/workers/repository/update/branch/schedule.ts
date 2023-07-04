@@ -1,6 +1,6 @@
 import later from '@breejs/later';
-import { CronExpression, parseExpression as parseCron } from 'cron-parser';
 import is from '@sindresorhus/is';
+import { CronExpression, parseExpression as parseCron } from 'cron-parser';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
