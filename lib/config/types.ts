@@ -386,7 +386,12 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
+  parent?:
+    | 'customDatasources'
+    | 'hostRules'
+    | 'packageRules'
+    | 'postUpgradeTasks'
+    | 'regexManagers';
 
   // used by tests
   relatedOptions?: string[];
