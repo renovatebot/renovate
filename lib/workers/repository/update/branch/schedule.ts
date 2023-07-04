@@ -1,5 +1,5 @@
 import later from '@breejs/later';
-import { parseCron } from '@cheap-glitch/mi-cron';
+import { CronExpression, parseExpression as parseCron } from 'cron-parser';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
@@ -33,10 +33,16 @@ export function hasValidSchedule(
   }
   // check if any of the schedules fail to parse
   const hasFailedSchedules = schedule.some((scheduleText) => {
-    const parsedCron = parseCron(scheduleText);
+    let parsedCron: CronExpression | undefined;
+    try {
+      parsedCron = parseCron(scheduleText);
+    } catch (err) {
+      parsedCron = undefined;
+    }
+
     if (parsedCron !== undefined) {
       if (
-        parsedCron.minutes.length !== 60 ||
+        parsedCron.fields.minute.length !== 60 ||
         scheduleText.indexOf(minutesChar) !== 0
       ) {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
@@ -81,29 +87,25 @@ export function hasValidSchedule(
 }
 
 function cronMatches(cron: string, now: DateTime): boolean {
+  // it will always parse because it is checked beforehand
   const parsedCron = parseCron(cron);
 
-  // istanbul ignore if: doesn't return undefined but type will include undefined
-  if (!parsedCron) {
-    return false;
-  }
-
-  if (parsedCron.hours.indexOf(now.hour) === -1) {
+  if ((parsedCron.fields.hour as number[]).indexOf(now.hour) === -1) {
     // Hours mismatch
     return false;
   }
 
-  if (parsedCron.days.indexOf(now.day) === -1) {
+  if ((parsedCron.fields.dayOfMonth as number[]).indexOf(now.day) === -1) {
     // Days mismatch
     return false;
   }
 
-  if (!parsedCron.weekDays.includes(now.weekday % 7)) {
+  if (!(parsedCron.fields.dayOfWeek as number[]).includes(now.weekday % 7)) {
     // Weekdays mismatch
     return false;
   }
 
-  if (parsedCron.months.indexOf(now.month) === -1) {
+  if ((parsedCron.fields.month as number[]).indexOf(now.month) === -1) {
     // Months mismatch
     return false;
   }
@@ -171,7 +173,12 @@ export function isScheduledNow(
 
   // We run if any schedule matches
   const isWithinSchedule = configSchedule.some((scheduleText) => {
-    const cronSchedule = parseCron(scheduleText);
+    let cronSchedule: CronExpression | undefined;
+    try {
+      cronSchedule = parseCron(scheduleText);
+    } catch (err) {
+      cronSchedule = undefined;
+    }
     if (cronSchedule) {
       // We have Cron syntax
       if (cronMatches(scheduleText, now)) {
