@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { DartDatasource } from '../../datasource/dart';
 import * as npmVersioning from '../../versioning/npm';
 
@@ -11,3 +12,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)pubspec\\.ya?ml$'],
   versioning: npmVersioning.id,
 };
+
+export const categories: Category[] = ['dart'];

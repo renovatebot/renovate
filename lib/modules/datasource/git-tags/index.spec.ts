@@ -5,7 +5,7 @@ import { add, clear } from '../../../util/host-rules';
 import { GitTagsDatasource } from '.';
 
 jest.mock('simple-git');
-const simpleGitFactoryMock = simpleGit as jest.Mock;
+const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
 
 const packageName = 'https://github.com/example/example.git';
 
@@ -15,7 +15,7 @@ const datasource = GitTagsDatasource.id;
 const datasourceInstance = new GitTagsDatasource();
 
 describe('modules/datasource/git-tags/index', () => {
-  let gitMock: any;
+  let gitMock: jest.MockedObject<Pick<SimpleGit, 'env' | 'listRemote'>>;
 
   beforeEach(() => {
     // clear host rules

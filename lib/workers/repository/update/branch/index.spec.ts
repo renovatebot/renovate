@@ -2,7 +2,6 @@ import {
   fs,
   git,
   mocked,
-  mockedFunction,
   partial,
   platform,
   scm,
@@ -34,7 +33,6 @@ import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { needsChangelogs } from '../../changelog';
 import type { ResultWithPr } from '../pr';
 import * as _prWorker from '../pr';
 import * as _prAutomerge from '../pr/automerge';
@@ -816,9 +814,8 @@ describe('workers/repository/update/branch/index', () => {
         ignoreTests: true,
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
-        fetchReleaseNotes: true,
+        fetchReleaseNotes: 'branch',
       } satisfies BranchConfig;
-      mockedFunction(needsChangelogs).mockReturnValueOnce(true);
       scm.getBranchCommit.mockResolvedValue('123test'); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,

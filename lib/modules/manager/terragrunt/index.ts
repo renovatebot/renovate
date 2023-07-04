@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
@@ -16,3 +17,5 @@ export const defaultConfig = {
   commitMessageTopic: 'Terragrunt dependency {{depName}}',
   fileMatch: ['(^|/)terragrunt\\.hcl$'],
 };
+
+export const categories: Category[] = ['iac', 'terraform'];
