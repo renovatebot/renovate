@@ -210,7 +210,10 @@ export const presets: Record<string, Preset> = {
   },
   docker: {
     description: 'Keep Dockerfile `FROM` sources updated.',
-    docker: {
+    'docker-compose': {
+      enabled: true,
+    },
+    dockerfile: {
       enabled: true,
     },
   },
@@ -360,7 +363,10 @@ export const presets: Record<string, Preset> = {
   },
   onlyNpm: {
     description: 'Renovate only npm dependencies.',
-    docker: {
+    'docker-compose': {
+      enabled: false,
+    },
+    dockerfile: {
       enabled: false,
     },
     meteor: {

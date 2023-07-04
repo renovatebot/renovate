@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getLanguageList, getManagerList } from '../modules/manager';
+import { getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -24,7 +24,7 @@ let optionParents: Record<string, RenovateOptions['parent']>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = getLanguageList().concat(getManagerList());
+const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
@@ -304,6 +304,7 @@ export async function validateConfig(
             const selectors = [
               'matchFileNames',
               'matchLanguages',
+              'matchCategories',
               'matchBaseBranches',
               'matchManagers',
               'matchDatasources',

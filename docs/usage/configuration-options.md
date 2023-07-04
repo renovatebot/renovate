@@ -763,24 +763,6 @@ Descriptions fields embedded within presets are also collated as part of the onb
 
 Add to this object if you wish to define rules that apply only to PRs that update digests.
 
-## docker
-
-Add config here if you wish it to apply to Docker package managers Dockerfile and Docker Compose.
-If instead you mean to apply settings to any package manager that updates using the Docker _datasource_, use a package rule instead, e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "labels": ["docker-update"]
-    }
-  ]
-}
-```
-
-## dotnet
-
 ## draftPR
 
 If you want the PRs created by Renovate to be considered as drafts rather than normal PRs, you could add this property to your `renovate.json`:
@@ -1131,16 +1113,6 @@ If you need to modify this path, for example in order to ignore directories, you
   "goGetDirs": ["./some-project/", "./tools/..."]
 }
 ```
-
-## golang
-
-Configuration added here applies for all Go-related updates.
-The only supported package manager for Go is the native Go Modules (the `gomod` manager).
-
-For self-hosted users, `GOPROXY`, `GONOPROXY`, `GOPRIVATE` and `GOINSECURE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
-
-Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
-Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
 
@@ -1664,14 +1636,6 @@ Currently this applies to the `minimumReleaseAge` check only.
 The `flexible` mode can result in "flapping" of Pull Requests, for example: a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `minimumReleaseAge`.
 We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you can see suppressed PRs.
 
-## java
-
-Use this configuration option for shared config across all Java projects (Gradle and Maven).
-
-## js
-
-Use this configuration option for shared config across npm/Yarn/pnpm and meteor package managers.
-
 ## labels
 
 By default, Renovate won't add any labels to PRs.
@@ -1809,12 +1773,6 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.
-
-## node
-
-Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
-
-Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a comprehensive explanation of how the `node` option can be used.
 
 ## npmToken
 
@@ -2055,17 +2013,23 @@ See also `matchPackagePrefixes`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
-### matchLanguages
+### matchCategories
 
-Use this field to restrict rules to a particular language. e.g.
+Use `matchCategories` to restrict rules to a particular language or group.
+Matching is done using "any" logic, i.e. "match any of the following categories".
+The categories can be found in the [manager documentation](./modules/manager/index.md).
+
+<!-- prettier-ignore -->
+!!! note
+    Rules with `matchCategories` are only applied _after_ extraction of dependencies.
+    If you want to configure which managers are being extracted at all, use `enabledManagers` instead.
 
 ```json
 {
   "packageRules": [
     {
-      "matchPackageNames": ["request"],
-      "matchLanguages": ["python"],
-      "enabled": false
+      "matchCategories": ["python"],
+      "addLabels": ["py"]
     }
   ]
 }
@@ -2528,8 +2492,6 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 
 Add to this object if you wish to define rules that apply only to patch updates.
 
-## php
-
 ## pin
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
@@ -2863,10 +2825,6 @@ Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 Configure to `false` to disable deleting orphan branches and autoclosing PRs.
 Defaults to `true`.
-
-## python
-
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files, or any file that matches the pattern `requirements-*.(txt|pip)` - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
@@ -3313,10 +3271,6 @@ Renovate's "rollback" feature exists to propose a downgrade to the next-highest 
 
 Renovate does not create these rollback PRs by default, so this functionality needs to be opted-into.
 We recommend you do this selectively with `packageRules` and not globally.
-
-## ruby
-
-## rust
 
 ## schedule
 
