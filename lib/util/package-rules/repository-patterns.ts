@@ -7,7 +7,7 @@ import { massagePattern } from './utils';
 
 export class RepositoryPatternsMatcher extends Matcher {
   override matches(
-    { repository }: PackageRuleInputConfig, // TODO - need correct fields
+    { repository }: PackageRuleInputConfig,
     { matchRepositoryPatterns }: PackageRule
   ): boolean | null {
     if (is.undefined(matchRepositoryPatterns)) {
