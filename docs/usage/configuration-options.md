@@ -2602,6 +2602,9 @@ You can use variable templating in your commands as long as [`allowPostUpgradeCo
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
 Dotfiles are included.
 
+Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
+Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
+
 ### executionMode
 
 Defaults to `update`, but can also be set to `branch`.

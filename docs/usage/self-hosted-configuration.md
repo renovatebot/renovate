@@ -40,8 +40,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is needed becaus
         "commands": [
           "npm ci --ignore-scripts",
           "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ],
-        "fileFilters": ["**/**"]
+        ]
       }
     }
   ]
