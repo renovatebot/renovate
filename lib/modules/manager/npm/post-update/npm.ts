@@ -25,6 +25,7 @@ import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function generateLockFile(
   lockFileDir: string,
@@ -41,9 +42,12 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
-      constraint: config.constraints?.npm ?? config.extractedConstraints?.npm,
+      constraint:
+        config.constraints?.npm ??
+        getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
     };
     const commands: string[] = [];
     let cmdOptions = '';
@@ -67,7 +71,7 @@ export async function generateLockFile(
       cwdFile: lockFileName,
       extraEnv,
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
         npmToolConstraint,
       ],
       docker: {},

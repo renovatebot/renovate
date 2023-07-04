@@ -1,6 +1,6 @@
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
-import { PackageLock } from './schema';
+import { PackageLock } from '../schema';
 import type { LockFile } from './types';
 
 export async function getNpmLock(filePath: string): Promise<LockFile> {
