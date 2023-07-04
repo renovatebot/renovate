@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { getChildEnv } from '../exec';
+import { getChildEnv } from '../exec/utils';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
