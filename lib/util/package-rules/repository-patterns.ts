@@ -18,15 +18,9 @@ export class RepositoryPatternsMatcher extends Matcher {
       return false;
     }
 
-    const reposToMatchAgainst = [repository];
-
     let isMatch = false;
     for (const repositoryPattern of matchRepositoryPatterns) {
-      if (
-        reposToMatchAgainst.some((repo) =>
-          isRepositoryMatch(repositoryPattern, repo)
-        )
-      ) {
+      if (isRepositoryMatch(repositoryPattern, repository)) {
         isMatch = true;
       }
     }
