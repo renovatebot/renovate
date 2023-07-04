@@ -514,12 +514,14 @@ export async function updatePr({
   prBody: body,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: GitPullRequest = {
     title,
+    targetRefName: getNewBranchName(targetBranch),
   };
 
   if (body) {
@@ -528,7 +530,9 @@ export async function updatePr({
 
   if (state === 'open') {
     await azureApiGit.updatePullRequest(
-      { status: PullRequestStatus.Active },
+      {
+        status: PullRequestStatus.Active,
+      },
       config.repoId,
       prNo
     );

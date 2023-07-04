@@ -880,7 +880,7 @@ The above would mean Renovate would not include files matching the above glob pa
 ## extends
 
 See [shareable config presets](./config-presets.md) for details.
-Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/presets.md/#how-to-use-presets) page.
+Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/presets.md#how-to-use-presets) page.
 
 ## extractVersion
 
@@ -935,10 +935,11 @@ Set this to `false` if you want to disable release notes fetching.
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 
+- Bitbucket Cloud
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except github.com, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from github.com.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note

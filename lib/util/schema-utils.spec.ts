@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { Json, Json5, LooseArray, LooseRecord, UtcDate } from './schema-utils';
+import {
+  Json,
+  Json5,
+  LooseArray,
+  LooseRecord,
+  Url,
+  UtcDate,
+} from './schema-utils';
 
 describe('util/schema-utils', () => {
   describe('LooseArray', () => {
@@ -268,6 +275,24 @@ describe('util/schema-utils', () => {
 
     it('rejects invalid date', () => {
       expect(() => UtcDate.parse('foobar')).toThrow();
+    });
+  });
+
+  describe('Url', () => {
+    it('parses valid URLs', () => {
+      const urlStr = 'https://www.example.com/foo/bar?baz=qux';
+      const parsedUrl = Url.parse(urlStr);
+      expect(parsedUrl).toMatchObject({
+        protocol: 'https:',
+        hostname: 'www.example.com',
+        pathname: '/foo/bar',
+        search: '?baz=qux',
+      });
+    });
+
+    it('throws an error for invalid URLs', () => {
+      const urlStr = 'invalid-url-string';
+      expect(() => Url.parse(urlStr)).toThrow('Invalid URL');
     });
   });
 });

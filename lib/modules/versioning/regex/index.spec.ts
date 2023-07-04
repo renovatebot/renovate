@@ -22,15 +22,14 @@ describe('modules/versioning/regex/index', () => {
     });
 
     describe('throws', () => {
-      for (const re of [
-        '^(?<major>\\d+)(',
-        '^(?<major>\\d+)?(?<!y)x$',
-        '^(?<major>\\d+)?(?<=y)x$',
-      ]) {
-        it(re, () => {
-          expect(() => get(`regex:${re}`)).toThrow(CONFIG_VALIDATION);
-        });
-      }
+      it.each`
+        regex
+        ${'^(?<major>\\d+)('}
+        ${'^(?<major>\\d+)?(?<!y)x$'}
+        ${'^(?<major>\\d+)?(?<=y)x$'}
+      `(`on invalid regex: "$regex"`, ({ re }: { re: string }) => {
+        expect(() => get(`regex:${re}`)).toThrow(CONFIG_VALIDATION);
+      });
     });
 
     it.each`
