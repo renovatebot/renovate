@@ -945,20 +945,22 @@ export async function updatePr({
   ).body;
 
   try {
+    const body: any = {
+      title,
+      description: sanitize(description),
+      reviewers: pr.reviewers,
+    };
+    if (targetBranch) {
+      body.destination = {
+        branch: {
+          name: targetBranch,
+        },
+      };
+    }
+
     await bitbucketHttp.putJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      {
-        body: {
-          title,
-          description: sanitize(description),
-          reviewers: pr.reviewers,
-          destination: {
-            branch: {
-              name: targetBranch,
-            },
-          },
-        },
-      }
+      { body }
     );
   } catch (err) {
     // Try sanitizing reviewers
