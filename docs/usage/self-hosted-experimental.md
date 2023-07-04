@@ -71,14 +71,12 @@ Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
-## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
+## `RENOVATE_X_DELETE_CONFIG_FILE`
 
-If set, you'll get the following behavior.
+If `true` Renovate tries to delete the self-hosted config file after reading it.
+You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
 
-When using `matchPackageNames` and `matchPackagePatterns` matchers:
-
-1. Renovate first tries to match against `depName`
-2. If `depName` doesn't match then Renovate tries to match against `packageName`
+The process that runs Renovate must have the correct permissions to delete the config file.
 
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 

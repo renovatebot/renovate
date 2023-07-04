@@ -7,7 +7,10 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import { Result } from '../../util/result';
+import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
+import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -30,7 +33,7 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function getDatasourceFor(datasource: string): DatasourceApi | null {
+export function getDatasourceFor(datasource: string): DatasourceApi | null {
   return datasources.get(datasource) ?? null;
 }
 
@@ -239,14 +242,14 @@ export function getDefaultVersioning(
   datasourceName: string | undefined
 ): string {
   if (!datasourceName) {
-    return 'semver';
+    return defaultVersioning.id;
   }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: wrong regex manager config?
   if (!datasource) {
     logger.warn({ datasourceName }, 'Missing datasource!');
   }
-  return datasource?.defaultVersioning ?? 'semver';
+  return datasource?.defaultVersioning ?? defaultVersioning.id;
 }
 
 function applyReplacements(
@@ -352,7 +355,7 @@ export async function getPkgReleases(
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
   }
-  let res: ReleaseResult;
+  let res: ReleaseResult | null = null;
   try {
     res = clone(
       await getRawReleases({
@@ -394,13 +397,10 @@ export async function getPkgReleases(
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   // Filter versions for uniqueness
-  res.releases = res.releases.filter(
-    (filterRelease, filterIndex) =>
-      res.releases.findIndex(
-        (findRelease) => findRelease.version === filterRelease.version
-      ) === filterIndex
-  );
+  res.releases = uniq(res.releases, (x, y) => x.version === y.version);
+
   if (config?.constraintsFiltering === 'strict') {
+    const filteredReleases: string[] = [];
     // Filter releases for compatibility
     for (const [constraintName, constraintValue] of Object.entries(
       config.constraints ?? {}
@@ -413,7 +413,7 @@ export async function getPkgReleases(
             return true;
           }
 
-          return constraint.some(
+          const satisfiesConstraints = constraint.some(
             // If the constraint value is a subset of any release's constraints, then it's OK
             // fallback to release's constraint match if subset is not supported by versioning
             (releaseConstraint) =>
@@ -421,8 +421,21 @@ export async function getPkgReleases(
               (version.subset?.(constraintValue, releaseConstraint) ??
                 version.matches(constraintValue, releaseConstraint))
           );
+          if (!satisfiesConstraints) {
+            filteredReleases.push(release.version);
+          }
+          return satisfiesConstraints;
         });
       }
+    }
+    if (filteredReleases.length) {
+      logger.debug(
+        `Filtered ${
+          filteredReleases.length
+        } releases for ${packageName} due to constraintsFiltering=strict: ${filteredReleases.join(
+          ', '
+        )}`
+      );
     }
   }
   // Strip constraints from releases result
@@ -430,6 +443,12 @@ export async function getPkgReleases(
     delete release.constraints;
   });
   return res;
+}
+
+export function getPkgReleasesWithResult(
+  config: GetPkgReleasesConfig
+): Promise<Result<ReleaseResult | null>> {
+  return Result.wrap(getPkgReleases(config));
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {

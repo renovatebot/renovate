@@ -1,12 +1,18 @@
-import { git, mocked, scm } from '../../../../../test/util';
+import { git, mocked, partial, scm } from '../../../../../test/util';
 import * as _cache from '../../../../util/cache/repository';
-import type { RepoCacheData } from '../../../../util/cache/repository/types';
+import type {
+  OnboardingBranchCache,
+  RepoCacheData,
+} from '../../../../util/cache/repository/types';
 import {
   deleteOnboardingCache,
+  getOnboardingConfigFromCache,
+  getOnboardingFileNameFromCache,
   hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
   isOnboardingBranchModified,
   setOnboardingCache,
+  setOnboardingConfigDetails,
 } from './onboarding-branch-cache';
 
 jest.mock('../../../../util/cache/repository');
@@ -230,6 +236,63 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       expect(
         await isOnboardingBranchConflicted('master', 'configure/renovate')
       ).toBeTrue();
+    });
+  });
+
+  describe('getOnboardingFileNameFromCache()', () => {
+    it('returns cached value', () => {
+      const dummyCache = {
+        onboardingBranchCache: partial<OnboardingBranchCache>({
+          configFileName: 'renovate.json',
+        }),
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValueOnce(dummyCache);
+      expect(getOnboardingFileNameFromCache()).toBe('renovate.json');
+    });
+
+    it('returns undefined', () => {
+      expect(getOnboardingFileNameFromCache()).toBeUndefined();
+    });
+  });
+
+  describe('getOnboardingConfigFromCache()', () => {
+    it('returns cached value', () => {
+      const dummyCache = {
+        onboardingBranchCache: partial<OnboardingBranchCache>({
+          configFileParsed: 'parsed',
+        }),
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValueOnce(dummyCache);
+      expect(getOnboardingConfigFromCache()).toBe('parsed');
+    });
+
+    it('returns undefined', () => {
+      expect(getOnboardingConfigFromCache()).toBeUndefined();
+    });
+  });
+
+  describe('setOnboardingConfigDetails()', () => {
+    it('returns cached value', () => {
+      const dummyCache = {
+        onboardingBranchCache: {
+          defaultBranchSha: 'default-sha',
+          onboardingBranchSha: 'onboarding-sha',
+          isConflicted: true,
+          isModified: true,
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValueOnce(dummyCache);
+      setOnboardingConfigDetails('renovate.json', 'parsed');
+      expect(dummyCache).toEqual({
+        onboardingBranchCache: {
+          defaultBranchSha: 'default-sha',
+          onboardingBranchSha: 'onboarding-sha',
+          isConflicted: true,
+          isModified: true,
+          configFileName: 'renovate.json',
+          configFileParsed: 'parsed',
+        },
+      });
     });
   });
 });

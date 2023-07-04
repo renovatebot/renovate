@@ -43,6 +43,7 @@ import type {
   Label,
   PR,
   PRMergeMethod,
+  PRUpdateParams,
   Repo,
   RepoSortMethod,
   SortMethod,
@@ -622,17 +623,23 @@ const platform: Platform = {
     prTitle,
     prBody: body,
     state,
+    targetBranch,
   }: UpdatePrConfig): Promise<void> {
     let title = prTitle;
     if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
       title = DRAFT_PREFIX + title;
     }
 
-    await helper.updatePR(config.repository, number, {
+    const prUpdateParams: PRUpdateParams = {
       title,
       ...(body && { body }),
       ...(state && { state }),
-    });
+    };
+    if (targetBranch) {
+      prUpdateParams.base = targetBranch;
+    }
+
+    await helper.updatePR(config.repository, number, prUpdateParams);
   },
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
@@ -737,7 +744,7 @@ const platform: Platform = {
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
             // TODO: types (#7154)
-            logger.warn(`Closing duplicate Issue #${issue.number!}`);
+            logger.warn({ issueNo: issue.number! }, 'Closing duplicate issue');
             // TODO #7154
             await helper.closeIssue(config.repository, issue.number!);
           }

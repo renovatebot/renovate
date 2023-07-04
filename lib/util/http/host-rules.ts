@@ -12,7 +12,29 @@ import { dnsLookup } from './dns';
 import { keepaliveAgents } from './keepalive';
 import type { GotOptions } from './types';
 
-export function findMatchingRules(options: GotOptions, url: string): HostRule {
+export type HostRulesGotOptions = Pick<
+  GotOptions,
+  | 'hostType'
+  | 'url'
+  | 'noAuth'
+  | 'headers'
+  | 'token'
+  | 'username'
+  | 'password'
+  | 'context'
+  | 'enabled'
+  | 'abortOnError'
+  | 'abortIgnoreStatusCodes'
+  | 'timeout'
+  | 'lookup'
+  | 'agent'
+  | 'http2'
+>;
+
+export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
+  options: GotOptions,
+  url: string
+): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
@@ -70,7 +92,10 @@ export function findMatchingRules(options: GotOptions, url: string): HostRule {
 }
 
 // Apply host rules to requests
-export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
+export function applyHostRules<GotOptions extends HostRulesGotOptions>(
+  url: string,
+  inOptions: GotOptions
+): GotOptions {
   const options: GotOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;

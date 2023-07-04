@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getLanguageList, getManagerList } from '../modules/manager';
+import { getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -24,7 +24,7 @@ let optionParents: Record<string, RenovateOptions['parent']>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = getLanguageList().concat(getManagerList());
+const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
@@ -52,15 +52,6 @@ function isManagerPath(parentPath: string): boolean {
 
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
-}
-
-function validateAliasObject(val: Record<string, unknown>): true | string {
-  for (const [key, value] of Object.entries(val)) {
-    if (!is.urlString(value)) {
-      return key;
-    }
-  }
-  return true;
 }
 
 function validatePlainObject(val: Record<string, unknown>): true | string {
@@ -311,9 +302,9 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'matchFiles',
-              'matchPaths',
+              'matchFileNames',
               'matchLanguages',
+              'matchCategories',
               'matchBaseBranches',
               'matchManagers',
               'matchDatasources',
@@ -570,11 +561,11 @@ export async function validateConfig(
         ) {
           if (is.plainObject(val)) {
             if (key === 'registryAliases') {
-              const res = validateAliasObject(val);
+              const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({
                   topic: 'Configuration Error',
-                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
             } else if (

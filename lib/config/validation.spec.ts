@@ -276,7 +276,7 @@ describe('config/validation', () => {
             },
           ],
         },
-        docker: {
+        ansible: {
           minor: {
             matchDepNames: ['meteor'],
             matchPackageNames: ['testPackage'],
@@ -578,16 +578,16 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `registryAliases.registryAliases.sample` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.sample` configuration: value is not a string',
           topic: 'Configuration Error',
         },
       ]);
     });
 
-    it('errors if registryAliases have invalid url', async () => {
+    it('errors if registryAliases have invalid value', async () => {
       const config = {
         registryAliases: {
-          example1: 'noturl',
+          example1: 123 as never,
           example2: 'http://www.example.com',
         },
       };
@@ -598,7 +598,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `registryAliases.registryAliases.example1` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.example1` configuration: value is not a string',
           topic: 'Configuration Error',
         },
       ]);
@@ -631,28 +631,21 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
-    it('errors if language or manager objects are nested', async () => {
+    it('errors if manager objects are nested', async () => {
       const config = {
-        python: {
+        pyenv: {
           enabled: false,
         },
-        java: {
+        maven: {
           gradle: {
             enabled: false,
-          },
-        },
-        major: {
-          minor: {
-            docker: {
-              automerge: true,
-            },
           },
         },
       } as never;
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
     });
