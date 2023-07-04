@@ -29,9 +29,9 @@ export class RepositoriesMatcher extends Matcher {
 
 function isRegexAndMatches(repoPattern: string, repo: string): boolean {
   if (
+    repoPattern.length < 2 ||
     !repoPattern.startsWith('/') ||
-    !repoPattern.endsWith('/') ||
-    repoPattern.length < 2
+    !repoPattern.endsWith('/')
   ) {
     return false;
   }
