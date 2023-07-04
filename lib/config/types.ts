@@ -330,7 +330,7 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
-  matchRepositoryPatterns?: string[];
+  matchRepositories?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
   excludePackageNames?: string[];

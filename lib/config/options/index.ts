@@ -1006,12 +1006,11 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchRepositoryPatterns',
+    name: 'matchRepositories',
     description:
-      'List of repositories to match (e.g. `["-archived$"]`). Valid only within a `packageRules` object.',
+      'List of repositories to match (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
-    format: 'regex',
     allowString: true,
     stage: 'package',
     parent: 'packageRules',

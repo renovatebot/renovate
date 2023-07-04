@@ -2035,7 +2035,7 @@ The categories can be found in the [manager documentation](./modules/manager/ind
 }
 ```
 
-### matchRepositoryPatterns
+### matchRepositories
 
 Use this field to restrict rules to a particular repository. e.g.
 
@@ -2043,12 +2043,14 @@ Use this field to restrict rules to a particular repository. e.g.
 {
   "packageRules": [
     {
-      "matchRepositoryPatterns": ["^literal/repo$", "-archived$"],
+      "matchRepositories": ["literal/repo", "/^some/repo$/", "**/*-archived"],
       "enabled": false
     }
   ]
 }
 ```
+
+It will use `regex` if starting/ending with `/`, otherwise it will use a `minimatch`.
 
 ### matchBaseBranches
 
