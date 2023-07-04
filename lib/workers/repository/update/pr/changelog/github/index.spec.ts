@@ -1,14 +1,14 @@
-import * as httpMock from '../../../../../../test/http-mock';
-import { partial } from '../../../../../../test/util';
-import { GlobalConfig } from '../../../../../config/global';
-import * as semverVersioning from '../../../../../modules/versioning/semver';
-import * as githubGraphql from '../../../../../util/github/graphql';
-import type { GithubTagItem } from '../../../../../util/github/graphql/types';
-import * as hostRules from '../../../../../util/host-rules';
-import type { BranchUpgradeConfig } from '../../../../types';
-import { getChangeLogJSON } from '.';
+import { getChangeLogJSON } from '..';
+import * as httpMock from '../../../../../../../test/http-mock';
+import { partial } from '../../../../../../../test/util';
+import { GlobalConfig } from '../../../../../../config/global';
+import * as semverVersioning from '../../../../../../modules/versioning/semver';
+import * as githubGraphql from '../../../../../../util/github/graphql';
+import type { GithubTagItem } from '../../../../../../util/github/graphql/types';
+import * as hostRules from '../../../../../../util/host-rules';
+import type { BranchUpgradeConfig } from '../../../../../types';
 
-jest.mock('../../../../../modules/datasource/npm');
+jest.mock('../../../../../../modules/datasource/npm');
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -33,7 +33,7 @@ const upgrade = partial<BranchUpgradeConfig>({
   ],
 });
 
-describe('workers/repository/update/pr/changelog/github', () => {
+describe('workers/repository/update/pr/changelog/github/index', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
@@ -215,6 +215,16 @@ describe('workers/repository/update/pr/changelog/github', () => {
           sourceUrl: 'https://github.com',
         })
       ).toEqual({ error: 'MissingGithubToken' });
+    });
+
+    it('handles suppressed Github warnings', async () => {
+      GlobalConfig.set({ githubTokenWarn: false });
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://github.com',
+        })
+      ).toBeNull();
     });
 
     it('handles no releases', async () => {

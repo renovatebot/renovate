@@ -13,3 +13,5 @@
 
 #### New Contributors
 * @&#8203;user made their first contribution in https://github.com/foo/foo/pull/2
+
+#### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)

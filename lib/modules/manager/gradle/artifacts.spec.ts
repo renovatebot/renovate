@@ -160,9 +160,10 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine > /dev/null',
+        cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -205,6 +206,7 @@ describe('modules/manager/gradle/artifacts', () => {
         cmd: 'gradlew.bat --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -244,9 +246,10 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin > /dev/null',
+        cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -294,9 +297,10 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
+        cmd: './gradlew --console=plain -q :dependencies --write-locks',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -354,9 +358,12 @@ describe('modules/manager/gradle/artifacts', () => {
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +
-          './gradlew --console=plain -q :dependencies --write-locks > /dev/null' +
+          './gradlew --console=plain -q :dependencies --write-locks' +
           '"',
-        options: { cwd: '/tmp/github/some/repo' },
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
       },
     ]);
   });
@@ -389,8 +396,11 @@ describe('modules/manager/gradle/artifacts', () => {
       },
       { cmd: 'install-tool java 16.0.1' },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
       },
     ]);
   });
@@ -425,9 +435,10 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks > /dev/null',
+        cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -526,8 +537,11 @@ describe('modules/manager/gradle/artifacts', () => {
       },
       { cmd: 'install-tool java 11.0.1' },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
-        options: { cwd: '/tmp/github/some/repo' },
+        cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
       },
     ]);
   });

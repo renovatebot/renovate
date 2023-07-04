@@ -3,6 +3,16 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
+  'best-practices': {
+    configMigration: true,
+    description: 'Preset with best practices from the Renovate maintainers.',
+    extends: [
+      'config:base',
+      'docker:pinDigests',
+      'helpers:pinGitHubActionDigests',
+      ':pinDevDependencies',
+    ],
+  },
   'js-app': {
     description: 'Default configuration for webapps.',
     extends: ['config:recommended', ':pinAllExceptPeerDependencies'],
