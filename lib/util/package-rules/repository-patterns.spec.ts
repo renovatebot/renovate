@@ -10,7 +10,7 @@ describe('util/package-rules/repository-patterns', () => {
           repository: undefined,
         },
         {
-          matchRepositoryPatterns: ['org/repo'],
+          matchRepositoryPatterns: ['^org/repo$'],
         }
       );
       expect(result).toBeFalse();
@@ -22,7 +22,7 @@ describe('util/package-rules/repository-patterns', () => {
           repository: 'org/repo',
         },
         {
-          matchRepositoryPatterns: ['org/other-repo'],
+          matchRepositoryPatterns: ['^org/other-repo$'],
         }
       );
       expect(result).toBeFalse();
@@ -34,7 +34,7 @@ describe('util/package-rules/repository-patterns', () => {
           repository: 'org/repo-archived',
         },
         {
-          matchRepositoryPatterns: ['-archived$'],
+          matchRepositoryPatterns: ['^org/repo$', '-archived$'],
         }
       );
       expect(result).toBeTrue();
