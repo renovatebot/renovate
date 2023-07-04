@@ -12,6 +12,7 @@ import {
   PlatformPrOptions,
   Pr,
   PrDebugData,
+  UpdatePrConfig,
   platform,
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
@@ -233,7 +234,7 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchReleaseNotes) {
+  if (config.fetchReleaseNotes === 'pr') {
     // fetch changelogs when not already done;
     await embedChangelogs(upgrades);
   }
@@ -315,12 +316,16 @@ export async function ensurePr(
     }
   }
 
-  const prBody = getPrBody(config, {
-    debugData: updatePrDebugData(
-      config.baseBranch,
-      existingPr?.bodyStruct?.debugData
-    ),
-  });
+  const prBody = getPrBody(
+    config,
+    {
+      debugData: updatePrDebugData(
+        config.baseBranch,
+        existingPr?.bodyStruct?.debugData
+      ),
+    },
+    config
+  );
 
   try {
     if (existingPr) {
@@ -353,6 +358,13 @@ export async function ensurePr(
         );
         return { type: 'with-pr', pr: existingPr };
       }
+
+      const updatePrConfig: UpdatePrConfig = {
+        number: existingPr.number,
+        prTitle,
+        prBody,
+        platformOptions: getPlatformPrOptions(config),
+      };
       // PR must need updating
       if (existingPr?.targetBranch !== config.baseBranch) {
         logger.debug(
@@ -363,6 +375,7 @@ export async function ensurePr(
           },
           'PR base branch has changed'
         );
+        updatePrConfig.targetBranch = config.baseBranch;
       }
       if (existingPrTitle !== newPrTitle) {
         logger.debug(
@@ -386,13 +399,7 @@ export async function ensurePr(
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
         return { type: 'with-pr', pr: existingPr };
       } else {
-        await platform.updatePr({
-          number: existingPr.number,
-          prTitle,
-          prBody,
-          platformOptions: getPlatformPrOptions(config),
-          targetBranch: config.baseBranch,
-        });
+        await platform.updatePr(updatePrConfig);
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
         setPrCache(branchName, prBodyFingerprint, true);
       }

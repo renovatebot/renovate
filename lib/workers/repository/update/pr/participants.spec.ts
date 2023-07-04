@@ -2,11 +2,11 @@ import { mocked, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';
-import * as _util from '../../../../util';
+import * as _util from '../../../../util/sample';
 import * as _codeOwners from './code-owners';
 import { addParticipants } from './participants';
 
-jest.mock('../../../../util');
+jest.mock('../../../../util/sample');
 const util = mocked(_util);
 
 jest.mock('./code-owners');

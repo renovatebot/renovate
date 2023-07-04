@@ -13,6 +13,7 @@ import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
+import { id as nodeVersioningId } from '../../../../modules/versioning/node';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
@@ -42,6 +43,11 @@ let config: LookupUpdateConfig;
 describe('workers/repository/process/lookup/index', () => {
   const getGithubReleases = jest.spyOn(
     GithubReleasesDatasource.prototype,
+    'getReleases'
+  );
+
+  const getGithubTags = jest.spyOn(
+    GithubTagsDatasource.prototype,
     'getReleases'
   );
 
@@ -81,6 +87,15 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
+    });
+
+    it('handles error result from getPkgReleasesWithResult', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'some-dep';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope('https://registry.npmjs.org').get('/some-dep').reply(500);
+      await expect(lookup.lookupUpdates(config)).rejects.toThrow();
     });
 
     it('returns rollback for pinned version', async () => {
@@ -996,6 +1011,23 @@ describe('workers/repository/process/lookup/index', () => {
       });
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '2.0.0', updateType: 'major' },
+      ]);
+    });
+
+    it('should allow unstable versions in same major for node', async () => {
+      config.currentValue = '20.3.0';
+      config.packageName = 'node';
+      config.datasource = GithubTagsDatasource.id;
+      config.versioning = nodeVersioningId;
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: '20.3.0' },
+          { version: '20.3.1' },
+          { version: '21.0.0' },
+        ],
+      });
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        { newValue: '20.3.1', updateType: 'patch' },
       ]);
     });
 

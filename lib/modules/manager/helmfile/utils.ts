@@ -7,8 +7,8 @@ import { DockerDatasource } from '../../datasource/docker';
 import { generateLoginCmd } from '../helmv3/common';
 import type { RepositoryRule } from '../helmv3/types';
 
-import { DocSchema } from './schema';
-import type { Doc, Release, Repository } from './types';
+import { DocSchema, LockSchema } from './schema';
+import type { Doc, Lock, Release, Repository } from './types';
 
 /** Returns true if a helmfile release contains kustomize specific keys **/
 export function kustomizationsKeysUsed(release: Release): boolean {
@@ -34,6 +34,11 @@ export async function localChartHasKustomizationsYaml(
 export function parseDoc(packageFileContent: string): Doc {
   const doc = yaml.load(packageFileContent);
   return DocSchema.parse(doc);
+}
+
+export function parseLock(lockFileContent: string): Lock {
+  const lock = yaml.load(lockFileContent);
+  return LockSchema.parse(lock);
 }
 
 export function isOCIRegistry(repository: Repository): boolean {

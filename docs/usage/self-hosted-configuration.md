@@ -19,15 +19,10 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPostUpgradeCommandTemplating
 
-Set to `true` to allow templating of dependency level post-upgrade commands.
-
 Let's look at an example of configuring packages with existing Angular migrations.
-
-Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`:
 
 ```javascript
 module.exports = {
-  allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
@@ -45,8 +40,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is needed becaus
         "commands": [
           "npm ci --ignore-scripts",
           "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ],
-        "fileFilters": ["**/**"]
+        ]
       }
     }
   ]
@@ -59,6 +53,9 @@ With this configuration, the executable command for `@angular/core` looks like t
 npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
+
+If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
+But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
 
 ## allowScripts
 
@@ -154,7 +151,7 @@ If the "development branch" is configured but the branch itself does not exist (
 
 ## binarySource
 
-Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
+Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
 By default, Renovate uses a child process to run such tools, so they must be:
 
 - installed before running Renovate
@@ -165,36 +162,9 @@ For this to work, `docker` needs to be installed and the Docker socket available
 Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
 Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
-This mode means that Renovate will dynamically install the version of tools available, if supported.
+This mode means that Renovate will dynamically install the desired version of each tool needed.
 
-Supported tools for dynamic install are:
-
-- `bundler`
-- `cargo`
-- `composer`
-- `dotnet`
-- `flux`
-- `golang`
-- `gradle-wrapper`
-- `helm`
-- `jb`
-- `jsonnet-bundler`
-- `lerna`
-- `mix`
-- `node`
-- `npm`
-- `pip_requirements`
-- `pip-compile`
-- `pipenv`
-- `pnpm`
-- `poetry`
-- `python`
-- `rust`
-- `yarn`
-
-If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
-
-Tools not on this list fall back to `binarySource=global`.
+If all projects are managed by Hermit, you can tell Renovate to use the tool versions specified in each project via Hermit by setting `binarySource=hermit`.
 
 ## cacheDir
 
@@ -333,17 +303,25 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 !!! note
     Dangling containers are only removed when Renovate runs again with the same prefix.
 
-## dockerImagePrefix
+## dockerCliOptions
 
-By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
-You can use the `dockerImagePrefix` option to override this default.
+You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar Docker containers.
 
-Say you want to pull your images from `ghcr.io/containerbase` to bypass Docker Hub limits.
+For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
+
+Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+
+## dockerSidecarImage
+
+By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+You can use the `dockerSidecarImage` option to override this default.
+
+Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
 ```json
 {
-  "dockerImagePrefix": "ghcr.io/containerbase"
+  "dockerSidecarImage": "ghcr.io/your_company/sidecar"
 }
 ```
 
@@ -351,7 +329,7 @@ Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/conta
 
 ## dockerUser
 
-Override default user and group used by Docker-based binaries.
+Override default user and group used by Docker-based tools.
 The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.

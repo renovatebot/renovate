@@ -24,6 +24,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -307,7 +308,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     {
       binarySource: 'docker',
       expectedCommands: [
-        { cmd: 'docker pull containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -318,14 +319,13 @@ describe('modules/manager/helmfile/artifacts', () => {
             '-e HELM_REGISTRY_CONFIG ' +
             '-e HELM_REPOSITORY_CONFIG ' +
             '-e HELM_REPOSITORY_CACHE ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'containerbase/sidecar ' +
+            'ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
             'install-tool helm v3.7.2' +
             ' && ' +
-            'install-tool helmfile v0.129.0' +
+            'install-tool helmfile 0.151.0' +
             ' && ' +
             'install-tool kustomize 5.0.0' +
             ' && ' +
@@ -338,7 +338,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       binarySource: 'install',
       expectedCommands: [
         { cmd: 'install-tool helm v3.7.2' },
-        { cmd: 'install-tool helmfile v0.129.0' },
+        { cmd: 'install-tool helmfile 0.151.0' },
         { cmd: 'install-tool kustomize 5.0.0' },
         { cmd: 'helmfile deps -f helmfile.yaml' },
       ],
@@ -358,9 +358,6 @@ describe('modules/manager/helmfile/artifacts', () => {
       // helm
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: 'v3.7.2' }],
-      });
-      datasource.getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: 'v0.129.0' }],
       });
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '5.0.0' }],

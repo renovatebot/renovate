@@ -217,19 +217,23 @@ describe('util/exec/docker/index', () => {
       cwd: '/tmp/foobar',
       envVars,
     };
-    const command = (img: string, vol?: string): string =>
+    const command = (img: string, vol?: string, opts?: string): string =>
       `docker run --rm ` +
       `--name=renovate_${img} ` +
       `--label=renovate_child ` +
       `--user=some-user ` +
       (vol ? `${vol} ` : '') +
+      (opts ? `${opts} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `containerbase/${img} ` +
+      `ghcr.io/containerbase/sidecar ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
-      GlobalConfig.set({ dockerUser: 'some-user' });
+      GlobalConfig.set({
+        dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
     });
 
     it('returns executable command', async () => {
@@ -267,6 +271,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -287,6 +292,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/cache/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -296,6 +302,19 @@ describe('util/exec/docker/index', () => {
       expect(res).toBe(
         command(image, `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`)
       );
+    });
+
+    it('add multiple docker cli option', async () => {
+      mockExecAll();
+      GlobalConfig.set({
+        dockerUser: 'some-user',
+        dockerCliOptions: '--memory=4g --cpus=".5"',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+      });
+      expect(res).toBe(command(image, undefined, `--memory=4g --cpus=".5"`));
     });
 
     // TODO: it('handles tag constraint', async () => {

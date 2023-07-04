@@ -17,7 +17,15 @@ export const presets: Record<string, Preset> = {
   },
   dockerVersions: {
     description: 'Upgrade Docker tags to newer versions.',
-    docker: {
+    'docker-compose': {
+      major: {
+        enabled: true,
+      },
+      minor: {
+        enabled: true,
+      },
+    },
+    dockerfile: {
       major: {
         enabled: true,
       },

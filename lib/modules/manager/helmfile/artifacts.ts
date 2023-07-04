@@ -14,7 +14,12 @@ import { getFile } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { generateRegistryLoginCmd, isOCIRegistry, parseDoc } from './utils';
+import {
+  generateRegistryLoginCmd,
+  isOCIRegistry,
+  parseDoc,
+  parseLock,
+} from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -51,7 +56,9 @@ export async function updateArtifacts({
       },
       {
         toolName: 'helmfile',
-        constraint: config.constraints?.helmfile,
+        constraint:
+          config.constraints?.helmfile ??
+          parseLock(existingLockFileContent).version,
       },
     ];
     const needKustomize = updatedDeps.some(

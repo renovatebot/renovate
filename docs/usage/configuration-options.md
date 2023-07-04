@@ -320,7 +320,7 @@ Configuring this to `true` means that Renovate will detect and apply the default
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.
-The `config:base` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
+The `config:recommended` preset that many extend from limits the number of concurrent branches to 10, but in many cases a limit as low as 3 or 5 can be most efficient for a repository.
 
 If you want the same limit for both concurrent branches and concurrent PRs, then set a value for `prConcurrentLimit` and it will be re-used for branch calculations too.
 But if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
@@ -602,10 +602,36 @@ Renovate supports two options:
 - `none`: No release filtering (all releases allowed)
 - `strict`: If the release's constraints match the package file constraints, then it's included
 
-We are working on adding more advanced filtering options.
+More advanced filtering options may come in future.
 
-Note: There must be a `constraints` object in your Renovate config for this to work.
+There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
 This feature is limited to `packagist`, `npm`, and `pypi` datasources.
+
+<!-- prettier-ignore -->
+!!! warning
+    Enabling this feature may result in many package updates being filtered out silently.
+    See below for a description of how it works.
+
+When `constraintsFiltering=strict`, the following logic applies:
+
+- Are there `constraints` for this repository, either detected from source or from config?
+- Does this package's release declare constraints of its own (e.g. `engines` in Node.js)?
+- If so, filter out this release unless the repository constraint is a _subset_ of the release constraint
+
+Here are some examples:
+
+| Your repo engines.node   | Dependency release engines.node | Result   |
+| ------------------------ | ------------------------------- | -------- |
+| `18`                     | `16 \|\| 18`                    | allowed  |
+| `^18.10.0`               | `>=18`                          | allowed  |
+| `^16.10.0 \|\| >=18.0.0` | `>= 16.0.0`                     | allowed  |
+| `>=16`                   | `16 \|\| 18`                    | filtered |
+| `16`                     | `^16.10.0`                      | filtered |
+
+When using with `npm`, we recommend you:
+
+- Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
+- Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
 
 ## defaultRegistryUrls
 
@@ -622,13 +648,13 @@ Compare that to `registryUrls`, which are a way to _override_ registries.
 
 ## dependencyDashboard
 
-Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:base` preset.
+Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:recommended` preset.
 
 To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
 
 ```json
 {
-  "extends": ["config:base", ":disableDependencyDashboard"]
+  "extends": ["config:recommended", ":disableDependencyDashboard"]
 }
 ```
 
@@ -736,24 +762,6 @@ Descriptions fields embedded within presets are also collated as part of the onb
 ## digest
 
 Add to this object if you wish to define rules that apply only to PRs that update digests.
-
-## docker
-
-Add config here if you wish it to apply to Docker package managers Dockerfile and Docker Compose.
-If instead you mean to apply settings to any package manager that updates using the Docker _datasource_, use a package rule instead, e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "labels": ["docker-update"]
-    }
-  ]
-}
-```
-
-## dotnet
 
 ## draftPR
 
@@ -880,7 +888,7 @@ The above would mean Renovate would not include files matching the above glob pa
 ## extends
 
 See [shareable config presets](./config-presets.md) for details.
-Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/presets.md/#how-to-use-presets) page.
+Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/presets.md#how-to-use-presets) page.
 
 ## extractVersion
 
@@ -931,14 +939,22 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchReleaseNotes
 
-Set this to `false` if you want to disable release notes fetching.
+Use this config option to configure release notes fetching.
+The available options are:
+
+- `off` - disable release notes fetching
+- `branch` - fetch release notes while creating/updating branch
+- `pr`(default) - fetches release notes while creating/updating pull-request
+
+It is not recommended to set fetchReleaseNotes=branch unless you are embedding release notes in commit information, because it results in a performance decrease.
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 
+- Bitbucket Cloud
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except github.com, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from github.com.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1097,16 +1113,6 @@ If you need to modify this path, for example in order to ignore directories, you
   "goGetDirs": ["./some-project/", "./tools/..."]
 }
 ```
-
-## golang
-
-Configuration added here applies for all Go-related updates.
-The only supported package manager for Go is the native Go Modules (the `gomod` manager).
-
-For self-hosted users, `GOPROXY`, `GONOPROXY`, `GOPRIVATE` and `GOINSECURE` environment variables are supported ([reference](https://go.dev/ref/mod#module-proxy)).
-
-Usage of `direct` will fallback to the Renovate-native release fetching mechanism.
-Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
 
@@ -1540,7 +1546,7 @@ For instance if you have a project with an `"examples/"` directory you wish to i
 ```
 
 Renovate's default ignore is `node_modules` and `bower_components` only.
-If you are extending from the popular `config:base` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
+If you are extending from the popular `config:recommended` preset then it adds ignore patterns for `vendor`, `examples`, `test(s)` and `fixtures` directories too.
 
 ## ignorePlugins
 
@@ -1561,12 +1567,12 @@ For example, consider this config:
 
 ```json
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "ignorePresets": [":prHourlyLimit2"]
 }
 ```
 
-It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
 ## ignoreReviewers
 
@@ -1629,14 +1635,6 @@ Currently this applies to the `minimumReleaseAge` check only.
 
 The `flexible` mode can result in "flapping" of Pull Requests, for example: a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `minimumReleaseAge`.
 We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you can see suppressed PRs.
-
-## java
-
-Use this configuration option for shared config across all Java projects (Gradle and Maven).
-
-## js
-
-Use this configuration option for shared config across npm/Yarn/pnpm and meteor package managers.
 
 ## labels
 
@@ -1776,12 +1774,6 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
-## node
-
-Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
-
-Check out our [Node.js documentation](https://docs.renovatebot.com/node) for a comprehensive explanation of how the `node` option can be used.
-
 ## npmToken
 
 See [Private npm module support](./getting-started/private-packages.md) for details on how this is used.
@@ -1871,28 +1863,28 @@ Example:
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
-Path rules are convenient to use if you wish to apply configuration rules to certain package files using patterns.
+File name matches are convenient to use if you wish to apply configuration rules to certain package or lock files using patterns.
 For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPaths": ["examples/**"],
+      "matchFileNames": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
     }
   ]
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with a `minimatch` pattern or use [`matchFiles`](#matchfiles) with an exact match.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` pattern (which can include an exact file name match).
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchFiles": ["package.json"],
+      "matchFileNames": ["package.json"],
       "dependencyDashboardApproval": true
     }
   ]
@@ -2021,17 +2013,23 @@ See also `matchPackagePrefixes`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
-### matchLanguages
+### matchCategories
 
-Use this field to restrict rules to a particular language. e.g.
+Use `matchCategories` to restrict rules to a particular language or group.
+Matching is done using "any" logic, i.e. "match any of the following categories".
+The categories can be found in the [manager documentation](./modules/manager/index.md).
+
+<!-- prettier-ignore -->
+!!! note
+    Rules with `matchCategories` are only applied _after_ extraction of dependencies.
+    If you want to configure which managers are being extracted at all, use `enabledManagers` instead.
 
 ```json
 {
   "packageRules": [
     {
-      "matchPackageNames": ["request"],
-      "matchLanguages": ["python"],
-      "enabled": false
+      "matchCategories": ["python"],
+      "addLabels": ["py"]
     }
   ]
 }
@@ -2187,23 +2185,50 @@ Use the syntax `!/ /` like this:
 }
 ```
 
-### matchFiles
+### matchFileNames
 
-Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
+Renovate will compare `matchFileNames` glob matching against the dependency's package file or lock file.
 
-For example the following would match `package.json` but not `package/frontend/package.json`:
+The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchFiles": ["package.json"]
+      "matchFileNames": ["package.json"],
+      "labels": ["npm"]
     }
   ]
 }
 ```
 
-Use [`matchPaths`](#matchpaths) instead if you need more flexible matching.
+The following example matches any `package.json`, including files like `backend/package.json`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group dependencies from package.json files",
+      "matchFileNames": ["**/package.json"],
+      "groupName": "All package.json changes"
+    }
+  ]
+}
+```
+
+The following example matches any file in directories starting with `app/`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchFileNames": ["app/**"],
+      "groupName": "App dependencies"
+    }
+  ]
+}
+```
 
 ### matchDepNames
 
@@ -2262,43 +2287,6 @@ See also `excludePackagePrefixes`.
 ```
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
-
-### matchPaths
-
-Renovate finds the file(s) listed in `matchPaths` with a `minimatch` glob pattern.
-
-For example the following matches any `package.json`, including files like `backend/package.json`:
-
-```json
-{
-  "packageRules": [
-    {
-      "description": "Group dependencies from package.json files",
-      "matchPaths": ["**/package.json"],
-      "groupName": "All package.json changes"
-    }
-  ]
-}
-```
-
-The following matches any file in directories starting with `app/`:
-
-```json
-{
-  "packageRules": [
-    {
-      "description": "Group all dependencies from the app directory",
-      "matchPaths": ["app/**"],
-      "groupName": "App dependencies"
-    }
-  ]
-}
-```
-
-<!-- prettier-ignore -->
-!!! warning
-    Partial matches for `matchPaths` are deprecated.
-    Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
 
 ### matchSourceUrlPrefixes
 
@@ -2504,8 +2492,6 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 
 Add to this object if you wish to define rules that apply only to patch updates.
 
-## php
-
 ## pin
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
@@ -2521,28 +2507,28 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 ## platformAutomerge
 
 <!-- prettier-ignore -->
-!!! warning
-    Before you enable `platformAutomerge` you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
+!!! note
+    If you use the default `platformAutomerge=true` then you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
     If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
     On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
     [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
     [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
     If you're using another platform, search their documentation for a similar feature.
 
-If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
 Renovate tries platform-native automerge only when it initially creates the PR.
 Any PR that is being updated will be automerged with the Renovate-based automerge.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure, GitHub and GitLab.
+This option is available for Azure, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
 Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=true`.
 Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
-This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
+This behavior is no longer guaranteed when `platformAutomerge` is `true` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
 Please check platform specific docs for version requirements.
@@ -2561,18 +2547,19 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 Table with options:
 
-| Name                     | Description                                                                                                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bundlerConservative`    | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
-| `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
-| `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
-| `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
-| `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
-| `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
-| `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
-| `pnpmDedupe`             | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
-| `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
-| `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
+| Name                         | Description                                                                                                                                                |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
+| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
+| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
+| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
+| `npmDedupe`                  | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `pnpmDedupe`                 | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
+| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
 ## postUpgradeTasks
 
@@ -2604,7 +2591,7 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](./self-hosted-configuration.md#allowpostupgradecommandtemplating) is enabled.
+You can use variable templating in your commands as long as [`allowPostUpgradeCommandTemplating`](./self-hosted-configuration.md#allowpostupgradecommandtemplating) is enabled.
 
 <!-- prettier-ignore -->
 !!! note
@@ -2613,6 +2600,10 @@ You can use variable templating in your commands if [`allowPostUpgradeCommandTem
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
+Dotfiles are included.
+
+Optional field which defaults to any non-ignored file in the repo (`**/*` glob pattern).
+Specify a custom value for this if you wish to exclude certain files which are modified by your `postUpgradeTasks` and you don't want committed.
 
 ### executionMode
 
@@ -2837,10 +2828,6 @@ Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
 
 Configure to `false` to disable deleting orphan branches and autoclosing PRs.
 Defaults to `true`.
-
-## python
-
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files, or any file that matches the pattern `requirements-*.(txt|pip)` - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
@@ -3285,13 +3272,8 @@ There are times when a dependency version in use by a project gets removed from 
 For some registries, existing releases or even whole packages can be removed or "yanked" at any time, while for some registries only very new or unused releases can be removed.
 Renovate's "rollback" feature exists to propose a downgrade to the next-highest release if the current release is no longer found in the registry.
 
-Renovate does not create these rollback PRs by default, with one exception: npm packages get a rollback PR if needed.
-
-You can configure the `rollbackPrs` property globally, per-language, or per-package to override the default behavior.
-
-## ruby
-
-## rust
+Renovate does not create these rollback PRs by default, so this functionality needs to be opted-into.
+We recommend you do this selectively with `packageRules` and not globally.
 
 ## schedule
 

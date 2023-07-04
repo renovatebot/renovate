@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
@@ -11,9 +11,10 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
 ];
 
-export const language: ProgrammingLanguage = 'python';
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)pyproject\\.toml$'],
 };
+
+export const categories: Category[] = ['python'];

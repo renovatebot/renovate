@@ -24,6 +24,12 @@ import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
+import {
+  getOnboardingConfigFromCache,
+  getOnboardingFileNameFromCache,
+  setOnboardingConfigDetails,
+} from '../onboarding/branch/onboarding-branch-cache';
+import { OnboardingState } from '../onboarding/common';
 import type { RepoFileConfig } from './types';
 
 async function detectConfigFile(): Promise<string | null> {
@@ -74,7 +80,13 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       delete cache.configFileName;
     }
   }
-  configFileName = (await detectConfigFile()) ?? undefined;
+
+  if (OnboardingState.onboardingCacheValid) {
+    configFileName = getOnboardingFileNameFromCache();
+  } else {
+    configFileName = (await detectConfigFile()) ?? undefined;
+  }
+
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
@@ -84,6 +96,16 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   // TODO #7154
   let configFileParsed: any;
   let configFileRaw: string | undefined | null;
+
+  if (OnboardingState.onboardingCacheValid) {
+    const cachedConfig = getOnboardingConfigFromCache();
+    const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
+    if (parsedConfig) {
+      setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
+      return { configFileName, configFileRaw, configFileParsed: parsedConfig };
+    }
+  }
+
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
@@ -171,6 +193,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
+
+  setOnboardingConfigDetails(configFileName, JSON.stringify(configFileParsed));
   return { configFileName, configFileRaw, configFileParsed };
 }
 
