@@ -20,5 +20,8 @@
   "jest.jestCommandLine": "yarn jest",
   "npm.packageManager": "yarn",
   "prettier.prettierPath": "./node_modules/prettier",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
 }
