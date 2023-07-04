@@ -338,7 +338,7 @@ export async function getReleaseNotesMd(
               // TODO: fix url
               const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
               const mdHeadingLink = title
-                .filter((word) => !isUrl(word))
+                .filter((word) => !validateUrl(word))
                 .join('-')
                 .replace(regEx(/[^A-Za-z0-9-]/g), '');
               const url = `${notesSourceUrl}#${mdHeadingLink}`;
