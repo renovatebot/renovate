@@ -449,6 +449,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
+    globalOnly: true,
   },
   {
     name: 'forkToken',
