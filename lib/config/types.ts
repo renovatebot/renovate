@@ -321,7 +321,6 @@ export interface PackageRule
   description?: string | string[];
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
-  matchLanguages?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
   matchDatasources?: string[];
@@ -341,6 +340,7 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchCategories?: string[];
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
@@ -477,7 +477,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
-  language?: string;
+  categories?: string[];
   baseBranch?: string;
   manager?: string;
   datasource?: string;
@@ -505,7 +505,6 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
-  language?: string | null;
 }
 
 export interface ValidationResult {

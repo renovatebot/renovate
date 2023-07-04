@@ -57,4 +57,54 @@ describe('config/migrations/custom/package-rules-migration', () => {
       }
     );
   });
+
+  it('should migrate languages to categories', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchLanguages: ['docker', 'js'],
+            addLabels: ['docker'],
+          },
+          {
+            languages: ['java'],
+            addLabels: ['java'],
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchCategories: ['docker', 'js'],
+            addLabels: ['docker'],
+          },
+          {
+            matchCategories: ['java'],
+            addLabels: ['java'],
+          },
+        ],
+      }
+    );
+  });
+
+  it('should migrate single match rule', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchLanguages: ['python'],
+            addLabels: ['py'],
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchCategories: ['python'],
+            addLabels: ['py'],
+          },
+        ],
+      }
+    );
+  });
 });

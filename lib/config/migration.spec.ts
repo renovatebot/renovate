@@ -564,7 +564,7 @@ describe('config/migration', () => {
             matchBaseBranches: ['master'],
             matchDatasources: ['orb'],
             matchDepTypes: ['peerDependencies'],
-            matchLanguages: ['python'],
+            matchCategories: ['python'],
             matchManagers: ['dockerfile'],
             matchPackageNames: ['foo'],
             matchPackagePatterns: ['^bar'],
