@@ -151,7 +151,7 @@ declare global {
     type MockInstance<T, Y extends any[]> = JestMockInstance<(...args: Y) => T>;
 
     interface Mock<T = any, Y extends any[] = any>
-      extends Function,
+      extends Function, // eslint-disable-line @typescript-eslint/ban-types
         MockInstance<T, Y> {
       new (...args: Y): T;
       (...args: Y): T;
