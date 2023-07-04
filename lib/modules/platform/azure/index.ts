@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import {
   GitPullRequest,
@@ -8,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { setTimeout } from 'timers/promises';
 import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,

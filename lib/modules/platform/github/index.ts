@@ -1,8 +1,8 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'node:url';
-import is from '@sindresorhus/is';
 import { setTimeout } from 'timers/promises';
+import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';

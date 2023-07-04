@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers/promises';
 import fs from 'fs-extra';
 import _simpleGit, { SimpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
@@ -11,7 +12,6 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as memCache from '../../../util/cache/memory';
 import type { RegistryInfo } from './types';
 import { CrateDatasource } from '.';
-import { setTimeout } from 'timers/promises';
 
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;

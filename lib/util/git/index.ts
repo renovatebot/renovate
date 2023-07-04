@@ -1,6 +1,6 @@
 import URL from 'node:url';
-import is from '@sindresorhus/is';
 import { setTimeout } from 'timers/promises';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 // TODO: check if bug is fixed (#7154)
 // eslint-disable-next-line import/no-named-as-default

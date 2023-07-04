@@ -1,6 +1,6 @@
 import URL from 'node:url';
-import is from '@sindresorhus/is';
 import { setTimeout } from 'timers/promises';
+import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
 import {
