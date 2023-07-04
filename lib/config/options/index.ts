@@ -66,7 +66,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     parent: 'postUpgradeTasks',
-    default: [],
+    default: ['**/*'],
     cli: false,
   },
   {
