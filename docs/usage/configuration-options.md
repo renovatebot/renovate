@@ -2046,7 +2046,7 @@ Use this field to restrict rules to a particular repository. e.g.
 {
   "packageRules": [
     {
-      "matchRepositoryPatterns": ["-archived$"],
+      "matchRepositoryPatterns": ["^literal/repo$", "-archived$"],
       "enabled": false
     }
   ]
