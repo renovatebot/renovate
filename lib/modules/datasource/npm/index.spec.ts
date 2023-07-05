@@ -6,14 +6,13 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { NpmDatasource, setNpmrc } from '.';
 
-jest.useFakeTimers();
-
 const datasource = NpmDatasource.id;
 
 let npmResponse: any;
 
 describe('modules/datasource/npm/index', () => {
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.resetAllMocks();
     GlobalConfig.reset();
     hostRules.clear();

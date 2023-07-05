@@ -2,10 +2,9 @@ import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../global';
 import * as npm from '.';
 
-jest.useFakeTimers();
-
 describe('config/presets/npm/index', () => {
   beforeEach(() => {
+    jest.useFakeTimers();
     GlobalConfig.reset();
   });
 
