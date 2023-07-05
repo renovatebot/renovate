@@ -40,16 +40,16 @@ You can't run the Docker images in a Windows or macOS container.
 
 In general, you can run Renovate natively on Windows as long as you have all tools it will need (e.g. `npm`, `pipenv`, etc.) preinstalled before you run Renovate.
 
-There are two flavors:
+There are two Docker image flavors:
 
+- The default image, which installs required tools at runtime (default for `latest` tag),
 - The `-full` image, which comes with latest or very recent versions of every tool pre-installed
-- The default "slim" image, this is the image you'll get if you use the `latest` tag
 
-##### The slim image (default)
+##### The default image (formerly `slim`)
 
-The default image (also aliased as `-slim`) only comes with the Node.js environment.
+The default image only comes with the Node.js environment.
 Renovate will then install the required tools at runtime when needed (see documentation for (see documentation for `binarySource=install` for further details).
-We recommend this default "slim" image for most users.
+We recommend this default image for most users.
 
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
