@@ -19,7 +19,7 @@ export class GitLabChangeLogSource extends ChangeLogSource {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
   }
 
-  protected override hasValidRepository(repository: string): boolean {
+  override hasValidRepository(repository: string): boolean {
     return repository.split('/').length >= 2;
   }
 }

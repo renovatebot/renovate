@@ -267,7 +267,7 @@ export abstract class ChangeLogSource {
     return false;
   }
 
-  protected hasValidRepository(repository: string): boolean {
+  hasValidRepository(repository: string): boolean {
     return repository.split('/').length === 2;
   }
 }
