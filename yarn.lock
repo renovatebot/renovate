@@ -9791,10 +9791,10 @@ sax@^1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-semantic-release@21.0.5:
-  version "21.0.5"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-21.0.5.tgz#3a95c44df8c4cb0bdc4e483f3c14ba3d8f04f1bd"
-  integrity sha512-mCc7Hx9Ro/1Clk9tLLgwQIQuiEzx+1OX12EazvNysnx1VG4eaNJE9b9IyWtTxyFxaFYi7nM5VB5ZDVzheHTDPA==
+semantic-release@21.0.6:
+  version "21.0.6"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-21.0.6.tgz#096fd47630716461f4f634d13c9d7dfea92fe5a1"
+  integrity sha512-NDyosObAwUNzPpdf+mpL49Xy+5iYHjdWM34LBNdbdYv9vBLbw+eCCDihxcqPh+f9m4ZzlBrYCkHUaZv2vPGW9A==
   dependencies:
     "@semantic-release/commit-analyzer" "^10.0.0"
     "@semantic-release/error" "^4.0.0"
