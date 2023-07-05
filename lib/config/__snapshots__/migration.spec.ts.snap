@@ -173,6 +173,21 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
   "onboarding": false,
   "packageRules": [
     {
+      "enabled": false,
+      "matchCategories": [
+        "python",
+      ],
+      "matchPackageNames": [
+        "foo",
+      ],
+    },
+    {
+      "enabled": false,
+      "matchCategories": [
+        "dotnet",
+      ],
+    },
+    {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
       "matchPackagePatterns": "^(@angular|typescript)",

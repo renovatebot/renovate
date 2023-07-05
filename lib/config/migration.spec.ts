@@ -122,6 +122,9 @@ describe('config/migration', () => {
             ],
           },
         ],
+        dotnet: {
+          enabled: false,
+        },
         exposeEnv: true,
         lockFileMaintenance: {
           exposeEnv: false,
@@ -132,6 +135,14 @@ describe('config/migration', () => {
         devDependencies: {
           automerge: 'minor',
           schedule: null,
+        },
+        python: {
+          packageRules: [
+            {
+              matchPackageNames: ['foo'],
+              enabled: false,
+            },
+          ],
         },
         nvmrc: {
           pathRules: [
@@ -159,7 +170,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.depTypes).toBeUndefined();
       expect(migratedConfig.automerge).toBe(false);
-      expect(migratedConfig.packageRules).toHaveLength(9);
+      expect(migratedConfig.packageRules).toHaveLength(11);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
 

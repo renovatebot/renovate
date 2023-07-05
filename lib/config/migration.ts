@@ -118,7 +118,6 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
     ];
     for (const language of languages) {
       if (is.nonEmptyObject(migratedConfig[language])) {
-        logger.debug(`Migrating ${language} config`);
         migratedConfig.packageRules ??= [];
         const currentContent = migratedConfig[language] as any;
         const packageRule = {
