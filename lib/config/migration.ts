@@ -125,7 +125,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           matchCategories: [language],
           ...currentContent,
         };
-        migratedConfig.packageRules.push(packageRule);
+        migratedConfig.packageRules.unshift(packageRule);
       }
       delete migratedConfig[language];
     }
