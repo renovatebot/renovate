@@ -232,6 +232,10 @@ describe('modules/platform/gitlab/index', () => {
   }
 
   describe('initRepo', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
     const okReturn = { default_branch: 'master', url: 'https://some-url' };
 
     it(`should escape all forward slashes in project names`, async () => {
@@ -292,11 +296,12 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
           default_branch: 'master',
+          mirror: true,
         });
+      GlobalConfig.set({ includeMirrors: true });
       expect(
         await gitlab.initRepo({
           repository: 'some/repo',
-          includeMirrors: true,
         })
       ).toEqual({
         defaultBranch: 'master',

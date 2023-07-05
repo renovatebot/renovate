@@ -270,7 +270,6 @@ export async function initRepo({
   ignorePrAuthor,
   gitUrl,
   endpoint,
-  includeMirrors,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -288,6 +287,8 @@ export async function initRepo({
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
+    const includeMirrors = GlobalConfig.get('includeMirrors', false);
+
     if (res.body.mirror && includeMirrors !== true) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
