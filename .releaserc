@@ -92,6 +92,11 @@
   "branches": [
     {
       "name": "main"
+    },
+    {
+      "name": "v35",
+      "range": "35.x",
+      "channel": "version35"
     }
   ]
 }

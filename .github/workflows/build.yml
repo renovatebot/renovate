@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - v35
 
   pull_request:
     types:
