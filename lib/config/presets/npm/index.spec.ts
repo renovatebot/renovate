@@ -4,7 +4,6 @@ import * as npm from '.';
 
 describe('config/presets/npm/index', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     GlobalConfig.reset();
   });
 

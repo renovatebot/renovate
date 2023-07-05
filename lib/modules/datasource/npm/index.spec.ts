@@ -12,7 +12,6 @@ let npmResponse: any;
 
 describe('modules/datasource/npm/index', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.resetAllMocks();
     GlobalConfig.reset();
     hostRules.clear();

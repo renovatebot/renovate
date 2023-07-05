@@ -26,7 +26,6 @@ describe('modules/platform/azure/index', () => {
   let logger: jest.Mocked<typeof _logger>;
 
   beforeEach(async () => {
-    jest.useFakeTimers();
     // reset module
     jest.resetModules();
     jest.mock('./azure-got-wrapper');
