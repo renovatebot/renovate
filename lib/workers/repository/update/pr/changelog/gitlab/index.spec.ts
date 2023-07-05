@@ -361,4 +361,20 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
       expect(changelogSource.hasValidRepository('some/repo/name')).toBeTrue();
     });
   });
+
+  describe('getAllTags', () => {
+    it('handles endpoint', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get('/api/v4/projects/some%2Frepo/repository/tags?per_page=100')
+        .reply(200, [
+          { name: 'v5.2.0' },
+          { name: 'v5.4.0' },
+          { name: 'v5.5.0' },
+        ]);
+      expect(
+        await changelogSource.getAllTags('https://git.test.com/', 'some/repo')
+      ).toBe(['v5.2.0', 'v5.4.0', 'v5.5.0']);
+    });
+  });
 });
