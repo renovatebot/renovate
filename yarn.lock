@@ -5086,14 +5086,14 @@ duplexer2@~0.1.0:
   dependencies:
     readable-stream "^2.0.2"
 
-editorconfig@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-1.0.3.tgz#9a1893d249bc1b8c49a1b421d0e6bf81c8fb86f2"
-  integrity sha512-SLHUig+v3PpjlCGenNDSMVj5caWTJ+aDXaqR1ucZCbXcotV3D7+ycT1jwbICxiPC6gju/rS+iRw8SC7kQukSig==
+editorconfig@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-2.0.0.tgz#5b84b35122889a97a005aca7981a3038526ec8d0"
+  integrity sha512-s1NQ63WQ7RNXH6Efb2cwuyRlfpbtdZubvfNe4vCuoyGPewNPY7vah8JUSOFBiJ+jr99Qh8t0xKv0oITc1dclgw==
   dependencies:
     "@one-ini/wasm" "0.1.1"
     commander "^11.0.0"
-    minimatch "9.0.1"
+    minimatch "9.0.2"
     semver "^7.5.3"
 
 electron-to-chromium@^1.4.284:
@@ -8057,13 +8057,6 @@ minimalistic-assert@^1.0.0:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimatch@9.0.1, minimatch@^9.0.1:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.1.tgz#8a555f541cf976c622daf078bb28f29fb927c253"
-  integrity sha512-0jWhJpD/MdhPXwPuiRkCbfYfSKp2qnn2eOc279qI7f+osl/l+prKSrvhg157zSYvx/1nmgn2NqdT6k2Z7zSH9w==
-  dependencies:
-    brace-expansion "^2.0.1"
-
 minimatch@9.0.2:
   version "9.0.2"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.2.tgz#397e387fff22f6795844d00badc903a3d5de7057"
@@ -8096,6 +8089,13 @@ minimatch@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.0.tgz#bfc8e88a1c40ffd40c172ddac3decb8451503b56"
   integrity sha512-0jJj8AvgKqWN05mrwuqi8QYKx1WmYSUoKSxu5Qhs9prezTz10sxAHGNZe9J9cqIJzta8DWsleh2KaVaLl6Ru2w==
+  dependencies:
+    brace-expansion "^2.0.1"
+
+minimatch@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.1.tgz#8a555f541cf976c622daf078bb28f29fb927c253"
+  integrity sha512-0jWhJpD/MdhPXwPuiRkCbfYfSKp2qnn2eOc279qI7f+osl/l+prKSrvhg157zSYvx/1nmgn2NqdT6k2Z7zSH9w==
   dependencies:
     brace-expansion "^2.0.1"
 
