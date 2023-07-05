@@ -1,6 +1,13 @@
 import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import { CronExpression, parseExpression as parseCron } from 'cron-parser';
+import {
+  CronExpression,
+  DayOfTheMonthRange,
+  DayOfTheWeekRange,
+  HourRange,
+  MonthRange,
+  parseExpression,
+} from 'cron-parser';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
@@ -12,6 +19,14 @@ const scheduleMappings: Record<string, string> = {
   'every month': 'before 5am on the first day of the month',
   monthly: 'before 5am on the first day of the month',
 };
+
+function parseCron(scheduleText: string): CronExpression | undefined {
+  try {
+    return parseExpression(scheduleText);
+  } catch (err) {
+    return undefined;
+  }
+}
 
 export function hasValidTimezone(timezone: string): [true] | [false, string] {
   if (!DateTime.local().setZone(timezone).isValid) {
@@ -33,13 +48,7 @@ export function hasValidSchedule(
   }
   // check if any of the schedules fail to parse
   const hasFailedSchedules = schedule.some((scheduleText) => {
-    let parsedCron: CronExpression | undefined;
-    try {
-      parsedCron = parseCron(scheduleText);
-    } catch (err) {
-      parsedCron = undefined;
-    }
-
+    const parsedCron = parseCron(scheduleText);
     if (parsedCron !== undefined) {
       if (
         parsedCron.fields.minute.length !== 60 ||
@@ -87,25 +96,36 @@ export function hasValidSchedule(
 }
 
 function cronMatches(cron: string, now: DateTime): boolean {
-  // it will always parse because it is checked beforehand
   const parsedCron = parseCron(cron);
 
-  if ((parsedCron.fields.hour as number[]).indexOf(now.hour) === -1) {
+  // it will always parse because it is checked beforehand
+  // istanbul ignore if
+  if (!parsedCron) {
+    return false;
+  }
+
+  if (parsedCron.fields.hour.indexOf(now.hour as HourRange) === -1) {
     // Hours mismatch
     return false;
   }
 
-  if ((parsedCron.fields.dayOfMonth as number[]).indexOf(now.day) === -1) {
+  if (
+    parsedCron.fields.dayOfMonth.indexOf(now.day as DayOfTheMonthRange) === -1
+  ) {
     // Days mismatch
     return false;
   }
 
-  if (!(parsedCron.fields.dayOfWeek as number[]).includes(now.weekday % 7)) {
+  if (
+    !parsedCron.fields.dayOfWeek.includes(
+      (now.weekday % 7) as DayOfTheWeekRange
+    )
+  ) {
     // Weekdays mismatch
     return false;
   }
 
-  if ((parsedCron.fields.month as number[]).indexOf(now.month) === -1) {
+  if (parsedCron.fields.month.indexOf(now.month as MonthRange) === -1) {
     // Months mismatch
     return false;
   }
@@ -173,12 +193,7 @@ export function isScheduledNow(
 
   // We run if any schedule matches
   const isWithinSchedule = configSchedule.some((scheduleText) => {
-    let cronSchedule: CronExpression | undefined;
-    try {
-      cronSchedule = parseCron(scheduleText);
-    } catch (err) {
-      cronSchedule = undefined;
-    }
+    const cronSchedule = parseCron(scheduleText);
     if (cronSchedule) {
       // We have Cron syntax
       if (cronMatches(scheduleText, now)) {
