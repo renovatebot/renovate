@@ -1,6 +1,7 @@
 // TODO fix mocks
 import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -132,6 +133,10 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('getRepos', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
     it('should throw an error if it receives an error', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -162,6 +167,29 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const repos = await gitlab.getRepos();
       expect(repos).toEqual(['a/b', 'c/d']);
+    });
+
+    it('should return an array of repos including mirrors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'c/d',
+          },
+          {
+            path_with_namespace: 'c/f',
+            mirror: true,
+          },
+        ]);
+      GlobalConfig.set({ includeMirrors: true });
+      const repos = await gitlab.getRepos();
+      expect(repos).toEqual(['a/b', 'c/d', 'c/f']);
     });
 
     it('should encode the requested topics into the URL', async () => {

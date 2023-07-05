@@ -50,7 +50,6 @@ export interface RenovateSharedConfig {
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
-  includeMirrors?: boolean;
   includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
@@ -144,6 +143,7 @@ export interface RepoGlobalConfig {
   containerbaseDir?: string;
   platform?: PlatformId;
   endpoint?: string;
+  includeMirrors?: boolean;
 }
 
 export interface LegacyAdminConfig {

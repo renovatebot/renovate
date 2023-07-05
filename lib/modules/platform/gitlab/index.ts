@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -168,8 +169,10 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       paginate: true,
     });
     logger.debug(`Discovered ${res.body.length} project(s)`);
+    const includeMirrors = GlobalConfig.get('includeMirrors', false);
+
     return res.body
-      .filter((repo) => !repo.mirror)
+      .filter((repo) => includeMirrors || !repo.mirror)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
