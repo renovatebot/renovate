@@ -42,6 +42,7 @@ export abstract class ChangeLogSource {
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
     const tags = (
       await getPkgReleases({
+        registryUrls: [endpoint],
         datasource: this.datasource,
         packageName: repository,
         versioning:
