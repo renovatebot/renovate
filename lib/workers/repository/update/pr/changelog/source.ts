@@ -91,7 +91,7 @@ export abstract class ChangeLogSource {
       return null;
     }
 
-    if (repository.split('/').length !== 2) {
+    if (is.falsy(this.hasValidRepository(repository))) {
       logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
       return null;
     }
@@ -265,5 +265,9 @@ export abstract class ChangeLogSource {
 
   protected shouldSkipPackage(config: BranchUpgradeConfig): boolean {
     return false;
+  }
+
+  protected hasValidRepository(repository: string): boolean {
+    return repository.split('/').length === 2;
   }
 }
