@@ -3960,6 +3960,11 @@ arg@^4.1.0:
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
   integrity sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==
 
+arg@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/arg/-/arg-5.0.2.tgz#c81433cc427c92c4dcf4865142dbca6f15acd59c"
+  integrity sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg==
+
 argparse@^1.0.7:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-1.0.10.tgz#bcd6791ea5ae09725e17e5ad988134cd40b3d911"
@@ -5826,11 +5831,6 @@ fs-minipass@^3.0.0, fs-minipass@^3.0.1:
   dependencies:
     minipass "^5.0.0"
 
-fs-monkey@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/fs-monkey/-/fs-monkey-1.0.4.tgz#ee8c1b53d3fe8bb7e5d2c5c5dfc0168afdd2f747"
-  integrity sha512-INM/fWAxMICjttnD0DX1rBvinKskj5G1w+oy/pnm9u/tSlnBrzFonJMcalKJ30P8RRsPzKcCG7Q8l0jx5Fh9YQ==
-
 fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
@@ -6382,6 +6382,11 @@ husky@8.0.3:
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/husky/-/husky-8.0.3.tgz#4936d7212e46d1dea28fef29bb3a108872cd9184"
   integrity sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==
+
+hyperdyperid@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/hyperdyperid/-/hyperdyperid-1.2.0.tgz#59668d323ada92228d2a869d3e474d5a33b69e6b"
+  integrity sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==
 
 iconv-lite@^0.6.2:
   version "0.6.3"
@@ -7348,6 +7353,14 @@ json-file-plus@^3.3.1:
     promiseback "^2.0.2"
     safer-buffer "^2.0.2"
 
+json-joy@^9.2.0:
+  version "9.3.0"
+  resolved "https://registry.yarnpkg.com/json-joy/-/json-joy-9.3.0.tgz#3895579591b96416c7c81ea3a590068b1188e6a4"
+  integrity sha512-ZQiyMcbcfqki5Bsk0kWfne/Ixl4Q6cLBzCd3VE/TSp7jhns/WDBrIMTuyzDfwmLxuFtQdojiLSLX8MxTyK23QA==
+  dependencies:
+    arg "^5.0.2"
+    hyperdyperid "^1.2.0"
+
 json-parse-better-errors@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
@@ -7943,12 +7956,13 @@ mdurl@^1.0.1:
   resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
   integrity sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g==
 
-memfs@3.5.3:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/memfs/-/memfs-3.5.3.tgz#d9b40fe4f8d5788c5f895bda804cd0d9eeee9f3b"
-  integrity sha512-UERzLsxzllchadvbPs5aolHh65ISpKpM+ccLbOJ8/vvpBKmAWf+la7dXFy7Mr0ySHbdHrFv5kGFCUHHe6GFEmw==
+memfs@4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/memfs/-/memfs-4.2.0.tgz#b30d4b70626b1015f4c35548eab34087a903a5f5"
+  integrity sha512-V5/xE+zl6+soWxlBjiVTQSkfXybTwhEBj2I8sK9LaS5lcZsTuhRftakrcRpDY7Ycac2NTK/VzEtpKMp+gpymrQ==
   dependencies:
-    fs-monkey "^1.0.4"
+    json-joy "^9.2.0"
+    thingies "^1.11.1"
 
 memorystream@^0.3.1:
   version "0.3.1"
@@ -10397,6 +10411,11 @@ text-table@^0.2.0, text-table@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==
+
+thingies@^1.11.1:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/thingies/-/thingies-1.12.0.tgz#a815c224482d607aa70f563d3cbb351a338e4710"
+  integrity sha512-AiGqfYC1jLmJagbzQGuoZRM48JPsr9yB734a7K6wzr34NMhjUPrWSQrkF7ZBybf3yCerCL2Gcr02kMv4NmaZfA==
 
 through2-concurrent@^2.0.0:
   version "2.0.0"
