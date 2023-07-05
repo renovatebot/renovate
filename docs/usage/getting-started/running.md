@@ -35,7 +35,7 @@ The `renovate` npm package is compatible with all of Renovate's supported platfo
 Renovate is also distributed as Docker images on Docker Hub (`renovate/renovate`) and GitHub container registry (`ghcr.io/renovatebot/renovate`).
 These Docker images work on all the hosting platforms that Renovate supports.
 
-Both `linux/amd64` and `linux/arm64` architectures are supported, although you may still find some bugs in the `arm64` image.
+Both `linux/amd64` and `linux/arm64` architectures are supported, but you may still find some bugs in the `arm64` image.
 You can't run the Docker images in a Windows or macOS container.
 
 In general, you can run Renovate natively on Windows as long as you have all tools it will need (e.g. `npm`, `pipenv`, etc.) preinstalled before you run Renovate.
@@ -48,7 +48,8 @@ There are two Docker image flavors:
 ##### The default image (formerly `slim`)
 
 The default image only comes with the Node.js environment.
-Renovate will then install the required tools at runtime when needed (see documentation for (see documentation for `binarySource=install` for further details).
+Renovate will then install any needed tools when it runs.
+Read the `binarySource=install` documentation for more details.
 We recommend this default image for most users.
 
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
