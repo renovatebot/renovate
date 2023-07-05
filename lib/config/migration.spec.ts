@@ -564,13 +564,41 @@ describe('config/migration', () => {
             matchBaseBranches: ['master'],
             matchDatasources: ['orb'],
             matchDepTypes: ['peerDependencies'],
-            matchLanguages: ['python'],
+            matchCategories: ['python'],
             matchManagers: ['dockerfile'],
             matchPackageNames: ['foo'],
             matchPackagePatterns: ['^bar'],
-            matchPaths: ['package.json'],
+            matchFileNames: ['package.json'],
             matchSourceUrlPrefixes: ['https://github.com/lodash'],
             matchUpdateTypes: ['major'],
+          },
+        ],
+      });
+    });
+
+    it('migrates in order of precedence', () => {
+      const config: TestRenovateConfig = {
+        packageRules: [
+          {
+            matchFiles: ['matchFiles'],
+            matchPaths: ['matchPaths'],
+          },
+          {
+            matchPaths: ['matchPaths'],
+            matchFiles: ['matchFiles'],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            matchFileNames: ['matchPaths'],
+          },
+          {
+            matchFileNames: ['matchFiles'],
           },
         ],
       });

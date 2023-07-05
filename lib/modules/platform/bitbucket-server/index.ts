@@ -37,7 +37,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { repoFingerprint } from '../util';
+import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -851,6 +851,7 @@ export async function updatePr({
   prBody: rawDescription,
   state,
   bitbucketInvalidReviewers,
+  targetBranch,
 }: UpdatePrConfig & {
   bitbucketInvalidReviewers: string[] | undefined;
 }): Promise<void> {
@@ -863,23 +864,26 @@ export async function updatePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
+    const body: any = {
+      title,
+      description,
+      version: pr.version,
+      reviewers: pr.reviewers
+        ?.filter((name: string) => !bitbucketInvalidReviewers?.includes(name))
+        .map((name: string) => ({ user: { name } })),
+    };
+    if (targetBranch) {
+      body.toRef = {
+        id: getNewBranchName(targetBranch),
+      };
+    }
+
     const { body: updatedPr } = await bitbucketServerHttp.putJson<{
       version: number;
       state: string;
     }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-      {
-        body: {
-          title,
-          description,
-          version: pr.version,
-          reviewers: pr.reviewers
-            ?.filter(
-              (name: string) => !bitbucketInvalidReviewers?.includes(name)
-            )
-            .map((name: string) => ({ user: { name } })),
-        },
-      }
+      { body }
     );
 
     updatePrVersion(prNo, updatedPr.version);

@@ -211,6 +211,7 @@ export async function initRepo({
       owner: info.owner,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
+      is_private: info.is_private,
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
@@ -309,6 +310,34 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
+
+  /**
+   * Bitbucket doesn't support renaming or reopening declined PRs.
+   * Instead, we have to use comment-driven signals.
+   */
+  if (pr?.state === 'closed') {
+    const reopenComments = await comments.reopenComments(config, pr.number);
+
+    if (is.nonEmptyArray(reopenComments)) {
+      if (config.is_private) {
+        // Only workspace members could have commented on a private repository
+        logger.debug(
+          `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`
+        );
+        return null;
+      }
+
+      for (const comment of reopenComments) {
+        if (await isAccountMemberOfWorkspace(comment.user, config.repository)) {
+          logger.debug(
+            `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`
+          );
+          return null;
+        }
+      }
+    }
+  }
+
   return pr ?? null;
 }
 
@@ -719,9 +748,15 @@ async function sanitizeReviewers(
   if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
     const sanitizedReviewers: Account[] = [];
 
+    const MSG_AUTHOR_AND_REVIEWER =
+      'is the author and cannot be included as a reviewer.';
+    const MSG_MALFORMED_REVIEWERS_LIST = 'Malformed reviewers list';
+    const MSG_NOT_WORKSPACE_MEMBER =
+      'is not a member of this workspace and cannot be added to this pull request';
+
     for (const msg of err.body.error.fields.reviewers) {
       // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-      if (msg === 'Malformed reviewers list') {
+      if (msg === MSG_MALFORMED_REVIEWERS_LIST) {
         logger.debug(
           { err },
           'PR contains reviewers that may be either inactive or no longer a member of this workspace. Will try setting only active reviewers'
@@ -741,11 +776,7 @@ async function sanitizeReviewers(
           }
         }
         // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
-      } else if (
-        msg.endsWith(
-          'is not a member of this workspace and cannot be added to this pull request'
-        )
-      ) {
+      } else if (msg.endsWith(MSG_NOT_WORKSPACE_MEMBER)) {
         logger.debug(
           { err },
           'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers'
@@ -754,6 +785,17 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still a member of this workspace
         for (const reviewer of reviewers) {
           if (await isAccountMemberOfWorkspace(reviewer, config.repository)) {
+            sanitizedReviewers.push(reviewer);
+          }
+        }
+      } else if (msg.endsWith(MSG_AUTHOR_AND_REVIEWER)) {
+        logger.debug(
+          { err },
+          'PR contains reviewer accounts which are also the author. Will try setting only non-author reviewers'
+        );
+        const author = msg.replace(MSG_AUTHOR_AND_REVIEWER, '').trim();
+        for (const reviewer of reviewers) {
+          if (reviewer.display_name !== author) {
             sanitizedReviewers.push(reviewer);
           }
         }
@@ -822,6 +864,7 @@ export async function createPr({
     ).body;
     reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
       uuid: reviewer.user.uuid,
+      display_name: reviewer.user.display_name,
     }));
   }
 
@@ -891,6 +934,7 @@ export async function updatePr({
   prTitle: title,
   prBody: description,
   state,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
@@ -901,15 +945,22 @@ export async function updatePr({
   ).body;
 
   try {
+    const body: any = {
+      title,
+      description: sanitize(description),
+      reviewers: pr.reviewers,
+    };
+    if (targetBranch) {
+      body.destination = {
+        branch: {
+          name: targetBranch,
+        },
+      };
+    }
+
     await bitbucketHttp.putJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      {
-        body: {
-          title,
-          description: sanitize(description),
-          reviewers: pr.reviewers,
-        },
-      }
+      { body }
     );
   } catch (err) {
     // Try sanitizing reviewers

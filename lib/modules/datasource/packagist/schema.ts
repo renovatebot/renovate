@@ -207,11 +207,7 @@ export const RegistryMeta = z
         ['providers-lazy-url']: z.string().nullable().catch(null),
         ['providers-url']: z.string().nullable().catch(null),
         ['metadata-url']: z.string().nullable().catch(null),
-        ['available-packages']: z
-          .array(z.string())
-          .transform((xs) => new Set(xs))
-          .nullable()
-          .catch(null),
+        ['available-packages']: z.array(z.string()).nullable().catch(null),
       })
     )
   )

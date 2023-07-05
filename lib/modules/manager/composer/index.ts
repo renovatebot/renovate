@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { updateArtifacts } from './artifacts';
@@ -7,7 +7,6 @@ import { getRangeStrategy } from './range';
 import { updateLockedDependency } from './update-locked';
 import { composerVersioningId } from './utils';
 
-export const language: ProgrammingLanguage = 'php';
 export const supportsLockFileMaintenance = true;
 
 export {
@@ -21,6 +20,8 @@ export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)composer\\.json$'],
   versioning: composerVersioningId,
 };
+
+export const categories: Category[] = ['php'];
 
 export const supportedDatasources = [
   GitTagsDatasource.id,

@@ -92,6 +92,26 @@ async function dryRun(
 
 describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
+    it('parses invalid dashboard body without throwing error', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: null as never,
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {},
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';

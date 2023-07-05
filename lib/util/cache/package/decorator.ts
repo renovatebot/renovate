@@ -78,7 +78,7 @@ export function cache<T>({
 
     const softTtl = ttlMinutes;
 
-    const cacheHardTtlMinutes = GlobalConfig.get().cacheHardTtlMinutes ?? 0;
+    const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
     let hardTtl = softTtl;
     if (methodName === 'getReleases' || methodName === 'getDigest') {
       hardTtl = Math.max(softTtl, cacheHardTtlMinutes);

@@ -54,7 +54,7 @@ We recommend the `-slim` image for most users.
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
-Read the [`binarySource` config option docs](../self-hosted-configuration.md/#binarysource) for more information.
+Read the [`binarySource` config option docs](../self-hosted-configuration.md#binarysource) for more information.
 
 ##### The default image
 
@@ -64,7 +64,7 @@ You must set `binarySource=global`, if you don't then Renovate still installs th
 Update your Docker images regularly to keep the pre-installed tools up-to-date.
 
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
-Use the [`containerbaseDir` config option](../self-hosted-configuration.md/#containerbasedir) to control where Renovate stores its containerbase cache.
+Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
 The default image is for users who don't want to download or install things at runtime.
 The default image has some downsides, because it:
