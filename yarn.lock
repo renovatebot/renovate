@@ -2727,10 +2727,10 @@
     luxon "^3.3.0"
     node-fetch "^2.6.11"
 
-"@renovatebot/pep440@2.1.18":
-  version "2.1.18"
-  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.18.tgz#775a4612b8a92b27f8ebed8f8496f1e4d7f99d0a"
-  integrity sha512-dL5NDeIAklFrND8s4NGOC3C/ZKBFi4KGv5Nrw6XC+pCC84K128BRCW/fTfOQZO3iAUmWbDR1Dsuj+kFDXL/A/g==
+"@renovatebot/pep440@2.1.19":
+  version "2.1.19"
+  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.19.tgz#866d7a783e5ccc5a3437183a05d80fa57cb14eff"
+  integrity sha512-ekk2lUPUmPUiR7teeU2N/5GGQEY1pTQiWN20GNjzE4BPyaF+UhvsSCM3i26gqnCD0njv+i7yiJa5j9dXkRBzeQ==
 
 "@renovatebot/ruby-semver@3.0.3":
   version "3.0.3"
