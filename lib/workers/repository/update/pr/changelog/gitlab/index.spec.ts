@@ -374,7 +374,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         ]);
       expect(
         await changelogSource.getAllTags('https://git.test.com/', 'some/repo')
-      ).toBe(['v5.2.0', 'v5.4.0', 'v5.5.0']);
+      ).toEqual(['v5.2.0', 'v5.4.0', 'v5.5.0']);
     });
   });
 });
