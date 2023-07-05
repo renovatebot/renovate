@@ -10,7 +10,7 @@ jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
 jest.mock('../../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 function lernaPkgFile(lernaClient: string): Partial<PackageFileContent> {
   return {
@@ -134,7 +134,11 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
     it('suppports docker', async () => {
       const execSnapshots = mockExecAll();
-      GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+      GlobalConfig.set({
+        ...globalConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
 
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -144,7 +148,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/containerbase/sidecar',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -153,9 +157,8 @@ describe('modules/manager/npm/post-update/lerna', () => {
           cmd:
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
-            '-w "some-dir" containerbase/sidecar ' +
+            '-w "some-dir" ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
             'install-tool node 16.16.0 ' +
             '&& ' +

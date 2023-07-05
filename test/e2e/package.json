@@ -11,7 +11,7 @@
   "renovate-config": {
     "default": {
       "extends": [
-        "config:base",
+        "config:recommended",
         ":assignAndReview(rarkins)",
         ":maintainLockFilesWeekly"
       ]

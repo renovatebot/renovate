@@ -1,6 +1,6 @@
 # Adding a Package Manager
 
-This document explains how to add a new language/package manager.
+This document explains how to add a new package manager.
 
 ## Code structure
 
@@ -21,7 +21,7 @@ The manager's `index.ts` file supports the following values or functions:
 | `extractPackageFile`          |          | yes   |
 | `extractAllPackageFiles`      | yes      | yes   |
 | `getRangeStrategy`            | yes      |       |
-| `language`                    | yes      |       |
+| `categories`                  | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
@@ -79,10 +79,6 @@ For example, pinning or _not_ pinning a dependency, depending on other values in
 The `npm` manager uses the `getRangeStrategy` function to pin `devDependencies` but not `dependencies`, unless the package file is detected as an app.
 
 If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
-
-### `language` (optional)
-
-This is used when more than one package manager shares settings from a common language.
 
 ### `supportsLockFileMaintenance` (optional)
 
