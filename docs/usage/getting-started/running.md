@@ -35,39 +35,36 @@ The `renovate` npm package is compatible with all of Renovate's supported platfo
 Renovate is also distributed as Docker images on Docker Hub (`renovate/renovate`) and GitHub container registry (`ghcr.io/renovatebot/renovate`).
 These Docker images work on all the hosting platforms that Renovate supports.
 
-You must run the Docker images in a `linux/amd64` container.
-We're working on `linux/arm64` container support.
+Both `linux/amd64` and `linux/arm64` architectures are supported, although you may still find some bugs in the `arm64` image.
 You can't run the Docker images in a Windows or macOS container.
 
 In general, you can run Renovate natively on Windows as long as you have all tools it will need (e.g. `npm`, `pipenv`, etc.) preinstalled before you run Renovate.
 
 There are two flavors:
 
-- The `-slim` image
-- The default "full" image, this is the image you'll get if you use the `latest` tag
+- The `-full` image, which comes with latest or very recent versions of every tool pre-installed
+- The default "slim" image, this is the image you'll get if you use the `latest` tag
 
-##### The slim image
+##### The slim image (default)
 
-The `-slim` image only comes with the Node.js environment.
-By default, the image installs the required tools when needed.
-We recommend the `-slim` image for most users.
+The default image (also aliased as `-slim`) only comes with the Node.js environment.
+Renovate will then install the required tools at runtime when needed (see documentation for (see documentation for `binarySource=install` for further details).
+We recommend this default "slim" image for most users.
+
+Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
+Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
 Read the [`binarySource` config option docs](../self-hosted-configuration.md#binarysource) for more information.
 
-##### The default image
+##### The full image
 
-The default image comes with most package managers that Renovate supports, but not _all_ package managers.
-
-You must set `binarySource=global`, if you don't then Renovate still installs the latest version of the tools or the requested version from the repository.
+The `-full` image comes with most package managers that Renovate supports, but not _all_ package managers.
 Update your Docker images regularly to keep the pre-installed tools up-to-date.
 
-Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
-Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
-
-The default image is for users who don't want to download or install things at runtime.
-The default image has some downsides, because it:
+The full image is for users who don't want to download or install things at runtime.
+This image has some downsides, because it:
 
 - Comes pre-installed with _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
