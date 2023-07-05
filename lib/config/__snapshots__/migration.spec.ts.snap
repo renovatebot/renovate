@@ -311,17 +311,6 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates more pack
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates node to travis 1`] = `
-{
-  "node": {
-    "automerge": false,
-  },
-  "travis": {
-    "enabled": true,
-  },
-}
-`;
-
 exports[`config/migration migrateConfig(config, parentConfig) migrates packageFiles 1`] = `
 {
   "includePaths": [

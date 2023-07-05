@@ -126,8 +126,8 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           ...currentContent,
         };
         migratedConfig.packageRules.unshift(packageRule);
+        delete migratedConfig[language];
       }
-      delete migratedConfig[language];
     }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {

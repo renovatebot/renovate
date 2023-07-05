@@ -309,25 +309,6 @@ describe('config/migration', () => {
       ).toBeFalse();
     });
 
-    it('migrates node to travis', () => {
-      const config: TestRenovateConfig = {
-        node: {
-          enabled: true,
-          automerge: 'none' as never,
-        },
-      };
-      const { isMigrated, migratedConfig } =
-        configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTrue();
-      expect(
-        (migratedConfig.node as RenovateSharedConfig).enabled
-      ).toBeUndefined();
-      expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
-        true
-      );
-    });
-
     it('migrates packageFiles', () => {
       const config: TestRenovateConfig = {
         packageFiles: [
