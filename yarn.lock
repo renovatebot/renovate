@@ -2066,10 +2066,10 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@ls-lint/ls-lint@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@ls-lint/ls-lint/-/ls-lint-2.0.0.tgz#a31256efaeb1d97d6bcb4a98ed7f2e96809e6767"
-  integrity sha512-1QEk2tzSH5YBCgP+klCZJvdGHJFNQgJb8qPFpFwQPmvjmZMV0aPE11TZ4qd+BlTcteeCWzs5ewSIOVRx2xT+Lw==
+"@ls-lint/ls-lint@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@ls-lint/ls-lint/-/ls-lint-2.0.1.tgz#27a0513fde8e06704ff174b0a696d473190b8874"
+  integrity sha512-z+sGTPWHQ2nWRj2UsDFSEQDOCw2iIjP2bPU/K1wgLNkWUv7J8WjzoBsZLgUqIgD1Sqi7zpksFTtTymgnUwramA==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
