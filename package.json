@@ -326,7 +326,7 @@
     "npm-run-all": "4.1.5",
     "nyc": "15.1.0",
     "rimraf": "5.0.1",
-    "semantic-release": "21.0.6",
+    "semantic-release": "21.0.7",
     "strip-ansi": "6.0.1",
     "tar": "6.1.15",
     "tmp-promise": "3.0.3",
