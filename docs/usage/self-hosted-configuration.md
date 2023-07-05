@@ -19,15 +19,10 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPostUpgradeCommandTemplating
 
-Set to `true` to allow templating of dependency level post-upgrade commands.
-
 Let's look at an example of configuring packages with existing Angular migrations.
-
-Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`:
 
 ```javascript
 module.exports = {
-  allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
@@ -45,8 +40,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is needed becaus
         "commands": [
           "npm ci --ignore-scripts",
           "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ],
-        "fileFilters": ["**/**"]
+        ]
       }
     }
   ]
@@ -59,6 +53,9 @@ With this configuration, the executable command for `@angular/core` looks like t
 npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
+
+If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
+But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
 
 ## allowScripts
 
@@ -314,17 +311,17 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 
 Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
-## dockerImagePrefix
+## dockerSidecarImage
 
-By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
-You can use the `dockerImagePrefix` option to override this default.
+By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+You can use the `dockerSidecarImage` option to override this default.
 
-Say you want to pull your images from `ghcr.io/containerbase` to bypass Docker Hub limits.
+Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
 ```json
 {
-  "dockerImagePrefix": "ghcr.io/containerbase"
+  "dockerSidecarImage": "ghcr.io/your_company/sidecar"
 }
 ```
 
