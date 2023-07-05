@@ -1684,10 +1684,10 @@
   resolved "https://registry.yarnpkg.com/@breejs/later/-/later-4.1.0.tgz#9246907f46cc9e9c9af37d791ab468d98921bcc1"
   integrity sha512-QgGnZ9b7o4k0Ai1ZbTJWwZpZcFK9d+Gb+DyNt4UT9x6IEIs5HVu0iIlmgzGqN+t9MoJSpSPo9S/Mm51UtHr3JA==
 
-"@cdktf/hcl2json@0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@cdktf/hcl2json/-/hcl2json-0.17.0.tgz#5a56dcc1ef2c50a3f4ee8987b6b56d8db6b0ed23"
-  integrity sha512-PNEDsVJBHqlBZtQNvMimjpkIkqqrRqWq7NVJaGiCSpb02rf5VeCgJvZhY0stUXd6hmsi4pg/Y10v4tjv7gb/XA==
+"@cdktf/hcl2json@0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@cdktf/hcl2json/-/hcl2json-0.17.1.tgz#6547b045e6c75c03184eca39022b3627ccb3143b"
+  integrity sha512-nOAuJe22FKzBlNJhKRHHTH8Pst2kNEJ18IIL4T2Tfde9EMayyBcGmQ4rsEu4tj0+EuUkryKSkLmwdzPrJS+aaQ==
   dependencies:
     fs-extra "^11.1.1"
 
