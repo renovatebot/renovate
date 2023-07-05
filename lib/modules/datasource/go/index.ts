@@ -20,6 +20,10 @@ export class GoDatasource extends Datasource {
     super(GoDatasource.id);
   }
 
+  override readonly defaultConfig = {
+    commitMessageTopic: 'module {{depName}}',
+  };
+
   override readonly customRegistrySupport = false;
 
   readonly goproxy = new GoProxyDatasource();

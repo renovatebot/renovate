@@ -276,7 +276,7 @@ describe('config/validation', () => {
             },
           ],
         },
-        docker: {
+        ansible: {
           minor: {
             matchDepNames: ['meteor'],
             matchPackageNames: ['testPackage'],
@@ -631,28 +631,21 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
-    it('errors if language or manager objects are nested', async () => {
+    it('errors if manager objects are nested', async () => {
       const config = {
-        python: {
+        pyenv: {
           enabled: false,
         },
-        java: {
+        maven: {
           gradle: {
             enabled: false,
-          },
-        },
-        major: {
-          minor: {
-            docker: {
-              automerge: true,
-            },
           },
         },
       } as never;
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
     });
