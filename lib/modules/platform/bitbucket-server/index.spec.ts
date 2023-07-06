@@ -201,7 +201,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-
+        jest.mock('timers/promises');
         jest.mock('../../../util/git');
         jest.mock('../../../util/host-rules');
         hostRules = require('../../../util/host-rules');
