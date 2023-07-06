@@ -303,7 +303,7 @@ const staticGroups = {
         commitMessageTopic: 'Node.js',
         excludePackageNames: ['calico/node', 'kindest/node'],
         matchDatasources: ['docker'],
-        matchPackageNames: ['node'],
+        matchDepNames: ['node'],
         matchPackagePatterns: ['/node$'],
       },
     ],
