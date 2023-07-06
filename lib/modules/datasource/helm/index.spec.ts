@@ -6,6 +6,7 @@ import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
 const indexYaml = Fixtures.get('index.yaml');
+const emptyPackageIndexYaml = Fixtures.get('index_emptypackage.yaml');
 
 describe('modules/datasource/helm/index', () => {
   describe('getReleases', () => {
@@ -158,6 +159,20 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(200, indexYaml);
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'ambassador',
+        registryUrls: ['https://example-repository.com'],
+      });
+      expect(releases).not.toBeNull();
+      expect(releases).toMatchSnapshot();
+    });
+
+    it('returns list of versions for other packages if one packages has no versions', async () => {
+      httpMock
+        .scope('https://example-repository.com')
+        .get('/index.yaml')
+        .reply(200, emptyPackageIndexYaml);
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
         packageName: 'ambassador',
