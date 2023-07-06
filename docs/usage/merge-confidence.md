@@ -21,7 +21,7 @@ Merge Confidence adds the following badges to your pull requests:
 
 ## Supported platforms
 
-Merge Confidence badges for pull requests are available in beta on any supported Renovate platform, including Mend Remediate.
+Merge Confidence badges for pull requests are available on any supported platform or Renovate distribution, including Mend Remediate.
 
 ## Supported languages
 
@@ -35,7 +35,7 @@ We plan to support more languages soon.
 
 ## Enabling and disabling
 
-If you use the Mend Renovate App (formerly WhiteSource Renovate App) then the badges are enabled automatically.
+If you use the Mend Renovate App then the badges are enabled automatically.
 
 If you don't use the app, you can enable the badges by adding this to your Renovate config:
 
@@ -82,7 +82,7 @@ We plan to expose much more of the data via a companion website, such as number 
 
 ## Explanations
 
-### npm package ranking
+### Package ranking
 
 npm packages less than three days old can be [unpublished](https://docs.npmjs.com/unpublishing-packages-from-the-registry/), which can result in a service impact if you have updated to a package that gets unpublished.
 This is why npm packages can only get the **High** Confidence badge when they are at least three days old.
@@ -91,10 +91,6 @@ This is why npm packages can only get the **High** Confidence badge when they ar
 
 The percentages for `Adoption` and `Passing` are weighted towards Organizations, private repositories, and projects with high test reliability.
 This means those values aren't _raw_ percentages.
-
-## Roadmap
-
-High-level information on planned improvements is available in the [Merge Confidence Roadmap Project](https://github.com/whitesource/merge-confidence/projects/1) on GitHub.
 
 ## Questions and feedback
 
