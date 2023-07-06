@@ -181,7 +181,6 @@
     "commander": "11.0.0",
     "conventional-commits-detector": "1.0.3",
     "deepmerge": "4.3.1",
-    "delay": "5.0.0",
     "dequal": "2.0.3",
     "detect-indent": "6.1.0",
     "editorconfig": "2.0.0",
