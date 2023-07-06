@@ -31,7 +31,7 @@ describe('modules/platform/gitlab/index', () => {
     jest.mock('../../../logger');
     logger = (await import('../../../logger')).logger as never;
     jest.mock('../../../util/host-rules');
-    jest.mock('delay');
+    jest.mock('timers/promises');
     hostRules = require('../../../util/host-rules');
     jest.mock('../../../util/git');
     git = require('../../../util/git');

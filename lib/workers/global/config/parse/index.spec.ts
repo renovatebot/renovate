@@ -30,7 +30,6 @@ describe('workers/global/config/parse/index', () => {
           './__fixtures__/default.js'
         ),
       };
-      jest.mock('delay', () => Promise.resolve());
     });
 
     it('supports token in env', async () => {

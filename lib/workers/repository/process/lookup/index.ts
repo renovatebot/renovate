@@ -9,7 +9,7 @@ import {
   getDatasourceList,
   getDefaultVersioning,
   getDigest,
-  getPkgReleasesWithResult,
+  getPkgReleasesSafe,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../modules/datasource';
@@ -82,7 +82,7 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-      const lookupResult = (await getPkgReleasesWithResult(config)).unwrap();
+      const lookupResult = (await getPkgReleasesSafe(config)).unwrap();
       if (!lookupResult.ok) {
         throw lookupResult.error;
       }
