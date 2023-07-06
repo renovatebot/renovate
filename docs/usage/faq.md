@@ -29,7 +29,7 @@ The Renovate team only fixes bugs in an older version if:
 If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
-## When is Renovate's GitHub hosted app updated?
+## When is the GitHub hosted app of Renovate updated?
 
 The Renovate maintainers manually update the GitHub hosted app.
 The maintainers don't follow any release schedule or release cadence.
