@@ -41,9 +41,7 @@ If you don't use the app, you can enable the badges by adding the `mergeConfiden
 
 ```json
 {
-  "extends": [
-    "mergeConfidence:default"
-  ]
+  "extends": ["mergeConfidence:default"]
 }
 ```
 
@@ -51,9 +49,7 @@ If you want to disable the badges in the app, add the `mergeConfidence:default` 
 
 ```json
 {
-  "ignorePresets": [
-    "mergeConfidence:default"
-  ]
+  "ignorePresets": ["mergeConfidence:default"]
 }
 ```
 
