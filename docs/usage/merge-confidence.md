@@ -94,4 +94,4 @@ High-level information on planned improvements is available in the [Merge Confid
 
 ## Questions and feedback
 
-You are invited to [create an Issue](https://github.com/whitesource/merge-confidence/issues/new) if you have anything you'd like to discuss.
+You are invited to [start a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you'd like to discuss.
