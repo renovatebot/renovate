@@ -1,4 +1,4 @@
-This `custom` datasource allow to request data from generic HTTP endpoints.
+This `custom` datasource allows requesting version data from generic HTTP endpoints.
 
 ## Usage
 
@@ -42,9 +42,9 @@ Available template variables:
 }
 ```
 
-After all transformation, the resulting json has to follow this format.
+After all transformations, the resulting json has to follow this formats:
 
-Minimal supported object:
+Minimal-supported object:
 
 ```json
 {
@@ -58,6 +58,8 @@ Minimal supported object:
   ]
 }
 ```
+
+All available options:
 
 ```json
 {

@@ -657,7 +657,8 @@ As this is a template it can be dynamically set. E.g. add the `packageName` as p
 
 ### format
 
-Defines which format the API is returning. Available values: `json`
+Defines which format the API is returning.
+Only `json` is supported, but more are planned for future.
 
 ### transformTemplates
 

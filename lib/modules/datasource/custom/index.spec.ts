@@ -24,7 +24,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toBeNull();
     });
 
-    it('return null if no custom datasource could not be found', async () => {
+    it('return null if no custom datasource could  be found', async () => {
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: '*',
