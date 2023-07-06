@@ -8,8 +8,6 @@ import { NpmDatasource, setNpmrc } from '.';
 
 const datasource = NpmDatasource.id;
 
-jest.mock('delay');
-
 let npmResponse: any;
 
 describe('modules/datasource/npm/index', () => {

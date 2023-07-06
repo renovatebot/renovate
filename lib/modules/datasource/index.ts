@@ -445,7 +445,7 @@ export async function getPkgReleases(
   return res;
 }
 
-export function getPkgReleasesWithResult(
+export function getPkgReleasesSafe(
   config: GetPkgReleasesConfig
 ): Promise<Result<ReleaseResult | null>> {
   return Result.wrap(getPkgReleases(config));
