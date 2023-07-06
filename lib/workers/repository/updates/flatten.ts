@@ -109,9 +109,7 @@ export async function flattenUpdates(
               });
             }
             // apply config from datasource
-            const datasourceConfig = await getDefaultConfig(
-              depConfig.datasource
-            );
+            const datasourceConfig = getDefaultConfig(depConfig.datasource);
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
             updateConfig = applyPackageRules(updateConfig);
             // apply major/minor/patch/pin/digest

@@ -56,7 +56,7 @@ async function fetchDepUpdates(
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
-  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
+  const datasourceDefaultConfig = getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
@@ -71,9 +71,9 @@ async function fetchDepUpdates(
   } else {
     if (depConfig.datasource) {
       try {
-        const updateResult = await withLookupStats(depConfig.datasource, () =>
-          lookupUpdates(depConfig as LookupUpdateConfig)
-        );
+        const updateResult = await withLookupStats(depConfig.datasource, () => {
+          return lookupUpdates(depConfig as LookupUpdateConfig);
+        });
         Object.assign(dep, updateResult);
       } catch (err) {
         if (

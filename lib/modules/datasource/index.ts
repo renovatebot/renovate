@@ -16,6 +16,7 @@ import datasources from './api';
 import { addMetaData } from './metadata';
 import { setNpmrc } from './npm';
 import { resolveRegistryUrl } from './npm/npmrc';
+import { Datasource } from './schema';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -32,10 +33,6 @@ export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
-
-export function getDatasourceFor(datasource: string): DatasourceApi | null {
-  return datasources.get(datasource) ?? null;
-}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -244,12 +241,13 @@ export function getDefaultVersioning(
   if (!datasourceName) {
     return defaultVersioning.id;
   }
-  const datasource = getDatasourceFor(datasourceName);
+  const datasource = Datasource.safeParse(datasourceName);
   // istanbul ignore if: wrong regex manager config?
-  if (!datasource) {
+  if (datasource.success === false) {
     logger.warn({ datasourceName }, 'Missing datasource!');
+    return defaultVersioning.id;
   }
-  return datasource?.defaultVersioning ?? defaultVersioning.id;
+  return datasource.data.defaultVersioning ?? defaultVersioning.id;
 }
 
 function applyReplacements(
@@ -268,12 +266,15 @@ async function fetchReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
-  let { registryUrls } = config;
+  const datasourceResult = Datasource.safeParse(datasourceName);
   // istanbul ignore if: need test
-  if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
-    logger.warn('Unknown datasource: ' + datasourceName);
+  if (!datasourceResult.success) {
+    logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
+  const datasource = datasourceResult.data;
+
+  let registryUrls = config.registryUrls;
   if (datasourceName === 'npm') {
     if (is.string(config.npmrc)) {
       setNpmrc(config.npmrc);
@@ -281,12 +282,6 @@ async function fetchReleases(
     if (!is.nonEmptyArray(registryUrls)) {
       registryUrls = [resolveRegistryUrl(config.packageName)];
     }
-  }
-  const datasource = getDatasourceFor(datasourceName);
-  // istanbul ignore if: needs test
-  if (!datasource) {
-    logger.warn({ datasource: datasourceName }, 'Unknown datasource');
-    return null;
   }
   registryUrls = resolveRegistryUrls(
     datasource,
@@ -451,9 +446,18 @@ export function getPkgReleasesSafe(
   return Result.wrap(getPkgReleases(config));
 }
 
-export function supportsDigests(datasource: string | undefined): boolean {
-  const ds = !!datasource && getDatasourceFor(datasource);
-  return !!ds && 'getDigest' in ds;
+export function supportsDigests(datasourceName: string | undefined): boolean {
+  const datasourceResult = Datasource.safeParse(datasourceName);
+  // istanbul ignore if
+  if (!datasourceResult.success) {
+    logger.warn(
+      { datasource: datasourceName },
+      'Unknown datasource does not support digests'
+    );
+    return false;
+  }
+  const datasource = datasourceResult.data;
+  return 'getDigest' in datasource;
 }
 
 function getDigestConfig(
@@ -475,20 +479,28 @@ export function getDigest(
   config: GetDigestInputConfig,
   value?: string
 ): Promise<string | null> {
-  const datasource = getDatasourceFor(config.datasource);
+  const datasourceResult = Datasource.safeParse(config.datasource);
   // istanbul ignore if: need test
-  if (!datasource || !('getDigest' in datasource)) {
+  if (!datasourceResult.success) {
     return Promise.resolve(null);
   }
+  const datasource = datasourceResult.data;
   const digestConfig = getDigestConfig(datasource, config);
   return datasource.getDigest!(digestConfig, value);
 }
 
 export function getDefaultConfig(
-  datasource: string
-): Promise<Record<string, unknown>> {
-  const loadedDatasource = getDatasourceFor(datasource);
-  return Promise.resolve<Record<string, unknown>>(
-    loadedDatasource?.defaultConfig ?? Object.create({})
-  );
+  datasourceName: string
+): Record<string, unknown> {
+  const datasourceResult = Datasource.safeParse(datasourceName);
+  if (!datasourceResult.success) {
+    return {};
+  }
+
+  const datasource = datasourceResult.data;
+  if (datasource.defaultConfig) {
+    return clone(datasource.defaultConfig);
+  }
+
+  return {};
 }
