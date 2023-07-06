@@ -61,13 +61,10 @@ If you want to disable the badges in the app, add the `mergeConfidence:default` 
 
 Merge Confidence uses the following confidence levels:
 
-- **Low**: We think the update contains breaking changes. Often this is expected because it's a Major version update, but updates can have unknown breaking changes.
-
-- **Neutral**: We don't have enough data about the update, or we can't decide if the update should be Low or High confidence.
-
-- **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there's a very low chance of breaking changes.
-
-- **Very High**: We only use this for updates which are months old and have either high `Adoption` or have very high test `Passing` scores.
+- **Low**: We think the update contains breaking changes. Often this is expected because it's a `major` version update, but updates can have unknown breaking changes
+- **Neutral**: We don't have enough data about the update, or we can't decide if the update should be Low or High confidence
+- **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there's a very low chance of breaking changes
+- **Very High**: We only use this for updates which are months old and have either high `Adoption` or have very high test `Passing` scores
 
 ## How it works
 
@@ -88,7 +85,7 @@ We plan to expose much more of the data via a companion website, such as number 
 
 ### Package ranking
 
-npm packages less than three days old can be [unpublished](https://docs.npmjs.com/unpublishing-packages-from-the-registry/), which can result in a service impact if you have updated to a package that gets unpublished.
+npm packages less than three days old can be [unpublished](https://docs.npmjs.com/policies/unpublish), which can result in a service impact if you have updated to a package that gets unpublished.
 This is why npm packages can only get the **High** Confidence badge when they are at least three days old.
 
 ### Percentage values weighting
