@@ -484,7 +484,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'spring boot',
-        matchPackageNames: ['org.springframework.boot'],
+        matchDepNames: ['org.springframework.boot'],
         matchPackagePrefixes: ['org.springframework.boot:'],
       },
     ],
