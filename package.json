@@ -178,7 +178,7 @@
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "10.0.1",
+    "commander": "11.0.0",
     "conventional-commits-detector": "1.0.3",
     "deepmerge": "4.3.1",
     "delay": "5.0.0",
