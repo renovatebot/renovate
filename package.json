@@ -319,7 +319,7 @@
     "jest-extended": "4.0.0",
     "jest-mock-extended": "3.0.4",
     "markdownlint-cli2": "0.8.1",
-    "memfs": "4.2.0",
+    "memfs": "3.5.3",
     "mock-fs": "5.2.0",
     "mockdate": "3.0.5",
     "nock": "13.3.1",
