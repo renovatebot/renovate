@@ -108,10 +108,7 @@ export class Fixtures {
   }
 }
 
-export function readFile(
-  fileName: string,
-  options: any
-): Promise<TDataOut> {
+export function readFile(fileName: string, options: any): Promise<TDataOut> {
   if (fileName.endsWith('.wasm') || fileName.endsWith('.wasm.gz')) {
     return fs.promises.readFile(fileName, options);
   }
