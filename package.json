@@ -139,11 +139,11 @@
     "node": "^18.12.0 || >=20.0.0"
   },
   "dependencies": {
-    "@aws-sdk/client-codecommit": "3.348.0",
-    "@aws-sdk/client-ec2": "3.348.0",
-    "@aws-sdk/client-ecr": "3.348.0",
-    "@aws-sdk/client-rds": "3.348.0",
-    "@aws-sdk/client-s3": "3.348.0",
+    "@aws-sdk/client-codecommit": "3.363.0",
+    "@aws-sdk/client-ec2": "3.363.0",
+    "@aws-sdk/client-ecr": "3.363.0",
+    "@aws-sdk/client-rds": "3.363.0",
+    "@aws-sdk/client-s3": "3.363.0",
     "@breejs/later": "4.1.0",
     "@cdktf/hcl2json": "0.17.1",
     "@cheap-glitch/mi-cron": "1.0.1",
