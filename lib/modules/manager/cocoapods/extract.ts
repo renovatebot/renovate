@@ -109,22 +109,8 @@ export async function extractPackageFile(
 
     if (depName) {
       const managerData = { lineNumber };
-      let dep: PackageDependency = {
-        depName,
-        groupName,
-        skipReason: 'unspecified-version',
-      };
-
-      if (currentValue) {
-        dep = {
-          depName,
-          groupName,
-          datasource: PodDatasource.id,
-          currentValue,
-          managerData,
-          registryUrls,
-        };
-      } else if (git) {
+      let dep: PackageDependency;
+      if (git) {
         if (tag) {
           dep = { ...gitDep(parsedLine), managerData };
         } else {
@@ -139,6 +125,15 @@ export async function extractPackageFile(
           depName,
           groupName,
           skipReason: 'path-dependency',
+        };
+      } else {
+        dep = {
+          depName,
+          groupName,
+          datasource: PodDatasource.id,
+          currentValue: currentValue ?? '>= 0',
+          managerData,
+          registryUrls,
         };
       }
 

@@ -62,16 +62,16 @@ describe('modules/manager/cocoapods/extract', () => {
         { depName: 'TOCropViewController', currentValue: '~> 2.5.1' },
         { depName: 'FMDB', currentValue: '~> 2.7.5' },
         { depName: 'FDStackView', currentValue: '~> 1.0.1' },
-        { depName: 'LYEmptyView', skipReason: 'unspecified-version' },
+        { depName: 'LYEmptyView', currentValue: '>= 0' },
         { depName: 'MMKV', currentValue: '~> 1.0.22' },
-        { depName: 'fishhook', skipReason: 'unspecified-version' },
+        { depName: 'fishhook', currentValue: '>= 0' },
         { depName: 'CocoaLumberjack', currentValue: '~> 3.5.3' },
         { depName: 'GZIP', currentValue: '~> 1.2' },
         { depName: 'LBXScan/LBXNative', currentValue: '~> 2.3' },
         { depName: 'LBXScan/LBXZXing', currentValue: '~> 2.3' },
         { depName: 'LBXScan/UI', currentValue: '~> 2.3' },
-        { depName: 'MLeaksFinder', skipReason: 'unspecified-version' },
-        { depName: 'FBMemoryProfiler', skipReason: 'unspecified-version' },
+        { depName: 'MLeaksFinder', currentValue: '>= 0' },
+        { depName: 'FBMemoryProfiler', currentValue: '>= 0' },
       ]);
     });
   });
