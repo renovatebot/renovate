@@ -9,7 +9,7 @@ import {
   getDatasourceList,
   getDefaultVersioning,
   getDigest,
-  getPkgReleasesWithResult as getPkgReleasesSafe,
+  getPkgReleasesSafe,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../modules/datasource';
