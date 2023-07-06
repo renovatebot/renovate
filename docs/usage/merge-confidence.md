@@ -37,20 +37,24 @@ We plan to support more languages soon.
 
 If you use the Mend Renovate App then the badges are enabled automatically.
 
-If you don't use the app, you can enable the badges by adding this to your Renovate config:
+If you don't use the app, you can enable the badges by adding the `mergeConfidence:default` preset to the `extends` array in your Renovate config:
 
-```json lines
+```json
+{
   "extends": [
     "mergeConfidence:default"
   ]
+}
 ```
 
-If you want to disable the badges in the app, add this to your config:
+If you want to disable the badges in the app, add the `mergeConfidence:default` preset to the `ignorePresets` array in your config:
 
-```json lines
+```json
+{
   "ignorePresets": [
     "mergeConfidence:default"
   ]
+}
 ```
 
 ## Confidence levels and their meaning
