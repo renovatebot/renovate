@@ -4,6 +4,7 @@ import * as defaultPreset from './default';
 import * as dockerPreset from './docker';
 import * as groupPreset from './group';
 import * as helpersPreset from './helpers';
+import * as mergeConfidence from './merge-confidence';
 import * as monorepoPreset from './monorepo';
 import * as npm from './npm';
 import * as packagesPreset from './packages';
@@ -21,6 +22,7 @@ export const groups: Record<string, Record<string, Preset>> = {
   docker: dockerPreset.presets,
   group: groupPreset.presets,
   helpers: helpersPreset.presets,
+  mergeConfidence: mergeConfidence.presets,
   monorepo: monorepoPreset.presets,
   npm: npm.presets,
   packages: packagesPreset.presets,
