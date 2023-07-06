@@ -1,9 +1,10 @@
 import hasha from 'hasha';
 import * as packageCache from '../../../util/cache/package';
-import { Http, HttpError } from '../../../util/http';
+import type { Http } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import type { ReleaseResult } from '../types';
 import { GemMetadata, GemVersions } from './schema';
+import { logger } from '../../../logger';
 
 interface CacheRecord {
   hash: string;
@@ -62,12 +63,9 @@ export class MetadataCache {
       );
       return data;
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
-        const releases = versions.map((version) => ({ version }));
-        return { releases };
-      }
-
-      throw err;
+      logger.debug({ err }, 'Rubygems: failed to fetch metadata');
+      const releases = versions.map((version) => ({ version }));
+      return { releases };
     }
   }
 }
