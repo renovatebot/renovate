@@ -1,10 +1,10 @@
 import hasha from 'hasha';
+import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import type { ReleaseResult } from '../types';
 import { GemMetadata, GemVersions } from './schema';
-import { logger } from '../../../logger';
 
 interface CacheRecord {
   hash: string;
