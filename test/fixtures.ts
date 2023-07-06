@@ -4,7 +4,6 @@ import { jest } from '@jest/globals';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
-import type { IOptions } from 'memfs/lib/volume';
 import upath from 'upath';
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -109,12 +108,9 @@ export class Fixtures {
   }
 }
 
-export function readFile(
-  fileName: string,
-  options: IOptions
-): Promise<TDataOut> {
+export function readFile(fileName: string, options: any): Promise<TDataOut> {
   if (fileName.endsWith('.wasm') || fileName.endsWith('.wasm.gz')) {
-    return fs.promises.readFile(fileName, options as any);
+    return fs.promises.readFile(fileName, options);
   }
 
   return memfs.promises.readFile(fileName, options);
