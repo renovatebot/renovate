@@ -1,7 +1,6 @@
 // TODO fix mocks
 import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -133,10 +132,6 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('getRepos', () => {
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('should throw an error if it receives an error', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -187,8 +182,7 @@ describe('modules/platform/gitlab/index', () => {
             mirror: true,
           },
         ]);
-      GlobalConfig.set({ includeMirrors: true });
-      const repos = await gitlab.getRepos();
+      const repos = await gitlab.getRepos({ includeMirrors: true });
       expect(repos).toEqual(['a/b', 'c/d', 'c/f']);
     });
 
@@ -232,10 +226,6 @@ describe('modules/platform/gitlab/index', () => {
   }
 
   describe('initRepo', () => {
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     const okReturn = { default_branch: 'master', url: 'https://some-url' };
 
     it(`should escape all forward slashes in project names`, async () => {
@@ -298,10 +288,10 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           mirror: true,
         });
-      GlobalConfig.set({ includeMirrors: true });
       expect(
         await gitlab.initRepo({
           repository: 'some/repo',
+          includeMirrors: true,
         })
       ).toEqual({
         defaultBranch: 'master',

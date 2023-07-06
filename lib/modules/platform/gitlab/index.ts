@@ -3,7 +3,6 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -73,6 +72,7 @@ let config: {
   cloneSubmodules: boolean | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
+  includeMirrors: boolean;
 } = {} as any;
 
 const defaults = {
@@ -169,7 +169,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       paginate: true,
     });
     logger.debug(`Discovered ${res.body.length} project(s)`);
-    const includeMirrors = GlobalConfig.get('includeMirrors', false);
+    const includeMirrors = config?.includeMirrors === true;
 
     return res.body
       .filter((repo) => includeMirrors || !repo.mirror)
@@ -270,6 +270,7 @@ export async function initRepo({
   ignorePrAuthor,
   gitUrl,
   endpoint,
+  includeMirrors,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -287,7 +288,6 @@ export async function initRepo({
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
-    const includeMirrors = GlobalConfig.get('includeMirrors', false);
 
     if (res.body.mirror && includeMirrors !== true) {
       logger.debug(
