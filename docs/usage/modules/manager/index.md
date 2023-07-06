@@ -82,17 +82,6 @@ To disable a specific manager like `gradle`, do this:
 }
 ```
 
-To disable all managers within a language like `python`, do this:
-
-```json
-{
-  "python": {
-    "enabled": false
-  }
-}
-```
-
-Only languages declared by a Renovate manager are supported.
 Please check the [list of supported managers](https://docs.renovatebot.com/modules/manager/#supported-managers).
 
 #### Limiting enabled managers
