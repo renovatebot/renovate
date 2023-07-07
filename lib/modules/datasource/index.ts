@@ -369,9 +369,6 @@ function filterValidVersions<
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
 
-  releaseResult.releases = releaseResult.releases
-    .filter((release) => versioning.isVersion(release.version))
-    .sort((a, b) => versioning.sortVersions(a.version, b.version));
   releaseResult.releases = filterMap(releaseResult.releases, (release) =>
     versioning.isVersion(release.version) ? release : null
   );
