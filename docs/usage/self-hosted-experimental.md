@@ -124,6 +124,14 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
+## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
+
+Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
+
+Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+
+Default value: `1000` (milliseconds).
+
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
