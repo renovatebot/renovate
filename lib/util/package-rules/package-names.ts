@@ -21,7 +21,7 @@ export class PackageNameMatcher extends Matcher {
     }
 
     if (matchPackageNames.includes(depName)) {
-      logger.once.warn(
+      logger.once.info(
         { packageRule, packageName, depName },
         'Use matchDepNames instead of matchPackageNames'
       );
