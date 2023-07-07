@@ -4,6 +4,18 @@ describe('util/package-rules/repositories', () => {
   const packageNameMatcher = new RepositoriesMatcher();
 
   describe('match', () => {
+    it('should return null if match repositories is not defined', () => {
+      const result = packageNameMatcher.matches(
+        {
+          repository: 'org/repo',
+        },
+        {
+          matchRepositories: undefined,
+        }
+      );
+      expect(result).toBeNull();
+    });
+
     it('should return false if repository is not defined', () => {
       const result = packageNameMatcher.matches(
         {
@@ -78,6 +90,18 @@ describe('util/package-rules/repositories', () => {
   });
 
   describe('excludes', () => {
+    it('should return null if exclude repositories is not defined', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: 'org/repo',
+        },
+        {
+          excludeRepositories: undefined,
+        }
+      );
+      expect(result).toBeNull();
+    });
+
     it('should return false if exclude repository is not defined', () => {
       const result = packageNameMatcher.excludes(
         {
