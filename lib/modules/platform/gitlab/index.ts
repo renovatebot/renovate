@@ -169,8 +169,6 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       paginate: true,
     });
     logger.debug(`Discovered ${res.body.length} project(s)`);
-    const includeMirrors = config?.includeMirrors === true;
-
     return res.body
       .filter((repo) => includeMirrors || !repo.mirror)
       .map((repo) => repo.path_with_namespace);
