@@ -49,6 +49,7 @@ export interface ExecOptions {
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;
   preCommands?: Opt<string[]>;
+  ignoreStdout?: boolean;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;

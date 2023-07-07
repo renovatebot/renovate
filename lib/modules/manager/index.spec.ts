@@ -31,12 +31,6 @@ describe('modules/manager/index', () => {
     });
   });
 
-  describe('getLanguageList()', () => {
-    it('gets', () => {
-      expect(manager.getLanguageList()).not.toBeNull();
-    });
-  });
-
   describe('getManagerList()', () => {
     it('gets', () => {
       expect(manager.getManagerList()).not.toBeNull();

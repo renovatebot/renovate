@@ -1,5 +1,5 @@
-import type { BranchUpgradeConfig } from '../../../../types';
-import { ChangeLogSource } from './source';
+import type { BranchUpgradeConfig } from '../../../../../types';
+import { ChangeLogSource } from '../source';
 
 export class GitLabChangeLogSource extends ChangeLogSource {
   constructor() {
@@ -17,5 +17,9 @@ export class GitLabChangeLogSource extends ChangeLogSource {
     nextHead: string
   ): string {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
+  }
+
+  override hasValidRepository(repository: string): boolean {
+    return repository.split('/').length >= 2;
   }
 }

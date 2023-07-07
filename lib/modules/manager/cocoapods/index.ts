@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
@@ -14,6 +15,8 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Podfile$'],
   versioning: rubyVersioning.id,
 };
+
+export const categories: Category[] = ['swift'];
 
 export const supportedDatasources = [
   GitTagsDatasource.id,

@@ -10,6 +10,7 @@ import { regEx } from '../../util/regex';
 import { Result } from '../../util/result';
 import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
+import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -241,14 +242,14 @@ export function getDefaultVersioning(
   datasourceName: string | undefined
 ): string {
   if (!datasourceName) {
-    return 'semver';
+    return defaultVersioning.id;
   }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: wrong regex manager config?
   if (!datasource) {
     logger.warn({ datasourceName }, 'Missing datasource!');
   }
-  return datasource?.defaultVersioning ?? 'semver';
+  return datasource?.defaultVersioning ?? defaultVersioning.id;
 }
 
 function applyReplacements(
@@ -399,6 +400,7 @@ export async function getPkgReleases(
   res.releases = uniq(res.releases, (x, y) => x.version === y.version);
 
   if (config?.constraintsFiltering === 'strict') {
+    const filteredReleases: string[] = [];
     // Filter releases for compatibility
     for (const [constraintName, constraintValue] of Object.entries(
       config.constraints ?? {}
@@ -411,7 +413,7 @@ export async function getPkgReleases(
             return true;
           }
 
-          return constraint.some(
+          const satisfiesConstraints = constraint.some(
             // If the constraint value is a subset of any release's constraints, then it's OK
             // fallback to release's constraint match if subset is not supported by versioning
             (releaseConstraint) =>
@@ -419,8 +421,21 @@ export async function getPkgReleases(
               (version.subset?.(constraintValue, releaseConstraint) ??
                 version.matches(constraintValue, releaseConstraint))
           );
+          if (!satisfiesConstraints) {
+            filteredReleases.push(release.version);
+          }
+          return satisfiesConstraints;
         });
       }
+    }
+    if (filteredReleases.length) {
+      logger.debug(
+        `Filtered ${
+          filteredReleases.length
+        } releases for ${packageName} due to constraintsFiltering=strict: ${filteredReleases.join(
+          ', '
+        )}`
+      );
     }
   }
   // Strip constraints from releases result
@@ -430,7 +445,7 @@ export async function getPkgReleases(
   return res;
 }
 
-export function getPkgReleasesWithResult(
+export function getPkgReleasesSafe(
   config: GetPkgReleasesConfig
 ): Promise<Result<ReleaseResult | null>> {
   return Result.wrap(getPkgReleases(config));

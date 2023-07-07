@@ -185,7 +185,7 @@ Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 
 ```json
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "ignorePaths": ["docker/old-files/"]
 }
 ```
@@ -388,7 +388,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:35.141.3
+FROM renovate/renovate:35.158.0
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

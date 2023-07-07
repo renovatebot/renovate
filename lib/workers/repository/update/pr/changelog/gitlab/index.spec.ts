@@ -1,11 +1,10 @@
-import * as httpMock from '../../../../../../test/http-mock';
-import { partial } from '../../../../../../test/util';
-import * as semverVersioning from '../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../util/host-rules';
-import type { BranchUpgradeConfig } from '../../../../types';
-import { getChangeLogJSON } from '.';
-
-jest.mock('../../../../../modules/datasource/npm');
+import { getChangeLogJSON } from '..';
+import * as httpMock from '../../../../../../../test/http-mock';
+import { partial } from '../../../../../../../test/util';
+import * as semverVersioning from '../../../../../../modules/versioning/semver';
+import * as hostRules from '../../../../../../util/host-rules';
+import type { BranchUpgradeConfig } from '../../../../../types';
+import { GitLabChangeLogSource } from './source';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -31,7 +30,9 @@ const upgrade = partial<BranchUpgradeConfig>({
 
 const matchHost = 'https://gitlab.com/';
 
-describe('workers/repository/update/pr/changelog/gitlab', () => {
+const changelogSource = new GitLabChangeLogSource();
+
+describe('workers/repository/update/pr/changelog/gitlab/index', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
@@ -347,6 +348,33 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         },
       });
       expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
+    });
+  });
+
+  describe('hasValidRepository', () => {
+    it('handles invalid repository', () => {
+      expect(changelogSource.hasValidRepository('foo')).toBeFalse();
+    });
+
+    it('handles valid repository', () => {
+      expect(changelogSource.hasValidRepository('some/repo')).toBeTrue();
+      expect(changelogSource.hasValidRepository('some/repo/name')).toBeTrue();
+    });
+  });
+
+  describe('getAllTags', () => {
+    it('handles endpoint', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get('/api/v4/projects/some%2Frepo/repository/tags?per_page=100')
+        .reply(200, [
+          { name: 'v5.2.0' },
+          { name: 'v5.4.0' },
+          { name: 'v5.5.0' },
+        ]);
+      expect(
+        await changelogSource.getAllTags('https://git.test.com/', 'some/repo')
+      ).toEqual(['v5.2.0', 'v5.4.0', 'v5.5.0']);
     });
   });
 });

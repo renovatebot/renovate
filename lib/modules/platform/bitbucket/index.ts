@@ -211,6 +211,7 @@ export async function initRepo({
       owner: info.owner,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
+      is_private: info.is_private,
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
@@ -309,6 +310,34 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
+
+  /**
+   * Bitbucket doesn't support renaming or reopening declined PRs.
+   * Instead, we have to use comment-driven signals.
+   */
+  if (pr?.state === 'closed') {
+    const reopenComments = await comments.reopenComments(config, pr.number);
+
+    if (is.nonEmptyArray(reopenComments)) {
+      if (config.is_private) {
+        // Only workspace members could have commented on a private repository
+        logger.debug(
+          `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`
+        );
+        return null;
+      }
+
+      for (const comment of reopenComments) {
+        if (await isAccountMemberOfWorkspace(comment.user, config.repository)) {
+          logger.debug(
+            `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`
+          );
+          return null;
+        }
+      }
+    }
+  }
+
   return pr ?? null;
 }
 
@@ -916,20 +945,22 @@ export async function updatePr({
   ).body;
 
   try {
+    const body: any = {
+      title,
+      description: sanitize(description),
+      reviewers: pr.reviewers,
+    };
+    if (targetBranch) {
+      body.destination = {
+        branch: {
+          name: targetBranch,
+        },
+      };
+    }
+
     await bitbucketHttp.putJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      {
-        body: {
-          title,
-          description: sanitize(description),
-          reviewers: pr.reviewers,
-          destination: {
-            branch: {
-              name: targetBranch,
-            },
-          },
-        },
-      }
+      { body }
     );
   } catch (err) {
     // Try sanitizing reviewers

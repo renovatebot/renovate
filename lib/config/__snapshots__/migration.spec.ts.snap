@@ -164,7 +164,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
         "extends": [
           "node",
         ],
-        "matchPaths": [
+        "matchFileNames": [
           "node/**",
         ],
       },
@@ -172,6 +172,21 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
   },
   "onboarding": false,
   "packageRules": [
+    {
+      "enabled": false,
+      "matchCategories": [
+        "python",
+      ],
+      "matchPackageNames": [
+        "foo",
+      ],
+    },
+    {
+      "enabled": false,
+      "matchCategories": [
+        "dotnet",
+      ],
+    },
     {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
@@ -211,7 +226,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
       "extends": [
         "foo",
       ],
-      "matchPaths": [
+      "matchFileNames": [
         "examples/**",
       ],
     },
@@ -293,7 +308,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates more pack
       "matchDepTypes": [
         "devDependencies",
       ],
-      "matchPaths": [
+      "matchFileNames": [
         "package.json",
       ],
       "rangeStrategy": "pin",
@@ -302,23 +317,12 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates more pack
       "matchDepTypes": [
         "dependencies",
       ],
-      "matchPaths": [
+      "matchFileNames": [
         "package.json",
       ],
       "rangeStrategy": "pin",
     },
   ],
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) migrates node to travis 1`] = `
-{
-  "node": {
-    "automerge": false,
-  },
-  "travis": {
-    "enabled": true,
-  },
 }
 `;
 
@@ -332,13 +336,13 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates packageFi
   ],
   "packageRules": [
     {
-      "matchPaths": [
+      "matchFileNames": [
         "backend/package.json",
       ],
       "rangeStrategy": "replace",
     },
     {
-      "matchPaths": [
+      "matchFileNames": [
         "frontend/package.json",
       ],
       "rangeStrategy": "pin",
@@ -347,7 +351,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates packageFi
       "matchDepTypes": [
         "devDependencies",
       ],
-      "matchPaths": [
+      "matchFileNames": [
         "other/package.json",
       ],
       "rangeStrategy": "pin",
@@ -356,7 +360,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates packageFi
       "matchDepTypes": [
         "dependencies",
       ],
-      "matchPaths": [
+      "matchFileNames": [
         "other/package.json",
       ],
       "rangeStrategy": "pin",
