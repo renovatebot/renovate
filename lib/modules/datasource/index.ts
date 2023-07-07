@@ -414,21 +414,26 @@ function applyConstraintsFiltering<
 
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
-  const version = allVersioning.get(versioningName);
+  const versioning = allVersioning.get(versioningName);
 
+  const configConstraints = config.constraints;
   const filteredReleases: string[] = [];
-  const configConstraints = config.constraints ?? {};
-  // Filter releases for compatibility
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
     const releaseConstraints = release.constraints;
     delete release.constraints;
 
+    // istanbul ignore if
+    if (!configConstraints || !releaseConstraints) {
+      return release;
+    }
+
     for (const [name, configConstraint] of Object.entries(configConstraints)) {
-      if (!version.isValid(configConstraint)) {
+      // istanbul ignore if
+      if (!versioning.isValid(configConstraint)) {
         continue;
       }
 
-      const constraint = releaseConstraints?.[name];
+      const constraint = releaseConstraints[name];
       if (!is.nonEmptyArray(constraint)) {
         // A release with no constraints is OK
         continue;
@@ -439,8 +444,8 @@ function applyConstraintsFiltering<
         // fallback to release's constraint match if subset is not supported by versioning
         (releaseConstraint) =>
           !releaseConstraint ||
-          (version.subset?.(configConstraint, releaseConstraint) ??
-            version.matches(configConstraint, releaseConstraint))
+          (versioning.subset?.(configConstraint, releaseConstraint) ??
+            versioning.matches(configConstraint, releaseConstraint))
       );
 
       if (!satisfiesConstraints) {
