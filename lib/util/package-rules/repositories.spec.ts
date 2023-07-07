@@ -40,6 +40,18 @@ describe('util/package-rules/repositories', () => {
       expect(result).toBeTrue();
     });
 
+    it('should return false if repository has invalid regex pattern', () => {
+      const result = packageNameMatcher.matches(
+        {
+          repository: 'org/repo',
+        },
+        {
+          matchRepositories: ['/[/'],
+        }
+      );
+      expect(result).toBeFalse();
+    });
+
     it('should return false if repository does not match regex pattern', () => {
       const result = packageNameMatcher.matches(
         {
@@ -124,6 +136,18 @@ describe('util/package-rules/repositories', () => {
         }
       );
       expect(result).toBeTrue();
+    });
+
+    it('should return false if exclude repository has invalid regex pattern', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: 'org/repo',
+        },
+        {
+          excludeRepositories: ['/[/'],
+        }
+      );
+      expect(result).toBeFalse();
     });
 
     it('should return false if exclude repository does not match regex pattern', () => {

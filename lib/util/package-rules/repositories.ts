@@ -55,10 +55,15 @@ function isRegexAndMatches(repoPattern: string, repo: string): boolean {
 
   const repoPatternWithoutSlashes = repoPattern.slice(1, -1);
 
-  const re = regEx(massagePattern(repoPatternWithoutSlashes));
-  if (re.test(repo)) {
-    logger.trace(`${repo} matches against ${String(re)}`);
-    return true;
+  try {
+    const re = regEx(massagePattern(repoPatternWithoutSlashes));
+    if (re.test(repo)) {
+      logger.trace(`${repo} matches against ${String(re)}`);
+      return true;
+    }
+    return false;
+  } catch (error: any) {
+    logger.debug(`invalid regex provided ${repoPatternWithoutSlashes}`);
+    return false;
   }
-  return false;
 }
