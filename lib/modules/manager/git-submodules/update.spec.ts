@@ -9,24 +9,19 @@ import { updateDependency } from '.';
 
 jest.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
+const gitMock = {
+  env: jest.fn(),
+  submoduleUpdate: jest.fn(),
+  checkout: jest.fn(),
+};
 
 describe('modules/manager/git-submodules/update', () => {
-  let gitMock: jest.MockedObject<
-    Pick<SimpleGit, 'env' | 'submoduleUpdate' | 'checkout'>
-  >;
-
   beforeEach(() => {
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
     // clear host rules
     hostRules.clear();
     // clear environment variables
     process.env = {};
-    // reset git mock
-    gitMock = {
-      env: jest.fn(),
-      submoduleUpdate: jest.fn(),
-      checkout: jest.fn(),
-    };
 
     simpleGitFactoryMock.mockReturnValue(gitMock);
     gitMock.env.mockImplementation(() => gitMock as unknown as SimpleGit);
