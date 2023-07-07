@@ -25,6 +25,23 @@ export class RepositoriesMatcher extends Matcher {
         minimatch(repository, matchRepositoryName, { dot: true })
     );
   }
+
+  override excludes(
+    { repository }: PackageRuleInputConfig,
+    { excludeRepositories }: PackageRule
+  ): boolean | null {
+    if (is.undefined(excludeRepositories)) {
+      return null;
+    }
+    if (is.undefined(repository)) {
+      return false;
+    }
+    return excludeRepositories.some(
+      (matchRepositoryName) =>
+        isRegexAndMatches(matchRepositoryName, repository) ||
+        minimatch(repository, matchRepositoryName, { dot: true })
+    );
+  }
 }
 
 function isRegexAndMatches(repoPattern: string, repo: string): boolean {

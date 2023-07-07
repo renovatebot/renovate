@@ -64,13 +64,87 @@ describe('util/package-rules/repositories', () => {
       expect(result).toBeFalse();
     });
 
-    it('should return true if repository matches at least one of the matterns pattern', () => {
+    it('should return true if repository matches at least one pattern', () => {
       const result = packageNameMatcher.matches(
         {
           repository: 'org/repo-archived',
         },
         {
           matchRepositories: ['/^org/repo$/', '**/*-archived'],
+        }
+      );
+      expect(result).toBeTrue();
+    });
+  });
+
+  describe('excludes', () => {
+    it('should return false if exclude repository is not defined', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: undefined,
+        },
+        {
+          excludeRepositories: ['org/repo'],
+        }
+      );
+      expect(result).toBeFalse();
+    });
+
+    it('should return true if exclude repository matches regex pattern', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: 'org/repo',
+        },
+        {
+          excludeRepositories: ['/^org/repo$/'],
+        }
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return false if exclude repository does not match regex pattern', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: 'org/repo',
+        },
+        {
+          excludeRepositories: ['/^org/other-repo$/'],
+        }
+      );
+      expect(result).toBeFalse();
+    });
+
+    it('should return true if exclude repository matches minimatch pattern', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: 'org/repo',
+        },
+        {
+          excludeRepositories: ['org/**'],
+        }
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return false if exclude repository does not match minimatch pattern', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: 'org/repo',
+        },
+        {
+          excludeRepositories: ['other-org/**'],
+        }
+      );
+      expect(result).toBeFalse();
+    });
+
+    it('should return true if exclude repository matches at least one pattern', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          repository: 'org/repo-archived',
+        },
+        {
+          excludeRepositories: ['/^org/repo$/', '**/*-archived'],
         }
       );
       expect(result).toBeTrue();
