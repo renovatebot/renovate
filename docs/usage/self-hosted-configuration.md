@@ -484,7 +484,7 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 ## includeMirrors
 
-By default, Renovate does not operate on repositories that are mirrors.
+By default, Renovate does not autodiscover repositories that are mirrors.
 
 Change this setting to `true` to include repositories that are mirrors as Renovate targets.
 
