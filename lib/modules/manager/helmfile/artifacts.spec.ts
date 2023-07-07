@@ -24,6 +24,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -307,7 +308,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     {
       binarySource: 'docker',
       expectedCommands: [
-        { cmd: 'docker pull containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -318,10 +319,9 @@ describe('modules/manager/helmfile/artifacts', () => {
             '-e HELM_REGISTRY_CONFIG ' +
             '-e HELM_REPOSITORY_CONFIG ' +
             '-e HELM_REPOSITORY_CACHE ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'containerbase/sidecar ' +
+            'ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
             'install-tool helm v3.7.2' +
             ' && ' +

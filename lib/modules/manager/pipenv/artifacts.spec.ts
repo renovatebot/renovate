@@ -26,7 +26,7 @@ jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
@@ -36,7 +36,11 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
-const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
+const dockerAdminConfig = {
+  ...adminConfig,
+  binarySource: 'docker',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+};
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };

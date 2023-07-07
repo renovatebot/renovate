@@ -1,12 +1,11 @@
-import { logger } from '../../logger';
 import versionings from './api';
-import { isVersioningApiConstructor } from './common';
+import { Versioning } from './schema';
 import * as semverCoerced from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 
 export * from './types';
 
-const defaultVersioning = semverCoerced;
+export const defaultVersioning = semverCoerced;
 
 export const getVersioningList = (): string[] => Array.from(versionings.keys());
 /**
@@ -17,28 +16,18 @@ export const getVersionings = (): Map<
   VersioningApi | VersioningApiConstructor
 > => versionings;
 
-export function get(versioning: string | undefined): VersioningApi {
-  if (!versioning) {
-    logger.trace(
-      `Missing versioning, using ${defaultVersioning.id} as fallback.`
-    );
-    return defaultVersioning.api;
-  }
-  const [versioningName, ...versioningRest] = versioning.split(':');
-  const versioningConfig = versioningRest.length
-    ? versioningRest.join(':')
-    : undefined;
+export function get(versioning = ''): VersioningApi {
+  const res = Versioning.safeParse(versioning);
 
-  const theVersioning = versionings.get(versioningName);
-  if (!theVersioning) {
-    logger.info(
-      { versioning },
-      `Unknown versioning - defaulting to ${defaultVersioning.id}`
-    );
-    return defaultVersioning.api;
+  if (!res.success) {
+    const [issue] = res.error.issues;
+    if (issue && issue.code === 'custom' && issue.params?.error) {
+      throw issue.params.error;
+    }
+
+    // istanbul ignore next: should never happen
+    throw res.error;
   }
-  if (isVersioningApiConstructor(theVersioning)) {
-    return new theVersioning(versioningConfig);
-  }
-  return theVersioning;
+
+  return res.data;
 }

@@ -33,7 +33,7 @@ describe('modules/platform/azure/index', () => {
     jest.mock('../../../util/git');
     jest.mock('../../../util/host-rules');
     jest.mock('../../../logger');
-    jest.mock('delay');
+    jest.mock('timers/promises');
     hostRules = require('../../../util/host-rules');
     require('../../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
@@ -906,6 +906,7 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
+        targetBranch: 'new_base',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -1424,7 +1425,6 @@ describe('modules/platform/azure/index', () => {
         branchName: branchNameMock,
         id: pullRequestIdMock,
       });
-
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
       expect(res).toBeTrue();
     });
@@ -1452,12 +1452,10 @@ describe('modules/platform/azure/index', () => {
       azureHelper.getMergeMethod = jest
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
-
       const res = await azure.mergePr({
         branchName: branchNameMock,
         id: pullRequestIdMock,
       });
-
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
         expectedNumRetries + 1
       );
