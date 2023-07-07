@@ -54,6 +54,8 @@ describe('util/markdown', () => {
         '#### New Contributors\n' +
         '* @user made their first contribution in https://github.com/foo/foo/pull/2\n' +
         '#### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)' +
+        '\n' +
+        '* link to GH issue [#1234](https://github.com/some/repo/issues/1234)' +
         '\n';
 
       const expected = Fixtures.get('release-notes.txt');
