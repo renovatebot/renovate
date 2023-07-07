@@ -170,7 +170,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     });
     logger.debug(`Discovered ${res.body.length} project(s)`);
     return res.body
-      .filter((repo) => includeMirrors || !repo.mirror)
+      .filter((repo) => config?.includeMirrors || !repo.mirror)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
