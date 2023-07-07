@@ -329,7 +329,7 @@
     "strip-ansi": "6.0.1",
     "tar": "6.1.15",
     "tmp-promise": "3.0.3",
-    "ts-jest": "29.1.0",
+    "ts-jest": "29.1.1",
     "ts-node": "10.9.1",
     "type-fest": "3.12.0",
     "typescript": "5.1.6",
