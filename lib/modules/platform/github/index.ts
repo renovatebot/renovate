@@ -1,8 +1,8 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'node:url';
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -338,7 +338,7 @@ export async function createFork(
   }
   logger.info({ forkedRepo: forkedRepo.full_name }, 'Created forked repo');
   logger.debug(`Sleeping 30s after creating fork`);
-  await delay(30000);
+  await setTimeout(30000);
   return forkedRepo;
 }
 

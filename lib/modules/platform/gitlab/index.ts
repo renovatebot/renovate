@@ -1,6 +1,6 @@
 import URL from 'node:url';
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import JSON5 from 'json5';
 import semver from 'semver';
 import {
@@ -108,12 +108,16 @@ export async function initPlatform({
   try {
     if (!gitAuthor) {
       const user = (
-        await gitlabApi.getJson<{ email: string; name: string; id: number }>(
-          `user`,
-          { token }
-        )
+        await gitlabApi.getJson<{
+          email: string;
+          name: string;
+          id: number;
+          commit_email?: string;
+        }>(`user`, { token })
       ).body;
-      platformConfig.gitAuthor = `${user.name} <${user.email}>`;
+      platformConfig.gitAuthor = `${user.name} <${
+        user.commit_email ?? user.email
+      }>`;
     }
     // istanbul ignore if: experimental feature
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
@@ -613,7 +617,7 @@ async function tryPrAutomerge(
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
           break;
         }
-        await delay(500 * attempt);
+        await setTimeout(500 * attempt);
       }
 
       await gitlabApi.putJson(
@@ -701,6 +705,7 @@ export async function updatePr({
   prBody: description,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   let title = prTitle;
   if ((await getPrList()).find((pr) => pr.number === iid)?.isDraft) {
@@ -711,15 +716,19 @@ export async function updatePr({
     ['open']: 'reopen',
     // TODO: null check (#7154)
   }[state!];
+
+  const body: any = {
+    title,
+    description: sanitize(description),
+    ...(newState && { state_event: newState }),
+  };
+  if (targetBranch) {
+    body.target_branch = targetBranch;
+  }
+
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        ...(newState && { state_event: newState }),
-      },
-    }
+    { body }
   );
 
   await tryPrAutomerge(iid, platformOptions);
@@ -857,7 +866,7 @@ export async function setBranchStatus({
   }
   try {
     // give gitlab some time to create pipelines for the sha
-    await delay(1000);
+    await setTimeout(1000);
 
     await gitlabApi.postJson(url, { body: options });
 
