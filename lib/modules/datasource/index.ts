@@ -409,6 +409,9 @@ function applyConstraintsFiltering<
   >
 >(config: Config, releaseResult: ReleaseResult): void {
   if (config?.constraintsFiltering !== 'strict') {
+    for (const release of releaseResult.releases) {
+      delete release.constraints;
+    }
     return;
   }
 
@@ -420,12 +423,15 @@ function applyConstraintsFiltering<
   const configConstraints = config.constraints ?? {};
   // Filter releases for compatibility
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    const releaseConstraints = release.constraints;
+    delete release.constraints;
+
     for (const [name, configConstraint] of Object.entries(configConstraints)) {
       if (!version.isValid(configConstraint)) {
         continue;
       }
 
-      const constraint = release.constraints?.[name];
+      const constraint = releaseConstraints?.[name];
       if (!is.nonEmptyArray(constraint)) {
         // A release with no constraints is OK
         continue;
@@ -446,7 +452,6 @@ function applyConstraintsFiltering<
       }
     }
 
-    delete release.constraints;
     return release;
   });
 
