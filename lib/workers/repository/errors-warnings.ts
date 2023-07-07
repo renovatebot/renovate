@@ -55,6 +55,9 @@ function getDepWarnings(
       }
     }
   }
+  if (warnings.length) {
+    logger.warn({ warnings, files: warningFiles }, 'Package lookup failures');
+  }
   return { warnings, warningFiles };
 }
 
@@ -70,7 +73,6 @@ export function getDepWarningsOnboardingPR(
   if (!warnings.length) {
     return '';
   }
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -90,7 +92,7 @@ export function getDepWarningsPR(
   config: RenovateConfig,
   dependencyDashboard?: boolean
 ): string {
-  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  const { warnings } = getDepWarnings(packageFiles);
   if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
     return '';
   }
@@ -98,7 +100,6 @@ export function getDepWarningsPR(
   if (!warnings.length) {
     return '';
   }
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -130,7 +131,6 @@ export function getDepWarningsDashboard(
     .map((dep) => '`' + dep + '`')
     .join(', ');
 
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   let warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
