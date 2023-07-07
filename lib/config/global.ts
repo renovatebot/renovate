@@ -28,7 +28,6 @@ export class GlobalConfig {
     'gitTimeout',
     'platform',
     'endpoint',
-    'includeMirrors',
   ];
 
   private static config: RepoGlobalConfig = {};
