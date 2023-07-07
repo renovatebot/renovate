@@ -31,7 +31,7 @@ describe('modules/platform/gitlab/index', () => {
     jest.mock('../../../logger');
     logger = (await import('../../../logger')).logger as never;
     jest.mock('../../../util/host-rules');
-    jest.mock('delay');
+    jest.mock('timers/promises');
     hostRules = require('../../../util/host-rules');
     jest.mock('../../../util/git');
     git = require('../../../util/git');
@@ -2187,6 +2187,35 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200);
       await expect(
         gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
+      ).toResolve();
+    });
+
+    it('updates target branch of the PR', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'open',
+            target_branch: 'branch-b',
+          },
+        ])
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      await expect(
+        gitlab.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          state: 'closed',
+          targetBranch: 'branch-b',
+        })
       ).toResolve();
     });
 

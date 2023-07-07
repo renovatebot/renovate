@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import {
   GitPullRequest,
@@ -8,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import delay from 'delay';
 import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,
@@ -48,7 +48,6 @@ import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
@@ -57,7 +56,6 @@ import {
 
 interface Config {
   repoForceRebase: boolean;
-  defaultMergeMethod: GitPullRequestMergeStrategy;
   mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
@@ -202,14 +200,6 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-  const names = getProjectAndRepo(repository);
-  config.defaultMergeMethod = await azureHelper.getMergeMethod(
-    // TODO #7154
-    repo.id!,
-    names.project,
-    null,
-    defaultBranch
-  );
   config.mergeMethods = {};
   config.repoForceRebase = false;
 
@@ -427,6 +417,20 @@ export async function getBranchStatus(
   return 'green';
 }
 
+async function getMergeStrategy(
+  targetRefName: string
+): Promise<GitPullRequestMergeStrategy> {
+  return (
+    config.mergeMethods[targetRefName] ??
+    (config.mergeMethods[targetRefName] = await azureHelper.getMergeMethod(
+      config.repoId,
+      config.project,
+      targetRefName,
+      config.defaultBranch
+    ))
+  );
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -457,6 +461,7 @@ export async function createPr({
     config.repoId
   );
   if (platformOptions?.usePlatformAutomerge) {
+    const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -464,7 +469,7 @@ export async function createPr({
           id: pr.createdBy!.id,
         },
         completionOptions: {
-          mergeStrategy: config.defaultMergeMethod,
+          mergeStrategy,
           deleteSourceBranch: true,
           mergeCommitMessage: title,
         },
@@ -509,6 +514,7 @@ export async function updatePr({
   prBody: body,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -517,13 +523,19 @@ export async function updatePr({
     title,
   };
 
+  if (targetBranch) {
+    objToUpdate.targetRefName = getNewBranchName(targetBranch);
+  }
+
   if (body) {
     objToUpdate.description = max4000Chars(sanitize(body));
   }
 
   if (state === 'open') {
     await azureApiGit.updatePullRequest(
-      { status: PullRequestStatus.Active },
+      {
+        status: PullRequestStatus.Active,
+      },
       config.repoId,
       prNo
     );
@@ -700,21 +712,12 @@ export async function mergePr({
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
-  // TODO #7154
-  const mergeMethod =
-    config.mergeMethods[pr.targetRefName!] ??
-    (config.mergeMethods[pr.targetRefName!] = await azureHelper.getMergeMethod(
-      config.repoId,
-      config.project,
-      pr.targetRefName,
-      config.defaultBranch
-    ));
-
+  const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,
     completionOptions: {
-      mergeStrategy: mergeMethod,
+      mergeStrategy,
       deleteSourceBranch: true,
       mergeCommitMessage: pr.title,
     },
@@ -727,8 +730,8 @@ export async function mergePr({
       // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
-    } using mergeStrategy ${mergeMethod} (${
-      GitPullRequestMergeStrategy[mergeMethod]
+    } using mergeStrategy ${mergeStrategy} (${
+      GitPullRequestMergeStrategy[mergeStrategy]
     })`
   );
 
@@ -749,7 +752,7 @@ export async function mergePr({
         `Updated PR to closed status but change has not taken effect yet. Retrying...`
       );
 
-      await delay(sleepMs);
+      await setTimeout(sleepMs);
       pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
       isClosed = pr.status === PullRequestStatus.Completed;
     }

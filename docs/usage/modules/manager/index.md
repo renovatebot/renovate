@@ -52,7 +52,7 @@ Renovate will _extend_ the existing [`fileMatch`](/configuration-options/#filema
 In other words, the regular expression are "additive".
 If a manager matches a file that you _don't_ want it to, ignore it using the [`ignorePaths`](/configuration-options/#ignorepaths) configuration option.
 Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, check your preset config isn't the cause of it.
-The `config:base` preset ignores common test and example directory names, for example.
+The `config:recommended` preset ignores common test and example directory names, for example.
 
 ### Enabling and disabling managers
 
@@ -82,17 +82,6 @@ To disable a specific manager like `gradle`, do this:
 }
 ```
 
-To disable all managers within a language like `python`, do this:
-
-```json
-{
-  "python": {
-    "enabled": false
-  }
-}
-```
-
-Only languages declared by a Renovate manager are supported.
 Please check the [list of supported managers](https://docs.renovatebot.com/modules/manager/#supported-managers).
 
 #### Limiting enabled managers

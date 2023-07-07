@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import * as rubyVersioning from '../../versioning/ruby';
@@ -6,7 +6,6 @@ import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateLockedDependency } from './update-locked';
 
-export const language: ProgrammingLanguage = 'ruby';
 export const supportsLockFileMaintenance = true;
 
 /*
@@ -24,6 +23,8 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Gemfile$'],
   versioning: rubyVersioning.id,
 };
+
+export const categories: Category[] = ['ruby'];
 
 export const supportedDatasources = [
   RubyGemsDatasource.id,

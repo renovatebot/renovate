@@ -128,7 +128,7 @@ export interface RepoGlobalConfig {
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
-  dockerImagePrefix?: string;
+  dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
   executionTimeout?: number;
@@ -265,7 +265,7 @@ export interface RenovateConfig
   vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
-  fetchReleaseNotes?: boolean;
+  fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
@@ -306,6 +306,8 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
+export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
+
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
 export type MergeStrategy =
@@ -322,9 +324,7 @@ export interface PackageRule
     Record<string, unknown> {
   description?: string | string[];
   isVulnerabilityAlert?: boolean;
-  matchFiles?: string[];
-  matchPaths?: string[];
-  matchLanguages?: string[];
+  matchFileNames?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
   matchDatasources?: string[];
@@ -344,6 +344,7 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchCategories?: string[];
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
@@ -468,6 +469,7 @@ export type RenovateOptions =
 export interface PackageRuleInputConfig extends Record<string, unknown> {
   versioning?: string;
   packageFile?: string;
+  lockFiles?: string[];
   depType?: string;
   depTypes?: string[];
   depName?: string;
@@ -479,7 +481,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
-  language?: string;
+  categories?: string[];
   baseBranch?: string;
   manager?: string;
   datasource?: string;
@@ -507,7 +509,6 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
-  language?: string | null;
 }
 
 export interface ValidationResult {

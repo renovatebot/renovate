@@ -1,4 +1,4 @@
-import delay from 'delay';
+import { setTimeout } from 'timers/promises';
 import fs from 'fs-extra';
 import _simpleGit, { SimpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
@@ -30,7 +30,7 @@ function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
     .mockImplementation(
       async (_registryUrl: string, clonePath: string, _opts) => {
         if (delayMs && delayMs > 0) {
-          await delay(delayMs);
+          await setTimeout(delayMs);
         }
 
         const path = `${clonePath}/my/pk/mypkg`;

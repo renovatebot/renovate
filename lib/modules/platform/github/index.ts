@@ -1,8 +1,8 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'node:url';
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -338,7 +338,7 @@ export async function createFork(
   }
   logger.info({ forkedRepo: forkedRepo.full_name }, 'Created forked repo');
   logger.debug(`Sleeping 30s after creating fork`);
-  await delay(30000);
+  await setTimeout(30000);
   return forkedRepo;
 }
 
@@ -1192,7 +1192,7 @@ export async function ensureIssue({
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
-          logger.warn(`Closing duplicate issue ${i.number}`);
+          logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
           // TODO #7154
           await closeIssue(i.number!);
         }
@@ -1693,7 +1693,10 @@ export async function mergePr({
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${config.mergeMethod} merge PR`);
+        logger.warn(
+          { mergeMethod: config.mergeMethod, err },
+          'Failed to merge PR'
+        );
         return false;
       }
     }
