@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
-import type { Release, ReleaseResult } from '../types';
-import { newlineRegex } from '../../../util/regex';
 import { filterMap } from '../../../util/filter-map';
+import { newlineRegex } from '../../../util/regex';
+import { LooseArray } from '../../../util/schema-utils';
+import type { Release } from '../types';
 
 export const MarshalledVersionInfo = LooseArray(
   z
