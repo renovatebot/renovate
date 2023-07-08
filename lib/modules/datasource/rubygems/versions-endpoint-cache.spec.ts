@@ -254,6 +254,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
             1.1.1 |checksum:aaa
             2.2.2 |checksum:bbb
             3.3.3 |checksum:ccc
+
           `
         );
 
