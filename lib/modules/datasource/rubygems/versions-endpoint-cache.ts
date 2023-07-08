@@ -6,7 +6,8 @@ import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
 import { copystr } from '../../../util/string';
-import { parseUrl } from '../../../util/url';
+import { joinUrlParts, parseUrl } from '../../../util/url';
+import { GemInfo } from './schema';
 
 interface VersionsEndpointUnsupported {
   versionsEndpointSupported: false;
@@ -164,10 +165,29 @@ export class VersionsEndpointCache {
     return newCache;
   }
 
+  async getInfo(
+    registryUrl: string,
+    packageName: string
+  ): Promise<VersionsResult> {
+    try {
+      const url = joinUrlParts(registryUrl, '/info', packageName);
+      const { body } = await this.http.get(url);
+      const versions = GemInfo.parse(body);
+      return { type: 'success', versions };
+    } catch (err) {
+      return { type: 'not-supported' };
+    }
+  }
+
   async getVersions(
     registryUrl: string,
     packageName: string
   ): Promise<VersionsResult> {
+    const registryHostname = parseUrl(registryUrl)?.hostname;
+    if (registryHostname !== 'rubygems.org') {
+      return this.getInfo(registryUrl, packageName);
+    }
+
     /**
      * Ensure that only one request for a given registryUrl is in flight at a time.
      */

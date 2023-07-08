@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
-import type { Release } from '../types';
+import type { Release, ReleaseResult } from '../types';
+import { newlineRegex } from '../../../util/regex';
+import { filterMap } from '../../../util/filter-map';
 
 export const MarshalledVersionInfo = LooseArray(
   z
@@ -95,3 +97,11 @@ export const GemVersions = LooseArray(
     )
 );
 export type GemVersions = z.infer<typeof GemVersions>;
+
+export const GemInfo = z.string().transform((body): string[] =>
+  filterMap(body.split(newlineRegex), (line) => {
+    const spaceIdx = line.indexOf(' ');
+    return spaceIdx > 0 ? line.slice(0, spaceIdx) : null;
+  })
+);
+export type GemInfo = z.infer<typeof GemInfo>;

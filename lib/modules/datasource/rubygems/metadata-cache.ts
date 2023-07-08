@@ -1,5 +1,4 @@
 import hasha from 'hasha';
-import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
@@ -63,7 +62,6 @@ export class MetadataCache {
       );
       return data;
     } catch (err) {
-      logger.debug({ err }, 'Rubygems: failed to fetch metadata');
       const releases = versions.map((version) => ({ version }));
       return { releases };
     }

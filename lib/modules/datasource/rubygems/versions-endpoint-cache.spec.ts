@@ -241,4 +241,37 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       });
     });
   });
+
+  describe('Non-rubygems registry', () => {
+    it('tries /info/:package', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/info/foo')
+        .reply(
+          200,
+          codeBlock`
+            ---
+            1.1.1 |checksum:aaa
+            2.2.2 |checksum:bbb
+            3.3.3 |checksum:ccc
+          `
+        );
+
+      const res = await rubygems.getVersions('https://example.com', 'foo');
+
+      expect(res).toEqual({
+        type: 'success',
+        versions: ['1.1.1', '2.2.2', '3.3.3'],
+      });
+    });
+
+    it('handles errors', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/info/foo')
+        .replyWithError('Unknown error');
+      const res = await rubygems.getVersions('https://example.com', 'foo');
+      expect(res).toEqual({ type: 'not-supported' });
+    });
+  });
 });
