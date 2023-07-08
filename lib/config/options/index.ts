@@ -993,6 +993,17 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchCurrentAge',
+    description:
+      'List of categories to match (for example: `["python"]`). Valid only within a `packageRules` object.',
+    type: 'string',
+    parent: 'packageRules',
+    stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchCategories',
     description:
       'List of categories to match (for example: `["python"]`). Valid only within a `packageRules` object.',

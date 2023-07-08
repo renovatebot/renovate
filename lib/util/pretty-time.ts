@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import ms from 'ms';
 import { logger } from '../logger';
 import { regEx } from './regex';
+import { DateTime } from 'luxon';
 
 const splitRegex = regEx(/(.*?[a-z]+)/);
 
@@ -37,6 +38,31 @@ export function toMs(time: string): number | null {
     return totalMillis;
   } catch (err) {
     logger.debug({ time, err }, `Invalid time specifier: '${time}'`);
+    return null;
+  }
+}
+
+export function satisfiesRange(date: string, range: string): boolean | null {
+  const operator = range.trim()[1] === '=' ? range.slice(0, 2) : range[0];
+  const dateMs =
+    typeof date === 'string'
+      ? DateTime.fromISO(date).toMillis()
+      : DateTime.fromJSDate(date).toMillis();
+  try {
+    switch (operator) {
+      case '>':
+        return dateMs > toMs(range)!;
+      case '>=':
+        return dateMs >= toMs(range)!;
+      case '<':
+        return dateMs < toMs(range)!;
+      case '<=':
+        return dateMs <= toMs(range)!;
+      case '=':
+        return dateMs === toMs(range)!;
+    }
+    return null;
+  } catch (err) {
     return null;
   }
 }

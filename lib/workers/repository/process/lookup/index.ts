@@ -119,7 +119,6 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioning.isVersion(release.version)
       );
-
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -205,6 +204,15 @@ export async function lookupUpdates(
         return res;
       }
       res.currentVersion = currentVersion!;
+
+      // Reapply package rules to check matches for matchCurrentAge
+      const currentVersionRelease = allVersions.find(
+        (version) => version.version === currentVersion
+      );
+      config = applyPackageRules({
+        ...config,
+        releaseTimestamp: currentVersionRelease?.releaseTimestamp,
+      });
       if (
         currentValue &&
         currentVersion &&

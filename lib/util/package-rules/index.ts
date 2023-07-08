@@ -90,6 +90,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
       delete config.matchDepTypes;
       delete config.matchCurrentValue;
       delete config.matchCurrentVersion;
+      delete config.matchCurrentAge;
     }
   }
   return config;

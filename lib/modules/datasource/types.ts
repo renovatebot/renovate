@@ -55,6 +55,7 @@ export interface Release {
   registryUrl?: string;
   sourceUrl?: string | undefined;
   sourceDirectory?: string;
+  currentAge?: string;
 }
 
 export interface ReleaseResult {

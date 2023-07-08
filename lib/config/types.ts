@@ -3,6 +3,7 @@ import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
+import type { Release } from '../modules/datasource';
 
 export type RenovateConfigStage =
   | 'global'
@@ -323,6 +324,7 @@ export interface PackageRule
   matchFileNames?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
+  matchCurrentAge?: string;
   matchDatasources?: string[];
   matchDepTypes?: string[];
   matchDepNames?: string[];
@@ -482,6 +484,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  releaseTimestamp?: string | null;
 }
 
 export interface ConfigMigration {
