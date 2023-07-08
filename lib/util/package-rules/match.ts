@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { minimatch } from 'minimatch';
 import { logger } from '../../logger';
 import { regEx } from '../regex';
@@ -16,8 +17,14 @@ export function matchRegexOrMinimatch(pattern: string, input: string): boolean {
 }
 
 export function anyMatchRegexOrMinimatch(
-  patterns: string[],
-  input: string
-): boolean {
+  patterns: string[] | undefined,
+  input: string | undefined
+): boolean | null {
+  if (is.undefined(patterns)) {
+    return null;
+  }
+  if (is.undefined(input)) {
+    return false;
+  }
   return patterns.some((pattern) => matchRegexOrMinimatch(pattern, input));
 }
