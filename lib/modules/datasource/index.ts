@@ -385,6 +385,7 @@ function sortAndRemoveDuplicates<
     versioning.sortVersions(a.version, b.version)
   );
 
+  // Once releases are sorted, deduplication is straightforward and efficient
   let previousVersion: string | null = null;
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
     if (previousVersion === release.version) {
