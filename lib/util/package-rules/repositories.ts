@@ -4,6 +4,7 @@ import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { regEx } from '../regex';
 import { Matcher } from './base';
+import { anyMatchRegexOrMinimatch } from './match';
 import { massagePattern } from './utils';
 
 export class RepositoriesMatcher extends Matcher {
@@ -19,11 +20,7 @@ export class RepositoriesMatcher extends Matcher {
       return false;
     }
 
-    return matchRepositories.some(
-      (matchRepositoryName) =>
-        isRegexAndMatches(matchRepositoryName, repository) ||
-        minimatch(repository, matchRepositoryName, { dot: true })
-    );
+    return anyMatchRegexOrMinimatch(matchRepositories, repository);
   }
 
   override excludes(
