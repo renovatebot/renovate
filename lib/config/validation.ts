@@ -319,6 +319,7 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
