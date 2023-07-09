@@ -50,8 +50,8 @@ describe('util/pretty-time', () => {
       date                                  | range         | expected
       ${'2020-01-01'}                       | ${'< 1 year'} | ${false}
       ${'2020-01-01'}                       | ${'> 1 year'} | ${true}
-      ${'2020-01-01'}                       | ${'<1year'}   | ${false}
-      ${'2020-01-01'}                       | ${'> 1year'}  | ${true}
+      ${'2020-01-01'}                       | ${'<=1year'}  | ${false}
+      ${'2020-01-01'}                       | ${'>= 1year'} | ${true}
       ${'2020-01-01'}                       | ${'< 1year'}  | ${false}
       ${new Date(Date.now()).toISOString()} | ${'< 1 year'} | ${true}
       ${new Date(Date.now()).toISOString()} | ${'> 1 year'} | ${false}
