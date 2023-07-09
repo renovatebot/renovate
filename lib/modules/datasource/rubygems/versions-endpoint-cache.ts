@@ -150,7 +150,7 @@ export class VersionsEndpointCache {
       return newResult;
     }
 
-    if (oldResult.res.success === false) {
+    if (!oldResult.res.success) {
       return oldResult;
     }
 
@@ -184,7 +184,7 @@ export class VersionsEndpointCache {
     }
     const { res } = cachedResult;
 
-    if (res.success === false) {
+    if (!res.success) {
       logger.debug(
         { packageName, registryUrl },
         'Rubygems: endpoint not supported'
