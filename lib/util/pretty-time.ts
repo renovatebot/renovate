@@ -42,30 +42,37 @@ export function toMs(time: string): number | null {
   }
 }
 
-const rangeRegex = regEx(/^(?<operator>>|<|>=|<=)\s*(?<age>.*)/);
+const rangeRegex = regEx(/^(?<operator>(>=|<=|<|>))\s*(?<age>.*)/);
 
 export function satisfiesRange(date: string, range: string): boolean | null {
   const grps = range.trim().match(rangeRegex)?.groups;
   if (!grps) {
     return null;
   }
+
   const { operator, age } = grps;
   const dateMs =
     typeof date === 'string'
       ? DateTime.fromISO(date).toMillis()
       : DateTime.fromJSDate(date).toMillis();
-  const ageMs = Date.now() - toMs(age)!;
+  const ageMs = toMs(age);
+  if (!ageMs || !dateMs) {
+    return null;
+  }
+
+  const rangeMs = Date.now() - ageMs;
 
   switch (operator) {
     case '>':
-      return dateMs < ageMs;
+      return dateMs < rangeMs;
     case '>=':
-      return dateMs <= ageMs;
+      return dateMs <= rangeMs;
     case '<':
-      return dateMs > ageMs;
+      return dateMs > rangeMs;
     case '<=':
-      return dateMs >= ageMs;
+      return dateMs >= rangeMs;
+    // istanbul ignore if
     default:
-      return dateMs === ageMs;
+      return dateMs === rangeMs;
   }
 }

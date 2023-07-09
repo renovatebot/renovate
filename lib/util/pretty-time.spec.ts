@@ -47,27 +47,22 @@ describe('util/pretty-time', () => {
 
   describe('satisfiesRange()', () => {
     it.each`
-      date                                  | range         | expected
-      ${'2020-01-01'}                       | ${'< 1 year'} | ${false}
-      ${'2020-01-01'}                       | ${'> 1 year'} | ${true}
-      ${'2020-01-01'}                       | ${'<=1year'}  | ${false}
-      ${'2020-01-01'}                       | ${'>= 1year'} | ${true}
-      ${'2020-01-01'}                       | ${'< 1year'}  | ${false}
-      ${new Date(Date.now()).toISOString()} | ${'< 1 year'} | ${true}
-      ${new Date(Date.now()).toISOString()} | ${'> 1 year'} | ${false}
+      date                                  | range              | expected
+      ${'2020-01-01'}                       | ${'< 1 year'}      | ${false}
+      ${'2020-01-01'}                       | ${'> 1 year'}      | ${true}
+      ${'2020-01-01'}                       | ${'<=1year'}       | ${false}
+      ${'2020-01-01'}                       | ${'>= 1year'}      | ${true}
+      ${'2020-01-01'}                       | ${'< 1year'}       | ${false}
+      ${new Date(Date.now()).toISOString()} | ${'< 1 year'}      | ${true}
+      ${new Date(Date.now()).toISOString()} | ${'> 1 year'}      | ${false}
+      ${'2020-01-01'}                       | ${'> 1 millenial'} | ${null}
+      ${'invalid-date'}                     | ${'> 1 year'}      | ${null}
+      ${'2020-01-01'}                       | ${'1 year'}        | ${null}
     `(
       `satisfiesRange('$date', '$range') === $expected`,
       ({ date, range, expected }) => {
         expect(satisfiesRange(date, range)).toBe(expected);
       }
     );
-
-    it('returns null when range is not correct', () => {
-      expect(satisfiesRange('2020-01-01', '== 2years')).toBeNull();
-    });
-
-    it('returns false when date is invalid', () => {
-      expect(satisfiesRange('somde date', '> 2years')).toBeFalse();
-    });
   });
 });
