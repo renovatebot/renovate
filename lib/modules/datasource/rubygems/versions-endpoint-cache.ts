@@ -85,6 +85,16 @@ type VersionsEndpointResult = Result<VersionsEndpointData, 'unsupported-api'>;
 
 export const memCache = new Map<string, VersionsEndpointResult>();
 
+function cacheResult(
+  registryUrl: string,
+  result: VersionsEndpointResult
+): void {
+  const registryHostname = parseUrl(registryUrl)?.hostname;
+  if (registryHostname === 'rubygems.org') {
+    memCache.set(registryUrl, result);
+  }
+}
+
 const VersionLines = z
   .string()
   .transform((x) => x.split(newlineRegex))
@@ -128,16 +138,6 @@ export class VersionsEndpointCache {
 
   private cacheRequests = new Map<string, Promise<VersionsEndpointResult>>();
 
-  private static cacheResult(
-    registryUrl: string,
-    result: VersionsEndpointResult
-  ): void {
-    const registryHostname = parseUrl(registryUrl)?.hostname;
-    if (registryHostname === 'rubygems.org') {
-      memCache.set(registryUrl, result);
-    }
-  }
-
   /**
    * At any given time, there should only be one request for a given registryUrl.
    */
@@ -146,7 +146,7 @@ export class VersionsEndpointCache {
 
     if (!oldResult) {
       const newResult = await this.fullSync(registryUrl);
-      VersionsEndpointCache.cacheResult(registryUrl, newResult);
+      cacheResult(registryUrl, newResult);
       return newResult;
     }
 
@@ -157,7 +157,7 @@ export class VersionsEndpointCache {
     if (isStale(oldResult.res.value)) {
       memCache.delete(registryUrl); // If no error is thrown, we'll re-set the cache
       const newResult = await this.deltaSync(oldResult.res.value, registryUrl);
-      VersionsEndpointCache.cacheResult(registryUrl, newResult);
+      cacheResult(registryUrl, newResult);
       return newResult;
     }
 
