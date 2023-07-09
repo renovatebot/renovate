@@ -169,7 +169,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     });
     logger.debug(`Discovered ${res.body.length} project(s)`);
     return res.body
-      .filter((repo) => !repo.mirror)
+      .filter((repo) => !repo.mirror || config?.includeMirrors)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
@@ -267,6 +267,7 @@ export async function initRepo({
   ignorePrAuthor,
   gitUrl,
   endpoint,
+  includeMirrors,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -284,7 +285,8 @@ export async function initRepo({
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
-    if (res.body.mirror) {
+
+    if (res.body.mirror && includeMirrors !== true) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation'
       );

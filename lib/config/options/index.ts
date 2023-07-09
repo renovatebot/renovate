@@ -442,6 +442,15 @@ const options: RenovateOptions[] = [
     default: 'auto',
   },
   {
+    name: 'includeMirrors',
+    description:
+      'Whether to process repositories that are mirrors. By default, repositories that are mirrors are skipped.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+    globalOnly: true,
+  },
+  {
     name: 'forkToken',
     description: 'Set a personal access token here to enable "fork mode".',
     stage: 'repository',

@@ -143,6 +143,7 @@ export interface RepoGlobalConfig {
   containerbaseDir?: string;
   platform?: PlatformId;
   endpoint?: string;
+  includeMirrors?: boolean;
 }
 
 export interface LegacyAdminConfig {
