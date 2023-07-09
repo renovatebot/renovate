@@ -44,7 +44,10 @@ export function toMs(time: string): number | null {
 
 const rangeRegex = regEx(/^(?<operator>(>=|<=|<|>))\s*(?<age>.*)/);
 
-export function satisfiesRange(date: string, range: string): boolean | null {
+export function satisfiesDateRange(
+  date: string,
+  range: string
+): boolean | null {
   const grps = range.trim().match(rangeRegex)?.groups;
   if (!grps) {
     return null;

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { satisfiesRange } from '../pretty-time';
+import { satisfiesDateRange } from '../pretty-time';
 import { Matcher } from './base';
 
 export class CurrentAgeMatcher extends Matcher {
@@ -12,6 +12,6 @@ export class CurrentAgeMatcher extends Matcher {
       return null;
     }
 
-    return satisfiesRange(releaseTimestamp, matchCurrentAge);
+    return satisfiesDateRange(releaseTimestamp, matchCurrentAge);
   }
 }
