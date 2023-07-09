@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import ms from 'ms';
 import { logger } from '../logger';
 import { regEx } from './regex';
-import { DateTime } from 'luxon';
 
 const splitRegex = regEx(/(.*?[a-z]+)/);
 

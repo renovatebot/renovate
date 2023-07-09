@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { Matcher } from './base';
 import { satisfiesRange } from '../pretty-time';
+import { Matcher } from './base';
 
 export class CurrentAgeMatcher extends Matcher {
   override matches(
