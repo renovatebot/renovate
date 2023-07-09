@@ -1,4 +1,4 @@
-import { satisfiesRange, toMs } from './pretty-time';
+import { satisfiesDateRange, toMs } from './pretty-time';
 
 describe('util/pretty-time', () => {
   it.each`
@@ -45,7 +45,7 @@ describe('util/pretty-time', () => {
     expect(toMs(null as never)).toBeNull();
   });
 
-  describe('satisfiesRange()', () => {
+  describe('satisfiesDateRange()', () => {
     it.each`
       date                                  | range              | expected
       ${'2020-01-01'}                       | ${'< 1 year'}      | ${false}
@@ -61,7 +61,7 @@ describe('util/pretty-time', () => {
     `(
       `satisfiesRange('$date', '$range') === $expected`,
       ({ date, range, expected }) => {
-        expect(satisfiesRange(date, range)).toBe(expected);
+        expect(satisfiesDateRange(date, range)).toBe(expected);
       }
     );
   });
