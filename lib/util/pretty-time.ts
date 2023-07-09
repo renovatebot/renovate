@@ -54,10 +54,7 @@ export function satisfiesDateRange(
   }
 
   const { operator, age } = grps;
-  const dateMs =
-    typeof date === 'string'
-      ? DateTime.fromISO(date).toMillis()
-      : DateTime.fromJSDate(date).toMillis();
+  const dateMs = DateTime.fromISO(date).toMillis();
   const ageMs = toMs(age);
   if (!ageMs || !dateMs) {
     return null;
