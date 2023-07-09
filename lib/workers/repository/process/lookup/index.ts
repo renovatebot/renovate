@@ -19,6 +19,7 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error'
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
+import { Result } from '../../../../util/result';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -30,7 +31,6 @@ import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
 } from './utils';
-import { Result } from '../../../../util/result';
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig
