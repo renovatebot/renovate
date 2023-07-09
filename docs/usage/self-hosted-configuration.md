@@ -103,6 +103,8 @@ RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
 }
 ```
 
+The search for repositories is case-insensitive.
+
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
