@@ -71,7 +71,7 @@ export function satisfiesRange(date: string, range: string): boolean | null {
       return dateMs > rangeMs;
     case '<=':
       return dateMs >= rangeMs;
-    // istanbul ignore if
+    // istanbul ignore next
     default:
       return dateMs === rangeMs;
   }
