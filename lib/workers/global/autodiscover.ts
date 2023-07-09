@@ -105,7 +105,7 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
       }
       res = repos.filter(autodiscoveryPred);
     } else {
-      res = repos.filter(minimatch.filter(filter));
+      res = repos.filter(minimatch.filter(filter, { nocase: true }));
     }
     for (const repository of res) {
       matched.add(repository);
