@@ -1,10 +1,10 @@
 interface Ok<T> {
-  readonly ok: true;
+  readonly success: true;
   readonly value: T;
 }
 
 interface Err<E> {
-  readonly ok: false;
+  readonly success: false;
   readonly error: E;
 }
 
@@ -12,18 +12,18 @@ type Res<T, E> = Ok<T> | Err<E>;
 
 export class Result<T, E = Error> {
   static ok<T>(value: T): Result<T, never> {
-    return new Result({ ok: true, value });
+    return new Result({ success: true, value });
   }
 
   static err(): Result<never, true>;
   static err<E>(e: E): Result<never, E>;
   static err<E>(e?: E): Result<never, E> | Result<never, true> {
     if (typeof e === 'undefined' && arguments.length === 0) {
-      return new Result({ ok: false, error: true });
+      return new Result({ success: false, error: true });
     }
 
     const error = e as E;
-    return new Result({ ok: false, error });
+    return new Result({ success: false, error });
   }
 
   private static wrapCallback<T>(callback: () => T): Result<T> {
@@ -54,20 +54,20 @@ export class Result<T, E = Error> {
   private constructor(public readonly res: Res<T, E>) {}
 
   transform<U>(fn: (value: T) => U): Result<U, E> {
-    return this.res.ok
+    return this.res.success
       ? Result.ok(fn(this.res.value))
       : Result.err(this.res.error);
   }
 
   catch<U>(fallback: U): T | U {
-    return this.res.ok ? this.res.value : fallback;
+    return this.res.success ? this.res.value : fallback;
   }
 
   get value(): T | undefined {
-    return this.res.ok ? this.res.value : undefined;
+    return this.res.success ? this.res.value : undefined;
   }
 
   get error(): E | undefined {
-    return this.res.ok ? undefined : this.res.error;
+    return this.res.success ? undefined : this.res.error;
   }
 }

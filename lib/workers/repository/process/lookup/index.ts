@@ -84,7 +84,7 @@ export async function lookupUpdates(
         return res;
       }
       const { res: lookupResult } = await Result.wrap(getPkgReleases(config));
-      if (!lookupResult.ok) {
+      if (!lookupResult.success) {
         throw lookupResult.error;
       }
       dependency = clone(lookupResult.value);
