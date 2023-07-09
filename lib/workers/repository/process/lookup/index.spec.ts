@@ -1885,6 +1885,46 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('handles current age packageRules with version restrictions', async () => {
+      config.packageName = 'openjdk';
+      config.currentValue = '17.0.0';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.packageRules = [
+        {
+          matchCurrentAge: '> 1 day',
+          allowedVersions: '< 19.0.0',
+        },
+      ];
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+            // a day old release
+            releaseTimestamp: new Date(
+              Date.now() - 25 * 60 * 60 * 1000
+            ).toISOString(),
+          },
+          {
+            version: '18.0.0',
+          },
+          {
+            version: '19.0.0',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+      ]);
+    });
+
     it('handles replacements - name only without pinDigests enabled', async () => {
       config.packageName = 'openjdk';
       config.currentValue = '17.0.0';
