@@ -1949,8 +1949,9 @@ Use the syntax `!/ /` like the following:
 
 ### matchCurrentAge
 
-Use this field if you want to limit a `packageRule` to package with certain age.
-Eg. If you want to group packages which are older than 2 months ie. haven't been updated formore than 2 months
+Use this field if you want to match packages that lie in a certain age range.
+
+For Eg. If you want to group packages which are older than 2 months
 
 ```json
 {
