@@ -349,6 +349,7 @@ const options: RenovateOptions[] = [
     description: 'Defines custom datasources for usage by managers',
     type: 'object',
     experimental: true,
+    experimentalIssues: [23286],
     default: {},
   },
   {
