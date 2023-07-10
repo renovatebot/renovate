@@ -57,6 +57,12 @@ describe('modules/manager/git-submodules/extract', () => {
       expect(res?.deps[0].currentValue).toBe('main');
     });
 
+    it('default to master if no branch can be detected', async () => {
+      const res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('master');
+    });
+
     it('given branch is used when branch is specified', async () => {
       const res = await extractPackageFile('', '.gitmodules.3', {});
       expect(res?.deps).toHaveLength(1);
