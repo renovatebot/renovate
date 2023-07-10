@@ -122,7 +122,7 @@ describe('modules/versioning/debian/index', () => {
     ${'stretch'}      | ${true}
     ${'buster'}       | ${true}
     ${'bullseye'}     | ${true}
-    ${'bookworm'}     | ${false}
+    ${'bookworm'}     | ${true}
     ${'trixie'}       | ${false}
     ${'sid'}          | ${false}
     ${'1.1'}          | ${false}
@@ -140,7 +140,7 @@ describe('modules/versioning/debian/index', () => {
     ${'9'}            | ${true}
     ${'10'}           | ${true}
     ${'11'}           | ${true}
-    ${'12'}           | ${false}
+    ${'12'}           | ${true}
     ${'13'}           | ${false}
     ${'sid'}          | ${false}
     ${'experimental'} | ${false}
