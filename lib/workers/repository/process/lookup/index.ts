@@ -9,7 +9,7 @@ import {
   getDatasourceList,
   getDefaultVersioning,
   getDigest,
-  getPkgReleasesWithResult,
+  getPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../modules/datasource';
@@ -19,6 +19,7 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error'
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
+import { Result } from '../../../../util/result';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -82,8 +83,8 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-      const lookupResult = (await getPkgReleasesWithResult(config)).unwrap();
-      if (!lookupResult.ok) {
+      const { res: lookupResult } = await Result.wrap(getPkgReleases(config));
+      if (!lookupResult.success) {
         throw lookupResult.error;
       }
       dependency = clone(lookupResult.value);

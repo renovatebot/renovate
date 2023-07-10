@@ -41,4 +41,15 @@ describe('workers/repository/update/pr/changelog/source', () => {
       );
     });
   });
+
+  describe('hasValidRepository', () => {
+    it('handles invalid repository', () => {
+      expect(changelogSource.hasValidRepository('foo')).toBeFalse();
+      expect(changelogSource.hasValidRepository('some/repo/name')).toBeFalse();
+    });
+
+    it('handles valid repository', () => {
+      expect(changelogSource.hasValidRepository('some/repo')).toBeTrue();
+    });
+  });
 });

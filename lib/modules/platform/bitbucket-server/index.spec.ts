@@ -201,7 +201,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        jest.mock('delay');
+        jest.mock('timers/promises');
         jest.mock('../../../util/git');
         jest.mock('../../../util/host-rules');
         hostRules = require('../../../util/host-rules');
@@ -266,7 +266,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               values: [repoMock(url, 'SOME', 'repo')],
               start: 0,
             });
-          expect(await bitbucket.getRepos()).toEqual(['some/repo']);
+          expect(await bitbucket.getRepos()).toEqual(['SOME/repo']);
         });
       });
 
