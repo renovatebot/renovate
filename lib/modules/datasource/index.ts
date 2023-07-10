@@ -8,7 +8,6 @@ import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
 import { filterMap } from '../../util/filter-map';
 import { regEx } from '../../util/regex';
-import { Result } from '../../util/result';
 import { trimTrailingSlash } from '../../util/url';
 import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
@@ -504,12 +503,6 @@ export async function getPkgReleases(
   sortAndRemoveDuplicates(config, res);
   applyConstraintsFiltering(config, res);
   return res;
-}
-
-export function getPkgReleasesSafe(
-  config: GetPkgReleasesConfig
-): Promise<Result<ReleaseResult | null>> {
-  return Result.wrap(getPkgReleases(config));
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {
