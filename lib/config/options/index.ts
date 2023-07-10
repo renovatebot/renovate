@@ -354,7 +354,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.2.0',
+    default: 'ghcr.io/containerbase/sidecar:9.2.1',
     globalOnly: true,
   },
   {
@@ -440,6 +440,15 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
     default: 'auto',
+  },
+  {
+    name: 'includeMirrors',
+    description:
+      'Whether to process repositories that are mirrors. By default, repositories that are mirrors are skipped.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+    globalOnly: true,
   },
   {
     name: 'forkToken',
