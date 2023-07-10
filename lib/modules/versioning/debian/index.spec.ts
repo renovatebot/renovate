@@ -119,7 +119,7 @@ describe('modules/versioning/debian/index', () => {
     ${'squeeze'}      | ${false}
     ${'wheezy'}       | ${false}
     ${'jessie'}       | ${false}
-    ${'stretch'}      | ${true}
+    ${'stretch'}      | ${false}
     ${'buster'}       | ${true}
     ${'bullseye'}     | ${true}
     ${'bookworm'}     | ${true}
@@ -137,7 +137,7 @@ describe('modules/versioning/debian/index', () => {
     ${'6'}            | ${false}
     ${'7'}            | ${false}
     ${'8'}            | ${false}
-    ${'9'}            | ${true}
+    ${'9'}            | ${false}
     ${'10'}           | ${true}
     ${'11'}           | ${true}
     ${'12'}           | ${true}
