@@ -10,13 +10,7 @@ const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const Git = jest.requireActual('simple-git') as SimpleGitFactory;
 
-const gitMock = {
-  env: jest.fn(),
-  listRemote: jest.fn(),
-  subModule: jest.fn(),
-  raw: jest.fn(),
-  ...mock<Omit<SimpleGit, 'env' | 'subModule' | 'raw' | 'listRemote'>>(),
-};
+const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/extract', () => {
   beforeEach(() => {
