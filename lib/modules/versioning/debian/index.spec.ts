@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { DebianVersioningApi } from '.';
 
 describe('modules/versioning/debian/index', () => {
-  const dt = DateTime.fromISO('2022-04-20');
+  const dt = DateTime.fromISO('2022-07-10');
 
   const debian = new DebianVersioningApi();
 
