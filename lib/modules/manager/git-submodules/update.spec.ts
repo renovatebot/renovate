@@ -21,7 +21,7 @@ describe('modules/manager/git-submodules/update', () => {
     process.env = {};
 
     simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockImplementation(() => gitMock as unknown as SimpleGit);
+    gitMock.env.mockImplementation(() => gitMock);
   });
 
   describe('updateDependency', () => {

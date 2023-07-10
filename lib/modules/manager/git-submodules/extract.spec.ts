@@ -23,7 +23,7 @@ describe('modules/manager/git-submodules/extract', () => {
     simpleGitFactoryMock.mockImplementation((basePath: string) => {
       const git = Git(basePath);
 
-      gitMock.env.mockImplementation(() => gitMock as unknown as SimpleGit);
+      gitMock.env.mockImplementation(() => gitMock);
       gitMock.subModule.mockResolvedValue(
         '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
       );
