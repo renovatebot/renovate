@@ -302,11 +302,6 @@ export async function getReleaseNotesMd(
   const { baseUrl, repository } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
-  const skippedRepos = ['facebook/react-native'];
-  // istanbul ignore if
-  if (skippedRepos.includes(repository)) {
-    return null;
-  }
   const changelog = await getReleaseNotesMdFile(project);
   if (!changelog) {
     return null;
