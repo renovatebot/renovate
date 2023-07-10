@@ -6,7 +6,6 @@ import { HelmDatasource } from '.';
 
 // Truncated index.yaml file
 const indexYaml = Fixtures.get('index.yaml');
-const emptyPackageIndexYaml = Fixtures.get('index_emptypackage.yaml');
 
 describe('modules/datasource/helm/index', () => {
   describe('getReleases', () => {
@@ -172,14 +171,18 @@ describe('modules/datasource/helm/index', () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, emptyPackageIndexYaml);
+        .reply(200, Fixtures.get('index_emptypackage.yaml'));
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
         packageName: 'ambassador',
         registryUrls: ['https://example-repository.com'],
       });
-      expect(releases).not.toBeNull();
-      expect(releases).toMatchSnapshot();
+      expect(releases).toMatchObject({
+        homepage: 'https://www.getambassador.io/',
+        registryUrl: 'https://example-repository.com',
+        sourceUrl: 'https://github.com/datawire/ambassador',
+        releases: expect.toBeArrayOfSize(1),
+      });
     });
 
     it('adds trailing slash to subdirectories', async () => {
