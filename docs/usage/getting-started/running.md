@@ -120,7 +120,6 @@ If you use Forking Renovate, you'll miss out on these features of the regular Re
 
 - Automerge
 - The `baseBranches` config option
-- The app dashboard (`app.renovatebot.com`)
 
 ### Hosting Renovate
 
