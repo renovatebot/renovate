@@ -79,7 +79,7 @@ describe('config/migrations/custom/extends-migration', () => {
         extends: ['github>whitesource/merge-confidence:beta'],
       },
       {
-        extends: ['mergeConfidence:default'],
+        extends: ['mergeConfidence:all-badges'],
       }
     );
   });
