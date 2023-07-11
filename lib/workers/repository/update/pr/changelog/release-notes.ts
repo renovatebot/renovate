@@ -302,6 +302,11 @@ export async function getReleaseNotesMd(
   const { baseUrl, repository } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
+
+  if (shouldSkipChangelogMd(repository)) {
+    return null;
+  }
+
   const changelog = await getReleaseNotesMdFile(project);
   if (!changelog) {
     return null;
@@ -439,4 +444,10 @@ export async function addReleaseNotes(
     output.hasReleaseNotes = !!output.hasReleaseNotes || !!releaseNotes;
   }
   return output;
+}
+
+export function shouldSkipChangelogMd(repository: string): boolean {
+  const skippedRepositories = ['facebook/react-native'];
+
+  return skippedRepositories.includes(repository);
 }

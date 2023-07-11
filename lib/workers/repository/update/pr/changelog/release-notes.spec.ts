@@ -14,6 +14,7 @@ import {
   getReleaseNotes,
   getReleaseNotesMd,
   releaseNotesCacheMinutes,
+  shouldSkipChangelogMd,
 } from './release-notes';
 import type {
   ChangeLogNotes,
@@ -1346,6 +1347,16 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       it('15.3.0 is not equal to 15.2.0', () => {
         expect(versionOneNotes).not.toMatchObject(versionTwoNotes);
+      });
+    });
+
+    describe('shouldSkipChangelogMd', () => {
+      it('should skip for flagged repository', () => {
+        expect(shouldSkipChangelogMd('facebook/react-native')).toBeTrue();
+      });
+
+      it('should continue for other repository', () => {
+        expect(shouldSkipChangelogMd('some/repo')).toBeFalse();
       });
     });
   });
