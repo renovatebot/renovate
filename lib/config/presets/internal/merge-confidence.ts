@@ -18,7 +18,7 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  minimal: {
+  'age-confidence-badges': {
     description: 'Enable Age & Confidence badges for pull requests.',
     packageRules: [
       {
