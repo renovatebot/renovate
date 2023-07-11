@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 import upath from 'upath';
@@ -246,7 +247,6 @@ export async function mergeRenovateConfig(
   }
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
-  logger.debug({ config: migratedConfig }, 'migrated config');
   // TODO #7154
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
