@@ -18,4 +18,14 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  minimal: {
+    description: 'Enable Age & Confidence badges for pull requests.',
+    packageRules: [
+      {
+        matchDatasources: ['maven', 'npm', 'pypi'],
+        matchUpdateTypes: ['patch', 'minor', 'major'],
+        prBodyColumns: ['Package', 'Change', 'Age', 'Confidence'],
+      },
+    ],
+  },
 };
