@@ -1,7 +1,7 @@
 import { range } from './range';
 
 describe('util/range', () => {
-  test.each`
+  it.each`
     start | end  | expected
     ${0}  | ${0} | ${[0]}
     ${0}  | ${1} | ${[0, 1]}

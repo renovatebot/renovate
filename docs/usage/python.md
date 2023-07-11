@@ -5,13 +5,8 @@ description: Python/pip dependencies support in Renovate
 
 # Python package manager support
 
-Renovate supports the following Python package managers:
-
-- `pip` (e.g. `requirements.txt`, `requirements.pip`) files
-- `pipenv` (e.g. `Pipfile`)
-- `poetry` (e.g. `pyproject.toml`)
-- `setup.py` file
-- `setup.cfg` file
+Renovate supports several Python package managers, including `pip`, `pipenv`, `poetry`, etc.
+See [all supported managers](https://docs.renovatebot.com/modules/manager/).
 
 ## Versioning support
 
@@ -31,6 +26,9 @@ Legacy versions with the `===` prefix are ignored.
 ## Alternative file names
 
 For the `pip_requirements` manager, the default file matching regex for `requirements.txt` follows common file name conventions.
+
+It will match `requirements.txt` and `requirements.pip`, and any file in the format `requirements-*.txt` or `requirements-*.pip`, to allow for common filename patterns such as `requirements-dev.txt`.
+
 But Renovate may not find all your files.
 
 You can tell Renovate where to find your file(s) by setting your own `fileMatch` regex:
@@ -52,6 +50,7 @@ There are three ways to do this:
 
 - index-url in `requirements.txt`
 - sources in `Pipfile`
+- sources in `pyproject.toml`
 - set URL in Renovate configuration
 
 ### index-url in `requirements.txt`

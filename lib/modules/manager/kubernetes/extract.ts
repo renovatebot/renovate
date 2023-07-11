@@ -17,7 +17,7 @@ import type { KubernetesConfiguration } from './types';
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
   logger.trace('kubernetes.extractPackageFile()');
@@ -31,7 +31,7 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [
     ...extractImages(content, config),
-    ...extractApis(content, fileName),
+    ...extractApis(content, packageFile),
   ];
 
   return deps.length ? { deps } : null;
@@ -44,7 +44,7 @@ function extractImages(
   const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex)) {
-    const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
+    const match = regEx(/^\s*-?\s*image:\s*['"]?([^\s'"]+)['"]?\s*/).exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom, true, config.registryAliases);
@@ -63,13 +63,16 @@ function extractImages(
   return deps.filter((dep) => !dep.currentValue?.includes('${'));
 }
 
-function extractApis(content: string, fileName: string): PackageDependency[] {
+function extractApis(
+  content: string,
+  packageFile: string
+): PackageDependency[] {
   let doc: KubernetesConfiguration[];
 
   try {
     doc = loadAll(content) as KubernetesConfiguration[];
   } catch (err) {
-    logger.debug({ err, fileName }, 'Failed to parse Kubernetes manifest.');
+    logger.debug({ err, packageFile }, 'Failed to parse Kubernetes manifest.');
     return [];
   }
 

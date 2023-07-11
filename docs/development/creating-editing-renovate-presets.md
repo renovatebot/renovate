@@ -1,6 +1,6 @@
 # Creating/editing Renovate presets
 
-Renovate comes with default presets that you can find in the `lib/config/presets/internal` directory.
+Renovate comes with default presets that you can find in the [`lib/config/presets/internal`](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) directory.
 You can suggest changes to the presets with a pull request.
 
 Follow the rules below to increase the chance that your pull request gets merged.
@@ -27,7 +27,7 @@ We have multiple kinds of `group:` presets, with different rules.
 ##### Rules for `group:*` presets
 
 1. Finally, any other `group:*` presets can be added if they are beneficial to a wide number of users
-1. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one by one and not get them automatically from `config:base`, which includes `group:monorepo` and `group:recommended`
+1. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one by one and not get them automatically from `config:recommended`, which includes `group:monorepo` and `group:recommended`
 
 #### Replacement presets
 

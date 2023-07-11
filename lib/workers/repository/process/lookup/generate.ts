@@ -1,19 +1,21 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource';
 import type { LookupUpdate } from '../../../../modules/manager/types';
 import type { VersioningApi } from '../../../../modules/versioning';
 import type { RangeStrategy } from '../../../../types';
+import { getMergeConfidenceLevel } from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
 import { getUpdateType } from './update-type';
 
-export function generateUpdate(
+export async function generateUpdate(
   config: LookupUpdateConfig,
   versioning: VersioningApi,
   rangeStrategy: RangeStrategy,
   currentVersion: string,
   bucket: string,
   release: Release
-): LookupUpdate {
+): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {
     bucket,
@@ -77,6 +79,16 @@ export function generateUpdate(
   update.updateType =
     update.updateType ??
     getUpdateType(config, versioning, currentVersion, newVersion);
+  const { datasource, packageName, packageRules } = config;
+  if (packageRules?.some((pr) => is.nonEmptyArray(pr.matchConfidence))) {
+    update.mergeConfidenceLevel = await getMergeConfidenceLevel(
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      update.updateType
+    );
+  }
   if (!versioning.isVersion(update.newValue)) {
     update.isRange = true;
   }

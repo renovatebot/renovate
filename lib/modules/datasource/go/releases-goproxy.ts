@@ -3,8 +3,10 @@ import { DateTime } from 'luxon';
 import moo from 'moo';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
+import goVersioning from '../../versioning/go-mod-directive';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
@@ -14,7 +16,7 @@ import type { GoproxyItem, VersionInfo } from './types';
 
 const parsedGoproxy: Record<string, GoproxyItem[]> = {};
 
-const modRegex = regEx(`^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\\d+))?$`);
+const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
@@ -32,8 +34,10 @@ export class GoProxyDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-
-    const goproxy = process.env.GOPROXY;
+    const goproxy = process.env.GOPROXY ?? 'https://proxy.golang.org,direct';
+    if (goproxy === 'direct') {
+      return this.direct.getReleases(config);
+    }
     const proxyList = this.parseGoproxy(goproxy);
     const noproxy = GoProxyDatasource.parseNoproxy();
 
@@ -45,12 +49,6 @@ export class GoProxyDatasource extends Datasource {
       return result;
     }
 
-    const isGopkgin = packageName.startsWith('gopkg.in/');
-    const majorSuffixSeparator = isGopkgin ? '.' : '/';
-    const modParts = packageName.match(modRegex);
-    const baseMod = modParts?.groups?.baseMod ?? packageName;
-    const currentMajor = parseInt(modParts?.groups?.majorVersion ?? '0');
-
     for (const { url, fallback } of proxyList) {
       try {
         if (url === 'off') {
@@ -60,43 +58,20 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const releases: Release[] = [];
-        for (let i = 0; ; i++) {
-          try {
-            const major = currentMajor + i;
-            let mod: string;
-            if (major < 2 && !isGopkgin) {
-              mod = baseMod;
-              i++; // v0 and v1 are the same module
-            } else {
-              mod = `${baseMod}${majorSuffixSeparator}v${major}`;
-            }
-            const result = await this.getVersionsWithInfo(url, mod);
-            if (result.length === 0) {
-              break;
-            }
-            releases.push(...result);
-          } catch (err) {
-            const statusCode = err?.response?.statusCode;
-            if (i > 0 && statusCode === 404) {
-              break;
-            }
-            throw err;
-          }
-        }
-
-        if (releases.length) {
+        const res = await this.getVersionsWithInfo(url, packageName);
+        if (res.releases.length) {
+          result = res;
           try {
             const datasource = await BaseGoDatasource.getDatasource(
               packageName
             );
             const sourceUrl = getSourceUrl(datasource);
-            result = { releases, sourceUrl };
+            if (sourceUrl) {
+              result.sourceUrl = sourceUrl;
+            }
           } catch (err) {
             logger.trace({ err }, `Can't get datasource for ${packageName}`);
-            result = { releases };
           }
-
           break;
         }
       } catch (err) {
@@ -159,11 +134,11 @@ export class GoProxyDatasource extends Datasource {
       },
       asterisk: {
         match: '*',
-        value: (_: string) => '[^\\/]*',
+        value: (_: string) => '[^/]*',
       },
       qmark: {
         match: '?',
-        value: (_: string) => '[^\\/]',
+        value: (_: string) => '[^/]',
       },
       characterRangeOpen: {
         match: '[',
@@ -258,26 +233,78 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
+  async getLatestVersion(
+    baseUrl: string,
+    packageName: string
+  ): Promise<string | null> {
+    try {
+      const url = `${baseUrl}/${this.encodeCase(packageName)}/@latest`;
+      const res = await this.http.getJson<VersionInfo>(url);
+      return res.body.Version;
+    } catch (err) {
+      logger.debug({ err }, 'Failed to get latest version');
+      return null;
+    }
+  }
+
   async getVersionsWithInfo(
     baseUrl: string,
     packageName: string
-  ): Promise<Release[]> {
-    const releasesIndex = await this.listVersions(baseUrl, packageName);
-    const releases = await p.map(releasesIndex, async (versionInfo) => {
-      const { version, releaseTimestamp } = versionInfo;
+  ): Promise<ReleaseResult> {
+    const isGopkgin = packageName.startsWith('gopkg.in/');
+    const majorSuffixSeparator = isGopkgin ? '.' : '/';
+    const modParts = packageName.match(modRegex)?.groups;
+    const baseMod = modParts?.baseMod ?? /* istanbul ignore next */ packageName;
+    const packageMajor = parseInt(modParts?.majorVersion ?? '0');
 
-      if (releaseTimestamp) {
-        return { version, releaseTimestamp };
+    const result: ReleaseResult = { releases: [] };
+    for (let major = packageMajor; ; major += 1) {
+      let pkg = `${baseMod}${majorSuffixSeparator}v${major}`;
+      if (!isGopkgin && major < 2) {
+        pkg = baseMod;
+        major += 1; // v0 and v1 are the same module
       }
 
       try {
-        return await this.versionInfo(baseUrl, packageName, version);
+        const res = await this.listVersions(baseUrl, pkg);
+        const releases = await p.map(res, async (versionInfo) => {
+          const { version, releaseTimestamp } = versionInfo;
+
+          if (releaseTimestamp) {
+            return { version, releaseTimestamp };
+          }
+
+          try {
+            return await this.versionInfo(baseUrl, pkg, version);
+          } catch (err) {
+            logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
+            return { version };
+          }
+        });
+        result.releases.push(...releases);
       } catch (err) {
-        logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
-        return { version };
+        if (
+          err instanceof HttpError &&
+          err.response?.statusCode === 404 &&
+          major !== packageMajor
+        ) {
+          break;
+        }
+
+        throw err;
       }
-    });
-    return releases;
+
+      const latestVersion = await this.getLatestVersion(baseUrl, pkg);
+      if (latestVersion) {
+        result.tags ??= {};
+        result.tags.latest ??= latestVersion;
+        if (goVersioning.isGreaterThan(latestVersion, result.tags.latest)) {
+          result.tags.latest = latestVersion;
+        }
+      }
+    }
+
+    return result;
   }
 
   static getCacheKey({ packageName }: GetReleasesConfig): string {

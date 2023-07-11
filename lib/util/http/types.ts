@@ -1,4 +1,4 @@
-import type { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'node:http';
 import type {
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
@@ -19,7 +19,7 @@ export type GotExtraOptions = {
   token?: string;
   hostType?: string;
   enabled?: boolean;
-  useCache?: boolean;
+  memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
 };
@@ -62,9 +62,16 @@ export interface HttpOptions {
   throwHttpErrors?: boolean;
 
   token?: string;
-  useCache?: boolean;
+  memCache?: boolean;
+}
 
-  onSchemaError?: 'warn' | 'throw';
+export interface EtagCache<T = any> {
+  etag: string;
+  data: T;
+}
+
+export interface HttpRequestOptions<T = any> {
+  etagCache?: EtagCache<T>;
 }
 
 export interface InternalHttpOptions extends HttpOptions {

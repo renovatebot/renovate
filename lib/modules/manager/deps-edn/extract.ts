@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { ClojureDatasource } from '../../datasource/clojure';
 import { CLOJARS_REPO } from '../../datasource/clojure/common';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -66,7 +66,7 @@ function resolveGitPackageFromEdnKey(
 
   const bitbucketDependencyGroups = bitbucketDependencyRegex.exec(key)?.groups;
   if (bitbucketDependencyGroups?.packageName) {
-    dep.datasource = BitBucketTagsDatasource.id;
+    dep.datasource = BitbucketTagsDatasource.id;
     dep.packageName = bitbucketDependencyGroups.packageName;
     return;
   }

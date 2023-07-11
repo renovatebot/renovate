@@ -1,5 +1,6 @@
 import {
   AZURE_API_USING_HOST_TYPES,
+  BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../constants';
@@ -14,16 +15,19 @@ import { parseUrl } from './url';
  */
 export function detectPlatform(
   url: string
-): 'gitlab' | 'github' | 'azure' | null {
+): 'azure' | 'bitbucket' | 'github' | 'gitlab' | null {
   const { hostname } = parseUrl(url) ?? {};
+  if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
+    return 'azure';
+  }
+  if (hostname === 'bitbucket.org' || hostname?.includes('bitbucket')) {
+    return 'bitbucket';
+  }
   if (hostname === 'github.com' || hostname?.includes('github')) {
     return 'github';
   }
   if (hostname === 'gitlab.com' || hostname?.includes('gitlab')) {
     return 'gitlab';
-  }
-  if (hostname === 'dev.azure.com' || hostname?.includes('azure')) {
-    return 'azure';
   }
 
   const hostType = hostRules.hostType({ url });
@@ -32,14 +36,17 @@ export function detectPlatform(
     return null;
   }
 
-  if (GITLAB_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'gitlab';
+  if (AZURE_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'azure';
+  }
+  if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'bitbucket';
   }
   if (GITHUB_API_USING_HOST_TYPES.includes(hostType)) {
     return 'github';
   }
-  if (AZURE_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'azure';
+  if (GITLAB_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'gitlab';
   }
 
   return null;

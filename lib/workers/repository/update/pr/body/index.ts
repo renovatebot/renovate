@@ -1,3 +1,4 @@
+import type { RenovateConfig } from '../../../../../config/types';
 import { PrDebugData, platform } from '../../../../../modules/platform';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
@@ -67,7 +68,8 @@ const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 export function getPrBody(
   branchConfig: BranchConfig,
-  prBodyConfig: PrBodyConfig
+  prBodyConfig: PrBodyConfig,
+  config: RenovateConfig
 ): string {
   massageUpdateMetadata(branchConfig);
   let warnings = '';
@@ -75,6 +77,7 @@ export function getPrBody(
   if (branchConfig.packageFiles) {
     warnings += getDepWarningsPR(
       branchConfig.packageFiles,
+      config,
       branchConfig.dependencyDashboard
     );
   }

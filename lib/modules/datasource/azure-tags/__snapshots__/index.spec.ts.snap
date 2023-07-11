@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/azure-tags/index getReleases returns tags from Azure DevOps 1`] = `
+{
+  "registryUrl": "https://dev.azure.com/my-organization/my-project",
+  "releases": [
+    {
+      "gitRef": "refs/tags/1.0.0",
+      "version": "refs/tags/1.0.0",
+    },
+    {
+      "gitRef": "refs/tags/1.1.0",
+      "version": "refs/tags/1.1.0",
+    },
+    {
+      "gitRef": "refs/tags/1.1.1",
+      "version": "refs/tags/1.1.1",
+    },
+  ],
+  "sourceUrl": "https://dev.azure.com/my-organization/my-project/_git/my-repo",
+}
+`;

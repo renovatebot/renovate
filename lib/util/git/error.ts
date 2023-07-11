@@ -73,9 +73,9 @@ export function checkForPlatformFailure(err: Error): Error | null {
 
 // istanbul ignore next
 export function handleCommitError(
-  files: FileChange[],
+  err: Error,
   branchName: string,
-  err: Error
+  files?: FileChange[]
 ): null {
   checkForPlatformFailure(err);
   if (err.message.includes(`'refs/heads/renovate' exists`)) {

@@ -201,7 +201,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        jest.mock('delay');
+        jest.mock('timers/promises');
         jest.mock('../../../util/git');
         jest.mock('../../../util/host-rules');
         hostRules = require('../../../util/host-rules');
@@ -1417,6 +1417,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
+              targetBranch: 'new_base',
             })
           ).toResolve();
         });
@@ -1729,13 +1730,6 @@ Followed by some information.
         });
       });
 
-      describe('getVulnerabilityAlerts()', () => {
-        it('returns empty array', async () => {
-          expect.assertions(1);
-          expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
-        });
-      });
-
       describe('getBranchStatus()', () => {
         it('should be success', async () => {
           const scope = await initRepo();
@@ -1749,7 +1743,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('green');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'green'
+          );
         });
 
         it('should be pending', async () => {
@@ -1764,7 +1760,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'yellow'
+          );
 
           scope
             .get(
@@ -1776,7 +1774,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'yellow'
+          );
         });
 
         it('should be failed', async () => {
@@ -1791,7 +1791,9 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'red'
+          );
 
           scope
             .get(
@@ -1799,15 +1801,17 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'red'
+          );
         });
 
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
-            REPOSITORY_CHANGED
-          );
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).rejects.toThrow(REPOSITORY_CHANGED);
         });
       });
 

@@ -9,24 +9,39 @@ import {
   parseGcv,
   usesGcv,
 } from './extract/consistent-versions-plugin';
-import { parseGradle, parseProps } from './parser';
+import { parseGradle, parseKotlinSource, parseProps } from './parser';
 import { REGISTRY_URLS } from './parser/common';
 import type {
   GradleManagerData,
   PackageRegistry,
-  PackageVariables,
   VariableRegistry,
 } from './types';
 import {
   getVars,
   isGradleScriptFile,
+  isKotlinSourceFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
   toAbsolutePath,
+  updateVars,
 } from './utils';
 
 const mavenDatasource = MavenDatasource.id;
+
+function updatePackageRegistries(
+  packageRegistries: PackageRegistry[],
+  urls: PackageRegistry[]
+): void {
+  for (const url of urls) {
+    const registryAlreadyKnown = packageRegistries.some(
+      (item) => item.registryUrl === url.registryUrl && item.scope === url.scope
+    );
+    if (!registryAlreadyKnown) {
+      packageRegistries.push(url);
+    }
+  }
+}
 
 function getRegistryUrlsForDep(
   packageRegistries: PackageRegistry[],
@@ -45,18 +60,17 @@ function getRegistryUrlsForDep(
   return [...new Set(registryUrls)];
 }
 
-export async function extractAllPackageFiles(
+async function parsePackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
-): Promise<PackageFile[] | null> {
-  const extractedDeps: PackageDependency<GradleManagerData>[] = [];
+  packageFiles: string[],
+  extractedDeps: PackageDependency<GradleManagerData>[],
+  packageFilesByName: Record<string, PackageFile>,
+  packageRegistries: PackageRegistry[]
+): Promise<PackageDependency<GradleManagerData>[]> {
   const varRegistry: VariableRegistry = {};
-  const packageFilesByName: Record<string, PackageFile> = {};
-  const packageRegistries: PackageRegistry[] = [];
-  const reorderedFiles = reorderFiles(packageFiles);
   const fileContents = await getLocalFiles(packageFiles);
 
-  for (const packageFile of reorderedFiles) {
+  for (const packageFile of packageFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
       datasource: mavenDatasource,
@@ -68,24 +82,28 @@ export async function extractAllPackageFiles(
       const content = fileContents[packageFile]!;
       const packageFileDir = upath.dirname(toAbsolutePath(packageFile));
 
-      const updateVars = (newVars: PackageVariables): void => {
-        const oldVars = varRegistry[packageFileDir] || {};
-        varRegistry[packageFileDir] = { ...oldVars, ...newVars };
-      };
-
       if (isPropsFile(packageFile)) {
         const { vars, deps } = parseProps(content, packageFile);
-        updateVars(vars);
+        updateVars(varRegistry, packageFileDir, vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const updatesFromCatalog = parseCatalog(packageFile, content);
-        extractedDeps.push(...updatesFromCatalog);
+        const deps = parseCatalog(packageFile, content);
+        extractedDeps.push(...deps);
       } else if (
         isGcvPropsFile(packageFile) &&
         usesGcv(packageFile, fileContents)
       ) {
-        const updatesFromGcv = parseGcv(packageFile, fileContents);
-        extractedDeps.push(...updatesFromGcv);
+        const deps = parseGcv(packageFile, fileContents);
+        extractedDeps.push(...deps);
+      } else if (isKotlinSourceFile(packageFile)) {
+        const vars = getVars(varRegistry, packageFileDir);
+        const { vars: gradleVars, deps } = parseKotlinSource(
+          content,
+          vars,
+          packageFile
+        );
+        updateVars(varRegistry, '/', gradleVars);
+        extractedDeps.push(...deps);
       } else if (isGradleScriptFile(packageFile)) {
         const vars = getVars(varRegistry, packageFileDir);
         const {
@@ -93,29 +111,40 @@ export async function extractAllPackageFiles(
           urls,
           vars: gradleVars,
         } = parseGradle(content, vars, packageFile, fileContents);
-        for (const url of urls) {
-          const registryAlreadyKnown = packageRegistries.some(
-            (item) =>
-              item.registryUrl === url.registryUrl && item.scope === url.scope
-          );
-          if (!registryAlreadyKnown) {
-            packageRegistries.push(url);
-          }
-        }
-        varRegistry[packageFileDir] = {
-          ...varRegistry[packageFileDir],
-          ...gradleVars,
-        };
-        updateVars(gradleVars);
+        updatePackageRegistries(packageRegistries, urls);
+        updateVars(varRegistry, packageFileDir, gradleVars);
         extractedDeps.push(...deps);
       }
     } catch (err) {
-      logger.warn(
+      logger.debug(
         { err, config, packageFile },
         `Failed to process Gradle file`
       );
     }
   }
+
+  return extractedDeps;
+}
+
+export async function extractAllPackageFiles(
+  config: ExtractConfig,
+  packageFiles: string[]
+): Promise<PackageFile[] | null> {
+  const packageFilesByName: Record<string, PackageFile> = {};
+  const packageRegistries: PackageRegistry[] = [];
+  const extractedDeps: PackageDependency<GradleManagerData>[] = [];
+  const kotlinSourceFiles = packageFiles.filter(isKotlinSourceFile);
+  const gradleFiles = reorderFiles(
+    packageFiles.filter((e) => !kotlinSourceFiles.includes(e))
+  );
+
+  await parsePackageFiles(
+    config,
+    [...kotlinSourceFiles, ...kotlinSourceFiles, ...gradleFiles],
+    extractedDeps,
+    packageFilesByName,
+    packageRegistries
+  );
 
   if (!extractedDeps.length) {
     return null;
@@ -145,9 +174,10 @@ export async function extractAllPackageFiles(
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
         if (!dep.depType) {
-          dep.depType = key.startsWith('buildSrc')
-            ? 'devDependencies'
-            : 'dependencies';
+          dep.depType =
+            key.startsWith('buildSrc') && !kotlinSourceFiles.length
+              ? 'devDependencies'
+              : 'dependencies';
         }
       }
 
@@ -163,7 +193,7 @@ export async function extractAllPackageFiles(
 
       packageFilesByName[key] = pkgFile;
     } else {
-      logger.warn({ dep }, `Failed to process Gradle dependency`);
+      logger.debug({ dep }, `Failed to process Gradle dependency`);
     }
   }
 

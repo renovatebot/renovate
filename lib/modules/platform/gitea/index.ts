@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
@@ -43,6 +43,7 @@ import type {
   Label,
   PR,
   PRMergeMethod,
+  PRUpdateParams,
   Repo,
   RepoSortMethod,
   SortMethod,
@@ -64,6 +65,8 @@ interface GiteaRepoConfig {
   defaultBranch: string;
   cloneSubmodules: boolean;
 }
+
+export const id = 'gitea';
 
 const DRAFT_PREFIX = 'WIP: ';
 
@@ -163,7 +166,7 @@ function getLabelList(): Promise<Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
       .getRepoLabels(config.repository, {
-        useCache: false,
+        memCache: false,
       })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} repo labels`);
@@ -172,7 +175,7 @@ function getLabelList(): Promise<Label[]> {
 
     const orgLabels = helper
       .getOrgLabels(config.repository.split('/')[0], {
-        useCache: false,
+        memCache: false,
       })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} org labels`);
@@ -380,14 +383,17 @@ const platform: Platform = {
 
       // Refresh caches by re-fetching commit status for branch
       await helper.getCombinedCommitStatus(config.repository, branchName, {
-        useCache: false,
+        memCache: false,
       });
     } catch (err) {
       logger.warn({ err }, 'Failed to set branch status');
     }
   },
 
-  async getBranchStatus(branchName: string): Promise<BranchStatus> {
+  async getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean
+  ): Promise<BranchStatus> {
     let ccs: CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
@@ -404,6 +410,17 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
+    if (
+      !internalChecksAsSuccess &&
+      ccs.worstStatus === 'success' &&
+      ccs.statuses.every((status) => status.context?.startsWith('renovate/'))
+    ) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      return 'yellow';
+    }
+
     return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
@@ -433,7 +450,7 @@ const platform: Platform = {
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
-        .searchPRs(config.repository, { state: 'all' }, { useCache: false })
+        .searchPRs(config.repository, { state: 'all' }, { memCache: false })
         .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
@@ -606,17 +623,23 @@ const platform: Platform = {
     prTitle,
     prBody: body,
     state,
+    targetBranch,
   }: UpdatePrConfig): Promise<void> {
     let title = prTitle;
     if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
       title = DRAFT_PREFIX + title;
     }
 
-    await helper.updatePR(config.repository, number, {
+    const prUpdateParams: PRUpdateParams = {
       title,
       ...(body && { body }),
       ...(state && { state }),
-    });
+    };
+    if (targetBranch) {
+      prUpdateParams.base = targetBranch;
+    }
+
+    await helper.updatePR(config.repository, number, prUpdateParams);
   },
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
@@ -634,7 +657,7 @@ const platform: Platform = {
   getIssueList(): Promise<Issue[]> {
     if (config.issueList === null) {
       config.issueList = helper
-        .searchIssues(config.repository, { state: 'all' }, { useCache: false })
+        .searchIssues(config.repository, { state: 'all' }, { memCache: false })
         .then((issues) => {
           const issueList = issues.map(toRenovateIssue);
           logger.debug(`Retrieved ${issueList.length} Issues`);
@@ -645,12 +668,10 @@ const platform: Platform = {
     return config.issueList;
   },
 
-  async getIssue(number: number, useCache = true): Promise<Issue | null> {
+  async getIssue(number: number, memCache = true): Promise<Issue | null> {
     try {
       const body = (
-        await helper.getIssue(config.repository, number, {
-          useCache,
-        })
+        await helper.getIssue(config.repository, number, { memCache })
       ).body;
       return {
         number,
@@ -723,7 +744,7 @@ const platform: Platform = {
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
             // TODO: types (#7154)
-            logger.warn(`Closing duplicate Issue #${issue.number!}`);
+            logger.warn({ issueNo: issue.number! }, 'Closing duplicate issue');
             // TODO #7154
             await helper.closeIssue(config.repository, issue.number!);
           }
@@ -933,10 +954,6 @@ const platform: Platform = {
   massageMarkdown(prBody: string): string {
     return smartTruncate(smartLinks(prBody), 1000000);
   },
-
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-    return Promise.resolve([]);
-  },
 };
 
 /* eslint-disable @typescript-eslint/unbound-method */
@@ -963,7 +980,6 @@ export const {
   getPrList,
   getRepoForceRebase,
   getRepos,
-  getVulnerabilityAlerts,
   initPlatform,
   initRepo,
   mergePr,

@@ -15,5 +15,31 @@ describe('util/package-rules/package-patterns', () => {
       );
       expect(result).toBeFalse();
     });
+
+    it('should match packageName', () => {
+      const result = packageNameMatcher.matches(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          matchPackagePatterns: ['def'],
+        }
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should fall back to matching depName', () => {
+      const result = packageNameMatcher.matches(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          matchPackagePatterns: ['abc'],
+        }
+      );
+      expect(result).toBeTrue();
+    });
   });
 });

@@ -14,7 +14,12 @@ import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
-  return { ...clone(config), errors: [], warnings: [], branchList: [] };
+  return {
+    ...clone(config),
+    errors: [],
+    warnings: [],
+    branchList: [],
+  };
 }
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {

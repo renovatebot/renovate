@@ -2,7 +2,6 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
 import type {
   AzureItem,
-  AzureTag,
   AzureTree,
   AzureTreeNode,
 } from '../../../../../../types/platform/azure';
@@ -12,41 +11,6 @@ import type { ChangeLogFile } from '../types';
 
 export const id = 'azure-changelog';
 const http = new AzureHttp(id);
-
-export async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
-  logger.trace('azure.getTags()');
-  const urlEncodedRepo = encodeURIComponent(repository);
-  const url = `${ensureTrailingSlash(
-    endpoint
-  )}git/repositories/${urlEncodedRepo}/refs?filter=tags&$top=100&api-version=7.0`;
-  try {
-    const res = await http.getJsonPaginated<AzureTag>(url);
-    const tags = res.body.value;
-
-    if (!tags.length) {
-      logger.debug(
-        { sourceRepo: repository },
-        'repository has no Azure DevOps tags'
-      );
-    }
-
-    return tags.map((tag) => tag.name).filter(Boolean);
-  } catch (err) {
-    logger.debug(
-      { sourceRepo: repository, err },
-      'Failed to fetch Azure DevOps tags'
-    );
-    // istanbul ignore if
-    if (err.message?.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
-  }
-}
 
 export async function getReleaseNotesMd(
   repository: string,

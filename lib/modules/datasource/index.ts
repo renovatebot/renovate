@@ -7,7 +7,10 @@ import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import { Result } from '../../util/result';
+import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
+import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
 import { addMetaData } from './metadata';
@@ -30,7 +33,7 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function getDatasourceFor(datasource: string): DatasourceApi | null {
+export function getDatasourceFor(datasource: string): DatasourceApi | null {
   return datasources.get(datasource) ?? null;
 }
 
@@ -90,7 +93,11 @@ function firstRegistry(
 ): Promise<ReleaseResult | null> {
   if (registryUrls.length > 1) {
     logger.warn(
-      { datasource: datasource.id, depName: config.depName, registryUrls },
+      {
+        datasource: datasource.id,
+        packageName: config.packageName,
+        registryUrls,
+      },
       'Excess registryUrls found for datasource lookup - using first configured only'
     );
   }
@@ -235,14 +242,14 @@ export function getDefaultVersioning(
   datasourceName: string | undefined
 ): string {
   if (!datasourceName) {
-    return 'semver';
+    return defaultVersioning.id;
   }
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: wrong regex manager config?
   if (!datasource) {
     logger.warn({ datasourceName }, 'Missing datasource!');
   }
-  return datasource?.defaultVersioning ?? 'semver';
+  return datasource?.defaultVersioning ?? defaultVersioning.id;
 }
 
 function applyReplacements(
@@ -278,6 +285,7 @@ async function fetchReleases(
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: needs test
   if (!datasource) {
+    logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
   registryUrls = resolveRegistryUrls(
@@ -342,12 +350,12 @@ export async function getPkgReleases(
     logger.warn('No datasource found');
     return null;
   }
-  const packageName = config.packageName ?? config.depName;
+  const packageName = config.packageName;
   if (!packageName) {
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
   }
-  let res: ReleaseResult;
+  let res: ReleaseResult | null = null;
   try {
     res = clone(
       await getRawReleases({
@@ -389,32 +397,45 @@ export async function getPkgReleases(
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   // Filter versions for uniqueness
-  res.releases = res.releases.filter(
-    (filterRelease, filterIndex) =>
-      res.releases.findIndex(
-        (findRelease) => findRelease.version === filterRelease.version
-      ) === filterIndex
-  );
-  // Filter releases for compatibility
-  for (const [constraintName, constraintValue] of Object.entries(
-    config.constraints ?? {}
-  )) {
-    // Currently we only support if the constraint is a plain version
-    // TODO: Support range/range compatibility filtering #8476
-    if (version.isVersion(constraintValue)) {
-      res.releases = res.releases.filter((release) => {
-        const constraint = release.constraints?.[constraintName];
-        if (!is.nonEmptyArray(constraint)) {
-          // A release with no constraints is OK
-          return true;
-        }
-        return constraint.some(
-          // If any of the release's constraints match, then it's OK
-          (releaseConstraint) =>
-            !releaseConstraint ||
-            version.matches(constraintValue, releaseConstraint)
-        );
-      });
+  res.releases = uniq(res.releases, (x, y) => x.version === y.version);
+
+  if (config?.constraintsFiltering === 'strict') {
+    const filteredReleases: string[] = [];
+    // Filter releases for compatibility
+    for (const [constraintName, constraintValue] of Object.entries(
+      config.constraints ?? {}
+    )) {
+      if (version.isValid(constraintValue)) {
+        res.releases = res.releases.filter((release) => {
+          const constraint = release.constraints?.[constraintName];
+          if (!is.nonEmptyArray(constraint)) {
+            // A release with no constraints is OK
+            return true;
+          }
+
+          const satisfiesConstraints = constraint.some(
+            // If the constraint value is a subset of any release's constraints, then it's OK
+            // fallback to release's constraint match if subset is not supported by versioning
+            (releaseConstraint) =>
+              !releaseConstraint ||
+              (version.subset?.(constraintValue, releaseConstraint) ??
+                version.matches(constraintValue, releaseConstraint))
+          );
+          if (!satisfiesConstraints) {
+            filteredReleases.push(release.version);
+          }
+          return satisfiesConstraints;
+        });
+      }
+    }
+    if (filteredReleases.length) {
+      logger.debug(
+        `Filtered ${
+          filteredReleases.length
+        } releases for ${packageName} due to constraintsFiltering=strict: ${filteredReleases.join(
+          ', '
+        )}`
+      );
     }
   }
   // Strip constraints from releases result
@@ -422,6 +443,12 @@ export async function getPkgReleases(
     delete release.constraints;
   });
   return res;
+}
+
+export function getPkgReleasesSafe(
+  config: GetPkgReleasesConfig
+): Promise<Result<ReleaseResult | null>> {
+  return Result.wrap(getPkgReleases(config));
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {
@@ -434,8 +461,7 @@ function getDigestConfig(
   config: GetDigestInputConfig
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
-  const packageName =
-    config.replacementName ?? config.packageName ?? config.depName;
+  const packageName = config.replacementName ?? config.packageName;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,

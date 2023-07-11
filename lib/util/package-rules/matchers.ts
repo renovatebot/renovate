@@ -1,17 +1,17 @@
 import { BaseBranchesMatcher } from './base-branches';
+import { CategoriesMatcher } from './categories';
 import { CurrentValueMatcher } from './current-value';
 import { CurrentVersionMatcher } from './current-version';
 import { DatasourcesMatcher } from './datasources';
 import { DepNameMatcher } from './dep-names';
 import { DepPatternsMatcher } from './dep-patterns';
 import { DepTypesMatcher } from './dep-types';
-import { FilesMatcher } from './files';
-import { LanguagesMatcher } from './languages';
+import { FileNamesMatcher } from './files';
 import { ManagersMatcher } from './managers';
+import { MergeConfidenceMatcher } from './merge-confidence';
 import { PackageNameMatcher } from './package-names';
 import { PackagePatternsMatcher } from './package-patterns';
 import { PackagePrefixesMatcher } from './package-prefixes';
-import { PathsMatcher } from './paths';
 import { SourceUrlPrefixesMatcher } from './sourceurl-prefixes';
 import { SourceUrlsMatcher } from './sourceurls';
 import type { MatcherApi } from './types';
@@ -28,14 +28,14 @@ matchers.push([
   new PackagePatternsMatcher(),
   new PackagePrefixesMatcher(),
 ]);
-matchers.push([new FilesMatcher()]);
-matchers.push([new PathsMatcher()]);
+matchers.push([new FileNamesMatcher()]);
 matchers.push([new DepTypesMatcher()]);
-matchers.push([new LanguagesMatcher()]);
 matchers.push([new BaseBranchesMatcher()]);
 matchers.push([new ManagersMatcher()]);
 matchers.push([new DatasourcesMatcher()]);
 matchers.push([new UpdateTypesMatcher()]);
+matchers.push([new MergeConfidenceMatcher()]);
 matchers.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
 matchers.push([new CurrentValueMatcher()]);
 matchers.push([new CurrentVersionMatcher()]);
+matchers.push([new CategoriesMatcher()]);

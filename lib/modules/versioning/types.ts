@@ -97,6 +97,20 @@ export interface VersioningApi {
   matches(version: string, range: string): boolean;
 
   valueToVersion?(version: string): string;
+
+  /**
+   * @returns true if subRange is entirely contained by superRange, false otherwise,
+   * and undefined if it cannot determine it.
+   *
+   * @param subRange - the sub range
+   * @param superRange - the dom range
+   */
+  subset?(subRange: string, superRange: string): boolean | undefined;
+
+  /**
+   * Return whether unstable-to-unstable upgrades within the same major version are allowed.
+   */
+  allowUnstableMajorUpgrades?: boolean;
 }
 
 export interface VersioningApiConstructor {

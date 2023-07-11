@@ -1,6 +1,6 @@
-import URL from 'url';
+import URL from 'node:url';
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import JSON5 from 'json5';
 import semver from 'semver';
 import {
@@ -16,7 +16,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -31,6 +31,7 @@ import {
 } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type {
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -79,6 +80,8 @@ const defaults = {
   version: '0.0.0',
 };
 
+export const id = 'gitlab';
+
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
@@ -105,12 +108,16 @@ export async function initPlatform({
   try {
     if (!gitAuthor) {
       const user = (
-        await gitlabApi.getJson<{ email: string; name: string; id: number }>(
-          `user`,
-          { token }
-        )
+        await gitlabApi.getJson<{
+          email: string;
+          name: string;
+          id: number;
+          commit_email?: string;
+        }>(`user`, { token })
       ).body;
-      platformConfig.gitAuthor = `${user.name} <${user.email}>`;
+      platformConfig.gitAuthor = `${user.name} <${
+        user.commit_email ?? user.email
+      }>`;
     }
     // istanbul ignore if: experimental feature
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
@@ -140,10 +147,23 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
+export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
+
+  const queryParams: Record<string, any> = {
+    membership: true,
+    per_page: 100,
+    with_merge_requests_enabled: true,
+    min_access_level: 30,
+    archived: false,
+  };
+  if (config?.topics?.length) {
+    queryParams['topic'] = config.topics.join(',');
+  }
+
+  const url = 'projects?' + getQueryString(queryParams);
+
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false`;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });
@@ -369,7 +389,7 @@ async function getStatus(
     return (
       await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
         paginate: true,
-        useCache,
+        memCache: useCache,
       })
     ).body;
   } catch (err) /* istanbul ignore next */ {
@@ -396,7 +416,8 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
 
@@ -426,6 +447,19 @@ export async function getBranchStatus(
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    branchStatuses.every(
+      (check) =>
+        check.name?.startsWith('renovate/') &&
+        gitlabToRenovateStatusMapping[check.status] === 'green'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   let status: BranchStatus = 'green'; // default to green
@@ -514,8 +548,38 @@ export async function getPrList(): Promise<Pr[]> {
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJson<{ name: string }[]>(url);
+    const { body: rules } = await gitlabApi.getJson<
+      {
+        name: string;
+        rule_type: string;
+        id: number;
+      }[]
+    >(url);
+
     const ruleName = 'renovateIgnoreApprovals';
+
+    const existingAnyApproverRule = rules?.find(
+      ({ rule_type }) => rule_type === 'any_approver'
+    );
+    const existingRegularApproverRules = rules?.filter(
+      ({ rule_type, name }) => rule_type !== 'any_approver' && name !== ruleName
+    );
+
+    if (existingRegularApproverRules?.length) {
+      await p.all(
+        existingRegularApproverRules.map((rule) => async (): Promise<void> => {
+          await gitlabApi.deleteJson(`${url}/${rule.id}`);
+        })
+      );
+    }
+
+    if (existingAnyApproverRule) {
+      await gitlabApi.putJson(`${url}/${existingAnyApproverRule.id}`, {
+        body: { ...existingAnyApproverRule, approvals_required: 0 },
+      });
+      return;
+    }
+
     const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
     if (!zeroApproversRule) {
       await gitlabApi.postJson(url, {
@@ -553,7 +617,7 @@ async function tryPrAutomerge(
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
           break;
         }
-        await delay(500 * attempt);
+        await setTimeout(500 * attempt);
       }
 
       await gitlabApi.putJson(
@@ -641,6 +705,7 @@ export async function updatePr({
   prBody: description,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   let title = prTitle;
   if ((await getPrList()).find((pr) => pr.number === iid)?.isDraft) {
@@ -651,15 +716,19 @@ export async function updatePr({
     ['open']: 'reopen',
     // TODO: null check (#7154)
   }[state!];
+
+  const body: any = {
+    title,
+    description: sanitize(description),
+    ...(newState && { state_event: newState }),
+  };
+  if (targetBranch) {
+    body.target_branch = targetBranch;
+  }
+
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        ...(newState && { state_event: newState }),
-      },
-    }
+    { body }
   );
 
   await tryPrAutomerge(iid, platformOptions);
@@ -736,7 +805,7 @@ export async function findPr({
     prList.find(
       (p: { sourceBranch: string; title: string; state: string }) =>
         p.sourceBranch === branchName &&
-        (!prTitle || p.title === prTitle) &&
+        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
         matchesState(p.state, state)
     ) ?? null
   );
@@ -797,7 +866,11 @@ export async function setBranchStatus({
   }
   try {
     // give gitlab some time to create pipelines for the sha
-    await delay(1000);
+    await setTimeout(
+      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY
+        ? parseInt(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 10)
+        : 1000
+    );
 
     await gitlabApi.postJson(url, { body: options });
 
@@ -830,7 +903,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     const res = await gitlabApi.getJson<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {
-      useCache: false,
+      memCache: false,
       paginate: true,
     });
     // istanbul ignore if
@@ -855,7 +928,7 @@ export async function getIssue(
     const issueBody = (
       await gitlabApi.getJson<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
-        { useCache }
+        { memCache: useCache }
       )
     ).body.description;
     return {
@@ -1191,10 +1264,6 @@ export async function ensureCommentRemoval(
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }
 
 export async function filterUnavailableUsers(

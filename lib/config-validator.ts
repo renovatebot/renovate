@@ -16,8 +16,6 @@ import {
 
 let returnVal = 0;
 
-/* eslint-disable no-console */
-
 async function validate(
   desc: string,
   config: RenovateConfig,
@@ -36,11 +34,17 @@ async function validate(
   const massagedConfig = massageConfig(migratedConfig);
   const res = await validateConfig(massagedConfig, isPreset);
   if (res.errors.length) {
-    logger.error({ errors: res.errors }, `${desc} contains errors`);
+    logger.error(
+      { file: desc, errors: res.errors },
+      'Found errors in configuration'
+    );
     returnVal = 1;
   }
   if (res.warnings.length) {
-    logger.warn({ warnings: res.warnings }, `${desc} contains warnings`);
+    logger.warn(
+      { file: desc, warnings: res.warnings },
+      'Found errors in configuration'
+    );
     returnVal = 1;
   }
 }
@@ -56,7 +60,7 @@ type PackageJson = {
       try {
         if (!(await pathExists(file))) {
           returnVal = 1;
-          logger.error(`${file} does not exist`);
+          logger.error({ file }, 'File does not exist');
           break;
         }
         const parsedContent = await getParsedContent(file);
@@ -64,11 +68,11 @@ type PackageJson = {
           logger.info(`Validating ${file}`);
           await validate(file, parsedContent);
         } catch (err) {
-          logger.warn({ err }, `${file} is not valid Renovate config`);
+          logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
         }
       } catch (err) {
-        logger.warn({ err }, `${file} could not be parsed`);
+        logger.warn({ file, err }, 'File could not be parsed');
         returnVal = 1;
       }
     }
@@ -85,11 +89,11 @@ type PackageJson = {
           logger.info(`Validating ${file}`);
           await validate(file, parsedContent);
         } catch (err) {
-          logger.warn({ err }, `${file} is not valid Renovate config`);
+          logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
         }
       } catch (err) {
-        logger.warn({ err }, `${file} could not be parsed`);
+        logger.warn({ file, err }, 'File could not be parsed');
         returnVal = 1;
       }
     }
@@ -118,7 +122,7 @@ type PackageJson = {
         try {
           await validate(file, fileConfig);
         } catch (err) {
-          logger.error({ err }, `${file} is not valid Renovate config`);
+          logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
         }
       }
@@ -131,6 +135,7 @@ type PackageJson = {
   }
   logger.info('Config validated successfully');
 })().catch((e) => {
+  // eslint-disable-next-line no-console
   console.error(e);
   process.exit(99);
 });

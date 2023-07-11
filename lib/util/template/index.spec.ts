@@ -1,15 +1,15 @@
 import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
-import * as _exec from '../exec';
+import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
-jest.mock('../exec');
+jest.mock('../exec/utils');
 
-const exec = mocked(_exec);
+const execUtils = mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {
-    exec.getChildEnv.mockReturnValue({
+    execUtils.getChildEnv.mockReturnValue({
       CUSTOM_FOO: 'foo',
       HOME: '/root',
     });
@@ -116,22 +116,25 @@ describe('util/template/index', () => {
 
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
+    const allowedArrayField = 'prBodyNotes';
     const forbiddenField = 'foobar';
 
     type TestCompileInput = Record<
-      typeof allowedField | typeof forbiddenField,
+      typeof allowedField | typeof allowedArrayField | typeof forbiddenField,
       unknown
     >;
 
     const compileInput: TestCompileInput = {
       [allowedField]: 'allowed',
+      [allowedArrayField]: ['allowed'],
       [forbiddenField]: 'forbidden',
     };
 
-    it('accessing allowed files', () => {
+    it('accessing allowed fields', () => {
       const p = template.proxyCompileInput(compileInput);
 
       expect(p[allowedField]).toBe('allowed');
+      expect(p[allowedArrayField]).toStrictEqual(['allowed']);
       expect(p[forbiddenField]).toBeUndefined();
     });
 
@@ -153,6 +156,7 @@ describe('util/template/index', () => {
       const arr = proxy[allowedField] as TestCompileInput[];
       const obj = arr[0];
       expect(obj[allowedField]).toBe('allowed');
+      expect(obj[allowedArrayField]).toStrictEqual(['allowed']);
       expect(obj[forbiddenField]).toBeUndefined();
     });
   });
@@ -203,6 +207,40 @@ describe('util/template/index', () => {
         undefined as never
       );
       expect(output).toBe('@fsouza/prettierd');
+    });
+  });
+
+  describe('equals', () => {
+    it('equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'git-refs',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('https://github.com/renovatebot/renovate');
+    });
+
+    it('not equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'github-releases',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('renovatebot/renovate');
+    });
+
+    it('not strict equals', () => {
+      const output = template.compile(
+        '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
+        {
+          newMajor: 3,
+        }
+      );
+      expect(output).toBe('not equals');
     });
   });
 });

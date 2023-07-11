@@ -15,7 +15,7 @@ Having the Dependency Dashboard also enables the concept of an "approval" workfl
 ## Supported platforms
 
 The Dependency Dashboard requires that the host platforms supports the concept of issues with dynamic Markdown checkboxes.
-Read [our FAQ, Renovate core features not supported on all platforms](https://docs.renovatebot.com/faq/#renovate-core-features-not-supported-on-all-platforms) to see if your platform can use the Dependency Dashboard feature.
+Read [our FAQ, Renovate core features not supported on all platforms](../faq.md#renovate-core-features-not-supported-on-all-platforms) to see if your platform can use the Dependency Dashboard feature.
 
 ## How to enable the dashboard
 
@@ -23,7 +23,7 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 
 ```json
 {
-  "extends": ["config:base", ":dependencyDashboard"]
+  "extends": ["config:recommended", ":dependencyDashboard"]
 }
 ```
 
@@ -41,7 +41,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 
 ```json
 {
-  "extends": ["config:base", ":disableDependencyDashboard"]
+  "extends": ["config:recommended", ":disableDependencyDashboard"]
 }
 ```
 
@@ -86,7 +86,7 @@ To require manual approval for _all updates_, add the `:dependencyDashboardAppro
 
 ```json
 {
-  "extends": ["config:base", ":dependencyDashboardApproval"]
+  "extends": ["config:recommended", ":dependencyDashboardApproval"]
 }
 ```
 

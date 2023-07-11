@@ -81,7 +81,6 @@ export interface NpmLockFiles {
 
 export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
   hasPackageManager?: boolean;
-  hasWorkspaces?: boolean;
   lernaClient?: string;
   lernaJsonFile?: string;
   lernaPackages?: string[];

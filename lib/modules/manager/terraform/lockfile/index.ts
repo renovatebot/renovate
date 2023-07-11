@@ -25,7 +25,7 @@ async function updateAllLocks(
       const updateConfig: GetPkgReleasesConfig = {
         versioning: 'hashicorp',
         datasource: 'terraform-provider',
-        depName: lock.packageName,
+        packageName: lock.packageName,
       };
       const { releases } = (await getPkgReleases(updateConfig)) ?? {};
       // istanbul ignore if: needs test
@@ -69,7 +69,13 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`terraform.updateArtifacts(${packageFileName})`);
 
-  const lockFilePath = findLockFile(packageFileName);
+  const lockFilePath = await findLockFile(packageFileName);
+
+  if (!lockFilePath) {
+    logger.debug('No .terraform.lock.hcl found');
+    return null;
+  }
+
   try {
     const lockFileContent = await readLockFile(lockFilePath);
     if (!lockFileContent) {

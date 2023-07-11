@@ -2,6 +2,7 @@ import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -20,11 +21,13 @@ export interface GroupConfig extends Record<string, unknown> {
   branchTopic?: string;
 }
 
+export type RecreateWhen = 'auto' | 'never' | 'always';
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  autoReplaceGlobalMatch?: boolean;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchPrefixOld?: string;
@@ -33,6 +36,9 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  commitMessageTopic?: string;
+  commitMessageAction?: string;
+  commitMessageExtra?: string;
   confidential?: boolean;
   customChangelogUrl?: string;
   draftPR?: boolean;
@@ -48,6 +54,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  internalChecksAsSuccess?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -64,6 +71,7 @@ export interface RenovateSharedConfig {
   respectLatest?: boolean;
   stopUpdatingLabel?: string;
   rebaseWhen?: string;
+  recreateWhen?: RecreateWhen;
   recreateClosed?: boolean;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
@@ -72,6 +80,7 @@ export interface RenovateSharedConfig {
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
+  commitMessageLowerCase?: 'auto' | 'never';
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -85,10 +94,12 @@ export interface RenovateSharedConfig {
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
+  autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
+  dockerCliOptions?: string;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -116,7 +127,8 @@ export interface RepoGlobalConfig {
   cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
-  dockerImagePrefix?: string;
+  dockerCliOptions?: string;
+  dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
   executionTimeout?: number;
@@ -187,6 +199,7 @@ export interface RegExManager extends RegexManagerTemplates {
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -211,7 +224,7 @@ export interface RenovateConfig
   hostRules?: HostRule[];
 
   ignorePresets?: string[];
-  includeForks?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
 
   fileList?: string[];
@@ -224,6 +237,7 @@ export interface RenovateConfig
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
+  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -244,13 +258,18 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
+  vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
-  fetchReleaseNotes?: boolean;
+  fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
-  skipInstalls?: boolean;
+  skipInstalls?: boolean | null;
+
+  constraintsFiltering?: ConstraintsFilter;
+
+  checkedBranches?: string[];
 }
 
 export interface AllConfig
@@ -283,6 +302,8 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
+export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
+
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
 export type MergeStrategy =
@@ -298,9 +319,8 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  matchFiles?: string[];
-  matchPaths?: string[];
-  matchLanguages?: string[];
+  isVulnerabilityAlert?: boolean;
+  matchFileNames?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
   matchDatasources?: string[];
@@ -320,7 +340,10 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchCategories?: string[];
+  matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
+  vulnerabilitySeverity?: string;
 }
 
 export interface ValidationMessage {
@@ -442,6 +465,7 @@ export type RenovateOptions =
 export interface PackageRuleInputConfig extends Record<string, unknown> {
   versioning?: string;
   packageFile?: string;
+  lockFiles?: string[];
   depType?: string;
   depTypes?: string[];
   depName?: string;
@@ -450,9 +474,10 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   currentVersion?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
-  language?: string;
+  categories?: string[];
   baseBranch?: string;
   manager?: string;
   datasource?: string;
@@ -480,7 +505,6 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
-  language?: string | null;
 }
 
 export interface ValidationResult {

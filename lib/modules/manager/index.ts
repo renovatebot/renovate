@@ -1,4 +1,3 @@
-import { programmingLanguages } from '../../constants';
 import type { RangeStrategy } from '../../types';
 import managers from './api';
 import type {
@@ -13,15 +12,12 @@ import type {
 export { hashMap } from './fingerprint.generated';
 const managerList = Array.from(managers.keys());
 
-const languageList = programmingLanguages.concat();
-
 export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
 ): ManagerApi[T] | undefined {
   return managers.get(manager)?.[name];
 }
-export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
 export const getManagers = (): Map<string, ManagerApi> => managers;
 
@@ -87,6 +83,9 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return managerRangeStrategy;
   }
   if (rangeStrategy === 'auto') {
+    if (m.updateLockedDependency) {
+      return 'update-lockfile';
+    }
     // default to 'replace' for auto
     return 'replace';
   }

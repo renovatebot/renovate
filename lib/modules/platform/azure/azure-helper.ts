@@ -7,6 +7,7 @@ import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
 import * as azureApi from './azure-got-wrapper';
+import { WrappedExceptionSchema } from './schema';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
@@ -82,18 +83,23 @@ export async function getFile(
   if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
-      const jTmp = JSON.parse(fileContent);
-      if (jTmp.typeKey === 'GitItemNotFoundException') {
-        // file not found
-        return null;
-      }
-      if (jTmp.typeKey === 'GitUnresolvableToCommitException') {
-        // branch not found
-        return null;
+      const result = await WrappedExceptionSchema.safeParseAsync(
+        JSON.parse(fileContent)
+      );
+      if (result.success) {
+        if (result.data.typeKey === 'GitItemNotFoundException') {
+          logger.warn(`Unable to find file ${filePath}`);
+          return null;
+        }
+        if (result.data.typeKey === 'GitUnresolvableToCommitException') {
+          logger.warn(`Unable to find branch ${branchName}`);
+          return null;
+        }
       }
     } catch (error) {
       // it 's not a JSON, so I send the content directly with the line under
     }
+
     return fileContent;
   }
   return null; // no file found
@@ -141,12 +147,11 @@ export async function getMergeMethod(
   };
 
   const policyConfigurations = (
-    await (await azureApi.policyApi()).getPolicyConfigurations(project)
+    await (
+      await azureApi.policyApi()
+    ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
   )
-    .filter(
-      (p) =>
-        p.settings.scope.some(isRelevantScope) && p.type?.id === mergePolicyGuid
-    )
+    .filter((p) => p.settings.scope.some(isRelevantScope))
     .map((p) => p.settings)[0];
 
   logger.trace(

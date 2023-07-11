@@ -8,12 +8,13 @@ import {
   parseUrl,
   replaceUrlPath,
   resolveBaseUrl,
+  trimSlashes,
   trimTrailingSlash,
   validateUrl,
 } from './url';
 
 describe('util/url', () => {
-  test.each`
+  it.each`
     baseUrl                 | x                       | result
     ${'http://foo.io'}      | ${''}                   | ${'http://foo.io'}
     ${'http://foo.io/'}     | ${''}                   | ${'http://foo.io'}
@@ -52,7 +53,7 @@ describe('util/url', () => {
     expect(resolveBaseUrl(baseUrl, x)).toBe(result);
   });
 
-  test.each`
+  it.each`
     baseUrl                 | x                       | result
     ${'http://foo.io'}      | ${''}                   | ${'http://foo.io'}
     ${'http://foo.io/'}     | ${''}                   | ${'http://foo.io'}
@@ -89,6 +90,7 @@ describe('util/url', () => {
     ${'http://foo.io'}      | ${'aaa/?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
   `('replaceUrlPath("$baseUrl", "$x") => $result', ({ baseUrl, x, result }) => {
     expect(replaceUrlPath(baseUrl, x)).toBe(result);
+    expect(replaceUrlPath(new URL(baseUrl), x)).toBe(result);
   });
 
   it('getQueryString', () => {
@@ -120,6 +122,17 @@ describe('util/url', () => {
     expect(trimTrailingSlash('/foo/bar')).toBe('/foo/bar');
     expect(trimTrailingSlash('foo/')).toBe('foo');
     expect(trimTrailingSlash('foo//////')).toBe('foo');
+  });
+
+  it('trimSlashes', () => {
+    expect(trimSlashes('foo')).toBe('foo');
+    expect(trimSlashes('/foo')).toBe('foo');
+    expect(trimSlashes('foo/')).toBe('foo');
+    expect(trimSlashes('//////foo//////')).toBe('foo');
+    expect(trimSlashes('foo/bar')).toBe('foo/bar');
+    expect(trimSlashes('/foo/bar')).toBe('foo/bar');
+    expect(trimSlashes('foo/bar/')).toBe('foo/bar');
+    expect(trimSlashes('/foo/bar/')).toBe('foo/bar');
   });
 
   it('ensureTrailingSlash', () => {

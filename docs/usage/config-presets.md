@@ -101,7 +101,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing SemVer ranges.".
 It simply sets the configuration option `rangeStrategy` to `replace`.
 
-An example of a full config is `config:base`, which is Renovate's default configuration.
+An example of a full config is `config:recommended`, which is Renovate's default configuration.
 It mostly uses Renovate config defaults but adds a few smart customizations such as grouping monorepo packages together.
 
 <!-- prettier-ignore -->
@@ -111,8 +111,8 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 
 ## How to Use Preset Configs
 
-By default, Renovate App's onboarding PR suggests the `["config:base]"` preset.
-If you're self hosting, and want to use the `config:base` preset, then you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+By default, Renovate App's onboarding PR suggests the `["config:recommended]"` preset.
+If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
 
 Read the [Full Config Presets](https://docs.renovatebot.com/presets-config/) page to learn more about our `config:` presets.
 
@@ -120,18 +120,18 @@ A typical onboarding `renovate.json` looks like this:
 
 ```json
 {
-  "extends": ["config:base"]
+  "extends": ["config:recommended"]
 }
 ```
 
 Here's an example of using presets to change Renovate's behavior.
-You're happy with the `config:base` preset, but want Renovate to create PRs when you're not at the office.
+You're happy with the `config:recommended` preset, but want Renovate to create PRs when you're not at the office.
 You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` preset.
 You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
 ```json
 {
-  "extends": ["config:base", "schedule:nonOfficeHours"]
+  "extends": ["config:recommended", "schedule:nonOfficeHours"]
 }
 ```
 
@@ -164,7 +164,7 @@ In short, the number of `{{argx}}` parameters in the definition is how many para
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
 If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
-Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
+Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
 ## GitHub-hosted Presets
 
@@ -211,7 +211,10 @@ Renovate will determine the current platform and look up the preset from there.
 ## Contributing to presets
 
 Have you configured a rule that you think others might benefit from?
-Please consider contributing it to the [Renovate](https://github.com/renovatebot/renovate) repository so that it gains higher visibility and saves others from reinventing the same thing.
+Please consider contributing it to the [Renovate repository](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) so that it gains higher visibility and saves others from reinventing the same thing.
+
+Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
+The maintainers can also help improve the preset, and let you know where to put it in the code.
 
 ## Organization level presets
 
@@ -253,7 +256,7 @@ For example:
   "version": "0.0.1",
   "renovate-config": {
     "default": {
-      "extends": ["config:base", "schedule:nonOfficeHours"]
+      "extends": ["config:recommended", "schedule:nonOfficeHours"]
     }
   }
 }

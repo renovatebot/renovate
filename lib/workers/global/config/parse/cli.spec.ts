@@ -33,19 +33,19 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it('supports boolean no value', () => {
-      argv.push('--recreate-closed');
-      expect(cli.getConfig(argv)).toEqual({ recreateClosed: true });
+      argv.push('--config-migration');
+      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
       argv = argv.slice(0, -1);
     });
 
     it('supports boolean space true', () => {
-      argv.push('--recreate-closed');
+      argv.push('--config-migration');
       argv.push('true');
-      expect(cli.getConfig(argv)).toEqual({ recreateClosed: true });
+      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
     });
 
     it('throws exception for invalid boolean value', () => {
-      argv.push('--recreate-closed');
+      argv.push('--config-migration');
       argv.push('badvalue');
       expect(() => cli.getConfig(argv)).toThrow(
         Error(
@@ -55,19 +55,19 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it('supports boolean space false', () => {
-      argv.push('--recreate-closed');
+      argv.push('--config-migration');
       argv.push('false');
-      expect(cli.getConfig(argv)).toEqual({ recreateClosed: false });
+      expect(cli.getConfig(argv)).toEqual({ configMigration: false });
     });
 
     it('supports boolean equals true', () => {
-      argv.push('--recreate-closed=true');
-      expect(cli.getConfig(argv)).toEqual({ recreateClosed: true });
+      argv.push('--config-migration=true');
+      expect(cli.getConfig(argv)).toEqual({ configMigration: true });
     });
 
     it('supports boolean equals false', () => {
-      argv.push('--recreate-closed=false');
-      expect(cli.getConfig(argv)).toEqual({ recreateClosed: false });
+      argv.push('--config-migration=false');
+      expect(cli.getConfig(argv)).toEqual({ configMigration: false });
     });
 
     it('supports list single', () => {
@@ -121,7 +121,7 @@ describe('workers/global/config/parse/cli', () => {
       });
     });
 
-    test.each`
+    it.each`
       arg                              | config
       ${'--endpoints='}                | ${{ hostRules: [] }}
       ${'--azure-auto-complete=false'} | ${{ platformAutomerge: false }}
@@ -130,6 +130,12 @@ describe('workers/global/config/parse/cli', () => {
       ${'--git-lab-automerge=false'}   | ${{ platformAutomerge: false }}
       ${'--git-lab-automerge=true'}    | ${{ platformAutomerge: true }}
       ${'--git-lab-automerge'}         | ${{ platformAutomerge: true }}
+      ${'--recreate-closed=false'}     | ${{ recreateWhen: 'auto' }}
+      ${'--recreate-closed=true'}      | ${{ recreateWhen: 'always' }}
+      ${'--recreate-closed'}           | ${{ recreateWhen: 'always' }}
+      ${'--recreate-when=auto'}        | ${{ recreateWhen: 'auto' }}
+      ${'--recreate-when=always'}      | ${{ recreateWhen: 'always' }}
+      ${'--recreate-when=never'}       | ${{ recreateWhen: 'never' }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);
@@ -150,10 +156,10 @@ describe('workers/global/config/parse/cli', () => {
     });
 
     it('parses json object correctly', () => {
-      argv.push(`--onboarding-config={"extends": ["config:base"]}`);
+      argv.push(`--onboarding-config={"extends": ["config:recommended"]}`);
       expect(cli.getConfig(argv)).toEqual({
         onboardingConfig: {
-          extends: ['config:base'],
+          extends: ['config:recommended'],
         },
       });
     });

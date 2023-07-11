@@ -1,4 +1,5 @@
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import type { Category } from '../../../constants';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -15,13 +16,15 @@ export const defaultConfig = {
   fileMatch: [systemManifestRegex],
 };
 
+export const categories: Category[] = ['cd', 'kubernetes'];
+
 export const supportedDatasources = [
   GithubReleasesDatasource.id,
   GitRefsDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   GitTagsDatasource.id,
-  BitBucketTagsDatasource.id,
+  BitbucketTagsDatasource.id,
   HelmDatasource.id,
   DockerDatasource.id,
 ];

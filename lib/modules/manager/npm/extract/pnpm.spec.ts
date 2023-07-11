@@ -1,4 +1,5 @@
 import yaml from 'js-yaml';
+import { Fixtures } from '../../../../../test/fixtures';
 import { getFixturePath, logger } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as fs from '../../../../util/fs';
@@ -6,6 +7,7 @@ import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
   findPnpmWorkspace,
+  getPnpmLock,
 } from './pnpm';
 
 describe('modules/manager/npm/extract/pnpm', () => {
@@ -225,6 +227,39 @@ describe('modules/manager/npm/extract/pnpm', () => {
             packageFile.packageFile === 'not-matching/b/package.json'
         )?.managerData.pnpmShrinkwrap
       ).toBeUndefined();
+    });
+  });
+
+  describe('.getPnpmLock()', () => {
+    const readLocalFile = jest.spyOn(fs, 'readLocalFile');
+
+    it('returns empty if failed to parse', async () => {
+      readLocalFile.mockResolvedValueOnce(undefined as never);
+      const res = await getPnpmLock('package.json');
+      expect(res.lockedVersionsWithPath).toBeUndefined();
+    });
+
+    it('extracts version from monorepo', async () => {
+      const plocktest1Lock = Fixtures.get('pnpm-monorepo/pnpm-lock.yaml', '..');
+      readLocalFile.mockResolvedValueOnce(plocktest1Lock);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(11);
+    });
+
+    it('extracts version from normal repo', async () => {
+      const plocktest1Lock = Fixtures.get(
+        'lockfile-parsing/pnpm-lock.yaml',
+        '..'
+      );
+      readLocalFile.mockResolvedValueOnce(plocktest1Lock);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
+    });
+
+    it('returns empty if no deps', async () => {
+      readLocalFile.mockResolvedValueOnce('{}');
+      const res = await getPnpmLock('package.json');
+      expect(res.lockedVersionsWithPath).toBeUndefined();
     });
   });
 });

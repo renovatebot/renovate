@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
@@ -22,3 +23,5 @@ export const defaultConfig = {
   ],
   versioning: ivyVersioning.id,
 };
+
+export const categories: Category[] = ['java'];

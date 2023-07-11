@@ -24,6 +24,7 @@ const resolvers = {
   gitea,
   github,
   gitlab,
+  local: null,
 } satisfies Record<PlatformId, Resolver | null>;
 
 export function getPreset({
@@ -32,7 +33,7 @@ export function getPreset({
   presetPath,
   tag,
 }: PresetConfig): Promise<Preset | undefined> {
-  const { platform, endpoint } = GlobalConfig.get();
+  const platform = GlobalConfig.get('platform');
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
@@ -42,6 +43,7 @@ export function getPreset({
       `The platform you're using ($platform) does not support local presets.`
     );
   }
+  const endpoint = GlobalConfig.get('endpoint');
   return resolver.getPresetFromEndpoint(
     repo,
     presetName,

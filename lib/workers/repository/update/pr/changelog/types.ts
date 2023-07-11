@@ -24,8 +24,8 @@ export interface ChangeLogRelease {
 }
 
 export interface ChangeLogProject {
-  depName?: string;
-  type: 'github' | 'gitlab' | 'azure';
+  packageName?: string;
+  type: 'azure' | 'bitbucket' | 'github' | 'gitlab';
   apiBaseUrl?: string;
   baseUrl: string;
   repository: string;
@@ -34,9 +34,10 @@ export interface ChangeLogProject {
 }
 
 export type ChangeLogError =
+  | 'MissingAzureToken'
+  | 'MissingBitbucketToken'
   | 'MissingGithubToken'
-  | 'MissingGitlabToken'
-  | 'MissingAzureToken';
+  | 'MissingGitlabToken';
 
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;

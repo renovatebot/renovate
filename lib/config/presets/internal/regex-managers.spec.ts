@@ -56,7 +56,7 @@ describe('config/presets/internal/regex-managers', () => {
     });
 
     describe('matches regexes patterns', () => {
-      test.each`
+      it.each`
         path                    | expected
         ${'Dockerfile'}         | ${true}
         ${'foo/Dockerfile'}     | ${true}
@@ -110,7 +110,7 @@ describe('config/presets/internal/regex-managers', () => {
       expect(res?.deps).toMatchObject([
         {
           currentValue: '18.13.0',
-          datasource: 'node',
+          datasource: 'node-version',
           depName: 'node',
           replaceString:
             '# renovate: datasource=node depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
@@ -134,7 +134,7 @@ describe('config/presets/internal/regex-managers', () => {
     });
 
     describe('matches regexes patterns', () => {
-      test.each`
+      it.each`
         path                                | expected
         ${'.github/workflows/foo.yaml'}     | ${true}
         ${'.github/workflows/bar.yml'}      | ${true}
@@ -199,7 +199,7 @@ describe('config/presets/internal/regex-managers', () => {
     });
 
     describe('matches regexes patterns', () => {
-      test.each`
+      it.each`
         path                    | expected
         ${'Chart.yaml'}         | ${true}
         ${'foo/Chart.yaml'}     | ${true}

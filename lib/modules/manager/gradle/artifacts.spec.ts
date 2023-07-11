@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import { join } from 'upath';
 import {
   envMock,
@@ -12,6 +12,7 @@ import {
   logger,
   mockedFunction,
   partial,
+  scm,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -34,6 +35,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const osPlatformSpy = jest.spyOn(os, 'platform');
@@ -61,7 +63,7 @@ describe('modules/manager/gradle/artifacts', () => {
     });
 
     fs.findUpLocal.mockResolvedValue('gradlew');
-    git.getFileList.mockResolvedValue([
+    scm.getFileList.mockResolvedValue([
       'gradlew',
       'build.gradle',
       'gradle.lockfile',
@@ -92,7 +94,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
   it('aborts if no lockfile is found', async () => {
     const execSnapshots = mockExecAll();
-    git.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
+    scm.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
 
     expect(
       await updateArtifacts({
@@ -161,6 +163,50 @@ describe('modules/manager/gradle/artifacts', () => {
         cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      },
+    ]);
+  });
+
+  it('updates lock file in win32', async () => {
+    osPlatformSpy.mockReturnValue('win32');
+
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        { depName: 'org.junit.jupiter:junit-jupiter-api' },
+        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
+
+    // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'gradlew.bat --console=plain -q properties',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+      {
+        cmd: 'gradlew.bat --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -203,6 +249,7 @@ describe('modules/manager/gradle/artifacts', () => {
         cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -253,6 +300,7 @@ describe('modules/manager/gradle/artifacts', () => {
         cmd: './gradlew --console=plain -q :dependencies --write-locks',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -279,7 +327,7 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -287,10 +335,9 @@ describe('modules/manager/gradle/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e GRADLE_OPTS ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +
@@ -305,16 +352,18 @@ describe('modules/manager/gradle/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e GRADLE_OPTS ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +
           './gradlew --console=plain -q :dependencies --write-locks' +
           '"',
-        options: { cwd: '/tmp/github/some/repo' },
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
       },
     ]);
   });
@@ -348,7 +397,10 @@ describe('modules/manager/gradle/artifacts', () => {
       { cmd: 'install-tool java 16.0.1' },
       {
         cmd: './gradlew --console=plain -q :dependencies --write-locks',
-        options: { cwd: '/tmp/github/some/repo' },
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
       },
     ]);
   });
@@ -386,6 +438,7 @@ describe('modules/manager/gradle/artifacts', () => {
         cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
         options: {
           cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
@@ -485,7 +538,10 @@ describe('modules/manager/gradle/artifacts', () => {
       { cmd: 'install-tool java 11.0.1' },
       {
         cmd: './gradlew --console=plain -q :dependencies --write-locks',
-        options: { cwd: '/tmp/github/some/repo' },
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
       },
     ]);
   });

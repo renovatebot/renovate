@@ -1,4 +1,4 @@
-import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
+import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
 
 export interface ToolConstraint {
   toolName: string;
@@ -7,7 +7,8 @@ export interface ToolConstraint {
 
 export interface ToolConfig {
   datasource: string;
-  depName: string;
+  extractVersion?: string;
+  packageName: string;
   hash?: boolean;
   versioning: string;
 }
@@ -48,6 +49,7 @@ export interface ExecOptions {
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;
   preCommands?: Opt<string[]>;
+  ignoreStdout?: boolean;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;

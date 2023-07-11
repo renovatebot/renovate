@@ -99,7 +99,6 @@ As we retrieve items during the fetch process, we gradually construct a data str
     "2.0.0": { "version": "2.0.0", "releaseTimestamp": "2022-09-01" },
   },
   "createdAt": "2022-12-20",
-  "updatedAt": "2022-12-20",
 }
 ```
 
@@ -159,7 +158,6 @@ Given we performed fetch at the day of latest release, new cache looks like:
     "2.0.0": { "version": "2.0.0", "releaseTimestamp": "2022-09-01" },
   },
   "createdAt": "2022-12-20",
-  "updatedAt": "2022-12-30",
 }
 ```
 

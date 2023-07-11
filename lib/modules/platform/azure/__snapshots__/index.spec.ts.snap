@@ -30,33 +30,6 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
 }
 `;
 
-exports[`modules/platform/azure/index createPr() should create and return a PR object with auto-complete set 1`] = `
-{
-  "autoCompleteSetBy": {
-    "id": 123,
-  },
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "completionOptions": {
-    "deleteSourceBranch": true,
-    "mergeCommitMessage": "The Title",
-    "squashMerge": true,
-  },
-  "createdAt": undefined,
-  "createdBy": {
-    "id": 123,
-  },
-  "number": 456,
-  "pullRequestId": 456,
-  "sourceBranch": undefined,
-  "sourceRefName": undefined,
-  "state": "open",
-  "targetBranch": undefined,
-  "title": "The Title",
-}
-`;
-
 exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
 {
   "bodyStruct": {
@@ -73,6 +46,33 @@ exports[`modules/platform/azure/index createPr() should create and return an app
   "sourceRefName": undefined,
   "state": "open",
   "targetBranch": undefined,
+}
+`;
+
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
+{
+  "autoCompleteSetBy": {
+    "id": "123",
+  },
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "completionOptions": {
+    "deleteSourceBranch": true,
+    "mergeCommitMessage": "The Title",
+    "squashMerge": true,
+  },
+  "createdAt": undefined,
+  "createdBy": {
+    "id": "123",
+  },
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+  "title": "The Title",
 }
 `;
 
@@ -274,7 +274,7 @@ exports[`modules/platform/azure/index initRepo should initialise the config for 
 }
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should close the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should close the PR 1`] = `
 [
   [
     {
@@ -288,7 +288,9 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body) should close t
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should reopen the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should re-approve the PR 1`] = `undefined`;
+
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should reopen the PR 1`] = `
 [
   [
     {
@@ -308,11 +310,12 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body) should reopen 
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should update the PR 1`] = `
 [
   [
     {
       "description": "Hello world again",
+      "targetRefName": "refs/heads/new_base",
       "title": "The New Title",
     },
     "1",
@@ -321,7 +324,7 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body) should update 
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR without description 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should update the PR without description 1`] = `
 [
   [
     {

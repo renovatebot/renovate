@@ -1,5 +1,3 @@
-// TODO #7154
-import URL from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
@@ -9,8 +7,10 @@ import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as azure from './azure';
+import * as bitbucket from './bitbucket';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -39,7 +39,8 @@ export async function getReleaseList(
       case 'azure':
         logger.debug('Azure DevOps Releases are not supported.');
         return [];
-
+      case 'bitbucket':
+        return bitbucket.getReleaseList(project, release);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -86,7 +87,7 @@ export function massageBody(
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
     regEx(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`,
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
       false
     ),
@@ -94,7 +95,7 @@ export function massageBody(
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    regEx(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
     '\n'
   );
   // Reduce headings size
@@ -129,15 +130,15 @@ export async function getReleaseNotes(
   release: ChangeLogRelease,
   config: BranchUpgradeConfig
 ): Promise<ChangeLogNotes | null> {
-  const { depName, repository } = project;
+  const { packageName, repository } = project;
   const { version, gitRef } = release;
   // TODO: types (#7154)
-  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName!})`);
+  logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
-  let matchedRelease = getExactReleaseMatch(depName!, version, releases);
+  let matchedRelease = getExactReleaseMatch(packageName!, version, releases);
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
@@ -162,11 +163,11 @@ export async function getReleaseNotes(
 }
 
 function getExactReleaseMatch(
-  depName: string,
+  packageName: string,
   version: string,
   releases: ChangeLogNotes[]
 ): ChangeLogNotes | undefined {
-  const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
+  const exactReleaseReg = regEx(`${packageName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
     exactReleaseReg.test(r.tag!)
@@ -235,17 +236,6 @@ function sectionize(text: string, level: number): string[] {
   return result;
 }
 
-function isUrl(url: string): boolean {
-  try {
-    return !!URL.parse(url).hostname;
-  } catch (err) {
-    // istanbul ignore next
-    logger.debug({ err }, `Error parsing ${url} in URL.parse`);
-  }
-  // istanbul ignore next
-  return false;
-}
-
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
@@ -272,7 +262,12 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory
         );
-
+      case 'bitbucket':
+        return await bitbucket.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
@@ -364,8 +359,15 @@ export async function getReleaseNotesMd(
 
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
-            if (word.includes(version) && !isUrl(word)) {
+            if (word.includes(version) && !validateUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
+              // TODO: fix url
+              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
+              const mdHeadingLink = title
+                .filter((word) => !validateUrl(word))
+                .join('-')
+                .replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const url = `${notesSourceUrl}#${mdHeadingLink}`;
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
@@ -384,7 +386,10 @@ export async function getReleaseNotesMd(
             }
           }
         } catch (err) /* istanbul ignore next */ {
-          logger.warn({ err }, `Error parsing ${changelogFile}`);
+          logger.warn(
+            { file: changelogFile, err },
+            `Error parsing changelog file`
+          );
         }
       }
     }

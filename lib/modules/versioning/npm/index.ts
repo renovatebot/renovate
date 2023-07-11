@@ -33,6 +33,7 @@ const {
   ltr: isLessThanRange,
   gt: isGreaterThan,
   eq: equals,
+  subset,
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
@@ -63,6 +64,7 @@ export const api: VersioningApi = {
   getSatisfyingVersion,
   minSatisfyingVersion,
   sortVersions,
+  subset,
 };
 
 export default api;

@@ -1,5 +1,6 @@
 import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
+import { partial } from '../../../../test/util';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
@@ -211,7 +212,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
           resp(false, [
             { version: v3, releaseTimestamp: t3, foo: '3' },
             { version: v2, releaseTimestamp: t2, foo: '2' },
-            {} as never,
+            partial<TestAdapterInput>(),
             { version: v1, releaseTimestamp: t1, foo: '1' },
           ])
         );
@@ -382,7 +383,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         { version: v1, releaseTimestamp: t1, foo: '1' },
       ];
 
-      test.each`
+      it.each`
         isPrivate    | isCacheable
         ${undefined} | ${false}
         ${true}      | ${false}

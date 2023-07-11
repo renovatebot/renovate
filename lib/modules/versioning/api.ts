@@ -1,4 +1,6 @@
 import * as amazonMachineImage from './aws-machine-image';
+import * as azureRestApi from './azure-rest-api';
+import * as bazelModule from './bazel-module';
 import * as cargo from './cargo';
 import * as composer from './composer';
 import * as conan from './conan';
@@ -38,6 +40,8 @@ const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
 
 api.set(amazonMachineImage.id, amazonMachineImage.api);
+api.set(azureRestApi.id, azureRestApi.api);
+api.set(bazelModule.id, bazelModule.api);
 api.set(cargo.id, cargo.api);
 api.set(composer.id, composer.api);
 api.set(conan.id, conan.api);

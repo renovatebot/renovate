@@ -37,16 +37,19 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
+  forkOrg?: string;
   forkToken?: string;
-  includeForks?: boolean;
+  forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
+  bbUseDevelopmentBranch?: boolean;
 }
 
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
+  targetBranch: string;
 }
 
 export interface PrBodyStruct {
@@ -87,13 +90,14 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove?: boolean;
+  autoApprove?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
 };
+
 export interface CreatePRConfig {
   sourceBranch: string;
   targetBranch: string;
@@ -109,6 +113,7 @@ export interface UpdatePrConfig {
   prTitle: string;
   prBody?: string;
   state?: 'open' | 'closed';
+  targetBranch?: string;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -159,11 +164,15 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export interface AutodiscoverConfig {
+  topics?: string[];
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
-  getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
+  getVulnerabilityAlerts?(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
     repoName?: string,
@@ -186,7 +195,7 @@ export interface Platform {
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
-  getRepos(): Promise<string[]>;
+  getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
@@ -204,7 +213,10 @@ export interface Platform {
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(branchName: string): Promise<BranchStatus>;
+  getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean
+  ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
@@ -219,4 +231,6 @@ export interface PlatformScm {
   getBranchCommit(branchName: string): Promise<CommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
+  getFileList(): Promise<string[]>;
+  checkoutBranch(branchName: string): Promise<CommitSha>;
 }

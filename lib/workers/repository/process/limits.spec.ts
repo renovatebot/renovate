@@ -1,10 +1,6 @@
 import { DateTime } from 'luxon';
-import {
-  RenovateConfig,
-  getConfig,
-  platform,
-  scm,
-} from '../../../../test/util';
+import { RenovateConfig, partial, platform, scm } from '../../../../test/util';
+import type { Pr } from '../../../modules/platform/types';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
 
@@ -12,7 +8,13 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({
+    branchPrefix: 'foo/',
+    onboardingBranch: 'bar/configure',
+    prHourlyLimit: 2,
+    prConcurrentLimit: 10,
+    branchConcurrentLimit: null,
+  });
 });
 
 describe('workers/repository/process/limits', () => {
@@ -34,20 +36,19 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getPrHourlyRemaining({
         ...config,
         prHourlyLimit: 10,
-        branchPrefix: 'foo/',
-        onboardingBranch: 'bar/configure',
       });
       expect(res).toBe(7);
     });
 
     it('returns prHourlyLimit if errored', async () => {
-      config.prHourlyLimit = 2;
+      config.prHourlyLimit = 5;
       platform.getPrList.mockRejectedValue('Unknown error');
       const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toBe(2);
+      expect(res).toBe(5);
     });
 
     it('returns 99 if no hourly limit', async () => {
+      config.prHourlyLimit = 0;
       const res = await limits.getPrHourlyRemaining(config);
       expect(res).toBe(99);
     });
@@ -58,10 +59,12 @@ describe('workers/repository/process/limits', () => {
       config.prConcurrentLimit = 20;
       platform.getBranchPr.mockImplementation((branchName) =>
         branchName
-          ? Promise.resolve({
-              sourceBranch: branchName,
-              state: 'open',
-            } as never)
+          ? Promise.resolve(
+              partial<Pr>({
+                sourceBranch: branchName,
+                state: 'open',
+              })
+            )
           : Promise.reject('some error')
       );
       const branches: BranchConfig[] = [
@@ -73,6 +76,7 @@ describe('workers/repository/process/limits', () => {
     });
 
     it('returns 99 if no concurrent limit', async () => {
+      config.prConcurrentLimit = 0;
       const res = await limits.getConcurrentPrsRemaining(config, []);
       expect(res).toBe(99);
     });
@@ -80,16 +84,16 @@ describe('workers/repository/process/limits', () => {
 
   describe('getPrsRemaining()', () => {
     it('returns hourly limit', async () => {
-      config.prHourlyLimit = 5;
+      config.prHourlyLimit = 1;
       platform.getPrList.mockResolvedValueOnce([]);
       const res = await limits.getPrsRemaining(config, []);
-      expect(res).toBe(5);
+      expect(res).toBe(1);
     });
 
     it('returns concurrent limit', async () => {
-      config.prConcurrentLimit = 5;
+      config.prConcurrentLimit = 1;
       const res = await limits.getPrsRemaining(config, []);
-      expect(res).toBe(5);
+      expect(res).toBe(1);
     });
   });
 
@@ -120,9 +124,9 @@ describe('workers/repository/process/limits', () => {
       expect(res).toBe(99);
     });
 
-    it('returns 99 if no limits are set', async () => {
+    it('returns 10 if no limits are set', async () => {
       const res = await limits.getConcurrentBranchesRemaining(config, []);
-      expect(res).toBe(99);
+      expect(res).toBe(10);
     });
 
     it('returns prConcurrentLimit if errored', async () => {

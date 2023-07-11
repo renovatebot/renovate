@@ -1,5 +1,6 @@
 import { logger } from '../logger';
 import { clone } from '../util/clone';
+import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils';
 import * as options from './options';
 import type { RenovateConfig } from './types';
 
@@ -12,9 +13,17 @@ export function mergeChildConfig<
     return parent as never;
   }
   const parentConfig = clone(parent);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const childConfig = clone(child!);
+  const childConfig = clone(child);
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
+
+  // Ensure highest severity survives parent / child merge
+  if (config?.isVulnerabilityAlert) {
+    config.vulnerabilitySeverity = getHighestVulnerabilitySeverity(
+      parent,
+      child
+    );
+  }
+
   for (const option of options.getOptions()) {
     if (
       option.mergeable &&
@@ -22,6 +31,7 @@ export function mergeChildConfig<
       parentConfig[option.name]
     ) {
       logger.trace(`mergeable option: ${option.name}`);
+
       if (option.name === 'constraints') {
         config[option.name] = {
           ...parentConfig[option.name],

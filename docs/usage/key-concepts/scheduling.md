@@ -60,7 +60,7 @@ You can set a specific time zone in your local config file like this:
 }
 ```
 
-Read our docs on the [timezone](https://docs.renovatebot.com/configuration-options/#timezone) configuration option.
+Also read the [`timezone` config option docs](../configuration-options.md#timezone).
 
 ### Scheduling syntax
 
@@ -93,11 +93,11 @@ If you use the GitHub hosted app, the default is that Renovate will always be al
 Be sure to schedule enough time for Renovate to process your repository.
 Do not set schedules like "Run Renovate for an hour each Sunday" as you _will_ run into problems.
 
-Say you want Renovate bot to run each day before 2 am:
+Say you want Renovate to run each day before 4 am:
 
 ```json
 {
-  "schedule": ["before 2am"]
+  "schedule": ["before 4am"]
 }
 ```
 
@@ -139,4 +139,4 @@ Say you want to restrict `aws-sdk` to weekly updates, you would create this pack
 The "schedule" property must _always_ be defined in an array, even if you only set a single schedule.
 Multiple entries in the array means "or".
 
-Read the [schedule config option](https://docs.renovatebot.com/configuration-options/#schedule) documentation to learn more.
+Read the [schedule config option](../configuration-options.md#schedule) documentation to learn more.
