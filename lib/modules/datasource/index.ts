@@ -6,13 +6,13 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
+import { filterMap } from '../../util/filter-map';
 import { regEx } from '../../util/regex';
-import { Result } from '../../util/result';
-import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
 import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
+import { CustomDatasource } from './custom';
 import { addMetaData } from './metadata';
 import { setNpmrc } from './npm';
 import { resolveRegistryUrl } from './npm/npmrc';
@@ -34,6 +34,9 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 const cacheNamespace = 'datasource-releases';
 
 export function getDatasourceFor(datasource: string): DatasourceApi | null {
+  if (datasource?.startsWith('custom.')) {
+    return getDatasourceFor(CustomDatasource.id);
+  }
   return datasources.get(datasource) ?? null;
 }
 
@@ -343,6 +346,131 @@ function getRawReleases(
   return promisedRes;
 }
 
+function applyExtractVersion<
+  Config extends Pick<GetPkgReleasesConfig, 'extractVersion'>
+>(config: Config, releaseResult: ReleaseResult): void {
+  if (!config.extractVersion) {
+    return;
+  }
+
+  const extractVersionRegEx = regEx(config.extractVersion);
+  releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    const version = extractVersionRegEx.exec(release.version)?.groups?.version;
+    if (!version) {
+      return null;
+    }
+
+    release.version = version;
+    return release;
+  });
+}
+
+function filterValidVersions<
+  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
+>(config: Config, releaseResult: ReleaseResult): void {
+  const versioningName =
+    config.versioning ?? getDefaultVersioning(config.datasource);
+  const versioning = allVersioning.get(versioningName);
+
+  releaseResult.releases = filterMap(releaseResult.releases, (release) =>
+    versioning.isVersion(release.version) ? release : null
+  );
+}
+
+function sortAndRemoveDuplicates<
+  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
+>(config: Config, releaseResult: ReleaseResult): void {
+  const versioningName =
+    config.versioning ?? getDefaultVersioning(config.datasource);
+  const versioning = allVersioning.get(versioningName);
+
+  releaseResult.releases = releaseResult.releases.sort((a, b) =>
+    versioning.sortVersions(a.version, b.version)
+  );
+
+  // Once releases are sorted, deduplication is straightforward and efficient
+  let previousVersion: string | null = null;
+  releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    if (previousVersion === release.version) {
+      return null;
+    }
+    previousVersion = release.version;
+    return release;
+  });
+}
+
+function applyConstraintsFiltering<
+  Config extends Pick<
+    GetPkgReleasesConfig,
+    | 'constraintsFiltering'
+    | 'versioning'
+    | 'datasource'
+    | 'constraints'
+    | 'packageName'
+  >
+>(config: Config, releaseResult: ReleaseResult): void {
+  if (config?.constraintsFiltering !== 'strict') {
+    for (const release of releaseResult.releases) {
+      delete release.constraints;
+    }
+    return;
+  }
+
+  const versioningName =
+    config.versioning ?? getDefaultVersioning(config.datasource);
+  const versioning = allVersioning.get(versioningName);
+
+  const configConstraints = config.constraints;
+  const filteredReleases: string[] = [];
+  releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    const releaseConstraints = release.constraints;
+    delete release.constraints;
+
+    // istanbul ignore if
+    if (!configConstraints || !releaseConstraints) {
+      return release;
+    }
+
+    for (const [name, configConstraint] of Object.entries(configConstraints)) {
+      // istanbul ignore if
+      if (!versioning.isValid(configConstraint)) {
+        continue;
+      }
+
+      const constraint = releaseConstraints[name];
+      if (!is.nonEmptyArray(constraint)) {
+        // A release with no constraints is OK
+        continue;
+      }
+
+      const satisfiesConstraints = constraint.some(
+        // If the constraint value is a subset of any release's constraints, then it's OK
+        // fallback to release's constraint match if subset is not supported by versioning
+        (releaseConstraint) =>
+          !releaseConstraint ||
+          (versioning.subset?.(configConstraint, releaseConstraint) ??
+            versioning.matches(configConstraint, releaseConstraint))
+      );
+
+      if (!satisfiesConstraints) {
+        filteredReleases.push(release.version);
+        return null;
+      }
+    }
+
+    return release;
+  });
+
+  if (filteredReleases.length) {
+    const count = filteredReleases.length;
+    const packageName = config.packageName;
+    const releases = filteredReleases.join(', ');
+    logger.debug(
+      `Filtered ${count} releases for ${packageName} due to constraintsFiltering=strict: ${releases}`
+    );
+  }
+}
+
 export async function getPkgReleases(
   config: GetPkgReleasesConfig
 ): Promise<ReleaseResult | null> {
@@ -373,82 +501,12 @@ export async function getPkgReleases(
   if (!res) {
     return res;
   }
-  if (config.extractVersion) {
-    const extractVersionRegEx = regEx(config.extractVersion);
-    res.releases = res.releases
-      .map((release) => {
-        const version = extractVersionRegEx.exec(release.version)?.groups
-          ?.version;
-        if (version) {
-          return { ...release, version }; // overwrite version
-        }
-        return null; // filter out any we can't extract
-      })
-      .filter(is.truthy);
-  }
-  // Use the datasource's default versioning if none is configured
-  const versioning =
-    config.versioning ?? getDefaultVersioning(config.datasource);
-  const version = allVersioning.get(versioning);
 
-  // Filter and sort valid versions
-  res.releases = res.releases
-    .filter((release) => version.isVersion(release.version))
-    .sort((a, b) => version.sortVersions(a.version, b.version));
-
-  // Filter versions for uniqueness
-  res.releases = uniq(res.releases, (x, y) => x.version === y.version);
-
-  if (config?.constraintsFiltering === 'strict') {
-    const filteredReleases: string[] = [];
-    // Filter releases for compatibility
-    for (const [constraintName, constraintValue] of Object.entries(
-      config.constraints ?? {}
-    )) {
-      if (version.isValid(constraintValue)) {
-        res.releases = res.releases.filter((release) => {
-          const constraint = release.constraints?.[constraintName];
-          if (!is.nonEmptyArray(constraint)) {
-            // A release with no constraints is OK
-            return true;
-          }
-
-          const satisfiesConstraints = constraint.some(
-            // If the constraint value is a subset of any release's constraints, then it's OK
-            // fallback to release's constraint match if subset is not supported by versioning
-            (releaseConstraint) =>
-              !releaseConstraint ||
-              (version.subset?.(constraintValue, releaseConstraint) ??
-                version.matches(constraintValue, releaseConstraint))
-          );
-          if (!satisfiesConstraints) {
-            filteredReleases.push(release.version);
-          }
-          return satisfiesConstraints;
-        });
-      }
-    }
-    if (filteredReleases.length) {
-      logger.debug(
-        `Filtered ${
-          filteredReleases.length
-        } releases for ${packageName} due to constraintsFiltering=strict: ${filteredReleases.join(
-          ', '
-        )}`
-      );
-    }
-  }
-  // Strip constraints from releases result
-  res.releases.forEach((release) => {
-    delete release.constraints;
-  });
+  applyExtractVersion(config, res);
+  filterValidVersions(config, res);
+  sortAndRemoveDuplicates(config, res);
+  applyConstraintsFiltering(config, res);
   return res;
-}
-
-export function getPkgReleasesSafe(
-  config: GetPkgReleasesConfig
-): Promise<Result<ReleaseResult | null>> {
-  return Result.wrap(getPkgReleases(config));
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {

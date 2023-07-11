@@ -11,6 +11,6 @@ For example:
 
 <!-- prettier-ignore -->
 !!! warning
-    This manager isn't aware of subresource integrity (SRI) hashes.
-    It searches for and replaces _any_ matching URL it finds, without considering things like script integrity hashes.
-    Use the `html` manager if you need SRI updating.
+    This manager does _not_ read or update Subresource Integrity (SRI) hashes.
+    It replaces _any_ matching URL it finds, without adding or updating script integrity hashes.
+    We recommend you use the `html` manager if you need SRI updating.

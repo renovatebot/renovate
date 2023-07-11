@@ -168,6 +168,28 @@ describe('modules/platform/gitlab/index', () => {
       expect(repos).toEqual(['a/b', 'c/d']);
     });
 
+    it('should return an array of repos including mirrors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'c/d',
+          },
+          {
+            path_with_namespace: 'c/f',
+            mirror: true,
+          },
+        ]);
+      const repos = await gitlab.getRepos({ includeMirrors: true });
+      expect(repos).toEqual(['a/b', 'c/d', 'c/f']);
+    });
+
     it('should encode the requested topics into the URL', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -260,6 +282,26 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
+    });
+
+    it('should not throw an error if repository is a mirror when includeMirrors option is set', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo')
+        .reply(200, {
+          default_branch: 'master',
+          mirror: true,
+        });
+      expect(
+        await gitlab.initRepo({
+          repository: 'some/repo',
+          includeMirrors: true,
+        })
+      ).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('should throw an error if repository access is disabled', async () => {
