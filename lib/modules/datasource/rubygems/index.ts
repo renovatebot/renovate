@@ -41,50 +41,50 @@ export class RubyGemsDatasource extends Datasource {
     }
 
     try {
-      const { res: versionsResult } =
-        await this.versionsEndpointCache.getVersions(registryUrl, packageName);
-
-      if (versionsResult.success) {
-        const { value: versions } = versionsResult;
-        const result = await this.metadataCache.getRelease(
-          registryUrl,
-          packageName,
-          versions
-        );
-        return result;
-      }
-
       const registryHostname = parseUrl(registryUrl)?.hostname;
-      if (
-        versionsResult.error === 'unsupported-api' &&
-        registryHostname !== 'rubygems.org'
-      ) {
-        if (
-          registryHostname === 'rubygems.pkg.github.com' ||
-          registryHostname === 'gitlab.com'
-        ) {
-          return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
-        }
 
-        const gemMetadata = await this.fetchGemMetadata(
-          registryUrl,
-          packageName
-        );
-        if (!gemMetadata) {
-          return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
-        }
-
-        return await this.getReleasesViaAPI(
-          registryUrl,
-          packageName,
-          gemMetadata
-        );
+      if (registryHostname === 'rubygems.org') {
+        return await this.getRubygemsReleases(registryUrl, packageName);
       }
 
-      return null;
+      if (
+        registryHostname === 'rubygems.pkg.github.com' ||
+        registryHostname === 'gitlab.com'
+      ) {
+        return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
+      }
+
+      const gemMetadata = await this.fetchGemMetadata(registryUrl, packageName);
+      if (!gemMetadata) {
+        return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
+      }
+
+      return await this.getReleasesViaAPI(
+        registryUrl,
+        packageName,
+        gemMetadata
+      );
     } catch (error) {
       this.handleGenericErrors(error);
     }
+  }
+
+  async getRubygemsReleases(
+    registryUrl: string,
+    packageName: string
+  ): Promise<ReleaseResult | null> {
+    const { res: versionsResult } =
+      await this.versionsEndpointCache.getVersions(registryUrl, packageName);
+    if (!versionsResult.success) {
+      return null;
+    }
+
+    const { value: versions } = versionsResult;
+    return await this.metadataCache.getRelease(
+      registryUrl,
+      packageName,
+      versions
+    );
   }
 
   @cache({
