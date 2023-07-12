@@ -37,7 +37,7 @@ We plan to support more languages soon.
 
 If you use the Mend Renovate App then the badges are enabled automatically.
 
-If you don't use the app, you can enable the badges by adding the `mergeConfidence:all-badges` preset to the `extends` array in your Renovate config:
+If you're self-hosting Renovate, you can enable the badges by adding the `mergeConfidence:all-badges` preset to the `extends` array in your Renovate config:
 
 ```json
 {
