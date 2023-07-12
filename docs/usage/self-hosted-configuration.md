@@ -484,6 +484,12 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
+## includeMirrors
+
+By default, Renovate does not autodiscover repositories that are mirrors.
+
+Change this setting to `true` to include repositories that are mirrors as Renovate targets.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.

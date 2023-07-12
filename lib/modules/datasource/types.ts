@@ -1,4 +1,7 @@
-import type { ConstraintsFilter } from '../../config/types';
+import type {
+  ConstraintsFilter,
+  CustomDatasourceConfig,
+} from '../../config/types';
 import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
@@ -20,11 +23,14 @@ export interface DigestConfig {
 }
 
 export interface GetReleasesConfig {
+  customDatasources?: Record<string, CustomDatasourceConfig>;
+  datasource?: string;
   packageName: string;
   registryUrl?: string;
 }
 
 export interface GetPkgReleasesConfig {
+  customDatasources?: Record<string, CustomDatasourceConfig>;
   npmrc?: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
