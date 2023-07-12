@@ -1022,7 +1022,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'packageRules',
-    description: 'Rules for matching package names.',
+    description: 'Rules for matching packages.',
     type: 'array',
     stage: 'package',
     mergeable: true,
