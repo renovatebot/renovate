@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import { logger } from '../logger';
 import * as configMassage from './massage';
 import * as configMigration from './migration';
@@ -21,7 +22,10 @@ export async function migrateAndValidate(
       logger.debug('No config migration necessary');
     }
     const massagedConfig = configMassage.massageConfig(migratedConfig);
-    logger.debug({ config: massagedConfig }, 'massaged config');
+    // log only if it's changed
+    if (!dequal(input, massagedConfig)) {
+      logger.debug({ config: massagedConfig }, 'Post-massage config');
+    }
     const {
       warnings,
       errors,
