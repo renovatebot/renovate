@@ -11,46 +11,40 @@ interface Err<E> {
 type Res<T, E> = Ok<T> | Err<E>;
 
 export class ResultPromise<T, E> extends Promise<Result<T, E>> {
-  transform<U>(fn: (value: T) => U): ResultPromise<U, unknown> {
+  transform<U>(fn: (value: T) => U): ResultPromise<U, E | unknown> {
     return new ResultPromise((resolve) => {
-      // eslint-disable-next-line promise/catch-or-return
-      this.then(
-        ({ res }) => {
-          // eslint-disable-next-line promise/always-return
-          try {
-            if (res.success) {
-              const value = fn(res.value);
-              resolve(Result.ok(value));
-            } else {
-              resolve(Result.err(res.error));
-            }
-          } catch (err) {
-            resolve(Result.err(err));
+      this.then(({ res }) => {
+        try {
+          if (res.success) {
+            const value = fn(res.value);
+            return resolve(Result.ok(value));
+          } else {
+            return resolve(Result.err(res.error));
           }
-        },
+        } catch (err) {
+          return resolve(Result.err(err));
+        }
+      }).catch(
         // istanbul ignore next: should never happen
         (error) => {
-          resolve(Result.err(error));
+          return resolve(Result.err(error));
         }
       );
     });
   }
 
-  fallback<U>(value: U): ResultPromise<T | U, unknown> {
+  fallback<U>(value: U): ResultPromise<T | U, E | unknown> {
     return new ResultPromise((resolve) => {
-      // eslint-disable-next-line promise/catch-or-return
-      this.then(
-        ({ res }) => {
-          // eslint-disable-next-line promise/always-return
-          if (res.success) {
-            resolve(Result.ok(res.value));
-          } else {
-            resolve(Result.ok(value));
-          }
-        },
+      this.then(({ res }) => {
+        if (res.success) {
+          return resolve(Result.ok(res.value));
+        } else {
+          return resolve(Result.ok(value));
+        }
+      }).catch(
         // istanbul ignore next: should never happen
         (_error) => {
-          resolve(Result.ok(value));
+          return resolve(Result.ok(value));
         }
       );
     });
