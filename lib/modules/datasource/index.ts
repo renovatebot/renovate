@@ -12,6 +12,7 @@ import { trimTrailingSlash } from '../../util/url';
 import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
+import { CustomDatasource } from './custom';
 import { addMetaData } from './metadata';
 import { setNpmrc } from './npm';
 import { resolveRegistryUrl } from './npm/npmrc';
@@ -33,6 +34,9 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 const cacheNamespace = 'datasource-releases';
 
 export function getDatasourceFor(datasource: string): DatasourceApi | null {
+  if (datasource?.startsWith('custom.')) {
+    return getDatasourceFor(CustomDatasource.id);
+  }
   return datasources.get(datasource) ?? null;
 }
 

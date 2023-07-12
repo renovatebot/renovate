@@ -633,6 +633,38 @@ When using with `npm`, we recommend you:
 - Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
 
+## customDatasources
+
+Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
+These datasources can be referred by RegexManagers or can be used to overwrite default datasources.
+
+For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
+
+### defaultRegistryUrlTemplate
+
+`registryUrl` which is used, if none is return by extraction.
+As this is a template it can be dynamically set. E.g. add the `packageName` as part of the URL:
+
+```json5
+{
+  customDatasources: {
+    foo: {
+      defaultRegistryUrlTemplate: 'https://exmaple.foo.bar/v1/{{ packageName }}',
+    },
+  },
+}
+```
+
+### format
+
+Defines which format the API is returning.
+Only `json` is supported, but more are planned for future.
+
+### transformTemplates
+
+`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
+Use this if the API does not return a Renovate compatible schema.
+
 ## defaultRegistryUrls
 
 Override a datasource's default registries with this config option.

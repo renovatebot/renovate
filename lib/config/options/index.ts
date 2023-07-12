@@ -69,6 +69,16 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'format',
+    description: 'Format of the custom datasource',
+    type: 'string',
+    parent: 'customDatasources',
+    default: 'json',
+    allowedValues: ['json'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'executionMode',
     description:
       'Controls when the post upgrade tasks run: on every update, or once per upgrade branch.',
@@ -332,6 +342,14 @@ const options: RenovateOptions[] = [
       'Custom environment variables for child processes and sidecar Docker containers.',
     globalOnly: true,
     type: 'object',
+    default: {},
+  },
+  {
+    name: 'customDatasources',
+    description: 'Defines custom datasources for usage by managers',
+    type: 'object',
+    experimental: true,
+    experimentalIssues: [23286],
     default: {},
   },
   {
@@ -929,6 +947,16 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'defaultRegistryUrlTemplate',
+    description:
+      'Template for generating a defaultRegistryUrl for custom datasource',
+    type: 'string',
+    default: '',
+    parent: 'customDatasources',
     cli: false,
     env: false,
   },
@@ -1749,6 +1777,14 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to enable automerging without tests.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'transformTemplates',
+    description: 'List of jsonata transformation rules',
+    type: 'array',
+    subType: 'string',
+    parent: 'customDatasources',
+    default: [],
   },
   {
     name: 'transitiveRemediation',
