@@ -18,7 +18,7 @@ const Git = jest.requireActual('simple-git') as SimpleGitFactory;
 
 describe('modules/manager/git-submodules/extract', () => {
   // flaky ci tests
-  //jest.setTimeout(10 * 1000);
+  // jest.setTimeout(10 * 1000);
 
   beforeAll(() => {
     simpleGit.mockImplementation((basePath: string) => {

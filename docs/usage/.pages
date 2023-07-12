@@ -31,7 +31,6 @@ nav:
       - 'Noise Reduction': 'noise-reduction.md'
       - 'Upgrade best practices': 'upgrade-best-practices.md'
   - Included Presets:
-      - 'Compatibility Presets': 'presets-compatibility.md'
       - 'Default Presets': 'presets-default.md'
       - 'Docker Presets': 'presets-docker.md'
       - 'Full Config Presets': 'presets-config.md'

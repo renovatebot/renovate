@@ -1,33 +1,29 @@
 interface Ok<T> {
-  ok: true;
-  value: T;
+  readonly success: true;
+  readonly value: T;
 }
 
-interface Err {
-  ok: false;
-  error: Error;
+interface Err<E> {
+  readonly success: false;
+  readonly error: E;
 }
 
-type Res<T> = Ok<T> | Err;
+type Res<T, E> = Ok<T> | Err<E>;
 
-export class Result<T> {
-  static ok<T>(value: T): Result<T> {
-    return new Result({ ok: true, value });
+export class Result<T, E = Error> {
+  static ok<T>(value: T): Result<T, never> {
+    return new Result({ success: true, value });
   }
 
-  static err(): Result<never>;
-  static err(error: Error): Result<never>;
-  static err(message: string): Result<never>;
-  static err(error?: Error | string): Result<never> {
-    if (typeof error === 'undefined') {
-      return new Result({ ok: false, error: new Error() });
+  static err(): Result<never, true>;
+  static err<E>(e: E): Result<never, E>;
+  static err<E>(e?: E): Result<never, E> | Result<never, true> {
+    if (typeof e === 'undefined' && arguments.length === 0) {
+      return new Result({ success: false, error: true });
     }
 
-    if (typeof error === 'string') {
-      return new Result({ ok: false, error: new Error(error) });
-    }
-
-    return new Result({ ok: false, error });
+    const error = e as E;
+    return new Result({ success: false, error });
   }
 
   private static wrapCallback<T>(callback: () => T): Result<T> {
@@ -55,36 +51,23 @@ export class Result<T> {
       : Result.wrapCallback(input);
   }
 
-  private constructor(private res: Res<T>) {}
+  private constructor(public readonly res: Res<T, E>) {}
 
-  transform<U>(fn: (value: T) => U): Result<U> {
-    return this.res.ok
+  transform<U>(fn: (value: T) => U): Result<U, E> {
+    return this.res.success
       ? Result.ok(fn(this.res.value))
       : Result.err(this.res.error);
   }
 
-  unwrap(): Res<T>;
-  unwrap<U>(fallback: U): Res<T | U>;
-  unwrap<U>(fallback?: U): Res<T | U> {
-    if (this.res.ok) {
-      return this.res;
-    }
-
-    if (arguments.length) {
-      return { ok: true, value: fallback as U };
-    }
-
-    return this.res;
+  catch<U>(fallback: U): T | U {
+    return this.res.success ? this.res.value : fallback;
   }
 
-  value(): T | undefined;
-  value<U>(fallback: U): T | U;
-  value<U>(fallback?: U): T | U | undefined {
-    const res = arguments.length ? this.unwrap(fallback as U) : this.unwrap();
-    return res.ok ? res.value : undefined;
+  get value(): T | undefined {
+    return this.res.success ? this.res.value : undefined;
   }
 
-  error(): Error | undefined {
-    return this.res.ok ? undefined : this.res.error;
+  get error(): E | undefined {
+    return this.res.success ? undefined : this.res.error;
   }
 }

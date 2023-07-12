@@ -103,6 +103,8 @@ RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
 }
 ```
 
+The search for repositories is case-insensitive.
+
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
@@ -152,19 +154,22 @@ If the "development branch" is configured but the branch itself does not exist (
 ## binarySource
 
 Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
-By default, Renovate uses a child process to run such tools, so they must be:
 
-- installed before running Renovate
-- available in the path
+Renovate supports four possible ways to access those tools:
 
-But you can tell Renovate to use "sidecar" containers for third-party tools by setting `binarySource=docker`.
+- `global`: Uses pre-installed tools, e.g. `npm` installed via `npm install -g npm`.
+- `install` (default): Downloads and installs tools at runtime if running in a [Containerbase](https://github.com/containerbase/base) environment, otherwise falls back to `global`
+- `docker`: Runs tools inside Docker "sidecar" containers using `docker run`.
+- `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
+
+Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`.
+If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
+
+If you are building your own Renovate image, e.g. by installing Renovate using `npm`, then you will need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
+
+The `binarySource=docker` approach should not be necessary in most cases now and `binarySource=install` is recommended instead.
+If you have a use case where you cannot use `binarySource=install` but can use `binarySource=docker` then please share it in a GitHub Discussion so that the maintainers can understand it.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
-Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
-
-Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
-This mode means that Renovate will dynamically install the desired version of each tool needed.
-
-If all projects are managed by Hermit, you can tell Renovate to use the tool versions specified in each project via Hermit by setting `binarySource=hermit`.
 
 ## cacheDir
 
@@ -478,6 +483,12 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     `globalExtends` presets can't be private.
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
+
+## includeMirrors
+
+By default, Renovate does not autodiscover repositories that are mirrors.
+
+Change this setting to `true` to include repositories that are mirrors as Renovate targets.
 
 ## logContext
 
