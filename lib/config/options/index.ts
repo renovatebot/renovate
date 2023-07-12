@@ -69,6 +69,16 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'format',
+    description: 'Format of the custom datasource',
+    type: 'string',
+    parent: 'customDatasources',
+    default: 'json',
+    allowedValues: ['json'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'executionMode',
     description:
       'Controls when the post upgrade tasks run: on every update, or once per upgrade branch.',
@@ -335,6 +345,14 @@ const options: RenovateOptions[] = [
     default: {},
   },
   {
+    name: 'customDatasources',
+    description: 'Defines custom datasources for usage by managers',
+    type: 'object',
+    experimental: true,
+    experimentalIssues: [23286],
+    default: {},
+  },
+  {
     name: 'dockerChildPrefix',
     description:
       'Change this value to add a prefix to the Renovate Docker sidecar container names and labels.',
@@ -354,7 +372,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.2.1',
+    default: 'ghcr.io/containerbase/sidecar:9.2.2',
     globalOnly: true,
   },
   {
@@ -929,6 +947,16 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'defaultRegistryUrlTemplate',
+    description:
+      'Template for generating a defaultRegistryUrl for custom datasource',
+    type: 'string',
+    default: '',
+    parent: 'customDatasources',
     cli: false,
     env: false,
   },
@@ -1749,6 +1777,14 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to enable automerging without tests.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'transformTemplates',
+    description: 'List of jsonata transformation rules',
+    type: 'array',
+    subType: 'string',
+    parent: 'customDatasources',
+    default: [],
   },
   {
     name: 'transitiveRemediation',
