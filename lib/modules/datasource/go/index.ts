@@ -3,6 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
+import { id as semverId } from '../../versioning/semver';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
@@ -15,6 +16,8 @@ import { GoProxyDatasource } from './releases-goproxy';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
+
+  override readonly defaultVersioning = semverId;
 
   constructor() {
     super(GoDatasource.id);
