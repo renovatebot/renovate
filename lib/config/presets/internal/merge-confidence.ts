@@ -19,7 +19,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'age-confidence-badges': {
-    description: 'Enable Age & Confidence badges for pull requests.',
+    description: 'Show only the Age and Confidence Merge Confidence badges for pull requests.',
     packageRules: [
       {
         matchDatasources: ['maven', 'npm', 'pypi'],
