@@ -59,12 +59,12 @@ describe('util/pretty-time', () => {
     it.each`
       date                                  | range              | expected
       ${'2020-01-01'}                       | ${'< 1 year'}      | ${false}
-      ${'2020-01-01'}                       | ${'> 1 year'}      | ${true}
-      ${'2020-01-01'}                       | ${'<=1year'}       | ${false}
+      ${'2020-01-01'}                       | ${'> 1 day'}       | ${true}
+      ${'2020-01-01'}                       | ${'<=1month'}      | ${false}
       ${'2020-01-01'}                       | ${'>= 1year'}      | ${true}
-      ${'2020-01-01'}                       | ${'< 1year'}       | ${false}
-      ${new Date(Date.now()).toISOString()} | ${'< 1 year'}      | ${true}
-      ${new Date(Date.now()).toISOString()} | ${'> 1 year'}      | ${false}
+      ${'2020-01-01'}                       | ${'< 2years'}      | ${false}
+      ${new Date(Date.now()).toISOString()} | ${'< 3 days'}      | ${true}
+      ${new Date(Date.now()).toISOString()} | ${'> 3 months'}    | ${false}
       ${'2020-01-01'}                       | ${'> 1 millenial'} | ${null}
       ${'invalid-date'}                     | ${'> 1 year'}      | ${null}
       ${'2020-01-01'}                       | ${'1 year'}        | ${null}
