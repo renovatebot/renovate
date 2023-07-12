@@ -47,7 +47,7 @@ If you don't use the app, you can enable the badges by adding the `mergeConfiden
 
 <!-- prettier-ignore -->
 !!! note
-The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
+    The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
 
 If you want to disable the badges in the app, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
 
