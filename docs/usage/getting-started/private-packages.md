@@ -476,9 +476,9 @@ module.exports = {
 };
 ```
 
-## Mend Renovate Hosted App Encryption
+## Encryption and the Mend Renovate App
 
-The popular [Renovate App on GitHub](https://github.com/apps/renovate) is hosted by Mend.
+Many users use [the Mend Renovate App](https://github.com/apps/renovate), which is hosted by Mend.
 If you are a user of this app, and have private modules, then the following is applicable.
 
 ### Private presets with public repositories

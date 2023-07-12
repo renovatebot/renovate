@@ -870,7 +870,7 @@ For the full list of available managers, see the [Supported Managers](https://do
 Before you put any secrets in your repository configuration, encrypt the secrets.
 You can encrypt secrets using either a HTML page, or the CLI.
 
-To encrypt secrets for the hosted Mend Renovate app for github.com with a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form.
+To encrypt secrets for the Mend Renovate App for github.com with a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form.
 If you're self-hosting Renovate, you may download and edit the form, to use your own PGP public key.
 
 You can also encrypt secrets from the CLI, using the `curl`, `echo`, `jq`, `gpg`, `grep` and `tr` CLI programs.
@@ -1084,7 +1084,7 @@ If you want Renovate to run on a forked repository when in `autodiscover` mode t
 
 If you're running Renovate in some other mode, for example when giving a list of repositories to Renovate, but want to skip forked repositories: set `"forkProcessing": "disabled"` in your _global_ config.
 
-**When using the hosted GitHub Mend Renovate app**
+**When using the Mend Renovate App**
 
 The behavior of `forkProcessing` depends on how you allow Renovate to run on your account.
 

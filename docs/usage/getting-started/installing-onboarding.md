@@ -13,7 +13,7 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 
 ### Hosted GitHub.com App
 
-Follow these steps to install and enable Mend's Renovate GitHub App:
+Follow these steps to install and enable the Mend Renovate App:
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 
@@ -147,4 +147,4 @@ Any existing Renovate PRs will be closed after you've completed these steps.
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the hosted Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you're using the Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

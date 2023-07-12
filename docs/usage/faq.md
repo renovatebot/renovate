@@ -23,17 +23,17 @@ Renovate will:
 Only the latest version of Renovate is supported by the Renovate maintainers.
 The Renovate team only fixes bugs in an older version if:
 
-- the hosted app needs to stay on that older major version for a short time, or
+- the Mend Renovate App needs to stay on that older major version for a short time, or
 - some critical bug needs to be fixed and the new major is blocked
 
-If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
+If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
-## When is the Mend Renovate GitHub hosted app updated with new Renovate versions?
+## When is the Mend Renovate App updated with new Renovate versions?
 
 The Renovate maintainers manually update the GitHub hosted app.
 The maintainers don't follow any release schedule or release cadence.
-This means the hosted app can lag a few hours to a week behind the open source version.
+This means the Mend Renovate App can lag a few hours to a week behind the open source version.
 Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
 ## Renovate core features not supported on all platforms
