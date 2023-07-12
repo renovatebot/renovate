@@ -41,7 +41,7 @@ describe('util/result', () => {
     it('wraps promise rejecting with error', async () => {
       const err = new Error('oops');
       const res = await Result.wrap(Promise.reject(err));
-      expect(res.error?.message).toBe('oops');
+      expect(res.error).toMatchObject({ message: 'oops' });
     });
   });
 
@@ -59,18 +59,60 @@ describe('util/result', () => {
       expect(res.value).toBeUndefined();
       expect(res.error).toBe(err);
     });
+
+    it('transforms successful promises', async () => {
+      const res = await Result.wrap(Promise.resolve('foo')).transform(fn);
+      expect(res).toEqual(Result.ok('FOO'));
+    });
+
+    it('transforms failed promises', async () => {
+      const res = await Result.wrap(Promise.reject('bar')).transform(fn);
+      expect(res).toEqual(Result.err('bar'));
+    });
+
+    it('handles failed promise transform', async () => {
+      const res = await Result.wrap(Promise.resolve('foo')).transform(() => {
+        throw new Error('bar');
+      });
+      expect(res).toEqual(Result.err(new Error('bar')));
+    });
+
+    it('handles chained failure', async () => {
+      const res = await Result.wrap(Promise.resolve('foo'))
+        .transform(() => {
+          throw new Error('bar');
+        })
+        .transform(fn);
+      expect(res).toEqual(Result.err(new Error('bar')));
+    });
   });
 
-  describe('catch', () => {
+  describe('fallback', () => {
+    const fn = (x: string) => x.toUpperCase();
+
     it('returns original value for successful result', () => {
       const res = Result.ok(42);
-      expect(res.catch(0)).toBe(42);
+      expect(res.fallback(0)).toBe(42);
     });
 
     it('returns fallback value for error result', () => {
       const err = new Error('oops');
       const res = Result.err(err);
-      expect(res.catch(42)).toBe(42);
+      expect(res.fallback(42)).toBe(42);
+    });
+
+    it('skips fallback for successful promise transform', async () => {
+      const res = await Result.wrap(Promise.resolve('foo'))
+        .fallback('bar')
+        .transform(fn);
+      expect(res).toEqual(Result.ok('FOO'));
+    });
+
+    it('uses fallback for failed promise transform', async () => {
+      const res = await Result.wrap(Promise.reject('foo'))
+        .fallback('bar')
+        .transform(fn);
+      expect(res).toEqual(Result.ok('BAR'));
     });
   });
 

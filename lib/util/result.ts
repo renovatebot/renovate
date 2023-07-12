@@ -10,6 +10,53 @@ interface Err<E> {
 
 type Res<T, E> = Ok<T> | Err<E>;
 
+class ResultPromise<T, E> extends Promise<Result<T, E>> {
+  transform<U>(fn: (value: T) => U): ResultPromise<U, unknown> {
+    return new ResultPromise((resolve) => {
+      // eslint-disable-next-line promise/catch-or-return
+      this.then(
+        ({ res }) => {
+          // eslint-disable-next-line promise/always-return
+          try {
+            if (res.success) {
+              const value = fn(res.value);
+              resolve(Result.ok(value));
+            } else {
+              resolve(Result.err(res.error));
+            }
+          } catch (err) {
+            resolve(Result.err(err));
+          }
+        },
+        // istanbul ignore next: should never happen
+        (error) => {
+          resolve(Result.err(error));
+        }
+      );
+    });
+  }
+
+  fallback<U>(value: U): ResultPromise<T | U, unknown> {
+    return new ResultPromise((resolve) => {
+      // eslint-disable-next-line promise/catch-or-return
+      this.then(
+        ({ res }) => {
+          // eslint-disable-next-line promise/always-return
+          if (res.success) {
+            resolve(Result.ok(res.value));
+          } else {
+            resolve(Result.ok(value));
+          }
+        },
+        // istanbul ignore next: should never happen
+        (_error) => {
+          resolve(Result.ok(value));
+        }
+      );
+    });
+  }
+}
+
 export class Result<T, E = Error> {
   static ok<T>(value: T): Result<T, never> {
     return new Result({ success: true, value });
@@ -34,18 +81,21 @@ export class Result<T, E = Error> {
     }
   }
 
-  private static wrapPromise<T>(promise: Promise<T>): Promise<Result<T>> {
-    return promise.then(
-      (value) => Result.ok(value),
-      (error) => Result.err(error)
-    );
+  private static wrapPromise<T>(
+    promise: Promise<T>
+  ): ResultPromise<T, unknown> {
+    return new ResultPromise((resolve) => {
+      promise
+        .then((value) => resolve(Result.ok(value)))
+        .catch((error) => resolve(Result.err(error)));
+    });
   }
 
   static wrap<T>(callback: () => T): Result<T>;
-  static wrap<T>(promise: Promise<T>): Promise<Result<T>>;
+  static wrap<T>(promise: Promise<T>): ResultPromise<T, unknown>;
   static wrap<T>(
     input: (() => T) | Promise<T>
-  ): Result<T> | Promise<Result<T>> {
+  ): Result<T> | ResultPromise<T, unknown> {
     return input instanceof Promise
       ? Result.wrapPromise(input)
       : Result.wrapCallback(input);
@@ -59,8 +109,8 @@ export class Result<T, E = Error> {
       : Result.err(this.res.error);
   }
 
-  catch<U>(fallback: U): T | U {
-    return this.res.success ? this.res.value : fallback;
+  fallback<U>(value: U): T | U {
+    return this.res.success ? this.res.value : value;
   }
 
   get value(): T | undefined {
