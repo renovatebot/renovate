@@ -20,9 +20,12 @@ const scheduleMappings: Record<string, string> = {
   monthly: 'before 5am on the first day of the month',
 };
 
-function parseCron(scheduleText: string): CronExpression | undefined {
+function parseCron(
+  scheduleText: string,
+  timezone?: string
+): CronExpression | undefined {
   try {
-    return parseExpression(scheduleText);
+    return parseExpression(scheduleText, { tz: timezone });
   } catch (err) {
     return undefined;
   }
@@ -95,8 +98,8 @@ export function hasValidSchedule(
   return [true];
 }
 
-function cronMatches(cron: string, now: DateTime): boolean {
-  const parsedCron = parseCron(cron);
+function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
+  const parsedCron = parseCron(cron, timezone);
 
   // it will always parse because it is checked beforehand
   // istanbul ignore if
@@ -196,7 +199,7 @@ export function isScheduledNow(
     const cronSchedule = parseCron(scheduleText);
     if (cronSchedule) {
       // We have Cron syntax
-      if (cronMatches(scheduleText, now)) {
+      if (cronMatches(scheduleText, now, config.timezone)) {
         logger.debug(`Matches schedule ${scheduleText}`);
         return true;
       }
