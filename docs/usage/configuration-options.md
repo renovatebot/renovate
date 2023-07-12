@@ -1997,6 +1997,7 @@ For example, if you want to group packages which are older than 2 months:
 ```
 
 The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
+Only one date part is supported, e.g. you _cannot_ do `> 1 year 1 month` and instead should do `> 13 months`.
 
 ### matchDepTypes
 
