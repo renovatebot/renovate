@@ -10,7 +10,7 @@ interface Err<E> {
 
 type Res<T, E> = Ok<T> | Err<E>;
 
-class ResultPromise<T, E> extends Promise<Result<T, E>> {
+export class ResultPromise<T, E> extends Promise<Result<T, E>> {
   transform<U>(fn: (value: T) => U): ResultPromise<U, unknown> {
     return new ResultPromise((resolve) => {
       // eslint-disable-next-line promise/catch-or-return
