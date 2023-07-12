@@ -56,6 +56,7 @@ describe('util/pretty-time', () => {
     beforeEach(() => {
       jest.setSystemTime(t0.toMillis());
     });
+
     it.each`
       date                                  | range              | expected
       ${'2020-01-01'}                       | ${'< 1 year'}      | ${false}

@@ -1998,7 +1998,6 @@ For example, if you want to group packages which are older than 2 months:
 
 The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
 
-
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
