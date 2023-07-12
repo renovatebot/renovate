@@ -108,7 +108,7 @@ Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbuc
 The difference is that Forking Renovate does not need `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
 Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
-[Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
+[Install Forking Renovate from GitHub App store](https://github.com/apps/forking-renovate).
 
 ##### Benefits
 

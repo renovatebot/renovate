@@ -11,7 +11,7 @@ That said, we will try to fix security problems in a reasonable timeframe if pos
 
 Renovate the open source project is **not** certified.
 
-The company which maintains Renovate and provides the hosted Renovate App for GitHub is called Mend.
+Mend is the company which maintains Renovate and provides the Mend Renovate App.
 Mend is ISO 27001 and SOC2 certified.
 
 ### Security / Disclosure
