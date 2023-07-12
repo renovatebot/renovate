@@ -47,7 +47,7 @@ describe('util/pretty-time', () => {
   });
 
   describe('satisfiesDateRange()', () => {
-    const t0 = DateTime.fromISO('2023-07-07', { zone: 'utc' });
+    const t0 = DateTime.fromISO('2023-07-07T12:00:00');
 
     beforeAll(() => {
       jest.useFakeTimers();
@@ -59,10 +59,11 @@ describe('util/pretty-time', () => {
 
     it.each`
       date                                  | range              | expected
-      ${'2020-01-01'}                       | ${'< 1 year'}      | ${false}
-      ${'2020-01-01'}                       | ${'> 1 day'}       | ${true}
-      ${'2020-01-01'}                       | ${'<=1month'}      | ${false}
-      ${'2020-01-01'}                       | ${'>= 1year'}      | ${true}
+      ${'2023-01-01'}                       | ${'< 1 y'}         | ${true}
+      ${'2023-07-07'}                       | ${'< 1 day'}       | ${true}
+      ${'2023-06-09'}                       | ${'<=1M'}          | ${true}
+      ${'2020-01-01'}                       | ${'>= 1hrs'}       | ${true}
+      ${'2023-07-07T11:12:00'}              | ${'<= 1hrs'}       | ${true}
       ${'2020-01-01'}                       | ${'< 2years'}      | ${false}
       ${new Date(Date.now()).toISOString()} | ${'< 3 days'}      | ${true}
       ${new Date(Date.now()).toISOString()} | ${'> 3 months'}    | ${false}

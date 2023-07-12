@@ -1999,6 +1999,10 @@ For example, if you want to group packages which are older than 2 months:
 The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
 Only one date part is supported, e.g. you _cannot_ do `> 1 year 1 month` and instead should do `> 13 months`.
 
+<!-- prettier-ignore -->
+!!! note
+    Only the words hour(s)/hrs/h, day(s)/d, week(s), month(s)/M and year(s)/y are supported.
+
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
