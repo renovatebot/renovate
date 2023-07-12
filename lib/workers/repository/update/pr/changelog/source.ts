@@ -42,6 +42,7 @@ export abstract class ChangeLogSource {
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
     const tags = (
       await getPkgReleases({
+        registryUrls: [endpoint],
         datasource: this.datasource,
         packageName: repository,
         versioning:
@@ -91,7 +92,7 @@ export abstract class ChangeLogSource {
       return null;
     }
 
-    if (repository.split('/').length !== 2) {
+    if (is.falsy(this.hasValidRepository(repository))) {
       logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
       return null;
     }
@@ -265,5 +266,9 @@ export abstract class ChangeLogSource {
 
   protected shouldSkipPackage(config: BranchUpgradeConfig): boolean {
     return false;
+  }
+
+  hasValidRepository(repository: string): boolean {
+    return repository.split('/').length === 2;
   }
 }

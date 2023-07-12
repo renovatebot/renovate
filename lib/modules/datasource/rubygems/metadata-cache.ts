@@ -1,7 +1,8 @@
 import hasha from 'hasha';
+import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
-import { Http, HttpError } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
+import type { Http } from '../../../util/http';
+import { joinUrlParts, parseUrl } from '../../../util/url';
 import type { ReleaseResult } from '../types';
 import { GemMetadata, GemVersions } from './schema';
 
@@ -51,23 +52,24 @@ export class MetadataCache {
         data.homepage = metadata.homepage;
       }
 
-      const newCache: CacheRecord = { hash, data };
-      const ttlMinutes = 100 * 24 * 60;
-      const ttlRandomDelta = Math.floor(Math.random() * 10 * 24 * 60);
-      await packageCache.set(
-        cacheNs,
-        cacheKey,
-        newCache,
-        ttlMinutes + ttlRandomDelta
-      );
-      return data;
-    } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
-        const releases = versions.map((version) => ({ version }));
-        return { releases };
+      const registryHostname = parseUrl(registryUrl)?.hostname;
+      if (registryHostname === 'rubygems.org') {
+        const newCache: CacheRecord = { hash, data };
+        const ttlMinutes = 100 * 24 * 60;
+        const ttlRandomDelta = Math.floor(Math.random() * 10 * 24 * 60);
+        await packageCache.set(
+          cacheNs,
+          cacheKey,
+          newCache,
+          ttlMinutes + ttlRandomDelta
+        );
       }
 
-      throw err;
+      return data;
+    } catch (err) {
+      logger.debug({ err }, 'Rubygems: failed to fetch metadata');
+      const releases = versions.map((version) => ({ version }));
+      return { releases };
     }
   }
 }

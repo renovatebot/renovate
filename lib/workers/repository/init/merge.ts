@@ -246,7 +246,6 @@ export async function mergeRenovateConfig(
   }
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
-  logger.debug({ config: migratedConfig }, 'migrated config');
   // TODO #7154
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
