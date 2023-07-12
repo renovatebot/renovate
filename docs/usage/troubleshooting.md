@@ -7,7 +7,7 @@ Learn how to troubleshoot problems with Renovate, where to find the logging outp
 Renovate's debug-level logs are usually enough to help troubleshoot most problems.
 Where you can find the logs depends on how you're running Renovate.
 
-### GitHub Hosted app
+### The Mend Renovate App
 
 Each pull request from Renovate has a link to the [Mend Developer Portal](https://developer.mend.io/) in the PR body text.
 

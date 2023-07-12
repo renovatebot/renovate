@@ -88,7 +88,7 @@ The _@breejs/later_ library also handles the concepts of "days", time_before", a
 ### In repository schedule configuration
 
 Reminder: the times when the Renovate process runs are controlled by the bot admin using tools such as `cron`.
-If you use the GitHub hosted app, the default is that Renovate will always be allowed to run.
+If you use the Mend Renovate App, the default is that Renovate will always be allowed to run.
 
 Be sure to schedule enough time for Renovate to process your repository.
 Do not set schedules like "Run Renovate for an hour each Sunday" as you _will_ run into problems.

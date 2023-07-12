@@ -31,17 +31,17 @@ If you're self hosting Renovate, use the latest release if possible.
 
 ## When is the Mend Renovate App updated with new Renovate versions?
 
-The Renovate maintainers manually update the GitHub hosted app.
+The Renovate maintainers manually update the app.
 The maintainers don't follow any release schedule or release cadence.
 This means the Mend Renovate App can lag a few hours to a week behind the open source version.
 Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
 ## Renovate core features not supported on all platforms
 
-| Feature              | Platforms which lack feature                               | See Renovate issue(s)                                        |
-| -------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| Hosted app           | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
+| Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
+| --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| The Mend Renovate App | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
 
 ## Major platform features not supported by Renovate
 
