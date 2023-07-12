@@ -119,8 +119,9 @@ For example:
 ### Ubuntu codenames
 
 Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release.
+
 You must only use the _first_ term of the code name in _lowercase_.
-For example: `jammy` for the Jammy Jellyfish release.
+So use `jammy` for the Jammy Jellyfish release.
 
 For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 
