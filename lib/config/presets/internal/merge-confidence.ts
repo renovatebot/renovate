@@ -2,7 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   'all-badges': {
-    description: 'Enable all Merge Confidence badges for pull requests.',
+    description: 'Show all Merge Confidence badges for pull requests.',
     packageRules: [
       {
         matchDatasources: ['maven', 'npm', 'pypi'],
