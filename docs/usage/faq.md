@@ -29,6 +29,13 @@ The Renovate team only fixes bugs in an older version if:
 If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
 If you're self hosting Renovate, use the latest release if possible.
 
+## When is the Mend Renovate GitHub hosted app updated with new Renovate versions?
+
+The Renovate maintainers manually update the GitHub hosted app.
+The maintainers don't follow any release schedule or release cadence.
+This means the hosted app can lag a few hours to a week behind the open source version.
+Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
+
 ## Renovate core features not supported on all platforms
 
 | Feature              | Platforms which lack feature                               | See Renovate issue(s)                                        |

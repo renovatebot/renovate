@@ -55,18 +55,24 @@ function getDepWarnings(
       }
     }
   }
+  if (warnings.length) {
+    logger.warn({ warnings, files: warningFiles }, 'Package lookup failures');
+  }
   return { warnings, warningFiles };
 }
 
 export function getDepWarningsOnboardingPR(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
+  config: RenovateConfig
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+    return '';
+  }
   let warningText = '';
   if (!warnings.length) {
     return '';
   }
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -83,14 +89,17 @@ export function getDepWarningsOnboardingPR(
 
 export function getDepWarningsPR(
   packageFiles: Record<string, PackageFile[]>,
+  config: RenovateConfig,
   dependencyDashboard?: boolean
 ): string {
-  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  const { warnings } = getDepWarnings(packageFiles);
+  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+    return '';
+  }
   let warningText = '';
   if (!warnings.length) {
     return '';
   }
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -104,8 +113,12 @@ export function getDepWarningsPR(
 }
 
 export function getDepWarningsDashboard(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
+  config: RenovateConfig
 ): string {
+  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+    return '';
+  }
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   if (!warnings.length) {
     return '';
@@ -118,7 +131,6 @@ export function getDepWarningsDashboard(
     .map((dep) => '`' + dep + '`')
     .join(', ');
 
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   let warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );

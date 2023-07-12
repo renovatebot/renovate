@@ -391,7 +391,7 @@ describe('modules/manager/helmfile/extract', () => {
 
     it('detects kustomize and respects relative paths', async () => {
       fs.localPathExists.mockImplementationOnce((path) => {
-        if (!path.startsWith(GlobalConfig.get('localDir') ?? '')) {
+        if (!path.startsWith(GlobalConfig.get('localDir', ''))) {
           throw new Error(FILE_ACCESS_VIOLATION_ERROR);
         }
         return Promise.resolve(true);

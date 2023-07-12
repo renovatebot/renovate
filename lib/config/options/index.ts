@@ -1,7 +1,6 @@
 import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
-import * as dockerVersioning from '../../modules/versioning/docker';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
@@ -24,9 +23,9 @@ const options: RenovateOptions[] = [
   {
     name: 'allowPostUpgradeCommandTemplating',
     description:
-      'Set this to `true` to allow templating for post-upgrade commands.',
+      'Set this to `false` to disable template compilation for post-upgrade commands.',
     type: 'boolean',
-    default: false,
+    default: true,
     globalOnly: true,
   },
   {
@@ -66,8 +65,18 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     parent: 'postUpgradeTasks',
-    default: [],
+    default: ['**/*'],
     cli: false,
+  },
+  {
+    name: 'format',
+    description: 'Format of the custom datasource',
+    type: 'string',
+    parent: 'customDatasources',
+    default: 'json',
+    allowedValues: ['json'],
+    cli: false,
+    env: false,
   },
   {
     name: 'executionMode',
@@ -336,6 +345,14 @@ const options: RenovateOptions[] = [
     default: {},
   },
   {
+    name: 'customDatasources',
+    description: 'Defines custom datasources for usage by managers',
+    type: 'object',
+    experimental: true,
+    experimentalIssues: [23286],
+    default: {},
+  },
+  {
     name: 'dockerChildPrefix',
     description:
       'Change this value to add a prefix to the Renovate Docker sidecar container names and labels.',
@@ -344,11 +361,18 @@ const options: RenovateOptions[] = [
     default: 'renovate_',
   },
   {
-    name: 'dockerImagePrefix',
+    name: 'dockerCliOptions',
     description:
-      'Change this value to override the default Renovate Docker sidecar image name prefix.',
+      'Pass CLI flags to `docker run` command when `binarySource=docker`.',
     type: 'string',
-    default: 'docker.io/containerbase',
+    globalOnly: true,
+  },
+  {
+    name: 'dockerSidecarImage',
+    description:
+      'Change this value to override the default Renovate sidecar image.',
+    type: 'string',
+    default: 'ghcr.io/containerbase/sidecar:9.2.2',
     globalOnly: true,
   },
   {
@@ -436,8 +460,27 @@ const options: RenovateOptions[] = [
     default: 'auto',
   },
   {
+    name: 'includeMirrors',
+    description:
+      'Whether to process repositories that are mirrors. By default, repositories that are mirrors are skipped.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+    globalOnly: true,
+  },
+  {
     name: 'forkToken',
     description: 'Set a personal access token here to enable "fork mode".',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+  },
+  {
+    name: 'forkOrg',
+    description:
+      'The preferred organization to create or find forked repositories, when in fork mode.',
     stage: 'repository',
     type: 'string',
     globalOnly: true,
@@ -756,6 +799,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'autodiscoverTopics',
+    description: '',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'prCommitsPerRunLimit',
     description:
       'Set the maximum number of commits per Renovate run. By default there is no limit.',
@@ -898,6 +951,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'defaultRegistryUrlTemplate',
+    description:
+      'Template for generating a defaultRegistryUrl for custom datasource',
+    type: 'string',
+    default: '',
+    parent: 'customDatasources',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'registryUrls',
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
@@ -967,9 +1030,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchLanguages',
+    name: 'matchCategories',
     description:
-      'List of languages to match (e.g. `["python"]`). Valid only within a `packageRules` object.',
+      'List of categories to match (for example: `["python"]`). Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1294,20 +1357,9 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchFiles',
+    name: 'matchFileNames',
     description:
       'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    stage: 'repository',
-    parent: 'packageRules',
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'matchPaths',
-    description:
-      'List of strings or glob patterns to match against package files. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1574,10 +1626,11 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'recreateClosed',
+    name: 'recreateWhen',
     description: 'Recreate PRs even if same ones were closed previously.',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    default: 'auto',
+    allowedValues: ['auto', 'always', 'never'],
   },
   {
     name: 'rebaseWhen',
@@ -1724,6 +1777,14 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to enable automerging without tests.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'transformTemplates',
+    description: 'List of jsonata transformation rules',
+    type: 'array',
+    subType: 'string',
+    parent: 'customDatasources',
+    default: [],
   },
   {
     name: 'transitiveRemediation',
@@ -1899,7 +1960,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       enabled: false,
-      recreateClosed: true,
+      recreateWhen: 'always',
       rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
@@ -2063,25 +2124,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'js',
-    description: 'Configuration object for JavaScript language.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-  },
-  {
-    name: 'golang',
-    description: 'Configuration object for Go language.',
-    stage: 'package',
-    type: 'object',
-    default: {
-      commitMessageTopic: 'module {{depName}}',
-    },
-    mergeable: true,
-    cli: false,
-  },
-  {
     name: 'postUpdateOptions',
     description:
       'Enable post-update options to be run after package/artifact updating.',
@@ -2090,12 +2132,12 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
-      'helmUpdateSubChartArchives',
       'gomodMassage',
-      'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
       'gomodTidyE',
+      'gomodUpdateImportPaths',
+      'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
       'yarnDedupeFewer',
@@ -2104,64 +2146,6 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     mergeable: true,
-  },
-  {
-    name: 'ruby',
-    description: 'Configuration object for Ruby language.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
-    name: 'rust',
-    description: 'Configuration option for Rust package management.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
-    name: 'node',
-    description: 'Configuration object for Node version renovation.',
-    stage: 'package',
-    type: 'object',
-    default: {
-      commitMessageTopic: 'Node.js',
-    },
-    mergeable: true,
-    cli: false,
-  },
-  {
-    name: 'docker',
-    description: 'Configuration object for Docker language.',
-    stage: 'package',
-    type: 'object',
-    default: {
-      versioning: dockerVersioning.id,
-    },
-    mergeable: true,
-    cli: false,
-  },
-  {
-    name: 'php',
-    description: 'Configuration object for PHP.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
-    name: 'python',
-    description: 'Configuration object for Python.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
   },
   {
     name: 'constraints',
@@ -2180,24 +2164,6 @@ const options: RenovateOptions[] = [
       'pipenv',
       'poetry',
     ],
-  },
-  {
-    name: 'java',
-    description: 'Configuration object for all Java package managers.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
-    name: 'dotnet',
-    description: 'Configuration object for .NET language.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
   },
   {
     name: 'hostRules',
@@ -2405,6 +2371,7 @@ const options: RenovateOptions[] = [
       'artifactErrors',
       'branchAutomergeFailure',
       'configErrorIssue',
+      'dependencyLookupWarnings',
       'deprecationWarningIssues',
       'lockFileErrors',
       'missingCredentialsError',
@@ -2549,9 +2516,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'fetchReleaseNotes',
-    description: 'Controls if release notes are fetched.',
-    type: 'boolean',
-    default: true,
+    description: 'Controls if and when release notes are fetched.',
+    type: 'string',
+    allowedValues: ['off', 'branch', 'pr'],
+    default: 'pr',
     cli: false,
     env: false,
   },
@@ -2611,7 +2579,7 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
-    default: false,
+    default: true,
   },
   {
     name: 'userStrings',

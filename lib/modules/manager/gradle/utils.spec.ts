@@ -153,17 +153,17 @@ describe('modules/manager/gradle/utils', () => {
   it('getVars', () => {
     const registry: VariableRegistry = {
       [toAbsolutePath('/foo')]: {
-        foo: { key: 'foo', value: 'FOO' } as never,
-        bar: { key: 'bar', value: 'BAR' } as never,
-        baz: { key: 'baz', value: 'BAZ' } as never,
-        qux: { key: 'qux', value: 'QUX' } as never,
+        foo: { key: 'foo', value: 'FOO' },
+        bar: { key: 'bar', value: 'BAR' },
+        baz: { key: 'baz', value: 'BAZ' },
+        qux: { key: 'qux', value: 'QUX' },
       },
       [toAbsolutePath('/foo/bar')]: {
-        foo: { key: 'foo', value: 'foo' } as never,
+        foo: { key: 'foo', value: 'foo' },
       },
       [toAbsolutePath('/foo/bar/baz')]: {
-        bar: { key: 'bar', value: 'bar' } as never,
-        baz: { key: 'baz', value: 'baz' } as never,
+        bar: { key: 'bar', value: 'bar' },
+        baz: { key: 'baz', value: 'baz' },
       },
     };
     const res = getVars(registry, '/foo/bar/baz/build.gradle');
@@ -178,8 +178,8 @@ describe('modules/manager/gradle/utils', () => {
   it('updateVars', () => {
     const registry: VariableRegistry = {
       [toAbsolutePath('/foo/bar/baz')]: {
-        bar: { key: 'bar', value: 'bar' } as never,
-        baz: { key: 'baz', value: 'baz' } as never,
+        bar: { key: 'bar', value: 'bar' },
+        baz: { key: 'baz', value: 'baz' },
       },
     };
 

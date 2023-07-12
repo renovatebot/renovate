@@ -202,14 +202,13 @@ export function supportsDynamicInstall(toolName: string): boolean {
 }
 
 export function isContainerbase(): boolean {
-  return !!process.env.CONTAINERBASE || !!process.env.BUILDPACK;
+  return !!process.env.CONTAINERBASE;
 }
 
 export function isDynamicInstall(
   toolConstraints?: Opt<ToolConstraint[]>
 ): boolean {
-  const { binarySource } = GlobalConfig.get();
-  if (binarySource !== 'install') {
+  if (GlobalConfig.get('binarySource') !== 'install') {
     return false;
   }
   if (!isContainerbase()) {
@@ -254,7 +253,7 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint;
+        return constraint.replace(/^=+/, '').trim();
       }
     } else {
       logger.warn(
@@ -269,6 +268,7 @@ export async function resolveConstraint(
   const releases = pkgReleases?.releases ?? [];
 
   if (!releases?.length) {
+    logger.warn({ toolConfig }, 'No tool releases found.');
     throw new Error('No tool releases found.');
   }
 

@@ -1,13 +1,12 @@
 import {
   fs,
-  getConfig,
   git,
   mocked,
-  mockedFunction,
   partial,
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import {
@@ -34,7 +33,6 @@ import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { needsChangelogs } from '../../changelog';
 import type { ResultWithPr } from '../pr';
 import * as _prWorker from '../pr';
 import * as _prAutomerge from '../pr/automerge';
@@ -318,7 +316,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });
 
-    it('skips branch if merged PR found', async () => {
+    it('allows branch even if merged PR found', async () => {
       const pr = partial<Pr>({
         number: 13,
         state: 'merged',
@@ -329,7 +327,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Merged PR with PrNo: ${pr.number} is blocking this branch`
+        `Matching PR #${pr.number} was merged previously`
       );
     });
 
@@ -816,9 +814,8 @@ describe('workers/repository/update/branch/index', () => {
         ignoreTests: true,
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
-        fetchReleaseNotes: true,
+        fetchReleaseNotes: 'branch',
       } satisfies BranchConfig;
-      mockedFunction(needsChangelogs).mockReturnValueOnce(true);
       scm.getBranchCommit.mockResolvedValue('123test'); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
@@ -1026,7 +1023,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [partial<ArtifactError>()],
         updatedArtifacts: [partial<FileChange>()],
       });
-      config.recreateClosed = true;
+      config.recreateWhen = 'always';
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
@@ -1550,7 +1547,8 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
-      } as never);
+        updatedArtifacts: [],
+      } satisfies PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [
@@ -1561,14 +1559,16 @@ describe('workers/repository/update/branch/index', () => {
         ],
       } as never);
       scm.branchExists.mockResolvedValue(true);
-      platform.getBranchPr.mockResolvedValueOnce({
-        title: 'rebase!',
-        state: 'open',
-        bodyStruct: {
-          hash: hashBody(`- [x] <!-- rebase-check -->`),
-          rebaseRequested: true,
-        },
-      } as never);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'rebase!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        })
+      );
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({

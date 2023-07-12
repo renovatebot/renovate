@@ -29,6 +29,10 @@ sudo apt-get update
 sudo apt-get install -y git build-essential nodejs yarn
 ```
 
+#### Nix
+
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs yarn`.
+
 #### Windows
 
 Follow these steps to set up your development environment on Windows 10.

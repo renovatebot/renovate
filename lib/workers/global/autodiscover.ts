@@ -35,7 +35,10 @@ export async function autodiscoverRepositories(
     return config;
   }
   // Autodiscover list of repositories
-  let discovered = await platform.getRepos();
+  let discovered = await platform.getRepos({
+    topics: config.autodiscoverTopics,
+    includeMirrors: config.includeMirrors,
+  });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug(
@@ -103,7 +106,7 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
       }
       res = repos.filter(autodiscoveryPred);
     } else {
-      res = repos.filter(minimatch.filter(filter));
+      res = repos.filter(minimatch.filter(filter, { nocase: true }));
     }
     for (const repository of res) {
       matched.add(repository);

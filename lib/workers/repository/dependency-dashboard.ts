@@ -76,7 +76,8 @@ function getAllSelectedBranches(
 
 function getCheckedBranches(issueBody: string): Record<string, string> {
   let dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
+  for (const [, type, branchName] of issueBody?.matchAll(markedBranchesRe) ??
+    []) {
     dependencyDashboardChecks[branchName] = type;
   }
   dependencyDashboardChecks = getAllSelectedBranches(
@@ -115,7 +116,7 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      const dashboardChecks = parseDashboardIssue(issue.body!);
+      const dashboardChecks = parseDashboardIssue(issue.body ?? '');
 
       if (config.checkedBranches) {
         const checkedBranchesRec: Record<string, string> = Object.fromEntries(
@@ -188,6 +189,7 @@ export async function ensureDependencyDashboard(
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
+  logger.debug('ensureDependencyDashboard()');
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
@@ -345,7 +347,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  const warn = getDepWarningsDashboard(packageFiles);
+  const warn = getDepWarningsDashboard(packageFiles, config);
   if (warn) {
     issueBody += warn;
     issueBody += '\n';
@@ -435,7 +437,7 @@ export async function ensureDependencyDashboard(
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        updatedIssue.body!
+        updatedIssue.body ?? ''
       );
       for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];
