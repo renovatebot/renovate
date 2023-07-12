@@ -1,9 +1,20 @@
+import { DateTime } from 'luxon';
 import { CurrentAgeMatcher } from './current-age';
 
 describe('util/package-rules/current-age', () => {
   const matcher = new CurrentAgeMatcher();
 
   describe('match', () => {
+    const t0 = DateTime.fromISO('2023-07-07', { zone: 'utc' });
+
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    beforeEach(() => {
+      jest.setSystemTime(t0.toMillis());
+    });
+
     it('returns false if release is older', () => {
       const result = matcher.matches(
         {

@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { satisfiesDateRange, toMs } from './pretty-time';
 
 describe('util/pretty-time', () => {
@@ -46,6 +47,15 @@ describe('util/pretty-time', () => {
   });
 
   describe('satisfiesDateRange()', () => {
+    const t0 = DateTime.fromISO('2023-07-07', { zone: 'utc' });
+
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    beforeEach(() => {
+      jest.setSystemTime(t0.toMillis());
+    });
     it.each`
       date                                  | range              | expected
       ${'2020-01-01'}                       | ${'< 1 year'}      | ${false}
