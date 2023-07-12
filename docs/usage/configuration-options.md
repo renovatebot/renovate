@@ -2219,7 +2219,7 @@ Use the syntax `!/ /` like this:
 
 ### matchFileNames
 
-Renovate will compare `matchFileNames` glob matching against the dependency's package file or lock file.
+Renovate will compare `matchFileNames` glob matching against the dependency's package file and also lock file if one exists.
 
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
@@ -2261,6 +2261,8 @@ The following example matches any file in directories starting with `app/`:
   ]
 }
 ```
+
+It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
 ### matchDepNames
 
