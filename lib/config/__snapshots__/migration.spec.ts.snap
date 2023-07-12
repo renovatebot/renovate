@@ -173,6 +173,21 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
   "onboarding": false,
   "packageRules": [
     {
+      "enabled": false,
+      "matchCategories": [
+        "python",
+      ],
+      "matchPackageNames": [
+        "foo",
+      ],
+    },
+    {
+      "enabled": false,
+      "matchCategories": [
+        "dotnet",
+      ],
+    },
+    {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
       "matchPackagePatterns": "^(@angular|typescript)",
@@ -308,17 +323,6 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates more pack
       "rangeStrategy": "pin",
     },
   ],
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) migrates node to travis 1`] = `
-{
-  "node": {
-    "automerge": false,
-  },
-  "travis": {
-    "enabled": true,
-  },
 }
 `;
 

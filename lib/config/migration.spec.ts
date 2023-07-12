@@ -122,6 +122,9 @@ describe('config/migration', () => {
             ],
           },
         ],
+        dotnet: {
+          enabled: false,
+        },
         exposeEnv: true,
         lockFileMaintenance: {
           exposeEnv: false,
@@ -132,6 +135,14 @@ describe('config/migration', () => {
         devDependencies: {
           automerge: 'minor',
           schedule: null,
+        },
+        python: {
+          packageRules: [
+            {
+              matchPackageNames: ['foo'],
+              enabled: false,
+            },
+          ],
         },
         nvmrc: {
           pathRules: [
@@ -159,7 +170,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.depTypes).toBeUndefined();
       expect(migratedConfig.automerge).toBe(false);
-      expect(migratedConfig.packageRules).toHaveLength(9);
+      expect(migratedConfig.packageRules).toHaveLength(11);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
 
@@ -307,25 +318,6 @@ describe('config/migration', () => {
         (migratedConfig.lockFileMaintenance as RenovateConfig)
           ?.packageRules?.[0].respectLatest
       ).toBeFalse();
-    });
-
-    it('migrates node to travis', () => {
-      const config: TestRenovateConfig = {
-        node: {
-          enabled: true,
-          automerge: 'none' as never,
-        },
-      };
-      const { isMigrated, migratedConfig } =
-        configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTrue();
-      expect(
-        (migratedConfig.node as RenovateSharedConfig).enabled
-      ).toBeUndefined();
-      expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
-        true
-      );
     });
 
     it('migrates packageFiles', () => {

@@ -15,7 +15,6 @@ describe('util/markdown', () => {
       *   Issue or PR (fork): foo#1
       *   Issue or PR (project): remarkjs/remark#1
       *   Mention: @wooorm
-      *   Changelog heading with link: [v2.23.1](https://github.com/bootstrap-vue/bootstrap-vue/blob/HEAD/CHANGELOG.md#2231-2022-10-26)
     `;
 
     const after =
@@ -30,7 +29,6 @@ describe('util/markdown', () => {
         -   Issue or PR (fork): [foo#1](https://github.com/foo/repo/issues/1)
         -   Issue or PR (project): [remarkjs/remark#1](https://github.com/remarkjs/remark/issues/1)
         -   Mention: [@wooorm](https://github.com/wooorm)
-        -   Changelog heading with link: [v2.23.1](https://github.com/bootstrap-vue/bootstrap-vue/blob/HEAD/CHANGELOG.md#2231-2022-10-26)
     ` + '\n';
 
     it('works', async () => {
@@ -54,6 +52,8 @@ describe('util/markdown', () => {
         '#### New Contributors\n' +
         '* @user made their first contribution in https://github.com/foo/foo/pull/2\n' +
         '#### [Heading With Markdown Link](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023-07-03)' +
+        '\n' +
+        '* link to GH issue [#1234](https://github.com/some/repo/issues/1234)' +
         '\n';
 
       const expected = Fixtures.get('release-notes.txt');
