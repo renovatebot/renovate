@@ -131,12 +131,22 @@ describe('util/result', () => {
     });
 
     it('handles chained failure', async () => {
-      const res = await Result.wrap<string>(Promise.resolve('foo'))
-        .transform(() => {
-          throw new Error('bar');
-        })
-        .transform(fn as never);
-      expect(res).toEqual(Result.err(new Error('bar')));
+      const fn1 = (x: string): Result<string, string> =>
+        Result.ok(x.toUpperCase());
+      const fn2 = (x: string): Result<string[], number> =>
+        Result.ok(x.split(''));
+      const fn3 = (x: string[]): Result<string, boolean> =>
+        Result.ok(x.join(' '));
+
+      const res: Result<string, string | number | boolean> = await Result.wrap<
+        string,
+        string
+      >(Promise.resolve('foo'))
+        .transform(fn1)
+        .transform(fn2)
+        .transform(fn3);
+
+      expect(res).toEqual(Result.ok('F O O'));
     });
   });
 

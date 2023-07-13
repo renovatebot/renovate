@@ -23,11 +23,11 @@ export class Result<T, E = Error> {
     return new Result({ ok: false, error });
   }
 
-  static wrap<T>(callback: () => T): Result<T>;
-  static wrap<T>(promise: Promise<T>): AsyncResult<T, unknown>;
-  static wrap<T>(
+  static wrap<T, E = Error>(callback: () => T): Result<T, E>;
+  static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E>;
+  static wrap<T, E = Error>(
     input: (() => T) | Promise<T>
-  ): Result<T> | AsyncResult<T, unknown> {
+  ): Result<T, E> | AsyncResult<T, E> {
     if (input instanceof Promise) {
       return AsyncResult.wrap(input);
     }
@@ -95,7 +95,7 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
     super(executor);
   }
 
-  static wrap<T>(promise: Promise<T>): AsyncResult<T, unknown> {
+  static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E> {
     return new AsyncResult((resolve) => {
       promise
         .then((value) => resolve(Result.ok(value)))
