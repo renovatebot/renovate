@@ -9,7 +9,7 @@ Where you can find the logs depends on how you're running Renovate.
 
 ### The Mend Renovate App
 
-Each pull request from Renovate has a link to the [Mend Developer Portal](https://developer.mend.io/) in the PR body text.
+Each pull request from the Mend Renovate App has a link to the [Mend Developer Portal](https://developer.mend.io/) in the PR body text.
 
 The text you're looking for is:
 
