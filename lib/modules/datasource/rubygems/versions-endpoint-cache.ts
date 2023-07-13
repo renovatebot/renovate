@@ -143,20 +143,20 @@ export class VersionsEndpointCache {
    */
   private async getCache(registryUrl: string): Promise<VersionsEndpointResult> {
     const oldResult = memCache.get(registryUrl);
-
     if (!oldResult) {
       const newResult = await this.fullSync(registryUrl);
       cacheResult(registryUrl, newResult);
       return newResult;
     }
 
-    if (!oldResult.res.success) {
+    const { value: data } = oldResult.unwrap();
+    if (!data) {
       return oldResult;
     }
 
-    if (isStale(oldResult.res.value)) {
+    if (isStale(data)) {
       memCache.delete(registryUrl); // If no error is thrown, we'll re-set the cache
-      const newResult = await this.deltaSync(oldResult.res.value, registryUrl);
+      const newResult = await this.deltaSync(data, registryUrl);
       cacheResult(registryUrl, newResult);
       return newResult;
     }
@@ -182,9 +182,9 @@ export class VersionsEndpointCache {
     } finally {
       this.cacheRequests.delete(registryUrl);
     }
-    const { res } = cachedResult;
 
-    if (!res.success) {
+    const { value: cachedData } = cachedResult.unwrap();
+    if (!cachedData) {
       logger.debug(
         { packageName, registryUrl },
         'Rubygems: endpoint not supported'
@@ -192,7 +192,7 @@ export class VersionsEndpointCache {
       return Result.err('unsupported-api');
     }
 
-    const versions = res.value.packageVersions.get(packageName);
+    const versions = cachedData.packageVersions.get(packageName);
     if (!versions?.length) {
       logger.debug(
         { packageName, registryUrl },
