@@ -20,7 +20,12 @@ import { UpdateTypesMatcher } from './update-types';
 const matchers: MatcherApi[][] = [];
 export default matchers;
 
-// each manager under the same key will use a logical OR, if multiple matchers are applied AND will be used
+// Each matcher under the same index will use a logical OR, if multiple matchers are applied AND will be used
+
+// applyPackageRules evaluates matchers in the order of insertion and returns early on failure.
+// Therefore, when multiple matchers are set in a single packageRule, some may not be checked.
+// Since matchConfidence matcher can abort the run due to unauthenticated use, it should be evaluated first.
+matchers.push([new MergeConfidenceMatcher()]);
 matchers.push([
   new DepNameMatcher(),
   new DepPatternsMatcher(),
@@ -34,7 +39,6 @@ matchers.push([new BaseBranchesMatcher()]);
 matchers.push([new ManagersMatcher()]);
 matchers.push([new DatasourcesMatcher()]);
 matchers.push([new UpdateTypesMatcher()]);
-matchers.push([new MergeConfidenceMatcher()]);
 matchers.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
 matchers.push([new CurrentValueMatcher()]);
 matchers.push([new CurrentVersionMatcher()]);
