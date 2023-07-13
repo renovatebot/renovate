@@ -140,6 +140,7 @@ export function parsePreset(input: string): ParsedPreset {
     'docker',
     'group',
     'helpers',
+    'mergeConfidence',
     'monorepo',
     'npm',
     'packages',

@@ -27,6 +27,7 @@ export const removedPresets: Record<string, string | null> = {
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,
   'group:jsTestMonMajor': 'group:jsTestNonMajor',
+  'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
 };
 
 const renamedMonorepos: Record<string, string> = {
