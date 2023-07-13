@@ -54,9 +54,14 @@ export function satisfiesDateRange(
   }
 
   const { operator, age } = grps;
-  const dateMs = DateTime.fromISO(date).toMillis();
+  const luxonDate = DateTime.fromISO(date);
+  if (!luxonDate) {
+    logger.debug(`Invalid date specifier: '${date}'`);
+    return null;
+  }
+  const dateMs = luxonDate.toMillis();
   const ageMs = toMs(age);
-  if (!ageMs || !dateMs) {
+  if (!ageMs) {
     return null;
   }
 

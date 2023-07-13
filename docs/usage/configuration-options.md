@@ -2001,7 +2001,7 @@ Only one date part is supported, e.g. you _cannot_ do `> 1 year 1 month` and ins
 
 <!-- prettier-ignore -->
 !!! note
-    Only the words hour(s)/hrs/h, day(s)/d, week(s), month(s)/M and year(s)/y are supported.
+    We recommend using these words hour(s), day(s), week(s), month(s) and year(s) to specify time formats.
 
 ### matchDepTypes
 

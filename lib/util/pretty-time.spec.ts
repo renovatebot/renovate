@@ -59,7 +59,7 @@ describe('util/pretty-time', () => {
 
     it.each`
       date                                  | range              | expected
-      ${'2023-01-01'}                       | ${'< 1 y'}         | ${true}
+      ${'2023-01-01'}                       | ${'< 1 Y'}         | ${true}
       ${'2023-07-07'}                       | ${'< 1 day'}       | ${true}
       ${'2023-06-09'}                       | ${'<=1M'}          | ${true}
       ${'2020-01-01'}                       | ${'>= 1hrs'}       | ${true}
