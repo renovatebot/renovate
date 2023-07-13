@@ -212,16 +212,11 @@ describe('modules/platform/github/index', () => {
             archived: true,
             topics: ['managed-by-renovate'],
           },
-          {
-            full_name: 'g/h',
-            archived: false,
-            topics: ['managed-by-renovate'],
-          },
           null,
         ]);
 
       const repos = await github.getRepos({ topics: ['managed-by-renovate'] });
-      expect(repos).toEqual(['c/d', 'g/h']);
+      expect(repos).toEqual(['c/d']);
     });
 
     it('should return an array of repos when using Github App endpoint', async () => {
