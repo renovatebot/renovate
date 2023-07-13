@@ -10,13 +10,7 @@ const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const Git = jest.requireActual('simple-git') as SimpleGitFactory;
 
-const gitMock = {
-  env: jest.fn(),
-  listRemote: jest.fn(),
-  subModule: jest.fn(),
-  raw: jest.fn(),
-  ...mock<Omit<SimpleGit, 'env' | 'subModule' | 'raw' | 'listRemote'>>(),
-};
+const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/extract', () => {
   beforeEach(() => {
@@ -29,7 +23,7 @@ describe('modules/manager/git-submodules/extract', () => {
     simpleGitFactoryMock.mockImplementation((basePath: string) => {
       const git = Git(basePath);
 
-      gitMock.env.mockImplementation(() => gitMock as unknown as SimpleGit);
+      gitMock.env.mockImplementation(() => gitMock);
       gitMock.subModule.mockResolvedValue(
         '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
       );
@@ -84,6 +78,12 @@ describe('modules/manager/git-submodules/extract', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
+    });
+
+    it('default to master if no branch can be detected', async () => {
+      const res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('master');
     });
 
     it('given branch is used when branch is specified', async () => {

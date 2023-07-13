@@ -110,7 +110,7 @@ export async function getRepos(): Promise<string[]> {
     );
     const result = repos.map(
       (r: { project: { key: string }; slug: string }) =>
-        `${r.project.key.toLowerCase()}/${r.slug}`
+        `${r.project.key}/${r.slug}`
     );
     logger.debug({ result }, 'result of getRepos()');
     return result;

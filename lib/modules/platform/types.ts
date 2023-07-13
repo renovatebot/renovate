@@ -44,6 +44,7 @@ export interface RepoParams {
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
+  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
@@ -166,6 +167,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 
 export interface AutodiscoverConfig {
   topics?: string[];
+  includeMirrors?: boolean;
 }
 
 export interface Platform {

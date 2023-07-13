@@ -1,3 +1,4 @@
+import { mock } from 'jest-mock-extended';
 import { SimpleGit, simpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
@@ -9,11 +10,7 @@ import { updateDependency } from '.';
 
 jest.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
-const gitMock = {
-  env: jest.fn(),
-  submoduleUpdate: jest.fn(),
-  checkout: jest.fn(),
-};
+const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
@@ -24,7 +21,7 @@ describe('modules/manager/git-submodules/update', () => {
     process.env = {};
 
     simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockImplementation(() => gitMock as unknown as SimpleGit);
+    gitMock.env.mockImplementation(() => gitMock);
   });
 
   describe('updateDependency', () => {
