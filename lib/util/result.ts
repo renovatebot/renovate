@@ -3,11 +3,13 @@ import { logger } from '../logger';
 interface Ok<T> {
   readonly ok: true;
   readonly value: T;
+  readonly error?: never;
 }
 
 interface Err<E> {
   readonly ok: false;
   readonly error: E;
+  readonly value?: never;
 }
 
 type Res<T, E> = Ok<T> | Err<E>;
@@ -38,7 +40,7 @@ export class Result<T, E = Error> {
     }
   }
 
-  private constructor(public readonly res: Res<T, E>) {}
+  private constructor(private readonly res: Res<T, E>) {}
 
   unwrap(): Res<T, E>;
   unwrap<U>(fallback: U): T | U;
@@ -118,12 +120,13 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   ): AsyncResult<U, E | EE> {
     return new AsyncResult((resolve) => {
       this.then((oldResult) => {
-        if (!oldResult.res.ok) {
-          return resolve(Result.err(oldResult.res.error));
+        const { ok, value, error } = oldResult.unwrap();
+        if (!ok) {
+          return resolve(Result.err(error));
         }
 
         try {
-          const newResult = fn(oldResult.res.value);
+          const newResult = fn(value);
 
           if (newResult instanceof Promise) {
             return newResult.then(resolve).catch((error) => {
