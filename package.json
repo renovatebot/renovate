@@ -212,7 +212,7 @@
     "luxon": "3.3.0",
     "markdown-it": "13.0.1",
     "markdown-table": "2.0.0",
-    "minimatch": "9.0.2",
+    "minimatch": "9.0.3",
     "moo": "0.5.2",
     "ms": "2.1.3",
     "nanoid": "3.3.6",
