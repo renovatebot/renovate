@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { logger } from '../../../logger';
-import type { CustomExtractConfig } from '../types';
+import { Fixtures } from '../../../../../test/fixtures';
+import { logger } from '../../../../logger';
+import type { CustomExtractConfig } from '../../types';
 import { defaultConfig, extractPackageFile } from '.';
 
 const dockerfileContent = Fixtures.get(`Dockerfile`);
