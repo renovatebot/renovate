@@ -230,8 +230,8 @@ If you need to configure per-repository credentials then you can also configure 
 The recommended approaches in order of preference are:
 
 1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
-1. **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config // DRAFT: should I change this line?
-1. **Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config // DRAFT: should I change this line?
+1. **The Mend Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
+1. **The Mend Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
 
 These approaches are described in full below.
 

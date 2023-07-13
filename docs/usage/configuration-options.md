@@ -1587,7 +1587,7 @@ Applicable for Composer only for now.
 
 ## ignorePrAuthor
 
-This is usually needed if someone needs to migrate bot accounts, including from hosted app to self-hosted. // DRAFT: Do I need to change this line?
+This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
 You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
 It's recommended to revert this setting once that transition period is over and all old PRs are resolved.
@@ -2574,11 +2574,11 @@ To learn how to use GitHub's Merge Queue feature with Renovate, read our [Key Co
 
 ## platformCommit
 
-Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps). // DRAFT: Should I change this line?
+Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
 It does not apply when you use a Personal Access Token as credential.
 
 When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
-This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature. // DRAFT: Should I change this line?
+This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
 
 ## postUpdateOptions
 
@@ -3559,7 +3559,7 @@ Follow these steps:
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
-   If you're the account administrator, browse to the app (for example [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned // DRAFT: Should I change this line?
+   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
 
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 

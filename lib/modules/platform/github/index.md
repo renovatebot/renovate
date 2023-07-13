@@ -1,7 +1,5 @@
 # GitHub and GitHub Enterprise Server
 
-// DRAFT: Maintainers check this file.
-
 ## Authentication
 
 First, [create a classic Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) for the bot account, select `repo` scope.
