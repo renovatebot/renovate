@@ -39,7 +39,7 @@ export class PackagePatternsMatcher extends Matcher {
       return true;
     }
     if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
-      logger.once.warn(
+      logger.once.info(
         { packageRule, packageName, depName },
         'Use matchDepPatterns instead of matchPackagePatterns'
       );
