@@ -1,15 +1,29 @@
-import _simpleGit, { Response, SimpleGit } from 'simple-git';
+import { mock } from 'jest-mock-extended';
+import { SimpleGit, simpleGit } from 'simple-git';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as hostRules from '../../../util/host-rules';
 import type { Upgrade } from '../types';
 import { updateDependency } from '.';
 
 jest.mock('simple-git');
-const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
+const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
+const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/update', () => {
+  beforeEach(() => {
+    GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
+    // clear host rules
+    hostRules.clear();
+    // clear environment variables
+    process.env = {};
+
+    simpleGitFactoryMock.mockReturnValue(gitMock);
+    gitMock.env.mockImplementation(() => gitMock);
+  });
+
   describe('updateDependency', () => {
     let upgrade: Upgrade;
     let adminConfig: RepoGlobalConfig;
@@ -29,11 +43,8 @@ describe('modules/manager/git-submodules/update', () => {
     });
 
     it('returns null on error', async () => {
-      simpleGit.mockReturnValue({
-        submoduleUpdate() {
-          throw new Error();
-        },
-      });
+      gitMock.submoduleUpdate.mockRejectedValue(new Error());
+
       const update = await updateDependency({
         fileContent: '',
         upgrade,
@@ -42,14 +53,9 @@ describe('modules/manager/git-submodules/update', () => {
     });
 
     it('returns content on update', async () => {
-      simpleGit.mockReturnValue({
-        submoduleUpdate() {
-          return Promise.resolve('') as Response<string>;
-        },
-        checkout() {
-          return Promise.resolve('') as Response<string>;
-        },
-      });
+      gitMock.submoduleUpdate.mockResolvedValue('');
+      gitMock.checkout.mockResolvedValue('');
+
       const update = await updateDependency({
         fileContent: '',
         upgrade,
