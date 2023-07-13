@@ -800,13 +800,13 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'autodiscoverTopics',
-    description: '',
+    description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',
     type: 'array',
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab'],
+    supportedPlatforms: ['gitlab', 'github'],
   },
   {
     name: 'prCommitsPerRunLimit',

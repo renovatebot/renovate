@@ -42,6 +42,7 @@ import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -187,9 +188,7 @@ export async function initPlatform({
   return platformResult;
 }
 
-// Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
-  logger.debug('Autodiscovering GitHub repositories');
+async function fetchRepositories(): Promise<GhRestRepo[]> {
   try {
     if (platformConfig.isGHApp) {
       const res = await githubApi.getJson<{
@@ -198,24 +197,34 @@ export async function getRepos(): Promise<string[]> {
         paginationField: 'repositories',
         paginate: 'all',
       });
-      return res.body.repositories
-        .filter(is.nonEmptyObject)
-        .filter((repo) => !repo.archived)
-        .map((repo) => repo.full_name);
+      return res.body.repositories;
     } else {
       const res = await githubApi.getJson<GhRestRepo[]>(
         `user/repos?per_page=100`,
         { paginate: 'all' }
       );
-      return res.body
-        .filter(is.nonEmptyObject)
-        .filter((repo) => !repo.archived)
-        .map((repo) => repo.full_name);
+      return res.body;
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
   }
+}
+
+// Get all repositories that the user has access to
+export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
+  logger.debug('Autodiscovering GitHub repositories');
+  return (await fetchRepositories())
+    .filter(is.nonEmptyObject)
+    .filter((repo) => !repo.archived)
+    .filter((repo) => {
+      if (config?.topics) {
+        const autodiscoverTopics = config.topics;
+        return repo.topics.some((topic) => autodiscoverTopics.includes(topic));
+      }
+      return true;
+    })
+    .map((repo) => repo.full_name);
 }
 
 async function getBranchProtection(

@@ -192,6 +192,38 @@ describe('modules/platform/github/index', () => {
       expect(repos).toMatchSnapshot();
     });
 
+    it('should filters repositories by topics', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user/repos?per_page=100')
+        .reply(200, [
+          {
+            full_name: 'a/b',
+            archived: false,
+            topics: [],
+          },
+          {
+            full_name: 'c/d',
+            archived: false,
+            topics: ['managed-by-renovate'],
+          },
+          {
+            full_name: 'e/f',
+            archived: true,
+            topics: ['managed-by-renovate'],
+          },
+          {
+            full_name: 'g/h',
+            archived: false,
+            topics: ['managed-by-renovate'],
+          },
+          null,
+        ]);
+
+      const repos = await github.getRepos({ topics: ['managed-by-renovate'] });
+      expect(repos).toEqual(['c/d', 'g/h']);
+    });
+
     it('should return an array of repos when using Github App endpoint', async () => {
       //Use Github App token
       await github.initPlatform({
