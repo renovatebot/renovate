@@ -27,10 +27,10 @@ export class Result<T, E = Error> {
   static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
   static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E>;
   static wrap<T, E = Error>(
-    input: (() => T) | Promise<T>
+    input: (() => T) | Promise<Result<T, E>> | Promise<T>
   ): Result<T, E> | AsyncResult<T, E> {
     if (input instanceof Promise) {
-      return AsyncResult.wrap(input);
+      return AsyncResult.wrap(input as never);
     }
 
     try {
