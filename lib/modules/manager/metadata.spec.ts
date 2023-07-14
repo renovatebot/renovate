@@ -11,7 +11,12 @@ describe('modules/manager/metadata', () => {
   it.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
     let readme: string | undefined;
     try {
-      readme = await fs.readFile(`${__dirname}/${manager}/readme.md`, 'utf8');
+      readme = await fs.readFile(
+        `${__dirname}/${
+          manager === 'custom' ? 'custom/regex' : manager
+        }/readme.md`,
+        'utf8'
+      );
     } catch (err) {
       // do nothing
     }

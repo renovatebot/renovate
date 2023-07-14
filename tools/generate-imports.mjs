@@ -89,9 +89,17 @@ async function getFileHash(filePath) {
 export async function getManagerHash(managerName) {
   /** @type {string[]} */
   let hashes = [];
-  const files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
-    (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
-  );
+  let files = [];
+  if (managerName === 'regex') {
+    files = (await glob(`lib/modules/manager/custom/${managerName}/**`)).filter(
+      (fileName) =>
+        minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+    );
+  } else
+    files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
+      (fileName) =>
+        minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+    );
 
   // sort files in case glob order changes
   files.sort();
@@ -144,12 +152,20 @@ async function generateHash() {
     const hashMap = `export const hashMap = new Map<string, string>();`;
     /** @type {string[]} */
     let hashes = [];
-    // get managers list
-    const managers = (
+    // get  managers list
+    let managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })
     )
       .filter((file) => file.isDirectory())
       .map((file) => file.name);
+    // add custom managers
+    managers = managers.concat(
+      ...(
+        await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
+      )
+        .filter((file) => file.isDirectory())
+        .map((file) => file.name)
+    );
 
     for (const manager of managers) {
       const hash = await getManagerHash(manager);
