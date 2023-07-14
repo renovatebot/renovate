@@ -823,7 +823,7 @@ For example: `:warning:` will be replaced with `⚠️`.
 You may need to set a `username` if you:
 
 - use the Bitbucket platform, or
-- use the GitHub App with CLI (required)
+- use a self-hosted GitHub App with CLI (required)
 
 If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 
