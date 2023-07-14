@@ -41,25 +41,26 @@ export class RubyGemsDatasource extends Datasource {
       return null;
     }
 
-    const versionsResult = await Result.wrap(
+    const { value: rubygemsResult, error: rubygemsError } = await Result.wrap(
       this.versionsEndpointCache.getVersions(registryUrl, packageName)
     )
       .transform((versions) =>
         this.metadataCache.getRelease(registryUrl, packageName, versions)
       )
       .unwrap();
+
     // istanbul ignore else: will be removed soon
-    if (versionsResult.ok) {
-      return versionsResult.value;
-    } else if (versionsResult.error instanceof Error) {
-      this.handleGenericErrors(versionsResult.error);
+    if (rubygemsResult) {
+      return rubygemsResult;
+    } else if (rubygemsError instanceof Error) {
+      this.handleGenericErrors(rubygemsError);
     }
 
     try {
       const registryHostname = parseUrl(registryUrl)?.hostname;
 
       if (
-        versionsResult.error === 'unsupported-api' &&
+        rubygemsError === 'unsupported-api' &&
         registryHostname !== 'rubygems.org'
       ) {
         if (
