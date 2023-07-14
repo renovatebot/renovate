@@ -46,6 +46,57 @@ export class Result<T, E = Error> {
     }
   }
 
+  static wrapNullable<T, E = Error, NullableError = Error>(
+    callback: () => T,
+    nullableError: NullableError
+  ): Result<T, E | NullableError>;
+  static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
+    callback: () => T,
+    nullError: NullError,
+    undefinedError: UndefinedError
+  ): Result<T, E | NullError | UndefinedError>;
+
+  static wrapNullable<T, E = Error, NullableError = Error>(
+    promise: Promise<T>,
+    nullableError: NullableError
+  ): AsyncResult<T, E | NullableError>;
+  static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
+    promise: Promise<T>,
+    nullError: NullError,
+    undefinedError: UndefinedError
+  ): AsyncResult<T, E | NullError | UndefinedError>;
+
+  static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
+    input: (() => T) | Promise<T>,
+    arg2: NullError,
+    arg3?: UndefinedError
+  ):
+    | Result<T, E | NullError | UndefinedError>
+    | AsyncResult<T, E | NullError | UndefinedError> {
+    const nullError = arg2;
+    const undefinedError = arg3 ?? arg2;
+
+    if (input instanceof Promise) {
+      return AsyncResult.wrapNullable(input, nullError, undefinedError);
+    }
+
+    try {
+      const result = input();
+
+      if (result === null) {
+        return Result.err(nullError);
+      }
+
+      if (result === undefined) {
+        return Result.err(undefinedError);
+      }
+
+      return Result.ok(result);
+    } catch (error) {
+      return Result.err(error);
+    }
+  }
+
   private constructor(private readonly res: Res<T, E>) {}
 
   unwrap(): Res<T, E>;
@@ -137,6 +188,28 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
         .then((value) => {
           if (value instanceof Result) {
             return resolve(value);
+          }
+
+          return resolve(Result.ok(value));
+        })
+        .catch((error) => resolve(Result.err(error)));
+    });
+  }
+
+  static wrapNullable<T, E, NullError, UndefinedError>(
+    promise: Promise<T>,
+    nullError: NullError,
+    undefinedError: UndefinedError
+  ): AsyncResult<T, E | NullError | UndefinedError> {
+    return new AsyncResult((resolve) => {
+      promise
+        .then((value) => {
+          if (value === null) {
+            return resolve(Result.err(nullError));
+          }
+
+          if (value === undefined) {
+            return resolve(Result.err(undefinedError));
           }
 
           return resolve(Result.ok(value));

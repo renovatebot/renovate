@@ -37,6 +37,37 @@ describe('util/result', () => {
         });
         expect(res).toEqual(Result.err('oops'));
       });
+
+      it('wraps nullable callback', () => {
+        const res = Result.wrapNullable(() => 42, 'oops');
+        expect(res).toEqual(Result.ok(42));
+      });
+
+      it('wraps nullable callback null', () => {
+        const res = Result.wrapNullable(() => null, 'oops');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps nullable callback undefined', () => {
+        const res = Result.wrapNullable(() => undefined, 'oops');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('distincts between null and undefined callback results', () => {
+        expect(Result.wrapNullable(() => null, 'null', 'undefined')).toEqual(
+          Result.err('null')
+        );
+        expect(
+          Result.wrapNullable(() => undefined, 'null', 'undefined')
+        ).toEqual(Result.err('undefined'));
+      });
+
+      it('handles nullable callback error', () => {
+        const res = Result.wrapNullable(() => {
+          throw 'oops';
+        }, 'nullable');
+        expect(res).toEqual(Result.err('oops'));
+      });
     });
 
     describe('Unwrapping', () => {
@@ -120,6 +151,36 @@ describe('util/result', () => {
         const res: AsyncResult<number, string> = Result.wrap(
           Promise.reject('oops')
         );
+        await expect(res).resolves.toEqual(Result.err('oops'));
+      });
+
+      it('wraps nullable promise', async () => {
+        const res = Result.wrapNullable(Promise.resolve(42), 'oops');
+        await expect(res).resolves.toEqual(Result.ok(42));
+      });
+
+      it('wraps promise returning null', async () => {
+        const res = Result.wrapNullable(Promise.resolve(null), 'oops');
+        await expect(res).resolves.toEqual(Result.err('oops'));
+      });
+
+      it('wraps promise returning undefined', async () => {
+        const res = Result.wrapNullable(Promise.resolve(undefined), 'oops');
+        await expect(res).resolves.toEqual(Result.err('oops'));
+      });
+
+      it('distincts between null and undefined promise results', async () => {
+        await expect(
+          Result.wrapNullable(Promise.resolve(null), 'null', 'undefined')
+        ).resolves.toEqual(Result.err('null'));
+
+        await expect(
+          Result.wrapNullable(Promise.resolve(undefined), 'null', 'undefined')
+        ).resolves.toEqual(Result.err('undefined'));
+      });
+
+      it('handles rejected nullable promise', async () => {
+        const res = Result.wrapNullable(Promise.reject('oops'), 'nullable');
         await expect(res).resolves.toEqual(Result.err('oops'));
       });
     });

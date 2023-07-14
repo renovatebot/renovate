@@ -80,18 +80,16 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-      const lookupResult = await Result.wrap(
-        getPkgReleases(config).then((x) =>
-          x === null ? Result.err('package-not-found') : Result.ok(x)
+
+      const { value: lookupValue, error: lookupError } =
+        await Result.wrapNullable(
+          getPkgReleases(config),
+          'no-releases' as const
         )
-      )
-        .transform((x) => Result.ok(clone(x)))
-        .unwrap();
-      if (!lookupResult.ok) {
-        throw lookupResult.error;
-      }
-      dependency = lookupResult.value;
-      if (!dependency) {
+          .transform((x) => Result.ok(clone(x)))
+          .unwrap();
+
+      if (lookupError === 'no-releases') {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: packageName,
@@ -102,6 +100,12 @@ export async function lookupUpdates(
         res.warnings.push(warning);
         return res;
       }
+
+      if (lookupError) {
+        throw lookupError;
+      }
+
+      dependency = lookupValue;
       if (dependency.deprecationMessage) {
         logger.debug(
           `Found deprecationMessage for ${datasource} package ${packageName}`
