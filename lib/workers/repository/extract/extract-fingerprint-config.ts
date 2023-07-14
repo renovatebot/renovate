@@ -4,6 +4,7 @@ import type {
   RenovateConfig,
 } from '../../../config/types';
 import { getManagerList } from '../../../modules/manager';
+import { getCustomManagerList } from '../../../modules/manager/custom';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/types';
 import type { WorkerExtractConfig } from '../../types';
@@ -55,6 +56,7 @@ export function generateFingerprintConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
+  const customManagerList = getCustomManagerList();
   let managerList: Set<string>;
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
@@ -72,7 +74,7 @@ export function generateFingerprintConfig(
           fileList: [],
         });
       }
-    } else {
+    } else if (!customManagerList.includes(manager)) {
       const managerConfig = getManagerConfig(config, manager);
       managerExtractConfigs.push({ ...managerConfig, fileList: [] });
     }

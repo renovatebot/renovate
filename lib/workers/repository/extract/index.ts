@@ -7,11 +7,13 @@ import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
+import { getCustomManagerList } from '../../../modules/manager/custom';
 
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
   let managerList = getManagerList();
+  const customManagerList = getCustomManagerList();
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
@@ -36,7 +38,7 @@ export async function extractAllDependencies(
         customManagerConfig.manager = 'regex'; // TODO: replace 'regex' with regexManager.customType
         tryConfig(mergeChildConfig(customManagerConfig, regexManager));
       }
-    } else {
+    } else if (!customManagerList.includes(manager)) {
       const managerConfig = getManagerConfig(config, manager);
       managerConfig.manager = manager;
       tryConfig(managerConfig);
