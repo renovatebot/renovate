@@ -6,7 +6,7 @@ Look at the Merge Confidence badges before merging to:
 - See at a glance if you should update
 
 Merge Confidence finds and flags undeclared breaking releases.
-It analyzes test and release adoption data across Mend Renovate’s early-adopting user base.
+It analyzes test and release adoption data from the Mend Renovate App users.
 
 ![Renovate PR with Merge Confidence badges](assets/images/merge-confidence.png)
 
@@ -49,7 +49,7 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 !!! note
     The `mergeConfidence:age-confidence-badges` preset can be used to only show the Age and Confidence badges.
 
-If you want to disable the badges in the app, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
+If you want to disable the badges in the Mend Renovate App, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
 
 ```json
 {
@@ -68,7 +68,7 @@ Merge Confidence uses the following confidence levels:
 
 ## How it works
 
-Mend's hosted Renovate App has created millions of pull requests on `github.com` to help developers update their dependencies since 2017.
+The Mend Renovate App created millions of pull requests on `github.com` to help developers update their dependencies since 2017.
 We bundle and analyze metrics such as package `Age`, package `Adoption`, and `Passing` tests.
 This way we can find packages that have undeclared breaking changes.
 
