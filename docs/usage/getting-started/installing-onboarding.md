@@ -9,19 +9,19 @@ If the administrator has configured a fixed list of repositories then the only w
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
 - Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
-- If using a GitHub App (including Mend Renovate on `github.com`) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
+- If using a GitHub App (including the Mend Renovate App) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
 
 ### Hosted GitHub.com App
 
-Follow these steps to install and enable Mend's Renovate GitHub App:
+Follow these steps to install and enable the Mend Renovate App:
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 
-![Github App Install button](../assets/images/github-app-install.png){ loading=lazy }
+![The Mend Renovate App Install button](../assets/images/github-app-install.png){ loading=lazy }
 
 The only choice you need to make is whether to run Renovate on all repositories or on selected repositories:
 
-![Github App repositories](../assets/images/github-app-choose-repos.png){ loading=lazy }
+![The Mend Renovate App repositories](../assets/images/github-app-choose-repos.png){ loading=lazy }
 
 Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
@@ -147,4 +147,4 @@ Any existing Renovate PRs will be closed after you've completed these steps.
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the hosted Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you're using the Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
