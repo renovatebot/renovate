@@ -147,7 +147,7 @@ async function generateHash() {
   console.log('generating hashes');
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
-    /** @type {string[]} */
+    /** @type {Record<string, string>[]} */
     let hashes = [];
     // get  managers list
     const managers = (
@@ -165,23 +165,23 @@ async function generateHash() {
 
     for (const manager of managers) {
       const hash = await getManagerHash(manager, false);
-      hashes.push(hash);
+      hashes.push({ manager, hash });
     }
 
     for (const manager of customManagers) {
       const hash = await getManagerHash(manager, true);
-      hashes.push(hash);
+      hashes.push({ manager, hash });
     }
 
     //add manager hashes to hashMap {key->manager, value->hash}
-    hashes = (await Promise.all(hashes)).map(
-      (hash, index) => `hashMap.set('${managers[index]}','${hash}');`
+    const hashStrings = (await Promise.all(hashes)).map(
+      ({ manager, hash }) => `hashMap.set('${manager}','${hash}');`
     );
 
     //write hashMap to fingerprint.generated.ts
     await updateFile(
       'lib/modules/manager/fingerprint.generated.ts',
-      [hashMap, hashes.join('\n')].join('\n\n')
+      [hashMap, hashStrings.join('\n')].join('\n\n')
     );
   } catch (err) {
     console.log('ERROR:', err.message);
