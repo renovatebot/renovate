@@ -1,3 +1,4 @@
+/* eslint-disable promise/no-nesting */
 import { logger } from '../logger';
 
 interface Ok<T> {
