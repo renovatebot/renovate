@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { load } from 'js-yaml';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -9,18 +10,23 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { PubspecLock, PubspecSdk } from './types';
 
-function getFlutterConstraint(lockFileContent: string): string | undefined {
-  return regEx(/^\tflutter: ['"](?<flutterVersion>.*)['"]$/m).exec(
-    lockFileContent
-  )?.groups?.flutterVersion;
-}
-
-function getDartConstraint(lockFileContent: string): string | undefined {
-  return regEx(/^\tdart: ['"](?<dartVersion>.*)['"]$/m).exec(lockFileContent)
-    ?.groups?.dartVersion;
+export function getConstraint(
+  lockFileContent: string,
+  lockFileSdkKey: keyof PubspecSdk
+): string | undefined {
+  try {
+    const data = load(lockFileContent, { json: true }) as PubspecLock;
+    const constraint = data.sdks[lockFileSdkKey];
+    if (is.string(constraint)) {
+      return constraint;
+    }
+  } catch (err) {
+    // Do nothing
+  }
+  return undefined;
 }
 
 export async function updateArtifacts({
@@ -64,8 +70,9 @@ export async function updateArtifacts({
     }
 
     const constraint = isFlutter
-      ? config.constraints?.flutter ?? getFlutterConstraint(oldLockFileContent)
-      : config.constraints?.dart ?? getDartConstraint(oldLockFileContent);
+      ? config.constraints?.flutter ??
+        getConstraint(oldLockFileContent, 'flutter')
+      : config.constraints?.dart ?? getConstraint(oldLockFileContent, 'dart');
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},
