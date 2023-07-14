@@ -30,12 +30,14 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       const baz = await rubygems.getVersions(registryUrl, 'baz');
       const qux = await rubygems.getVersions(registryUrl, 'qux');
 
-      expect(foo.unwrap(null)).toEqual(['1.1.1']);
-      expect(bar.unwrap(null)).toEqual(['2.2.2']);
-      expect(baz.unwrap(null)).toEqual(['3.3.3']);
+      expect(foo.unwrap().value).toEqual(['1.1.1']);
+      expect(bar.unwrap().value).toEqual(['2.2.2']);
+      expect(baz.unwrap().value).toEqual(['3.3.3']);
       expect(qux.unwrap().error).toBe('package-not-found');
 
-      expect(memCache.get('https://rubygems.org')?.unwrap(null)).toMatchObject({
+      expect(
+        memCache.get('https://rubygems.org')?.unwrap().value
+      ).toMatchObject({
         contentTail: '33333333333333333333333333333333\n',
       });
     });
@@ -49,9 +51,9 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
         rubygems.getVersions(registryUrl, 'baz'),
       ]);
 
-      expect(foo.unwrap(null)).toEqual(['1.1.1']);
-      expect(bar.unwrap(null)).toEqual(['2.2.2']);
-      expect(baz.unwrap(null)).toEqual(['3.3.3']);
+      expect(foo.unwrap().value).toEqual(['1.1.1']);
+      expect(bar.unwrap().value).toEqual(['2.2.2']);
+      expect(baz.unwrap().value).toEqual(['3.3.3']);
     });
 
     it('handles 404', async () => {
@@ -92,7 +94,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       httpMock.scope(registryUrl).get('/versions').reply(200, fullBody);
 
       const res1 = await rubygems.getVersions(registryUrl, 'foo');
-      expect(res1.unwrap(null)).toEqual(['1.1.1']);
+      expect(res1.unwrap().value).toEqual(['1.1.1']);
 
       jest.advanceTimersByTime(15 * 60 * 1000);
       httpMock
@@ -107,9 +109,11 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
         );
 
       const res2 = await rubygems.getVersions(registryUrl, 'foo');
-      expect(res2.unwrap(null)).toEqual(['1.2.3']);
+      expect(res2.unwrap().value).toEqual(['1.2.3']);
 
-      expect(memCache.get('https://rubygems.org')?.unwrap(null)).toMatchObject({
+      expect(
+        memCache.get('https://rubygems.org')?.unwrap().value
+      ).toMatchObject({
         contentTail: '44444444444444444444444444444444\n',
       });
     });
@@ -118,7 +122,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       httpMock.scope(registryUrl).get('/versions').reply(200, fullBody);
 
       const res1 = await rubygems.getVersions(registryUrl, 'foo');
-      expect(res1.unwrap(null)).toEqual(['1.1.1']);
+      expect(res1.unwrap().value).toEqual(['1.1.1']);
 
       jest.advanceTimersByTime(15 * 60 * 1000);
       httpMock
@@ -144,9 +148,11 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
         );
 
       const res2 = await rubygems.getVersions(registryUrl, 'foo');
-      expect(res2.unwrap(null)).toEqual(['1.2.3']);
+      expect(res2.unwrap().value).toEqual(['1.2.3']);
 
-      expect(memCache.get('https://rubygems.org')?.unwrap(null)).toMatchObject({
+      expect(
+        memCache.get('https://rubygems.org')?.unwrap().value
+      ).toMatchObject({
         contentTail: '01010101010101010101010101010101\n',
       });
     });
@@ -155,7 +161,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       httpMock.scope(registryUrl).get('/versions').reply(200, fullBody);
 
       const res1 = await rubygems.getVersions(registryUrl, 'foo');
-      expect(res1.unwrap(null)).toEqual(['1.1.1']);
+      expect(res1.unwrap().value).toEqual(['1.1.1']);
 
       jest.advanceTimersByTime(15 * 60 * 1000);
       httpMock
@@ -167,9 +173,11 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
         );
 
       const res2 = await rubygems.getVersions(registryUrl, 'foo');
-      expect(res2.unwrap(null)).toEqual(['1.2.3']);
+      expect(res2.unwrap().value).toEqual(['1.2.3']);
 
-      expect(memCache.get('https://rubygems.org')?.unwrap(null)).toMatchObject({
+      expect(
+        memCache.get('https://rubygems.org')?.unwrap().value
+      ).toMatchObject({
         contentTail: '44444444444444444444444444444444\n',
       });
     });
@@ -210,7 +218,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
 
         const res = await rubygems.getVersions(registryUrl, 'foo');
 
-        expect(res.unwrap(null)).toEqual(['9.9.9']);
+        expect(res.unwrap().value).toEqual(['9.9.9']);
       });
 
       it('handles unknown errors', async () => {

@@ -57,12 +57,12 @@ describe('util/result', () => {
       });
 
       it('skips fallback for successful value', () => {
-        const res = Result.ok(42);
-        expect(res.unwrap(0)).toBe(42);
+        const res: Result<number> = Result.ok(42);
+        expect(res.unwrap(-1)).toBe(42);
       });
 
       it('uses fallback for error value', () => {
-        const res = Result.err('oops');
+        const res: Result<number, string> = Result.err('oops');
         expect(res.unwrap(42)).toBe(42);
       });
     });

@@ -2,7 +2,7 @@ import { logger } from '../logger';
 
 interface Ok<T> {
   readonly ok: true;
-  readonly value: T;
+  readonly value: NonNullable<T>;
   readonly error?: never;
 }
 
@@ -15,7 +15,7 @@ interface Err<E> {
 type Res<T, E> = Ok<T> | Err<E>;
 
 export class Result<T, E = Error> {
-  static ok<T>(value: T): Result<T, never> {
+  static ok<T>(value: NonNullable<T>): Result<T, never> {
     return new Result({ ok: true, value });
   }
 
@@ -23,11 +23,16 @@ export class Result<T, E = Error> {
     return new Result({ ok: false, error });
   }
 
-  static wrap<T, E = Error>(callback: () => T): Result<T, E>;
+  static wrap<T, E = Error>(callback: () => NonNullable<T>): Result<T, E>;
   static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
-  static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E>;
   static wrap<T, E = Error>(
-    input: (() => T) | Promise<Result<T, E>> | Promise<T>
+    promise: Promise<NonNullable<T>>
+  ): AsyncResult<T, E>;
+  static wrap<T, E = Error>(
+    input:
+      | (() => NonNullable<T>)
+      | Promise<Result<T, E>>
+      | Promise<NonNullable<T>>
   ): Result<T, E> | AsyncResult<T, E> {
     if (input instanceof Promise) {
       return AsyncResult.wrap(input as never);
@@ -44,22 +49,34 @@ export class Result<T, E = Error> {
   private constructor(private readonly res: Res<T, E>) {}
 
   unwrap(): Res<T, E>;
-  unwrap<U>(fallback: U): T | U;
-  unwrap<U>(fallback?: U): Res<T, E> | T | U {
-    if (arguments.length === 0) {
+  unwrap(fallback: NonNullable<T>): NonNullable<T>;
+  unwrap(fallback?: NonNullable<T>): Res<T, E> | NonNullable<T> {
+    if (fallback === undefined) {
       return this.res;
     }
-    return this.res.ok ? this.res.value : (fallback as U);
+    return this.res.ok ? this.res.value : fallback;
   }
 
-  transform<U, EE>(fn: (value: T) => Result<U, EE>): Result<U, E | EE>;
   transform<U, EE>(
-    fn: (value: T) => Promise<Result<U, EE>>
+    fn: (value: NonNullable<T>) => Result<U, EE>
+  ): Result<U, E | EE>;
+  transform<U, EE>(
+    fn: (value: NonNullable<T>) => Promise<Result<U, EE>>
   ): AsyncResult<U, E | EE>;
-  transform<U>(fn: (value: T) => Promise<U>): AsyncResult<U, E | Error>;
-  transform<U>(fn: (value: T) => U): Result<U, E | Error>;
+  transform<U>(
+    fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
+  ): AsyncResult<U, E | Error>;
+  transform<U>(
+    fn: (value: NonNullable<T>) => NonNullable<U>
+  ): Result<U, E | Error>;
   transform<U, EE>(
-    fn: (value: T) => U | Result<U, EE> | Promise<U | Result<U, EE>>
+    fn: (
+      value: NonNullable<T>
+    ) =>
+      | NonNullable<U>
+      | Result<U, EE>
+      | Result<U, EE>
+      | Promise<NonNullable<U>>
   ): Result<U, E | EE> | AsyncResult<U, E | EE> {
     if (!this.res.ok) {
       return Result.err(this.res.error);
@@ -109,9 +126,11 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   }
 
   static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
-  static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E>;
   static wrap<T, E = Error>(
-    promise: Promise<T | Result<T, E>>
+    promise: Promise<NonNullable<T>>
+  ): AsyncResult<T, E>;
+  static wrap<T, E = Error>(
+    promise: Promise<NonNullable<T> | Result<T, E>>
   ): AsyncResult<T, E> {
     return new AsyncResult((resolve) => {
       promise
@@ -127,21 +146,35 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   }
 
   unwrap(): Promise<Res<T, E>>;
-  unwrap<U>(fallback: U): Promise<T | U>;
-  unwrap<U>(fallback?: U): Promise<Res<T, E> | (T | U)> {
-    return arguments.length === 0
-      ? this.then((res) => res.unwrap())
-      : this.then((res) => res.unwrap(fallback as U));
+  unwrap(fallback: NonNullable<T>): Promise<NonNullable<T>>;
+  unwrap(
+    fallback?: NonNullable<T>
+  ): Promise<Res<T, E>> | Promise<NonNullable<T>> {
+    return fallback === undefined
+      ? this.then<Res<T, E>>((res) => res.unwrap())
+      : this.then<NonNullable<T>>((res) => res.unwrap(fallback));
   }
 
-  transform<U, EE>(fn: (value: T) => Result<U, EE>): AsyncResult<U, E | EE>;
   transform<U, EE>(
-    fn: (value: T) => Promise<Result<U, EE>>
+    fn: (value: NonNullable<T>) => Result<U, EE>
   ): AsyncResult<U, E | EE>;
-  transform<U>(fn: (value: T) => Promise<U>): AsyncResult<U, E | Error>;
-  transform<U>(fn: (value: T) => U): AsyncResult<U, E | Error>;
   transform<U, EE>(
-    fn: (value: T) => U | Result<U, EE> | Promise<U | Result<U, EE>>
+    fn: (value: NonNullable<T>) => Promise<Result<U, EE>>
+  ): AsyncResult<U, E | EE>;
+  transform<U>(
+    fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
+  ): AsyncResult<U, E | Error>;
+  transform<U>(
+    fn: (value: NonNullable<T>) => NonNullable<U>
+  ): AsyncResult<U, E | Error>;
+  transform<U, EE>(
+    fn: (
+      value: NonNullable<T>
+    ) =>
+      | Result<U, EE>
+      | Promise<Result<U, EE>>
+      | Promise<NonNullable<U>>
+      | NonNullable<U>
   ): AsyncResult<U, E | EE | Error> {
     return new AsyncResult((resolve) => {
       this.then((oldResult) => {

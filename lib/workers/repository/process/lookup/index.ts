@@ -80,7 +80,11 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-      const lookupResult = await Result.wrap(getPkgReleases(config))
+      const lookupResult = await Result.wrap(
+        getPkgReleases(config).then((x) =>
+          x === null ? Result.err('package-not-found') : Result.ok(x)
+        )
+      )
         .transform((x) => Result.ok(clone(x)))
         .unwrap();
       if (!lookupResult.ok) {
