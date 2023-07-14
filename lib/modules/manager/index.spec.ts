@@ -2,6 +2,7 @@ import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
 import type { ManagerApi } from './types';
 import * as manager from '.';
+import { join } from 'upath';
 
 jest.mock('../../util/fs');
 
@@ -10,7 +11,7 @@ const datasources = getDatasourceList();
 describe('modules/manager/index', () => {
   describe('supportedDatasources', () => {
     for (const m of manager.getManagerList()) {
-      if (m === 'regex') {
+      if (m === 'regex' || m === 'custom') {
         // regex supports any
         continue;
       }
@@ -53,7 +54,11 @@ describe('modules/manager/index', () => {
     const mgrs = manager.getManagers();
 
     const loadedMgr = loadModules(__dirname, validate);
-    expect(Array.from(mgrs.keys())).toEqual(Object.keys(loadedMgr));
+    const loadedCustomMgr = loadModules(join(__dirname, 'custom'), validate);
+
+    expect(Array.from(mgrs.keys())).toEqual(
+      Object.keys({ ...loadedMgr, ...loadedCustomMgr }).sort()
+    );
 
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name)!;
