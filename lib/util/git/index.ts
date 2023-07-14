@@ -897,7 +897,9 @@ export async function hasDiff(
 ): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff([sourceRef, targetRef, '--']))) !== '';
+    return (
+      (await gitRetry(() => git.diff([sourceRef, targetRef, '--']))) !== ''
+    );
   } catch (err) {
     return true;
   }
