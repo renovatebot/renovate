@@ -99,9 +99,7 @@ export async function lookupUpdates(
         // TODO: return warnings in own field
         res.warnings.push(warning);
         return res;
-      }
-
-      if (lookupError) {
+      } else if (lookupError) {
         throw lookupError;
       }
 
