@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { getCustomManagerList } from './custom';
 
 describe('modules/manager/metadata', () => {
   const managerList: string[] = fs
@@ -10,10 +11,11 @@ describe('modules/manager/metadata', () => {
 
   it.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
     let readme: string | undefined;
+    const customManagers = getCustomManagerList();
     try {
       readme = await fs.readFile(
         `${__dirname}/${
-          manager === 'custom' ? 'custom/regex' : manager
+          customManagers.includes(manager) ? 'custom/' : '' + manager
         }/readme.md`,
         'utf8'
       );

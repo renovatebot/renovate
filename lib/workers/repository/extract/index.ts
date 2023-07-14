@@ -30,13 +30,15 @@ export async function extractAllDependencies(
   };
 
   for (const manager of managerList) {
-    const managerConfig = getManagerConfig(config, manager);
-    managerConfig.manager = manager;
-    if (manager === 'regex') {
+    if (manager === 'custom') {
       for (const regexManager of config.regexManagers ?? []) {
-        tryConfig(mergeChildConfig(managerConfig, regexManager));
+        const customManagerConfig = getManagerConfig(config, 'regex'); // TODO: replace 'regex' with regexManager.customType
+        customManagerConfig.manager = 'regex'; // TODO: replace 'regex' with regexManager.customType
+        tryConfig(mergeChildConfig(customManagerConfig, regexManager));
       }
     } else {
+      const managerConfig = getManagerConfig(config, manager);
+      managerConfig.manager = manager;
       tryConfig(managerConfig);
     }
   }

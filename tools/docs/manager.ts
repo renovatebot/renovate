@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '../../lib/config/types';
 import { getManagers } from '../../lib/modules/manager';
+import { getCustomManagerList } from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import {
@@ -10,10 +11,12 @@ import {
 } from './utils';
 
 const noCategoryDisplayName = 'no-category';
-
+const customManagersList = getCustomManagerList();
 function getTitle(manager: string, displayName: string): string {
-  if (manager === 'regex') {
-    return `Custom Manager Support using Regex`;
+  if (customManagersList.includes(manager)) {
+    return `Custom Manager Support using ${manager}`;
+  } else if (manager === 'custom') {
+    return 'Custom Managers';
   }
   return `Automated Dependency Updates for ${displayName}`;
 }
@@ -59,7 +62,7 @@ sidebar_label: ${displayName}
     }
     md += '\n\n';
 
-    if (manager !== 'regex') {
+    if (!customManagersList.includes(manager) && manager !== 'custom') {
       const nameWithUrl = getNameWithUrl(manager, definition);
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {
@@ -106,10 +109,10 @@ sidebar_label: ${displayName}
     }
     const managerReadmeContent = await readFile(
       `lib/modules/manager/${
-        manager === 'regex' ? 'custom/regex' : manager
+        customManagersList.includes(manager) ? 'custom/' : '' + manager
       }/readme.md`
     );
-    if (manager !== 'regex') {
+    if (!customManagersList.includes(manager) && manager !== 'custom') {
       md += '\n## Additional Information\n\n';
     }
     md += managerReadmeContent;
