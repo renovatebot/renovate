@@ -89,11 +89,6 @@ describe('modules/manager/git-submodules/extract', () => {
         token: 'xyz',
         hostType: 'gitlab',
       });
-      hostRules.add({
-        matchHost: 'organization@dev.azure.com/organization',
-        token: 'pat',
-        hostType: 'azure',
-      });
       gitMock.listRemote.mockResolvedValueOnce(
         'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
       );
