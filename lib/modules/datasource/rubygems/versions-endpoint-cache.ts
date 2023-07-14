@@ -183,8 +183,8 @@ export class VersionsEndpointCache {
       this.cacheRequests.delete(registryUrl);
     }
 
-    const { value: cachedData } = cachedResult.unwrap();
-    if (!cachedData) {
+    const { ok, value: cachedData } = cachedResult.unwrap();
+    if (!ok) {
       logger.debug(
         { packageName, registryUrl },
         'Rubygems: endpoint not supported'

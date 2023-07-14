@@ -2,6 +2,7 @@ import { Marshal } from '@qnighy/marshal';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
@@ -41,17 +42,15 @@ export class RubyGemsDatasource extends Datasource {
     }
 
     try {
-      const { res: versionsResult } =
-        await this.versionsEndpointCache.getVersions(registryUrl, packageName);
-
-      if (versionsResult.success) {
-        const { value: versions } = versionsResult;
-        const result = await this.metadataCache.getRelease(
-          registryUrl,
-          packageName,
-          versions
-        );
-        return result;
+      const versionsResult = await Result.wrap(
+        this.versionsEndpointCache.getVersions(registryUrl, packageName)
+      )
+        .transform((versions) =>
+          this.metadataCache.getRelease(registryUrl, packageName, versions)
+        )
+        .unwrap();
+      if (versionsResult.ok) {
+        return versionsResult.value;
       }
 
       const registryHostname = parseUrl(registryUrl)?.hostname;

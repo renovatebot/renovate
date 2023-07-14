@@ -24,6 +24,7 @@ export class Result<T, E = Error> {
   }
 
   static wrap<T, E = Error>(callback: () => T): Result<T, E>;
+  static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
   static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E>;
   static wrap<T, E = Error>(
     input: (() => T) | Promise<T>
@@ -55,8 +56,10 @@ export class Result<T, E = Error> {
   transform<U, EE>(
     fn: (value: T) => Promise<Result<U, EE>>
   ): AsyncResult<U, E | EE>;
+  transform<U>(fn: (value: T) => Promise<U>): AsyncResult<U, E | Error>;
+  transform<U>(fn: (value: T) => U): Result<U, E | Error>;
   transform<U, EE>(
-    fn: (value: T) => Result<U, EE> | Promise<Result<U, EE>>
+    fn: (value: T) => U | Result<U, EE> | Promise<U | Result<U, EE>>
   ): Result<U, E | EE> | AsyncResult<U, E | EE> {
     if (!this.res.ok) {
       return Result.err(this.res.error);
@@ -67,17 +70,27 @@ export class Result<T, E = Error> {
 
       if (res instanceof Promise) {
         return new AsyncResult((resolve) => {
-          res.then(resolve).catch((error) => {
-            logger.warn(
-              { err: error },
-              'Result: unhandled async transform error'
-            );
-            resolve(Result.err(error) as never);
-          });
+          res
+            .then((newResult) =>
+              newResult instanceof Result
+                ? resolve(newResult)
+                : resolve(Result.ok(newResult))
+            )
+            .catch((error) => {
+              logger.warn(
+                { err: error },
+                'Result: unhandled async transform error'
+              );
+              resolve(Result.err(error) as never);
+            });
         });
       }
 
-      return res;
+      if (res instanceof Result) {
+        return res;
+      }
+
+      return Result.ok(res);
     } catch (error) {
       logger.warn({ err: error }, 'Result: unhandled transform error');
       return Result.err(error);
@@ -95,10 +108,20 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
     super(executor);
   }
 
-  static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E> {
+  static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
+  static wrap<T, E = Error>(promise: Promise<T>): AsyncResult<T, E>;
+  static wrap<T, E = Error>(
+    promise: Promise<T | Result<T, E>>
+  ): AsyncResult<T, E> {
     return new AsyncResult((resolve) => {
       promise
-        .then((value) => resolve(Result.ok(value)))
+        .then((value) => {
+          if (value instanceof Result) {
+            return resolve(value);
+          }
+
+          return resolve(Result.ok(value));
+        })
         .catch((error) => resolve(Result.err(error)));
     });
   }
@@ -115,9 +138,11 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   transform<U, EE>(
     fn: (value: T) => Promise<Result<U, EE>>
   ): AsyncResult<U, E | EE>;
+  transform<U>(fn: (value: T) => Promise<U>): AsyncResult<U, E | Error>;
+  transform<U>(fn: (value: T) => U): AsyncResult<U, E | Error>;
   transform<U, EE>(
-    fn: (value: T) => Result<U, EE> | Promise<Result<U, EE>>
-  ): AsyncResult<U, E | EE> {
+    fn: (value: T) => U | Result<U, EE> | Promise<U | Result<U, EE>>
+  ): AsyncResult<U, E | EE | Error> {
     return new AsyncResult((resolve) => {
       this.then((oldResult) => {
         const { ok, value, error } = oldResult.unwrap();
@@ -129,16 +154,26 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
           const newResult = fn(value);
 
           if (newResult instanceof Promise) {
-            return newResult.then(resolve).catch((error) => {
-              logger.warn(
-                { err: error },
-                'AsyncResult: unhandled async transform error'
-              );
-              return resolve(Result.err(error));
-            });
+            return newResult
+              .then((asyncRes) =>
+                asyncRes instanceof Result
+                  ? resolve(asyncRes)
+                  : resolve(Result.ok(asyncRes))
+              )
+              .catch((error) => {
+                logger.warn(
+                  { err: error },
+                  'AsyncResult: unhandled async transform error'
+                );
+                return resolve(Result.err(error));
+              });
           }
 
-          return resolve(newResult);
+          if (newResult instanceof Result) {
+            return resolve(newResult);
+          }
+
+          return resolve(Result.ok(newResult));
         } catch (error) {
           logger.warn({ err: error }, 'AsyncResult: unhandled transform error');
           return resolve(Result.err(error));
