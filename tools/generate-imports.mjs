@@ -84,22 +84,19 @@ async function getFileHash(filePath) {
 /**
  *
  * @param {string} managerName
+ * @param {boolean} customManager
  * @returns {Promise<string>}
  */
-export async function getManagerHash(managerName) {
+export async function getManagerHash(managerName, customManager) {
   /** @type {string[]} */
   let hashes = [];
-  let files = [];
-  if (managerName === 'regex') {
-    files = (await glob(`lib/modules/manager/custom/${managerName}/**`)).filter(
-      (fileName) =>
-        minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
-    );
-  } else
-    files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
-      (fileName) =>
-        minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
-    );
+  const files = (
+    await glob(
+      `lib/modules/manager/${customManager ? 'custom/' : '' + managerName}/**`
+    )
+  ).filter((fileName) =>
+    minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+  );
 
   // sort files in case glob order changes
   files.sort();
@@ -153,22 +150,26 @@ async function generateHash() {
     /** @type {string[]} */
     let hashes = [];
     // get  managers list
-    let managers = (
+    const managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })
     )
       .filter((file) => file.isDirectory())
       .map((file) => file.name);
-    // add custom managers
-    managers = managers.concat(
-      ...(
-        await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
-      )
-        .filter((file) => file.isDirectory())
-        .map((file) => file.name)
-    );
+
+    // get custom managers list
+    const customManagers = (
+      await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
+    )
+      .filter((file) => file.isDirectory())
+      .map((file) => file.name);
 
     for (const manager of managers) {
-      const hash = await getManagerHash(manager);
+      const hash = await getManagerHash(manager, false);
+      hashes.push(hash);
+    }
+
+    for (const manager of customManagers) {
+      const hash = await getManagerHash(manager, true);
       hashes.push(hash);
     }
 

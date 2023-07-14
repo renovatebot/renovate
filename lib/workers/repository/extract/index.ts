@@ -3,11 +3,11 @@ import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList, hashMap } from '../../../modules/manager';
+import { getCustomManagerList } from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
-import { getCustomManagerList } from '../../../modules/manager/custom';
 
 export async function extractAllDependencies(
   config: RenovateConfig
