@@ -26,7 +26,7 @@ export const getManagers = (): Map<string, ManagerApi> => allManagers;
 export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
   let config: GlobalManagerConfig = {};
   for (const managerName of managerList) {
-    const manager = managers.get(managerName)!;
+    const manager = allManagers.get(managerName)!;
     if (manager.detectGlobalConfig) {
       // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
       config = { ...config, ...(await manager.detectGlobalConfig()) };
