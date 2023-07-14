@@ -8,7 +8,7 @@ interface Ok<T> {
 
 interface Err<E> {
   readonly ok: false;
-  readonly error: E;
+  readonly error: NonNullable<E>;
   readonly value?: never;
 }
 
@@ -19,7 +19,7 @@ export class Result<T, E = Error> {
     return new Result({ ok: true, value });
   }
 
-  static err<E>(error: E): Result<never, E> {
+  static err<E>(error: NonNullable<E>): Result<never, E> {
     return new Result({ ok: false, error });
   }
 
@@ -48,28 +48,28 @@ export class Result<T, E = Error> {
 
   static wrapNullable<T, E = Error, NullableError = Error>(
     callback: () => T,
-    nullableError: NullableError
+    nullableError: NonNullable<NullableError>
   ): Result<T, E | NullableError>;
   static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
     callback: () => T,
-    nullError: NullError,
-    undefinedError: UndefinedError
+    nullError: NonNullable<NullError>,
+    undefinedError: NonNullable<UndefinedError>
   ): Result<T, E | NullError | UndefinedError>;
 
   static wrapNullable<T, E = Error, NullableError = Error>(
     promise: Promise<T>,
-    nullableError: NullableError
+    nullableError: NonNullable<NullableError>
   ): AsyncResult<T, E | NullableError>;
   static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
     promise: Promise<T>,
-    nullError: NullError,
-    undefinedError: UndefinedError
+    nullError: NonNullable<NullError>,
+    undefinedError: NonNullable<UndefinedError>
   ): AsyncResult<T, E | NullError | UndefinedError>;
 
   static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
     input: (() => T) | Promise<T>,
-    arg2: NullError,
-    arg3?: UndefinedError
+    arg2: NonNullable<NullError>,
+    arg3?: NonNullable<UndefinedError>
   ):
     | Result<T, E | NullError | UndefinedError>
     | AsyncResult<T, E | NullError | UndefinedError> {
@@ -198,8 +198,8 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
 
   static wrapNullable<T, E, NullError, UndefinedError>(
     promise: Promise<T>,
-    nullError: NullError,
-    undefinedError: UndefinedError
+    nullError: NonNullable<NullError>,
+    undefinedError: NonNullable<UndefinedError>
   ): AsyncResult<T, E | NullError | UndefinedError> {
     return new AsyncResult((resolve) => {
       promise
