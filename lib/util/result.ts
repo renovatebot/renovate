@@ -16,6 +16,8 @@ interface Err<E> {
 type Res<T, E> = Ok<T> | Err<E>;
 
 export class Result<T, E = Error> {
+  private constructor(private readonly res: Res<T, E>) {}
+
   static ok<T>(value: NonNullable<T>): Result<T, never> {
     return new Result({ ok: true, value });
   }
@@ -24,6 +26,35 @@ export class Result<T, E = Error> {
     return new Result({ ok: false, error });
   }
 
+  /**
+   * Wrap a callback or promise in a Result in such a way that any thrown errors
+   * are caught and wrapped with `Result.err()`.
+   *
+   * In case of a promise, the `AsyncResult` is returned.
+   * Use `.unwrap()` to get the `Promise<Result<T, E>>` from `AsyncResult`.
+   *
+   *   ```ts
+   *
+   *   // SYNC
+   *   const parse = (json: string) => Result.wrap(() => JSON.parse(json));
+   *
+   *   const { value, error } = parse('{"foo": "bar"}').unwrap();
+   *   expect(value).toEqual({ foo: 'bar' });
+   *   expect(error).toBeUndefined();
+   *
+   *   const { value, error } = parse('!!!').unwrap();
+   *   expect(value).toBeUndefined();
+   *   expect(error).toBeInstanceOf(SyntaxError);
+   *
+   *   // ASYNC
+   *   const request = (url: string) => Result.wrap(http.get(url));
+   *
+   *   const { value, error } = await request('https://example.com').unwrap();
+   *   expect(value).toBeString();
+   *   expect(error).toBeUndefined();
+   *
+   *   ```
+   */
   static wrap<T, E = Error>(callback: () => NonNullable<T>): Result<T, E>;
   static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
   static wrap<T, E = Error>(
@@ -47,6 +78,32 @@ export class Result<T, E = Error> {
     }
   }
 
+  /**
+   * Similar to `Result.wrap()`, but helps to undo the billion dollar mistake by
+   * replacing `null` or `undefined` with an error of provided type.
+   *
+   * In case of a promise, the `AsyncResult` is returned.
+   *
+   *   ```ts
+   *
+   *   // SYNC
+   *   const getHostname = (url: string) =>
+   *     Result.wrapNullable(
+   *       () => parseUrl(url)?.hostname,
+   *       'invalid-url' as const
+   *     );
+   *   const { value, error } = getHostname('foobar').unwrap();
+   *   expect(value).toBeUndefined();
+   *   expect(error).toBe('invalid-url');
+   *
+   *   // ASYNC
+   *   const { value, error } = await Result.wrapNullable(
+   *     readLocalFile('yarn.lock'),
+   *     'file-read-error' as const
+   *   ).unwrap();
+   *
+   *   ```
+   */
   static wrapNullable<T, E = Error, NullableError = Error>(
     callback: () => T,
     nullableError: NonNullable<NullableError>
@@ -56,7 +113,6 @@ export class Result<T, E = Error> {
     nullError: NonNullable<NullError>,
     undefinedError: NonNullable<UndefinedError>
   ): Result<T, E | NullError | UndefinedError>;
-
   static wrapNullable<T, E = Error, NullableError = Error>(
     promise: Promise<T>,
     nullableError: NonNullable<NullableError>
@@ -66,7 +122,6 @@ export class Result<T, E = Error> {
     nullError: NonNullable<NullError>,
     undefinedError: NonNullable<UndefinedError>
   ): AsyncResult<T, E | NullError | UndefinedError>;
-
   static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
     input: (() => T) | Promise<T>,
     arg2: NonNullable<NullError>,
@@ -98,8 +153,23 @@ export class Result<T, E = Error> {
     }
   }
 
-  private constructor(private readonly res: Res<T, E>) {}
-
+  /**
+   * Returns a discriminated union for type-safe consumption of the result.
+   * When `fallback` is provided, the error is discarded and value is returned directly.
+   *
+   *   ```ts
+   *
+   *   // DESTRUCTURING
+   *   const { value, error } = Result.ok('foo').unwrap();
+   *   expect(value).toBe('foo');
+   *   expect(error).toBeUndefined();
+   *
+   *   // FALLBACK
+   *   const value = Result.err('bar').unwrap('foo');
+   *   expect(value).toBe('foo');
+   *
+   *   ```
+   */
   unwrap(): Res<T, E>;
   unwrap(fallback: NonNullable<T>): NonNullable<T>;
   unwrap(fallback?: NonNullable<T>): Res<T, E> | NonNullable<T> {
@@ -109,6 +179,30 @@ export class Result<T, E = Error> {
     return this.res.ok ? this.res.value : fallback;
   }
 
+  /**
+   * Transforms the value if the result is `ok`.
+   * The transform function can be sync or async.
+   *
+   * It can return plain value, but for better control
+   * of the error type, it's recommended to return `Result`.
+   *
+   *   ```ts
+   *
+   *   // SYNC
+   *   const { value, error } = Result.ok('foo')
+   *     .transform((x) => x.length)
+   *     .unwrap();
+   *   expect(value).toBe(3);
+   *
+   *   // ASYNC
+   *   const { value, error } = await Result.wrap(
+   *     http.getJson('https://api.example.com/data.json')
+   *   )
+   *     .transform(({ body }) => body)
+   *     .unwrap();
+   *
+   *   ```
+   */
   transform<U, EE>(
     fn: (value: NonNullable<T>) => Result<U, EE>
   ): Result<U, E | EE>;
@@ -167,6 +261,12 @@ export class Result<T, E = Error> {
   }
 }
 
+/**
+ * This class is being used when `Result` methods encounter async code.
+ * It isn't meant to be used directly, but exported for usage in type annotations.
+ *
+ * All the methods resemble `Result` methods, but work asynchronously.
+ */
 export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   constructor(
     executor: (
