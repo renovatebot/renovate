@@ -41,7 +41,7 @@ export class RubyGemsDatasource extends Datasource {
       return null;
     }
 
-    const { value: rubygemsResult, error: rubygemsError } = await Result.wrap(
+    const { val: rubygemsResult, err: rubygemsError } = await Result.wrap(
       this.versionsEndpointCache.getVersions(registryUrl, packageName)
     )
       .transform((versions) =>
@@ -57,6 +57,7 @@ export class RubyGemsDatasource extends Datasource {
     }
 
     try {
+      rubygemsError;
       const registryHostname = parseUrl(registryUrl)?.hostname;
 
       if (

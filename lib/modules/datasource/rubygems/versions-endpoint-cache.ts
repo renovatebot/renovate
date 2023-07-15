@@ -149,7 +149,7 @@ export class VersionsEndpointCache {
       return newResult;
     }
 
-    const { value: data } = oldResult.unwrap();
+    const { val: data } = oldResult.unwrap();
     if (!data) {
       return oldResult;
     }
@@ -183,7 +183,7 @@ export class VersionsEndpointCache {
       this.cacheRequests.delete(registryUrl);
     }
 
-    const { value: cachedData } = cachedResult.unwrap();
+    const { val: cachedData } = cachedResult.unwrap();
     if (!cachedData) {
       logger.debug(
         { packageName, registryUrl },

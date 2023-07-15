@@ -9,7 +9,7 @@ describe('util/result', () => {
         expect(res).toEqual({
           res: {
             ok: true,
-            value: 42,
+            val: 42,
           },
         });
       });
@@ -19,7 +19,7 @@ describe('util/result', () => {
         expect(res).toEqual({
           res: {
             ok: false,
-            error: 'oops',
+            err: 'oops',
           },
         });
       });
@@ -75,7 +75,7 @@ describe('util/result', () => {
         const res = Result.ok(42);
         expect(res.unwrap()).toEqual({
           ok: true,
-          value: 42,
+          val: 42,
         });
       });
 
@@ -83,7 +83,7 @@ describe('util/result', () => {
         const res = Result.err('oops');
         expect(res.unwrap()).toEqual({
           ok: false,
-          error: 'oops',
+          err: 'oops',
         });
       });
 
@@ -190,7 +190,7 @@ describe('util/result', () => {
         const res = Result.wrap(Promise.resolve(42));
         await expect(res.unwrap()).resolves.toEqual({
           ok: true,
-          value: 42,
+          val: 42,
         });
       });
 
@@ -198,7 +198,7 @@ describe('util/result', () => {
         const res = Result.wrap(Promise.reject('oops'));
         await expect(res.unwrap()).resolves.toEqual({
           ok: false,
-          error: 'oops',
+          err: 'oops',
         });
       });
 

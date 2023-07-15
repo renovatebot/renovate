@@ -3,14 +3,14 @@ import { logger } from '../logger';
 
 interface Ok<T> {
   readonly ok: true;
-  readonly value: NonNullable<T>;
-  readonly error?: never;
+  readonly val: NonNullable<T>;
+  readonly err?: never;
 }
 
 interface Err<E> {
   readonly ok: false;
-  readonly error: NonNullable<E>;
-  readonly value?: never;
+  readonly err: NonNullable<E>;
+  readonly val?: never;
 }
 
 type Res<T, E> = Ok<T> | Err<E>;
@@ -18,12 +18,12 @@ type Res<T, E> = Ok<T> | Err<E>;
 export class Result<T, E = Error> {
   private constructor(private readonly res: Res<T, E>) {}
 
-  static ok<T>(value: NonNullable<T>): Result<T, never> {
-    return new Result({ ok: true, value });
+  static ok<T>(val: NonNullable<T>): Result<T, never> {
+    return new Result({ ok: true, val });
   }
 
-  static err<E>(error: NonNullable<E>): Result<never, E> {
-    return new Result({ ok: false, error });
+  static err<E>(err: NonNullable<E>): Result<never, E> {
+    return new Result({ ok: false, err });
   }
 
   /**
@@ -38,20 +38,20 @@ export class Result<T, E = Error> {
    *   // SYNC
    *   const parse = (json: string) => Result.wrap(() => JSON.parse(json));
    *
-   *   const { value, error } = parse('{"foo": "bar"}').unwrap();
-   *   expect(value).toEqual({ foo: 'bar' });
-   *   expect(error).toBeUndefined();
+   *   const { val, err } = parse('{"foo": "bar"}').unwrap();
+   *   expect(val).toEqual({ foo: 'bar' });
+   *   expect(err).toBeUndefined();
    *
-   *   const { value, error } = parse('!!!').unwrap();
-   *   expect(value).toBeUndefined();
-   *   expect(error).toBeInstanceOf(SyntaxError);
+   *   const { val, err } = parse('!!!').unwrap();
+   *   expect(val).toBeUndefined();
+   *   expect(err).toBeInstanceOf(SyntaxError);
    *
    *   // ASYNC
    *   const request = (url: string) => Result.wrap(http.get(url));
    *
-   *   const { value, error } = await request('https://example.com').unwrap();
-   *   expect(value).toBeString();
-   *   expect(error).toBeUndefined();
+   *   const { val, err } = await request('https://example.com').unwrap();
+   *   expect(val).toBeString();
+   *   expect(err).toBeUndefined();
    *
    *   ```
    */
@@ -92,12 +92,12 @@ export class Result<T, E = Error> {
    *       () => parseUrl(url)?.hostname,
    *       'invalid-url' as const
    *     );
-   *   const { value, error } = getHostname('foobar').unwrap();
-   *   expect(value).toBeUndefined();
-   *   expect(error).toBe('invalid-url');
+   *   const { val, err } = getHostname('foobar').unwrap();
+   *   expect(val).toBeUndefined();
+   *   expect(err).toBe('invalid-url');
    *
    *   // ASYNC
-   *   const { value, error } = await Result.wrapNullable(
+   *   const { val, err } = await Result.wrapNullable(
    *     readLocalFile('yarn.lock'),
    *     'file-read-error' as const
    *   ).unwrap();
@@ -160,13 +160,13 @@ export class Result<T, E = Error> {
    *   ```ts
    *
    *   // DESTRUCTURING
-   *   const { value, error } = Result.ok('foo').unwrap();
-   *   expect(value).toBe('foo');
-   *   expect(error).toBeUndefined();
+   *   const { val, err } = Result.ok('foo').unwrap();
+   *   expect(val).toBe('foo');
+   *   expect(err).toBeUndefined();
    *
    *   // FALLBACK
    *   const value = Result.err('bar').unwrap('foo');
-   *   expect(value).toBe('foo');
+   *   expect(val).toBe('foo');
    *
    *   ```
    */
@@ -176,7 +176,7 @@ export class Result<T, E = Error> {
     if (fallback === undefined) {
       return this.res;
     }
-    return this.res.ok ? this.res.value : fallback;
+    return this.res.ok ? this.res.val : fallback;
   }
 
   /**
@@ -189,13 +189,13 @@ export class Result<T, E = Error> {
    *   ```ts
    *
    *   // SYNC
-   *   const { value, error } = Result.ok('foo')
+   *   const { val, err } = Result.ok('foo')
    *     .transform((x) => x.length)
    *     .unwrap();
-   *   expect(value).toBe(3);
+   *   expect(val).toBe(3);
    *
    *   // ASYNC
-   *   const { value, error } = await Result.wrap(
+   *   const { val, err } = await Result.wrap(
    *     http.getJson('https://api.example.com/data.json')
    *   )
    *     .transform(({ body }) => body)
@@ -225,11 +225,11 @@ export class Result<T, E = Error> {
       | Promise<NonNullable<U>>
   ): Result<U, E | EE> | AsyncResult<U, E | EE> {
     if (!this.res.ok) {
-      return Result.err(this.res.error);
+      return Result.err(this.res.err);
     }
 
     try {
-      const res = fn(this.res.value);
+      const res = fn(this.res.val);
 
       if (res instanceof Promise) {
         return new AsyncResult((resolve) => {
@@ -352,7 +352,7 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   ): AsyncResult<U, E | EE | Error> {
     return new AsyncResult((resolve) => {
       this.then((oldResult) => {
-        const { ok, value, error } = oldResult.unwrap();
+        const { ok, val: value, err: error } = oldResult.unwrap();
         if (!ok) {
           return resolve(Result.err(error));
         }

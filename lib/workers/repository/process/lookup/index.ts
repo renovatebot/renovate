@@ -81,13 +81,12 @@ export async function lookupUpdates(
         return res;
       }
 
-      const { value: lookupValue, error: lookupError } =
-        await Result.wrapNullable(
-          getPkgReleases(config),
-          'no-releases' as const
-        )
-          .transform((x) => Result.ok(clone(x)))
-          .unwrap();
+      const { val: lookupValue, err: lookupError } = await Result.wrapNullable(
+        getPkgReleases(config),
+        'no-releases' as const
+      )
+        .transform((x) => Result.ok(clone(x)))
+        .unwrap();
 
       if (lookupError === 'no-releases') {
         // If dependency lookup fails then warn and return
