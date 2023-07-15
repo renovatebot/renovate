@@ -192,9 +192,12 @@ export class ConanDatasource extends Datasource {
             const packageUrlResp = await this.http.getJson<ConanProperties>(
               packageUrl
             );
-            const conanPackageUrl =
-              packageUrlResp.body.properties['conan.package.url'][0];
-            dep.sourceUrl = conanPackageUrl;
+
+            if (packageUrlResp.body.properties && 'conan.package.url' in packageUrlResp.body.properties) {
+              const conanPackageUrl =
+                packageUrlResp.body.properties['conan.package.url'][0];
+              dep.sourceUrl = conanPackageUrl;
+            }
           }
           return dep;
         }
