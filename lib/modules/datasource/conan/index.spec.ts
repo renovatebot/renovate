@@ -433,5 +433,44 @@ describe('modules/datasource/conan/index', () => {
         ],
       });
     });
+
+    it('artifactory http error', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/search?q=arti')
+        .reply(
+          200,
+          { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
+          {
+            'x-jfrog-version': 'latest',
+          }
+        );
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/arti/1.1.1/_/_/latest')
+        .reply(404);
+
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl:
+          'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.1.1',
+          },
+        ],
+      });
+    });
   });
 });
