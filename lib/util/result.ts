@@ -82,6 +82,19 @@ export class Result<T, E = Error> {
    * Similar to `Result.wrap()`, but helps to undo the billion dollar mistake by
    * replacing `null` or `undefined` with an error of provided type.
    *
+   * Functions and promises that return nullable can't be wrapped with `Result.wrap()`,
+   * because `val` is constrained by being `NonNullable<T>`.
+   * Therefore, `null` and `undefined` must be transformed to `err`.
+   *
+   * This method is the feature-rich shorthand for:
+   *
+   *   ```ts
+   *   const { val, err } = Result.wrap(() => {
+   *     const result = callback();
+   *     return result === null ? Result.err('oops') : Result.ok(result);
+   *   }).unwrap();
+   *   ```
+   *
    * In case of a promise, the `AsyncResult` is returned.
    *
    *   ```ts
@@ -319,6 +332,24 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
     });
   }
 
+  /**
+   * Returns a discriminated union for type-safe consumption of the result.
+   * When `fallback` is provided, the error is discarded and value is returned directly.
+   *
+   *   ```ts
+   *
+   *   // DESTRUCTURING
+   *   const { val, err } = await Result.wrap(readFile('foo.txt')).unwrap();
+   *   expect(val).toBe('foo');
+   *   expect(err).toBeUndefined();
+   *
+   *   // FALLBACK
+   *   const val = await Result.wrap(readFile('foo.txt')).unwrap('bar');
+   *   expect(val).toBe('bar');
+   *   expect(err).toBeUndefined();
+   *
+   *   ```
+   */
   unwrap(): Promise<Res<T, E>>;
   unwrap(fallback: NonNullable<T>): Promise<NonNullable<T>>;
   unwrap(
@@ -329,6 +360,23 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
       : this.then<NonNullable<T>>((res) => res.unwrap(fallback));
   }
 
+  /**
+   * Transforms the value if the result is `ok`.
+   * The transform function can be sync or async.
+   *
+   * It can return plain value, but for better control
+   * of the error type, it's recommended to return `Result`.
+   *
+   *   ```ts
+   *
+   *   const { val, err } = await Result.wrap(
+   *     http.getJson('https://api.example.com/data.json')
+   *   )
+   *     .transform(({ body }) => body)
+   *     .unwrap();
+   *
+   *   ```
+   */
   transform<U, EE>(
     fn: (value: NonNullable<T>) => Result<U, EE>
   ): AsyncResult<U, E | EE>;
