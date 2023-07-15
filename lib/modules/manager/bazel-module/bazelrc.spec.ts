@@ -16,6 +16,12 @@ function mockReadLocalFile(files: Record<string, string | null>) {
   });
 }
 
+function mockIsValidLocalPath(files: Record<string, boolean>) {
+  fs.isValidLocalPath.mockImplementation((file: string): boolean => {
+    return file in files;
+  });
+}
+
 describe('modules/manager/bazel-module/bazelrc', () => {
   describe('BazelOption', () => {
     it.each`
@@ -88,6 +94,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
   describe('read()', () => {
     it('when .bazelrc does not exist', async () => {
       mockReadLocalFile({ '.bazelrc': null });
+      mockIsValidLocalPath({
+        '.bazelrc': true,
+        'foo.bazelrc': true,
+        'shared.bazelrc': true,
+      });
       const result = await read('.');
       expect(result).toHaveLength(0);
     });
@@ -98,6 +109,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
           // This is not a valid comment
           build --show_timestamps --keep_going --jobs 600
           `,
+      });
+      mockIsValidLocalPath({
+        '.bazelrc': true,
+        'foo.bazelrc': true,
+        'shared.bazelrc': true,
       });
       const result = await read('.');
       expect(result).toEqual([
@@ -116,6 +132,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
           build --show_timestamps --keep_going --jobs 600
           build --color=yes
           `,
+      });
+      mockIsValidLocalPath({
+        '.bazelrc': true,
+        'foo.bazelrc': true,
+        'shared.bazelrc': true,
       });
       const result = await read('.');
       expect(result).toEqual([
@@ -141,6 +162,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
           build --color=yes
           `,
       });
+      mockIsValidLocalPath({
+        '.bazelrc': true,
+        'foo.bazelrc': true,
+        'shared.bazelrc': true,
+      });
       const result = await read('.');
       expect(result).toEqual([
         new CommandEntry('build', [new BazelOption('show_timestamps')]),
@@ -155,6 +181,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
           try-import %workspace%/local.bazelrc
           `,
         'local.bazelrc': null,
+      });
+      mockIsValidLocalPath({
+        '.bazelrc': true,
+        'foo.bazelrc': true,
+        'shared.bazelrc': true,
       });
       const result = await read('.');
       expect(result).toEqual([
@@ -175,6 +206,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
           build --show_timestamps
           `,
       });
+      mockIsValidLocalPath({
+        '.bazelrc': true,
+        'foo.bazelrc': true,
+        'shared.bazelrc': true,
+      });
       const result = await read('.');
       expect(result).toEqual([
         new CommandEntry('build', [new BazelOption('show_timestamps')]),
@@ -194,6 +230,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
         'foo.bazelrc': codeBlock`
           import %workspace%/shared.bazelrc
           `,
+      });
+      mockIsValidLocalPath({
+        '.bazelrc': true,
+        'foo.bazelrc': true,
+        'shared.bazelrc': true,
       });
       expect.assertions(1);
       await expect(read('.')).rejects.toEqual(
