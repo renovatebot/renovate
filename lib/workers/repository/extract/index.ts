@@ -33,7 +33,9 @@ export async function extractAllDependencies(
 
   for (const manager of managerList) {
     if (manager === 'custom') {
-      for (const regexManager of config.regexManagers ?? []) {
+      for (const regexManager of config.regexManagers ??
+        // istanbul ignore next
+        []) {
         const customManagerConfig = getManagerConfig(config, 'regex'); // TODO: replace 'regex' with regexManager.customType
         customManagerConfig.manager = 'regex'; // TODO: replace 'regex' with regexManager.customType
         tryConfig(mergeChildConfig(customManagerConfig, regexManager));
