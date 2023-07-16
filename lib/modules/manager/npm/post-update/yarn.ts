@@ -125,7 +125,10 @@ export async function generateLockFile(
       !!upgrades[0]?.managerData?.hasPackageManager;
 
     if (!isYarn1 && hasPackageManager) {
-      toolConstraints.push({ toolName: 'corepack' });
+      toolConstraints.push({
+        toolName: 'corepack',
+        constraint: config.constraints?.corepack,
+      });
     } else {
       toolConstraints.push(yarnTool);
       if (isYarn1 && minYarnVersion) {
