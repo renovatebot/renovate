@@ -20,12 +20,10 @@ export async function updateArtifacts({
     logger.debug({ updatedDeps }, 'maven-lockfile.updateArtifacts()');
     // Check if any Maven dependencies were updated
     if (!updatedDeps.some((dep) => dep.datasource === 'maven')) {
-      logger.info(
+      logger.debug(
         'No Maven dependency version updated - skipping Artifacts update'
       );
-      return Promise.reject(
-        'No Maven dependency version updated - skipping Artifacts update'
-      );
+      return null;
     }
 
     // Set the current working directory for the `glob` search
