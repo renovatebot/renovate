@@ -27,7 +27,9 @@
     "seccomp=unconfined",
     "--privileged"
   ],
-  "postCreateCommand": "yarn install",
+  // The chmod command fixes the permissions of /tmp, which for some reason is
+  // broken on GitHub Codespaces
+  "postCreateCommand": "set -ex; sudo chmod 1777 /tmp; yarn install",
   // Otherwise jest watcher fails because deps were not installed yet
   "waitFor": "postCreateCommand"
 }
