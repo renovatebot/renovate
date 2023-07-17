@@ -16,6 +16,14 @@ interface Err<E> {
 
 type Res<T, E> = Ok<T> | Err<E>;
 
+/**
+ * Class for representing a result that can fail.
+ *
+ * The mental model:
+ * - `.wrap()` and `.wrapNullable()` are sinks
+ * - `.transform()` are pipes which can be chained
+ * - `.unwrap()` is the point of consumption
+ */
 export class Result<T, E = Error> {
   private constructor(private readonly res: Res<T, E>) {}
 
