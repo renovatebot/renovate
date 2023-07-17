@@ -10,18 +10,6 @@ entries:
     engine: gotpl
     home: https://www.getambassador.io/
     icon: https://www.getambassador.io/images/logo.png
-    keywords:
-    - api gateway
-    - ambassador
-    - datawire
-    - envoy
-    maintainers:
-    - email: markus@maga.se
-      name: flydiverny
-    - email: flynn@datawire.io
-      name: kflynn
-    - email: nkrause@datawire.io
-      name: nbkrause
     name: ambassador
     sources:
     - https://github.com/datawire/ambassador
