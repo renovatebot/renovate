@@ -40,10 +40,8 @@ export async function updateArtifacts({
         cwdFile: cwd,
       };
       // Generate the Maven lockfile using the `mvn` command
-      const cmd = util.format(
-        'mvn io.github.chains-project:maven-lockfile:%s:generate',
-        maven_lockfile_version
-      );
+      const cmd = 
+        `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
       const result: ExecResult = await exec(cmd, execOptions);
       logger.info({ result }, 'maven-lockfile.updateArtifacts() result');
       const status = await getRepoStatus();
