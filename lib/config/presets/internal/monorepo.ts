@@ -292,6 +292,7 @@ const patternGroups = {
   'aws-java-sdk-v2': '^software.amazon.awssdk:',
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
+  'datatables.net': ['^datatables.net'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
