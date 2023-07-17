@@ -149,7 +149,7 @@ async function generateHash() {
     const hashMap = `export const hashMap = new Map<string, string>();`;
     /** @type {Record<string, string>[]} */
     let hashes = [];
-    // get  managers list
+    // get managers list
     const managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })
     )
