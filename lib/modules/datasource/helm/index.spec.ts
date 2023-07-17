@@ -167,6 +167,24 @@ describe('modules/datasource/helm/index', () => {
       expect(releases).toMatchSnapshot();
     });
 
+    it('returns list of versions for other packages if one packages has no versions', async () => {
+      httpMock
+        .scope('https://example-repository.com')
+        .get('/index.yaml')
+        .reply(200, Fixtures.get('index_emptypackage.yaml'));
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'ambassador',
+        registryUrls: ['https://example-repository.com'],
+      });
+      expect(releases).toMatchObject({
+        homepage: 'https://www.getambassador.io/',
+        registryUrl: 'https://example-repository.com',
+        sourceUrl: 'https://github.com/datawire/ambassador',
+        releases: expect.toBeArrayOfSize(1),
+      });
+    });
+
     it('adds trailing slash to subdirectories', async () => {
       httpMock
         .scope('https://example-repository.com')
