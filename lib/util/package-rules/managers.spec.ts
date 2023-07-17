@@ -4,7 +4,7 @@ describe('util/package-rules/managers', () => {
   const managersMatcher = new ManagersMatcher();
 
   describe('match', () => {
-    it('should match againt custom manager when macthManager=custom', () => {
+    it('should match against custom manager when matchManager=custom', () => {
       const result = managersMatcher.matches(
         {
           manager: 'regex',
@@ -52,7 +52,7 @@ describe('util/package-rules/managers', () => {
       expect(result).toBeFalse();
     });
 
-    it('should return false if matchManagers is undefined', () => {
+    it('should return null if matchManagers is undefined', () => {
       const result = managersMatcher.matches(
         {
           manager: 'npm',
