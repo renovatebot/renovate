@@ -9,3 +9,6 @@ build --jobs 600
 
 # This file does not exist.
 try-import %workspace%/local.bazelrc
+
+# This file does not exist/is outside of the basePath
+try-import /does-not-exist/.bazelrc
