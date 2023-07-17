@@ -123,11 +123,18 @@
   "v12": {
     "codename": "Bookworm",
     "series": "bookworm",
-    "created": "2021-08-14"
+    "created": "2021-08-14",
+    "release": "2023-06-10",
+    "eol": "2026-06-10"
   },
   "v13": {
     "codename": "Trixie",
     "series": "trixie",
-    "created": "2023-08-01"
+    "created": "2023-06-10"
+  },
+  "v14": {
+    "codename": "Forky",
+    "series": "forky",
+    "created": "2025-08-01"
   }
 }

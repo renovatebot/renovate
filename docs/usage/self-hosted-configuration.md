@@ -103,6 +103,8 @@ RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
 }
 ```
 
+The search for repositories is case-insensitive.
+
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
@@ -482,6 +484,12 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
+## includeMirrors
+
+By default, Renovate does not autodiscover repositories that are mirrors.
+
+Change this setting to `true` to include repositories that are mirrors as Renovate targets.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -815,7 +823,7 @@ For example: `:warning:` will be replaced with `⚠️`.
 You may need to set a `username` if you:
 
 - use the Bitbucket platform, or
-- use the GitHub App with CLI (required)
+- use a self-hosted GitHub App with CLI (required)
 
 If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 

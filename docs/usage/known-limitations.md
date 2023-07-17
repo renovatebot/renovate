@@ -21,9 +21,9 @@ For scheduled action to take place, both these need to happen:
 - The bot needs to run against your repository
 - The current time needs to fall within your repository's configured schedule
 
-### GitHub hosted app scheduled jobs
+### The Mend Renovatate app and scheduled jobs
 
-On the GitHub hosted app Mend checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
+The Mend Renovate App checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
 
 For this reason, you should set your schedule window to at least three or four hours.
 This makes it likely that Renovate bot checks your repository at least once during the schedule.
