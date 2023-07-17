@@ -11,7 +11,7 @@ interface Err<E> {
   readonly ok: false;
   readonly err: NonNullable<E>;
   readonly val?: never;
-  readonly uncaught?: true;
+  readonly _uncaught?: true;
 }
 
 type Res<T, E> = Ok<T> | Err<E>;
@@ -28,7 +28,7 @@ export class Result<T, E = Error> {
   }
 
   static _uncaught<E>(err: NonNullable<E>): Result<never, E> {
-    return new Result({ ok: false, err, uncaught: true });
+    return new Result({ ok: false, err, _uncaught: true });
   }
 
   /**
@@ -207,7 +207,7 @@ export class Result<T, E = Error> {
       return fallback;
     }
 
-    if (this.res.uncaught) {
+    if (this.res._uncaught) {
       throw this.res.err;
     }
 
