@@ -17,7 +17,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     // Log the updated dependencies
-    logger.debug({ updatedDeps }, 'maven-lockfile.updateArtifacts()');
+    logger.trace({ updatedDeps }, 'maven-lockfile.updateArtifacts()');
     // Check if any Maven dependencies were updated
     if (!updatedDeps.some((dep) => dep.datasource === 'maven')) {
       logger.debug(
@@ -43,14 +43,14 @@ export async function updateArtifacts({
       const cmd = 
         `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
       const result: ExecResult = await exec(cmd, execOptions);
-      logger.info({ result }, 'maven-lockfile.updateArtifacts() result');
+      logger.trace({ result }, 'maven-lockfile.updateArtifacts() result');
       const status = await getRepoStatus();
       const res: UpdateArtifactsResult[] = await addUpdatedLockfiles(status);
-      return Promise.resolve(res);
+      return res;
     } else {
-      logger.info('No lockfile.json files found');
+      logger.debug('No lockfile.json files found');
       //TODO: lookup if JS developers prefer to reject or resolve with null
-      return Promise.reject('No lockfile.json files found');
+      return null;
     }
   } catch (err) {
     logger.error({ err }, 'maven-lockfile.updateArtifacts() error');
@@ -63,7 +63,6 @@ async function addUpdatedLockfiles(
 ): Promise<UpdateArtifactsResult[]> {
   const res: UpdateArtifactsResult[] = [];
   for (const f of [...status.modified]) {
-    logger.info(`modified: ${f}`);
     if (/.*\/lockfile.json/.exec(f)) {
       logger.trace(`lockfile.json updated`);
       res.push({
