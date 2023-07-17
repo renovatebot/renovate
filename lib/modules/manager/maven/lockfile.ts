@@ -1,9 +1,11 @@
-import glob from 'glob';
+import path from 'path';
+
+import { glob } from 'glob';
 import type { StatusResult } from 'simple-git';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecResult } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { getParentDir, readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
@@ -26,17 +28,17 @@ export async function updateArtifacts({
     }
 
     // Set the current working directory for the `glob` search
-    const cwd = await getPackageFileName(packageFileName);
+    const parentDir = path.resolve(getParentDir(packageFileName));
 
     // Search for files that match `lockfile.json`
-    const files = glob.sync('**/lockfile.json', { cwd });
+    const files = await getLockfileJsonFiles(parentDir);
 
     // Check if any files were found
     if (files.length > 0) {
       logger.info(`Found ${files.length} lockfile.json files`);
       // Do something with the files...
       const execOptions = {
-        cwdFile: cwd,
+        cwd: parentDir,
       };
       // Generate the Maven lockfile using the `mvn` command
       const cmd = `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
@@ -82,11 +84,6 @@ async function addUpdatedLockfiles(
   return res;
 }
 
-function getPackageFileName(
-  packageFileName: string | null
-): Promise<string> | never {
-  if (packageFileName) {
-    return Promise.resolve(packageFileName);
-  }
-  throw new Error('Error, packageFileName is null');
+function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
+  return glob('**/lockfile.json', { cwd: directoryPath });
 }
