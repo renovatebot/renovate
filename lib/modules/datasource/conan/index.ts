@@ -204,7 +204,7 @@ export class ConanDatasource extends Datasource {
               }
             }
           } catch (err) {
-            logger.debug({ err }, "Couldn't determine conan package url");
+            logger.debug({ err }, "Couldn't determine Conan package url");
           }
           return dep;
         }
