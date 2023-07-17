@@ -83,7 +83,7 @@ describe('modules/manager/github-actions/extract', () => {
     it('use github.com only as registry when running against non-GitHub', () => {
       GlobalConfig.set({
         platform: 'bitbucket',
-        endpoint: 'https://github.enterprise.com',
+        endpoint: 'https://bitbucket.enterprise.com',
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
