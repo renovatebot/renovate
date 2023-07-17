@@ -1,4 +1,3 @@
-import util from 'util';
 import glob from 'glob';
 import type { StatusResult } from 'simple-git';
 import { logger } from '../../../logger';
@@ -40,8 +39,7 @@ export async function updateArtifacts({
         cwdFile: cwd,
       };
       // Generate the Maven lockfile using the `mvn` command
-      const cmd = 
-        `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
+      const cmd = `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
       const result: ExecResult = await exec(cmd, execOptions);
       logger.trace({ result }, 'maven-lockfile.updateArtifacts() result');
       const status = await getRepoStatus();
@@ -54,7 +52,14 @@ export async function updateArtifacts({
     }
   } catch (err) {
     logger.error({ err }, 'maven-lockfile.updateArtifacts() error');
-    return Promise.reject(err);
+    return [
+      {
+        artifactError: {
+          // error is written to stdout
+          stderr: err.stdout || err.message,
+        },
+      },
+    ];
   }
 }
 
