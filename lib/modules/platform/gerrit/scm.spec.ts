@@ -248,6 +248,7 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'renovate/dependency-1.x',
         files: [],
         message: ['commit msg', expect.stringMatching(/Change-Id: I.{32}/)],
+        force: true,
       });
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
@@ -286,6 +287,7 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'renovate/dependency-1.x',
         files: [],
         message: ['commit msg', 'Change-Id: ...'],
+        force: true,
       });
       expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
       expect(git.pushCommit).toHaveBeenCalledTimes(0);
@@ -323,6 +325,7 @@ describe('modules/platform/gerrit/scm', () => {
         branchName: 'renovate/dependency-1.x',
         files: [],
         message: ['commit msg', 'Change-Id: ...'],
+        force: true,
       });
       expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
       expect(git.pushCommit).toHaveBeenCalledWith({

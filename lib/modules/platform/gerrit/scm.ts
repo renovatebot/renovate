@@ -111,7 +111,7 @@ export class GerritScm extends DefaultGitScm {
       ...origMsg,
       `Change-Id: ${existingChange?.change_id ?? generateChangeId()}`,
     ];
-    const commitResult = await git.prepareCommit(commit);
+    const commitResult = await git.prepareCommit({ ...commit, force: true });
     if (commitResult) {
       const { commitSha } = commitResult;
       if (existingChange?.revisions && existingChange.current_revision) {
