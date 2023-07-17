@@ -57,7 +57,6 @@ export class RubyGemsDatasource extends Datasource {
     }
 
     try {
-      rubygemsError;
       const registryHostname = parseUrl(registryUrl)?.hostname;
 
       if (
