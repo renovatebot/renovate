@@ -1341,6 +1341,20 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         });
       });
 
+      it('handles skipped packages', async () => {
+        const res = await getReleaseNotesMd(
+          {
+            ...githubProject,
+            repository: 'facebook/react-native',
+          },
+          partial<ChangeLogRelease>({
+            version: '0.72.3',
+            gitRef: '0.72.3',
+          })
+        );
+        expect(res).toBeNull();
+      });
+
       it('isUrl', () => {
         expect(versionOneNotes).not.toMatchObject(versionTwoNotes);
       });
