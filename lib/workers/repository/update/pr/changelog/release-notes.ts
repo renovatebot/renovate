@@ -23,6 +23,8 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
+const skippedRepositories = ['facebook/react-native'];
+
 export async function getReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
@@ -447,7 +449,5 @@ export async function addReleaseNotes(
 }
 
 export function shouldSkipChangelogMd(repository: string): boolean {
-  const skippedRepositories = ['facebook/react-native'];
-
   return skippedRepositories.includes(repository);
 }
