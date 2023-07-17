@@ -176,6 +176,10 @@ export async function getDependency(
       if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;
       }
+      const nodeConstraint = res.versions?.[version].engines?.node;
+      if (is.nonEmptyString(nodeConstraint)) {
+        release.constraints = { node: [nodeConstraint] };
+      }
       const source = PackageSource.parse(res.versions?.[version].repository);
       if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
         release.sourceUrl = source.sourceUrl;

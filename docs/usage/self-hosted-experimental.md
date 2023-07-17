@@ -78,15 +78,6 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
-## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
-
-If set, you'll get the following behavior.
-
-When using `matchPackageNames` and `matchPackagePatterns` matchers:
-
-1. Renovate first tries to match against `depName`
-2. If `depName` doesn't match then Renovate tries to match against `packageName`
-
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 
 If set, Renovate will query this API for Merge Confidence data.
@@ -132,6 +123,14 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
+
+## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
+
+Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
+
+Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+
+Default value: `1000` (milliseconds).
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 

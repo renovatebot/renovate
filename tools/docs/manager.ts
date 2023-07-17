@@ -9,6 +9,8 @@ import {
   replaceContent,
 } from './utils';
 
+const noCategoryDisplayName = 'no-category';
+
 function getTitle(manager: string, displayName: string): string {
   if (manager === 'regex') {
     return `Custom Manager Support using Regex`;
@@ -26,19 +28,37 @@ export async function generateManagers(
 ): Promise<void> {
   const managers = getManagers();
 
-  const allLanguages: Record<string, string[]> = {};
+  const allCategories: Record<string, string[]> = {};
+
   for (const [manager, definition] of managers) {
-    const language = definition.language ?? 'other';
-    allLanguages[language] = allLanguages[language] || [];
-    allLanguages[language].push(manager);
     const { defaultConfig, supportedDatasources, urls } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
+
+    const categories = definition.categories ?? [noCategoryDisplayName];
+    for (const category of categories) {
+      allCategories[category] ??= [];
+      allCategories[category].push(manager);
+    }
+
     let md = `---
 title: ${getTitle(manager, displayName)}
 sidebar_label: ${displayName}
 ---
 `;
+    md += '**Categories**: ';
+    if (categories.length) {
+      for (let i = 0; i < categories.length; i++) {
+        const category = categories[i];
+        if (i < categories.length - 1) {
+          md += `\`${category}\`, `;
+        } else {
+          md += `\`${category}\``;
+        }
+      }
+    }
+    md += '\n\n';
+
     if (manager !== 'regex') {
       const nameWithUrl = getNameWithUrl(manager, definition);
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
@@ -96,19 +116,21 @@ sidebar_label: ${displayName}
 
     await updateFile(`${dist}/modules/manager/${manager}/index.md`, md);
   }
-  const languages = Object.keys(allLanguages).filter(
-    (language) => language !== 'other'
-  );
-  languages.sort();
-  languages.push('other');
-  let languageText = '\n';
 
-  for (const language of languages) {
-    languageText += `**${language}**: `;
-    languageText += allLanguages[language].map(getManagerLink).join(', ');
-    languageText += '\n\n';
+  // add noCategoryDisplayName as last option
+  const categories = Object.keys(allCategories).filter(
+    (category) => category !== noCategoryDisplayName
+  );
+  categories.sort();
+  categories.push(noCategoryDisplayName);
+  let categoryText = '\n';
+
+  for (const category of categories) {
+    categoryText += `**${category}**: `;
+    categoryText += allCategories[category].map(getManagerLink).join(', ');
+    categoryText += '\n\n';
   }
   let indexContent = await readFile(`docs/usage/modules/manager/index.md`);
-  indexContent = replaceContent(indexContent, languageText);
+  indexContent = replaceContent(indexContent, categoryText);
   await updateFile(`${dist}/modules/manager/index.md`, indexContent);
 }

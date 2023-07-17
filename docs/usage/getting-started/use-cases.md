@@ -213,7 +213,7 @@ This also means that you might want a similar config for all of your repositorie
 You can use configuration "presets" to avoid duplicating your configuration across your repositories.
 
 Configuration presets are JSON configuration files which are committed to repositories and then referenced from others.
-Renovate includes over 100 built-in presets, like the default recommended `config:base` preset.
+Renovate includes over 100 built-in presets, like the default recommended `config:recommended` preset.
 
 The typical workflow for a company is:
 

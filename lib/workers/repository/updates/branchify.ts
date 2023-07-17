@@ -3,7 +3,6 @@ import type { Merge } from 'type-fest';
 import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
-import { embedChangelogs, needsChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
 
@@ -71,22 +70,6 @@ export async function branchifyUpgrades(
         return true;
       })
       .reverse();
-
-    if (config.fetchReleaseNotes && config.repoIsOnboarded) {
-      const branches = branchUpgrades[branchName].filter((upg) =>
-        needsChangelogs(upg)
-      );
-      if (branches.length) {
-        logger.warn(
-          {
-            branches: branches.map((b) => b.branchName),
-            docs: 'https://docs.renovatebot.com/templates/',
-          },
-          'Fetching changelogs early is deprecated. Remove `logJSON` and `releases` from config templates. They are only allowed in `commitBody` template. See template docs for allowed templates'
-        );
-        await embedChangelogs(branches);
-      }
-    }
 
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;

@@ -2,11 +2,11 @@
 
 As end user, you can choose from these ways to run Renovate:
 
-- You use the Mend Renovate app on GitHub, or
+- You use the Mend Renovate App, or
 - You self-host Renovate, for example by running the pre-built Docker image, or
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
-If you're using the Mend Renovate App on GitHub, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
+If you're using the Mend Renovate App, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
 ## Self-Hosting Renovate
 
@@ -35,39 +35,37 @@ The `renovate` npm package is compatible with all of Renovate's supported platfo
 Renovate is also distributed as Docker images on Docker Hub (`renovate/renovate`) and GitHub container registry (`ghcr.io/renovatebot/renovate`).
 These Docker images work on all the hosting platforms that Renovate supports.
 
-You must run the Docker images in a `linux/amd64` container.
-We're working on `linux/arm64` container support.
+Both `linux/amd64` and `linux/arm64` architectures are supported, but you may still find some bugs in the `arm64` image.
 You can't run the Docker images in a Windows or macOS container.
 
 In general, you can run Renovate natively on Windows as long as you have all tools it will need (e.g. `npm`, `pipenv`, etc.) preinstalled before you run Renovate.
 
-There are two flavors:
+There are two Docker image flavors:
 
-- The `-slim` image
-- The default "full" image, this is the image you'll get if you use the `latest` tag
+- The default image, which installs required tools at runtime (default for `latest` tag),
+- The `-full` image, which comes with latest or very recent versions of every tool pre-installed
 
-##### The slim image
+##### The default image (formerly `slim`)
 
-The `-slim` image only comes with the Node.js environment.
-By default, the image installs the required tools when needed.
-We recommend the `-slim` image for most users.
+The default image only comes with the Node.js environment.
+Renovate will then install any needed tools when it runs.
+Read the `binarySource=install` documentation for more details.
+We recommend this default image for most users.
+
+Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
+Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
 Read the [`binarySource` config option docs](../self-hosted-configuration.md#binarysource) for more information.
 
-##### The default image
+##### The full image
 
-The default image comes with most package managers that Renovate supports, but not _all_ package managers.
-
-You must set `binarySource=global`, if you don't then Renovate still installs the latest version of the tools or the requested version from the repository.
+The `-full` image comes with most package managers that Renovate supports, but not _all_ package managers.
 Update your Docker images regularly to keep the pre-installed tools up-to-date.
 
-Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
-Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
-
-The default image is for users who don't want to download or install things at runtime.
-The default image has some downsides, because it:
+The full image is for users who don't want to download or install things at runtime.
+This image has some downsides, because it:
 
 - Comes pre-installed with _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
@@ -106,11 +104,11 @@ Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbuc
 
 #### Forking Renovate app
 
-"Forking Renovate" is the sister app to the Mend Renovate App on GitHub.com.
+"Forking Renovate" is the sister app to the Mend Renovate App.
 The difference is that Forking Renovate does not need `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
 Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
-[Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
+[Install Forking Renovate from GitHub App store](https://github.com/apps/forking-renovate).
 
 ##### Benefits
 
@@ -122,7 +120,6 @@ If you use Forking Renovate, you'll miss out on these features of the regular Re
 
 - Automerge
 - The `baseBranches` config option
-- The app dashboard (`app.renovatebot.com`)
 
 ### Hosting Renovate
 

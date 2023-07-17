@@ -65,7 +65,7 @@ describe('workers/global/config/parse/file', () => {
         "onboarding": false,
         "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {
-          "extends": ["config:base"],
+          "extends": ["config:recommended"],
         },
         "repositories": [ "test/test" ],
       };`,

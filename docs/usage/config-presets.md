@@ -101,7 +101,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing SemVer ranges.".
 It simply sets the configuration option `rangeStrategy` to `replace`.
 
-An example of a full config is `config:base`, which is Renovate's default configuration.
+An example of a full config is `config:recommended`, which is Renovate's default configuration.
 It mostly uses Renovate config defaults but adds a few smart customizations such as grouping monorepo packages together.
 
 <!-- prettier-ignore -->
@@ -111,8 +111,8 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 
 ## How to Use Preset Configs
 
-By default, Renovate App's onboarding PR suggests the `["config:base]"` preset.
-If you're self hosting, and want to use the `config:base` preset, then you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+By default, Renovate App's onboarding PR suggests the `["config:recommended]"` preset.
+If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
 
 Read the [Full Config Presets](https://docs.renovatebot.com/presets-config/) page to learn more about our `config:` presets.
 
@@ -120,18 +120,18 @@ A typical onboarding `renovate.json` looks like this:
 
 ```json
 {
-  "extends": ["config:base"]
+  "extends": ["config:recommended"]
 }
 ```
 
 Here's an example of using presets to change Renovate's behavior.
-You're happy with the `config:base` preset, but want Renovate to create PRs when you're not at the office.
+You're happy with the `config:recommended` preset, but want Renovate to create PRs when you're not at the office.
 You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` preset.
 You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
 ```json
 {
-  "extends": ["config:base", "schedule:nonOfficeHours"]
+  "extends": ["config:recommended", "schedule:nonOfficeHours"]
 }
 ```
 
@@ -256,7 +256,7 @@ For example:
   "version": "0.0.1",
   "renovate-config": {
     "default": {
-      "extends": ["config:base", "schedule:nonOfficeHours"]
+      "extends": ["config:recommended", "schedule:nonOfficeHours"]
     }
   }
 }

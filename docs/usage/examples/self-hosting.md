@@ -248,7 +248,7 @@ module.exports = {
   token: '**gitlab_token**',
   platform: 'gitlab',
   onboardingConfig: {
-    extends: ['config:base'],
+    extends: ['config:recommended'],
   },
   repositories: ['username/repo', 'orgname/repo'],
 };

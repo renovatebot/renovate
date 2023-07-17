@@ -357,7 +357,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack', async () => {
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -403,7 +403,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack on grouping', async () => {
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -454,7 +454,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses slim yarn instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -536,6 +536,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       localDir: '.',
       binarySource: 'docker',
       cacheDir: '/tmp/cache',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     Fixtures.mock(
       {
@@ -555,10 +556,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = { encoding: 'utf-8' };
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar', options },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar', options },
       {
         cmd:
-          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "some-dir" containerbase/sidecar ` +
+          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/containerbase/sidecar ` +
           `bash -l -c "` +
           `install-tool node 16.16.0` +
           ` && ` +

@@ -117,6 +117,48 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid customDatasources content', async () => {
+      const config = {
+        customDatasources: {
+          foo: {
+            randomKey: '',
+            defaultRegistryUrlTemplate: [],
+            transformTemplates: [{}],
+          },
+        },
+      } as any;
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+        },
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.randomKey` configuration: key is not allowed',
+        },
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.transformTemplates` configuration: is not an array of string',
+        },
+      ]);
+    });
+
+    it('catches invalid customDatasources record type', async () => {
+      const config = {
+        customDatasources: {
+          randomKey: '',
+        },
+      } as any;
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customDatasources.randomKey` configuration: customDatasource is not an object',
+        },
+      ]);
+    });
+
     it('catches invalid baseBranches regex', async () => {
       const config = {
         baseBranches: ['/***$}{]][/'],
@@ -276,7 +318,7 @@ describe('config/validation', () => {
             },
           ],
         },
-        docker: {
+        ansible: {
           minor: {
             matchDepNames: ['meteor'],
             matchPackageNames: ['testPackage'],
@@ -631,28 +673,21 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
-    it('errors if language or manager objects are nested', async () => {
+    it('errors if manager objects are nested', async () => {
       const config = {
-        python: {
+        pyenv: {
           enabled: false,
         },
-        java: {
+        maven: {
           gradle: {
             enabled: false,
-          },
-        },
-        major: {
-          minor: {
-            docker: {
-              automerge: true,
-            },
           },
         },
       } as never;
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
     });

@@ -303,7 +303,7 @@ const staticGroups = {
         commitMessageTopic: 'Node.js',
         excludePackageNames: ['calico/node', 'kindest/node'],
         matchDatasources: ['docker'],
-        matchPackageNames: ['node'],
+        matchDepNames: ['node'],
         matchPackagePatterns: ['/node$'],
       },
     ],
@@ -484,7 +484,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'spring boot',
-        matchPackageNames: ['org.springframework.boot'],
+        matchDepNames: ['org.springframework.boot'],
         matchPackagePrefixes: ['org.springframework.boot:'],
       },
     ],

@@ -34,7 +34,7 @@ import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
-import { embedChangelog, needsChangelogs } from '../../changelog';
+import { embedChangelogs } from '../../changelog';
 import { ensurePr } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
@@ -482,6 +482,10 @@ export async function processBranch(
       } else {
         logger.debug('No updated lock files in branch');
       }
+      if (config.fetchReleaseNotes === 'branch') {
+        await embedChangelogs(config.upgrades);
+      }
+
       const postUpgradeCommandResults = await executePostUpgradeCommands(
         config
       );
@@ -540,14 +544,6 @@ export async function processBranch(
 
       // compile commit message with body, which maybe needs changelogs
       if (config.commitBody) {
-        if (
-          config.fetchReleaseNotes &&
-          needsChangelogs(config, ['commitBody'])
-        ) {
-          // we only need first upgrade, the others are only needed on PR update
-          // we add it to first, so PR fetch can skip fetching for that update
-          await embedChangelog(config.upgrades[0]);
-        }
         // changelog is on first upgrade
         config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
           config.commitBody,

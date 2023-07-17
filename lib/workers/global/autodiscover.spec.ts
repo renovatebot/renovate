@@ -164,4 +164,18 @@ describe('workers/global/autodiscover', () => {
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(expectedRepositories);
   });
+
+  it('filters autodiscovered github repos case-insensitive', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = ['project/re*'];
+    config.platform = 'github';
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'PROJECT/repo2'])
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/repo', 'PROJECT/repo2']);
+  });
 });

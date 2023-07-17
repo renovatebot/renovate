@@ -4,18 +4,14 @@ import { getElapsedMinutes } from '../../../util/date';
 import { Http, HttpError } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { LooseArray } from '../../../util/schema-utils';
 import { copystr } from '../../../util/string';
 import { parseUrl } from '../../../util/url';
 
-interface VersionsEndpointUnsupported {
-  versionsEndpointSupported: false;
-}
-
 type PackageVersions = Map<string, string[]>;
 
 interface VersionsEndpointData {
-  versionsEndpointSupported: true;
   packageVersions: PackageVersions;
   syncedAt: Date;
   contentLength: number;
@@ -68,8 +64,7 @@ function reconcilePackageVersions(
   return packageVersions;
 }
 
-function parseFullBody(body: string): VersionsEndpointData {
-  const versionsEndpointSupported = true;
+function parseFullBody(body: string): VersionsEndpointResult {
   const packageVersions = reconcilePackageVersions(
     new Map<string, string[]>(),
     VersionLines.parse(body)
@@ -78,20 +73,27 @@ function parseFullBody(body: string): VersionsEndpointData {
   const contentLength = body.length;
   const contentTail = getContentTail(body);
 
-  return {
-    versionsEndpointSupported,
+  return Result.ok({
     packageVersions,
     syncedAt,
     contentLength,
     contentTail,
-  };
+  });
 }
 
-type VersionsEndpointResult =
-  | VersionsEndpointUnsupported
-  | VersionsEndpointData;
+type VersionsEndpointResult = Result<VersionsEndpointData, 'unsupported-api'>;
 
 export const memCache = new Map<string, VersionsEndpointResult>();
+
+function cacheResult(
+  registryUrl: string,
+  result: VersionsEndpointResult
+): void {
+  const registryHostname = parseUrl(registryUrl)?.hostname;
+  if (registryHostname === 'rubygems.org') {
+    memCache.set(registryUrl, result);
+  }
+}
 
 const VersionLines = z
   .string()
@@ -126,10 +128,10 @@ function isStale(regCache: VersionsEndpointData): boolean {
   return getElapsedMinutes(regCache.syncedAt) >= 15;
 }
 
-export type VersionsResult =
-  | { type: 'success'; versions: string[] }
-  | { type: 'not-supported' }
-  | { type: 'not-found' };
+export type VersionsResult = Result<
+  string[],
+  'unsupported-api' | 'package-not-found'
+>;
 
 export class VersionsEndpointCache {
   constructor(private readonly http: Http) {}
@@ -140,28 +142,26 @@ export class VersionsEndpointCache {
    * At any given time, there should only be one request for a given registryUrl.
    */
   private async getCache(registryUrl: string): Promise<VersionsEndpointResult> {
-    const cacheKey = `rubygems-versions-cache:${registryUrl}`;
+    const oldResult = memCache.get(registryUrl);
 
-    const oldCache = memCache.get(cacheKey);
-    memCache.delete(cacheKey); // If no error is thrown, we'll re-set the cache
-
-    let newCache: VersionsEndpointResult;
-
-    if (!oldCache) {
-      newCache = await this.fullSync(registryUrl);
-    } else if (oldCache.versionsEndpointSupported === false) {
-      newCache = oldCache;
-    } else if (isStale(oldCache)) {
-      newCache = await this.deltaSync(oldCache, registryUrl);
-    } else {
-      newCache = oldCache;
+    if (!oldResult) {
+      const newResult = await this.fullSync(registryUrl);
+      cacheResult(registryUrl, newResult);
+      return newResult;
     }
 
-    const registryHostname = parseUrl(registryUrl)?.hostname;
-    if (registryHostname === 'rubygems.org') {
-      memCache.set(cacheKey, newCache);
+    if (!oldResult.res.success) {
+      return oldResult;
     }
-    return newCache;
+
+    if (isStale(oldResult.res.value)) {
+      memCache.delete(registryUrl); // If no error is thrown, we'll re-set the cache
+      const newResult = await this.deltaSync(oldResult.res.value, registryUrl);
+      cacheResult(registryUrl, newResult);
+      return newResult;
+    }
+
+    return oldResult;
   }
 
   async getVersions(
@@ -176,31 +176,32 @@ export class VersionsEndpointCache {
       cacheRequest = this.getCache(registryUrl);
       this.cacheRequests.set(registryUrl, cacheRequest);
     }
-    let cache: VersionsEndpointResult;
+    let cachedResult: VersionsEndpointResult;
     try {
-      cache = await cacheRequest;
+      cachedResult = await cacheRequest;
     } finally {
       this.cacheRequests.delete(registryUrl);
     }
+    const { res } = cachedResult;
 
-    if (cache.versionsEndpointSupported === false) {
+    if (!res.success) {
       logger.debug(
         { packageName, registryUrl },
         'Rubygems: endpoint not supported'
       );
-      return { type: 'not-supported' };
+      return Result.err('unsupported-api');
     }
 
-    const versions = cache.packageVersions.get(packageName);
+    const versions = res.value.packageVersions.get(packageName);
     if (!versions?.length) {
       logger.debug(
         { packageName, registryUrl },
         'Rubygems: versions not found'
       );
-      return { type: 'not-found' };
+      return Result.err('package-not-found');
     }
 
-    return { type: 'success', versions };
+    return Result.ok(versions);
   }
 
   private async fullSync(registryUrl: string): Promise<VersionsEndpointResult> {
@@ -211,7 +212,7 @@ export class VersionsEndpointCache {
       return parseFullBody(body);
     } catch (err) {
       if (err instanceof HttpError && err.response?.statusCode === 404) {
-        return { versionsEndpointSupported: false };
+        return Result.err('unsupported-api');
       }
 
       throw err;
@@ -255,7 +256,6 @@ export class VersionsEndpointCache {
       /**
        * Update the cache with the new data.
        */
-      const versionsEndpointSupported = true;
       const delta = stripContentHead(body);
       const packageVersions = reconcilePackageVersions(
         oldCache.packageVersions,
@@ -265,13 +265,12 @@ export class VersionsEndpointCache {
       const contentLength = oldCache.contentLength + delta.length;
       const contentTail = getContentTail(body);
 
-      return {
-        versionsEndpointSupported,
+      return Result.ok({
         packageVersions,
         syncedAt,
         contentLength,
         contentTail,
-      };
+      });
     } catch (err) {
       if (err instanceof HttpError) {
         const responseStatus = err.response?.statusCode;
@@ -289,7 +288,7 @@ export class VersionsEndpointCache {
          * This is unlikely to happen in real life, but still.
          */
         if (responseStatus === 404) {
-          return { versionsEndpointSupported: false };
+          return Result.err('unsupported-api');
         }
       }
 
