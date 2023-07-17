@@ -274,6 +274,7 @@ const repoGroups = {
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const orgGroups = {
+  'datatables.net': ['https://github.com/DataTables/'],
   hapijs: 'https://github.com/hapijs/',
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
@@ -292,7 +293,6 @@ const patternGroups = {
   'aws-java-sdk-v2': '^software.amazon.awssdk:',
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
-  'datatables.net': ['^datatables.net'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
