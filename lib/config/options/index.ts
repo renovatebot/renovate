@@ -806,7 +806,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab', 'github'],
+    supportedPlatforms: ['github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
