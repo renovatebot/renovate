@@ -67,7 +67,7 @@ async function addUpdatedLockfiles(
   for (const f of [...status.modified]) {
     logger.info(`modified: ${f}`);
     if (/.*\/lockfile.json/.exec(f)) {
-      logger.info(`lockfile.json updated`);
+      logger.trace(`lockfile.json updated`);
       res.push({
         file: {
           type: 'addition',
