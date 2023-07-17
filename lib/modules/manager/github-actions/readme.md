@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@af513c7a016048ae468971c52ed77d9562c7c819 # renovate: tag=v1.0.0
+      - uses: actions/checkout@af513c7a016048ae468971c52ed77d9562c7c819 # v1.0.0
 ```
 
 Renovate will update the commit SHA but follow the GitHub tag you specified.
