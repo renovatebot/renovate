@@ -7,14 +7,11 @@
   },
   "name": "Renovate",
   "dockerFile": "Dockerfile",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
   "customizations": {
     "vscode": {
-      "settings": {
-        "terminal.integrated.profiles.linux": {
-          "bash": { "path": "/bin/bash" }
-        },
-        "terminal.integrated.defaultProfile.linux": "bash"
-      },
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
@@ -30,5 +27,7 @@
     "seccomp=unconfined",
     "--privileged"
   ],
-  "postCreateCommand": "yarn install"
+  "postCreateCommand": "yarn install",
+  // Otherwise jest watcher fails because deps were not installed yet
+  "waitFor": "postCreateCommand"
 }
