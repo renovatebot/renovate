@@ -175,7 +175,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
     );
     newIssueBody += '## Repository problems\n\n';
     newIssueBody +=
-      'These problems occurred while renovating this repository.\n\n';
+      'Renovate tried to update this repository, but found these problems.\n\n';
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }
