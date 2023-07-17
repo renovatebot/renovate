@@ -204,8 +204,7 @@ export class ConanDatasource extends Datasource {
               }
             }
           } catch (err) {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            logger.warn(`Couldn't determine conan package url ${err}`);
+            logger.debug({ err }, "Couldn't determine conan package url");
           }
           return dep;
         }
