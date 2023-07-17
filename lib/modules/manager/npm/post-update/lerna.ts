@@ -55,29 +55,16 @@ export async function generateLockFiles(
   let cmdOptions = '';
   try {
     if (lernaClient === 'yarn') {
-      const yarnCompatibility =
-        config.constraints?.yarn ?? config.extractedConstraints?.yarn;
-      const isValidRange = semver.validRange(yarnCompatibility);
-      const minYarnVersion =
-        isValidRange && semver.minVersion(yarnCompatibility);
-      const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
-
       const yarnTool: ToolConstraint = {
         toolName: 'yarn',
         constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
       };
-      if (isValidRange) {
+      const yarnCompatibility =
+        config.constraints?.yarn ?? config.extractedConstraints?.yarn;
+      if (semver.validRange(yarnCompatibility)) {
         yarnTool.constraint = yarnCompatibility;
       }
       toolConstraints.push(yarnTool);
-
-      if (!isYarn1) {
-        toolConstraints.push({
-          toolName: 'corepack',
-          constraint: config.constraints?.corepack,
-        });
-      }
-
       if (skipInstalls !== false) {
         // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
         yarnTool.toolName = 'yarn-slim';
