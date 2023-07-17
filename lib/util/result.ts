@@ -11,6 +11,7 @@ interface Err<E> {
   readonly ok: false;
   readonly err: NonNullable<E>;
   readonly val?: never;
+  readonly uncaught?: true;
 }
 
 type Res<T, E> = Ok<T> | Err<E>;
@@ -26,9 +27,13 @@ export class Result<T, E = Error> {
     return new Result({ ok: false, err });
   }
 
+  static _uncaught<E>(err: NonNullable<E>): Result<never, E> {
+    return new Result({ ok: false, err, uncaught: true });
+  }
+
   /**
    * Wrap a callback or promise in a Result in such a way that any thrown errors
-   * are caught and wrapped with `Result.err()`.
+   * are caught and wrapped with `Result.err()` (and hence never re-thrown).
    *
    * In case of a promise, the `AsyncResult` is returned.
    * Use `.unwrap()` to get the `Promise<Result<T, E>>` from `AsyncResult`.
@@ -84,16 +89,21 @@ export class Result<T, E = Error> {
    * Similar to `Result.wrap()`, but helps to undo the billion dollar mistake by
    * replacing `null` or `undefined` with an error of provided type.
    *
-   * Functions and promises that return nullable can't be wrapped with `Result.wrap()`,
-   * because `val` is constrained by being `NonNullable<T>`.
-   * Therefore, `null` and `undefined` must be transformed to `err`.
+   * Errors thrown inside the callback or promise are caught and wrapped with `Result.err()`,
+   * hence never re-thrown.
    *
-   * This method is the feature-rich shorthand for:
+   * Since functions and promises returning nullable can't be wrapped with `Result.wrap()`
+   * because `val` is constrained by being `NonNullable<T>`, `null` and `undefined`
+   * must be converted to some sort of `err` value.
+   *
+   * This method does exactly this, i.g. it is the feature-rich shorthand for:
    *
    *   ```ts
    *   const { val, err } = Result.wrap(() => {
    *     const result = callback();
-   *     return result === null ? Result.err('oops') : Result.ok(result);
+   *     return result === null || result === undefined
+   *       ? Result.err('oops')
+   *       : Result.ok(result);
    *   }).unwrap();
    *   ```
    *
@@ -171,6 +181,7 @@ export class Result<T, E = Error> {
   /**
    * Returns a discriminated union for type-safe consumption of the result.
    * When `fallback` is provided, the error is discarded and value is returned directly.
+   * When error was uncaught during transformation, it's being re-thrown here.
    *
    *   ```ts
    *
@@ -188,18 +199,27 @@ export class Result<T, E = Error> {
   unwrap(): Res<T, E>;
   unwrap(fallback: NonNullable<T>): NonNullable<T>;
   unwrap(fallback?: NonNullable<T>): Res<T, E> | NonNullable<T> {
-    if (fallback === undefined) {
-      return this.res;
+    if (this.res.ok) {
+      return fallback === undefined ? this.res : this.res.val;
     }
-    return this.res.ok ? this.res.val : fallback;
+
+    if (fallback !== undefined) {
+      return fallback;
+    }
+
+    if (this.res.uncaught) {
+      throw this.res.err;
+    }
+
+    return this.res;
   }
 
   /**
    * Transforms the ok-value, sync or async way.
    *
    * Transform functions SHOULD NOT throw.
-   * All uncaught errors are logged and wrapped to `Result.err()`,
-   * which leads to resulting type to be incomplete in it's error part.
+   * Uncaught errors are logged and wrapped to `Result._uncaught()`,
+   * which leads to re-throwing them in `unwrap()`.
    *
    *   ```ts
    *
@@ -252,12 +272,9 @@ export class Result<T, E = Error> {
                 ? resolve(newResult)
                 : resolve(Result.ok(newResult))
             )
-            .catch((error) => {
-              logger.warn(
-                { err: error },
-                'Result: unhandled async transform error'
-              );
-              resolve(Result.err(error) as never);
+            .catch((err) => {
+              logger.warn({ err }, 'Result: unhandled async transform error');
+              resolve(Result._uncaught(err) as never);
             });
         });
       }
@@ -267,9 +284,9 @@ export class Result<T, E = Error> {
       }
 
       return Result.ok(res);
-    } catch (error) {
-      logger.warn({ err: error }, 'Result: unhandled transform error');
-      return Result.err(error);
+    } catch (err) {
+      logger.warn({ err }, 'Result: unhandled transform error');
+      return Result._uncaught(err);
     }
   }
 }
@@ -308,7 +325,7 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
 
           return resolve(Result.ok(value));
         })
-        .catch((error) => resolve(Result.err(error)));
+        .catch((err) => resolve(Result.err(err)));
     });
   }
 
@@ -330,7 +347,7 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
 
           return resolve(Result.ok(value));
         })
-        .catch((error) => resolve(Result.err(error)));
+        .catch((err) => resolve(Result.err(err)));
     });
   }
 
@@ -366,8 +383,8 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
    * Transforms the ok-value, sync or async way.
    *
    * Transform functions SHOULD NOT throw.
-   * All uncaught errors are logged and wrapped to `Result.err()`,
-   * which leads to resulting type to be incomplete in it's error part.
+   * Uncaught errors are logged and wrapped to `Result._uncaught()`,
+   * which leads to re-throwing them in `unwrap()`.
    *
    *   ```ts
    *
@@ -417,12 +434,12 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
                   ? resolve(asyncRes)
                   : resolve(Result.ok(asyncRes))
               )
-              .catch((error) => {
+              .catch((err) => {
                 logger.warn(
-                  { err: error },
+                  { err },
                   'AsyncResult: unhandled async transform error'
                 );
-                return resolve(Result.err(error));
+                return resolve(Result._uncaught(err));
               });
           }
 
@@ -431,12 +448,13 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
           }
 
           return resolve(Result.ok(newResult));
-        } catch (error) {
-          logger.warn({ err: error }, 'AsyncResult: unhandled transform error');
-          return resolve(Result.err(error));
+        } catch (err) {
+          logger.warn({ err }, 'AsyncResult: unhandled transform error');
+          return resolve(Result._uncaught(err));
         }
-      }).catch((error) => {
-        resolve(Result.err(error));
+      }).catch((err) => {
+        // Actually, this should never happen
+        resolve(Result.err(err));
       });
     });
   }

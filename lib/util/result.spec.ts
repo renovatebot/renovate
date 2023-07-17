@@ -96,6 +96,17 @@ describe('util/result', () => {
         const res: Result<number, string> = Result.err('oops');
         expect(res.unwrap(42)).toBe(42);
       });
+
+      it('throws error uncaught in the failed transform', () => {
+        const res = Result.ok(42);
+        expect(() =>
+          res
+            .transform(() => {
+              throw 'oops';
+            })
+            .unwrap()
+        ).toThrow('oops');
+      });
     });
 
     describe('Transforming', () => {
@@ -122,7 +133,7 @@ describe('util/result', () => {
         const res = Result.ok('foo').transform(() => {
           throw 'oops';
         });
-        expect(res).toEqual(Result.err('oops'));
+        expect(res).toEqual(Result._uncaught('oops'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'oops' },
           'Result: unhandled transform error'
@@ -293,7 +304,7 @@ describe('util/result', () => {
         const res = Result.ok('foo');
         await expect(
           res.transform((_) => Promise.reject('oops'))
-        ).resolves.toEqual(Result.err('oops'));
+        ).resolves.toEqual(Result._uncaught('oops'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'Result: unhandled async transform error'
@@ -306,7 +317,7 @@ describe('util/result', () => {
           res.transform(() => {
             throw 'bar';
           })
-        ).resolves.toEqual(Result.err('bar'));
+        ).resolves.toEqual(Result._uncaught('bar'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'AsyncResult: unhandled transform error'
@@ -317,7 +328,7 @@ describe('util/result', () => {
         const res = Result.wrap(Promise.resolve('foo'));
         await expect(
           res.transform(() => Promise.reject('bar'))
-        ).resolves.toEqual(Result.err('bar'));
+        ).resolves.toEqual(Result._uncaught('bar'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),
           'AsyncResult: unhandled async transform error'
