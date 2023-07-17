@@ -26,7 +26,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
-      config.regexManagers = undefined; // for coverage
+      delete config.regexManagers; // for coverage
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('ansible');
     });
