@@ -77,7 +77,7 @@ async function addUpdatedLockfiles(
       });
     }
   }
-  return Promise.resolve(res);
+  return res;
 }
 
 function getPackageFileName(
