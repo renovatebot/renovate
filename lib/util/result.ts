@@ -56,16 +56,18 @@ export class Result<T, E = Error> {
    *   ```
    */
   static wrap<T, E = Error>(callback: () => NonNullable<T>): Result<T, E>;
-  static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
+  static wrap<T, E = Error, EE = never>(
+    promise: Promise<Result<T, EE>>
+  ): AsyncResult<T, E | EE>;
   static wrap<T, E = Error>(
     promise: Promise<NonNullable<T>>
   ): AsyncResult<T, E>;
-  static wrap<T, E = Error>(
+  static wrap<T, E = Error, EE = never>(
     input:
       | (() => NonNullable<T>)
-      | Promise<Result<T, E>>
+      | Promise<Result<T, EE>>
       | Promise<NonNullable<T>>
-  ): Result<T, E> | AsyncResult<T, E> {
+  ): Result<T, E | EE> | AsyncResult<T, E | EE> {
     if (input instanceof Promise) {
       return AsyncResult.wrap(input as never);
     }
@@ -193,11 +195,11 @@ export class Result<T, E = Error> {
   }
 
   /**
-   * Transforms the value if the result is `ok`.
-   * The transform function can be sync or async.
+   * Transforms the ok-value, sync or async way.
    *
-   * It can return plain value, but for better control
-   * of the error type, it's recommended to return `Result`.
+   * Transform functions SHOULD NOT throw.
+   * All uncaught errors are logged and wrapped to `Result.err()`,
+   * which leads to resulting type to be incomplete in it's error part.
    *
    *   ```ts
    *
@@ -217,17 +219,15 @@ export class Result<T, E = Error> {
    *   ```
    */
   transform<U, EE>(
-    fn: (value: NonNullable<T>) => Result<U, EE>
+    fn: (value: NonNullable<T>) => Result<U, E | EE>
   ): Result<U, E | EE>;
   transform<U, EE>(
-    fn: (value: NonNullable<T>) => Promise<Result<U, EE>>
+    fn: (value: NonNullable<T>) => Promise<Result<U, E | EE>>
   ): AsyncResult<U, E | EE>;
   transform<U>(
     fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
-  ): AsyncResult<U, E | Error>;
-  transform<U>(
-    fn: (value: NonNullable<T>) => NonNullable<U>
-  ): Result<U, E | Error>;
+  ): AsyncResult<U, E>;
+  transform<U>(fn: (value: NonNullable<T>) => NonNullable<U>): Result<U, E>;
   transform<U, EE>(
     fn: (
       value: NonNullable<T>
@@ -290,13 +290,15 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
     super(executor);
   }
 
-  static wrap<T, E = Error>(promise: Promise<Result<T, E>>): AsyncResult<T, E>;
+  static wrap<T, E = Error, EE = never>(
+    promise: Promise<Result<T, EE>>
+  ): AsyncResult<T, E | EE>;
   static wrap<T, E = Error>(
     promise: Promise<NonNullable<T>>
   ): AsyncResult<T, E>;
-  static wrap<T, E = Error>(
-    promise: Promise<NonNullable<T> | Result<T, E>>
-  ): AsyncResult<T, E> {
+  static wrap<T, E = Error, EE = never>(
+    promise: Promise<NonNullable<T> | Result<T, E | EE>>
+  ): AsyncResult<T, E | EE> {
     return new AsyncResult((resolve) => {
       promise
         .then((value) => {
@@ -361,11 +363,11 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   }
 
   /**
-   * Transforms the value if the result is `ok`.
-   * The transform function can be sync or async.
+   * Transforms the ok-value, sync or async way.
    *
-   * It can return plain value, but for better control
-   * of the error type, it's recommended to return `Result`.
+   * Transform functions SHOULD NOT throw.
+   * All uncaught errors are logged and wrapped to `Result.err()`,
+   * which leads to resulting type to be incomplete in it's error part.
    *
    *   ```ts
    *
@@ -385,10 +387,10 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
   ): AsyncResult<U, E | EE>;
   transform<U>(
     fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
-  ): AsyncResult<U, E | Error>;
+  ): AsyncResult<U, E>;
   transform<U>(
     fn: (value: NonNullable<T>) => NonNullable<U>
-  ): AsyncResult<U, E | Error>;
+  ): AsyncResult<U, E>;
   transform<U, EE>(
     fn: (
       value: NonNullable<T>
