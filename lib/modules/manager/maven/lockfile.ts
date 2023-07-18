@@ -1,14 +1,12 @@
-import path from 'path';
-
 import { glob } from 'glob';
 import type { StatusResult } from 'simple-git';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecResult } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -23,8 +21,8 @@ export async function updateArtifacts({
       );
       return null;
     }
-    const parent = path.dirname(packageFileName);
-    const parentDir = path.resolve(parent);
+    const parent = upath.dirname(packageFileName);
+    const parentDir = upath.resolve(parent);
     const files = await getLockfileJsonFiles(parentDir);
 
     // Check if any files were found
@@ -119,7 +117,7 @@ async function getLockfileVersion(folder: string): Promise<string> {
  */
 function filterLockfileJsonFiles(filePaths: string[]): string[] {
   return filePaths.filter((filePath) => {
-    const fileName = path.basename(filePath);
+    const fileName = upath.basename(filePath);
     return fileName === 'lockfile.json';
   });
 }
