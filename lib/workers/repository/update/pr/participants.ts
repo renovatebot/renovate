@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
+import { dryRunCanDoAction } from '../../../../util/dryrun';
 import { sampleSize } from '../../../../util/sample';
 import { codeOwnersForPr } from './code-owners';
 
@@ -50,9 +50,7 @@ export async function addParticipants(
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
       if (assignees.length > 0) {
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
-        } else {
+        if (dryRunCanDoAction(`add assignees to PR #${pr.number}`, assignees)) {
           await platform.addAssignees(pr.number, assignees);
           logger.debug({ assignees }, 'Added assignees');
         }
@@ -82,9 +80,7 @@ export async function addParticipants(
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
       if (reviewers.length > 0) {
-        if (GlobalConfig.get('dryRun')) {
-          logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
-        } else {
+        if (dryRunCanDoAction(`add reviewers to PR #${pr.number}`, reviewers)) {
           await platform.addReviewers(pr.number, reviewers);
           logger.debug({ reviewers }, 'Added reviewers');
         }

@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
-import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
+import { dryRunCanDoAction } from '../../util/dryrun';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import type { BranchConfig, SelectAllConfig } from '../types';
@@ -209,12 +209,14 @@ export async function ensureDependencyDashboard(
       )
     )
   ) {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info(
-        { title: config.dependencyDashboardTitle },
-        'DRY-RUN: Would close Dependency Dashboard'
-      );
-    } else {
+    if (
+      dryRunCanDoAction(
+        'close Dependency Dashboard',
+        config.dependencyDashboardTitle!,
+        undefined,
+        { title: config.dependencyDashboardTitle }
+      )
+    ) {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
@@ -228,12 +230,14 @@ export async function ensureDependencyDashboard(
   logger.debug('Ensuring Dependency Dashboard');
   const hasBranches = is.nonEmptyArray(branches);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info(
-        { title: config.dependencyDashboardTitle },
-        'DRY-RUN: Would close Dependency Dashboard'
-      );
-    } else {
+    if (
+      dryRunCanDoAction(
+        'close Dependency Dashboard',
+        config.dependencyDashboardTitle!,
+        undefined,
+        { title: config.dependencyDashboardTitle }
+      )
+    ) {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
@@ -452,19 +456,15 @@ export async function ensureDependencyDashboard(
     }
   }
 
-  if (GlobalConfig.get('dryRun')) {
-    logger.info(
-      { title: config.dependencyDashboardTitle },
-      'DRY-RUN: Would ensure Dependency Dashboard'
-    );
-  } else {
-    await platform.ensureIssue({
-      title: config.dependencyDashboardTitle!,
-      reuseTitle,
-      body: platform.massageMarkdown(issueBody),
-      labels: config.dependencyDashboardLabels,
-      confidential: config.confidential,
-    });
+  const issue = {
+    title: config.dependencyDashboardTitle!,
+    reuseTitle,
+    body: platform.massageMarkdown(issueBody),
+    labels: config.dependencyDashboardLabels,
+    confidential: config.confidential,
+  };
+  if (dryRunCanDoAction('ensure Dependency Dashboard', issue, issue.body)) {
+    await platform.ensureIssue(issue);
   }
 }
 

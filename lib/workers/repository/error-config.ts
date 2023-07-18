@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../modules/platform';
+import { dryRunCanDoAction } from '../../util/dryrun';
 import { regEx } from '../../util/regex';
 
 export function raiseConfigWarningIssue(
@@ -84,21 +85,20 @@ async function raiseWarningIssue(
 
 async function handleOnboardingPr(pr: Pr, issueMessage: string): Promise<void> {
   logger.debug('Updating onboarding PR with config error notice');
-  if (GlobalConfig.get('dryRun')) {
-    logger.info(`DRY-RUN: Would update PR #${pr.number}`);
-    return;
-  }
 
   let prBody = `## Action Required: Fix Renovate Configuration\n\n${issueMessage}`;
   prBody += `\n\nOnce you have resolved this problem (in this onboarding branch), Renovate will return to providing you with a preview of your repository's configuration.`;
 
-  try {
-    await platform.updatePr({
-      number: pr.number,
-      prTitle: pr.title,
-      prBody,
-    });
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error updating onboarding PR');
+  const prUpdate = {
+    number: pr.number,
+    prTitle: pr.title,
+    prBody,
+  };
+  if (dryRunCanDoAction(`update PR #${pr.number}`, prUpdate, prUpdate.prBody)) {
+    try {
+      await platform.updatePr(prUpdate);
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ err }, 'Error updating onboarding PR');
+    }
   }
 }

@@ -7,6 +7,7 @@ import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { dryRunCanDoAction } from '../../../../util/dryrun';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
 import { toSha256 } from '../../../../util/hasha';
@@ -150,14 +151,14 @@ If you need any further assistance then you can also [request help here](${
       return;
     }
     // PR must need updating
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would update onboarding PR');
-    } else {
-      await platform.updatePr({
-        number: existingPr.number,
-        prTitle: existingPr.title,
-        prBody,
-      });
+    const prUpdate = {
+      number: existingPr.number,
+      prTitle: existingPr.title,
+      prBody,
+    };
+
+    if (dryRunCanDoAction(`update onboarding PR`, prUpdate, prUpdate.prBody)) {
+      await platform.updatePr(prUpdate);
       logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
     }
     return;
@@ -165,21 +166,21 @@ If you need any further assistance then you can also [request help here](${
   logger.debug('Creating onboarding PR');
   const labels: string[] = prepareLabels(config);
   try {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create onboarding PR');
-    } else {
+    const prCreate = {
+      sourceBranch: config.onboardingBranch!,
+      targetBranch: config.defaultBranch!,
+      prTitle: config.onboardingPrTitle!,
+      prBody,
+      labels,
+      platformOptions: getPlatformPrOptions({
+        ...config,
+        automerge: false,
+      }),
+    };
+
+    if (dryRunCanDoAction(`create onboarding PR`, prCreate, prCreate.prBody)) {
       // TODO #7154
-      const pr = await platform.createPr({
-        sourceBranch: config.onboardingBranch!,
-        targetBranch: config.defaultBranch!,
-        prTitle: config.onboardingPrTitle!,
-        prBody,
-        labels,
-        platformOptions: getPlatformPrOptions({
-          ...config,
-          automerge: false,
-        }),
-      });
+      const pr = await platform.createPr(prCreate);
       logger.info(
         { pr: `Pull Request #${pr!.number}` },
         'Onboarding PR created'

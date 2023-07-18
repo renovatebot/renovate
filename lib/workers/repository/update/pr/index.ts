@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -23,6 +22,7 @@ import {
 import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
+import { dryRunCanDoAction } from '../../../../util/dryrun';
 import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
 import { getBranchLastCommitTime } from '../../../../util/git';
@@ -395,14 +395,20 @@ export async function ensurePr(
         );
       }
 
-      if (GlobalConfig.get('dryRun')) {
-        logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
+      if (
+        !dryRunCanDoAction(
+          `update PR #${existingPr.number}`,
+          updatePrConfig,
+          updatePrConfig.prBody
+        )
+      ) {
         return { type: 'with-pr', pr: existingPr };
-      } else {
-        await platform.updatePr(updatePrConfig);
-        logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
-        setPrCache(branchName, prBodyFingerprint, true);
       }
+
+      await platform.updatePr(updatePrConfig);
+      logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+      setPrCache(branchName, prBodyFingerprint, true);
+
       return {
         type: 'with-pr',
         pr: {
@@ -418,8 +424,19 @@ export async function ensurePr(
       logger.info('Creating Rollback PR');
     }
     let pr: Pr | null;
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create PR: ' + prTitle);
+    const prCreate = {
+      sourceBranch: branchName,
+      targetBranch: config.baseBranch,
+      prTitle,
+      prBody,
+      labels: prepareLabels(config),
+      platformOptions: getPlatformPrOptions(config),
+      draftPR: !!config.draftPR,
+    };
+    // eslint-disable-next-line no-negated-condition
+    if (
+      !dryRunCanDoAction(`create PR #${prTitle}`, prCreate, prCreate.prBody)
+    ) {
       pr = { number: 0 } as never;
     } else {
       try {
@@ -431,15 +448,7 @@ export async function ensurePr(
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
         }
-        pr = await platform.createPr({
-          sourceBranch: branchName,
-          targetBranch: config.baseBranch,
-          prTitle,
-          prBody,
-          labels: prepareLabels(config),
-          platformOptions: getPlatformPrOptions(config),
-          draftPR: !!config.draftPR,
-        });
+        pr = await platform.createPr(prCreate);
 
         incLimitedValue('PullRequests');
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
@@ -478,14 +487,19 @@ export async function ensurePr(
       }
       content = platform.massageMarkdown(content);
       logger.debug('Adding branch automerge failure message to PR');
-      if (GlobalConfig.get('dryRun')) {
-        logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
-      } else {
-        await ensureComment({
-          number: pr.number,
-          topic,
-          content,
-        });
+      const prComment = {
+        number: pr.number,
+        topic,
+        content,
+      };
+      if (
+        dryRunCanDoAction(
+          `add comment to PR #${pr.number}`,
+          prComment,
+          prComment.content
+        )
+      ) {
+        await ensureComment(prComment);
       }
     }
     // Skip assign and review if automerging PR

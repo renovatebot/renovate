@@ -1,5 +1,4 @@
 // TODO #7154
-import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
 import {
@@ -7,6 +6,7 @@ import {
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
+import { dryRunCanDoAction } from '../../../../util/dryrun';
 import type { BranchConfig } from '../../../types';
 import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
@@ -93,10 +93,13 @@ export async function checkAutoMerge(
     // TODO: types (#7154)
     logger.debug(`Applying automerge comment: ${automergeComment!}`);
     // istanbul ignore if
-    if (GlobalConfig.get('dryRun')) {
-      logger.info(
-        `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
-      );
+    if (
+      !dryRunCanDoAction(
+        `add PR automerge comment to PR #${pr.number}`,
+        {},
+        automergeComment
+      )
+    ) {
       return {
         automerged: false,
         prAutomergeBlockReason: 'DryRun',
@@ -118,13 +121,12 @@ export async function checkAutoMerge(
   }
   // Let's merge this
   // istanbul ignore if
-  if (GlobalConfig.get('dryRun')) {
-    // TODO: types (#7154)
-    logger.info(
-      `DRY-RUN: Would merge PR #${
-        pr.number
-      } with strategy "${automergeStrategy!}"`
-    );
+  if (
+    !dryRunCanDoAction(
+      `merge PR #${pr.number} with strategy "${automergeStrategy!}"`,
+      {}
+    )
+  ) {
     return {
       automerged: false,
       prAutomergeBlockReason: 'DryRun',

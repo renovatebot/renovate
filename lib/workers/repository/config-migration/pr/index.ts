@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
+import { dryRunCanDoAction } from '../../../../util/dryrun';
 import { emojify } from '../../../../util/emoji';
 import * as template from '../../../../util/template';
 import { joinUrlParts } from '../../../../util/url';
@@ -78,36 +78,34 @@ ${
       return;
     }
     // PR must need updating
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would update migration PR');
-    } else {
-      await platform.updatePr({
-        number: existingPr.number,
-        prTitle,
-        prBody,
-      });
+    const prUpdate = {
+      number: existingPr.number,
+      prTitle,
+      prBody,
+    };
+    if (dryRunCanDoAction(`update migration PR`, prUpdate, prUpdate.prBody)) {
+      await platform.updatePr(prUpdate);
       logger.info({ pr: existingPr.number }, 'Migration PR updated');
     }
     return;
   }
   logger.debug('Creating migration PR');
   const labels = prepareLabels(config);
+  const prCreate = {
+    sourceBranch: branchName,
+    // TODO #7154
+    targetBranch: config.defaultBranch!,
+    prTitle,
+    prBody,
+    labels,
+    platformOptions: getPlatformPrOptions({
+      ...config,
+      automerge: false,
+    }),
+  };
   try {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create migration PR');
-    } else {
-      const pr = await platform.createPr({
-        sourceBranch: branchName,
-        // TODO #7154
-        targetBranch: config.defaultBranch!,
-        prTitle,
-        prBody,
-        labels,
-        platformOptions: getPlatformPrOptions({
-          ...config,
-          automerge: false,
-        }),
-      });
+    if (dryRunCanDoAction(`create migration PR`, prCreate, prCreate.prBody)) {
+      const pr = await platform.createPr(prCreate);
       logger.info({ pr: pr?.number }, 'Migration PR created');
       if (pr) {
         await addParticipants(config, pr);
