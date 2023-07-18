@@ -1,0 +1,12 @@
+packages:
+  google_fonts:
+    dependency: "direct main"
+    description:
+      name: google_fonts
+      sha256: e20ff62b158b96f392bfc8afe29dee1503c94fbea2cbe8186fd59b756b8ae982
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.0"
+sdks:
+  dart: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"

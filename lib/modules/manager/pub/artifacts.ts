@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -11,23 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { PubspecLock, PubspecSdk } from './types';
-
-export function getConstraint(
-  lockFileContent: string,
-  lockFileSdkKey: keyof PubspecSdk
-): string | undefined {
-  try {
-    const data = load(lockFileContent, { json: true }) as PubspecLock;
-    const constraint = data.sdks[lockFileSdkKey];
-    if (is.string(constraint)) {
-      return constraint;
-    }
-  } catch (err) {
-    // Do nothing
-  }
-  return undefined;
-}
+import { lazyParsePubspeckLock } from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -69,10 +52,11 @@ export async function updateArtifacts({
       );
     }
 
+    const oldLazyPubspecLock = lazyParsePubspeckLock(oldLockFileContent);
+    const oldPubspecLock = oldLazyPubspecLock.getValue();
     const constraint = isFlutter
-      ? config.constraints?.flutter ??
-        getConstraint(oldLockFileContent, 'flutter')
-      : config.constraints?.dart ?? getConstraint(oldLockFileContent, 'dart');
+      ? config.constraints?.flutter ?? oldPubspecLock?.sdks.flutter
+      : config.constraints?.dart ?? oldPubspecLock?.sdks.dart;
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},
