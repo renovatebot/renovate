@@ -17,4 +17,29 @@
       <version>10.3.0</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>3.1.1</version>
+      </plugin>
+      <plugin>
+        <groupId>io.github.chains-project</groupId>
+        <artifactId>
+          maven-lockfile</artifactId>
+        <version>4.0.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>
+                validate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

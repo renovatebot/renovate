@@ -5,11 +5,10 @@ import type { StatusResult } from 'simple-git';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecResult } from '../../../util/exec/types';
-import { getParentDir, readLocalFile } from '../../../util/fs';
+import { readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-const maven_lockfile_version = '4.0.0';
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -17,8 +16,6 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    // Log the updated dependencies
-    logger.trace({ updatedDeps }, 'maven-lockfile.updateArtifacts()');
     // Check if any Maven dependencies were updated
     if (!updatedDeps.some((dep) => dep.datasource === 'maven')) {
       logger.debug(
@@ -26,20 +23,17 @@ export async function updateArtifacts({
       );
       return null;
     }
-
-    // Set the current working directory for the `glob` search
-    const parentDir = path.resolve(getParentDir(packageFileName));
-
-    // Search for files that match `lockfile.json`
+    const parent = path.dirname(packageFileName);
+    const parentDir = path.resolve(parent);
     const files = await getLockfileJsonFiles(parentDir);
 
     // Check if any files were found
     if (files.length > 0) {
       logger.info(`Found ${files.length} lockfile.json files`);
-      // Do something with the files...
       const execOptions = {
         cwd: parentDir,
       };
+      const maven_lockfile_version = await getLockfileVersion(parentDir);
       // Generate the Maven lockfile using the `mvn` command
       const cmd = `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
       const result: ExecResult = await exec(cmd, execOptions);
@@ -49,7 +43,6 @@ export async function updateArtifacts({
       return res;
     } else {
       logger.debug('No lockfile.json files found');
-      //TODO: lookup if JS developers prefer to reject or resolve with null
       return null;
     }
   } catch (err) {
@@ -57,7 +50,6 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          // error is written to stdout
           stderr: err.stdout || err.message,
         },
       },
@@ -65,25 +57,69 @@ export async function updateArtifacts({
   }
 }
 
+/**
+ * Returns a `Promise<UpdateArtifactsResult[]>` of updated lockfile.json files.<br>
+ *
+ * Only modified files are added to the result not created files.
+ * If there was no preexisting lockfile we assume this was a decision by the developer.
+ * @param status The `StatusResult` object returned by `simple-git`.
+ * @returns A `Promise<UpdateArtifactsResult[]>` of updated lockfile.json files.
+ */
 async function addUpdatedLockfiles(
   status: StatusResult
 ): Promise<UpdateArtifactsResult[]> {
   const res: UpdateArtifactsResult[] = [];
-  for (const f of [...status.modified]) {
-    if (/.*\/lockfile.json/.exec(f)) {
-      logger.trace(`lockfile.json updated`);
-      res.push({
-        file: {
-          type: 'addition',
-          path: f,
-          contents: await readLocalFile(f),
-        },
-      });
-    }
+  for (const f of filterLockfileJsonFiles(status.modified)) {
+    logger.trace(`lockfile.json updated`);
+    res.push({
+      file: {
+        type: 'addition',
+        path: f,
+        contents: await readLocalFile(f),
+      },
+    });
   }
   return res;
 }
-
+/**
+ * Returns a `Promise<string[]>` of `lockfile.json` files. If the array is empty, no files were found.
+ * @param directoryPath the directory to start the search from
+ * @returns a `Promise<string[]>` of `lockfile.json` files, empty if none were found.
+ */
 function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
   return glob('**/lockfile.json', { cwd: directoryPath });
+}
+/**
+ * Returns the version of the maven-lockfile plugin used in the project.
+ *
+ * For this we let maven evaluate the plugin version. This is done by running the `mvn help:describe` command.
+ * The output of this command is then parsed to extract the version.
+ * If the version could not be found, an error is thrown.
+ *
+ * @param {string} folder - The folder to check. This should be the parent folder of the `pom.xml` file.
+ * @returns {Promise<string>} The version of the maven-lockfile plugin used in the project.
+ */
+async function getLockfileVersion(folder: string): Promise<string> {
+  const command =
+    'mvn help:describe -DgroupId=io.github.chains-project -DartifactId=maven-lockfile -Dminimal=true -B';
+  const result: ExecResult = await exec(command, { cwd: folder });
+  if (result.stderr) {
+    throw new Error(result.stderr);
+  }
+  const version = /Version: (.*)/.exec(result.stdout);
+  if (version) {
+    return version[1];
+  }
+  throw new Error('Could not find version');
+}
+/**
+ * Filters the file paths to only include `lockfile.json` files
+ * @param filePaths The file paths to filter
+ * @returns The filtered file paths
+ */
+function filterLockfileJsonFiles(filePaths: string[]): string[] {
+  return filePaths.filter((filePath) => {
+    const fileName = path.basename(filePath);
+    return fileName === 'lockfile.json';
+  });
 }
