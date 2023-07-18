@@ -11,6 +11,11 @@ interface Err<E> {
   readonly ok: false;
   readonly err: NonNullable<E>;
   readonly val?: never;
+
+  /**
+   * Internal flag to indicate that the error was thrown during `.transform()`
+   * and will be re-thrown on `.unwrap()`.
+   */
   readonly _uncaught?: true;
 }
 
