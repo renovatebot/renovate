@@ -54,7 +54,7 @@ export function satisfiesDateRange(
   }
 
   const { operator, age } = grps;
-  const luxonDate = DateTime.fromISO(date);
+  const luxonDate = DateTime.fromISO(date, { zone: 'utc' });
   if (!luxonDate.isValid) {
     logger.debug(`Invalid date specifier: '${date}'`);
     return null;
@@ -77,7 +77,7 @@ export function satisfiesDateRange(
       return dateMs > rangeMs;
     case '<=':
       return dateMs >= rangeMs;
-    // istanbul ignore next: can never happen 
+    // istanbul ignore next: can never happen
     default:
       return dateMs === rangeMs;
   }
