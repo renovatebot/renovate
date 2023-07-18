@@ -62,5 +62,30 @@ describe('modules/manager/git-submodules/update', () => {
       });
       expect(update).toBe('');
     });
+
+    it('returns content on update and uses git environment variables', async () => {
+      gitMock.submoduleUpdate.mockResolvedValue('');
+      gitMock.checkout.mockResolvedValue('');
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 'abc123',
+      });
+
+      const update = await updateDependency({
+        fileContent: '',
+        upgrade,
+      });
+      expect(update).toBe('');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+    });
   });
 });
