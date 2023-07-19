@@ -37,7 +37,7 @@ It needs only a corresponding Gerrit-Label (default `Renovate-Stability`) and th
 You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
 This is because Renovate will query the label and prevent `automerge` accordingly.
 
-The same applies to the feature [Merge-Confidence](https://docs.renovatebot.com/merge-confidence/).
+The same applies to the [Merge Confidence feature](https://docs.renovatebot.com/merge-confidence/).
 
 The Gerrit-Label names can be configured in your Renovate config file:
 
