@@ -110,4 +110,17 @@
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-27
   // https://kubernetes.io/docs/reference/using-api/deprecation-guide/#csistoragecapacity-v127
   CSIStorageCapacity: ['storage.k8s.io/v1beta1', 'storage.k8s.io/v1'],
+  // https://github.com/fluxcd/flux2/releases/tag/v2.0.0
+  GitRepository: [
+    'source.toolkit.fluxcd.io/v1beta2',
+    'source.toolkit.fluxcd.io/v1',
+  ],
+  Kustomization: [
+    'source.toolkit.fluxcd.io/v1beta2',
+    'source.toolkit.fluxcd.io/v1',
+  ],
+  Receiver: [
+    'notification.toolkit.fluxcd.io/v1beta2',
+    'notification.toolkit.fluxcd.io/v1',
+  ],
 }

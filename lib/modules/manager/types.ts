@@ -273,6 +273,8 @@ export interface ManagerApi extends ModuleApi {
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>,
     ManagerData<T> {
+  // TODO: remove null
+  constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean | null;
