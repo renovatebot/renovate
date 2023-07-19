@@ -164,5 +164,29 @@ describe('modules/manager/git-submodules/extract', () => {
         ],
       });
     });
+
+    it('whitespaces in submodule URL are encoded properly', async () => {
+      hostRules.add({
+        matchHost: 'organization@dev.azure.com/organization',
+        token: 'pat',
+        hostType: 'azure',
+      });
+      gitMock.listRemote.mockResolvedValueOnce(
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+      );
+      const res = await extractPackageFile('', '.gitmodules.6', {});
+      expect(res).toEqual({
+        datasource: 'git-refs',
+        deps: [
+          {
+            currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            currentValue: 'main',
+            depName: 'some-azure',
+            packageName:
+              'https://organization@dev.azure.com/organization/whitespace%20project/_git/repo',
+          },
+        ],
+      });
+    });
   });
 });
