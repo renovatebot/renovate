@@ -2086,6 +2086,32 @@ describe('modules/platform/gitlab/index', () => {
         title: 'some title',
       });
     });
+
+    it('should swallow an error on auto-approve', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .post('/api/v4/projects/undefined/merge_requests/12345/approve')
+        .replyWithError('some error');
+      await expect(
+        gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            autoApprove: true,
+          },
+        })
+      ).toResolve();
+    });
   });
 
   describe('getPr(prNo)', () => {

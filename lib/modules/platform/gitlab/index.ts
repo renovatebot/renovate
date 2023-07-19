@@ -642,7 +642,7 @@ async function approvePr(pr: number): Promise<void> {
     await gitlabApi.postJson(
       `projects/${config.repository}/merge_requests/${pr}/approve`
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.warn({ err }, 'GitLab: Error approving merge request');
   }
 }
