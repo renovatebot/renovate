@@ -352,35 +352,29 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return this.requestJson<ResT>('get', args);
   }
 
-  getJsonSafe<ResT>(
-    url: string,
-    options?: Opts & HttpRequestOptions<ResT>
-  ): AsyncResult<ResT, RequestError | EmptyResultError>;
-  getJsonSafe<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
-    url: string,
-    schema: Schema
-  ): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(
     url: string,
     options: Opts & HttpRequestOptions<Infer<Schema>>,
     schema: Schema
   ): AsyncResult<Infer<Schema>, SafeJsonError>;
-  getJsonSafe<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(
     arg1: string,
     arg2?: (Opts & HttpRequestOptions<ResT>) | Schema,
     arg3?: Schema
   ): AsyncResult<ResT, SafeJsonError> {
     const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
     return Result.wrap(this.requestJson<ResT>('get', args)).transform(
-      ({ body }) => {
-        if (!body) {
-          const message = `Empty result: '${String(body)}'`;
-          const err = new EmptyResultError(message);
-          return Result.err(err);
-        }
-
-        return Result.ok(body);
-      }
+      (response) => response.body
     );
   }
 

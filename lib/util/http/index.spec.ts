@@ -404,30 +404,6 @@ describe('util/http/index', () => {
         expect(val).toBeUndefined();
         expect(err).toBeInstanceOf(HttpError);
       });
-
-      it('returns error for empty body', async () => {
-        httpMock.scope('http://example.com').get('/').reply(200, '');
-
-        const { val, err } = await http
-          .getJsonSafe<string>('http://example.com')
-          .unwrap();
-
-        expect(val).toBeUndefined();
-        expect(err).toBeInstanceOf(EmptyResultError);
-        expect(err?.message).toBe(`Empty result: ''`);
-      });
-
-      it('returns error for null', async () => {
-        httpMock.scope('http://example.com').get('/').reply(200, 'null');
-
-        const { val, err } = await http
-          .getJsonSafe<string>('http://example.com')
-          .unwrap();
-
-        expect(val).toBeUndefined();
-        expect(err).toBeInstanceOf(EmptyResultError);
-        expect(err?.message).toBe(`Empty result: 'null'`);
-      });
     });
 
     describe('postJson', () => {
