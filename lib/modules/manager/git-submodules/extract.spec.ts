@@ -57,6 +57,29 @@ describe('modules/manager/git-submodules/extract', () => {
       expect(res?.deps[0].currentValue).toBe('main');
     });
 
+    it('default branch is detected with using git environment variables when no branch is specified', async () => {
+      gitMock.listRemote.mockResolvedValueOnce(
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+      );
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 'abc123',
+      });
+      const res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('main');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+    });
+
     it('default to master if no branch can be detected', async () => {
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);

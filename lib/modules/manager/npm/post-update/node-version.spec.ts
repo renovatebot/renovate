@@ -1,4 +1,5 @@
 import { fs } from '../../../../../test/util';
+import { Lazy } from '../../../../util/lazy';
 import {
   getNodeConstraint,
   getNodeToolConstraint,
@@ -14,38 +15,60 @@ describe('modules/manager/npm/post-update/node-version', () => {
   };
 
   describe('getNodeConstraint()', () => {
-    it('returns package.json range', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
-      const res = await getNodeConstraint(config, '');
+    it('returns from user constraints', async () => {
+      const res = await getNodeConstraint(
+        config,
+        [],
+        '',
+        new Lazy(() => Promise.resolve({}))
+      );
       expect(res).toBe('^12.16.0');
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
     it('returns .node-version value', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       fs.readLocalFile.mockResolvedValueOnce('12.16.1\n');
-      const res = await getNodeConstraint(config, '');
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() => Promise.resolve({}))
+      );
       expect(res).toBe('12.16.1');
     });
 
     it('returns .nvmrc value', async () => {
       fs.readLocalFile.mockResolvedValueOnce('12.16.2\n');
-      const res = await getNodeConstraint(config, '');
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() => Promise.resolve({}))
+      );
       expect(res).toBe('12.16.2');
     });
 
     it('ignores unusable ranges in dotfiles', async () => {
       fs.readLocalFile.mockResolvedValueOnce('latest');
       fs.readLocalFile.mockResolvedValueOnce('lts');
-      const res = await getNodeConstraint(config, '');
-      expect(res).toBe('^12.16.0');
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() => Promise.resolve({}))
+      );
+      expect(res).toBeNull();
     });
 
-    it('returns no constraint', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
-      const res = await getNodeConstraint({ ...config, constraints: null }, '');
-      expect(res).toBeNull();
+    it('returns from package.json', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() => Promise.resolve({ engines: { node: '^12.16.3' } }))
+      );
+      expect(res).toBe('^12.16.3');
     });
   });
 
@@ -67,7 +90,8 @@ describe('modules/manager/npm/post-update/node-version', () => {
         await getNodeToolConstraint(
           config,
           [{ depName: 'node', newValue: '16.15.0' }],
-          ''
+          '',
+          new Lazy(() => Promise.resolve({}))
         )
       ).toEqual({
         toolName: 'node',
@@ -76,7 +100,14 @@ describe('modules/manager/npm/post-update/node-version', () => {
     });
 
     it('returns getNodeConstraint', async () => {
-      expect(await getNodeToolConstraint(config, [], '')).toEqual({
+      expect(
+        await getNodeToolConstraint(
+          config,
+          [],
+          '',
+          new Lazy(() => Promise.resolve({}))
+        )
+      ).toEqual({
         toolName: 'node',
         constraint: '^12.16.0',
       });

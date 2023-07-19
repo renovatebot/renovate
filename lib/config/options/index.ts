@@ -372,7 +372,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.5.2',
+    default: 'ghcr.io/containerbase/sidecar:9.6.1',
     globalOnly: true,
   },
   {
@@ -800,13 +800,13 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'autodiscoverTopics',
-    description: '',
+    description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',
     type: 'array',
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab'],
+    supportedPlatforms: ['github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
