@@ -30,7 +30,17 @@ export function bumpPackageVersion(
 
   try {
     const project = new XmlDocument(content);
-    const versionNode = project.descendantWithPath('PropertyGroup.Version')!;
+    // Version, if present, takes precedence of VersionPrefix
+    let versionNode = project.descendantWithPath('PropertyGroup.Version');
+    if (!versionNode) {
+      versionNode = project.descendantWithPath('PropertyGroup.VersionPrefix');
+    }
+    if (!versionNode) {
+      logger.warn(
+        "Couldn't find Version or VersionPrefix in any PropertyGroup"
+      );
+      return { bumpedContent };
+    }
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 

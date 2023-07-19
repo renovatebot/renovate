@@ -7,6 +7,8 @@ const minimumContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1</Version></PropertyGroup></Project>';
 const prereleaseContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1.0.0-1</Version></PropertyGroup></Project>';
+const prefixContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>';
 
 describe('modules/manager/nuget/update', () => {
   describe('bumpPackageVersion', () => {
@@ -75,6 +77,19 @@ describe('modules/manager/nuget/update', () => {
 
       const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('PropertyGroup.Version')).toBe('1.0.0-2');
+    });
+
+    it('bumps csproj version prefix', () => {
+      const { bumpedContent } = bumpPackageVersion(
+        prefixContent,
+        '1.0.0',
+        'patch'
+      );
+
+      const project = new XmlDocument(bumpedContent!);
+      expect(project.valueWithPath('PropertyGroup.VersionPrefix')).toBe(
+        '1.0.1'
+      );
     });
   });
 });
