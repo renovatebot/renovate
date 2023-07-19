@@ -27,6 +27,7 @@ export interface GhRestRepo {
     login: string;
   };
   archived: boolean;
+  topics: string[];
 }
 
 export interface GhRestPr {
