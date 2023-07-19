@@ -31,6 +31,7 @@ import './legacy';
 export { RequestError as HttpError };
 
 export class EmptyResultError extends Error {}
+export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
 type JsonArgs<
   Opts extends HttpOptions & HttpRequestOptions<ResT>,
@@ -358,17 +359,17 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   getJsonSafe<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
     schema: Schema
-  ): AsyncResult<Infer<Schema>, RequestError | ZodError | EmptyResultError>;
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
   getJsonSafe<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
     options: Opts & HttpRequestOptions<Infer<Schema>>,
     schema: Schema
-  ): AsyncResult<Infer<Schema>, RequestError | ZodError | EmptyResultError>;
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
   getJsonSafe<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
     arg1: string,
     arg2?: (Opts & HttpRequestOptions<ResT>) | Schema,
     arg3?: Schema
-  ): AsyncResult<ResT, RequestError | ZodError | EmptyResultError> {
+  ): AsyncResult<ResT, SafeJsonError> {
     const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
     return Result.wrap(this.requestJson<ResT>('get', args)).transform(
       ({ body }) => {
