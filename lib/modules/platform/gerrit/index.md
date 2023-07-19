@@ -31,7 +31,7 @@ It works similar to the default option `"pr"`.
 
 ## Optional Features
 
-The [stabilityDays](https://docs.renovatebot.com/configuration-options/#stabilitydays) feature can be used.
+The [`minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage) feature can be used.
 It needs only a corresponding Gerrit-Label (default `Renovate-Stability`) and the permission to set the min/max value.
 
 You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
