@@ -1,5 +1,12 @@
 # Gerrit
 
+## Supported Gerrit Versions
+
+All Gerrit 3.x Versions should be working.
+
+The current implementation uses the "hashtags" Feature from Gerrit and therefore needs a Gerrit version with [NoteDB](https://gerrit-review.googlesource.com/Documentation/note-db.html) backend.
+Gerrit 2.x with NoteDB (available only in 2.15 and 2.16 only) are untested but could work too.
+
 ## Authentication
 
 <figure markdown>
@@ -44,7 +51,7 @@ The Gerrit-Label names can be configured in your Renovate config file:
 ```json
 {
   "gerritLabelMapping": {
-    "stabilityDaysLabel": "Renovate-StabilityDays",
+    "minimumReleaseAgeLabel": "Renovate-MinimumReleaseAge",
     "mergeConfidenceLabel": "Renovate-Merge-Confidence"
   }
 }

@@ -2614,10 +2614,10 @@ const options: RenovateOptions[] = [
   {
     name: 'gerritLabelMapping',
     description:
-      'The name of the Gerrit labels to use for the `StabilityDays` and `Merge-Confidence` (branch)status.',
+      'The name of the Gerrit labels to use for the `MinimumReleaseAge` and `Merge-Confidence` (branch)status.',
     type: 'object',
     default: {
-      stabilityDaysLabel: undefined,
+      minimumReleaseAgeLabel: undefined,
       mergeConfidenceLabel: undefined,
     },
     supportedPlatforms: ['gerrit'],

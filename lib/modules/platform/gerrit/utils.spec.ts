@@ -255,7 +255,7 @@ describe('modules/platform/gerrit/utils', () => {
 
   describe('mapBranchStateContextToLabel()', () => {
     const labelConfig: RepoGlobalConfig['gerritLabelMapping'] = {
-      stabilityDaysLabel: 'Stability',
+      minimumReleaseAgeLabel: 'Stability',
       mergeConfidenceLabel: 'Confidence',
     };
     const gerritLabels: Record<string, GerritLabelTypeInfo> = {

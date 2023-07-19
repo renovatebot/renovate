@@ -469,7 +469,7 @@ describe('modules/platform/gerrit/index', () => {
       beforeEach(() => {
         writeToConfig({
           labelMappings: {
-            stabilityDaysLabel: 'Renovate-Stability',
+            minimumReleaseAgeLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
           },
           labels: {
@@ -558,7 +558,7 @@ describe('modules/platform/gerrit/index', () => {
       beforeEach(() => {
         writeToConfig({
           labelMappings: {
-            stabilityDaysLabel: 'Renovate-Stability',
+            minimumReleaseAgeLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
           },
           labels: {

@@ -130,8 +130,9 @@ export function mapBranchStateContextToLabel(
 } {
   let labelName;
   switch (context) {
+    //TODO #21442
     case 'renovate/stability-days':
-      labelName = labelMapping?.stabilityDaysLabel;
+      labelName = labelMapping?.minimumReleaseAgeLabel;
       break;
     case 'renovate/merge-confidence':
       labelName = labelMapping?.mergeConfidenceLabel;
