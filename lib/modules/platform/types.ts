@@ -235,4 +235,6 @@ export interface PlatformScm {
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<CommitSha>;
+  mergeToLocal(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string): Promise<void>;
 }
