@@ -151,7 +151,7 @@
     "@opentelemetry/context-async-hooks": "1.15.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.41.0",
     "@opentelemetry/instrumentation": "0.41.0",
-    "@opentelemetry/instrumentation-bunyan": "0.31.4",
+    "@opentelemetry/instrumentation-bunyan": "0.32.0",
     "@opentelemetry/instrumentation-http": "0.41.0",
     "@opentelemetry/resources": "1.15.0",
     "@opentelemetry/sdk-trace-base": "1.15.0",
