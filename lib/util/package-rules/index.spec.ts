@@ -716,6 +716,7 @@ describe('util/package-rules/index', () => {
       const config: TestConfig = {
         packageRules: [
           {
+            matchUpdateTypes: ['major'],
             matchConfidence: ['high'],
             x: 1,
           },

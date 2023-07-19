@@ -15,16 +15,19 @@ import type {
   PackageFileContent,
   PostUpdateConfig,
 } from '../../types';
+import type { PackageJsonSchema } from '../schema';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 // Exported for testability
 export function getLernaVersion(
-  lernaPackageFile: Partial<PackageFile<NpmManagerData>>
+  lernaPackageFile: Partial<PackageFile<NpmManagerData>>,
+  lazyPgkJson: PackageJsonSchema
 ): string | null {
-  const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
-  if (!lernaDep?.currentValue || !semver.validRange(lernaDep.currentValue)) {
+  const constraint = getPackageManagerVersion('lerna', lazyPgkJson);
+  if (!constraint || !semver.validRange(constraint)) {
     logger.warn(
       // TODO: types (#7154)
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -32,7 +35,7 @@ export function getLernaVersion(
     );
     return null;
   }
-  return lernaDep.currentVersion ?? lernaDep.currentValue;
+  return constraint;
 }
 
 export async function generateLockFiles(
@@ -48,19 +51,22 @@ export async function generateLockFiles(
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  const toolConstraints: ToolConstraint[] = [
-    await getNodeToolConstraint(config, [], lockFileDir),
-  ];
+
   const cmd: string[] = [];
   let cmdOptions = '';
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const toolConstraints: ToolConstraint[] = [
+      await getNodeToolConstraint(config, [], lockFileDir, lazyPgkJson),
+    ];
     if (lernaClient === 'yarn') {
       const yarnTool: ToolConstraint = {
         toolName: 'yarn',
         constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
       };
       const yarnCompatibility =
-        config.constraints?.yarn ?? config.extractedConstraints?.yarn;
+        config.constraints?.yarn ??
+        getPackageManagerVersion('yarn', await lazyPgkJson.getValue());
       if (semver.validRange(yarnCompatibility)) {
         yarnTool.constraint = yarnCompatibility;
       }
@@ -73,7 +79,8 @@ export async function generateLockFiles(
     } else if (lernaClient === 'npm') {
       const npmTool: ToolConstraint = { toolName: 'npm' };
       const npmCompatibility =
-        config.constraints?.npm ?? config.extractedConstraints?.npm;
+        config.constraints?.npm ??
+        getPackageManagerVersion('npm', await lazyPgkJson.getValue());
       if (semver.validRange(npmCompatibility)) {
         npmTool.constraint = npmCompatibility;
       }
@@ -107,7 +114,9 @@ export async function generateLockFiles(
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
-    const lernaVersion = getLernaVersion(lernaPackageFile);
+    const lernaVersion =
+      config.constraints?.lerna ??
+      getLernaVersion(lernaPackageFile, await lazyPgkJson.getValue());
     if (
       !is.string(lernaVersion) ||
       (semver.valid(lernaVersion) && semver.gte(lernaVersion, '7.0.0'))
@@ -115,7 +124,7 @@ export async function generateLockFiles(
       logger.debug('Skipping lerna bootstrap');
       cmd.push(`${lernaClient} install ${cmdOptions}`);
     } else {
-      logger.debug(`Using lerna version ${String(lernaVersion)}`);
+      logger.debug(`Using lerna version ${lernaVersion}`);
       toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
       cmd.push('lerna info || echo "Ignoring lerna info failure"');
       cmd.push(`${lernaClient} install ${cmdOptions}`);

@@ -132,11 +132,6 @@ The steps to enable GitHub's Merge Queue differ based on whether you use GitHub 
     The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
     For example, here's [Renovate's main repository's Merge Queue overview](https://github.com/renovatebot/renovate/queue/main).
 
-<!-- prettier-ignore -->
-!!! warning "GitHub Merge Queue is in beta"
-    GitHub's Merge Queue feature is labeled as a beta feature by GitHub.
-    The Merge Queue may stop working, have bugs, or you may need to update your configuration when GitHub changes things.
-
 #### If you use GitHub Actions
 
 If you use GitHub Actions as your CI provider, follow these steps:
@@ -248,7 +243,7 @@ If you have mandatory Pull Request reviews then it means Renovate can't automerg
 
 If you're on `github.com` or GitHub Enterprise Server (`>=3.4`) you can let Renovate bypass the mandatory Pull Request reviews using the "[Allow specified actors to bypass required pull requests](https://github.blog/changelog/2021-11-19-allow-bypassing-required-pull-requests/)" option in your branch protection rules.
 
-Alternatively, if you are running the hosted Mend Renovate App on `github.com`, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
+Alternatively, if you use the Mend Renovate App, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
 These approval helper apps are only available for GitHub.
 
 ### Codeowners
