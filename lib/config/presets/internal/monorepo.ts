@@ -178,7 +178,10 @@ const repoGroups = {
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
   nswag: 'https://github.com/RicoSuter/NSwag',
-  nuxtjs: 'https://github.com/nuxt/nuxt.js',
+  nuxtjs: [
+    'https://github.com/nuxt/nuxt.js', // old repo
+    'https://github.com/nuxt/nuxt',
+  ],
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
