@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { ZodError, z } from 'zod';
 import * as httpMock from '../../../test/http-mock';
 import { logger } from '../../../test/util';
 import {
@@ -10,7 +10,7 @@ import * as hostRules from '../host-rules';
 import * as queue from './queue';
 import * as throttle from './throttle';
 import type { HttpResponse } from './types';
-import { Http } from '.';
+import { EmptyResultError, Http, HttpError } from '.';
 
 const baseUrl = 'http://renovate.com';
 
@@ -362,6 +362,71 @@ describe('util/http/index', () => {
         await expect(
           http.getJson('http://renovate.com', SomeSchema)
         ).rejects.toThrow(z.ZodError);
+      });
+    });
+
+    describe('getJsonSafe', () => {
+      it('uses schema for response body', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .reply(200, JSON.stringify({ x: 2, y: 2 }));
+
+        const { val, err } = await http
+          .getJsonSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBe('2 + 2 = 4');
+        expect(err).toBeUndefined();
+      });
+
+      it('returns schema error result', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .reply(200, JSON.stringify({ x: '2', y: '2' }));
+
+        const { val, err } = await http
+          .getJsonSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(ZodError);
+      });
+
+      it('returns error result', async () => {
+        httpMock.scope('http://example.com').get('/').replyWithError('unknown');
+
+        const { val, err } = await http
+          .getJsonSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(HttpError);
+      });
+
+      it('returns error for empty body', async () => {
+        httpMock.scope('http://example.com').get('/').reply(200, '');
+
+        const { val, err } = await http
+          .getJsonSafe<string>('http://example.com')
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(EmptyResultError);
+        expect(err?.message).toBe(`Empty result: ''`);
+      });
+
+      it('returns error for null', async () => {
+        httpMock.scope('http://example.com').get('/').reply(200, 'null');
+
+        const { val, err } = await http
+          .getJsonSafe<string>('http://example.com')
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(EmptyResultError);
+        expect(err?.message).toBe(`Empty result: 'null'`);
       });
     });
 
