@@ -8,17 +8,6 @@ import { updateArtifacts } from './lockfile';
 
 describe('modules/manager/maven/lockfile', () => {
   describe('updateArtifacts()', () => {
-    it('null if no datasource=maven found', async () => {
-      expect.assertions(1);
-      const result = await updateArtifacts({
-        packageFileName: 'pom.xml',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: {},
-      });
-      return expect(result).resolves.toBeNull();
-    });
-
     it('returns null if no Maven dependencies are updated', async () => {
       expect.assertions(1);
       const result = await updateArtifacts({
@@ -41,7 +30,6 @@ describe('modules/manager/maven/lockfile', () => {
             'lib/modules/manager/maven/__fixtures__/simpleprojectWithLockfile'
           ),
         });
-
         const result = await updateArtifacts({
           packageFileName:
             'lib/modules/manager/maven/__fixtures__/simpleprojectWithLockfile/pom.xml',
@@ -52,6 +40,32 @@ describe('modules/manager/maven/lockfile', () => {
         expect(result).not.toBeNull();
         expect(result).toHaveLength(1);
         expect(result![0].file?.path).toBe('lockfile.json');
+      } finally {
+        if (tempFilePath) {
+          await deleteDummyLockfile(tempFilePath);
+        }
+      }
+    });
+
+    it('only lockfiles which are modified are added', async () => {
+      let tempFilePath: string | undefined = undefined;
+      try {
+        tempFilePath = createDummyLockfile();
+        mockLockfileCreatedInGit();
+        GlobalConfig.set({
+          localDir: join(
+            'lib/modules/manager/maven/__fixtures__/simpleprojectWithLockfile'
+          ),
+        });
+        const result = await updateArtifacts({
+          packageFileName:
+            'lib/modules/manager/maven/__fixtures__/simpleprojectWithLockfile/pom.xml',
+          updatedDeps: [{ datasource: 'maven' }],
+          newPackageFileContent: '{}',
+          config: {},
+        });
+        expect(result).not.toBeNull();
+        expect(result).toHaveLength(0);
       } finally {
         if (tempFilePath) {
           await deleteDummyLockfile(tempFilePath);
@@ -89,6 +103,21 @@ function mockLockfileChangedInGit(pathToFile?: string) {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['lockfile.json'],
+      })
+    );
+  }
+}
+function mockLockfileCreatedInGit(pathToFile?: string) {
+  if (pathToFile) {
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        created: [`${pathToFile}/lockfile.json`],
+      })
+    );
+  } else {
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        created: ['lockfile.json'],
       })
     );
   }

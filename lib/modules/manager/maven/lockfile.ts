@@ -116,6 +116,9 @@ async function getLockfileVersion(folder: string): Promise<string> {
  * @returns The filtered file paths
  */
 function filterLockfileJsonFiles(filePaths: string[]): string[] {
+  if (!filePaths) {
+    return [];
+  }
   return filePaths.filter((filePath) => {
     const fileName = upath.basename(filePath);
     return fileName === 'lockfile.json';
