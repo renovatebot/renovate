@@ -126,7 +126,7 @@ export default async function extractPackageFile(
       );
       deps.push({
         depName: path,
-        packageName: getHttpUrl(subModuleUrl),
+        packageName: httpSubModuleUrl,
         currentValue,
         currentDigest,
       });
