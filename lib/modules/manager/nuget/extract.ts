@@ -130,7 +130,9 @@ export async function extractPackageFile(
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
-    packageFileVersion = parsedXml.valueWithPath('PropertyGroup.Version');
+    findVersion(parsedXml, (el: XmlElement) => {
+      packageFileVersion = el.val;
+    });
   } catch (err) {
     logger.debug({ err, packageFile }, `Failed to parse XML`);
   }
@@ -146,4 +148,18 @@ export async function extractPackageFile(
     res.lockFiles = [lockFileName];
   }
   return res;
+}
+
+export function findVersion(
+  parsedXml: XmlDocument,
+  callback: (arg: XmlElement) => void
+): void {
+  for (const tag of ['Version', 'VersionPrefix']) {
+    for (const l1Elem of parsedXml.childrenNamed('PropertyGroup')) {
+      for (const l2Elem of l1Elem.childrenNamed(tag)) {
+        callback(l2Elem);
+        return;
+      }
+    }
+  }
 }

@@ -1,8 +1,9 @@
 import semver, { ReleaseType } from 'semver';
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { replaceAt } from '../../../util/string';
 import type { BumpPackageVersionResult } from '../types';
+import { findVersion } from './extract';
 
 export function bumpPackageVersion(
   content: string,
@@ -30,17 +31,18 @@ export function bumpPackageVersion(
 
   try {
     const project = new XmlDocument(content);
-    // Version, if present, takes precedence of VersionPrefix
-    let versionNode = project.descendantWithPath('PropertyGroup.Version');
-    if (!versionNode) {
-      versionNode = project.descendantWithPath('PropertyGroup.VersionPrefix');
-    }
+
+    let versionNode: XmlElement | undefined;
+    findVersion(project, (el: XmlElement) => {
+      versionNode = el;
+    });
     if (!versionNode) {
       logger.warn(
         "Couldn't find Version or VersionPrefix in any PropertyGroup"
       );
       return { bumpedContent };
     }
+
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 

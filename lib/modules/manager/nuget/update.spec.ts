@@ -1,4 +1,5 @@
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
+import { findVersion } from './extract';
 import { bumpPackageVersion } from '.';
 
 const simpleContent =
@@ -9,6 +10,10 @@ const prereleaseContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1.0.0-1</Version></PropertyGroup></Project>';
 const prefixContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>';
+const secondGroupContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
+const twoGroupsContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>0.0.5</VersionPrefix></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
 
 describe('modules/manager/nuget/update', () => {
   describe('bumpPackageVersion', () => {
@@ -90,6 +95,36 @@ describe('modules/manager/nuget/update', () => {
       expect(project.valueWithPath('PropertyGroup.VersionPrefix')).toBe(
         '1.0.1'
       );
+    });
+
+    it('finds the version in a later property group', () => {
+      const { bumpedContent } = bumpPackageVersion(
+        secondGroupContent,
+        '0.0.1',
+        'patch'
+      );
+
+      const project = new XmlDocument(bumpedContent!);
+      let newVersion = '';
+      findVersion(project, (el: XmlElement) => {
+        newVersion = el.val;
+      });
+      expect(newVersion).toBe('0.0.2');
+    });
+
+    it('finds picks version over versionprefix', () => {
+      const { bumpedContent } = bumpPackageVersion(
+        twoGroupsContent,
+        '0.0.1',
+        'patch'
+      );
+
+      const project = new XmlDocument(bumpedContent!);
+      let newVersion = '';
+      findVersion(project, (el: XmlElement) => {
+        newVersion = el.val;
+      });
+      expect(newVersion).toBe('0.0.2');
     });
   });
 });
