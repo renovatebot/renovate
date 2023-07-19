@@ -16,6 +16,7 @@ import type {
   ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import { getCustomManagerList } from '../modules/manager/custom';
 
 const options = getOptions();
 
@@ -65,7 +66,9 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !getManagerList().includes(manager)
+    (manager) =>
+      !getManagerList().includes(manager) &&
+      !getCustomManagerList().includes(manager.replace('custom.', ''))
   );
 }
 

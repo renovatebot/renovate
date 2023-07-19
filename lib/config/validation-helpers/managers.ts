@@ -1,4 +1,5 @@
 import { getManagerList } from '../../modules/manager';
+import { getCustomManagerList } from '../../modules/manager/custom';
 import type { ValidationMessage } from '../types';
 import type { CheckManagerArgs } from './types';
 
@@ -13,7 +14,9 @@ export function check({
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(
-        (confManager) => !getManagerList().includes(confManager)
+        (confManager) =>
+          !getManagerList().includes(confManager) &&
+          !getCustomManagerList().includes(confManager.replace('custom.', ''))
       )
     ) {
       managersErrMessage = `${currentPath}:

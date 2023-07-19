@@ -863,6 +863,14 @@ Example:
 }
 ```
 
+To match custom managers like `regex`, you need to prefix the custom manager's name with `custom.`
+
+```json
+{
+  "enabledManagers": ["custom.regex"]
+}
+```
+
 For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
 
 ## encrypted
@@ -877,8 +885,10 @@ You can also encrypt secrets from the CLI, using the `curl`, `echo`, `jq`, `gpg`
 Here is an example:
 
 ```
+
 curl https://app.renovatebot.com/renovate.pgp --output renovate.pgp
 echo -n '{"o":"your-organization", "r":"your-repository (optional)", "v":"your-secret-value"}' | jq . -c | gpg --encrypt -a --recipient-file renovate.pgp | grep -v '^----' | tr -d '\n'
+
 ```
 
 The above script uses:
@@ -2107,6 +2117,20 @@ Use this field to restrict rules to a particular package manager. e.g.
     {
       "matchPackageNames": ["node"],
       "matchManagers": ["dockerfile"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+To match custom managers like `regex`, you may need to prefix the custom manager's name with `custom.`
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["node"],
+      "matchManagers": ["custom.regex"],
       "enabled": false
     }
   ]

@@ -4,20 +4,19 @@ import { AbstractMigration } from '../base/abstract-migration';
 
 const customManagers = getCustomManagerList();
 
-export class EnabledManagersMigration extends AbstractMigration {
-  override readonly propertyName = 'enabledManagers';
+export class MatchManagersMigration extends AbstractMigration {
+  override readonly propertyName = 'matchManagers';
 
   override run(value: unknown): void {
-    if (is.array(value)) {
+    if (Array.isArray(value)) {
       const newValue = value.filter(is.nonEmptyString).map((manager) => {
-        if (manager === 'yarn') {
-          return 'npm';
-        } else if (isCustomManager(manager)) {
+        if (isCustomManager(manager)) {
           return `custom.${manager}`;
         } else {
           return manager;
         }
       });
+
       this.rewrite(newValue);
     }
   }

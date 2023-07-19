@@ -218,7 +218,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            matchManagers: 'string not an array',
+            matchManagers: 'string not an array' as never,
             enabled: true,
           },
         ],
@@ -237,7 +237,7 @@ describe('config/validation', () => {
       ['single enabled manager', { enabledManagers: ['npm'] }],
       [
         'multiple enabled managers',
-        { enabledManagers: ['npm', 'gradle', 'maven'] },
+        { enabledManagers: ['npm', 'gradle', 'maven', 'custom.regex'] },
       ],
     ])('validates enabled managers for %s', async (_case, config) => {
       const { warnings, errors } = await configValidation.validateConfig(

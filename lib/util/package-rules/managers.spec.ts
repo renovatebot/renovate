@@ -4,25 +4,13 @@ describe('util/package-rules/managers', () => {
   const managersMatcher = new ManagersMatcher();
 
   describe('match', () => {
-    it('should match against custom manager when matchManager=custom', () => {
+    it('should match against custom manager with custom. prefix', () => {
       const result = managersMatcher.matches(
         {
-          manager: 'regex',
+          manager: 'custom.regex',
         },
         {
-          matchManagers: ['custom'],
-        }
-      );
-      expect(result).toBeTrue();
-    });
-
-    it('should match custom managers separately', () => {
-      const result = managersMatcher.matches(
-        {
-          manager: 'regex',
-        },
-        {
-          matchManagers: ['regex'],
+          matchManagers: ['custom.regex'],
         }
       );
       expect(result).toBeTrue();
@@ -34,7 +22,7 @@ describe('util/package-rules/managers', () => {
           manager: 'npm',
         },
         {
-          matchManagers: ['npm', 'custom'],
+          matchManagers: ['npm', 'custom.regex'],
         }
       );
       expect(result).toBeTrue();
@@ -46,7 +34,7 @@ describe('util/package-rules/managers', () => {
           manager: 'npm',
         },
         {
-          matchManagers: ['custom'],
+          matchManagers: ['custom.regex'],
         }
       );
       expect(result).toBeFalse();
