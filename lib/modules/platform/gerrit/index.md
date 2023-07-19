@@ -52,7 +52,7 @@ The Gerrit-Label names can be configured in your Renovate config file:
 
 ## TODOS
 
-- Images in Markdown-Comments, needs [Gerrit-Feature](https://bugs.chromium.org/p/gerrit/issues/detail?id=2015)
+- Images in Markdown comments, needs [Gerrit-Feature](https://bugs.chromium.org/p/gerrit/issues/detail?id=2015)
 
 ## Unsupported platform features/concepts
 
