@@ -23,7 +23,7 @@ describe('modules/manager/maven/lockfile', () => {
     it('if there is lockfile found the lockfile is updated', async () => {
       let tempFilePath: string | undefined = undefined;
       try {
-        tempFilePath = createDummyLockfile();
+        tempFilePath = createDummyLockfile('simpleprojectWithLockfile');
         mockLockfileChangedInGit();
         GlobalConfig.set({
           localDir: join(
@@ -50,7 +50,7 @@ describe('modules/manager/maven/lockfile', () => {
     it('only lockfiles which are modified are added', async () => {
       let tempFilePath: string | undefined = undefined;
       try {
-        tempFilePath = createDummyLockfile();
+        tempFilePath = createDummyLockfile('simpleprojectWithLockfile');
         mockLockfileCreatedInGit();
         GlobalConfig.set({
           localDir: join(
@@ -72,14 +72,42 @@ describe('modules/manager/maven/lockfile', () => {
         }
       }
     });
+
+    it('parent/child project work', async () => {
+      let tempFilePath: string | undefined = undefined;
+      try {
+        tempFilePath = createDummyLockfile(
+          'parent_child/simpleprojectWithLockfile'
+        );
+        mockLockfileChangedInGit('simpleprojectWithLockfile');
+        GlobalConfig.set({
+          localDir: join(
+            'lib/modules/manager/maven/__fixtures__/parent_child/'
+          ),
+        });
+        const result = await updateArtifacts({
+          packageFileName:
+            'lib/modules/manager/maven/__fixtures__/parent_child/simpleprojectWithLockfile/pom.xml',
+          updatedDeps: [{ datasource: 'maven' }],
+          newPackageFileContent: '{}',
+          config: {},
+        });
+        expect(result).not.toBeNull();
+        expect(result).toHaveLength(1);
+      } finally {
+        if (tempFilePath) {
+          await deleteDummyLockfile(tempFilePath);
+        }
+      }
+    });
   });
 });
 
-function createDummyLockfile() {
+function createDummyLockfile(subproject: string) {
   const tempFilePath = join(
     __dirname,
     '__fixtures__',
-    'simpleprojectWithLockfile',
+    subproject,
     'lockfile.json'
   );
   fs.writeFileSync(tempFilePath, '{}', 'utf8');
