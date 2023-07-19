@@ -78,6 +78,11 @@ describe('modules/manager/git-submodules/extract', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        '--symref',
+        'https://github.com/PowerShell/PowerShell-Docs',
+        'HEAD',
+      ]);
     });
 
     it('combined token from host rule is used to detect branch', async () => {
@@ -104,6 +109,11 @@ describe('modules/manager/git-submodules/extract', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        '--symref',
+        'https://github.com/PowerShell/PowerShell-Docs',
+        'HEAD',
+      ]);
     });
 
     it('default to master if no branch can be detected', async () => {
