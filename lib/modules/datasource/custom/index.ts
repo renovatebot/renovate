@@ -38,11 +38,29 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
-    const { defaultRegistryUrlTemplate, transformTemplates } = config;
+    const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
     // TODO add here other format options than JSON
     let response: unknown;
     try {
-      response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+      if (format === 'plain') {
+        const res = (
+          await this.http.get(defaultRegistryUrlTemplate, {
+            headers: {
+              'Content-Type': 'text-plain',
+            },
+          })
+        ).body;
+        const versions = res.split('\n').map((version) => {
+          return {
+            version,
+          };
+        });
+        response = {
+          releases: versions,
+        };
+      } else {
+        response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+      }
     } catch (e) {
       this.handleHttpErrors(e);
       return null;
