@@ -1,5 +1,5 @@
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { env, mockedFunction, partial } from '../../../../../test/util';
+import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import type { PackageFileContent, PostUpdateConfig } from '../../types';
@@ -7,6 +7,7 @@ import * as lernaHelper from './lerna';
 import { getNodeToolConstraint } from './node-version';
 
 jest.mock('../../../../util/exec/env');
+jest.mock('../../../../util/fs');
 jest.mock('./node-version');
 jest.mock('../../../datasource');
 
@@ -14,20 +15,11 @@ process.env.CONTAINERBASE = 'true';
 
 function lernaPkgFile(lernaClient: string): Partial<PackageFileContent> {
   return {
-    deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
     managerData: { lernaClient },
   };
 }
 
-function lernaPkgFileWithoutLernaDep(
-  lernaClient: string
-): Partial<PackageFileContent> {
-  return {
-    managerData: { lernaClient },
-  };
-}
-
-const config = partial<PostUpdateConfig>();
+const config = partial<PostUpdateConfig>({ constraints: { lerna: '2.0.0' } });
 
 describe('modules/manager/npm/post-update/lerna', () => {
   const globalConfig: RepoGlobalConfig = {
@@ -97,10 +89,13 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
     it('generates yarn.lock files', async () => {
       const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce(
+        '{"packageManager":"yarn@^1.10.0"}'
+      );
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
-        { ...config, extractedConstraints: { yarn: '^1.10.0' } },
+        { ...config },
         {}
       );
       expect(execSnapshots).toMatchSnapshot();
@@ -110,9 +105,9 @@ describe('modules/manager/npm/post-update/lerna', () => {
     it('defaults to latest and skips bootstrap if lerna version unspecified', async () => {
       const execSnapshots = mockExecAll();
       const res = await lernaHelper.generateLockFiles(
-        lernaPkgFileWithoutLernaDep('npm'),
+        lernaPkgFile('npm'),
         'some-dir',
-        config,
+        { ...config, constraints: null },
         {}
       );
       expect(res.error).toBeFalse();
@@ -125,7 +120,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        { ...config, constraints: { npm: '^6.0.0' } },
+        { ...config, constraints: { ...config.constraints, npm: '^6.0.0' } },
         {}
       );
       expect(res.error).toBeFalse();
@@ -143,7 +138,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        { ...config, constraints: { npm: '6.0.0' } },
+        { ...config, constraints: { ...config.constraints, npm: '6.0.0' } },
         {}
       );
       expect(execSnapshots).toMatchObject([
@@ -189,7 +184,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        { ...config, constraints: { npm: '6.0.0' } },
+        { ...config, constraints: { ...config.constraints, npm: '6.0.0' } },
         {}
       );
       expect(res.error).toBeFalse();
@@ -222,42 +217,36 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
   describe('getLernaVersion()', () => {
     it('returns specified version', () => {
-      const pkg = {
-        deps: [
-          { depName: 'lerna', currentValue: '^2.0.0', currentVersion: '2.0.0' },
-        ],
-      };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('2.0.0');
+      const pkg = {};
+      expect(
+        lernaHelper.getLernaVersion(pkg, { engines: { lerna: '2.0.0' } })
+      ).toBe('2.0.0');
     });
 
     it('returns specified range', () => {
-      const pkg = {
-        deps: [
-          { depName: 'lerna', currentValue: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
-        ],
-      };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe(
-        '1.x || >=2.5.0 || 5.0.0 - 7.2.3'
-      );
+      const pkg = {};
+      expect(
+        lernaHelper.getLernaVersion(pkg, {
+          engines: { lerna: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
+        })
+      ).toBe('1.x || >=2.5.0 || 5.0.0 - 7.2.3');
     });
 
     it('returns latest if no lerna dep is specified', () => {
-      const pkg = {
-        deps: [{ depName: 'something-else', currentValue: '1.2.3' }],
-      };
-      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
+      const pkg = {};
+      expect(lernaHelper.getLernaVersion(pkg, {})).toBeNull();
     });
 
     it('returns latest if pkg has no deps at all', () => {
       const pkg = {};
-      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
+      expect(lernaHelper.getLernaVersion(pkg, {})).toBeNull();
     });
 
     it('returns latest if specified lerna version is not a valid semVer range', () => {
-      const pkg = {
-        deps: [{ depName: 'lerna', currentValue: '[a.b.c;' }],
-      };
-      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
+      const pkg = {};
+      expect(
+        lernaHelper.getLernaVersion(pkg, { engines: { lerna: '[a.b.c;' } })
+      ).toBeNull();
     });
   });
 });
