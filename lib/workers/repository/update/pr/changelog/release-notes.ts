@@ -23,7 +23,7 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
-const skippedRepositories = ['facebook/react-native'];
+const repositoriesToSkipMdFetching = ['facebook/react-native'];
 
 export async function getReleaseList(
   project: ChangeLogProject,
@@ -448,6 +448,10 @@ export async function addReleaseNotes(
   return output;
 }
 
+/**
+ * Skip fetching changelog/release-notes markdown files.
+ * Will force a fallback to using GitHub release notes
+ */
 export function shouldSkipChangelogMd(repository: string): boolean {
-  return skippedRepositories.includes(repository);
+  return repositoriesToSkipMdFetching.includes(repository);
 }
