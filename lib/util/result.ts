@@ -264,10 +264,7 @@ export class Result<T, E = Error> {
   transform<U, EE>(
     fn: (
       value: NonNullable<T>
-    ) =>
-      | NonNullable<U>
-      | Result<U, EE>
-      | Promise<NonNullable<U>>
+    ) => NonNullable<U> | Result<U, EE> | Promise<NonNullable<U>>
   ): Result<U, E | EE> | AsyncResult<U, E | EE> {
     if (!this.res.ok) {
       return Result.err(this.res.err);
