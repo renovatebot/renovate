@@ -27,6 +27,7 @@ import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function checkYarnrc(
   lockFileDir: string
@@ -98,16 +99,18 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades, lockFileDir),
+      await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
-      : config.constraints?.yarn ?? config.extractedConstraints?.yarn;
+      : config.constraints?.yarn ??
+        getPackageManagerVersion('yarn', await lazyPgkJson.getValue());
     const minYarnVersion =
       semver.validRange(yarnCompatibility) &&
-      semver.minVersion(yarnCompatibility);
+      semver.minVersion(yarnCompatibility!);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');

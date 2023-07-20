@@ -1888,13 +1888,14 @@
     "@opentelemetry/sdk-trace-base" "1.15.0"
     tslib "^2.3.1"
 
-"@opentelemetry/instrumentation-bunyan@0.31.4":
-  version "0.31.4"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-bunyan/-/instrumentation-bunyan-0.31.4.tgz#0d11b13e52eae20a8999282acfb451ab8bb950cb"
-  integrity sha512-uwQPzNXq+f2/7odtYPsBlozm2bjDHLOB/r3pSO02BEnHG5L7RyzV7aPLH1xYTHrLnZAd8ew8Am5dGM4uRiO4sA==
+"@opentelemetry/instrumentation-bunyan@0.32.0":
+  version "0.32.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-bunyan/-/instrumentation-bunyan-0.32.0.tgz#3a8938d9516823dc06a94fcefdcce7726c105839"
+  integrity sha512-c2Fi12NMBPRNyzeMXjY3kmgJcu8T2TIR051S+EEnXP677+aJhUrzAPpIDEqJ3RITMemxS44NmDFnnG+p0zdUbg==
   dependencies:
-    "@opentelemetry/instrumentation" "^0.40.0"
+    "@opentelemetry/instrumentation" "^0.41.0"
     "@types/bunyan" "1.8.7"
+    tslib "^2.3.1"
 
 "@opentelemetry/instrumentation-http@0.41.0":
   version "0.41.0"
@@ -1907,7 +1908,7 @@
     semver "^7.5.1"
     tslib "^2.3.1"
 
-"@opentelemetry/instrumentation@0.41.0":
+"@opentelemetry/instrumentation@0.41.0", "@opentelemetry/instrumentation@^0.41.0":
   version "0.41.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.41.0.tgz#a67a7f6d215d8802c2e956907a913b793037e04d"
   integrity sha512-Ut9SnZfi7MexOk+GHCMjEtYHogIb6v1dfbnq+oTbQj0lOQUSNLtlO6bXwUdtmPhbvrx6bC0AGr1L6g3rNimv9w==
@@ -1918,17 +1919,6 @@
     semver "^7.5.1"
     shimmer "^1.2.1"
     tslib "^2.3.1"
-
-"@opentelemetry/instrumentation@^0.40.0":
-  version "0.40.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.40.0.tgz#13d5f2d60c3fafef124ab6961a32204f7ef8bb25"
-  integrity sha512-23TzBKPflUS1uEq5SXymnQKQDSda35KvHjnvxdcDQGE+wg6hwDHgScUCWiBmZW4sxAaPcANfs+Wc9B7yDuyT6Q==
-  dependencies:
-    "@types/shimmer" "^1.0.2"
-    import-in-the-middle "1.3.5"
-    require-in-the-middle "^7.1.0"
-    semver "^7.3.2"
-    shimmer "^1.2.1"
 
 "@opentelemetry/otlp-exporter-base@0.41.0":
   version "0.41.0"
@@ -6162,13 +6152,6 @@ import-from@^4.0.0:
   resolved "https://registry.yarnpkg.com/import-from/-/import-from-4.0.0.tgz#2710b8d66817d232e16f4166e319248d3d5492e2"
   integrity sha512-P9J71vT5nLlDeV8FHs5nNxaLbrpfAV5cF5srvbZfpwpcJoM/xZR3hiv+q+SAnuSmuGbXMWud063iIMx/V/EWZQ==
 
-import-in-the-middle@1.3.5:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.3.5.tgz#78384fbcfc7c08faf2b1f61cb94e7dd25651df9c"
-  integrity sha512-yzHlBqi1EBFrkieAnSt8eTgO5oLSl+YJ7qaOpUH/PMqQOMZoQ/RmDlwnTLQrwYto+gHYjRG+i/IbsB1eDx32NQ==
-  dependencies:
-    module-details-from-path "^1.0.3"
-
 import-in-the-middle@1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.4.1.tgz#31b25123bc35d556986a172bb398a3e6c32af9be"
@@ -9306,7 +9289,7 @@ require-directory@^2.1.1:
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
   integrity sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==
 
-require-in-the-middle@^7.1.0, require-in-the-middle@^7.1.1:
+require-in-the-middle@^7.1.1:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-7.2.0.tgz#b539de8f00955444dc8aed95e17c69b0a4f10fcf"
   integrity sha512-3TLx5TGyAY6AOqLBoXmHkNql0HIf2RGbuMgCDT2WO/uGVAPJs6h7Kl+bN6TIZGd9bWhWPwnDnTHGtW8Iu77sdw==
