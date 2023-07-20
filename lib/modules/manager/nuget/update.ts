@@ -1,5 +1,5 @@
 import semver, { ReleaseType } from 'semver';
-import { XmlDocument, XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { replaceAt } from '../../../util/string';
 import type { BumpPackageVersionResult } from '../types';
@@ -31,16 +31,17 @@ export function bumpPackageVersion(
 
   try {
     const project = new XmlDocument(content);
-
-    let versionNode: XmlElement | undefined;
-    findVersion(project, (el: XmlElement) => {
-      versionNode = el;
-    });
+    const versionNode = findVersion(project);
     if (!versionNode) {
       logger.warn(
         "Couldn't find Version or VersionPrefix in any PropertyGroup"
       );
       return { bumpedContent };
+    }
+    if (versionNode.val !== currentValue) {
+      throw new Error(
+        `currentValue passed to bumpPackageVersion() doesn't match value found`
+      );
     }
 
     const startTagPosition = versionNode.startTagPosition;
@@ -59,11 +60,7 @@ export function bumpPackageVersion(
       newProjVersion
     );
 
-    if (bumpedContent === content) {
-      logger.debug('Version was already bumped');
-    } else {
-      logger.debug('project version bumped');
-    }
+    logger.debug('project version bumped');
   } catch (err) {
     logger.warn(
       {

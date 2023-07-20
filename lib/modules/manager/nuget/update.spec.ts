@@ -1,4 +1,4 @@
-import { XmlDocument, XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { findVersion } from './extract';
 import { bumpPackageVersion } from '.';
 
@@ -8,14 +8,6 @@ const minimumContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1</Version></PropertyGroup></Project>';
 const prereleaseContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1.0.0-1</Version></PropertyGroup></Project>';
-const prefixContent =
-  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>';
-const secondGroupContent =
-  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
-const twoGroupsContent =
-  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>0.0.5</VersionPrefix></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
-const noVersionContent =
-  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>';
 
 describe('modules/manager/nuget/update', () => {
   describe('bumpPackageVersion', () => {
@@ -67,13 +59,15 @@ describe('modules/manager/nuget/update', () => {
     });
 
     it('does not bump version if csproj has no version', () => {
+      const originalContent =
+        '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>';
       const { bumpedContent } = bumpPackageVersion(
-        noVersionContent,
+        originalContent,
         '0.0.1',
         'patch'
       );
 
-      expect(bumpedContent).toEqual(noVersionContent);
+      expect(bumpedContent).toEqual(originalContent);
     });
 
     it('returns content if bumping errors', () => {
@@ -97,11 +91,9 @@ describe('modules/manager/nuget/update', () => {
     });
 
     it('bumps csproj version prefix', () => {
-      const { bumpedContent } = bumpPackageVersion(
-        prefixContent,
-        '1.0.0',
-        'patch'
-      );
+      const content =
+        '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>';
+      const { bumpedContent } = bumpPackageVersion(content, '1.0.0', 'patch');
 
       const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('PropertyGroup.VersionPrefix')).toBe(
@@ -110,32 +102,24 @@ describe('modules/manager/nuget/update', () => {
     });
 
     it('finds the version in a later property group', () => {
-      const { bumpedContent } = bumpPackageVersion(
-        secondGroupContent,
-        '0.0.1',
-        'patch'
-      );
+      const content =
+        '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
+      const { bumpedContent } = bumpPackageVersion(content, '0.0.1', 'patch');
 
       const project = new XmlDocument(bumpedContent!);
-      let newVersion = '';
-      findVersion(project, (el: XmlElement) => {
-        newVersion = el.val;
-      });
+      const versionNode = findVersion(project);
+      const newVersion = versionNode!.val;
       expect(newVersion).toBe('0.0.2');
     });
 
     it('finds picks version over versionprefix', () => {
-      const { bumpedContent } = bumpPackageVersion(
-        twoGroupsContent,
-        '0.0.1',
-        'patch'
-      );
+      const content =
+        '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>0.0.5</VersionPrefix></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
+      const { bumpedContent } = bumpPackageVersion(content, '0.0.1', 'patch');
 
       const project = new XmlDocument(bumpedContent!);
-      let newVersion = '';
-      findVersion(project, (el: XmlElement) => {
-        newVersion = el.val;
-      });
+      const versionNode = findVersion(project);
+      const newVersion = versionNode!.val;
       expect(newVersion).toBe('0.0.2');
     });
   });
