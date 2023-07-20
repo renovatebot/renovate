@@ -1,4 +1,3 @@
-import { version } from 'os';
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { api as npm } from '../npm';
