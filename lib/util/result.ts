@@ -264,7 +264,11 @@ export class Result<T, E = Error> {
   transform<U, EE>(
     fn: (
       value: NonNullable<T>
-    ) => NonNullable<U> | Result<U, EE> | Promise<NonNullable<U>>
+    ) =>
+      | Result<U, E | EE>
+      | Promise<Result<U, E | EE>>
+      | Promise<NonNullable<U>>
+      | NonNullable<U>
   ): Result<U, E | EE> | AsyncResult<U, E | EE> {
     if (!this.res.ok) {
       return Result.err(this.res.err);
@@ -433,7 +437,7 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
       | Promise<Result<U, EE>>
       | Promise<NonNullable<U>>
       | NonNullable<U>
-  ): AsyncResult<U, E | EE | Error> {
+  ): AsyncResult<U, E | EE> {
     return new AsyncResult((resolve) => {
       this.then((oldResult) => {
         const { ok, val: value, err: error } = oldResult.unwrap();
