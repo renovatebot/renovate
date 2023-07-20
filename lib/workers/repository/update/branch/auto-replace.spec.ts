@@ -217,7 +217,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('fails with oldversion in depname', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
-      upgrade.manager = 'custom.regex';
+      upgrade.manager = 'regex';
       upgrade.depName =
         '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
       upgrade.currentValue = '1';
@@ -279,7 +279,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('handles replacement with depName===newName when replaceString exists', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
-      upgrade.manager = 'custom.regex';
+      upgrade.manager = 'regex';
       upgrade.updateType = 'replacement';
       upgrade.depName =
         '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
@@ -1152,7 +1152,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
 
     it('regex: updates with pinDigest enabled but no currentDigest value', async () => {
       const yml = 'image: "some.url.com/my-repository:1.0"';
-      upgrade.manager = 'custom.regex';
+      upgrade.manager = 'regex';
       upgrade.updateType = 'replacement';
       upgrade.pinDigests = true;
       upgrade.depName = 'some.url.com/my-repository';
@@ -1171,11 +1171,10 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
     });
 
-    // eslint-disable-next-line
-    it.only('regex: updates with pinDigest enabled and a currentDigest value', async () => {
+    it('regex: updates with pinDigest enabled and a currentDigest value', async () => {
       const yml =
         'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
-      upgrade.manager = 'custom.regex';
+      upgrade.manager = 'regex';
       upgrade.updateType = 'replacement';
       upgrade.pinDigests = true;
       upgrade.depName = 'some.url.com/my-repository';
