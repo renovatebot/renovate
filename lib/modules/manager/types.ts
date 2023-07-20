@@ -24,6 +24,7 @@ export interface ExtractConfig extends CustomExtractConfig {
 }
 
 export interface CustomExtractConfig extends RegexManagerTemplates {
+  customType?: string;
   autoReplaceStringTemplate?: string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;

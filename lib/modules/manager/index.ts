@@ -65,7 +65,10 @@ export function extractPackageFile(
   config: ExtractConfig
 ): Result<PackageFileContent | null> {
   if (manager.startsWith('custom.')) {
-    return CustomManager.extractPackageFile(manager, content, fileName, config);
+    if (!config.customType) {
+      config.customType = manager.replace('custom.', '');
+    }
+    return CustomManager.extractPackageFile(content, fileName, config);
   }
   if (!managers.has(manager)) {
     return null;

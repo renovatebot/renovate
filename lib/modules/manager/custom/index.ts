@@ -10,17 +10,17 @@ const customManagerList = Array.from(customManagers.keys());
 export const getCustomManagerList = (): string[] => customManagerList;
 export const getCustomManagers = (): Map<string, ManagerApi> => customManagers;
 
-export { defaultConfig, supportedDatasources } from './regex';
+export const defaultConfig = {};
+export const supportedDatasources = ['*'];
 
 export function extractPackageFile(
-  manager: string,
   content: string,
   fileName: string,
   config: ExtractConfig
 ): Result<PackageFileContent | null> {
-  const customMgr = manager.replace('custom.', '');
+  const customMgr = config.customType;
 
-  if (!customManagers.has(customMgr)) {
+  if (!customMgr || !customManagers.has(customMgr)) {
     return null;
   }
   const m = customManagers.get(customMgr)!;

@@ -1,19 +1,18 @@
 import { join } from 'upath';
 import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
-import { getCustomManagerList } from './custom';
+import { getCustomManagers } from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
 jest.mock('../../util/fs');
 
 const datasources = getDatasourceList();
-const customManagerList = getCustomManagerList();
 
 describe('modules/manager/index', () => {
   describe('supportedDatasources', () => {
     for (const m of manager.getManagerList()) {
-      if (m === 'custom' || customManagerList.includes(m)) {
+      if (m === 'custom') {
         // custom managers support any
         continue;
       }
@@ -53,7 +52,7 @@ describe('modules/manager/index', () => {
       }
       return true;
     }
-    const mgrs = manager.getManagers();
+    const mgrs = new Map([...manager.getManagers(), ...getCustomManagers()]);
 
     const loadedMgr = loadModules(__dirname, validate);
     const loadedCustomMgr = loadModules(join(__dirname, 'custom'), validate);

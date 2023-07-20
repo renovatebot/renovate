@@ -193,6 +193,7 @@ export interface RegexManagerTemplates {
   registryUrlTemplate?: string;
 }
 export interface RegExManager extends RegexManagerTemplates {
+  customType?: string;
   fileMatch: string[];
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
