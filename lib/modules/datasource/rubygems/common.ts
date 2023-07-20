@@ -1,7 +1,8 @@
+import { assignKeys } from '../../../util/assign-keys';
 import type { Http, SafeJsonError } from '../../../util/http';
 import type { AsyncResult } from '../../../util/result';
-import { joinUrlParts } from '../../../util/url';
-import type { ReleaseResult } from '../types';
+import { joinUrlParts as join } from '../../../util/url';
+import type { Release, ReleaseResult } from '../types';
 import { GemMetadata, GemVersions } from './schema';
 
 export function getV1Releases(
@@ -9,35 +10,21 @@ export function getV1Releases(
   registryUrl: string,
   packageName: string
 ): AsyncResult<ReleaseResult, SafeJsonError> {
-  return http
-    .getJsonSafe(
-      joinUrlParts(registryUrl, '/api/v1/versions', `${packageName}.json`),
-      GemVersions
-    )
-    .transform(
-      (releases): Promise<ReleaseResult> =>
-        http
-          .getJsonSafe(
-            joinUrlParts(registryUrl, '/api/v1/gems', `${packageName}.json`),
-            GemMetadata
-          )
-          .transform(({ changelogUrl, sourceUrl, homepage }) => {
-            const result: ReleaseResult = { releases };
+  const fileName = `${packageName}.json`;
+  const versionsUrl = join(registryUrl, '/api/v1/versions', fileName);
+  const metadataUrl = join(registryUrl, '/api/v1/gems', fileName);
 
-            if (changelogUrl) {
-              result.changelogUrl = changelogUrl;
-            }
+  const addMetadata = (releases: Release[]): Promise<ReleaseResult> =>
+    http
+      .getJsonSafe(metadataUrl, GemMetadata)
+      .transform((metadata) =>
+        assignKeys({ releases } as ReleaseResult, metadata, [
+          'changelogUrl',
+          'sourceUrl',
+          'homepage',
+        ])
+      )
+      .unwrap({ releases });
 
-            if (sourceUrl) {
-              result.sourceUrl = sourceUrl;
-            }
-
-            if (homepage) {
-              result.homepage = homepage;
-            }
-
-            return result;
-          })
-          .unwrap({ releases })
-    );
+  return http.getJsonSafe(versionsUrl, GemVersions).transform(addMetadata);
 }
