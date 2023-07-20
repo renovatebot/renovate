@@ -40,6 +40,7 @@ export async function extractAllDependencies(
     config: RenovateConfig,
     manager: string
   ): void => {
+    // TODO: filter config.regexManagers (manager === customType)
     for (const regexManager of config.regexManagers ?? []) {
       const customManagerConfig = getManagerConfig(config, manager);
       customManagerConfig.manager = manager;
