@@ -14,6 +14,8 @@ const secondGroupContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
 const twoGroupsContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>0.0.5</VersionPrefix></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
+const noVersionContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>';
 
 describe('modules/manager/nuget/update', () => {
   describe('bumpPackageVersion', () => {
@@ -54,7 +56,7 @@ describe('modules/manager/nuget/update', () => {
       expect(project.valueWithPath('PropertyGroup.Version')).toBe('1');
     });
 
-    it('does not bump version if csproj has no version', () => {
+    it('does not bump version if extract found no version', () => {
       const { bumpedContent } = bumpPackageVersion(
         minimumContent,
         undefined,
@@ -62,6 +64,16 @@ describe('modules/manager/nuget/update', () => {
       );
 
       expect(bumpedContent).toEqual(minimumContent);
+    });
+
+    it('does not bump version if csproj has no version', () => {
+      const { bumpedContent } = bumpPackageVersion(
+        noVersionContent,
+        '0.0.1',
+        'patch'
+      );
+
+      expect(bumpedContent).toEqual(noVersionContent);
     });
 
     it('returns content if bumping errors', () => {
