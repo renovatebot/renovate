@@ -114,7 +114,9 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       skipInstalls: null,
     });
     expect(
-      fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
+      fingerprintConfig.managers.find(
+        (manager) => manager.manager === 'custom.regex'
+      )
     ).toBeUndefined();
   });
 });
