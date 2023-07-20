@@ -6,6 +6,7 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
+import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -33,10 +34,12 @@ import type {
   CommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
+import { HttpError } from '../../../util/http';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { sanitize } from '../../../util/sanitize';
 import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -759,9 +762,51 @@ export async function findPr({
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
+async function remoteBranchExists(
+  repo: string,
+  branchName: string
+): Promise<boolean> {
+  const RefSchema = z
+    .object({
+      ref: z.string().transform((val) => val.replace(/^refs\/heads\//, '')),
+    })
+    .transform(({ ref }) => ref);
+
+  const { val, err } = await githubApi
+    .getJsonSafe(
+      `/repos/${repo}/git/refs/heads/${branchName}`,
+      { memCache: false },
+      z.union([RefSchema, RefSchema.array()])
+    )
+    .transform((x) => {
+      if (is.array(x)) {
+        const existingBranches = x.join(', ');
+        return Result.err(
+          new Error(
+            `Trying to create a branch ${branchName} while nested branches exist: ${existingBranches}`
+          )
+        );
+      }
+
+      return Result.ok(true); // Supposedly, `ref` always equals `branchName` at this point
+    })
+    .unwrap();
+
+  if (err instanceof HttpError && err.response?.statusCode === 404) {
+    return false;
+  }
+
+  if (err) {
+    throw err;
+  }
+
+  return val;
+}
+
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+  const repository = config.repository!;
   try {
-    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    const commitUrl = `/repos/${repository}/git/commits/${sha}`;
     await githubApi.head(commitUrl, { memCache: false });
   } catch (err) {
     logger.error({ err, sha, branchName }, 'Commit not found');
@@ -769,16 +814,7 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
-  let branchExists = false;
-  let branchResult: undefined | HttpResponse<string>;
-  try {
-    branchResult = await githubApi.head(refUrl, { memCache: false });
-    branchExists = true;
-  } catch (err) {
-    if (err.statusCode !== 404) {
-      throw err;
-    }
-  }
+  const branchExists = await remoteBranchExists(repository, branchName);
 
   if (branchExists) {
     try {
@@ -787,17 +823,17 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
     } catch (err) {
       if (err.err?.response?.statusCode === 422) {
         logger.debug(
-          { branchResult, err },
+          { err },
           'Branch update failed due to reference not existing - will try to create'
         );
       } else {
-        logger.warn({ refUrl, err, branchResult }, 'Error updating branch');
+        logger.warn({ refUrl, err }, 'Error updating branch');
         throw err;
       }
     }
   }
 
-  await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
+  await githubApi.postJson(`/repos/${repository}/git/refs`, {
     body: { sha, ref: `refs/heads/${branchName}` },
   });
 }

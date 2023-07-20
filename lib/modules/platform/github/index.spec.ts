@@ -939,7 +939,7 @@ describe('modules/platform/github/index', () => {
         ])
         .head('/repos/some/repo/git/commits/123')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
+        .get('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
@@ -1036,7 +1036,7 @@ describe('modules/platform/github/index', () => {
         ])
         .head('/repos/some/repo/git/commits/123')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
+        .get('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
@@ -1070,7 +1070,7 @@ describe('modules/platform/github/index', () => {
         ])
         .head('/repos/some/repo/git/commits/123')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
+        .get('/repos/some/repo/git/refs/heads/somebranch')
         .reply(422);
 
       await github.initRepo({ repository: 'some/repo' });
@@ -3387,7 +3387,7 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .get('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(200);
@@ -3417,8 +3417,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
+        .get('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200, { ref: 'refs/heads/foo/bar' })
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
 
@@ -3447,8 +3447,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
+        .get('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200, { ref: 'refs/heads/foo/bar' })
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(422)
         .post('/repos/some/repo/git/refs')
@@ -3479,8 +3479,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
+        .get('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200, { ref: 'refs/heads/foo/bar' })
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
 
