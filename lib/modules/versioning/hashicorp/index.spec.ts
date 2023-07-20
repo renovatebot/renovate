@@ -2,9 +2,10 @@ import { api as semver } from '.';
 
 describe('modules/versioning/hashicorp/index', () => {
   it.each`
-    version    | range         | expected
-    ${'4.2.0'} | ${'~> 4.0'}   | ${true}
-    ${'4.2.0'} | ${'~> 4.0.0'} | ${false}
+    version    | range                 | expected
+    ${'4.2.0'} | ${'~> 4.0'}           | ${true}
+    ${'4.2.0'} | ${'~> 4.0.0'}         | ${false}
+    ${'4.2.0'} | ${'~> 4.0, != 4.2.0'} | ${false}
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
@@ -13,9 +14,10 @@ describe('modules/versioning/hashicorp/index', () => {
   );
 
   it.each`
-    versions                                         | range         | expected
-    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
-    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${'4.0.0'}
+    versions                                         | range                 | expected
+    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}           | ${'4.2.0'}
+    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'}         | ${'4.0.0'}
+    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'!=4.2.0, > 4.0.0'} | ${'5.0.0'}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -54,9 +56,10 @@ describe('modules/versioning/hashicorp/index', () => {
   );
 
   it.each`
-    versions                                | range         | expected
-    ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
-    ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${null}
+    versions                                | range                 | expected
+    ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}           | ${'4.2.0'}
+    ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'}         | ${null}
+    ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0, != 4.2.0'} | ${null}
   `(
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
