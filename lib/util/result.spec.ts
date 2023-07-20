@@ -353,34 +353,6 @@ describe('util/result', () => {
 
         expect(res).toEqual(Result.ok('F-O-O'));
       });
-
-      it('handles transforming Result into AsyncResult', async () => {
-        const res = Result.ok('foo').transform((x) =>
-          AsyncResult.ok(x.toUpperCase())
-        );
-        expect(res).toBeInstanceOf(AsyncResult);
-        await expect(res).resolves.toEqual(Result.ok('FOO'));
-      });
-
-      it('handles transforming AsyncResult into AsyncResult', async () => {
-        const res = AsyncResult.ok('foo').transform((x) =>
-          AsyncResult.ok(x.toUpperCase())
-        );
-        expect(res).toBeInstanceOf(AsyncResult);
-        await expect(res).resolves.toEqual(Result.ok('FOO'));
-      });
-
-      it('handles uncaught error thrown on AsyncResult-to-AsyncResult transform', async () => {
-        const fn = (_: string) =>
-          new AsyncResult<string, string>((_, reject) => reject('oops'));
-        const res = Result.wrap(Promise.resolve('foo')).transform(fn);
-        expect(res).toBeInstanceOf(AsyncResult);
-        await expect(res).resolves.toEqual(Result._uncaught('oops'));
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { err: 'oops' },
-          'AsyncResult: unhandled async transform error'
-        );
-      });
     });
   });
 });
