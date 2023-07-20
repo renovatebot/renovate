@@ -1,7 +1,6 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
 import customManagers from './custom/api';
-import * as CustomManager from './custom';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
@@ -12,24 +11,22 @@ import type {
   Result,
 } from './types';
 export { hashMap } from './fingerprint.generated';
-const managerList = Array.from(managers.keys());
+const managerList = Array.from([...managers.keys(), ...customManagers.keys()]);
+const allManagers = new Map([...managers, ...customManagers]);
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
 ): ManagerApi[T] | undefined {
-  if (manager.startsWith('custom.')) {
-    return customManagers.get(manager.replace('custom.', ''))?.[name];
-  }
-  return managers.get(manager)?.[name];
+  return allManagers.get(manager)?.[name];
 }
 export const getManagerList = (): string[] => managerList;
-export const getManagers = (): Map<string, ManagerApi> => managers;
+export const getManagers = (): Map<string, ManagerApi> => allManagers;
 
 export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
   let config: GlobalManagerConfig = {};
   for (const managerName of managerList) {
-    const manager = managers.get(managerName)!;
+    const manager = allManagers.get(managerName)!;
     if (manager.detectGlobalConfig) {
       // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
       config = { ...config, ...(await manager.detectGlobalConfig()) };
@@ -43,10 +40,10 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   files: string[]
 ): Promise<PackageFile[] | null> {
-  if (!managers.has(manager)) {
+  if (!allManagers.has(manager)) {
     return null;
   }
-  const m = managers.get(manager)!;
+  const m = allManagers.get(manager)!;
   if (m.extractAllPackageFiles) {
     const res = await m.extractAllPackageFiles(config, files);
     // istanbul ignore if
@@ -64,13 +61,10 @@ export function extractPackageFile(
   fileName: string,
   config: ExtractConfig
 ): Result<PackageFileContent | null> {
-  if (manager.startsWith('custom.')) {
-    CustomManager.extractPackageFile(manager, content, fileName, config);
-  }
-  if (!managers.has(manager)) {
+  if (!allManagers.has(manager)) {
     return null;
   }
-  const m = managers.get(manager)!;
+  const m = allManagers.get(manager)!;
   return m.extractPackageFile
     ? m.extractPackageFile(content, fileName, config)
     : null;
@@ -78,10 +72,10 @@ export function extractPackageFile(
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   const { manager, rangeStrategy } = config;
-  if (!manager || !managers.has(manager)) {
+  if (!manager || !allManagers.has(manager)) {
     return null;
   }
-  const m = managers.get(manager)!;
+  const m = allManagers.get(manager)!;
   if (m.getRangeStrategy) {
     // Use manager's own function if it exists
     const managerRangeStrategy = m.getRangeStrategy(config);

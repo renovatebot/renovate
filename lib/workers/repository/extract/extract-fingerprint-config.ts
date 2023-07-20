@@ -38,7 +38,7 @@ function getFilteredManagerConfig(
   config: WorkerExtractConfig
 ): WorkerExtractConfig {
   return {
-    ...(config.manager.startsWith('custom.') && getRegexManagerFields(config)),
+    ...(config.manager === 'regex' && getRegexManagerFields(config)),
     manager: config.manager,
     fileMatch: config.fileMatch,
     npmrc: config.npmrc,
@@ -56,6 +56,7 @@ export function generateFingerprintConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
+  const customManagerList = getCustomManagerList();
   let managerList: Set<string>;
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
@@ -64,28 +65,16 @@ export function generateFingerprintConfig(
     managerList = new Set(getManagerList());
   }
 
-  const handleCustomManager = (
-    config: RenovateConfig,
-    manager: string
-  ): void => {
-    // TODO: filter config.regexManagers (manager === customType)
-    for (const regexManager of config.regexManagers ?? []) {
-      const customManagerConfig = getManagerConfig(config, manager);
-      managerExtractConfigs.push({
-        ...mergeChildConfig(customManagerConfig, regexManager),
-        fileList: [],
-      });
-    }
-  };
-
   for (const manager of managerList) {
     if (manager === 'custom') {
-      for (const customManager of getCustomManagerList()) {
-        handleCustomManager(config, 'custom.' + customManager);
+      for (const regexManager of config.regexManagers ?? []) {
+        const customManagerConfig = getManagerConfig(config, 'regex'); // TODO: replace 'regex' with regexManager.customType
+        managerExtractConfigs.push({
+          ...mergeChildConfig(customManagerConfig, regexManager),
+          fileList: [],
+        });
       }
-    } else if (manager.startsWith('custom.')) {
-      handleCustomManager(config, 'custom.' + manager);
-    } else {
+    } else if (!customManagerList.includes(manager)) {
       const managerConfig = getManagerConfig(config, manager);
       managerExtractConfigs.push({ ...managerConfig, fileList: [] });
     }

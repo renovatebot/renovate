@@ -50,9 +50,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       skipInstalls: null,
     });
     expect(
-      fingerprintConfig.managers.find(
-        (manager) => manager.manager === 'custom.regex'
-      )
+      fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
     ).toEqual({
       fileMatch: ['js', '***$}{]]['],
       ignorePaths: ['ignore-path-1'],
@@ -62,7 +60,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       datasourceTemplate: 'maven',
       versioningTemplate: 'gradle',
       enabled: true,
-      manager: 'custom.regex',
+      manager: 'regex',
       npmrc: null,
       npmrcMerge: false,
       registryAliases: {

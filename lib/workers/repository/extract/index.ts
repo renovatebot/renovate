@@ -13,18 +13,13 @@ export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
   let managerList = getManagerList();
+  const customManagerList = getCustomManagerList();
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
     managerList = managerList.filter((manager) =>
       enabledManagers.includes(manager)
     );
-    // check for custom managers in enabledManagers (custom managers already validated during migration)
-    for (const manager of enabledManagers) {
-      if (manager.startsWith('custom.')) {
-        managerList.push(manager);
-      }
-    }
   }
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
@@ -36,26 +31,16 @@ export async function extractAllDependencies(
     }
   };
 
-  const handleCustomManager = (
-    config: RenovateConfig,
-    manager: string
-  ): void => {
-    // TODO: filter config.regexManagers (manager === customType)
-    for (const regexManager of config.regexManagers ?? []) {
-      const customManagerConfig = getManagerConfig(config, manager);
-      customManagerConfig.manager = manager;
-      tryConfig(mergeChildConfig(customManagerConfig, regexManager));
-    }
-  };
-
   for (const manager of managerList) {
     if (manager === 'custom') {
-      for (const customManager of getCustomManagerList()) {
-        handleCustomManager(config, `custom.${customManager}`);
+      for (const regexManager of config.regexManagers ??
+        // istanbul ignore next
+        []) {
+        const customManagerConfig = getManagerConfig(config, 'regex'); // TODO: replace 'regex' with regexManager.customType
+        customManagerConfig.manager = 'regex'; // TODO: replace 'regex' with regexManager.customType
+        tryConfig(mergeChildConfig(customManagerConfig, regexManager));
       }
-    } else if (manager.startsWith('custom.')) {
-      handleCustomManager(config, manager);
-    } else {
+    } else if (!customManagerList.includes(manager)) {
       const managerConfig = getManagerConfig(config, manager);
       managerConfig.manager = manager;
       tryConfig(managerConfig);

@@ -59,7 +59,7 @@ describe('workers/repository/extract/index', () => {
       ]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
-      expect(Object.keys(res.packageFiles)).toContain('custom.regex');
+      expect(Object.keys(res.packageFiles)).toContain('regex');
     });
   });
 });

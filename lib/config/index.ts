@@ -1,6 +1,5 @@
 import { logger } from '../logger';
 import { get, getManagerList } from '../modules/manager';
-import { getCustomManagerList } from '../modules/manager/custom';
 import * as options from './options';
 import type {
   AllConfig,
@@ -25,14 +24,8 @@ export function getManagerConfig(
     managerConfig.categories = categories;
   }
   // TODO: fix types #7154
-  managerConfig = mergeChildConfig(
-    managerConfig,
-    manager.startsWith('custom.')
-      ? config[manager.replace('custom.', '')]
-      : (config[manager] as any)
-  );
-  // remove config of other managers
-  for (const i of [...getManagerList(), ...getCustomManagerList()]) {
+  managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
+  for (const i of getManagerList()) {
     delete managerConfig[i];
   }
   return managerConfig;

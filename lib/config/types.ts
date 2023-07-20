@@ -330,7 +330,7 @@ export interface PackageRule
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
   matchBaseBranches?: string[];
-  matchManagers?: string[];
+  matchManagers?: string | string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
   matchDepNames?: string[];
