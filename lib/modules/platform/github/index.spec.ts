@@ -3518,5 +3518,36 @@ describe('modules/platform/github/index', () => {
 
       expect(res).toBeNull();
     });
+
+    it('aborts if branch name is the non-leaf ref', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .get('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200, [
+          { ref: 'refs/heads/foo/bar/baz' },
+          { ref: 'refs/heads/foo/bar/qux' },
+        ]);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
   });
 });

@@ -781,11 +781,9 @@ async function remoteBranchExists(
     .transform((x) => {
       if (is.array(x)) {
         const existingBranches = x.join(', ');
-        return Result.err(
-          new Error(
-            `Trying to create a branch ${branchName} while nested branches exist: ${existingBranches}`
-          )
-        );
+        const message = `Trying to create a branch ${branchName} while nested branches exist: ${existingBranches}`;
+        const err = new Error(message);
+        return Result.err(err);
       }
 
       return Result.ok(true); // Supposedly, `ref` always equals `branchName` at this point
