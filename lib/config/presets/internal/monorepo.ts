@@ -274,7 +274,7 @@ const repoGroups = {
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const orgGroups = {
-  'datatables.net': ['https://github.com/DataTables/'],
+  'datatables-net': ['https://github.com/DataTables/'],
   hapijs: 'https://github.com/hapijs/',
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
