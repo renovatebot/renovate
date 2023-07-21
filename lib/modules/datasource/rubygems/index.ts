@@ -2,6 +2,7 @@ import { Marshal } from '@qnighy/marshal';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
@@ -40,25 +41,26 @@ export class RubyGemsDatasource extends Datasource {
       return null;
     }
 
+    const { val: rubygemsResult, err: rubygemsError } = await Result.wrap(
+      this.versionsEndpointCache.getVersions(registryUrl, packageName)
+    )
+      .transform((versions) =>
+        this.metadataCache.getRelease(registryUrl, packageName, versions)
+      )
+      .unwrap();
+
+    // istanbul ignore else: will be removed soon
+    if (rubygemsResult) {
+      return rubygemsResult;
+    } else if (rubygemsError instanceof Error) {
+      this.handleGenericErrors(rubygemsError);
+    }
+
     try {
-      const cachedVersions = await this.versionsEndpointCache.getVersions(
-        registryUrl,
-        packageName
-      );
-
-      if (cachedVersions.type === 'success') {
-        const { versions } = cachedVersions;
-        const result = await this.metadataCache.getRelease(
-          registryUrl,
-          packageName,
-          versions
-        );
-        return result;
-      }
-
       const registryHostname = parseUrl(registryUrl)?.hostname;
+
       if (
-        cachedVersions.type === 'not-supported' &&
+        rubygemsError === 'unsupported-api' &&
         registryHostname !== 'rubygems.org'
       ) {
         if (

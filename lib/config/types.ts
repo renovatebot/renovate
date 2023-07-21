@@ -143,6 +143,7 @@ export interface RepoGlobalConfig {
   containerbaseDir?: string;
   platform?: PlatformId;
   endpoint?: string;
+  includeMirrors?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -260,6 +261,7 @@ export interface RenovateConfig
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
+  customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
@@ -270,6 +272,12 @@ export interface RenovateConfig
   constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
+}
+
+export interface CustomDatasourceConfig {
+  defaultRegistryUrlTemplate?: string;
+  format?: 'json';
+  transformTemplates?: string[];
 }
 
 export interface AllConfig
@@ -330,11 +338,13 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  matchRepositories?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  excludeRepositories?: string[];
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -379,7 +389,12 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
+  parent?:
+    | 'customDatasources'
+    | 'hostRules'
+    | 'packageRules'
+    | 'postUpgradeTasks'
+    | 'regexManagers';
 
   // used by tests
   relatedOptions?: string[];
@@ -482,6 +497,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  repository?: string;
 }
 
 export interface ConfigMigration {

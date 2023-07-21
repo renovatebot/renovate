@@ -266,7 +266,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               values: [repoMock(url, 'SOME', 'repo')],
               start: 0,
             });
-          expect(await bitbucket.getRepos()).toEqual(['some/repo']);
+          expect(await bitbucket.getRepos()).toEqual(['SOME/repo']);
         });
       });
 

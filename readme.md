@@ -25,7 +25,7 @@ Multi-platform and multi-language.
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
 - Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
 - Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
-- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
+- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
 
 ## Supported Platforms
 
@@ -69,10 +69,9 @@ Get started with Renovate by checking out our [tutorial](https://github.com/reno
 
 ### GitHub
 
-It's easiest to use the hosted Renovate app.
-Install the [Renovate app](https://github.com/apps/renovate) now.
-
-[More details on the GitHub App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
+We recommend that you use the Mend Renovate App.
+Install the [the Mend Renovate App](https://github.com/apps/renovate) now.
+[More details on the Mend Renovate App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
 
 ### Azure DevOps
 

@@ -29,4 +29,4 @@ Instead of `token`, you may also supply `username` and `password` instead.
 If you don't want to commit raw secrets to your repository, either:
 
 - If self hosting, add the `hostRules` to your bot's configuration file rather than the repository's configuration file, or
-- If using the hosted Mend Renovate app, make use of the [`encrypted`](https://docs.renovatebot.com/configuration-options/#encrypted) capability
+- If using the Mend Renovate App, make use of the [`encrypted`](https://docs.renovatebot.com/configuration-options/#encrypted) capability

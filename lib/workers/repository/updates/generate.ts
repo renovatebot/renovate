@@ -83,6 +83,8 @@ export function generateBranchConfig(
   const toVersions: string[] = [];
   const toValues = new Set<string>();
   for (const upg of branchUpgrades) {
+    upg.recreateClosed = upg.recreateWhen === 'always';
+
     if (upg.currentDigest) {
       upg.currentDigestShort =
         upg.currentDigestShort ??
