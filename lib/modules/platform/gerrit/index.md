@@ -20,7 +20,7 @@ Let Renovate use your HTTP access token by doing _one_ of the following:
 - Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`
 - Set your HTTP access token when you run Renovate in the CLI with `--password=`
 
-Make sure this user is allowed to assign the Code-Review label with "+2" to their own changes or "automerge" can't work.
+This user must be allowed to assign the Code-Review label with "+2" to their own changes for "automerge" to work.
 
 Remember to set `platform=gerrit` somewhere in your Renovate config file.
 
