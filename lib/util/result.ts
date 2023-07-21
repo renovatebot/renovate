@@ -1,4 +1,3 @@
-/* eslint-disable promise/no-promise-in-callback */
 import { logger } from '../logger';
 
 interface Ok<T> {
@@ -327,6 +326,7 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
   }
 
   static err<E>(err: NonNullable<E>): AsyncResult<never, E> {
+    // eslint-disable-next-line promise/no-promise-in-callback
     return new AsyncResult(Promise.resolve(Result.err(err)));
   }
 
