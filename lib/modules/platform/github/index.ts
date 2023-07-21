@@ -6,7 +6,6 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
-import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -34,12 +33,10 @@ import type {
   CommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
-import { HttpError } from '../../../util/http';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
 import { sanitize } from '../../../util/sanitize';
 import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -64,6 +61,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { remoteBranchExists } from './branch';
 import { coerceRestPr } from './common';
 import {
   enableAutoMergeMutation,
@@ -762,45 +760,6 @@ export async function findPr({
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
-async function remoteBranchExists(
-  repo: string,
-  branchName: string
-): Promise<boolean> {
-  const RefSchema = z
-    .object({
-      ref: z.string().transform((val) => val.replace(/^refs\/heads\//, '')),
-    })
-    .transform(({ ref }) => ref);
-
-  const { val, err } = await githubApi
-    .getJsonSafe(
-      `/repos/${repo}/git/refs/heads/${branchName}`,
-      { memCache: false },
-      z.union([RefSchema, RefSchema.array()])
-    )
-    .transform((x) => {
-      if (is.array(x)) {
-        const existingBranches = x.join(', ');
-        const message = `Trying to create a branch ${branchName} while nested branches exist: ${existingBranches}`;
-        const err = new Error(message);
-        return Result.err(err);
-      }
-
-      return Result.ok(true); // Supposedly, `ref` always equals `branchName` at this point
-    })
-    .unwrap();
-
-  if (err instanceof HttpError && err.response?.statusCode === 404) {
-    return false;
-  }
-
-  if (err) {
-    throw err;
-  }
-
-  return val;
-}
-
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   const repository = config.repository!;
   try {
@@ -812,7 +771,11 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
-  const branchExists = await remoteBranchExists(repository, branchName);
+  const branchExists = await remoteBranchExists(
+    githubApi,
+    repository,
+    branchName
+  );
 
   if (branchExists) {
     try {
