@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
+import { getExcludedVersions, getFilteredRange } from '../common';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { hashicorp2npm, npm2hashicorp } from './convertor';
@@ -111,17 +112,3 @@ export const api: VersioningApi = {
 export const { isVersion } = api;
 
 export default api;
-
-export function getExcludedVersions(range: string): string[] {
-  return range
-    .split(',')
-    .filter((version) => version.match('!='))
-    .map((version) => version.replace('!=', '').trim());
-}
-
-export function getFilteredRange(range: string): string {
-  return range
-    .split(',')
-    .filter((version) => !version.match('!='))
-    .join(',');
-}

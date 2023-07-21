@@ -6,6 +6,7 @@ describe('modules/versioning/hashicorp/index', () => {
     ${'4.2.0'} | ${'~> 4.0'}           | ${true}
     ${'4.2.0'} | ${'~> 4.0.0'}         | ${false}
     ${'4.2.0'} | ${'~> 4.0, != 4.2.0'} | ${false}
+    ${'4.2.6'} | ${'~> 4.0, != 4.2.0'} | ${true}
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
@@ -60,6 +61,7 @@ describe('modules/versioning/hashicorp/index', () => {
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}           | ${'4.2.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'}         | ${null}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0, != 4.2.0'} | ${null}
+    ${['0.4.0', '0.5.0', '4.2.0', '4.1.0']} | ${'~> 4.0, != 4.2.0'} | ${'4.1.0'}
   `(
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
