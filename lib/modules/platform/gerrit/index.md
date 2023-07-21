@@ -36,10 +36,10 @@ Renovate will now add the _Code-Review_ label with the value "+2" to each of its
 The Renovate option `automergeType: "branch"` makes no sense for Gerrit, because there are no branches used.
 It works similar to the default option `"pr"`.
 
-## Optional Features
+## Optional features
 
 The [`minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage) feature can be used.
-It needs only a corresponding Gerrit-Label (default `Renovate-Stability`) and the permission to set the min/max value.
+It needs only a corresponding Gerrit-Label and the permission to set the min/max value.
 
 You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
 This is because Renovate will query the label and prevent `automerge` accordingly.

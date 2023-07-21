@@ -1104,11 +1104,11 @@ You can't use other filenames because Renovate only checks the default filename 
 
 ## gerritLabelMapping
 
-The name of the Gerrit labels to use for the `StabilityDays` and `Merge-Confidence` status.
+The name of the Gerrit labels to use for the `MinimumReleaseAge` and `Merge-Confidence` status.
 
 ```json
 {
-  "stabilityDaysLabel": "Renovate-Stability",
+  "minimumReleaseAgeLabel": "Renovate-Release-Age",
   "mergeConfidenceLabel": "Renovate-Confidence"
 }
 ```
