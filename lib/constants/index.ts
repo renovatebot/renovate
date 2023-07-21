@@ -1,2 +1,3 @@
 export * from './platforms';
-export type * from './category';
+export type { Category } from './category';
+export { CategoryNames } from './category';
