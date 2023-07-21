@@ -420,13 +420,13 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
    *   ```
    */
   transform<U, EE>(
-    fn: (value: NonNullable<T>) => Result<U, EE>
+    fn: (value: NonNullable<T>) => Result<U, E | EE>
   ): AsyncResult<U, E | EE>;
   transform<U, EE>(
-    fn: (value: NonNullable<T>) => AsyncResult<U, EE>
+    fn: (value: NonNullable<T>) => AsyncResult<U, E | EE>
   ): AsyncResult<U, E | EE>;
   transform<U, EE>(
-    fn: (value: NonNullable<T>) => Promise<Result<U, EE>>
+    fn: (value: NonNullable<T>) => Promise<Result<U, E | EE>>
   ): AsyncResult<U, E | EE>;
   transform<U>(
     fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
@@ -438,9 +438,9 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
     fn: (
       value: NonNullable<T>
     ) =>
-      | Result<U, EE>
-      | AsyncResult<U, EE>
-      | Promise<Result<U, EE>>
+      | Result<U, E | EE>
+      | AsyncResult<U, E | EE>
+      | Promise<Result<U, E | EE>>
       | Promise<NonNullable<U>>
       | NonNullable<U>
   ): AsyncResult<U, E | EE> {
