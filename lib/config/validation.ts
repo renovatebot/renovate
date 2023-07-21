@@ -319,12 +319,14 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchRepositories',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
