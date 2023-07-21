@@ -1,5 +1,22 @@
 import { z } from 'zod';
-import { Json, LooseRecord } from '../../../../util/schema-utils';
+import { Json, LooseRecord } from '../../../util/schema-utils';
+
+export const PackageManagerSchema = z
+  .string()
+  .transform((val) => val.split('@'))
+  .transform(([name, version]) => ({ name, version }));
+
+export const PackageJsonSchema = z.object({
+  engines: LooseRecord(z.string()).optional(),
+  dependencies: LooseRecord(z.string()).optional(),
+  devDependencies: LooseRecord(z.string()).optional(),
+  peerDependencies: LooseRecord(z.string()).optional(),
+  packageManager: PackageManagerSchema.optional(),
+});
+
+export type PackageJsonSchema = z.infer<typeof PackageJsonSchema>;
+
+export const PackageJson = Json.pipe(PackageJsonSchema);
 
 export const PackageLockV3Schema = z.object({
   lockfileVersion: z.literal(3),
