@@ -56,7 +56,7 @@ export async function generateLockFile(
       cmdOptions += '--no-audit';
     } else {
       logger.debug('Updating lock file only');
-      cmdOptions += '--package-lock-only --no-audit';
+      cmdOptions += '--package-lock-only --no-save --no-audit';
     }
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {

@@ -282,7 +282,7 @@ describe('modules/manager/npm/post-update/npm', () => {
           '&& ' +
           'hash -d npm 2>/dev/null || true ' +
           '&& ' +
-          'npm install --package-lock-only --no-audit' +
+          'npm install --package-lock-only --no-save --no-audit' +
           '"',
       },
     ]);
@@ -310,7 +310,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { cmd: 'install-tool npm 6.0.0' },
       { cmd: 'hash -d npm 2>/dev/null || true' },
       {
-        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        cmd: 'npm install --package-lock-only --no-save --no-audit --ignore-scripts',
       },
     ]);
   });
@@ -424,14 +424,14 @@ describe('modules/manager/npm/post-update/npm', () => {
       expect(res.error).toBeUndefined();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
+          cmd: 'npm install --package-lock-only --no-save --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
         },
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
+          cmd: 'npm install --package-lock-only --no-save --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
         },
 
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts chalk@9.4.8 postcss@8.4.8',
+          cmd: 'npm install --package-lock-only --no-save --no-audit --ignore-scripts chalk@9.4.8 postcss@8.4.8',
         },
       ]);
     });
@@ -459,14 +459,14 @@ describe('modules/manager/npm/post-update/npm', () => {
       expect(res.error).toBeUndefined();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
+          cmd: 'npm install --package-lock-only --no-save --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
         },
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
+          cmd: 'npm install --package-lock-only --no-save --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
         },
 
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts chalk@9.4.8 postcss@8.4.8',
+          cmd: 'npm install --package-lock-only --no-save --no-audit --ignore-scripts chalk@9.4.8 postcss@8.4.8',
         },
       ]);
       expect(
