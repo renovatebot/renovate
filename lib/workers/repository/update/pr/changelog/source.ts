@@ -254,6 +254,11 @@ export abstract class ChangeLogSource {
       return '';
     }
     const pathname = parsedUrl.pathname;
+
+    if (this.platform === 'azure') {
+      return trimSlashes(pathname).replace(regEx(/.*\//), '');
+    }
+
     return trimSlashes(pathname)
       .replace(regEx(/\.git$/), '')
       .replace(regEx(/.*\\/), '');
@@ -271,6 +276,6 @@ export abstract class ChangeLogSource {
   }
 
   hasValidRepository(repository: string): boolean {
-    return repository.split('/').length === 2;
+    return repository.split('/').length > 0 && repository.split('/').length < 3;
   }
 }

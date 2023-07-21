@@ -345,29 +345,28 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
-          const url =
-            type === 'azure'
-              ? `${notesSourceUrl}&anchor=user-content-${encodeURIComponent(
-                  heading
-                    .replace(regEx(/^\s*#*\s*/), '')
-                    .toLowerCase()
-                    .replace(regEx(/\s+/), '-')
-                )}`
-              : `${notesSourceUrl}#${title
-                  .join('-')
-                  .replace(regEx(/[^A-Za-z0-9-]/g), '')}`;
 
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
             if (word.includes(version) && !validateUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
-              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
-              const mdHeadingLink = title
-                .filter((word) => !validateUrl(word))
-                .join('-')
-                .replace(regEx(/[^A-Za-z0-9-]/g), '');
-              const url = `${notesSourceUrl}#${mdHeadingLink}`;
+              const mdHeadingLink =
+                type === 'azure'
+                  ? `user-content-${encodeURIComponent(
+                      heading
+                        .replace(regEx(/^\s*#*\s*/), '')
+                        .toLowerCase()
+                        .replace(regEx(/\s+/), '-')
+                    )}`
+                  : title
+                      .filter((word) => !validateUrl(word))
+                      .join('-')
+                      .replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const url =
+                type === 'azure'
+                  ? `${notesSourceUrl}&anchor=${mdHeadingLink}`
+                  : `${notesSourceUrl}#${mdHeadingLink}`;
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
