@@ -69,11 +69,11 @@ const gitlabProject = partial<ChangeLogProject>({
   baseUrl: 'https://gitlab.com/',
 });
 
-const azureProject = {
+const azureProject = partial<ChangeLogProject>({
   type: 'azure',
   apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
   baseUrl: 'https://dev.azure.com/some-org/some-project/',
-} as ChangeLogProject;
+});
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
   const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
@@ -316,10 +316,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('should return empty array for dev.azure.com project', async () => {
       const res = await getReleaseList(
-        {
+        partial<ChangeLogProject>({
           ...azureProject,
-        },
-        {} as ChangeLogRelease
+        }),
+        partial<ChangeLogRelease>({})
       );
       expect(res).toBeEmptyArray();
     });
@@ -1016,10 +1016,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           ...azureProject,
           repository: 'some-repo',
         },
-        {
+        partial<ChangeLogRelease>({
           version: '2.0.0',
           gitRef: '2.0.0',
-        } as ChangeLogRelease
+        })
       );
       expect(res).toBeNull();
     });
@@ -1246,13 +1246,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           repository: 'some-repo',
           sourceDirectory,
         },
-        {
+        partial<ChangeLogRelease>({
           version: '4.33.0',
           gitRef: '4.33.0',
-        } as ChangeLogRelease
+        })
       );
 
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md`,
         url: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=${sourceDirectory}/CHANGELOG.md&anchor=user-content-4.33.0-%5B05-15-2020%5D`,
       });
@@ -1280,10 +1280,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           repository: 'some-repo',
           sourceDirectory,
         },
-        {
+        partial<ChangeLogRelease>({
           version: '4.33.0',
           gitRef: '4.33.0',
-        } as ChangeLogRelease
+        })
       );
 
       expect(res).toBeNull();

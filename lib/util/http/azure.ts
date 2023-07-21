@@ -3,7 +3,6 @@ import type { HttpOptions, HttpResponse } from './types';
 import { Http } from '.';
 
 export class AzureHttp extends Http<HttpOptions> {
-  http: any;
   constructor(type = 'azure', options?: HttpOptions) {
     super(type, options);
   }

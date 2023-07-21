@@ -982,10 +982,10 @@ It is not recommended to set fetchReleaseNotes=branch unless you are embedding r
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 
+- Azure DevOps (.com)
 - Bitbucket Cloud
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
-- Azure DevOps (.com)
 
 If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from `github.com`.
 

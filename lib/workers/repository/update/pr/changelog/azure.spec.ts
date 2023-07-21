@@ -4,9 +4,9 @@ import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getChangeLogJSON } from '.';
 
-jest.mock('../../../../../modules/datasource/npm');
+jest.mock('../../../../../modules/datasource');
 
-const upgrade: BranchUpgradeConfig = {
+const upgrade = {
   manager: 'some-manager',
   branchName: '',
   endpoint: 'https://dev.azure.com/some-org/some-project/_apis/',
@@ -25,7 +25,7 @@ const upgrade: BranchUpgradeConfig = {
     { version: '5.6.0', releaseTimestamp: '2020-02-13T15:37:00.000Z' },
     { version: '5.6.1' },
   ],
-};
+} satisfies BranchUpgradeConfig;
 
 const matchHost = 'https://dev.azure.com/';
 
@@ -77,7 +77,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot({
+      ).toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
@@ -123,7 +123,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot({
+      ).toMatchObject({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
