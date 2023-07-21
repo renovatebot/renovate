@@ -265,10 +265,10 @@ export class Result<T, E = Error> {
     fn: (
       value: NonNullable<T>
     ) =>
-      | NonNullable<U>
-      | Result<U, EE>
-      | Result<U, EE>
+      | Result<U, E | EE>
+      | Promise<Result<U, E | EE>>
       | Promise<NonNullable<U>>
+      | NonNullable<U>
   ): Result<U, E | EE> | AsyncResult<U, E | EE> {
     if (!this.res.ok) {
       return Result.err(this.res.err);
@@ -276,6 +276,10 @@ export class Result<T, E = Error> {
 
     try {
       const res = fn(this.res.val);
+
+      if (res instanceof Result) {
+        return res;
+      }
 
       if (res instanceof Promise) {
         return new AsyncResult((resolve) => {
@@ -290,10 +294,6 @@ export class Result<T, E = Error> {
               resolve(Result._uncaught(err) as never);
             });
         });
-      }
-
-      if (res instanceof Result) {
-        return res;
       }
 
       return Result.ok(res);
@@ -318,6 +318,14 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
     ) => void
   ) {
     super(executor);
+  }
+
+  static ok<T>(val: NonNullable<T>): AsyncResult<T, never> {
+    return new AsyncResult((resolve) => resolve(Result.ok(val)));
+  }
+
+  static err<E>(err: NonNullable<E>): AsyncResult<never, E> {
+    return new AsyncResult((resolve) => resolve(Result.err(err)));
   }
 
   static wrap<T, E = Error, EE = never>(
@@ -429,7 +437,7 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
       | Promise<Result<U, EE>>
       | Promise<NonNullable<U>>
       | NonNullable<U>
-  ): AsyncResult<U, E | EE | Error> {
+  ): AsyncResult<U, E | EE> {
     return new AsyncResult((resolve) => {
       this.then((oldResult) => {
         const { ok, val: value, err: error } = oldResult.unwrap();
@@ -439,6 +447,10 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
 
         try {
           const newResult = fn(value);
+
+          if (newResult instanceof Result) {
+            return resolve(newResult);
+          }
 
           if (newResult instanceof Promise) {
             return newResult
@@ -456,18 +468,14 @@ export class AsyncResult<T, E> extends Promise<Result<T, E>> {
               });
           }
 
-          if (newResult instanceof Result) {
-            return resolve(newResult);
-          }
-
           return resolve(Result.ok(newResult));
         } catch (err) {
           logger.warn({ err }, 'AsyncResult: unhandled transform error');
           return resolve(Result._uncaught(err));
         }
       }).catch((err) => {
-        // Actually, this should never happen
-        resolve(Result.err(err));
+        // Happens when `.unwrap()` of `oldResult` throws
+        resolve(Result._uncaught(err));
       });
     });
   }
