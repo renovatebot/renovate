@@ -53,10 +53,10 @@ export async function updateArtifacts({
     }
 
     const oldLazyPubspecLock = lazyParsePubspeckLock(oldLockFileContent);
-    const oldPubspecLock = oldLazyPubspecLock.getValue();
     const constraint = isFlutter
-      ? config.constraints?.flutter ?? oldPubspecLock?.sdks.flutter
-      : config.constraints?.dart ?? oldPubspecLock?.sdks.dart;
+      ? config.constraints?.flutter ??
+        oldLazyPubspecLock.getValue()?.sdks.flutter
+      : config.constraints?.dart ?? oldLazyPubspecLock.getValue()?.sdks.dart;
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},

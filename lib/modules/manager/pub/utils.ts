@@ -1,3 +1,4 @@
+import { load } from 'js-yaml';
 import { Lazy } from '../../../util/lazy';
 import { PubspecLockSchema } from './schema';
 
@@ -8,9 +9,13 @@ export function lazyParsePubspeckLock(
 }
 
 function parsePubspecLock(fileContent: string): PubspecLockSchema | undefined {
-  const res = PubspecLockSchema.safeParse(fileContent);
-  if (res.success) {
-    return res.data;
+  try {
+    const data = load(fileContent, { json: true });
+    const res = PubspecLockSchema.safeParse(data);
+    if (res.success) {
+      return res.data;
+    }
+  } catch {
+    // Do nothing
   }
-  return;
 }
