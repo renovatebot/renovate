@@ -107,6 +107,16 @@ describe('util/result', () => {
             .unwrap()
         ).toThrow('oops');
       });
+
+      it('returns ok-value for unwrapOrThrow', () => {
+        const res = Result.ok(42);
+        expect(res.unwrapOrThrow()).toBe(42);
+      });
+
+      it('throws error for unwrapOrThrow on error result', () => {
+        const res = Result.err('oops');
+        expect(() => res.unwrapOrThrow()).toThrow('oops');
+      });
     });
 
     describe('Transforming', () => {
@@ -138,6 +148,36 @@ describe('util/result', () => {
           { err: 'oops' },
           'Result: unhandled transform error'
         );
+      });
+    });
+
+    describe('Catch', () => {
+      it('bypasses ok result', () => {
+        const res = Result.ok(42);
+        expect(res.catch(() => Result.ok(0))).toEqual(Result.ok(42));
+        expect(res.catch(() => Result.ok(0))).toBe(res);
+      });
+
+      it('bypasses uncaught transform errors', () => {
+        const res = Result.ok(42).transform(() => {
+          throw 'oops';
+        });
+        expect(res.catch(() => Result.ok(0))).toEqual(Result._uncaught('oops'));
+        expect(res.catch(() => Result.ok(0))).toBe(res);
+      });
+
+      it('converts error to Result', () => {
+        const result = Result.err<string>('oops').catch(() =>
+          Result.ok<number>(42)
+        );
+        expect(result).toEqual(Result.ok(42));
+      });
+
+      it('handles error thrown in catch function', () => {
+        const result = Result.err<string>('oops').catch(() => {
+          throw 'oops';
+        });
+        expect(result).toEqual(Result._uncaught('oops'));
       });
     });
   });
@@ -221,6 +261,16 @@ describe('util/result', () => {
       it('uses fallback for error AsyncResult', async () => {
         const res = Result.wrap(Promise.reject('oops'));
         await expect(res.unwrap(42)).resolves.toBe(42);
+      });
+
+      it('returns ok-value for unwrapOrThrow', async () => {
+        const res = Result.wrap(Promise.resolve(42));
+        await expect(res.unwrapOrThrow()).resolves.toBe(42);
+      });
+
+      it('rejects for error for unwrapOrThrow', async () => {
+        const res = Result.wrap(Promise.reject('oops'));
+        await expect(res.unwrapOrThrow()).rejects.toBe('oops');
       });
     });
 
@@ -365,6 +415,34 @@ describe('util/result', () => {
           .transform(fn3);
 
         expect(res).toEqual(Result.ok('F-O-O'));
+      });
+    });
+
+    describe('Catch', () => {
+      it('converts error to AsyncResult', async () => {
+        const result = await Result.err<string>('oops').catch(() =>
+          AsyncResult.ok(42)
+        );
+        expect(result).toEqual(Result.ok(42));
+      });
+
+      it('converts error to Promise', async () => {
+        const fallback = Promise.resolve(Result.ok(42));
+        const result = await Result.err<string>('oops').catch(() => fallback);
+        expect(result).toEqual(Result.ok(42));
+      });
+
+      it('handles error thrown in Promise result', async () => {
+        const fallback = Promise.reject('oops');
+        const result = await Result.err<string>('oops').catch(() => fallback);
+        expect(result).toEqual(Result._uncaught('oops'));
+      });
+
+      it('converts AsyncResult error to Result', async () => {
+        const result = await AsyncResult.err<string>('oops').catch(() =>
+          AsyncResult.ok<number>(42)
+        );
+        expect(result).toEqual(Result.ok(42));
       });
     });
   });
