@@ -33,10 +33,10 @@ export class MetadataCache {
           : Result.err('cache-outdated');
       });
 
-    const saveCache = async (result: ReleaseResult): Promise<ReleaseResult> => {
+    const saveCache = async (data: ReleaseResult): Promise<ReleaseResult> => {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
-        const newCache: CacheRecord = { hash, data: result };
+        const newCache: CacheRecord = { hash, data };
         const ttlMinutes = 100 * 24 * 60;
         const ttlRandomDelta = Math.floor(Math.random() * 10 * 24 * 60);
         await packageCache.set(
@@ -47,7 +47,7 @@ export class MetadataCache {
         );
       }
 
-      return result;
+      return data;
     };
 
     return await loadCache()
