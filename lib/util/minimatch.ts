@@ -7,10 +7,11 @@ export function minimatch(
   options?: MinimatchOptions,
   useCache = true
 ): Minimatch {
-  const canBeCached = useCache;
+  const key = options
+    ? `${pattern.toString()}:${JSON.stringify(options)}`
+    : `${pattern.toString()}`;
 
-  const key = `${pattern.toString()}`;
-  if (canBeCached) {
+  if (useCache) {
     const cachedResult = cache.get(key);
     if (cachedResult) {
       return cachedResult;
@@ -18,7 +19,7 @@ export function minimatch(
   }
 
   const instance = new Minimatch(pattern, options);
-  if (canBeCached) {
+  if (useCache) {
     cache.set(key, instance);
   }
   return instance;
