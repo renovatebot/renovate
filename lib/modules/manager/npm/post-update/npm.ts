@@ -110,7 +110,7 @@ export async function generateLockFile(
           if (config.packageFile) {
             // TODO: How do we know, where the workspace package.json is located?
             // commands.push(`git checkout HEAD -- ` + config.packageFile);
-            // commands.push("npm install --no-audit --no-fund");
+            // commands.push('npm install --no-audit');
           }
         }
       }
@@ -274,6 +274,7 @@ export function divideWorkspaceAndRootDeps(
     lockRootUpdates.push(upgrade);
     rootDeps.add(upgrade.managerData.packageKey);
   }
+
   return { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps };
 }
 
