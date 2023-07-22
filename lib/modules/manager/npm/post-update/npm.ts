@@ -56,7 +56,7 @@ export async function generateLockFile(
       cmdOptions += '--no-audit';
     } else {
       logger.debug('Updating lock file only');
-      cmdOptions += '--package-lock-only --no-save --no-audit';
+      cmdOptions += '--package-lock-only --no-audit';
     }
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
@@ -107,6 +107,11 @@ export async function generateLockFile(
             ' '
           )}`;
           commands.push(updateCmd);
+          if (config.packageFile) {
+            // TODO: How do we know, where the workspace package.json is located?
+            // commands.push(`git checkout HEAD -- ` + config.packageFile);
+            // commands.push("npm install --no-audit --no-fund");
+          }
         }
       }
     }
@@ -119,6 +124,10 @@ export async function generateLockFile(
           .map((update) => update.managerData?.packageKey)
           .join(' ');
       commands.push(updateCmd);
+      if (config.packageFile) {
+        commands.push(`git checkout HEAD -- ` + config.packageFile);
+        commands.push("npm install --no-audit --no-fund");
+      }
     }
 
     if (upgrades.some((upgrade) => upgrade.isRemediation)) {
@@ -265,7 +274,7 @@ export function divideWorkspaceAndRootDeps(
     lockRootUpdates.push(upgrade);
     rootDeps.add(upgrade.managerData.packageKey);
   }
-
+  logger.debug({lockRootUpdates}, "lockRootUpdates");
   return { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps };
 }
 
