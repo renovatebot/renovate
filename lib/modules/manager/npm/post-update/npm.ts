@@ -274,7 +274,6 @@ export function divideWorkspaceAndRootDeps(
     lockRootUpdates.push(upgrade);
     rootDeps.add(upgrade.managerData.packageKey);
   }
-  logger.debug({lockRootUpdates}, "lockRootUpdates");
   return { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps };
 }
 
