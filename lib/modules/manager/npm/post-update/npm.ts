@@ -126,7 +126,7 @@ export async function generateLockFile(
       commands.push(updateCmd);
       if (config.packageFile) {
         commands.push(`git checkout HEAD -- ` + config.packageFile);
-        commands.push("npm install --no-audit --no-fund");
+        commands.push("npm install --no-audit");
       }
     }
 
