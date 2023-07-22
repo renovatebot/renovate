@@ -2,16 +2,33 @@ import { assignKeys } from './assign-keys';
 
 describe('util/assign-keys', () => {
   it('should assign values from right to left for specified keys', () => {
-    type Left = { a: number; b: number };
-    const left: Left = { a: 1, b: 2 };
+    type Left = {
+      foo: number | string;
+      bar: number | boolean;
+      baz?: number;
+    };
+    const left: Left = {
+      foo: 'foo',
+      bar: false,
+      baz: 42,
+    };
 
-    type Right = { a?: number; b?: number; c?: number };
-    const right: Right = { a: 3, c: 4 };
+    type Right = {
+      foo?: number;
+      bar?: number;
+      baz?: number;
+    };
+    const right: Right = {
+      foo: 1,
+      bar: 2,
+      baz: 3,
+    };
 
-    const result = assignKeys(left, right, ['a', 'b']);
+    const result = assignKeys(left, right, ['foo', 'bar']);
     expect(result).toEqual({
-      a: 3,
-      b: 2,
+      foo: 1,
+      bar: 2,
+      baz: 42,
     });
     expect(result).toBe(left);
   });
