@@ -561,6 +561,7 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
     ) => Result<U, E | EE> | AsyncResult<U, E | EE> | Promise<Result<U, E | EE>>
   ): AsyncResult<T | U, E | EE> {
     const caughtAsyncResult = this.asyncResult.then((result) =>
+      // eslint-disable-next-line promise/no-nesting
       result.catch(fn as never)
     );
     return AsyncResult.wrap(caughtAsyncResult);
