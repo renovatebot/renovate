@@ -227,6 +227,17 @@ export class Result<T, E = Error> {
   }
 
   /**
+   * Returns the ok-value or throw the error.
+   */
+  unwrapOrThrow(): NonNullable<T> {
+    if (this.res.ok) {
+      return this.res.val;
+    }
+
+    throw this.res.err;
+  }
+
+  /**
    * Transforms the ok-value, sync or async way.
    *
    * Transform functions SHOULD NOT throw.
@@ -298,6 +309,48 @@ export class Result<T, E = Error> {
       return Result.ok(result);
     } catch (err) {
       logger.warn({ err }, 'Result: unhandled transform error');
+      return Result._uncaught(err);
+    }
+  }
+
+  catch<U = T, EE = E>(
+    fn: (err: NonNullable<E>) => Result<U, E | EE>
+  ): Result<T | U, E | EE>;
+  catch<U = T, EE = E>(
+    fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>
+  ): AsyncResult<T | U, E | EE>;
+  catch<U = T, EE = E>(
+    fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>
+  ): AsyncResult<T | U, E | EE>;
+  catch<U = T, EE = E>(
+    fn: (
+      err: NonNullable<E>
+    ) => Result<U, E | EE> | AsyncResult<U, E | EE> | Promise<Result<U, E | EE>>
+  ): Result<T | U, E | EE> | AsyncResult<T | U, E | EE> {
+    if (this.res.ok) {
+      return this;
+    }
+
+    if (this.res._uncaught) {
+      return this;
+    }
+
+    try {
+      const result = fn(this.res.err);
+
+      if (result instanceof Promise) {
+        return AsyncResult.wrap(result, (err) => {
+          logger.warn(
+            { err },
+            'Result: unexpected error in async catch handler'
+          );
+          return Result._uncaught(err);
+        });
+      }
+
+      return result;
+    } catch (err) {
+      logger.warn({ err }, 'Result: unexpected error in catch handler');
       return Result._uncaught(err);
     }
   }
@@ -402,6 +455,14 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
   }
 
   /**
+   * Returns the ok-value or throw the error.
+   */
+  async unwrapOrThrow(): Promise<NonNullable<T>> {
+    const result = await this.asyncResult;
+    return result.unwrapOrThrow();
+  }
+
+  /**
    * Transforms the ok-value, sync or async way.
    *
    * Transform functions SHOULD NOT throw.
@@ -483,5 +544,25 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
           return Result._uncaught(err);
         })
     );
+  }
+
+  catch<U = T, EE = E>(
+    fn: (err: NonNullable<E>) => Result<U, E | EE>
+  ): AsyncResult<T | U, E | EE>;
+  catch<U = T, EE = E>(
+    fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>
+  ): AsyncResult<T | U, E | EE>;
+  catch<U = T, EE = E>(
+    fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>
+  ): AsyncResult<T | U, E | EE>;
+  catch<U = T, EE = E>(
+    fn: (
+      err: NonNullable<E>
+    ) => Result<U, E | EE> | AsyncResult<U, E | EE> | Promise<Result<U, E | EE>>
+  ): AsyncResult<T | U, E | EE> {
+    const caughtAsyncResult = this.asyncResult.then((result) =>
+      result.catch(fn as never)
+    );
+    return AsyncResult.wrap(caughtAsyncResult);
   }
 }
