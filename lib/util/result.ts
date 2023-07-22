@@ -1,4 +1,3 @@
-/* eslint-disable promise/no-nesting */
 import { logger } from '../logger';
 
 interface Ok<T> {
@@ -376,11 +375,12 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
   }
 
   static ok<T>(val: NonNullable<T>): AsyncResult<T, never> {
-    return new AsyncResult(new Promise((resolve) => resolve(Result.ok(val))));
+    return new AsyncResult(Promise.resolve(Result.ok(val)));
   }
 
   static err<E>(err: NonNullable<E>): AsyncResult<never, E> {
-    return new AsyncResult(new Promise((resolve) => resolve(Result.err(err))));
+    // eslint-disable-next-line promise/no-promise-in-callback
+    return new AsyncResult(Promise.resolve(Result.err(err)));
   }
 
   static wrap<T, E = Error, EE = never>(
@@ -388,20 +388,19 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
     onErr?: (err: NonNullable<E>) => Result<T, E>
   ): AsyncResult<T, E | EE> {
     return new AsyncResult(
-      promise.then<Result<T, E | EE>, Result<T, E | EE>>(
-        (value) => {
+      promise
+        .then((value) => {
           if (value instanceof Result) {
             return value;
           }
           return Result.ok(value);
-        },
-        (err) => {
+        })
+        .catch((err) => {
           if (onErr) {
             return onErr(err);
           }
           return Result.err(err);
-        }
-      )
+        })
     );
   }
 

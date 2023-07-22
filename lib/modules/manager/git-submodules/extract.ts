@@ -3,10 +3,9 @@ import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { detectPlatform } from '../../../util/common';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { simpleGitConfig } from '../../../util/git/config';
-import { getHttpUrl, getRemoteUrlWithToken } from '../../../util/git/url';
+import { getHttpUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import type { ExtractConfig, PackageFileContent } from '../types';
@@ -119,11 +118,7 @@ export default async function extractPackageFile(
         .replace(regEx(/^[-+]/), '')
         .split(regEx(/\s/));
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
-      // hostRules only understands HTTP URLs
-      // Find HTTP URL, then apply token
-      let httpSubModuleUrl = getHttpUrl(subModuleUrl);
-      const hostType = detectPlatform(httpSubModuleUrl) ?? GitRefsDatasource.id;
-      httpSubModuleUrl = getRemoteUrlWithToken(httpSubModuleUrl, hostType);
+      const httpSubModuleUrl = getHttpUrl(subModuleUrl);
       const currentValue = await getBranch(
         gitModulesPath,
         name,
@@ -131,7 +126,7 @@ export default async function extractPackageFile(
       );
       deps.push({
         depName: path,
-        packageName: getHttpUrl(subModuleUrl),
+        packageName: httpSubModuleUrl,
         currentValue,
         currentDigest,
       });
