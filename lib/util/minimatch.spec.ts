@@ -7,5 +7,6 @@ describe('util/minimatch', () => {
 
   it('does not cache minimatch', () => {
     expect(minimatch('foo', {}, false)).not.toBe(minimatch('foo', {}, false));
+    expect(minimatch('foo')).not.toBe(minimatch('foo', {}, false));
   });
 });
