@@ -62,7 +62,7 @@ import type {
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { remoteBranchExists } from './branch';
-import { coerceRestPr } from './common';
+import { coerceRestPr, githubApi } from './common';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
@@ -87,8 +87,6 @@ import type {
 import { getUserDetails, getUserEmail } from './user';
 
 export const id = 'github';
-
-const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
@@ -771,11 +769,7 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
-  const branchExists = await remoteBranchExists(
-    githubApi,
-    repository,
-    branchName
-  );
+  const branchExists = await remoteBranchExists(repository, branchName);
 
   if (branchExists) {
     try {

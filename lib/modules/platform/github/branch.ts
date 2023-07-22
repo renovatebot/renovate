@@ -1,13 +1,10 @@
-import { Http, HttpError } from '../../../util/http';
+import { HttpError } from '../../../util/http';
 import { Result } from '../../../util/result';
+import { githubApi } from './common';
 
-function headRef(
-  http: Http,
-  repo: string,
-  branchName: string
-): Promise<boolean> {
+function headRef(repo: string, branchName: string): Promise<boolean> {
   return Result.wrap(
-    http.headJson(`/repos/${repo}/git/refs/heads/${branchName}`, {
+    githubApi.headJson(`/repos/${repo}/git/refs/heads/${branchName}`, {
       memCache: false,
     })
   )
@@ -23,16 +20,15 @@ function headRef(
 }
 
 export async function remoteBranchExists(
-  http: Http,
   repo: string,
   branchName: string
 ): Promise<boolean> {
   const refNested = `${branchName}/`;
-  const isNested = await headRef(http, repo, refNested);
+  const isNested = await headRef(repo, refNested);
   if (isNested) {
     const message = `Trying to create a branch '${branchName}' while it's the part of nested branch`;
     throw new Error(message);
   }
 
-  return headRef(http, repo, branchName);
+  return headRef(repo, branchName);
 }

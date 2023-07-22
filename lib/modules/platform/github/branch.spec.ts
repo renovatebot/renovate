@@ -1,10 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
-import { GithubHttp } from '../../../util/http/github';
 import { remoteBranchExists } from './branch';
 
 describe('modules/platform/github/branch', () => {
-  const http = new GithubHttp();
-
   it('should return true if the branch exists', async () => {
     httpMock
       .scope('https://api.github.com')
@@ -13,7 +10,7 @@ describe('modules/platform/github/branch', () => {
       .head('/repos/my/repo/git/refs/heads/renovate/foobar')
       .reply(200, { ref: 'renovate/foobar' });
 
-    const result = await remoteBranchExists(http, 'my/repo', 'renovate/foobar');
+    const result = await remoteBranchExists('my/repo', 'renovate/foobar');
 
     expect(result).toBe(true);
   });
@@ -26,7 +23,7 @@ describe('modules/platform/github/branch', () => {
       .head('/repos/my/repo/git/refs/heads/renovate/foobar')
       .reply(404);
 
-    const result = await remoteBranchExists(http, 'my/repo', 'renovate/foobar');
+    const result = await remoteBranchExists('my/repo', 'renovate/foobar');
 
     expect(result).toBe(false);
   });
@@ -38,7 +35,7 @@ describe('modules/platform/github/branch', () => {
       .reply(200);
 
     await expect(
-      remoteBranchExists(http, 'my/repo', 'renovate/foobar')
+      remoteBranchExists('my/repo', 'renovate/foobar')
     ).rejects.toThrow(
       `Trying to create a branch 'renovate/foobar' while it's the part of nested branch`
     );
@@ -51,7 +48,7 @@ describe('modules/platform/github/branch', () => {
       .reply(500, { message: 'Something went wrong' });
 
     await expect(
-      remoteBranchExists(http, 'my/repo', 'renovate/foobar')
+      remoteBranchExists('my/repo', 'renovate/foobar')
     ).rejects.toThrow('external-host-error');
   });
 });
