@@ -2002,7 +2002,7 @@ Instead you should do `> 13 months`.
 
 <!-- prettier-ignore -->
 !!! note
-    We recommend you use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+    We recommend you to only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
 
 ### matchDepTypes
 
