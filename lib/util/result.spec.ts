@@ -225,16 +225,30 @@ describe('util/result', () => {
     });
 
     describe('Transforming', () => {
-      it('transforms successful promise to value', async () => {
+      it('transforms AsyncResult to pure value', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
           x.toUpperCase()
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
-      it('transforms successful promise to Result', async () => {
+      it('transforms AsyncResult to Result', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
           Result.ok(x.toUpperCase())
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+
+      it('transforms Result to AsyncResult', async () => {
+        const res = await Result.ok('foo').transform((x) =>
+          AsyncResult.ok(x.toUpperCase())
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+
+      it('transforms AsyncResult to AsyncResult', async () => {
+        const res = await AsyncResult.ok('foo').transform((x) =>
+          AsyncResult.ok(x.toUpperCase())
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
@@ -289,15 +303,14 @@ describe('util/result', () => {
         expect(fn).not.toHaveBeenCalled();
       });
 
-      it('handles uncaught error from AsyncResult before transforming', async () => {
-        const res: AsyncResult<number, string> = new AsyncResult((_, reject) =>
-          reject('oops')
-        );
-        const fn = jest.fn((x: number) => Promise.resolve(x + 1));
-        await expect(res.transform(fn)).resolves.toEqual(
-          Result._uncaught('oops')
-        );
-        expect(fn).not.toHaveBeenCalled();
+      it('re-wraps error thrown via unwrapping in async transform', async () => {
+        const res = await AsyncResult.ok(42)
+          .transform(async (): Promise<number> => {
+            await Promise.resolve();
+            throw 'oops';
+          })
+          .transform((x) => x + 1);
+        expect(res).toEqual(Result._uncaught('oops'));
       });
 
       it('handles error thrown on Result async transform', async () => {
