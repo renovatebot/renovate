@@ -7,8 +7,8 @@ describe('util/minimatch', () => {
 
   it('caches minimatch', () => {
     expect(minimatch('foo')).toBe(minimatch('foo'));
-    expect(minimatch('foo', { debug: true })).toBe(
-      minimatch('foo', { debug: true })
+    expect(minimatch('foo', { dot: true })).toBe(
+      minimatch('foo', { dot: true })
     );
   });
 
