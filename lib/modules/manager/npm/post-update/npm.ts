@@ -107,11 +107,6 @@ export async function generateLockFile(
             ' '
           )}`;
           commands.push(updateCmd);
-          if (config.packageFile) {
-            // TODO: How do we know, where the workspace package.json is located?
-            // commands.push(`git checkout HEAD -- ` + config.packageFile);
-            // commands.push('npm install --no-audit');
-          }
         }
       }
     }
