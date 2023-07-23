@@ -249,6 +249,7 @@
     "re2": "1.19.1"
   },
   "devDependencies": {
+    "@hyrious/marshal": "0.2.5",
     "@jest/globals": "29.6.1",
     "@jest/reporters": "29.6.1",
     "@jest/test-result": "29.6.1",

@@ -1,10 +1,10 @@
 import hasha from 'hasha';
-import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
-import { joinUrlParts, parseUrl } from '../../../util/url';
+import { AsyncResult, Result } from '../../../util/result';
+import { parseUrl } from '../../../util/url';
 import type { ReleaseResult } from '../types';
-import { GemMetadata, GemVersions } from './schema';
+import { getV1Releases } from './common';
 
 interface CacheRecord {
   hash: string;
@@ -19,39 +19,21 @@ export class MetadataCache {
     packageName: string,
     versions: string[]
   ): Promise<ReleaseResult> {
-    const hash = hasha(versions, { algorithm: 'sha256' });
     const cacheNs = `datasource-rubygems`;
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
-    const oldCache = await packageCache.get<CacheRecord>(cacheNs, cacheKey);
-    if (oldCache?.hash === hash) {
-      return oldCache.data;
-    }
+    const hash = hasha(versions, { algorithm: 'sha256' });
 
-    try {
-      const { body: releases } = await this.http.getJson(
-        joinUrlParts(registryUrl, '/api/v1/versions', `${packageName}.json`),
-        GemVersions
-      );
+    const loadCache = (): AsyncResult<ReleaseResult, unknown> =>
+      Result.wrapNullable(
+        packageCache.get<CacheRecord>(cacheNs, cacheKey),
+        'cache-not-found'
+      ).transform((cache) => {
+        return hash === cache.hash
+          ? Result.ok(cache.data)
+          : Result.err('cache-outdated');
+      });
 
-      const { body: metadata } = await this.http.getJson(
-        joinUrlParts(registryUrl, '/api/v1/gems', `${packageName}.json`),
-        GemMetadata
-      );
-
-      const data: ReleaseResult = { releases };
-
-      if (metadata.changelogUrl) {
-        data.changelogUrl = metadata.changelogUrl;
-      }
-
-      if (metadata.sourceUrl) {
-        data.sourceUrl = metadata.sourceUrl;
-      }
-
-      if (metadata.homepage) {
-        data.homepage = metadata.homepage;
-      }
-
+    const saveCache = async (data: ReleaseResult): Promise<ReleaseResult> => {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
         const newCache: CacheRecord = { hash, data };
@@ -66,10 +48,15 @@ export class MetadataCache {
       }
 
       return data;
-    } catch (err) {
-      logger.debug({ err }, 'Rubygems: failed to fetch metadata');
-      const releases = versions.map((version) => ({ version }));
-      return { releases };
-    }
+    };
+
+    return await loadCache()
+      .catch(() =>
+        getV1Releases(this.http, registryUrl, packageName).transform(saveCache)
+      )
+      .catch(() =>
+        Result.ok({ releases: versions.map((version) => ({ version })) })
+      )
+      .unwrapOrThrow();
   }
 }

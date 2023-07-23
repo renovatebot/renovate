@@ -17,10 +17,10 @@ export const MarshalledVersionInfo = LooseArray(
 export const GemMetadata = z
   .object({
     name: z.string(),
-    version: z.string().nullish().catch(null),
-    changelog_uri: z.string().nullish().catch(null),
-    homepage_uri: z.string().nullish().catch(null),
-    source_code_uri: z.string().nullish().catch(null),
+    version: z.string().optional().catch(undefined),
+    changelog_uri: z.string().optional().catch(undefined),
+    homepage_uri: z.string().optional().catch(undefined),
+    source_code_uri: z.string().optional().catch(undefined),
   })
   .transform(
     ({
@@ -44,9 +44,9 @@ export const GemVersions = LooseArray(
     .object({
       number: z.string(),
       created_at: z.string(),
-      platform: z.string().nullable().catch(null),
-      ruby_version: z.string().nullable().catch(null),
-      rubygems_version: z.string().nullable().catch(null),
+      platform: z.string().optional().catch(undefined),
+      ruby_version: z.string().optional().catch(undefined),
+      rubygems_version: z.string().optional().catch(undefined),
       metadata: z
         .object({
           changelog_uri: z.string().optional().catch(undefined),

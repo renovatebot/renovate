@@ -16,6 +16,7 @@ import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import { hashBody } from '../pr-body';
 import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
+import * as branch from './branch';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
 
@@ -939,8 +940,6 @@ describe('modules/platform/github/index', () => {
         ])
         .head('/repos/some/repo/git/commits/123')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
-        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
@@ -953,6 +952,7 @@ describe('modules/platform/github/index', () => {
           updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const pr = await github.getBranchPr('somebranch');
       const pr2 = await github.getBranchPr('somebranch');
@@ -1036,12 +1036,11 @@ describe('modules/platform/github/index', () => {
         ])
         .head('/repos/some/repo/git/commits/123')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
-        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(422);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getBranchPr('somebranch');
@@ -1069,9 +1068,8 @@ describe('modules/platform/github/index', () => {
           },
         ])
         .head('/repos/some/repo/git/commits/123')
-        .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
-        .reply(422);
+        .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockRejectedValueOnce('oops');
 
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getBranchPr('somebranch');
@@ -3387,10 +3385,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3417,10 +3414,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3447,12 +3443,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(422)
         .post('/repos/some/repo/git/refs')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3479,10 +3474,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
