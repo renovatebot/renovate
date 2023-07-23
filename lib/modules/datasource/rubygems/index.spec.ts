@@ -23,20 +23,19 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://firstparty.com')
         .get('/basepath/versions')
-        .reply(404);
-      httpMock
-        .scope('https://firstparty.com')
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200, { name: 'rails' })
+        .reply(404)
         .get('/basepath/api/v1/versions/rails.json')
-        .reply(200, []);
-      httpMock.scope('https://thirdparty.com').get('/versions').reply(404);
+        .reply(200, [])
+        .get('/basepath/api/v1/dependencies?gems=rails')
+        .reply(200, emptyMarshalArray);
       httpMock
         .scope('https://thirdparty.com')
-        .get('/api/v1/gems/rails.json')
-        .reply(200, { name: 'rails' })
+        .get('/versions')
+        .reply(404)
         .get('/api/v1/versions/rails.json')
-        .reply(200, []);
+        .reply(200, [])
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, emptyMarshalArray);
       expect(
         await getPkgReleases({
           versioning: rubyVersioning.id,
@@ -151,16 +150,18 @@ describe('modules/datasource/rubygems/index', () => {
         .scope('https://thirdparty.com/')
         .get('/versions')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(401);
+        .get('/api/v1/versions/rails.json')
+        .reply(400)
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, emptyMarshalArray);
       httpMock
         .scope('https://firstparty.com/')
         .get('/basepath/versions')
         .reply(404)
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200, railsInfo)
         .get('/basepath/api/v1/versions/rails.json')
-        .reply(200, railsVersions);
+        .reply(200, railsVersions)
+        .get('/basepath/api/v1/gems/rails.json')
+        .reply(200, railsInfo);
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
@@ -175,26 +176,22 @@ describe('modules/datasource/rubygems/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('falls back to info when version request fails', async () => {
+    it('falls back to dependencies when other API requests fail', async () => {
       httpMock
         .scope('https://thirdparty.com/')
         .get('/versions')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
-        .reply(400, {});
+        .reply(400, {})
+        .get('/api/v1/dependencies?gems=rails')
+        .reply(200, railsDependencies);
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
         packageName: 'rails',
-        registryUrls: [
-          'https://thirdparty.com',
-          'https://firstparty.com/basepath/',
-        ],
+        registryUrls: ['https://thirdparty.com'],
       });
-      expect(res?.releases).toHaveLength(1);
-      expect(res?.releases[0].version).toBe(railsInfo.version);
+      expect(res?.releases).toHaveLength(339);
     });
 
     it('errors when version request fails with anything other than 400 or 404', async () => {
@@ -202,8 +199,6 @@ describe('modules/datasource/rubygems/index', () => {
         .scope('https://thirdparty.com/')
         .get('/versions')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
         .reply(500, {});
       await expect(
@@ -224,7 +219,7 @@ describe('modules/datasource/rubygems/index', () => {
         .scope('https://thirdparty.com/')
         .get('/versions')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
+        .get('/api/v1/versions/rails.json')
         .reply(404, railsInfo)
         .get('/api/v1/dependencies?gems=rails')
         .reply(200, railsDependencies);
@@ -233,10 +228,7 @@ describe('modules/datasource/rubygems/index', () => {
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
         packageName: 'rails',
-        registryUrls: [
-          'https://thirdparty.com',
-          'https://firstparty.com/basepath/',
-        ],
+        registryUrls: ['https://thirdparty.com'],
       });
       expect(res?.releases).toHaveLength(339);
     });
