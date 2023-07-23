@@ -1244,6 +1244,11 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
+"@hyrious/marshal@0.2.5":
+  version "0.2.5"
+  resolved "https://registry.npmjs.org/@hyrious/marshal/-/marshal-0.2.5.tgz#96ee3c45e2b356d8a5b202336f1d17f0aefa7e0a"
+  integrity sha512-z0zS0N9TTX6gh78lsC9rkYMDGCvQAFn0oGT5zftU7HEr6/5woMf022/oMSxE94A1TXRyzk+SE2g7EMFc3n+uCw==
+
 "@iarna/toml@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-3.0.0.tgz#ccde5292fe9d348bbe93fe90d579fc442b72b0b3"
