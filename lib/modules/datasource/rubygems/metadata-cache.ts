@@ -55,7 +55,9 @@ export class MetadataCache {
         getV1Releases(this.http, registryUrl, packageName).transform(saveCache)
       )
       .catch(() =>
-        Result.ok({ releases: versions.map((version) => ({ version })) })
+        Result.ok({
+          releases: versions.map((version) => ({ version })),
+        })
       )
       .unwrapOrThrow();
   }

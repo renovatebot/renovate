@@ -1,4 +1,6 @@
 import { Marshal } from '@qnighy/marshal';
+import type { ZodError } from 'zod';
+import { logger } from '../../../logger';
 import { AsyncResult, Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
@@ -9,8 +11,6 @@ import { RubygemsHttp } from './http';
 import { MetadataCache } from './metadata-cache';
 import { MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
-import { logger } from '../../../logger';
-import type { ZodError } from 'zod';
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
