@@ -25,29 +25,3 @@ const Categories = [
 ] as const;
 
 export type Category = (typeof Categories)[number];
-
-export const CategoryNames: Record<Category, string> = {
-  ansible: 'Ansible',
-  batect: 'Batect',
-  bazel: 'Bazel',
-  c: 'C and C++',
-  cd: 'Continuous Delivery',
-  ci: 'Continuous Integration',
-  dart: 'Dart',
-  docker: 'Docker',
-  dotnet: '.NET',
-  elixir: 'Elixir',
-  golang: 'Go',
-  helm: 'Helm',
-  iac: 'Infrastructure as Code',
-  java: 'Java',
-  js: 'JavaScript',
-  kubernetes: 'Kubernetes',
-  node: 'Node.js',
-  php: 'PHP',
-  python: 'Python',
-  ruby: 'Ruby',
-  rust: 'Rust',
-  swift: 'Swift',
-  terraform: 'Terraform',
-};

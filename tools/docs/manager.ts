@@ -1,6 +1,5 @@
 import type { RenovateConfig } from '../../lib/config/types';
 import type { Category } from '../../lib/constants';
-import { CategoryNames } from '../../lib/constants';
 import { getManagers } from '../../lib/modules/manager';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
@@ -24,6 +23,32 @@ function getTitle(manager: string, displayName: string): string {
 function getManagerLink(manager: string): string {
   return `[\`${manager}\`](${manager}/)`;
 }
+
+export const CategoryNames: Record<Category, string> = {
+  ansible: 'Ansible',
+  batect: 'Batect',
+  bazel: 'Bazel',
+  c: 'C and C++',
+  cd: 'Continuous Delivery',
+  ci: 'Continuous Integration',
+  dart: 'Dart',
+  docker: 'Docker',
+  dotnet: '.NET',
+  elixir: 'Elixir',
+  golang: 'Go',
+  helm: 'Helm',
+  iac: 'Infrastructure as Code',
+  java: 'Java',
+  js: 'JavaScript',
+  kubernetes: 'Kubernetes',
+  node: 'Node.js',
+  php: 'PHP',
+  python: 'Python',
+  ruby: 'Ruby',
+  rust: 'Rust',
+  swift: 'Swift',
+  terraform: 'Terraform',
+};
 
 export async function generateManagers(
   dist: string,
