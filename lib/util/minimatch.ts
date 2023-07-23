@@ -7,9 +7,7 @@ export function minimatch(
   options?: MinimatchOptions,
   useCache = true
 ): Minimatch {
-  const key = options
-    ? `${pattern.toString()}:${JSON.stringify(options)}`
-    : `${pattern.toString()}`;
+  const key = options ? `${pattern}:${JSON.stringify(options)}` : pattern;
 
   if (useCache) {
     const cachedResult = cache.get(key);
