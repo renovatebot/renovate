@@ -6,10 +6,10 @@ import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { getV1Releases } from './common';
+import { assignMetadata, getV1Metadata, getV1Releases } from './common';
 import { RubygemsHttp } from './http';
 import { MetadataCache } from './metadata-cache';
-import { MarshalledVersionInfo } from './schema';
+import { GemInfo, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 export class RubyGemsDatasource extends Datasource {
@@ -56,9 +56,14 @@ export class RubyGemsDatasource extends Datasource {
     ) {
       result = this.getReleasesViaDeprecatedAPI(registryUrl, packageName);
     } else {
-      result = getV1Releases(this.http, registryUrl, packageName).catch(() =>
-        this.getReleasesViaDeprecatedAPI(registryUrl, packageName)
-      );
+      result = this.getReleasesViaInfoEndpoint(registryUrl, packageName)
+        .catch(() => getV1Releases(this.http, registryUrl, packageName))
+        .catch(() => this.getReleasesViaDeprecatedAPI(registryUrl, packageName))
+        .transform((result) =>
+          getV1Metadata(this.http, registryUrl, packageName)
+            .transform((metadata) => assignMetadata(result, metadata))
+            .unwrap(result)
+        );
     }
 
     const { val, err } = await result.unwrap();
@@ -74,6 +79,17 @@ export class RubyGemsDatasource extends Datasource {
     return null;
   }
 
+  private getReleasesViaInfoEndpoint(
+    registryUrl: string,
+    packageName: string
+  ): AsyncResult<ReleaseResult, Error | ZodError> {
+    const url = joinUrlParts(registryUrl, '/info', packageName);
+    return Result.wrap(this.http.get(url)).transform(({ body }) => {
+      const res = GemInfo.safeParse(body);
+      return res.success ? Result.ok(res.data) : Result.err(res.error);
+    });
+  }
+
   private getReleasesViaDeprecatedAPI(
     registryUrl: string,
     packageName: string
@@ -86,7 +102,7 @@ export class RubyGemsDatasource extends Datasource {
       const data = Marshal.parse(body);
       const releases = MarshalledVersionInfo.safeParse(data);
       return releases.success
-        ? Result.ok({ releases: releases.data })
+        ? Result.ok(releases.data)
         : Result.err(releases.error);
     });
   }

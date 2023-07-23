@@ -25,6 +25,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('returns null for missing pkg', async () => {
       httpMock
         .scope('https://example.com')
+        .get('/info/foobar')
+        .reply(200, '')
         .get('/api/v1/versions/foobar.json')
         .reply(200, [])
         .get('/api/v1/dependencies?gems=foobar')
@@ -115,6 +117,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('uses multiple source urls', async () => {
       httpMock
         .scope('https://registry-1.com/')
+        .get('/info/foobar')
+        .reply(404)
         .get('/api/v1/versions/foobar.json')
         .reply(400)
         .get('/api/v1/dependencies?gems=foobar')
@@ -122,6 +126,8 @@ describe('modules/datasource/rubygems/index', () => {
 
       httpMock
         .scope('https://registry-2.com/nested/path')
+        .get('/info/foobar')
+        .reply(404)
         .get('/api/v1/versions/foobar.json')
         .reply(200, [
           { number: '1.0.0', created_at: '2021-01-01' },
@@ -154,6 +160,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('falls back to dependencies API', async () => {
       httpMock
         .scope('https://example.com/')
+        .get('/info/foobar')
+        .reply(404)
         .get('/api/v1/versions/foobar.json')
         .reply(400, {})
         .get('/api/v1/dependencies?gems=foobar')
@@ -164,7 +172,9 @@ describe('modules/datasource/rubygems/index', () => {
             { number: '2.0.0' },
             { number: '3.0.0' },
           ])
-        );
+        )
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {});
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
@@ -186,6 +196,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('errors when version request fails with anything other than 400 or 404', async () => {
       httpMock
         .scope('https://example.com/')
+        .get('/info/foobar')
+        .reply(404)
         .get('/api/v1/versions/foobar.json')
         .reply(500, {})
         .get('/api/v1/dependencies?gems=foobar')

@@ -4,7 +4,7 @@ import type { Http } from '../../../util/http';
 import { AsyncResult, Result } from '../../../util/result';
 import { parseUrl } from '../../../util/url';
 import type { ReleaseResult } from '../types';
-import { getV1Releases } from './common';
+import { assignMetadata, getV1Metadata, getV1Releases } from './common';
 
 interface CacheRecord {
   hash: string;
@@ -52,7 +52,13 @@ export class MetadataCache {
 
     return await loadCache()
       .catch(() =>
-        getV1Releases(this.http, registryUrl, packageName).transform(saveCache)
+        getV1Releases(this.http, registryUrl, packageName)
+          .transform((releaseResult) =>
+            getV1Metadata(this.http, registryUrl, packageName)
+              .transform((metadata) => assignMetadata(releaseResult, metadata))
+              .unwrap(releaseResult)
+          )
+          .transform(saveCache)
       )
       .catch(() =>
         Result.ok({
