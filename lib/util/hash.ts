@@ -11,3 +11,7 @@ export function hash(data: string | Buffer, algorithm: AlgorithmName): string {
   hash.update(data);
   return hash.digest('hex');
 }
+
+export function toSha256(input: string): string {
+  return hash(input, 'sha256');
+}
