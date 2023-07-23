@@ -223,8 +223,7 @@ const options: RenovateOptions[] = [
     description: `Enable or disable Renovate bot.`,
     stage: 'package',
     type: 'boolean',
-    cli: false,
-    env: false,
+    cli: true,
   },
   {
     name: 'constraintsFiltering',
