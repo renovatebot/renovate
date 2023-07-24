@@ -1,4 +1,3 @@
-import hasha from 'hasha';
 import * as packageCache from '../../../util/cache/package';
 import { toSha256 } from '../../../util/hash';
 import type { Http } from '../../../util/http';
