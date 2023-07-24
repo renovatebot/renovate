@@ -40,12 +40,14 @@ export function bumpPackageVersion(
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);
+    logger.debug(`original content: ${content}`);
     bumpedContent = replaceAt(
       content,
       versionPosition,
       currentValue,
       newProjVersion
     );
+    logger.debug(`bumped content: ${bumpedContent}`);
 
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');
