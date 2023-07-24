@@ -110,6 +110,8 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('returns true if schedule uses cron syntax', () => {
       expect(schedule.hasValidSchedule(['* 5 * * *'])[0]).toBeTrue();
+      expect(schedule.hasValidSchedule(['* * * * * 6L'])[0]).toBeTrue();
+      expect(schedule.hasValidSchedule(['* * */2 6#1'])[0]).toBeTrue();
     });
 
     it('massages schedules', () => {
