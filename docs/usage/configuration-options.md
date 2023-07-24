@@ -1105,7 +1105,11 @@ You can't use other filenames because Renovate only checks the default filename 
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
+The `gitAuthor` option accepts a [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant string.
+Specifically, make sure to include a name followed by an email address, e.g.
+```
+Development Bot <dev-bot@my-software-company.com>
+```
 
 <!-- prettier-ignore -->
 !!! danger
