@@ -3293,6 +3293,8 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
 
+## repoProblemsHeader
+
 ## respectLatest
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
