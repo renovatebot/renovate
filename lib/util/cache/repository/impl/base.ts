@@ -88,7 +88,7 @@ export abstract class RepoCacheBase implements RepoCache {
       repository,
       fingerprint,
       payload,
-      hash,
+      hash: hashedJsonStr,
     });
   }
 
