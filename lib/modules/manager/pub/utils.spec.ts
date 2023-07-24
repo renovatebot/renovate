@@ -4,7 +4,6 @@ import { lazyParsePubspeckLock } from './utils';
 describe('modules/manager/pub/utils', () => {
   describe('lazyParsePubspeckLock', () => {
     const pubspecLock = Fixtures.get('pubspec.1.lock');
-    const invalidPubspecLock = Fixtures.get('pubspec.invalid.lock');
 
     it('load and parse successfully', () => {
       const actual = lazyParsePubspeckLock(pubspecLock);
@@ -15,12 +14,12 @@ describe('modules/manager/pub/utils', () => {
 
     it('invalid yaml', () => {
       const actual = lazyParsePubspeckLock('clearly-invalid');
-      expect(actual.getValue()).toBeUndefined();
+      expect(actual.getValue()).toBeNull();
     });
 
     it('invalid schema', () => {
-      const actual = lazyParsePubspeckLock(invalidPubspecLock);
-      expect(actual.getValue()).toBeUndefined();
+      const actual = lazyParsePubspeckLock('clearly:\n\tinvalid: lock');
+      expect(actual.getValue()).toBeNull();
     });
   });
 });

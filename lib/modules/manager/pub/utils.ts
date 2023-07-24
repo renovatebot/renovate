@@ -4,11 +4,11 @@ import { PubspecLockSchema } from './schema';
 
 export function lazyParsePubspeckLock(
   fileContent: string
-): Lazy<PubspecLockSchema | undefined> {
+): Lazy<PubspecLockSchema | null> {
   return new Lazy(() => parsePubspecLock(fileContent));
 }
 
-function parsePubspecLock(fileContent: string): PubspecLockSchema | undefined {
+function parsePubspecLock(fileContent: string): PubspecLockSchema | null {
   try {
     const data = load(fileContent, { json: true });
     const res = PubspecLockSchema.safeParse(data);
@@ -18,4 +18,5 @@ function parsePubspecLock(fileContent: string): PubspecLockSchema | undefined {
   } catch {
     // Do nothing
   }
+  return null;
 }
