@@ -1,6 +1,5 @@
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
-import hasha from 'hasha';
 import type { SetRequired } from 'type-fest';
 import { infer as Infer, type ZodError, ZodType } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
@@ -9,6 +8,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
@@ -180,18 +180,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
     options = applyAuthorization(options);
 
-    // use sha512: https://www.npmjs.com/package/hasha#algorithm
     const memCacheKey =
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
-        ? hasha([
-            'got-',
-            JSON.stringify({
+        ? hash(
+            `got-${JSON.stringify({
               url,
               headers: options.headers,
               method: options.method,
-            }),
-          ])
+            })}`
+          )
         : null;
 
     let resPromise: Promise<HttpResponse<T>> | null = null;
