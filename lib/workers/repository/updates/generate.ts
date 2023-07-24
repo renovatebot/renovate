@@ -416,11 +416,14 @@ export function generateBranchConfig(
     }
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
-  config.additionalReviewers = uniq(
+  const additionalReviewers = uniq(
     config.upgrades
       .map((upgrade) => upgrade.additionalReviewers)
       .flat()
       .filter(is.nonEmptyString)
   );
+  if (additionalReviewers.length > 0) {
+    config.additionalReviewers = additionalReviewers;
+  }
   return config;
 }
