@@ -14,11 +14,13 @@ export function replaceAt(
   oldString: string,
   newString: string
 ): string {
-  return (
-    content.substring(0, index) +
-    newString +
-    content.substring(index + oldString.length)
-  );
+  const firstPart = content.slice(0, index);
+  const secondPart = content.slice(index);
+  if (secondPart.startsWith(oldString)) {
+    return firstPart + secondPart.replace(oldString, newString);
+  }
+
+  return content;
 }
 
 /**
