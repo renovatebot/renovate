@@ -9,6 +9,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
+import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
 
@@ -415,5 +416,11 @@ export function generateBranchConfig(
     }
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
+  config.additionalReviewers = uniq(
+    config.upgrades
+      .map((upgrade) => upgrade.additionalReviewers)
+      .flat()
+      .filter(is.nonEmptyString)
+  );
   return config;
 }
