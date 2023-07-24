@@ -1,3 +1,4 @@
+// istanbul ignore next
 const Categories = [
   'ansible',
   'batect',
