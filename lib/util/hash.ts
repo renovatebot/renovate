@@ -15,3 +15,7 @@ export function hash(data: string | Buffer, algorithm: AlgorithmName): string {
 export function toSha256(input: string): string {
   return hash(input, 'sha256');
 }
+
+export function toSha512(input: string): string {
+  return hash(input, 'sha512');
+}
