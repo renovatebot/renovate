@@ -31,12 +31,21 @@ export function bumpPackageVersion(
   try {
     const project = new XmlDocument(content);
     const versionNode = project.descendantWithPath('PropertyGroup.Version')!;
+    const currentProjVersion = versionNode.val;
     const startTagPosition = versionNode.startTagPosition;
-    const versionPosition = content.indexOf(versionNode.val, startTagPosition);
+    const versionPosition = content.indexOf(
+      currentProjVersion,
+      startTagPosition
+    );
 
     const newProjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
+    }
+
+    if (currentProjVersion === newProjVersion) {
+      logger.debug('Version was already bumped');
+      return { bumpedContent };
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);
