@@ -1,7 +1,7 @@
-import hasha from 'hasha';
+import { hash } from './hash';
 import { safeStringify } from './stringify';
 
 export function fingerprint(input: unknown): string {
   const stringifiedInput = safeStringify(input);
-  return stringifiedInput ? hasha(stringifiedInput) : '';
+  return stringifiedInput ? hash(stringifiedInput) : '';
 }
