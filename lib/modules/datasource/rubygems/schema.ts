@@ -9,10 +9,10 @@ export const MarshalledVersionInfo = LooseArray(
       number: z.string(),
     })
     .transform(({ number: version }) => ({ version }))
-)
-  .transform((releases) => (releases.length === 0 ? null : { releases }))
-  .nullable()
-  .catch(null);
+).refine(
+  (value) => !is.emptyArray(value),
+  'Empty response from `/v1/dependencies` endpoint'
+);
 
 export const GemMetadata = z
   .object({
