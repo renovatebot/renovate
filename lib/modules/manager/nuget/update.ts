@@ -1,5 +1,7 @@
 import semver, { ReleaseType } from 'semver';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
+import { replaceAt } from '../../../util/string';
 import type { BumpPackageVersionResult } from '../types';
 
 export function bumpPackageVersion(
@@ -27,19 +29,23 @@ export function bumpPackageVersion(
   }
 
   try {
+    const project = new XmlDocument(content);
+    const versionNode = project.descendantWithPath('PropertyGroup.Version')!;
+    const startTagPosition = versionNode.startTagPosition;
+    const versionPosition = content.indexOf(versionNode.val, startTagPosition);
+
     const newProjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);
-    logger.debug(`original content: ${content}`);
-
-    bumpedContent = content.replace(
-      `<Version>${currentValue}</Version>`,
-      `<Version>${newProjVersion}</Version>`
+    bumpedContent = replaceAt(
+      content,
+      versionPosition,
+      currentValue,
+      newProjVersion
     );
-    logger.debug(`bumped content: ${bumpedContent}`);
 
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');
