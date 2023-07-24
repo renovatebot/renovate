@@ -1,7 +1,7 @@
-import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalDirectory } from '../../../util/fs';
+import { minimatch } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
 import { HermitDatasource } from '../../datasource/hermit';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -68,7 +68,7 @@ async function listHermitPackages(
   const out = [] as HermitListItem[];
 
   for (const f of files) {
-    if (!minimatch(f, '.*.pkg')) {
+    if (!minimatch('.*.pkg').match(f)) {
       continue;
     }
 
