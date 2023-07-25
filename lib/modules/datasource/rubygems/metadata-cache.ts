@@ -4,7 +4,7 @@ import type { Http } from '../../../util/http';
 import { AsyncResult, Result } from '../../../util/result';
 import { parseUrl } from '../../../util/url';
 import type { ReleaseResult } from '../types';
-import { assignMetadata, getV1Metadata, getV1Releases } from './common';
+import { getV1Releases } from './common';
 
 interface CacheRecord {
   hash: string;

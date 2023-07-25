@@ -7,7 +7,7 @@ import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { assignMetadata, getV1Metadata, getV1Releases } from './common';
+import { getV1Releases } from './common';
 import { RubygemsHttp } from './http';
 import { MetadataCache } from './metadata-cache';
 import { GemInfo, MarshalledVersionInfo } from './schema';
@@ -70,10 +70,10 @@ export class RubyGemsDatasource extends Datasource {
     ) {
       result = this.getReleasesViaDeprecatedAPI(registryUrl, packageName);
     } else {
-      result = this.getReleasesViaInfoEndpoint(registryUrl, packageName)
+      result = getV1Releases(this.http, registryUrl, packageName)
         .catch((err) =>
           unlessServerSide(err, () =>
-            getV1Releases(this.http, registryUrl, packageName)
+            this.getReleasesViaInfoEndpoint(registryUrl, packageName)
           )
         )
         .catch((err) =>

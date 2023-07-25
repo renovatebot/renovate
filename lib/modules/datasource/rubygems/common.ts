@@ -1,6 +1,6 @@
 import { assignKeys } from '../../../util/assign-keys';
-import { type Http, HttpError, type SafeJsonError } from '../../../util/http';
-import { type AsyncResult, Result } from '../../../util/result';
+import type { Http, SafeJsonError } from '../../../util/http';
+import type { AsyncResult } from '../../../util/result';
 import { joinUrlParts as join } from '../../../util/url';
 import type { ReleaseResult } from '../types';
 import { GemMetadata, GemVersions } from './schema';
