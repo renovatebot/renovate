@@ -1,11 +1,11 @@
-import hasha from 'hasha';
+import { hash } from '../../util/hash';
 
 export function repoFingerprint(
   repoId: number | string,
   endpoint: string | undefined
 ): string {
   const input = endpoint ? `${endpoint}::${repoId}` : `${repoId}`;
-  const fingerprint = hasha(input);
+  const fingerprint = hash(input);
   return fingerprint;
 }
 
