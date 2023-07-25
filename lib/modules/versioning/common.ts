@@ -9,7 +9,8 @@ export function isVersioningApiConstructor(
 export function getExcludedVersions(range: string): string[] {
   return range
     .split(',')
-    .filter((version) => version.match('!='))
+    .map(v => v.trim())
+    .filter((version) => /^!=/.test(version))
     .map((version) => version.replace('!=', '').trim());
 }
 
