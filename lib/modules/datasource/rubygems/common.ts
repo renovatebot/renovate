@@ -36,14 +36,9 @@ export function getV1Releases(
     `${packageName}.json`
   );
 
-  return http.getJsonSafe(versionsUrl, GemVersions).catch((err) => {
-    if (err instanceof HttpError) {
-      const status = err.response?.statusCode;
-      if (status === 404 || status === 400) {
-        return Result.err('unsupported-api');
-      }
-    }
-
-    return Result.err(err);
-  });
+  return http.getJsonSafe(versionsUrl, GemVersions).transform((releaseResult) =>
+    getV1Metadata(http, registryUrl, packageName)
+      .transform((metadata) => assignMetadata(releaseResult, metadata))
+      .unwrap(releaseResult)
+  );
 }
