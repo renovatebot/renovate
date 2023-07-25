@@ -1,4 +1,10 @@
-import { GemMetadata, GemVersions, MarshalledVersionInfo } from './schema';
+import { codeBlock } from 'common-tags';
+import {
+  GemInfo,
+  GemMetadata,
+  GemVersions,
+  MarshalledVersionInfo,
+} from './schema';
 
 describe('modules/datasource/rubygems/schema', () => {
   describe('MarshalledVersionInfo', () => {
@@ -9,39 +15,39 @@ describe('modules/datasource/rubygems/schema', () => {
         { number: '3.0.0' },
       ];
       const output = MarshalledVersionInfo.parse(input);
-      expect(output).toEqual([
-        { version: '1.0.0' },
-        { version: '2.0.0' },
-        { version: '3.0.0' },
-      ]);
+      expect(output).toEqual({
+        releases: [
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
+        ],
+      });
+    });
+
+    it('errors on empty input', () => {
+      expect(() => MarshalledVersionInfo.parse([])).toThrow(
+        'Empty response from `/v1/dependencies` endpoint'
+      );
     });
   });
 
   describe('GemMetadata', () => {
-    it('requires only name field', () => {
-      const input = { name: 'foo' };
-      const output = GemMetadata.parse(input);
-      expect(output).toEqual({
-        packageName: 'foo',
+    it('parses empty object into undefined fields', () => {
+      expect(GemMetadata.parse({})).toEqual({
         changelogUrl: undefined,
         homepage: undefined,
-        latestVersion: undefined,
         sourceUrl: undefined,
       });
     });
 
     it('parses valid input', () => {
       const input = {
-        name: 'foo',
-        version: '1.0.0',
         changelog_uri: 'https://example.com',
         homepage_uri: 'https://example.com',
         source_code_uri: 'https://example.com',
       };
       const output = GemMetadata.parse(input);
       expect(output).toEqual({
-        packageName: 'foo',
-        latestVersion: '1.0.0',
         changelogUrl: 'https://example.com',
         homepage: 'https://example.com',
         sourceUrl: 'https://example.com',
@@ -87,41 +93,68 @@ describe('modules/datasource/rubygems/schema', () => {
         },
       ];
       const output = GemVersions.parse(input);
-      expect(output).toEqual([
-        {
-          version: '1.0.0',
-          releaseTimestamp: '2021-01-01',
-          changelogUrl: 'https://example.com',
-          sourceUrl: 'https://example.com',
-          constraints: {
-            platform: ['ruby'],
-            ruby: ['2.7.0'],
-            rubygems: ['3.2.0'],
+      expect(output).toEqual({
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01',
+            changelogUrl: 'https://example.com',
+            sourceUrl: 'https://example.com',
+            constraints: {
+              platform: ['ruby'],
+              ruby: ['2.7.0'],
+              rubygems: ['3.2.0'],
+            },
           },
-        },
-        {
-          version: '2.0.0',
-          releaseTimestamp: '2022-01-01',
-          changelogUrl: 'https://example.com',
-          sourceUrl: 'https://example.com',
-          constraints: {
-            platform: ['ruby'],
-            ruby: ['2.7.0'],
-            rubygems: ['3.2.0'],
+          {
+            version: '2.0.0',
+            releaseTimestamp: '2022-01-01',
+            changelogUrl: 'https://example.com',
+            sourceUrl: 'https://example.com',
+            constraints: {
+              platform: ['ruby'],
+              ruby: ['2.7.0'],
+              rubygems: ['3.2.0'],
+            },
           },
-        },
-        {
-          version: '3.0.0',
-          releaseTimestamp: '2023-01-01',
-          changelogUrl: 'https://example.com',
-          sourceUrl: 'https://example.com',
-          constraints: {
-            platform: ['ruby'],
-            ruby: ['2.7.0'],
-            rubygems: ['3.2.0'],
+          {
+            version: '3.0.0',
+            releaseTimestamp: '2023-01-01',
+            changelogUrl: 'https://example.com',
+            sourceUrl: 'https://example.com',
+            constraints: {
+              platform: ['ruby'],
+              ruby: ['2.7.0'],
+              rubygems: ['3.2.0'],
+            },
           },
-        },
-      ]);
+        ],
+      });
+    });
+  });
+
+  describe('GemInfo', () => {
+    it('parses valid input', () => {
+      const input = codeBlock`
+        ---
+        1.1.1 |checksum:aaa
+        2.2.2 |checksum:bbb
+        3.3.3 |checksum:ccc
+      `;
+      const output = GemInfo.parse(input);
+      expect(output).toEqual({
+        releases: [
+          { version: '1.1.1' },
+          { version: '2.2.2' },
+          { version: '3.3.3' },
+        ],
+      });
+    });
+
+    it('errors on empty input', () => {
+      expect(() => GemInfo.parse('')).toThrow(
+        'Empty response from `/info` endpoint'
+      );
     });
   });
 });
