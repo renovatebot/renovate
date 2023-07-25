@@ -9,7 +9,7 @@ import { getOnboardingConfigContents } from './config';
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig,
-  previousConfigHash?: string
+  previousConfigHash: string | undefined
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
   const configFile = defaultConfigFile(config);
@@ -28,7 +28,6 @@ export async function rebaseOnboardingBranch(
   );
   const commitMessage = commitMessageFactory.create();
 
-  // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;

@@ -58,8 +58,10 @@ export async function checkOnboardingBranch(
     isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
     if (!isModified) {
-      const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
-      const commit = await rebaseOnboardingBranch(config, rawConfigHash);
+      const commit = await rebaseOnboardingBranch(
+        config,
+        onboardingPr.bodyStruct?.rawConfigHash
+      );
       if (commit) {
         logger.info(
           { branch: config.onboardingBranch, commit, onboarding: true },

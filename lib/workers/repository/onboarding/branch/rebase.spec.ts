@@ -1,6 +1,7 @@
 import { RenovateConfig, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
+import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
 import { toSha256 } from '../../../../util/hash';
 import { rebaseOnboardingBranch } from './rebase';
@@ -38,10 +39,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
-      await rebaseOnboardingBranch({
-        ...config,
-        onboardingConfigFileName: '.github/renovate.json',
-      });
+      await rebaseOnboardingBranch(
+        {
+          ...config,
+          onboardingConfigFileName: '.github/renovate.json',
+        },
+        hash
+      );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
         '.github/renovate.json'
@@ -52,10 +56,13 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      await rebaseOnboardingBranch({
-        ...config,
-        onboardingConfigFileName: undefined,
-      });
+      await rebaseOnboardingBranch(
+        {
+          ...config,
+          onboardingConfigFileName: undefined,
+        },
+        hash
+      );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
         'renovate.json'
@@ -65,21 +72,30 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       );
     });
 
-    describe('handle onboarding config hashes', () => {
+    it('handles a missing previous config hash', async () => {
+      await rebaseOnboardingBranch(config, undefined);
+      expect(scm.commitAndPush).toHaveBeenCalled();
+    });
+
+    it('does nothing if config hashes match', async () => {
       const contents =
         JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
+      await rebaseOnboardingBranch(config, toSha256(contents));
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
+    });
 
-      it('handles a missing previous config hash', async () => {
-        await rebaseOnboardingBranch(config, undefined);
-      });
+    it('requests update if config hashes mismatch', async () => {
+      await rebaseOnboardingBranch(config, hash);
+      expect(scm.commitAndPush).toHaveBeenCalled();
+    });
 
-      it('does nothing if config hashes match', async () => {
-        await rebaseOnboardingBranch(config, toSha256(contents));
-      });
-
-      it('requests update if config hashes mismatch', async () => {
-        await rebaseOnboardingBranch(config, hash);
-      });
+    it('dryRun=full', async () => {
+      GlobalConfig.set({ localDir: '', dryRun: 'full' });
+      await rebaseOnboardingBranch(config, hash);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would rebase files in onboarding branch'
+      );
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
     });
   });
 });
