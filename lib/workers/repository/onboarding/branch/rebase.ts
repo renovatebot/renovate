@@ -2,10 +2,10 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { toSha256 } from '../../../../util/hash';
 import { defaultConfigFile } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
-import { toSha256 } from '../../../../util/hash';
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig,
