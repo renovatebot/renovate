@@ -255,7 +255,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
 
-    it('rebases onboarding branch if no config hash found in pr', async () => {
+    it('rebases onboarding branch', async () => {
       const dummyCache = {
         scan: {
           master: {
@@ -275,6 +275,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(git.mergeBranch).toHaveBeenCalledOnce();
+      expect(logger.debug).not.toHaveBeenCalledWith(
+        'Skip processing since the onboarding branch is up to date and default branch has not changed'
+      ); // onboarding cache no longer valid
       expect(logger.info).toHaveBeenCalledWith(
         {
           branch: config.onboardingBranch,
@@ -309,6 +312,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         .mockReturnValueOnce('onboarding-sha');
       config.onboardingRebaseCheckbox = true;
       await checkOnboardingBranch(config);
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
       expect(git.mergeBranch).not.toHaveBeenCalled();
     });
 

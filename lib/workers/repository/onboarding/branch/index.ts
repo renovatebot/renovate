@@ -55,6 +55,22 @@ export async function checkOnboardingBranch(
   // TODO #7154
   const branchList = [onboardingBranch!];
   if (onboardingPr) {
+    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
+    // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
+    if (!isModified) {
+      const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
+      const commit = await rebaseOnboardingBranch(config, rawConfigHash);
+      if (commit) {
+        logger.info(
+          { branch: config.onboardingBranch, commit, onboarding: true },
+          'Branch updated'
+        );
+      }
+      // istanbul ignore if
+      if (platform.refreshPr) {
+        await platform.refreshPr(onboardingPr.number);
+      }
+    }
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
@@ -71,8 +87,6 @@ export async function checkOnboardingBranch(
       return { ...config, repoIsOnboarded, onboardingBranch, branchList };
     }
     OnboardingState.onboardingCacheValid = false;
-
-    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     if (isModified) {
       if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
         invalidateExtractCache(config.baseBranch!);
@@ -81,21 +95,6 @@ export async function checkOnboardingBranch(
         config.baseBranch!,
         config.onboardingBranch!
       );
-    }
-    // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
-    else {
-      const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
-      const commit = await rebaseOnboardingBranch(config, rawConfigHash);
-      if (commit) {
-        logger.info(
-          { branch: config.onboardingBranch, commit, onboarding: true },
-          'Branch updated'
-        );
-      }
-      // istanbul ignore if
-      if (platform.refreshPr) {
-        await platform.refreshPr(onboardingPr.number);
-      }
     }
   } else {
     logger.debug('Onboarding PR does not exist');

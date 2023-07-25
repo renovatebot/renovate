@@ -1,11 +1,9 @@
-import { RenovateConfig, getConfig, git, scm } from '../../../../../test/util';
+import { RenovateConfig, scm } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import * as memCache from '../../../../util/cache/memory';
-import { toSha256 } from '../../../../util/hasha';
-import { OnboardingState } from '../common';
+import { toSha256 } from '../../../../util/hash';
 import { rebaseOnboardingBranch } from './rebase';
-
-jest.mock('../../../../util/git');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   beforeAll(() => {
@@ -21,147 +19,67 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     beforeEach(() => {
       memCache.init();
       jest.resetAllMocks();
-      OnboardingState.prUpdateRequested = false;
       config = {
         ...getConfig(),
         repository: 'some/repo',
       };
     });
 
-    it.each`
-      checkboxEnabled
-      ${true}
-      ${false}
-    `(
-      'does nothing if branch is up to date ' +
-        '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-      async ({ checkboxEnabled }) => {
-        config.onboardingRebaseCheckbox = checkboxEnabled;
-        const contents =
-          JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
-        git.getFile
-          .mockResolvedValueOnce(contents) // package.json
-          .mockResolvedValueOnce(contents); // renovate.json
-        await rebaseOnboardingBranch(config, toSha256(contents));
-        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
-        expect(OnboardingState.prUpdateRequested).toBeFalse();
-      }
-    );
+    it('does nothing if branch is up to date', async () => {
+      const contents =
+        JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
+      await rebaseOnboardingBranch(config, toSha256(contents));
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+    });
 
-    it.each`
-      checkboxEnabled | expected
-      ${true}         | ${true}
-      ${false}        | ${false}
-    `(
-      'rebases onboarding branch ' +
-        '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-      async ({ checkboxEnabled, expected }) => {
-        config.onboardingRebaseCheckbox = checkboxEnabled;
-        await rebaseOnboardingBranch(config, hash);
-        expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
-        expect(OnboardingState.prUpdateRequested).toBe(expected);
-      }
-    );
+    it('rebases onboarding branch', async () => {
+      await rebaseOnboardingBranch(config, hash);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+    });
 
-    it.each`
-      checkboxEnabled | expected
-      ${true}         | ${true}
-      ${false}        | ${false}
-    `(
-      'uses the onboardingConfigFileName if set ' +
-        '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-      async ({ checkboxEnabled, expected }) => {
-        await rebaseOnboardingBranch({
-          ...config,
-          onboardingConfigFileName: '.github/renovate.json',
-          onboardingRebaseCheckbox: checkboxEnabled,
-        });
-        expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
-        expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
-          '.github/renovate.json'
-        );
-        expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
-          '.github/renovate.json'
-        );
-        expect(OnboardingState.prUpdateRequested).toBe(expected);
-      }
-    );
+    it('uses the onboardingConfigFileName if set', async () => {
+      await rebaseOnboardingBranch({
+        ...config,
+        onboardingConfigFileName: '.github/renovate.json',
+      });
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
+        '.github/renovate.json'
+      );
+      expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
+        '.github/renovate.json'
+      );
+    });
 
-    it.each`
-      checkboxEnabled | expected
-      ${true}         | ${true}
-      ${false}        | ${false}
-    `(
-      'falls back to "renovate.json" if onboardingConfigFileName is not set ' +
-        '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-      async ({ checkboxEnabled, expected }) => {
-        await rebaseOnboardingBranch({
-          ...config,
-          onboardingConfigFileName: undefined,
-          onboardingRebaseCheckbox: checkboxEnabled,
-        });
-        expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
-        expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
-          'renovate.json'
-        );
-        expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
-          'renovate.json'
-        );
-        expect(OnboardingState.prUpdateRequested).toBe(expected);
-      }
-    );
+    it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
+      await rebaseOnboardingBranch({
+        ...config,
+        onboardingConfigFileName: undefined,
+      });
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
+        'renovate.json'
+      );
+      expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
+        'renovate.json'
+      );
+    });
 
     describe('handle onboarding config hashes', () => {
       const contents =
         JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
 
-      beforeEach(() => {
-        git.getFile.mockResolvedValueOnce(contents);
+      it('handles a missing previous config hash', async () => {
+        await rebaseOnboardingBranch(config, undefined);
       });
 
-      it.each`
-        checkboxEnabled | expected
-        ${true}         | ${true}
-        ${false}        | ${false}
-      `(
-        'handles a missing previous config hash ' +
-          '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-        async ({ checkboxEnabled, expected }) => {
-          config.onboardingRebaseCheckbox = checkboxEnabled;
-          await rebaseOnboardingBranch(config, undefined);
-          expect(OnboardingState.prUpdateRequested).toBe(expected);
-        }
-      );
+      it('does nothing if config hashes match', async () => {
+        await rebaseOnboardingBranch(config, toSha256(contents));
+      });
 
-      it.each`
-        checkboxEnabled
-        ${true}
-        ${false}
-      `(
-        'does nothing if config hashes match' +
-          '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-        async ({ checkboxEnabled }) => {
-          git.getFile.mockResolvedValueOnce(contents); // package.json
-          config.onboardingRebaseCheckbox = checkboxEnabled;
-          await rebaseOnboardingBranch(config, toSha256(contents));
-          expect(OnboardingState.prUpdateRequested).toBeFalse();
-        }
-      );
-
-      it.each`
-        checkboxEnabled | expected
-        ${true}         | ${true}
-        ${false}        | ${false}
-      `(
-        'requests update if config hashes mismatch' +
-          '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-        async ({ checkboxEnabled, expected }) => {
-          git.getFile.mockResolvedValueOnce(contents); // package.json
-          config.onboardingRebaseCheckbox = checkboxEnabled;
-          await rebaseOnboardingBranch(config, hash);
-          expect(OnboardingState.prUpdateRequested).toBe(expected);
-        }
-      );
+      it('requests update if config hashes mismatch', async () => {
+        await rebaseOnboardingBranch(config, hash);
+      });
     });
   });
 });
