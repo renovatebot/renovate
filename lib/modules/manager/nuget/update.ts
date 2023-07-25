@@ -49,6 +49,8 @@ export function bumpPackageVersion(
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);
+    logger.debug(`project before bumpVersion(): ${content}`);
+
     bumpedContent = replaceAt(
       content,
       versionPosition,
@@ -56,11 +58,8 @@ export function bumpPackageVersion(
       newProjVersion
     );
 
-    if (bumpedContent === content) {
-      logger.debug('Version was already bumped');
-    } else {
-      logger.debug('project version bumped');
-    }
+    logger.debug('project version bumped');
+    logger.debug(`project after bumpVersion(): ${bumpedContent}`);
   } catch (err) {
     logger.warn(
       {
