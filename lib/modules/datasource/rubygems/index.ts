@@ -80,11 +80,6 @@ export class RubyGemsDatasource extends Datasource {
           unlessServerSide(err, () =>
             this.getReleasesViaDeprecatedAPI(registryUrl, packageName)
           )
-        )
-        .transform((result) =>
-          getV1Metadata(this.http, registryUrl, packageName)
-            .transform((metadata) => assignMetadata(result, metadata))
-            .unwrap(result)
         );
     }
 
