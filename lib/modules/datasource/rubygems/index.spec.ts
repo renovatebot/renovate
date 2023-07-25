@@ -193,13 +193,62 @@ describe('modules/datasource/rubygems/index', () => {
       });
     });
 
-    it('errors when version request fails with anything other than 400 or 404', async () => {
+    it('supports /info endpoint', async () => {
+      httpMock
+        .scope('https://example.com/')
+        .get('/info/foobar')
+        .reply(
+          200,
+          codeBlock`
+          1.0.0 |checksum:aaa
+          2.0.0 |checksum:bbb
+          3.0.0 |checksum:ccc
+        `
+        )
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {});
+
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'foobar',
+        registryUrls: ['https://example.com'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
+        ],
+      });
+    });
+
+    it('errors when version request fails with server error', async () => {
       httpMock
         .scope('https://example.com/')
         .get('/info/foobar')
         .reply(404)
         .get('/api/v1/versions/foobar.json')
-        .reply(500, {})
+        .reply(500);
+
+      await expect(
+        getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'foobar',
+          registryUrls: ['https://example.com'],
+        })
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('errors when dependencies request fails server error', async () => {
+      httpMock
+        .scope('https://example.com/')
+        .get('/info/foobar')
+        .reply(404)
+        .get('/api/v1/versions/foobar.json')
+        .reply(404)
         .get('/api/v1/dependencies?gems=foobar')
         .reply(500);
 

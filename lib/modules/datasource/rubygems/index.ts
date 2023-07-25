@@ -1,6 +1,7 @@
 import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod';
 import { logger } from '../../../logger';
+import { HttpError } from '../../../util/http';
 import { AsyncResult, Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
@@ -11,6 +12,19 @@ import { RubygemsHttp } from './http';
 import { MetadataCache } from './metadata-cache';
 import { GemInfo, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
+
+function unlessServerSide<T, E>(
+  err: E,
+  cb: () => AsyncResult<T, E>
+): AsyncResult<T, E> {
+  if (err instanceof HttpError && err.response?.statusCode) {
+    const code = err.response.statusCode;
+    if (code >= 500 && code <= 599) {
+      return AsyncResult.err(err);
+    }
+  }
+  return cb();
+}
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
@@ -57,8 +71,16 @@ export class RubyGemsDatasource extends Datasource {
       result = this.getReleasesViaDeprecatedAPI(registryUrl, packageName);
     } else {
       result = this.getReleasesViaInfoEndpoint(registryUrl, packageName)
-        .catch(() => getV1Releases(this.http, registryUrl, packageName))
-        .catch(() => this.getReleasesViaDeprecatedAPI(registryUrl, packageName))
+        .catch((err) =>
+          unlessServerSide(err, () =>
+            getV1Releases(this.http, registryUrl, packageName)
+          )
+        )
+        .catch((err) =>
+          unlessServerSide(err, () =>
+            this.getReleasesViaDeprecatedAPI(registryUrl, packageName)
+          )
+        )
         .transform((result) =>
           getV1Metadata(this.http, registryUrl, packageName)
             .transform((metadata) => assignMetadata(result, metadata))
