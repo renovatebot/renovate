@@ -1111,6 +1111,7 @@ It's recommended to include a name followed by an email address, e.g.
 ```
 Development Bot <dev-bot@my-software-company.com>
 ```
+
 <!-- prettier-ignore -->
 !!! danger
     We strongly recommend that the Git author email you use is unique to Renovate.
