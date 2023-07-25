@@ -174,7 +174,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       'repository problems'
     );
     newIssueBody += '## Repository problems\n\n';
-    newIssueBody += config.repoProblemsHeader;
+    newIssueBody += `${config.repoProblemsHeader}\n\n`;
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }

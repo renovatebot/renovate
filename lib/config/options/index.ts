@@ -1980,7 +1980,7 @@ const options: RenovateOptions[] = [
   {
     name: 'repoProblemsHeader',
     description:
-      'Text added here will be placed last in the Repository problems in the dependency dashboard issue.',
+      'Text added here will be placed under the Repository problems in the dependency dashboard issue.',
     type: 'string',
     default: `These problems occurred while renovating this repository.`,
   },
