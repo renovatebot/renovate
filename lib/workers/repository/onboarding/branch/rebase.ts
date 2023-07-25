@@ -20,9 +20,8 @@ export async function rebaseOnboardingBranch(
     logger.debug('Onboarding branch is up to date');
     return null;
   }
-
   logger.debug('Rebasing onboarding branch');
-  // istanbul ignore next
+
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
     configFile
