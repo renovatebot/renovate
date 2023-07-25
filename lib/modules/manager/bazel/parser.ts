@@ -1,7 +1,7 @@
 import { lang, lexer, parser, query as q } from 'good-enough-parser';
-import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
+import { hash } from '../../../util/hash';
 import { supportedRulesRegex } from './rules';
 import type { NestedFragment, RecordFragment } from './types';
 
@@ -294,8 +294,8 @@ const query = q.tree<Ctx>({
 });
 
 function getCacheKey(input: string): string {
-  const hash = hasha(input);
-  return `bazel-parser-${hash}`;
+  const hashedInput = hash(input);
+  return `bazel-parser-${hashedInput}`;
 }
 
 const starlark = lang.createLang('starlark');

@@ -40,8 +40,10 @@ const repoGroups = {
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
   ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
-  'aws-lambda-powertools-typescript':
+  'aws-lambda-powertools-typescript': [
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
+    'https://github.com/aws-powertools/powertools-lambda-typescript',
+  ],
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -92,6 +94,7 @@ const repoGroups = {
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
+  'fabric8-kubernetes-client': 'https://github.com/fabric8io/kubernetes-client',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
   fela: 'https://github.com/robinweser/fela',
@@ -117,7 +120,6 @@ const repoGroups = {
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
-  hotchocolate: 'https://github.com/ChilliCream/hotchocolate',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
@@ -176,7 +178,10 @@ const repoGroups = {
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
   nswag: 'https://github.com/RicoSuter/NSwag',
-  nuxtjs: 'https://github.com/nuxt/nuxt.js',
+  nuxtjs: [
+    'https://github.com/nuxt/nuxt.js', // old repo
+    'https://github.com/nuxt/nuxt',
+  ],
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
@@ -225,6 +230,7 @@ const repoGroups = {
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
+  'spectre-console': 'https://github.com/spectreconsole/spectre.console',
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
@@ -271,6 +277,7 @@ const repoGroups = {
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const orgGroups = {
+  'datatables-net': ['https://github.com/DataTables/'],
   hapijs: 'https://github.com/hapijs/',
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
@@ -291,6 +298,7 @@ const patternGroups = {
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
+  hotchocolate: '^HotChocolate\\.',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',

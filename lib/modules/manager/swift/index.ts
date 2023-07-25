@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import * as swiftVersioning from '../../versioning/swift';
 
@@ -14,3 +15,5 @@ export const defaultConfig = {
   versioning: swiftVersioning.id,
   pinDigests: false,
 };
+
+export const categories: Category[] = ['swift'];

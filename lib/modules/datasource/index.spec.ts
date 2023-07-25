@@ -114,7 +114,7 @@ describe('modules/datasource/index', () => {
 
   describe('getDefaultVersioning()', () => {
     it('returns semver if undefined', () => {
-      expect(getDefaultVersioning(undefined)).toBe('semver');
+      expect(getDefaultVersioning(undefined)).toBe('semver-coerced');
     });
   });
 

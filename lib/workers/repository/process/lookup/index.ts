@@ -6,7 +6,7 @@ import { logger } from '../../../../logger';
 import {
   Release,
   ReleaseResult,
-  getDatasourceList,
+  getDatasourceFor,
   getDefaultVersioning,
   getDigest,
   getPkgReleases,
@@ -16,9 +16,11 @@ import {
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { assignKeys } from '../../../../util/assign-keys';
 import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
+import { Result } from '../../../../util/result';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -64,10 +66,7 @@ export async function lookupUpdates(
   try {
     logger.trace({ dependency: packageName, currentValue }, 'lookupUpdates');
     // istanbul ignore if
-    if (
-      !isGetPkgReleasesConfig(config) ||
-      !getDatasourceList().includes(datasource)
-    ) {
+    if (!isGetPkgReleasesConfig(config) || !getDatasourceFor(datasource)) {
       res.skipReason = 'invalid-config';
       return res;
     }
@@ -83,8 +82,14 @@ export async function lookupUpdates(
         return res;
       }
 
-      dependency = clone(await getPkgReleases(config));
-      if (!dependency) {
+      const { val: lookupValue, err: lookupError } = await Result.wrapNullable(
+        getPkgReleases(config),
+        'no-releases' as const
+      )
+        .transform((x) => Result.ok(clone(x)))
+        .unwrap();
+
+      if (lookupError === 'no-releases') {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: packageName,
@@ -94,22 +99,26 @@ export async function lookupUpdates(
         // TODO: return warnings in own field
         res.warnings.push(warning);
         return res;
+      } else if (lookupError) {
+        throw lookupError;
       }
+
+      dependency = lookupValue;
       if (dependency.deprecationMessage) {
         logger.debug(
           `Found deprecationMessage for ${datasource} package ${packageName}`
         );
-        res.deprecationMessage = dependency.deprecationMessage;
       }
 
-      res.sourceUrl = dependency?.sourceUrl;
-      res.registryUrl = dependency?.registryUrl; // undefined when we fetched releases from multiple registries
-      if (dependency.sourceDirectory) {
-        res.sourceDirectory = dependency.sourceDirectory;
-      }
-      res.homepage = dependency.homepage;
-      res.changelogUrl = dependency.changelogUrl;
-      res.dependencyUrl = dependency?.dependencyUrl;
+      assignKeys(res, lookupValue, [
+        'deprecationMessage',
+        'sourceUrl',
+        'registryUrl',
+        'sourceDirectory',
+        'homepage',
+        'changelogUrl',
+        'dependencyUrl',
+      ]);
 
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning

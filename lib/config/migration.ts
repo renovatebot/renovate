@@ -104,6 +104,30 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
       }
     }
+    const languages = [
+      'docker',
+      'dotnet',
+      'golang',
+      'java',
+      'js',
+      'node',
+      'php',
+      'python',
+      'ruby',
+      'rust',
+    ];
+    for (const language of languages) {
+      if (is.nonEmptyObject(migratedConfig[language])) {
+        migratedConfig.packageRules ??= [];
+        const currentContent = migratedConfig[language] as any;
+        const packageRule = {
+          matchCategories: [language],
+          ...currentContent,
+        };
+        migratedConfig.packageRules.unshift(packageRule);
+        delete migratedConfig[language];
+      }
+    }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
       const existingRules = migratedConfig.packageRules;

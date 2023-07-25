@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import {
   GitPullRequest,
@@ -8,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import delay from 'delay';
 import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,
@@ -514,6 +514,7 @@ export async function updatePr({
   prBody: body,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -522,13 +523,19 @@ export async function updatePr({
     title,
   };
 
+  if (targetBranch) {
+    objToUpdate.targetRefName = getNewBranchName(targetBranch);
+  }
+
   if (body) {
     objToUpdate.description = max4000Chars(sanitize(body));
   }
 
   if (state === 'open') {
     await azureApiGit.updatePullRequest(
-      { status: PullRequestStatus.Active },
+      {
+        status: PullRequestStatus.Active,
+      },
       config.repoId,
       prNo
     );
@@ -745,7 +752,7 @@ export async function mergePr({
         `Updated PR to closed status but change has not taken effect yet. Retrying...`
       );
 
-      await delay(sleepMs);
+      await setTimeout(sleepMs);
       pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
       isClosed = pr.status === PullRequestStatus.Completed;
     }

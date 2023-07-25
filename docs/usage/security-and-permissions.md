@@ -11,7 +11,7 @@ That said, we will try to fix security problems in a reasonable timeframe if pos
 
 Renovate the open source project is **not** certified.
 
-The company which maintains Renovate and provides the hosted Renovate App for GitHub is called Mend.
+Mend is the company which maintains Renovate and provides the Mend Renovate App.
 Mend is ISO 27001 and SOC2 certified.
 
 ### Security / Disclosure
@@ -30,23 +30,23 @@ We apply the Principle of Least Privilege (PoLP) but do need substantial privile
 
 These permissions are always needed to run the respective app.
 
-| Permission        | Renovate hosted app |  Forking Renovate  | Why                                                           |
-| ----------------- | :-----------------: | :----------------: | ------------------------------------------------------------- |
-| Dependabot alerts |       `read`        |       `read`       | Create vulnerability fix PRs                                  |
-| Administration    |       `read`        |       `read`       | Read branch protections and to be able to assign teams to PRs |
-| Metadata          |       `read`        |       `read`       | Mandatory for all apps                                        |
-| Checks            | `read` and `write`  |   not applicable   | Read and write status checks                                  |
-| Code              | `read` and `write`  |       `read`       | Read for repository content and write for creating branches   |
-| Commit statuses   | `read` and `write`  | `read` and `write` | Read and write commit statuses for Renovate PRs               |
-| Issues            | `read` and `write`  | `read` and `write` | Create dependency dashboard or Config Warning issues          |
-| Pull Requests     | `read` and `write`  | `read` and `write` | Create update PRs                                             |
-| Workflows         | `read` and `write`  |   not applicable   | Explicit permission needed in order to update workflows       |
+| Permission        | The Mend Renovate App |  Forking Renovate  | Why                                                           |
+| ----------------- | :-------------------: | :----------------: | ------------------------------------------------------------- |
+| Dependabot alerts |        `read`         |       `read`       | Create vulnerability fix PRs                                  |
+| Administration    |        `read`         |       `read`       | Read branch protections and to be able to assign teams to PRs |
+| Metadata          |        `read`         |       `read`       | Mandatory for all apps                                        |
+| Checks            |  `read` and `write`   |   not applicable   | Read and write status checks                                  |
+| Code              |  `read` and `write`   |       `read`       | Read for repository content and write for creating branches   |
+| Commit statuses   |  `read` and `write`   | `read` and `write` | Read and write commit statuses for Renovate PRs               |
+| Issues            |  `read` and `write`   | `read` and `write` | Create dependency dashboard or Config Warning issues          |
+| Pull Requests     |  `read` and `write`   | `read` and `write` | Create update PRs                                             |
+| Workflows         |  `read` and `write`   |   not applicable   | Explicit permission needed in order to update workflows       |
 
 ### User permissions
 
 Renovate can also request users's permission to the following resources.
 These permissions will be requested and authorized on an individual-user basis.
 
-| Permission | Renovate hosted app | Forking Renovate | Why                                                      |
-| ---------- | :-----------------: | :--------------: | -------------------------------------------------------- |
-| email      |       `read`        |  not applicable  | Per-user consent requested if logging into App dashboard |
+| Permission | The Mend Renovate App | Forking Renovate | Why                                                      |
+| ---------- | :-------------------: | :--------------: | -------------------------------------------------------- |
+| email      |        `read`         |  not applicable  | Per-user consent requested if logging into App dashboard |

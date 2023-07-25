@@ -490,6 +490,7 @@ describe('modules/manager/npm/extract/index', () => {
           yarn: '1.12.3',
           npm: '5.9.0',
           pnpm: '6.11.2',
+          invalid: '1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -505,6 +506,12 @@ describe('modules/manager/npm/extract/index', () => {
             depType: 'volta',
             currentValue: '6.11.2',
             depName: 'pnpm',
+            prettyDepType: 'volta',
+          },
+          {
+            depType: 'volta',
+            currentValue: '1.0.0',
+            depName: 'invalid',
             prettyDepType: 'volta',
             skipReason: 'unknown-volta',
           },
@@ -870,6 +877,53 @@ describe('modules/manager/npm/extract/index', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('.extractAllPackageFiles()', () => {
+    it('runs', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(input02Content);
+      const res = await npmExtract.extractAllPackageFiles(
+        defaultExtractConfig,
+        ['package.json']
+      );
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '7.0.0',
+              datasource: 'npm',
+              depName: '@babel/core',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+            {
+              currentValue: '1.21.0',
+              datasource: 'npm',
+              depName: 'config',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+          ],
+          extractedConstraints: {},
+          managerData: {
+            hasPackageManager: false,
+            lernaClient: undefined,
+            lernaJsonFile: undefined,
+            lernaPackages: undefined,
+            npmLock: undefined,
+            packageJsonName: 'renovate',
+            pnpmShrinkwrap: undefined,
+            workspacesPackages: undefined,
+            yarnLock: undefined,
+            yarnZeroInstall: false,
+          },
+          npmrc: undefined,
+          packageFile: 'package.json',
+          packageFileVersion: '1.0.0',
+          skipInstalls: true,
+        },
+      ]);
     });
   });
 

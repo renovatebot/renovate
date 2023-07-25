@@ -25,6 +25,9 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
 export function initConfig(): void {
   apiBaseUrl = getApiBaseUrl();
   token = getApiToken();
+  if (!is.nullOrUndefined(token)) {
+    logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
+  }
 }
 
 export function resetConfig(): void {
@@ -218,6 +221,7 @@ function getApiBaseUrl(): string {
 
 export function getApiToken(): string | undefined {
   return hostRules.find({
+    url: apiBaseUrl,
     hostType,
   })?.token;
 }

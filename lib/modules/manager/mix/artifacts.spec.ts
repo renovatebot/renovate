@@ -90,7 +90,11 @@ describe('modules/manager/mix/artifacts', () => {
 
   it('returns updated mix.lock', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
@@ -161,7 +165,11 @@ describe('modules/manager/mix/artifacts', () => {
 
   it('authenticates to private repositories', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
@@ -221,7 +229,11 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns updated mix.lock in subdir', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
     mockExecAll();
     expect(

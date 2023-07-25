@@ -110,7 +110,7 @@ export async function postUpgradeCommandsExecutor(
 
       for (const relativePath of status.modified.concat(status.not_added)) {
         for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
+          if (minimatch(relativePath, pattern, { dot: true })) {
             logger.debug(
               { file: relativePath, pattern },
               'Post-upgrade file saved'
@@ -138,7 +138,7 @@ export async function postUpgradeCommandsExecutor(
 
       for (const relativePath of status.deleted || []) {
         for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
+          if (minimatch(relativePath, pattern, { dot: true })) {
             logger.debug(
               { file: relativePath, pattern },
               'Post-upgrade file removed'

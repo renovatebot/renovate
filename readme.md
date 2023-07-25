@@ -25,7 +25,7 @@ Multi-platform and multi-language.
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
 - Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
 - Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
-- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
+- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
 
 ## Supported Platforms
 
@@ -69,10 +69,9 @@ Get started with Renovate by checking out our [tutorial](https://github.com/reno
 
 ### GitHub
 
-It's easiest to use the hosted Renovate app.
-Install the [Renovate app](https://github.com/apps/renovate) now.
-
-[More details on the GitHub App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
+We recommend that you use the Mend Renovate App.
+Install the [the Mend Renovate App](https://github.com/apps/renovate) now.
+[More details on the Mend Renovate App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
 
 ### Azure DevOps
 
@@ -110,8 +109,8 @@ To get help with your configuration, go to the [discussions tab in the Renovate 
 To run your own instance of Renovate you have several options:
 
 - Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using `cron`)
-- Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
-- Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
+- Run the `renovate/renovate:full` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
+- Run the `renovate/renovate:latest` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
 
 [More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md).
 

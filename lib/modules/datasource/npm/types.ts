@@ -17,6 +17,7 @@ export interface NpmResponseVersion {
   gitHead?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  engines?: Record<string, string>;
 }
 
 export interface NpmResponse {

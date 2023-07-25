@@ -3,7 +3,7 @@ export const removedPresets: Record<string, string | null> = {
   ':autodetectRangeStrategy': null,
   ':automergeBranchMergeCommit': ':automergeBranch',
   ':automergeBranchPush': ':automergeBranch',
-  ':base': 'config:base',
+  ':base': 'config:recommended',
   ':app': 'config:js-app',
   ':enableGradleLite': null,
   ':js-app': 'config:js-app',
@@ -12,12 +12,14 @@ export const removedPresets: Record<string, string | null> = {
   ':masterIssueApproval': ':dependencyDashboardApproval',
   ':switchToGradleLite': null,
   ':unpublishSafe': 'npm:unpublishSafe',
+  'compatibility:additionalBranchPrefix': null,
   'config:application': 'config:js-app',
-  'config:base-js': 'config:base',
+  'config:base': 'config:recommended',
+  'config:base-js': 'config:recommended',
   'config:library': 'config:js-lib',
   'default:automergeBranchMergeCommit': ':automergeBranch',
   'default:automergeBranchPush': ':automergeBranch',
-  'default:base': 'config:base',
+  'default:base': 'config:recommended',
   'default:app': 'config:js-app',
   'default:js-app': 'config:js-app',
   'default:library': 'config:js-lib',
@@ -25,6 +27,7 @@ export const removedPresets: Record<string, string | null> = {
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,
   'group:jsTestMonMajor': 'group:jsTestNonMajor',
+  'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
 };
 
 const renamedMonorepos: Record<string, string> = {

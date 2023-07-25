@@ -7,6 +7,15 @@ description: Go modules support in Renovate
 
 Renovate supports upgrading dependencies in `go.mod` files and their accompanying `go.sum` checksums.
 
+If you're self-hosting Renovate, you may use these environment variables:
+
+- `GOPROXY`
+- `GONOPROXY`
+- `GOPRIVATE`
+- `GOINSECURE`
+
+To learn what these variables do, read the [Go Modules Reference about the`GOPROXY` protocol](https://go.dev/ref/mod#module-proxy).
+
 ## How It Works
 
 1. Renovate searches in each repository for any `go.mod` files

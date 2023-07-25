@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex';
+import { id as semverId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { FlutterResponse } from './types';
@@ -17,6 +18,8 @@ export class FlutterVersionDatasource extends Datasource {
   override readonly defaultRegistryUrls = ['https://storage.googleapis.com'];
 
   override readonly caching = true;
+
+  override readonly defaultVersioning = semverId;
 
   async getReleases({
     registryUrl,
