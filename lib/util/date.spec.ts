@@ -17,10 +17,6 @@ describe('util/date', () => {
     jest.setSystemTime(t0.toMillis());
   });
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   describe('getElapsedDays', () => {
     it('returns elapsed days', () => {
       const t = t0.minus({ days: 42 });

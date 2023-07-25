@@ -150,10 +150,6 @@ describe('workers/repository/update/branch/schedule', () => {
       config = {};
     });
 
-    afterAll(() => {
-      jest.useRealTimers();
-    });
-
     it('returns true if no schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
