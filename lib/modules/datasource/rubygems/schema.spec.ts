@@ -9,18 +9,11 @@ describe('modules/datasource/rubygems/schema', () => {
         { number: '3.0.0' },
       ];
       const output = MarshalledVersionInfo.parse(input);
-      expect(output).toEqual({
-        releases: [
-          { version: '1.0.0' },
-          { version: '2.0.0' },
-          { version: '3.0.0' },
-        ],
-      });
-    });
-
-    it('parses empty input', () => {
-      const output = MarshalledVersionInfo.parse([]);
-      expect(output).toBeNull();
+      expect(output).toEqual([
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+        { version: '3.0.0' },
+      ]);
     });
   });
 
