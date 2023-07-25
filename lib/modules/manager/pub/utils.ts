@@ -1,4 +1,5 @@
 import { load } from 'js-yaml';
+import { logger } from '../../../logger';
 import { Lazy } from '../../../util/lazy';
 import { PubspecLockSchema } from './schema';
 
@@ -14,9 +15,11 @@ function parsePubspecLock(fileContent: string): PubspecLockSchema | null {
     const res = PubspecLockSchema.safeParse(data);
     if (res.success) {
       return res.data;
+    } else {
+      logger.debug(res.error, 'Error parsing pubspec.lock file');
     }
-  } catch {
-    // Do nothing
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing pubspec.lock file');
   }
   return null;
 }
