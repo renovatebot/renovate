@@ -52,13 +52,7 @@ export class MetadataCache {
 
     return await loadCache()
       .catch(() =>
-        getV1Releases(this.http, registryUrl, packageName)
-          .transform((releaseResult) =>
-            getV1Metadata(this.http, registryUrl, packageName)
-              .transform((metadata) => assignMetadata(releaseResult, metadata))
-              .unwrap(releaseResult)
-          )
-          .transform(saveCache)
+        getV1Releases(this.http, registryUrl, packageName).transform(saveCache)
       )
       .catch(() =>
         Result.ok({
