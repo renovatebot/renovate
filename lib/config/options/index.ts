@@ -74,7 +74,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     parent: 'customDatasources',
     default: 'json',
-    allowedValues: ['json'],
+    allowedValues: ['json', 'plain'],
     cli: false,
     env: false,
   },
