@@ -4,22 +4,26 @@ import { Lazy } from '../../../util/lazy';
 import { PubspecLockSchema } from './schema';
 
 export function lazyParsePubspeckLock(
+  fileName: string,
   fileContent: string
 ): Lazy<PubspecLockSchema | null> {
-  return new Lazy(() => parsePubspecLock(fileContent));
+  return new Lazy(() => parsePubspecLock(fileName, fileContent));
 }
 
-function parsePubspecLock(fileContent: string): PubspecLockSchema | null {
+function parsePubspecLock(
+  fileName: string,
+  fileContent: string
+): PubspecLockSchema | null {
   try {
     const data = load(fileContent, { json: true });
     const res = PubspecLockSchema.safeParse(data);
     if (res.success) {
       return res.data;
     } else {
-      logger.debug(res.error, 'Error parsing pubspec.lock file');
+      logger.debug(res.error, `Error parsing ${fileName} file`);
     }
   } catch (err) {
-    logger.debug({ err }, 'Error parsing pubspec.lock file');
+    logger.debug({ err }, `Error parsing ${fileName} file`);
   }
   return null;
 }

@@ -52,7 +52,10 @@ export async function updateArtifacts({
       );
     }
 
-    const oldLazyPubspecLock = lazyParsePubspeckLock(oldLockFileContent);
+    const oldLazyPubspecLock = lazyParsePubspeckLock(
+      lockFileName,
+      oldLockFileContent
+    );
     const constraint = isFlutter
       ? config.constraints?.flutter ??
         oldLazyPubspecLock.getValue()?.sdks.flutter
