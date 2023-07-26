@@ -9,7 +9,7 @@ import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
-import { toSha256 } from '../../../../util/hasha';
+import { toSha256 } from '../../../../util/hash';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {

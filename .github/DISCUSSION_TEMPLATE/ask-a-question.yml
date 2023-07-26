@@ -27,7 +27,7 @@ body:
         - 'Azure DevOps Server'
         - 'Bitbucket Cloud (bitbucket.org)'
         - 'Bitbucket Server'
-        - 'Gitea'
+        - 'Gitea or Forgejo'
         - 'github.com'
         - 'GitHub Enterprise Server'
         - 'gitlab.com'

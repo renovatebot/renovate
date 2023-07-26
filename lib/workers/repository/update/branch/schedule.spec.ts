@@ -1,4 +1,3 @@
-import mockDate from 'mockdate';
 import type { RenovateConfig } from '../../../../config/types';
 import * as schedule from './schedule';
 
@@ -141,8 +140,12 @@ describe('workers/repository/update/branch/schedule', () => {
   describe('isScheduledNow(config)', () => {
     let config: RenovateConfig;
 
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
     beforeEach(() => {
-      mockDate.set('2017-06-30T10:50:00.000'); // Locally 2017-06-30 10:50am
+      jest.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
       jest.resetAllMocks();
       config = {};
     });
@@ -243,7 +246,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     describe('supports cron syntax on Sundays', () => {
       beforeEach(() => {
-        mockDate.set('2023-01-08T10:50:00.000'); // Locally Sunday 8 January 2023 10:50am
+        jest.setSystemTime(new Date('2023-01-08T10:50:00.000')); // Locally Sunday 8 January 2023 10:50am
       });
 
       it('approves if the weekday is *', () => {
@@ -275,7 +278,7 @@ describe('workers/repository/update/branch/schedule', () => {
       `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
         config.timezone = tz;
-        mockDate.set(datetime);
+        jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });
@@ -330,63 +333,63 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('approves first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
-      mockDate.set('2017-10-01T05:26:06.000'); // Locally Sunday, 1 October 2017 05:26:06
+      jest.setSystemTime(new Date('2017-10-01T05:26:06.000')); // Locally Sunday, 1 October 2017 05:26:06
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('approves valid weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
-      mockDate.set('2017-01-02T06:00:00.000'); // Locally Monday, 2 January 2017 6am (first Monday of the year)
+      jest.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am (first Monday of the year)
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
-      mockDate.set('2017-01-09T06:00:00.000'); // Locally Monday, 2 January 2017 6am (second Monday of the year)
+      jest.setSystemTime(new Date('2017-01-09T06:00:00.000')); // Locally Monday, 2 January 2017 6am (second Monday of the year)
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves on months of year', () => {
       config.schedule = ['of January'];
-      mockDate.set('2017-01-02T06:00:00.000'); // Locally Monday, 2 January 2017 6am
+      jest.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on months of year', () => {
       config.schedule = ['of January'];
-      mockDate.set('2017-02-02T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
+      jest.setSystemTime(new Date('2017-02-02T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month', () => {
       config.schedule = ['every 3 months'];
-      mockDate.set('2017-07-01T06:00:00.000'); // Locally Saturday, 1 July 2017 6am
+      jest.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month', () => {
       config.schedule = ['every 6 months'];
-      mockDate.set('2017-02-01T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
+      jest.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
-      mockDate.set('2017-07-01T06:00:00.000'); // Locally Saturday, 1 July 2017 6am
+      jest.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
-      mockDate.set('2017-02-01T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
+      jest.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
@@ -401,7 +404,7 @@ describe('workers/repository/update/branch/schedule', () => {
       ];
 
       cases.forEach(([datetime, expected]) => {
-        mockDate.set(datetime);
+        jest.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });
