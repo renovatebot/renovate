@@ -130,6 +130,14 @@ If using negations, all repositories except those who match the regex are added 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
 topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
 
+For example:
+
+```json
+{
+  "autodiscoverTopics": ["managed-by-renovate"]
+}
+```
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
@@ -823,7 +831,7 @@ For example: `:warning:` will be replaced with `⚠️`.
 You may need to set a `username` if you:
 
 - use the Bitbucket platform, or
-- use the GitHub App with CLI (required)
+- use a self-hosted GitHub App with CLI (required)
 
 If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 

@@ -1,9 +1,9 @@
 // TODO #7154
 import cleanGitRef from 'clean-git-ref';
-import hasha from 'hasha';
 import slugify from 'slugify';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { hash } from '../../../util/hash';
 import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
 
@@ -96,10 +96,13 @@ export function generateBranchName(update: RenovateConfig): void {
     hashInput = template.compile(hashInput, update);
     hashInput = template.compile(hashInput, update);
 
-    const hash = hasha(hashInput);
+    const hashedInput = hash(hashInput);
 
     // TODO: types (#7154)
-    update.branchName = `${update.branchPrefix!}${hash.slice(0, hashLength)}`;
+    update.branchName = `${update.branchPrefix!}${hashedInput.slice(
+      0,
+      hashLength
+    )}`;
   } else {
     update.branchName = template.compile(update.branchName!, update);
 

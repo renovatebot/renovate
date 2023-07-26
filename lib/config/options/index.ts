@@ -223,8 +223,6 @@ const options: RenovateOptions[] = [
     description: `Enable or disable Renovate bot.`,
     stage: 'package',
     type: 'boolean',
-    cli: false,
-    env: false,
   },
   {
     name: 'constraintsFiltering',
@@ -372,7 +370,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.2.1',
+    default: 'ghcr.io/containerbase/sidecar:9.7.0',
     globalOnly: true,
   },
   {
@@ -800,13 +798,13 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'autodiscoverTopics',
-    description: '',
+    description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',
     type: 'array',
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab'],
+    supportedPlatforms: ['github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -1022,7 +1020,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'packageRules',
-    description: 'Rules for matching package names.',
+    description: 'Rules for matching packages.',
     type: 'array',
     stage: 'package',
     mergeable: true,
@@ -1049,6 +1047,32 @@ const options: RenovateOptions[] = [
     allowString: true,
     parent: 'packageRules',
     stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchRepositories',
+    description:
+      'List of repositories to match (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludeRepositories',
+    description:
+      'List of repositories to exclude (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
     mergeable: true,
     cli: false,
     env: false,
@@ -2352,6 +2376,13 @@ const options: RenovateOptions[] = [
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
+      Age: "[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' depName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
+      Adoption:
+        "[![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' depName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
+      Passing:
+        "[![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
+      Confidence:
+        "[![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
     },
   },
   {

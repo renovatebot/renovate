@@ -32,7 +32,7 @@ export function getHttpUrl(url: string, token?: string): string {
     }
   }
 
-  return parsedUrl.toString(protocol);
+  return new URL(parsedUrl.toString(protocol)).href;
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {

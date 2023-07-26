@@ -1,14 +1,15 @@
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
-import hasha from 'hasha';
 import type { SetRequired } from 'type-fest';
-import { infer as Infer, ZodType } from 'zod';
+import { infer as Infer, type ZodError, ZodType } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { hash } from '../hash';
+import { type AsyncResult, Result } from '../result';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -28,6 +29,9 @@ import type {
 import './legacy';
 
 export { RequestError as HttpError };
+
+export class EmptyResultError extends Error {}
+export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
 type JsonArgs<
   Opts extends HttpOptions & HttpRequestOptions<ResT>,
@@ -176,18 +180,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
     options = applyAuthorization(options);
 
-    // use sha512: https://www.npmjs.com/package/hasha#algorithm
     const memCacheKey =
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
-        ? hasha([
-            'got-',
-            JSON.stringify({
+        ? hash(
+            `got-${JSON.stringify({
               url,
               headers: options.headers,
               method: options.method,
-            }),
-          ])
+            })}`
+          )
         : null;
 
     let resPromise: Promise<HttpResponse<T>> | null = null;
@@ -346,6 +348,32 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ): Promise<HttpResponse<ResT>> {
     const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
     return this.requestJson<ResT>('get', args);
+  }
+
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(
+    url: string,
+    options: Opts & HttpRequestOptions<Infer<Schema>>,
+    schema: Schema
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(
+    arg1: string,
+    arg2?: (Opts & HttpRequestOptions<ResT>) | Schema,
+    arg3?: Schema
+  ): AsyncResult<ResT, SafeJsonError> {
+    const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
+    return Result.wrap(this.requestJson<ResT>('get', args)).transform(
+      (response) => response.body
+    );
   }
 
   headJson(url: string, httpOptions?: Opts): Promise<HttpResponse<never>> {

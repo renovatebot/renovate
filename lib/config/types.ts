@@ -339,11 +339,13 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  matchRepositories?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  excludeRepositories?: string[];
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -497,6 +499,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: string | null;
+  repository?: string;
 }
 
 export interface ConfigMigration {

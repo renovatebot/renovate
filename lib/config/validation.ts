@@ -319,6 +319,7 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
@@ -326,6 +327,7 @@ export async function validateConfig(
               'matchUpdateTypes',
               'matchConfidence',
               'matchCurrentAge',
+              'matchRepositories',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -611,7 +613,12 @@ export async function validateConfig(
                 }
               }
             } else if (
-              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+              [
+                'customEnvVariables',
+                'migratePresets',
+                'productLinks',
+                'secrets',
+              ].includes(key)
             ) {
               const res = validatePlainObject(val);
               if (res !== true) {
