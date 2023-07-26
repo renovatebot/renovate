@@ -115,6 +115,37 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('return releases for plain text api and trim the content', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, '1.0.0 \n2.0.0 \n 3.0.0 ');
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            format: 'plain',
+          },
+        },
+      });
+      expect(result).toEqual(expected);
+    });
+
     it('return release when templating registryUrl', async () => {
       const expected = {
         releases: [
