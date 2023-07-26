@@ -1,8 +1,8 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
+import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
-import { logger } from '../../../../logger';
 
 jest.mock('../../../../util/fs');
 const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
