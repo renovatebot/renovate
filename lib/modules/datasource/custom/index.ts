@@ -79,7 +79,7 @@ export class CustomDatasource extends Datasource {
     ).body;
     const versions = res.split('\n').map((version) => {
       return {
-        version,
+        version: version.trim(),
       };
     });
     return {
