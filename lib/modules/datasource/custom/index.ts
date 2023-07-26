@@ -43,21 +43,7 @@ export class CustomDatasource extends Datasource {
     let response: unknown;
     try {
       if (format === 'plain') {
-        const res = (
-          await this.http.get(defaultRegistryUrlTemplate, {
-            headers: {
-              'Content-Type': 'text-plain',
-            },
-          })
-        ).body;
-        const versions = res.split('\n').map((version) => {
-          return {
-            version,
-          };
-        });
-        response = {
-          releases: versions,
-        };
+        response = await this.fetchPlainFormat(defaultRegistryUrlTemplate);
       } else {
         response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
       }
@@ -81,5 +67,23 @@ export class CustomDatasource extends Datasource {
       logger.trace({ data }, 'Response that has failed validation');
       return null;
     }
+  }
+
+  private async fetchPlainFormat(url: string): Promise<unknown> {
+    const res = (
+      await this.http.get(url, {
+        headers: {
+          'Content-Type': 'text-plain',
+        },
+      })
+    ).body;
+    const versions = res.split('\n').map((version) => {
+      return {
+        version,
+      };
+    });
+    return {
+      releases: versions,
+    };
   }
 }
