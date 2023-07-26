@@ -2,6 +2,7 @@ import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
+import { logger } from '../../../../logger';
 
 jest.mock('../../../../util/fs');
 const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
@@ -159,6 +160,32 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         managerData: {
+          yarnLock: 'yarn.lock',
+        },
+      });
+    });
+
+    it('warns when multiple lock files found', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'yarn.lock') {
+          return Promise.resolve('# yarn.lock');
+        }
+        if (fileName === 'package-lock.json') {
+          return Promise.resolve('# package-lock.json');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultExtractConfig
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+      );
+      expect(res).toMatchObject({
+        managerData: {
+          npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
         },
       });
