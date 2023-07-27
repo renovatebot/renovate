@@ -49,14 +49,12 @@ export function bumpPackageVersion(
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);
-
     bumpedContent = replaceAt(
       content,
       versionPosition,
       currentValue,
       newProjVersion
     );
-
   } catch (err) {
     logger.warn(
       {
