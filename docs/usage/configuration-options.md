@@ -3295,6 +3295,8 @@ Add to this object if you wish to define rules that apply only to PRs that repla
 
 ## repoProblemsHeader
 
+This field will replace the header of the Repository Problems in dependency dashboard issue.
+
 ## respectLatest
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
