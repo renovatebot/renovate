@@ -24,7 +24,7 @@
       ]
     }
   },
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postCreateCommand": [".devcontainer/post-create.sh"],
   // Otherwise jest watcher fails because deps were not installed yet
   "waitFor": "postCreateCommand"
 }
