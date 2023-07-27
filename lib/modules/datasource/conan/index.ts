@@ -26,12 +26,7 @@ import type {
   ConanRevisionsJSON,
   ConanYAML,
 } from './types';
-
-function isArtifactoryServer<T = unknown>(
-  res: HttpResponse<T> | undefined
-): boolean {
-  return is.string(res?.headers['x-jfrog-version']);
-}
+import { isArtifactoryServer } from '../util';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;

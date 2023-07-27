@@ -35,6 +35,7 @@ import type {
   OciImage,
   OciImageList,
 } from './types';
+import { isArtifactoryServer } from '../util';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -59,12 +60,6 @@ const defaultConfig = {
     },
   },
 };
-
-function isArtifactoryServer<T = unknown>(
-  res: HttpResponse<T> | undefined
-): boolean {
-  return is.string(res?.headers['x-jfrog-version']);
-}
 
 export class DockerDatasource extends Datasource {
   static readonly id = dockerDatasourceId;
