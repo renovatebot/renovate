@@ -48,9 +48,9 @@ export function isGetPkgReleasesConfig(
 
 export function applyExtractVersion<
   Config extends Pick<GetPkgReleasesConfig, 'extractVersion'>
->(config: Config, releaseResult: ReleaseResult): void {
+>(config: Config, releaseResult: ReleaseResult): ReleaseResult {
   if (!config.extractVersion) {
-    return;
+    return releaseResult;
   }
 
   const extractVersionRegEx = regEx(config.extractVersion);
@@ -63,11 +63,13 @@ export function applyExtractVersion<
     release.version = version;
     return release;
   });
+
+  return releaseResult;
 }
 
 export function filterValidVersions<
   Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
->(config: Config, releaseResult: ReleaseResult): void {
+>(config: Config, releaseResult: ReleaseResult): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
@@ -75,11 +77,13 @@ export function filterValidVersions<
   releaseResult.releases = filterMap(releaseResult.releases, (release) =>
     versioning.isVersion(release.version) ? release : null
   );
+
+  return releaseResult;
 }
 
 export function sortAndRemoveDuplicates<
   Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
->(config: Config, releaseResult: ReleaseResult): void {
+>(config: Config, releaseResult: ReleaseResult): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
@@ -97,6 +101,8 @@ export function sortAndRemoveDuplicates<
     previousVersion = release.version;
     return release;
   });
+
+  return releaseResult;
 }
 
 export function applyConstraintsFiltering<
@@ -108,12 +114,13 @@ export function applyConstraintsFiltering<
     | 'constraints'
     | 'packageName'
   >
->(config: Config, releaseResult: ReleaseResult): void {
+>(config: Config, releaseResult: ReleaseResult): ReleaseResult {
   if (config?.constraintsFiltering !== 'strict') {
     for (const release of releaseResult.releases) {
       delete release.constraints;
     }
-    return;
+
+    return releaseResult;
   }
 
   const versioningName =
@@ -169,4 +176,6 @@ export function applyConstraintsFiltering<
       `Filtered ${count} releases for ${packageName} due to constraintsFiltering=strict: ${releases}`
     );
   }
+
+  return releaseResult;
 }
