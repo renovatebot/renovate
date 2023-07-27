@@ -14,7 +14,6 @@ import {
   parseLinkHeader,
 } from '../../../util/url';
 import { id as dockerVersioningId } from '../../versioning/docker';
-import { isArtifactoryServer } from '../common';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import {
@@ -60,6 +59,12 @@ const defaultConfig = {
     },
   },
 };
+
+function isArtifactoryServer<T = unknown>(
+  res: HttpResponse<T> | undefined
+): boolean {
+  return is.string(res?.headers['x-jfrog-version']);
+}
 
 export class DockerDatasource extends Datasource {
   static readonly id = dockerDatasourceId;
