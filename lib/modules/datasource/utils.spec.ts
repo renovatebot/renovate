@@ -1,5 +1,5 @@
 import type { HttpResponse } from '../../util/http/types';
-import { isArtifactoryServer } from './common';
+import { isArtifactoryServer } from './util';
 
 describe('modules/datasource/utils', () => {
   it('is artifactory server invalid', () => {

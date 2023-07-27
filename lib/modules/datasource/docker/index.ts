@@ -16,6 +16,7 @@ import {
 import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { isArtifactoryServer } from '../util';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
@@ -35,7 +36,6 @@ import type {
   OciImage,
   OciImageList,
 } from './types';
-import { isArtifactoryServer } from '../util';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',

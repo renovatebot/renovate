@@ -3,7 +3,6 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
-import type { HttpResponse } from '../../../util/http/types';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as allVersioning from '../../versioning';
 import { Datasource } from '../datasource';
@@ -13,6 +12,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
+import { isArtifactoryServer } from '../util';
 import {
   conanDatasourceRegex,
   datasource,
@@ -26,7 +26,6 @@ import type {
   ConanRevisionsJSON,
   ConanYAML,
 } from './types';
-import { isArtifactoryServer } from '../util';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
