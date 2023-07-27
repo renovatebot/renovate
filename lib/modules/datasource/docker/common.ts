@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { parse } from 'auth-header';
-import hasha from 'hasha';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -8,6 +7,7 @@ import {
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { toSha256 } from '../../../util/hash';
 import * as hostRules from '../../../util/host-rules';
 import type { Http } from '../../../util/http';
 import type {
@@ -285,7 +285,7 @@ export function getRegistryRepository(
 export function extractDigestFromResponseBody(
   manifestResponse: HttpResponse
 ): string {
-  return 'sha256:' + hasha(manifestResponse.body, { algorithm: 'sha256' });
+  return 'sha256:' + toSha256(manifestResponse.body);
 }
 
 export function findLatestStable(tags: string[]): string | null {

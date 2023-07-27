@@ -1,6 +1,8 @@
 import { Marshal } from '@qnighy/marshal';
+import type { ZodError } from 'zod';
+import { logger } from '../../../logger';
 import { HttpError } from '../../../util/http';
-import { Result } from '../../../util/result';
+import { AsyncResult, Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
@@ -8,8 +10,21 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { getV1Releases } from './common';
 import { RubygemsHttp } from './http';
 import { MetadataCache } from './metadata-cache';
-import { MarshalledVersionInfo } from './schema';
+import { GemInfo, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
+
+function unlessServerSide<T, E>(
+  err: E,
+  cb: () => AsyncResult<T, E>
+): AsyncResult<T, E> {
+  if (err instanceof HttpError && err.response?.statusCode) {
+    const code = err.response.statusCode;
+    if (code >= 500 && code <= 599) {
+      return AsyncResult.err(err);
+    }
+  }
+  return cb();
+}
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
@@ -40,64 +55,72 @@ export class RubyGemsDatasource extends Datasource {
       return null;
     }
 
-    const { val: rubygemsResult, err: rubygemsError } = await Result.wrap(
-      this.versionsEndpointCache.getVersions(registryUrl, packageName)
-    )
-      .transform((versions) =>
+    const registryHostname = parseUrl(registryUrl)?.hostname;
+
+    let result: AsyncResult<ReleaseResult, Error | string>;
+    if (registryHostname === 'rubygems.org') {
+      result = Result.wrap(
+        this.versionsEndpointCache.getVersions(registryUrl, packageName)
+      ).transform((versions) =>
         this.metadataCache.getRelease(registryUrl, packageName, versions)
-      )
-      .unwrap();
-
-    // istanbul ignore else: will be removed soon
-    if (rubygemsResult) {
-      return rubygemsResult;
-    } else if (rubygemsError instanceof Error) {
-      this.handleGenericErrors(rubygemsError);
+      );
+    } else if (
+      registryHostname === 'rubygems.pkg.github.com' ||
+      registryHostname === 'gitlab.com'
+    ) {
+      result = this.getReleasesViaDeprecatedAPI(registryUrl, packageName);
+    } else {
+      result = getV1Releases(this.http, registryUrl, packageName)
+        .catch((err) =>
+          unlessServerSide(err, () =>
+            this.getReleasesViaInfoEndpoint(registryUrl, packageName)
+          )
+        )
+        .catch((err) =>
+          unlessServerSide(err, () =>
+            this.getReleasesViaDeprecatedAPI(registryUrl, packageName)
+          )
+        );
     }
 
-    try {
-      const registryHostname = parseUrl(registryUrl)?.hostname;
-
-      if (
-        rubygemsError === 'unsupported-api' &&
-        registryHostname !== 'rubygems.org'
-      ) {
-        if (
-          registryHostname === 'rubygems.pkg.github.com' ||
-          registryHostname === 'gitlab.com'
-        ) {
-          return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
-        }
-
-        const { val: apiV1Result, err: apiV1Error } = await getV1Releases(
-          this.http,
-          registryUrl,
-          packageName
-        ).unwrap();
-        if (apiV1Result) {
-          return apiV1Result;
-        } else if (apiV1Error instanceof HttpError) {
-          throw apiV1Error;
-        }
-
-        return await this.getReleasesViaFallbackAPI(registryUrl, packageName);
-      }
-
-      return null;
-    } catch (error) {
-      this.handleGenericErrors(error);
+    const { val, err } = await result.unwrap();
+    if (val) {
+      return val;
     }
+
+    if (err instanceof Error) {
+      this.handleGenericErrors(err);
+    }
+
+    logger.debug({ packageName, registryUrl }, `Rubygems fetch error: ${err}`);
+    return null;
   }
 
-  async getReleasesViaFallbackAPI(
+  private getReleasesViaInfoEndpoint(
     registryUrl: string,
     packageName: string
-  ): Promise<ReleaseResult | null> {
+  ): AsyncResult<ReleaseResult, Error | ZodError> {
+    const url = joinUrlParts(registryUrl, '/info', packageName);
+    return Result.wrap(this.http.get(url)).transform(({ body }) => {
+      const res = GemInfo.safeParse(body);
+      return res.success ? Result.ok(res.data) : Result.err(res.error);
+    });
+  }
+
+  private getReleasesViaDeprecatedAPI(
+    registryUrl: string,
+    packageName: string
+  ): AsyncResult<ReleaseResult, Error | ZodError> {
     const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
     const query = getQueryString({ gems: packageName });
     const url = `${path}?${query}`;
-    const { body: buffer } = await this.http.getBuffer(url);
-    const data = Marshal.parse(buffer);
-    return MarshalledVersionInfo.parse(data);
+    const bufPromise = this.http.getBuffer(url);
+    return Result.wrap(bufPromise).transform(({ body }) => {
+      const data = Marshal.parse(body);
+      const releases = MarshalledVersionInfo.safeParse(data);
+      return releases.success
+        ? Result.ok(releases.data)
+        : Result.err(releases.error);
+    });
   }
 }
