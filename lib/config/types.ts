@@ -272,7 +272,7 @@ export interface RenovateConfig
   constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
-  repoProblemsHeader: string;
+  repoProblemsHeader?: string;
 }
 
 export interface CustomDatasourceConfig {
