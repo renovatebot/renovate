@@ -24,7 +24,9 @@ export function getManagerConfig(
     managerConfig.categories = categories;
   }
   // TODO: fix types #7154
+  // TODO: do we allow separate config objects for custom managers? if yes this need minor modification
   managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
+  // TODO: do we allow separate config objects for custom managers? if yes this need minor modification
   for (const i of getManagerList()) {
     delete managerConfig[i];
   }

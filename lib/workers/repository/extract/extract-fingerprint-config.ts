@@ -38,7 +38,7 @@ function getFilteredManagerConfig(
   config: WorkerExtractConfig
 ): WorkerExtractConfig {
   return {
-    ...(config.manager === 'regex' && getRegexManagerFields(config)),
+    ...(config.manager === 'custom.regex' && getRegexManagerFields(config)),
     manager: config.manager,
     fileMatch: config.fileMatch,
     npmrc: config.npmrc,
@@ -65,23 +65,39 @@ export function generateFingerprintConfig(
     managerList = new Set(getManagerList());
   }
 
+  const fingerprintManagerList: Set<string> = new Set();
+
+  const handleCustomManager = (
+    customMgr: string,
+    config: RenovateConfig
+  ): void => {
+    // TODO: filter regexManagers using customType
+    for (const regexManager of config.regexManagers ?? []) {
+      const customManagerConfig = getManagerConfig(config, customMgr);
+      managerExtractConfigs.push({
+        ...mergeChildConfig(customManagerConfig, regexManager),
+        fileList: [],
+      });
+    }
+  };
+
   for (const manager of managerList) {
     if (manager === 'custom') {
-      for (const regexManager of config.regexManagers ?? []) {
-        const customManagerConfig = getManagerConfig(config, 'regex'); // TODO: replace 'regex' with regexManager.customType
-        managerExtractConfigs.push({
-          ...mergeChildConfig(customManagerConfig, regexManager),
-          fileList: [],
-        });
+      for (const customManager of customManagerList) {
+        fingerprintManagerList.add(`custom.${customManager}`);
+        handleCustomManager(`custom.${customManager}`, config);
       }
-    } else if (!customManagerList.includes(manager)) {
+    } else if (manager.startsWith('custom.')) {
+      handleCustomManager(manager, config);
+    } else {
       const managerConfig = getManagerConfig(config, manager);
       managerExtractConfigs.push({ ...managerConfig, fileList: [] });
     }
+    fingerprintManagerList.add(manager);
   }
 
   return {
-    managerList,
+    managerList: fingerprintManagerList,
     managers: managerExtractConfigs.map(getFilteredManagerConfig),
   };
 }

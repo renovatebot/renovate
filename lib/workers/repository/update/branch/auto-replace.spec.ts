@@ -186,7 +186,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
         "- project: 'pipeline-fragments/docker-lint'\n" +
         'ref: 2-4-0\n' +
         "file: 'ci-include-docker-lint-base.yml'";
-      upgrade.manager = 'regex';
+      upgrade.manager = 'custom.regex';
       upgrade.depName = 'pipeline-solutions/gitlab/fragments/docker-lint';
       upgrade.currentValue = '2-4-0';
       upgrade.newValue = '2-4-1';
@@ -217,7 +217,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('fails with oldversion in depname', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
-      upgrade.manager = 'regex';
+      upgrade.manager = 'custom.regex';
       upgrade.depName =
         '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
       upgrade.currentValue = '1';
@@ -279,7 +279,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('handles replacement with depName===newName when replaceString exists', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
-      upgrade.manager = 'regex';
+      upgrade.manager = 'custom.regex';
       upgrade.updateType = 'replacement';
       upgrade.depName =
         '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
@@ -1152,7 +1152,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
 
     it('regex: updates with pinDigest enabled but no currentDigest value', async () => {
       const yml = 'image: "some.url.com/my-repository:1.0"';
-      upgrade.manager = 'regex';
+      upgrade.manager = 'custom.regex';
       upgrade.updateType = 'replacement';
       upgrade.pinDigests = true;
       upgrade.depName = 'some.url.com/my-repository';
@@ -1174,7 +1174,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('regex: updates with pinDigest enabled and a currentDigest value', async () => {
       const yml =
         'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
-      upgrade.manager = 'regex';
+      upgrade.manager = 'custom.regex';
       upgrade.updateType = 'replacement';
       upgrade.pinDigests = true;
       upgrade.depName = 'some.url.com/my-repository';

@@ -1,6 +1,9 @@
 import type { RenovateConfig } from '../../lib/config/types';
 import { getManagers } from '../../lib/modules/manager';
-import { getCustomManagerList } from '../../lib/modules/manager/custom';
+import {
+  getCustomManagers,
+  getCustomManagerList,
+} from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import {
@@ -29,11 +32,11 @@ export async function generateManagers(
   dist: string,
   managerIssuesMap: OpenItems
 ): Promise<void> {
-  const managers = getManagers();
+  const allManagers = [...getManagers(), ...getCustomManagers()];
 
   const allCategories: Record<string, string[]> = {};
 
-  for (const [manager, definition] of managers) {
+  for (const [manager, definition] of allManagers) {
     const { defaultConfig, supportedDatasources, urls } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);

@@ -26,6 +26,24 @@ describe('config/massage', () => {
       });
     });
 
+    it('massages enabledManagers', () => {
+      const config: RenovateConfig = {
+        enabledManagers: ['npm', 'custom', 'custom.regex'],
+      };
+      expect(massage.massageConfig(config)).toEqual({
+        enabledManagers: ['npm', 'custom'],
+      });
+    });
+
+    it('massages matchManagers', () => {
+      const config: RenovateConfig = {
+        matchManagers: ['npm', 'custom', 'custom.regex'],
+      };
+      expect(massage.massageConfig(config)).toEqual({
+        matchManagers: ['npm', 'custom'],
+      });
+    });
+
     it('massages packageRules matchUpdateTypes', () => {
       const config: RenovateConfig = {
         packageRules: [

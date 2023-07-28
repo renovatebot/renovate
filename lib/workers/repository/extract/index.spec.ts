@@ -32,19 +32,22 @@ describe('workers/repository/extract/index', () => {
     });
 
     it('skips non-enabled managers', async () => {
-      config.enabledManagers = ['npm'];
+      config.enabledManagers = ['npm', 'custom'];
+      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       const res = await extractAllDependencies(config);
-      expect(res).toMatchObject({ packageFiles: { npm: [{}] } });
+      expect(res).toMatchObject({
+        packageFiles: { npm: [{}], 'custom.regex': [{}] },
+      });
     });
 
-    it('warns if no packages found for a enabled manager', async () => {
-      config.enabledManagers = ['npm'];
+    it('warns if no packages found for enabled managers', async () => {
+      config.enabledManagers = ['npm', 'custom.regex'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
-      expect(logger.debug).toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledTimes(2);
     });
 
     it('warns if packageFiles is null', async () => {
@@ -59,7 +62,7 @@ describe('workers/repository/extract/index', () => {
       ]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
-      expect(Object.keys(res.packageFiles)).toContain('regex');
+      expect(Object.keys(res.packageFiles)).toContain('custom.regex');
     });
   });
 });

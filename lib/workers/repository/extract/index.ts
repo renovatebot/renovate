@@ -20,6 +20,16 @@ export async function extractAllDependencies(
     managerList = managerList.filter((manager) =>
       enabledManagers.includes(manager)
     );
+
+    // handle custom managers
+    const enabledCustomMgrs = enabledManagers.filter((mgr) =>
+      mgr.startsWith('custom.')
+    );
+    for (const customMgr of enabledCustomMgrs) {
+      if (customManagerList.includes(customMgr.replace('custom.', ''))) {
+        managerList.push(customMgr);
+      }
+    }
   }
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
@@ -31,16 +41,26 @@ export async function extractAllDependencies(
     }
   };
 
+  const handleCustomManager = (
+    customMgr: string,
+    config: RenovateConfig
+  ): void => {
+    // TODO: filter regexManagers using customType before
+    for (const regexManager of config.regexManagers ?? []) {
+      const customManagerConfig = getManagerConfig(config, customMgr);
+      customManagerConfig.manager = customMgr;
+      tryConfig(mergeChildConfig(customManagerConfig, regexManager));
+    }
+  };
+
   for (const manager of managerList) {
     if (manager === 'custom') {
-      for (const regexManager of config.regexManagers ??
-        // istanbul ignore next
-        []) {
-        const customManagerConfig = getManagerConfig(config, 'regex'); // TODO: replace 'regex' with regexManager.customType
-        customManagerConfig.manager = 'regex'; // TODO: replace 'regex' with regexManager.customType
-        tryConfig(mergeChildConfig(customManagerConfig, regexManager));
+      for (const customManager of customManagerList) {
+        handleCustomManager(`custom.${customManager}`, config);
       }
-    } else if (!customManagerList.includes(manager)) {
+    } else if (manager.startsWith('custom.')) {
+      handleCustomManager(manager, config);
+    } else {
       const managerConfig = getManagerConfig(config, manager);
       managerConfig.manager = manager;
       tryConfig(managerConfig);
@@ -89,7 +109,7 @@ export async function extractAllDependencies(
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
       if (!(enabledManager in extractResult.packageFiles)) {
-        logger.debug(
+        logger.warn(
           { manager: enabledManager },
           `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
         );

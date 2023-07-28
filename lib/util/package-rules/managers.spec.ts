@@ -7,7 +7,7 @@ describe('util/package-rules/managers', () => {
     it('should match against custom manager when matchManager=custom', () => {
       const result = managersMatcher.matches(
         {
-          manager: 'regex',
+          manager: 'custom.regex',
         },
         {
           matchManagers: ['custom'],
@@ -19,10 +19,10 @@ describe('util/package-rules/managers', () => {
     it('should match custom managers separately', () => {
       const result = managersMatcher.matches(
         {
-          manager: 'regex',
+          manager: 'custom.regex',
         },
         {
-          matchManagers: ['regex'],
+          matchManagers: ['custom.regex'],
         }
       );
       expect(result).toBeTrue();

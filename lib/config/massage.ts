@@ -21,6 +21,20 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
   for (const [key, val] of Object.entries(config)) {
     if (allowedStrings.includes(key) && is.string(val)) {
       massagedConfig[key] = [val];
+    } else if (key === 'enabledManagers' && is.array(val)) {
+      let enabledMgrs = val.filter((m) => is.string(m)) as string[];
+      // massage out single custom manager names if 'custom' is present
+      if (val.includes('custom')) {
+        enabledMgrs = enabledMgrs.filter((mgr) => !mgr.startsWith('custom.'));
+      }
+      massagedConfig[key] = enabledMgrs;
+    } else if (key === 'matchManagers' && is.array(val)) {
+      let matchMgrs = val.filter((m) => is.string(m)) as string[];
+      // massage out single custom manager names if 'custom' is present
+      if (val.includes('custom')) {
+        matchMgrs = matchMgrs.filter((mgr) => !mgr.startsWith('custom.'));
+      }
+      massagedConfig[key] = matchMgrs;
     } else if (key === 'npmToken' && is.string(val) && val.length < 50) {
       massagedConfig.npmrc = `//registry.npmjs.org/:_authToken=${val}\n`;
       delete massagedConfig.npmToken;

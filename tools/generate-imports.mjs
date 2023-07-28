@@ -170,7 +170,7 @@ async function generateHash() {
 
     for (const manager of customManagers) {
       const hash = await getManagerHash(manager, true);
-      hashes.push({ manager, hash });
+      hashes.push({ manager: `custom.${manager}`, hash });
     }
 
     //add manager hashes to hashMap {key->manager, value->hash}

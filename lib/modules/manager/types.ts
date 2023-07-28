@@ -17,14 +17,15 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig extends CustomExtractConfig {
-  registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
+  registryAliases?: Record<string, string>;
   skipInstalls?: boolean | null;
 }
 
 export interface CustomExtractConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
+  customType?: string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }

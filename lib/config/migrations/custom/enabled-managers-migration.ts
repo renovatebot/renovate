@@ -11,7 +11,7 @@ export class EnabledManagersMigration extends AbstractMigration {
           case 'yarn':
             return 'npm';
           case 'regex':
-            return 'custom';
+            return 'custom.regex';
           default:
             return manager;
         }

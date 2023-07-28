@@ -4,16 +4,16 @@ import { getDatasourceList } from '../datasource';
 import { getCustomManagerList } from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
+import * as customManager from './custom';
 
 jest.mock('../../util/fs');
 
 const datasources = getDatasourceList();
-const customManagerList = getCustomManagerList();
 
 describe('modules/manager/index', () => {
   describe('supportedDatasources', () => {
     for (const m of manager.getManagerList()) {
-      if (m === 'custom' || customManagerList.includes(m)) {
+      if (m === 'custom') {
         // custom managers support any
         continue;
       }
@@ -31,6 +31,7 @@ describe('modules/manager/index', () => {
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
+      expect(manager.get('custom.regex', 'extractPackageFile')).not.toBeNull();
     });
   });
 
@@ -54,11 +55,12 @@ describe('modules/manager/index', () => {
       return true;
     }
     const mgrs = manager.getManagers();
+    const customMgrs = customManager.getCustomManagers();
 
     const loadedMgr = loadModules(__dirname, validate);
     const loadedCustomMgr = loadModules(join(__dirname, 'custom'), validate);
 
-    expect(Array.from(mgrs.keys())).toEqual(
+    expect(Array.from([...mgrs.keys(), ...customMgrs.keys()])).toEqual(
       Object.keys({ ...loadedMgr, ...loadedCustomMgr })
     );
 
@@ -116,6 +118,17 @@ describe('modules/manager/index', () => {
       expect(
         manager.extractPackageFile('dummy', '', 'filename', {})
       ).toBeNull();
+    });
+
+    it('handles custom managers', () => {
+      customManager.getCustomManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+        extractPackageFile: () => Promise.resolve({ deps: [] }),
+      });
+      expect(
+        manager.extractPackageFile('custom.dummy', '', 'filename', {})
+      ).not.toBeNull();
     });
 
     it('returns non-null', () => {

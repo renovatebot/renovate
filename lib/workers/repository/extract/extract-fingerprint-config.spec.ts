@@ -1,6 +1,7 @@
 import { mergeChildConfig } from '../../../config';
 import { getConfig } from '../../../config/defaults';
 import { getManagerList } from '../../../modules/manager';
+import { getCustomManagerList } from '../../../modules/manager/custom';
 import { generateFingerprintConfig } from './extract-fingerprint-config';
 
 describe('workers/repository/extract/extract-fingerprint-config', () => {
@@ -31,8 +32,9 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
 
     const fingerprintConfig = generateFingerprintConfig(config);
-
-    expect(fingerprintConfig.managerList).toEqual(new Set(['npm', 'custom']));
+    expect(fingerprintConfig.managerList).toEqual(
+      new Set(['npm', 'custom', 'custom.regex'])
+    );
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
@@ -50,7 +52,9 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       skipInstalls: null,
     });
     expect(
-      fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
+      fingerprintConfig.managers.find(
+        (manager) => manager.manager === 'custom.regex'
+      )
     ).toEqual({
       fileMatch: ['js', '***$}{]]['],
       ignorePaths: ['ignore-path-1'],
@@ -60,7 +64,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       datasourceTemplate: 'maven',
       versioningTemplate: 'gradle',
       enabled: true,
-      manager: 'regex',
+      manager: 'custom.regex',
       npmrc: null,
       npmrcMerge: false,
       registryAliases: {
@@ -77,7 +81,12 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       npm: { fileMatch: ['hero.json'] },
     });
     const fingerprintConfig = generateFingerprintConfig(config);
-    expect(fingerprintConfig.managerList).toEqual(new Set(getManagerList()));
+    expect(fingerprintConfig.managerList).toEqual(
+      new Set([
+        ...getManagerList(),
+        ...getCustomManagerList().map((m) => `custom.${m}`),
+      ])
+    );
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
@@ -112,7 +121,9 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       skipInstalls: null,
     });
     expect(
-      fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
+      fingerprintConfig.managers.find(
+        (manager) => manager.manager === 'custom.regex'
+      )
     ).toBeUndefined();
   });
 });
