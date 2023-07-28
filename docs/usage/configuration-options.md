@@ -2002,12 +2002,13 @@ For example, if you want to group packages which are older than 2 months:
 ```
 
 The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
+
 Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
 Instead you should do `> 13 months`.
 
 <!-- prettier-ignore -->
 !!! note
-    We recommend you to only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
 
 ### matchDepTypes
 
