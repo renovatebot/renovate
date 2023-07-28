@@ -20,7 +20,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
           notStable: 'http://some.link.2',
         },
       },
-      enabledManagers: ['npm', 'custom'],
+      enabledManagers: ['npm', 'custom.regex'],
       regexManagers: [
         {
           fileMatch: ['js', '***$}{]]['],
@@ -33,7 +33,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
 
     const fingerprintConfig = generateFingerprintConfig(config);
     expect(fingerprintConfig.managerList).toEqual(
-      new Set(['npm', 'custom', 'custom.regex'])
+      new Set(['npm', 'custom.regex'])
     );
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
