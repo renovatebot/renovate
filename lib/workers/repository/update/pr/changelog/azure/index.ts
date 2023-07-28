@@ -9,7 +9,7 @@ import { AzureHttp } from '../../../../../../util/http/azure';
 import { ensureTrailingSlash } from '../../../../../../util/url';
 import type { ChangeLogFile } from '../types';
 
-export const id = 'azure-changelog';
+const id = 'azure-changelog';
 const http = new AzureHttp(id);
 
 export async function getReleaseNotesMd(
