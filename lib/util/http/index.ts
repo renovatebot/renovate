@@ -372,7 +372,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ): AsyncResult<ResT, SafeJsonError> {
     const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
     return Result.wrap(this.requestJson<ResT>('get', args)).transform(
-      (response) => response.body
+      (response) => Result.ok(response.body)
     );
   }
 

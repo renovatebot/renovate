@@ -160,7 +160,7 @@
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/osv-offline": "1.3.1",
     "@renovatebot/pep440": "2.1.20",
-    "@renovatebot/ruby-semver": "3.0.5",
+    "@renovatebot/ruby-semver": "3.0.6",
     "@sindresorhus/is": "4.6.0",
     "@types/ms": "0.7.31",
     "@types/tmp": "0.2.3",
