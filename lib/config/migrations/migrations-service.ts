@@ -27,6 +27,7 @@ import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migrati
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { IncludeForksMigration } from './custom/include-forks-migration';
 import { MatchDatasourcesMigration } from './custom/match-datasources-migration';
+import { MatchManagersMigration } from './custom/match-managers-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
 import { NodeMigration } from './custom/node-migration';
 import { PackageFilesMigration } from './custom/package-files-migration';
@@ -56,7 +57,6 @@ import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
 import { UpgradeInRangeMigration } from './custom/upgrade-in-range-migration';
 import { VersionStrategyMigration } from './custom/version-strategy-migration';
 import type { Migration, MigrationConstructor } from './types';
-import { MatchManagersMigration } from './custom/match-managers-migration';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([

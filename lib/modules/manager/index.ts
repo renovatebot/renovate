@@ -1,5 +1,6 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
+import * as CustomManager from './custom';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
@@ -9,7 +10,6 @@ import type {
   RangeConfig,
   Result,
 } from './types';
-import * as CustomManager from './custom';
 export { hashMap } from './fingerprint.generated';
 const managerList = Array.from(managers.keys()); // does not include custo, managers
 

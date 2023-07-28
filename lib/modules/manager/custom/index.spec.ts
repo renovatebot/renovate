@@ -1,6 +1,6 @@
 import * as customManager from '.';
 
-describe('modules/manager/custom/regex/index', () => {
+describe('modules/manager/custom/index', () => {
   it('has default config', () => {
     expect(customManager.defaultConfig).toEqual({});
   });

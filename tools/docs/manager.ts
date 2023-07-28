@@ -1,8 +1,8 @@
 import type { RenovateConfig } from '../../lib/config/types';
 import { getManagers } from '../../lib/modules/manager';
 import {
-  getCustomManagers,
   getCustomManagerList,
+  getCustomManagers,
 } from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
