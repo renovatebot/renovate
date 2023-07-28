@@ -77,21 +77,6 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles azure sourceDirectory 1`] = `
-{
-  "body": "-   add new auth, fix accept header and base path in mock
-
-Closes ADAPT-207
-
-See merge request itentialopensource/adapter-utils!177
-
-***
-",
-  "notesSourceUrl": "https://dev.azure.com/some-org/some-project/_git/some-repo?path=packages/foo/CHANGELOG.md",
-  "url": "https://dev.azure.com/some-org/some-project/_git/some-repo?path=packages/foo/CHANGELOG.md&anchor=user-content-4.33.0-%5B05-15-2020%5D",
-}
-`;
-
 exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles github sourceDirectory 1`] = `
 {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
