@@ -312,7 +312,7 @@ export async function processBranch(
       // istanbul ignore if
       if (
         !branchPr &&
-        !(config.automerge && config.automergeType === 'branch') // if branch is configured for automerge no need of a PR
+        !(config.automerge && config.automergeType === 'branch') // if branch is configured for automerge there's no need for a PR
       ) {
         logger.debug('Skipping PR creation out of schedule');
         return {
