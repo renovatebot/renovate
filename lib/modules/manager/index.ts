@@ -17,7 +17,7 @@ export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
 ): ManagerApi[T] | undefined {
-  if (manager.startsWith('custom.')) {
+  if (manager?.startsWith('custom.')) {
     return CustomManager.get(manager, name);
   }
   return managers.get(manager)?.[name];

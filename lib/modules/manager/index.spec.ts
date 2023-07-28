@@ -1,7 +1,6 @@
 import { join } from 'upath';
 import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
-import { getCustomManagerList } from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 import * as customManager from './custom';
