@@ -145,7 +145,7 @@
     "@aws-sdk/client-rds": "3.363.0",
     "@aws-sdk/client-s3": "3.363.0",
     "@breejs/later": "4.1.0",
-    "@cdktf/hcl2json": "0.17.1",
+    "@cdktf/hcl2json": "0.17.2",
     "@iarna/toml": "3.0.0",
     "@opentelemetry/api": "1.4.1",
     "@opentelemetry/context-async-hooks": "1.15.0",
