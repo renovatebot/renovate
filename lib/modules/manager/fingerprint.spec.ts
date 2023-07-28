@@ -1,6 +1,6 @@
 import { regEx } from '../../util/regex';
-import { getManagerList, hashMap } from '.';
 import { getCustomManagerList } from './custom';
+import { getManagerList, hashMap } from '.';
 
 describe('modules/manager/fingerprint', () => {
   it('validate manager hash', () => {
