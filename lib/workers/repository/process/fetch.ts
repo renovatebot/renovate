@@ -3,10 +3,8 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import {
-  getDefaultConfig,
-  getDefaultVersioning,
-} from '../../../modules/datasource';
+import { getDefaultConfig } from '../../../modules/datasource';
+import { getDefaultVersioning } from '../../../modules/datasource/common';
 import type {
   PackageDependency,
   PackageFile,
