@@ -5,7 +5,6 @@ import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as allVersioning from '../../versioning';
-import { isArtifactoryServer } from '../common';
 import { Datasource } from '../datasource';
 import type {
   DigestConfig,
@@ -13,6 +12,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
+import { isArtifactoryServer } from '../util';
 import {
   conanDatasourceRegex,
   datasource,
