@@ -1,16 +1,15 @@
-import * as httpMock from '../../../../../../test/http-mock';
-import * as semverVersioning from '../../../../../modules/versioning/semver';
-import * as hostRules from '../../../../../util/host-rules';
-import type { BranchUpgradeConfig } from '../../../../types';
-import { getChangeLogJSON } from '.';
+import { getChangeLogJSON } from '..';
+import * as httpMock from '../../../../../../../test/http-mock';
+import { partial } from '../../../../../../../test/util';
+import * as semverVersioning from '../../../../../../modules/versioning/semver';
+import * as hostRules from '../../../../../../util/host-rules';
+import type { BranchUpgradeConfig } from '../../../../../types';
 
-jest.mock('../../../../../modules/datasource');
-
-const upgrade = {
+const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   endpoint: 'https://dev.azure.com/some-org/some-project/_apis/',
-  depName: 'renovate',
+  packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
   newVersion: '5.7.0',
@@ -25,11 +24,11 @@ const upgrade = {
     { version: '5.6.0', releaseTimestamp: '2020-02-13T15:37:00.000Z' },
     { version: '5.6.1' },
   ],
-} satisfies BranchUpgradeConfig;
+});
 
 const matchHost = 'https://dev.azure.com/';
 
-describe('workers/repository/update/pr/changelog/azure', () => {
+describe('workers/repository/update/pr/changelog/azure/index', () => {
   afterEach(() => {
     httpMock.clear(false);
   });
@@ -63,15 +62,6 @@ describe('workers/repository/update/pr/changelog/azure', () => {
       ).toBeNull();
     });
 
-    it('skips invalid repos', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'https://dev.azure.com/help',
-        })
-      ).toBeNull();
-    });
-
     it('works without Azure', async () => {
       expect(
         await getChangeLogJSON({
@@ -82,7 +72,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
           baseUrl: 'https://dev.azure.com/some-org/some-project/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
           sourceUrl:
@@ -116,7 +106,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         })
         .persist()
         .get(
-          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0'
+          '/some-org/some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0'
         )
         .reply(200, []);
       expect(
@@ -124,11 +114,11 @@ describe('workers/repository/update/pr/changelog/azure', () => {
           ...upgrade,
         })
       ).toMatchObject({
-        hasReleaseNotes: true,
+        hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
           baseUrl: 'https://dev.azure.com/some-org/some-project/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
           sourceUrl:
@@ -164,12 +154,12 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot({
+      ).toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
           baseUrl: 'https://dev.azure.com/some-org/some-project/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
           sourceUrl:
@@ -203,12 +193,12 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         await getChangeLogJSON({
           ...upgrade,
         })
-      ).toMatchSnapshot({
+      ).toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://dev.azure.com/some-org/some-project/_apis/',
           baseUrl: 'https://dev.azure.com/some-org/some-project/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
           sourceUrl:

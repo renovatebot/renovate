@@ -61,7 +61,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          sourceUrl: 'https://dev.azure.com/unknown-repo',
+          sourceUrl: 'https://unsupported-source.com/unknown-repo',
         })
       ).toBeNull();
     });

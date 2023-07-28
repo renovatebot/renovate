@@ -34,7 +34,7 @@ export class AzureTagsDatasource extends Datasource {
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const url = `${registryUrl!}/git/repositories/${repo}/refs?filter=tags&$top=100&api-version=7.0`;
+    const url = `${registryUrl!}/_apis/git/repositories/${repo}/refs?filter=tags&$top=100&api-version=7.0`;
     const azureTags = (await this.azureHttp.getJsonPaginated<AzureTag>(url))
       .body.value;
 
