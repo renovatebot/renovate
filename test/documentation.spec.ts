@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../lib/config/options';
