@@ -11,3 +11,8 @@ export const AzurePrVote = {
   ApprovedWithSuggestions: 5,
   Approved: 10,
 } as const;
+
+export interface PagedResult<T = any> {
+  count: number;
+  value: T[];
+}

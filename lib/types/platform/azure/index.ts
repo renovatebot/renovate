@@ -17,8 +17,3 @@ export interface AzureTag {
   name: string;
   value: string;
 }
-
-export interface AzureBodyPaginated<T> {
-  count: number;
-  value: T[];
-}

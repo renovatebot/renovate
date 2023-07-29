@@ -15,17 +15,23 @@ describe('util/http/azure', () => {
   });
 
   it('gets paginated JSON', async () => {
+    const valuesPageOne = ['a', 'b'];
+    const valuesPageTwo = ['c', 'd'];
+    const valuesPageThree = ['e'];
+
     httpMock
       .scope(azureApiHost)
       .get('/some-org/some-project/some-path?$top=2')
-      .reply(200, { value: ['a', 'b'] }, { 'x-ms-continuationtoken': '1' })
+      .reply(200, { value: valuesPageOne }, { 'x-ms-continuationtoken': '1' })
       .get('/some-org/some-project/some-path?$top=2&continuationToken=1')
-      .reply(200, { value: ['c', 'd'] }, { 'x-ms-continuationtoken': '2' })
+      .reply(200, { value: valuesPageTwo }, { 'x-ms-continuationtoken': '2' })
       .get('/some-org/some-project/some-path?$top=2&continuationToken=2')
-      .reply(200, { value: ['e'] });
-    const res = await azureApi.getJsonPaginated(
+      .reply(200, { value: valuesPageThree });
+    const res = await azureApi.getJson(
       'https://dev.azure.com/some-org/some-project/some-path?$top=2'
     );
-    expect(res.body.value).toHaveLength(5);
+    expect(res.body).toEqual({
+      value: [...valuesPageOne, ...valuesPageTwo, ...valuesPageThree],
+    });
   });
 });
