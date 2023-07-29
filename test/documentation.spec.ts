@@ -9,11 +9,11 @@ const markdownGlob = '{docs,lib}/**/*.md';
 
 describe('documentation', () => {
   it('has no invalid links', async () => {
-    const files = await glob(markdownGlob);
+    const markdownFiles = await glob(markdownGlob);
 
     await Promise.all(
-      files.map(async (file) => {
-        const markdownText = await fs.readFile(file, 'utf8');
+      markdownFiles.map(async (markdownFile) => {
+        const markdownText = await fs.readFile(markdownFile, 'utf8');
         expect(markdownText).not.toMatch(regEx(/\.md\/#/));
       })
     );
