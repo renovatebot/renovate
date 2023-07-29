@@ -21,8 +21,8 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
   for (const [key, val] of Object.entries(config)) {
     if (allowedStrings.includes(key) && is.string(val)) {
       massagedConfig[key] = [val];
-    } else if (key === 'enabledManagers' && is.array(val)) {
-      let enabledMgrs = val.filter((m) => is.string(m)) as string[];
+    } else if (key === 'enabledManagers' && is.array<string>(val, is.string)) {
+      let matchMgrs = val
       // massage out single custom manager names if 'custom' is present
       if (val.includes('custom')) {
         enabledMgrs = enabledMgrs.filter((mgr) => !mgr.startsWith('custom.'));
