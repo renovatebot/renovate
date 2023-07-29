@@ -1,10 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import fs from 'node:fs';
+import fs from 'fs-extra';
+import { glob } from 'glob';
 import { getOptions } from '../lib/config/options';
+import { regEx } from '../lib/util/regex';
 
 const options = getOptions();
+const markdownGlob = '{docs,lib}/**/*.md';
 
 describe('documentation', () => {
+  it('has no invalid links', async () => {
+    const files = await glob(markdownGlob);
+
+    await Promise.all(
+      files.map(async (file) => {
+        const markdownText = await fs.readFile(file, 'utf8');
+        expect(markdownText).not.toMatch(regEx(/\.md\/#/));
+      })
+    );
+  });
+
   describe('website-documentation', () => {
     describe('configuration-options', () => {
       const doc = fs.readFileSync(
