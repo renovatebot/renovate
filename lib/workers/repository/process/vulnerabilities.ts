@@ -6,7 +6,7 @@ import { parseCvssVector } from 'vuln-vects';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getDefaultVersioning } from '../../../modules/datasource';
+import { getDefaultVersioning } from '../../../modules/datasource/common';
 import type {
   PackageDependency,
   PackageFile,

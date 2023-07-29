@@ -223,8 +223,6 @@ const options: RenovateOptions[] = [
     description: `Enable or disable Renovate bot.`,
     stage: 'package',
     type: 'boolean',
-    cli: false,
-    env: false,
   },
   {
     name: 'constraintsFiltering',
@@ -372,7 +370,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.6.2',
+    default: 'ghcr.io/containerbase/sidecar:9.8.2',
     globalOnly: true,
   },
   {

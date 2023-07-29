@@ -1159,10 +1159,10 @@
   resolved "https://registry.yarnpkg.com/@breejs/later/-/later-4.1.0.tgz#9246907f46cc9e9c9af37d791ab468d98921bcc1"
   integrity sha512-QgGnZ9b7o4k0Ai1ZbTJWwZpZcFK9d+Gb+DyNt4UT9x6IEIs5HVu0iIlmgzGqN+t9MoJSpSPo9S/Mm51UtHr3JA==
 
-"@cdktf/hcl2json@0.17.1":
-  version "0.17.1"
-  resolved "https://registry.yarnpkg.com/@cdktf/hcl2json/-/hcl2json-0.17.1.tgz#6547b045e6c75c03184eca39022b3627ccb3143b"
-  integrity sha512-nOAuJe22FKzBlNJhKRHHTH8Pst2kNEJ18IIL4T2Tfde9EMayyBcGmQ4rsEu4tj0+EuUkryKSkLmwdzPrJS+aaQ==
+"@cdktf/hcl2json@0.17.3":
+  version "0.17.3"
+  resolved "https://registry.yarnpkg.com/@cdktf/hcl2json/-/hcl2json-0.17.3.tgz#a20593c7f2b1c7ff9363e0abc78fd42cc19ce611"
+  integrity sha512-lczep0P2adwv08bf3mF1ScKyAD/Y502QVxGrYm8+E+3cl11qtFVblFJXRcAS288Opnqz1X0ekN4YCmkPawETbg==
   dependencies:
     fs-extra "^11.1.1"
 
@@ -1243,6 +1243,11 @@
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
+
+"@hyrious/marshal@0.2.5":
+  version "0.2.5"
+  resolved "https://registry.npmjs.org/@hyrious/marshal/-/marshal-0.2.5.tgz#96ee3c45e2b356d8a5b202336f1d17f0aefa7e0a"
+  integrity sha512-z0zS0N9TTX6gh78lsC9rkYMDGCvQAFn0oGT5zftU7HEr6/5woMf022/oMSxE94A1TXRyzk+SE2g7EMFc3n+uCw==
 
 "@iarna/toml@3.0.0":
   version "3.0.0"
@@ -2188,10 +2193,10 @@
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.20.tgz#102eefb0653607f43d3686519e52ff87d3d92f13"
   integrity sha512-Z6SLxecPwPUbzdfMVenF04fogoB0LVmaBa4IMzc3s2yV+bbDQUQTFhsmMhqxFfK2iRCKky3vDHspNFQ+gdThMQ==
 
-"@renovatebot/ruby-semver@3.0.5":
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-3.0.5.tgz#ad31659506f9f7512db1d468ff6a0b30ad484451"
-  integrity sha512-SIqhMZ7cF+PpqYfvMRnfRRsldEcEkDuHPiBNNr+q/aAEqaKxk4xC+kh8nYtCQ80ridA8j2QPqgyGCRuRgHHCiA==
+"@renovatebot/ruby-semver@3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-3.0.6.tgz#c5983c064446773a9d91edbbaf96d4cedeae5782"
+  integrity sha512-iKCsDnjehKGEXEbfd0caODioN7/urjqygwQruKEHc8IOlBBdlgAsbrCsgnwWw0YOTP99WSM0mZomnCHoJolQdA==
 
 "@seald-io/binary-search-tree@^1.0.3":
   version "1.0.3"
@@ -3211,10 +3216,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@18.16.19":
-  version "18.16.19"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.16.19.tgz#cb03fca8910fdeb7595b755126a8a78144714eea"
-  integrity sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==
+"@types/node@*", "@types/node@18.17.1":
+  version "18.17.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.17.1.tgz#84c32903bf3a09f7878c391d31ff08f6fe7d8335"
+  integrity sha512-xlR1jahfizdplZYRU59JlUx9uzF1ARa8jbhM11ccpCJya8kvos5jwdm2ZAgxSCwOl0fq21svP18EVwPBXMQudw==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -7897,11 +7902,6 @@ mock-fs@5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-5.2.0.tgz#3502a9499c84c0a1218ee4bf92ae5bf2ea9b2b5e"
   integrity sha512-2dF2R6YMSZbpip1V1WHKGLNjr/k48uQClqMVb5H3MOvwc9qhYis3/IWbj02qIg/Y8MDXKFF4c5v0rxx2o6xTZw==
-
-mockdate@3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/mockdate/-/mockdate-3.0.5.tgz#789be686deb3149e7df2b663d2bc4392bc3284fb"
-  integrity sha512-iniQP4rj1FhBdBYS/+eQv7j1tadJ9lJtdzgOpvsOHng/GbcDh2Fhdeq+ZRldrPYdXvCyfFUmFeEwEGXZB5I/AQ==
 
 modify-values@^1.0.0, modify-values@^1.0.1:
   version "1.0.1"
