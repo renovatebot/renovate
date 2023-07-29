@@ -2,6 +2,7 @@ import type { AzureTag } from '../../../types/platform/azure';
 import { cache } from '../../../util/cache/package/decorator';
 import { AzureHttp } from '../../../util/http/azure';
 import { ensureTrailingSlash } from '../../../util/url';
+import type { PagedResult } from '../../platform/azure/types';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -35,7 +36,8 @@ export class AzureTagsDatasource extends Datasource {
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `${registryUrl!}/_apis/git/repositories/${repo}/refs?filter=tags&$top=100&api-version=7.0`;
-    const azureTags = (await this.azureHttp.getJson<AzureTag[]>(url)).body;
+    const azureTags = (await this.azureHttp.getJson<PagedResult<AzureTag>>(url))
+      .body.value;
 
     const dependency: ReleaseResult = {
       sourceUrl: AzureTagsDatasource.getSourceUrl(repo, registryUrl!),
