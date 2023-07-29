@@ -1,3 +1,4 @@
+import { SafeParseReturnType, ZodError } from 'zod';
 import { logger } from '../logger';
 
 interface Ok<T> {
@@ -19,6 +20,45 @@ interface Err<E> {
 }
 
 type Res<T, E> = Ok<T> | Err<E>;
+
+function isZodResult<Input, Output>(
+  input: unknown
+): input is SafeParseReturnType<Input, NonNullable<Output>> {
+  if (
+    typeof input !== 'object' ||
+    input === null ||
+    Object.keys(input).length !== 2 ||
+    !('success' in input) ||
+    typeof input.success !== 'boolean'
+  ) {
+    return false;
+  }
+
+  if (input.success) {
+    return (
+      'data' in input &&
+      typeof input.data !== 'undefined' &&
+      input.data !== null
+    );
+  } else {
+    return 'error' in input && input.error instanceof ZodError;
+  }
+}
+
+function fromZodResult<Input, Output>(
+  input: SafeParseReturnType<Input, NonNullable<Output>>
+): Result<Output, ZodError<Input>> {
+  return input.success ? Result.ok(input.data) : Result.err(input.error);
+}
+
+/**
+ * All non-nullable values that also are not Promises nor Zod results.
+ * It's useful for restricting Zod results to not return `null` or `undefined`.
+ */
+type RawValue<T> = Exclude<
+  NonNullable<T>,
+  SafeParseReturnType<unknown, NonNullable<T>> | Promise<unknown>
+>;
 
 /**
  * Class for representing a result that can fail.
@@ -72,19 +112,25 @@ export class Result<T, E = Error> {
    *
    *   ```
    */
-  static wrap<T, E = Error>(callback: () => NonNullable<T>): Result<T, E>;
+  static wrap<T, Input = any>(
+    zodResult: SafeParseReturnType<Input, NonNullable<T>>
+  ): Result<T, ZodError<Input>>;
+  static wrap<T, E = Error>(callback: () => RawValue<T>): Result<T, E>;
   static wrap<T, E = Error, EE = never>(
     promise: Promise<Result<T, EE>>
   ): AsyncResult<T, E | EE>;
-  static wrap<T, E = Error>(
-    promise: Promise<NonNullable<T>>
-  ): AsyncResult<T, E>;
-  static wrap<T, E = Error, EE = never>(
+  static wrap<T, E = Error>(promise: Promise<RawValue<T>>): AsyncResult<T, E>;
+  static wrap<T, E = Error, EE = never, Input = any>(
     input:
-      | (() => NonNullable<T>)
+      | SafeParseReturnType<Input, NonNullable<T>>
+      | (() => RawValue<T>)
       | Promise<Result<T, EE>>
-      | Promise<NonNullable<T>>
-  ): Result<T, E | EE> | AsyncResult<T, E | EE> {
+      | Promise<RawValue<T>>
+  ): Result<T, ZodError<Input>> | Result<T, E | EE> | AsyncResult<T, E | EE> {
+    if (isZodResult<Input, T>(input)) {
+      return fromZodResult(input);
+    }
+
     if (input instanceof Promise) {
       return AsyncResult.wrap(input as never);
     }
@@ -244,6 +290,8 @@ export class Result<T, E = Error> {
    * Uncaught errors are logged and wrapped to `Result._uncaught()`,
    * which leads to re-throwing them in `unwrap()`.
    *
+   * Zod `.safeParse()` results are converted automatically.
+   *
    *   ```ts
    *
    *   // SYNC
@@ -267,23 +315,35 @@ export class Result<T, E = Error> {
   transform<U, EE>(
     fn: (value: NonNullable<T>) => AsyncResult<U, E | EE>
   ): AsyncResult<U, E | EE>;
+  transform<U, Input = any>(
+    fn: (value: NonNullable<T>) => SafeParseReturnType<Input, NonNullable<U>>
+  ): Result<U, E | ZodError<Input>>;
+  transform<U, Input = any>(
+    fn: (
+      value: NonNullable<T>
+    ) => Promise<SafeParseReturnType<Input, NonNullable<U>>>
+  ): AsyncResult<U, E | ZodError<Input>>;
   transform<U, EE>(
     fn: (value: NonNullable<T>) => Promise<Result<U, E | EE>>
   ): AsyncResult<U, E | EE>;
   transform<U>(
-    fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
+    fn: (value: NonNullable<T>) => Promise<RawValue<U>>
   ): AsyncResult<U, E>;
-  transform<U>(fn: (value: NonNullable<T>) => NonNullable<U>): Result<U, E>;
-  transform<U, EE>(
+  transform<U>(fn: (value: NonNullable<T>) => RawValue<U>): Result<U, E>;
+  transform<U, EE, Input = any>(
     fn: (
       value: NonNullable<T>
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
+      | SafeParseReturnType<Input, NonNullable<U>>
+      | Promise<SafeParseReturnType<Input, NonNullable<U>>>
       | Promise<Result<U, E | EE>>
-      | Promise<NonNullable<U>>
-      | NonNullable<U>
-  ): Result<U, E | EE> | AsyncResult<U, E | EE> {
+      | Promise<RawValue<U>>
+      | RawValue<U>
+  ):
+    | Result<U, E | EE | ZodError<Input>>
+    | AsyncResult<U, E | EE | ZodError<Input>> {
     if (!this.res.ok) {
       return Result.err(this.res.err);
     }
@@ -297,6 +357,10 @@ export class Result<T, E = Error> {
 
       if (result instanceof AsyncResult) {
         return result;
+      }
+
+      if (isZodResult<Input, U>(result)) {
+        return fromZodResult(result);
       }
 
       if (result instanceof Promise) {
@@ -383,8 +447,11 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
     return new AsyncResult(Promise.resolve(Result.err(err)));
   }
 
-  static wrap<T, E = Error, EE = never>(
-    promise: Promise<Result<T, EE>> | Promise<NonNullable<T>>,
+  static wrap<T, E = Error, EE = never, Input = any>(
+    promise:
+      | Promise<SafeParseReturnType<Input, NonNullable<T>>>
+      | Promise<Result<T, EE>>
+      | Promise<RawValue<T>>,
     onErr?: (err: NonNullable<E>) => Result<T, E>
   ): AsyncResult<T, E | EE> {
     return new AsyncResult(
@@ -393,6 +460,11 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
           if (value instanceof Result) {
             return value;
           }
+
+          if (isZodResult<Input, T>(value)) {
+            return fromZodResult(value);
+          }
+
           return Result.ok(value);
         })
         .catch((err) => {
@@ -469,6 +541,8 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
    * Uncaught errors are logged and wrapped to `Result._uncaught()`,
    * which leads to re-throwing them in `unwrap()`.
    *
+   * Zod `.safeParse()` results are converted automatically.
+   *
    *   ```ts
    *
    *   const { val, err } = await Result.wrap(
@@ -485,25 +559,33 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
   transform<U, EE>(
     fn: (value: NonNullable<T>) => AsyncResult<U, E | EE>
   ): AsyncResult<U, E | EE>;
+  transform<U, Input = any>(
+    fn: (value: NonNullable<T>) => SafeParseReturnType<Input, NonNullable<U>>
+  ): AsyncResult<U, E | ZodError<Input>>;
+  transform<U, Input = any>(
+    fn: (
+      value: NonNullable<T>
+    ) => Promise<SafeParseReturnType<Input, NonNullable<U>>>
+  ): AsyncResult<U, E | ZodError<Input>>;
   transform<U, EE>(
     fn: (value: NonNullable<T>) => Promise<Result<U, E | EE>>
   ): AsyncResult<U, E | EE>;
   transform<U>(
-    fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
+    fn: (value: NonNullable<T>) => Promise<RawValue<U>>
   ): AsyncResult<U, E>;
-  transform<U>(
-    fn: (value: NonNullable<T>) => NonNullable<U>
-  ): AsyncResult<U, E>;
-  transform<U, EE>(
+  transform<U>(fn: (value: NonNullable<T>) => RawValue<U>): AsyncResult<U, E>;
+  transform<U, EE, Input = any>(
     fn: (
       value: NonNullable<T>
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
+      | SafeParseReturnType<Input, NonNullable<U>>
+      | Promise<SafeParseReturnType<Input, NonNullable<U>>>
       | Promise<Result<U, E | EE>>
-      | Promise<NonNullable<U>>
-      | NonNullable<U>
-  ): AsyncResult<U, E | EE> {
+      | Promise<RawValue<U>>
+      | RawValue<U>
+  ): AsyncResult<U, E | EE | ZodError<Input>> {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => {
@@ -521,6 +603,10 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
 
             if (result instanceof AsyncResult) {
               return result;
+            }
+
+            if (isZodResult<Input, U>(result)) {
+              return fromZodResult(result);
             }
 
             if (result instanceof Promise) {

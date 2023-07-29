@@ -25,10 +25,10 @@ describe('modules/datasource/rubygems/index', () => {
     it('returns null for missing pkg', async () => {
       httpMock
         .scope('https://example.com')
-        .get('/versions')
-        .reply(404)
         .get('/api/v1/versions/foobar.json')
         .reply(200, [])
+        .get('/info/foobar')
+        .reply(200, '')
         .get('/api/v1/dependencies?gems=foobar')
         .reply(200, rubyMarshal([]));
       expect(
@@ -117,25 +117,23 @@ describe('modules/datasource/rubygems/index', () => {
     it('uses multiple source urls', async () => {
       httpMock
         .scope('https://registry-1.com/')
-        .get('/versions')
-        .reply(404)
         .get('/api/v1/versions/foobar.json')
-        .reply(400)
+        .reply(404)
+        .get('/info/foobar')
+        .reply(404)
         .get('/api/v1/dependencies?gems=foobar')
         .reply(404);
 
       httpMock
         .scope('https://registry-2.com/nested/path')
-        .get('/versions')
-        .reply(404)
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {})
         .get('/api/v1/versions/foobar.json')
         .reply(200, [
           { number: '1.0.0', created_at: '2021-01-01' },
           { number: '2.0.0', created_at: '2022-01-01' },
           { number: '3.0.0', created_at: '2023-01-01' },
-        ])
-        .get('/api/v1/gems/foobar.json')
-        .reply(200, {});
+        ]);
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
@@ -160,10 +158,10 @@ describe('modules/datasource/rubygems/index', () => {
     it('falls back to dependencies API', async () => {
       httpMock
         .scope('https://example.com/')
-        .get('/versions')
-        .reply(404)
         .get('/api/v1/versions/foobar.json')
-        .reply(400, {})
+        .reply(404, {})
+        .get('/info/foobar')
+        .reply(404)
         .get('/api/v1/dependencies?gems=foobar')
         .reply(
           200,
@@ -191,13 +189,62 @@ describe('modules/datasource/rubygems/index', () => {
       });
     });
 
-    it('errors when version request fails with anything other than 400 or 404', async () => {
+    it('supports /info endpoint', async () => {
       httpMock
         .scope('https://example.com/')
-        .get('/versions')
+        .get('/api/v1/versions/foobar.json')
+        .reply(404)
+        .get('/info/foobar')
+        .reply(
+          200,
+          codeBlock`
+            1.0.0 |checksum:aaa
+            2.0.0 |checksum:bbb
+            3.0.0 |checksum:ccc
+          `
+        );
+
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'foobar',
+        registryUrls: ['https://example.com'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
+        ],
+      });
+    });
+
+    it('errors when version request fails with server error', async () => {
+      httpMock
+        .scope('https://example.com/')
+        .get('/api/v1/versions/foobar.json')
+        .reply(500);
+
+      await expect(
+        getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'foobar',
+          registryUrls: ['https://example.com'],
+        })
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('errors when dependencies request fails server error', async () => {
+      httpMock
+        .scope('https://example.com/')
+        .get('/info/foobar')
         .reply(404)
         .get('/api/v1/versions/foobar.json')
-        .reply(500, {});
+        .reply(404)
+        .get('/api/v1/dependencies?gems=foobar')
+        .reply(500);
 
       await expect(
         getPkgReleases({
@@ -212,8 +259,6 @@ describe('modules/datasource/rubygems/index', () => {
     it('returns null for GitHub Packages package miss', async () => {
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
-        .get('/versions')
-        .reply(404)
         .get('/api/v1/dependencies?gems=foobar')
         .reply(200, rubyMarshal([]));
 
@@ -230,8 +275,6 @@ describe('modules/datasource/rubygems/index', () => {
     it('returns a dep for GitHub Packages package hit', async () => {
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
-        .get('/versions')
-        .reply(404)
         .get('/api/v1/dependencies?gems=foobar')
         .reply(
           200,

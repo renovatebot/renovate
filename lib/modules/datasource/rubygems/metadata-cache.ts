@@ -1,5 +1,5 @@
-import hasha from 'hasha';
 import * as packageCache from '../../../util/cache/package';
+import { toSha256 } from '../../../util/hash';
 import type { Http } from '../../../util/http';
 import { AsyncResult, Result } from '../../../util/result';
 import { parseUrl } from '../../../util/url';
@@ -21,7 +21,7 @@ export class MetadataCache {
   ): Promise<ReleaseResult> {
     const cacheNs = `datasource-rubygems`;
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
-    const hash = hasha(versions, { algorithm: 'sha256' });
+    const hash = toSha256(versions.join(''));
 
     const loadCache = (): AsyncResult<ReleaseResult, unknown> =>
       Result.wrapNullable(
@@ -55,7 +55,9 @@ export class MetadataCache {
         getV1Releases(this.http, registryUrl, packageName).transform(saveCache)
       )
       .catch(() =>
-        Result.ok({ releases: versions.map((version) => ({ version })) })
+        Result.ok({
+          releases: versions.map((version) => ({ version })),
+        })
       )
       .unwrapOrThrow();
   }
