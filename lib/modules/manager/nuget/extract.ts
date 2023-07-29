@@ -123,7 +123,7 @@ export async function extractPackageFile(
   }
 
   let deps: PackageDependency[] = [];
-  let packageFileVersion;
+  let packageFileVersion: string | undefined;
   try {
     const parsedXml = new XmlDocument(content);
     deps = extractDepsFromXml(parsedXml).map((dep) => ({
