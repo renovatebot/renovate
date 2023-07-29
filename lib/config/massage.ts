@@ -22,14 +22,14 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
     if (allowedStrings.includes(key) && is.string(val)) {
       massagedConfig[key] = [val];
     } else if (key === 'enabledManagers' && is.array<string>(val, is.string)) {
-      let matchMgrs = val
+      let enabledMgrs = val;
       // massage out single custom manager names if 'custom' is present
       if (val.includes('custom')) {
         enabledMgrs = enabledMgrs.filter((mgr) => !mgr.startsWith('custom.'));
       }
       massagedConfig[key] = enabledMgrs;
-    } else if (key === 'matchManagers' && is.array(val)) {
-      let matchMgrs = val.filter((m) => is.string(m)) as string[];
+    } else if (key === 'matchManagers' && is.array<string>(val, is.string)) {
+      let matchMgrs = val;
       // massage out single custom manager names if 'custom' is present
       if (val.includes('custom')) {
         matchMgrs = matchMgrs.filter((mgr) => !mgr.startsWith('custom.'));
