@@ -3,7 +3,7 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { replaceAt } from '../../../util/string';
 import type { BumpPackageVersionResult } from '../types';
-import { findVersion } from './extract';
+import { findVersion } from './util';
 
 export function bumpPackageVersion(
   content: string,
@@ -41,9 +41,11 @@ export function bumpPackageVersion(
 
     const currentProjVersion = versionNode.val;
     if (currentProjVersion !== currentValue) {
-      throw new Error(
-        `currentValue passed to bumpPackageVersion() doesn't match value found`
+      logger.warn(
+        { currentValue, currentProjVersion },
+        "currentValue passed to bumpPackageVersion() doesn't match value found"
       );
+      return { bumpedContent };
     }
 
     const startTagPosition = versionNode.startTagPosition;

@@ -1,5 +1,5 @@
 import upath from 'upath';
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { findUpLocal, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
@@ -82,4 +82,15 @@ export async function getConfiguredRegistries(
     }
   }
   return registries;
+}
+
+export function findVersion(parsedXml: XmlDocument): XmlElement | undefined {
+  for (const tag of ['Version', 'VersionPrefix']) {
+    for (const l1Elem of parsedXml.childrenNamed('PropertyGroup')) {
+      for (const l2Elem of l1Elem.childrenNamed(tag)) {
+        return l2Elem;
+      }
+    }
+  }
+  return undefined;
 }

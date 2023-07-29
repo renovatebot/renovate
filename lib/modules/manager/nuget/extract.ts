@@ -12,7 +12,7 @@ import type {
 } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
-import { getConfiguredRegistries } from './util';
+import { findVersion, getConfiguredRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -147,15 +147,4 @@ export async function extractPackageFile(
     res.lockFiles = [lockFileName];
   }
   return res;
-}
-
-export function findVersion(parsedXml: XmlDocument): XmlElement | undefined {
-  for (const tag of ['Version', 'VersionPrefix']) {
-    for (const l1Elem of parsedXml.childrenNamed('PropertyGroup')) {
-      for (const l2Elem of l1Elem.childrenNamed(tag)) {
-        return l2Elem;
-      }
-    }
-  }
-  return undefined;
 }
