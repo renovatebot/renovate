@@ -47,44 +47,44 @@ describe('documentation', () => {
         expect(headers).toEqual(expectedOptions);
       });
 
-      const headers3 = doc
+      const subHeaders = doc
         .match(/\n### (.*?)\n/g)
         ?.map((match) => match.substring(5, match.length - 1));
-      headers3!.sort();
-      const expectedOptions3 = options
+      subHeaders!.sort();
+      const expectedSubOptions = options
         .filter((option) => option.stage !== 'global')
         .filter((option) => !option.globalOnly)
         .filter((option) => option.parent)
         .map((option) => option.name)
         .sort();
-      expectedOptions3.sort();
+      expectedSubOptions.sort();
 
       it('has headers for every required sub-option', () => {
-        expect(headers3).toEqual(expectedOptions3);
+        expect(subHeaders).toEqual(expectedSubOptions);
       });
     });
 
     describe('self-hosted-configuration', () => {
-      const selfHostDoc = fs.readFileSync(
+      const doc = fs.readFileSync(
         'docs/usage/self-hosted-configuration.md',
         'utf8'
       );
 
-      const selfHostHeaders = selfHostDoc
+      const headers = doc
         .match(/\n## (.*?)\n/g)
         ?.map((match) => match.substring(4, match.length - 1));
 
-      const selfHostExpectedOptions = options
+      const expectedOptions = options
         .filter((option) => !!option.globalOnly)
         .map((option) => option.name)
         .sort();
 
-      it('has self hosted doc headers sorted alphabetically', () => {
-        expect(selfHostHeaders).toEqual([...selfHostHeaders!].sort());
+      it('has headers sorted alphabetically', () => {
+        expect(headers).toEqual([...headers!].sort());
       });
 
-      it('has headers (self hosted) for every required option', () => {
-        expect(selfHostHeaders).toEqual(selfHostExpectedOptions);
+      it('has headers for every required option', () => {
+        expect(headers).toEqual(expectedOptions);
       });
     });
 
