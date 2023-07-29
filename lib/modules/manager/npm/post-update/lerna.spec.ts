@@ -219,7 +219,9 @@ describe('modules/manager/npm/post-update/lerna', () => {
     it('returns specified version', () => {
       const pkg = {};
       expect(
-        lernaHelper.getLernaVersion(pkg, { engines: { lerna: '2.0.0' } })
+        lernaHelper.getLernaVersion(pkg, {
+          devDependencies: { lerna: '2.0.0' },
+        })
       ).toBe('2.0.0');
     });
 
@@ -227,7 +229,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const pkg = {};
       expect(
         lernaHelper.getLernaVersion(pkg, {
-          engines: { lerna: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
+          dependencies: { lerna: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
         })
       ).toBe('1.x || >=2.5.0 || 5.0.0 - 7.2.3');
     });

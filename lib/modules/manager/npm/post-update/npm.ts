@@ -1,6 +1,5 @@
 // TODO: types (#7154)
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -20,6 +19,7 @@ import {
   readLocalFile,
   renameLocalFile,
 } from '../../../../util/fs';
+import { minimatch } from '../../../../util/minimatch';
 import { trimSlashes } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
@@ -246,7 +246,7 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns ?? []) {
-          if (minimatch(workspaceDir, workspacePattern)) {
+          if (minimatch(workspacePattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;
           }

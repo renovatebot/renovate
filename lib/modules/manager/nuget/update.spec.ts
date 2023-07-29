@@ -8,6 +8,10 @@ const minimumContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1</Version></PropertyGroup></Project>';
 const prereleaseContent =
   '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1.0.0-1</Version></PropertyGroup></Project>';
+const issue23526InitialContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>4.9.0</Version></PropertyGroup></Project>';
+const issue23526ExpectedContent =
+  '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>4.10.0</Version></PropertyGroup></Project>';
 
 describe('modules/manager/nuget/update', () => {
   describe('bumpPackageVersion', () => {
@@ -35,6 +39,21 @@ describe('modules/manager/nuget/update', () => {
       );
 
       expect(bumpedContent).toEqual(bumpedContent2);
+    });
+
+    it('issue 23526 does not bump version incorrectly', () => {
+      const { bumpedContent } = bumpPackageVersion(
+        issue23526InitialContent,
+        '4.9.0',
+        'minor'
+      );
+      const { bumpedContent: bumpedContent2 } = bumpPackageVersion(
+        bumpedContent!,
+        '4.9.0',
+        'minor'
+      );
+
+      expect(bumpedContent2).toEqual(issue23526ExpectedContent);
     });
 
     it('does not bump version if version is not a semantic version', () => {

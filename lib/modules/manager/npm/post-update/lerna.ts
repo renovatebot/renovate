@@ -24,9 +24,10 @@ import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 // Exported for testability
 export function getLernaVersion(
   lernaPackageFile: Partial<PackageFile<NpmManagerData>>,
-  lazyPgkJson: PackageJsonSchema
+  lazyPkgJson: PackageJsonSchema
 ): string | null {
-  const constraint = getPackageManagerVersion('lerna', lazyPgkJson);
+  const constraint =
+    lazyPkgJson.dependencies?.lerna ?? lazyPkgJson.devDependencies?.lerna;
   if (!constraint || !semver.validRange(constraint)) {
     logger.warn(
       // TODO: types (#7154)

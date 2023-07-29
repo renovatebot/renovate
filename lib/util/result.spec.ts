@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
 
@@ -68,6 +69,18 @@ describe('util/result', () => {
         }, 'nullable');
         expect(res).toEqual(Result.err('oops'));
       });
+
+      it('wraps zod parse result', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
+        expect(Result.wrap(schema.safeParse(42))).toMatchObject(
+          Result.err({
+            issues: [
+              { code: 'invalid_type', expected: 'string', received: 'number' },
+            ],
+          })
+        );
+      });
     });
 
     describe('Unwrapping', () => {
@@ -107,6 +120,16 @@ describe('util/result', () => {
             .unwrap()
         ).toThrow('oops');
       });
+
+      it('returns ok-value for unwrapOrThrow', () => {
+        const res = Result.ok(42);
+        expect(res.unwrapOrThrow()).toBe(42);
+      });
+
+      it('throws error for unwrapOrThrow on error result', () => {
+        const res = Result.err('oops');
+        expect(() => res.unwrapOrThrow()).toThrow('oops');
+      });
     });
 
     describe('Transforming', () => {
@@ -138,6 +161,42 @@ describe('util/result', () => {
           { err: 'oops' },
           'Result: unhandled transform error'
         );
+      });
+
+      it('automatically converts zod values', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = Result.ok('foo').transform((x) => schema.safeParse(x));
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+    });
+
+    describe('Catch', () => {
+      it('bypasses ok result', () => {
+        const res = Result.ok(42);
+        expect(res.catch(() => Result.ok(0))).toEqual(Result.ok(42));
+        expect(res.catch(() => Result.ok(0))).toBe(res);
+      });
+
+      it('bypasses uncaught transform errors', () => {
+        const res = Result.ok(42).transform(() => {
+          throw 'oops';
+        });
+        expect(res.catch(() => Result.ok(0))).toEqual(Result._uncaught('oops'));
+        expect(res.catch(() => Result.ok(0))).toBe(res);
+      });
+
+      it('converts error to Result', () => {
+        const result = Result.err<string>('oops').catch(() =>
+          Result.ok<number>(42)
+        );
+        expect(result).toEqual(Result.ok(42));
+      });
+
+      it('handles error thrown in catch function', () => {
+        const result = Result.err<string>('oops').catch(() => {
+          throw 'oops';
+        });
+        expect(result).toEqual(Result._uncaught('oops'));
       });
     });
   });
@@ -222,19 +281,43 @@ describe('util/result', () => {
         const res = Result.wrap(Promise.reject('oops'));
         await expect(res.unwrap(42)).resolves.toBe(42);
       });
+
+      it('returns ok-value for unwrapOrThrow', async () => {
+        const res = Result.wrap(Promise.resolve(42));
+        await expect(res.unwrapOrThrow()).resolves.toBe(42);
+      });
+
+      it('rejects for error for unwrapOrThrow', async () => {
+        const res = Result.wrap(Promise.reject('oops'));
+        await expect(res.unwrapOrThrow()).rejects.toBe('oops');
+      });
     });
 
     describe('Transforming', () => {
-      it('transforms successful promise to value', async () => {
+      it('transforms AsyncResult to pure value', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
           x.toUpperCase()
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
-      it('transforms successful promise to Result', async () => {
+      it('transforms AsyncResult to Result', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
           Result.ok(x.toUpperCase())
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+
+      it('transforms Result to AsyncResult', async () => {
+        const res = await Result.ok('foo').transform((x) =>
+          AsyncResult.ok(x.toUpperCase())
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+
+      it('transforms AsyncResult to AsyncResult', async () => {
+        const res = await AsyncResult.ok('foo').transform((x) =>
+          AsyncResult.ok(x.toUpperCase())
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
@@ -289,15 +372,14 @@ describe('util/result', () => {
         expect(fn).not.toHaveBeenCalled();
       });
 
-      it('handles uncaught error from AsyncResult before transforming', async () => {
-        const res: AsyncResult<number, string> = new AsyncResult((_, reject) =>
-          reject('oops')
-        );
-        const fn = jest.fn((x: number) => Promise.resolve(x + 1));
-        await expect(res.transform(fn)).resolves.toEqual(
-          Result._uncaught('oops')
-        );
-        expect(fn).not.toHaveBeenCalled();
+      it('re-wraps error thrown via unwrapping in async transform', async () => {
+        const res = await AsyncResult.ok(42)
+          .transform(async (): Promise<number> => {
+            await Promise.resolve();
+            throw 'oops';
+          })
+          .transform((x) => x + 1);
+        expect(res).toEqual(Result._uncaught('oops'));
       });
 
       it('handles error thrown on Result async transform', async () => {
@@ -352,6 +434,50 @@ describe('util/result', () => {
           .transform(fn3);
 
         expect(res).toEqual(Result.ok('F-O-O'));
+      });
+
+      it('asynchronously transforms Result to zod values', async () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = await Result.ok('foo').transform((x) =>
+          Promise.resolve(schema.safeParse(x))
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+
+      it('transforms AsyncResult to zod values', async () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = await AsyncResult.ok('foo').transform((x) =>
+          schema.safeParse(x)
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+    });
+
+    describe('Catch', () => {
+      it('converts error to AsyncResult', async () => {
+        const result = await Result.err<string>('oops').catch(() =>
+          AsyncResult.ok(42)
+        );
+        expect(result).toEqual(Result.ok(42));
+      });
+
+      it('converts error to Promise', async () => {
+        const fallback = Promise.resolve(Result.ok(42));
+        const result = await Result.err<string>('oops').catch(() => fallback);
+        expect(result).toEqual(Result.ok(42));
+      });
+
+      it('handles error thrown in Promise result', async () => {
+        const fallback = Promise.reject('oops');
+        const result = await Result.err<string>('oops').catch(() => fallback);
+        expect(result).toEqual(Result._uncaught('oops'));
+      });
+
+      it('converts AsyncResult error to Result', async () => {
+        const result = await AsyncResult.err<string>('oops').catch(() =>
+          AsyncResult.ok<number>(42)
+        );
+        expect(result).toEqual(Result.ok(42));
       });
     });
   });
