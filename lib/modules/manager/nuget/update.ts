@@ -38,13 +38,13 @@ export function bumpPackageVersion(
       );
       return { bumpedContent };
     }
-    if (versionNode.val !== currentValue) {
+
+    const currentProjVersion = versionNode.val;
+    if (currentProjVersion !== currentValue) {
       throw new Error(
         `currentValue passed to bumpPackageVersion() doesn't match value found`
       );
     }
-
-    const currentProjVersion = versionNode.val;
 
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(
@@ -55,11 +55,6 @@ export function bumpPackageVersion(
     const newProjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
-    }
-
-    if (currentProjVersion === newProjVersion) {
-      logger.debug('Version was already bumped');
-      return { bumpedContent };
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);

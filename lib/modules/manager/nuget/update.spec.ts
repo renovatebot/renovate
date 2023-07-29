@@ -131,7 +131,7 @@ describe('modules/manager/nuget/update', () => {
       expect(newVersion).toBe('0.0.2');
     });
 
-    it('finds picks version over versionprefix', () => {
+    it('picks version over versionprefix', () => {
       const content =
         '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>0.0.5</VersionPrefix></PropertyGroup><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>';
       const { bumpedContent } = bumpPackageVersion(content, '0.0.1', 'patch');
