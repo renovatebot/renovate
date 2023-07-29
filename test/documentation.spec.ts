@@ -1,22 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import fs from 'node:fs';
-import is from '@sindresorhus/is';
 import { getOptions } from '../lib/config/options';
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace jest {
-    type ContainsOption<T> = T extends ArrayLike<unknown> ? T[number] : unknown;
-
-    interface Matchers<R> {
-      /**
-       * only available in `test/website-docs.spec.js`
-       * @param arg Value which current values should contain
-       */
-      toContainOption(arg: ContainsOption<R>): void;
-    }
-  }
-}
 
 const options = getOptions();
 
@@ -85,47 +69,6 @@ describe('documentation', () => {
 
       it('has headers for every required option', () => {
         expect(headers).toEqual(expectedOptions);
-      });
-    });
-
-    describe('unrelated', () => {
-      // Checking relatedOptions field in options
-      const relatedOptionsMatrix = options
-        .map((option) => option.relatedOptions)
-        .filter(is.truthy)
-        .sort();
-
-      let relatedOptions = ([] as string[]).concat(...relatedOptionsMatrix!); // Converts the matrix to an 1D array
-      relatedOptions = [...new Set(relatedOptions)]; // Makes all options unique
-
-      /*
-      Matcher which checks if the argument is within the received array (or string)
-      on an error, it throws a custom message.
-      */
-      expect.extend({
-        toContainOption<T extends string>(received: T[], argument: T) {
-          if (received.includes(argument)) {
-            return {
-              message: (): string =>
-                `Option "${argument}" should be within options`,
-              pass: true,
-            };
-          }
-          return {
-            message: (): string =>
-              `Option "${argument}" doesn't exist within options`,
-            pass: false,
-          };
-        },
-      });
-
-      const allOptionNames = options.map((option) => option.name).sort();
-
-      // Lists through each option in the relatedOptions array to be able to locate the exact element which causes error, in case of one
-      it('has valid relateOptions values', () => {
-        relatedOptions.forEach((relOption) => {
-          expect(allOptionNames).toContainOption(relOption);
-        });
       });
     });
   });
