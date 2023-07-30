@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
@@ -102,9 +103,9 @@ function extractRunners(runner: unknown): PackageDependency[] {
       currentValue: version.join('-'),
       replaceString: rnr,
       depType: 'github-runner',
-      datasource: undefined,
+      datasource: GithubRunnersDatasource.id,
       autoReplaceStringTemplate:
-        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
     };
   });
 }
