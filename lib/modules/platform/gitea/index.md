@@ -19,8 +19,8 @@ The PAT should have these permissions:
 
 - `repo`
 - `read:user`
-- `read:misc` (since Gitea version 1.20.0)
 - `issue` (since Gitea version 1.20.0)
+- `read:misc` (for Gitea version 1.20.0 - 1.20.1)
 - `read:email` (until Gitea version 1.19.3)
 
 If you use Gitea packages, add the `read:packages` scope.
