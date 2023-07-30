@@ -76,6 +76,24 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: '"actions/checkout@v1.1.2"',
           versioning: 'docker',
         },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+        },
       ]);
     });
 
@@ -270,9 +288,9 @@ describe('modules/manager/github-actions/extract', () => {
         'workflow_5.yml'
       );
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps.filter((d) => d.datasource === undefined)).toHaveLength(
-        2
-      );
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners')
+      ).toHaveLength(2);
     });
   });
 });

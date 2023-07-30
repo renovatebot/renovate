@@ -1,5 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action runners from yaml configuration file 1`] = `
+[
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "12-xl",
+    "datasource": "github-runners",
+    "depName": "macos",
+    "depType": "github-runner",
+    "replaceString": "macos-12-xl",
+  },
+]
+`;
+
 exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
 [
   {
@@ -87,6 +108,30 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "actions-rs/cargo@v1.0.3",
     "versioning": "docker",
   },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
 ]
 `;
 
@@ -133,6 +178,38 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
   },
   {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "16-bullseye",
@@ -160,6 +237,14 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "postgres:10",
   },
   {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+  },
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "16-bullseye",
@@ -167,6 +252,14 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "node",
     "depType": "container",
     "replaceString": "node:16-bullseye",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
   },
 ]
 `;
