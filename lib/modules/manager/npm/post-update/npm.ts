@@ -171,7 +171,7 @@ export async function generateLockFile(
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile
     if (lockUpdates.length) {
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
-      if (lockFileParsed?.lockfileVersion >= 2) {
+      if (lockFileParsed?.lockfileVersion >== 2) {
         lockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
             | 'dependencies'
