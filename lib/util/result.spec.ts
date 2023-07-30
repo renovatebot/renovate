@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
 
@@ -67,6 +68,18 @@ describe('util/result', () => {
           throw 'oops';
         }, 'nullable');
         expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps zod parse result', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
+        expect(Result.wrap(schema.safeParse(42))).toMatchObject(
+          Result.err({
+            issues: [
+              { code: 'invalid_type', expected: 'string', received: 'number' },
+            ],
+          })
+        );
       });
     });
 
@@ -148,6 +161,12 @@ describe('util/result', () => {
           { err: 'oops' },
           'Result: unhandled transform error'
         );
+      });
+
+      it('automatically converts zod values', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = Result.ok('foo').transform((x) => schema.safeParse(x));
+        expect(res).toEqual(Result.ok('FOO'));
       });
     });
 
@@ -415,6 +434,22 @@ describe('util/result', () => {
           .transform(fn3);
 
         expect(res).toEqual(Result.ok('F-O-O'));
+      });
+
+      it('asynchronously transforms Result to zod values', async () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = await Result.ok('foo').transform((x) =>
+          Promise.resolve(schema.safeParse(x))
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+
+      it('transforms AsyncResult to zod values', async () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = await AsyncResult.ok('foo').transform((x) =>
+          schema.safeParse(x)
+        );
+        expect(res).toEqual(Result.ok('FOO'));
       });
     });
 
