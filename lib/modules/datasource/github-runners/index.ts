@@ -1,3 +1,4 @@
+import { id as semverId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
@@ -15,6 +16,8 @@ export class GithubRunnersDatasource extends Datasource {
     ],
     windows: [{ version: '2022' }, { version: '2019' }],
   };
+
+  override readonly defaultVersioning = semverId;
 
   constructor() {
     super(GithubRunnersDatasource.id);
