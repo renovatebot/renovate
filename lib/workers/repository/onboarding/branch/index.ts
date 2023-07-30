@@ -7,7 +7,7 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
+import { type Pr, platform } from '../../../../modules/platform';
 import { getCache } from '../../../../util/cache/repository';
 import {
   getBranchCommit,
