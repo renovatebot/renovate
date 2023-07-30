@@ -309,7 +309,6 @@ export async function processBranch(
           result: 'update-not-scheduled',
         };
       }
-      // istanbul ignore if
       if (
         !branchPr &&
         !(config.automerge && config.automergeType === 'branch') // if branch is configured for automerge there's no need for a PR

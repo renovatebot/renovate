@@ -610,7 +610,9 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('automerges branch if within automergeSchedule but not general schedule', async () => {
+    // automerge should respect only automergeSchedule
+    // mock a case where branchPr does not exist, pr-creation is off-schedule, and the branch is configured for automerge
+    it('automerges when there is no pr and, pr-creation is off-schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
