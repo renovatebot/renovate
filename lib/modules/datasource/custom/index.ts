@@ -70,14 +70,16 @@ export class CustomDatasource extends Datasource {
   }
 
   private async fetchPlainFormat(url: string): Promise<unknown> {
-    const res = (
-      await this.http.get(url, {
-        headers: {
-          'Content-Type': 'text-plain',
-        },
-      })
-    ).body;
-    const versions = res.split('\n').map((version) => {
+    const response = await this.http.get(url, {
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
+    const contentType = response.headers['content-type'];
+    if (!contentType?.startsWith('text/')) {
+      return null;
+    }
+    const versions = response.body.split('\n').map((version) => {
       return {
         version: version.trim(),
       };
