@@ -17,7 +17,7 @@
     "debug": "cross-env NODE_OPTIONS=--inspect-brk ts-node lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
     "doc-fence-check": "node tools/check-fenced-code.mjs",
-    "lint-website-docs": "jest --coverage false test/website-docs.spec.ts",
+    "lint-documentation": "jest --coverage false test/documentation.spec.ts",
     "eslint": "eslint . --cache --cache-location .cache/eslint --report-unused-disable-directives",
     "eslint-fix": "eslint --cache --cache-location .cache/eslint --fix . --report-unused-disable-directives",
     "eslint-ci": "eslint . --cache --cache-strategy content --cache-location .cache/eslint --format gha",
