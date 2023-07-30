@@ -263,5 +263,16 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ]);
     });
+
+    it('extracts multiple action runners from yaml configuration file', () => {
+      const res = extractPackageFile(
+        Fixtures.get('workflow_5.yml'),
+        'workflow_5.yml'
+      );
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps.filter((d) => d.datasource === undefined)).toHaveLength(
+        2
+      );
+    });
   });
 });

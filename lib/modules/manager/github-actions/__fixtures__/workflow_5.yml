@@ -1,0 +1,7 @@
+jobs:
+  test:
+    runs-on: ubuntu-latest
+  next-test:
+    runs-on:
+      ubuntu-22.04
+    runs-on: "macos-12-xl"

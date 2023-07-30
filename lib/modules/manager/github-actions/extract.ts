@@ -86,6 +86,29 @@ function extractContainer(container: unknown): PackageDependency | undefined {
   return undefined;
 }
 
+function extractRunners(runner: unknown): PackageDependency[] {
+  const runners = [];
+  if (is.string(runner)) {
+    runners.push(runner);
+  } else if (is.array(runner, is.string)) {
+    runners.push(...runner);
+  }
+
+  return runners.map((rnr) => {
+    const [depName, ...version] = rnr.split('-');
+
+    return {
+      depName,
+      currentValue: version.join('-'),
+      replaceString: rnr,
+      depType: 'github-runner',
+      datasource: undefined,
+      autoReplaceStringTemplate:
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+    };
+  });
+}
+
 function extractWithYAMLParser(
   content: string,
   packageFile: string
@@ -118,6 +141,8 @@ function extractWithYAMLParser(
         deps.push(dep);
       }
     }
+
+    deps.push(...extractRunners(job?.['runs-on']));
   }
 
   return deps;
