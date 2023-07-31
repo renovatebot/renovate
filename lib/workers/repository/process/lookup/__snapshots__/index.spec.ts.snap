@@ -2,11 +2,8 @@
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "8.0.0",
-  "dependencyUrl": undefined,
   "fixedVersion": "8.0.0",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
@@ -49,11 +46,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin for up to date version 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "8.1.0",
-  "dependencyUrl": undefined,
   "fixedVersion": "8.1.0",
-  "homepage": undefined,
   "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": [
@@ -71,11 +65,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest update 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "8.0.0",
-  "dependencyUrl": undefined,
   "fixedVersion": "8.0.0",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
@@ -128,14 +119,10 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles git su
 }
 `;
 
-
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "0.9.99",
-  "dependencyUrl": undefined,
   "fixedVersion": "0.9.99",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://registry.npmjs.org",
   "sourceUrl": "https://github.com/kriskowal/q",
@@ -189,16 +176,13 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles update
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() ignores deprecated 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "1.3.0",
-  "dependencyUrl": undefined,
   "deprecationMessage": "On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q2\` has the following deprecation notice:
 
 \`true\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "fixedVersion": "1.3.0",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://registry.npmjs.org",
   "sourceUrl": "https://github.com/kriskowal/q",
@@ -220,11 +204,8 @@ Marking the latest version of an npm package as deprecated results in the entire
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() is deprecated 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "1.3.0",
-  "dependencyUrl": undefined,
   "fixedVersion": "1.3.0",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://registry.npmjs.org",
   "sourceDirectory": "test",
@@ -279,11 +260,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns additi
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns complex object 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "1.3.0",
-  "dependencyUrl": undefined,
   "fixedVersion": "1.3.0",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://registry.npmjs.org",
   "sourceUrl": "https://github.com/kriskowal/q",
@@ -530,11 +508,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "8",
-  "dependencyUrl": undefined,
   "fixedVersion": "8",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
@@ -555,11 +530,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "8.1",
-  "dependencyUrl": undefined,
   "fixedVersion": "8.1",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
@@ -589,11 +561,8 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1.0 1`] = `
 {
-  "changelogUrl": undefined,
   "currentVersion": "8.1.0",
-  "dependencyUrl": undefined,
   "fixedVersion": "8.1.0",
-  "homepage": undefined,
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",

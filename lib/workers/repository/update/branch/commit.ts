@@ -1,10 +1,10 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { minimatch } from '../../../../util/minimatch';
 import { sanitize } from '../../../../util/sanitize';
 import type { BranchConfig } from '../../../types';
 
@@ -18,7 +18,7 @@ export function commitFilesToBranch(
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
       const matchesExcludePaths = config.excludeCommitPaths!.some(
-        (excludedPath) => minimatch(filePath, excludedPath, { dot: true })
+        (excludedPath) => minimatch(excludedPath, { dot: true }).match(filePath)
       );
       if (matchesExcludePaths) {
         logger.debug(`Excluding ${filePath} from commit`);
