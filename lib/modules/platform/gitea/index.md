@@ -17,11 +17,13 @@ You must set `platform=gitea` in your Renovate config file.
 
 The PAT should have these permissions:
 
-- `repo`
-- `read:user`
-- `issue` (since Gitea version 1.20.0)
-- `read:misc` (for Gitea version 1.20.0 - 1.20.1)
-- `read:email` (until Gitea version 1.19.3)
+| Permission  | Valid for Gitea versions |
+| ----------- | ----------- |
+| `repo`      | all       |
+| `read:user` | all        |
+| `issue`     | `>= 1.20.0`|
+| `read:email`| `<= 1.19.3`|
+| `read:misc` | Only for `1.20.0` and `1.20.1`|
 
 If you use Gitea packages, add the `read:packages` scope.
 
