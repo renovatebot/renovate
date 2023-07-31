@@ -101,10 +101,9 @@ export class RubyGemsDatasource extends Datasource {
     packageName: string
   ): AsyncResult<ReleaseResult, Error | ZodError> {
     const url = joinUrlParts(registryUrl, '/info', packageName);
-    return Result.wrap(this.http.get(url)).transform(({ body }) => {
-      const res = GemInfo.safeParse(body);
-      return res.success ? Result.ok(res.data) : Result.err(res.error);
-    });
+    return Result.wrap(this.http.get(url)).transform(({ body }) =>
+      GemInfo.safeParse(body)
+    );
   }
 
   private getReleasesViaDeprecatedAPI(
@@ -117,10 +116,7 @@ export class RubyGemsDatasource extends Datasource {
     const bufPromise = this.http.getBuffer(url);
     return Result.wrap(bufPromise).transform(({ body }) => {
       const data = Marshal.parse(body);
-      const releases = MarshalledVersionInfo.safeParse(data);
-      return releases.success
-        ? Result.ok(releases.data)
-        : Result.err(releases.error);
+      return MarshalledVersionInfo.safeParse(data);
     });
   }
 }

@@ -7,6 +7,7 @@ import {
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { loadModules } from '../../util/modules';
 import datasources from './api';
+import { getDefaultVersioning } from './common';
 import { Datasource } from './datasource';
 import type {
   DatasourceApi,
@@ -17,7 +18,6 @@ import type {
 import {
   getDatasourceList,
   getDatasources,
-  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   supportsDigests,

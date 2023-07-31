@@ -184,7 +184,10 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        { ...config, constraints: { ...config.constraints, npm: '6.0.0' } },
+        {
+          ...config,
+          constraints: { ...config.constraints, lerna: '^7.1.4', npm: '6.0.0' },
+        },
         {}
       );
       expect(res.error).toBeFalse();
@@ -192,21 +195,8 @@ describe('modules/manager/npm/post-update/lerna', () => {
         { cmd: 'install-tool node 16.16.0' },
         { cmd: 'install-tool npm 6.0.0' },
         { cmd: 'hash -d npm 2>/dev/null || true' },
-        { cmd: 'install-tool lerna 2.0.0' },
-        {
-          cmd: 'lerna info || echo "Ignoring lerna info failure"',
-          options: {
-            cwd: 'some-dir',
-          },
-        },
         {
           cmd: 'npm install --ignore-scripts  --no-audit --package-lock-only',
-          options: {
-            cwd: 'some-dir',
-          },
-        },
-        {
-          cmd: 'lerna bootstrap --no-ci --ignore-scripts -- --ignore-scripts  --no-audit --package-lock-only',
           options: {
             cwd: 'some-dir',
           },
@@ -219,33 +209,35 @@ describe('modules/manager/npm/post-update/lerna', () => {
     it('returns specified version', () => {
       const pkg = {};
       expect(
-        lernaHelper.getLernaVersion(pkg, { engines: { lerna: '2.0.0' } })
+        lernaHelper.getLernaConstraint(pkg, {
+          devDependencies: { lerna: '2.0.0' },
+        })
       ).toBe('2.0.0');
     });
 
     it('returns specified range', () => {
       const pkg = {};
       expect(
-        lernaHelper.getLernaVersion(pkg, {
-          engines: { lerna: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
+        lernaHelper.getLernaConstraint(pkg, {
+          dependencies: { lerna: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
         })
       ).toBe('1.x || >=2.5.0 || 5.0.0 - 7.2.3');
     });
 
     it('returns latest if no lerna dep is specified', () => {
       const pkg = {};
-      expect(lernaHelper.getLernaVersion(pkg, {})).toBeNull();
+      expect(lernaHelper.getLernaConstraint(pkg, {})).toBeNull();
     });
 
     it('returns latest if pkg has no deps at all', () => {
       const pkg = {};
-      expect(lernaHelper.getLernaVersion(pkg, {})).toBeNull();
+      expect(lernaHelper.getLernaConstraint(pkg, {})).toBeNull();
     });
 
     it('returns latest if specified lerna version is not a valid semVer range', () => {
       const pkg = {};
       expect(
-        lernaHelper.getLernaVersion(pkg, { engines: { lerna: '[a.b.c;' } })
+        lernaHelper.getLernaConstraint(pkg, { engines: { lerna: '[a.b.c;' } })
       ).toBeNull();
     });
   });

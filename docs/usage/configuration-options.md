@@ -466,6 +466,11 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
+<!-- prettier-ignore -->
+!!! note
+    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
+    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
+
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
