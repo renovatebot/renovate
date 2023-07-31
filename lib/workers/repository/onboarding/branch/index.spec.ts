@@ -275,6 +275,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(git.mergeBranch).toHaveBeenCalledOnce();
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       expect(logger.debug).not.toHaveBeenCalledWith(
         'Skip processing since the onboarding branch is up to date and default branch has not changed'
       ); // onboarding cache no longer valid
@@ -408,6 +409,8 @@ describe('workers/repository/onboarding/branch/index', () => {
           `Platform '${pl}' does not support extended markdown`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
+        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('detects missing rebase checkbox', async () => {
@@ -428,6 +431,8 @@ describe('workers/repository/onboarding/branch/index', () => {
           `Manual onboarding PR update requested`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
+        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('handles unchecked rebase checkbox', async () => {
@@ -435,6 +440,8 @@ describe('workers/repository/onboarding/branch/index', () => {
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
         await checkOnboardingBranch(config);
         expect(OnboardingState.prUpdateRequested).toBeFalse();
+        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
     });
   });
