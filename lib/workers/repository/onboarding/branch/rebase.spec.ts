@@ -19,7 +19,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = {
         ...getConfig(),
         repository: 'some/repo',
