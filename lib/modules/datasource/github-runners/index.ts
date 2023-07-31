@@ -5,6 +5,12 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 export class GithubRunnersDatasource extends Datasource {
   static readonly id = 'github-runners';
 
+  /**
+   * List of all available GitHub-hosted runners.
+   * Single source of truth: https://github.com/actions/runner-images
+   *
+   * Please don't add runners until they are out of beta state and have the label "latest" assigned.
+   */
   static readonly releases: { [packageName: string]: Release[] } = {
     ubuntu: [{ version: '22.04' }, { version: '20.04' }],
     macos: [
