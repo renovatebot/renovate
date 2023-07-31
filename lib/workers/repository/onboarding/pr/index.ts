@@ -218,11 +218,6 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
 async function getOnboardingConfigHashComment(
   config: RenovateConfig
 ): Promise<string> {
-  const platform = GlobalConfig.get('platform');
-  if (!platform || !['github', 'gitlab', 'azure', 'gitea'].includes(platform)) {
-    return '';
-  }
-  // Create hashMeta
   const configFile = defaultConfigFile(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';

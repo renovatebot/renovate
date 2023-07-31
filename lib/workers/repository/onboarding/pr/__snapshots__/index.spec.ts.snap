@@ -27,6 +27,8 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
 
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
@@ -62,6 +64,8 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
 
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
@@ -92,6 +96,8 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
 And this is a footer for repository:test baseBranch:some-branch
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
@@ -127,6 +133,8 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
 And this is a footer for repository:test baseBranch:some-branch
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
@@ -162,6 +170,8 @@ There should be several empty lines at the end of the PR
 
 
 
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
@@ -202,5 +212,7 @@ There should be several empty lines at the end of the PR
 
 
 
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
