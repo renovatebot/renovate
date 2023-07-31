@@ -105,7 +105,7 @@ function extractRunners(runner: unknown): PackageDependency[] {
       depType: 'github-runner',
       datasource: GithubRunnersDatasource.id,
       autoReplaceStringTemplate:
-        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
+        '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
     };
   });
 }
