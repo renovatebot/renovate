@@ -103,7 +103,7 @@ You can use this configuration to request the newest version available to [K3s](
 
 You can use this configuration to request the newest versions of the Hashicorp products:
 
-```json
+```json5
 {
   "regexManagers": [
     {
@@ -139,7 +139,7 @@ Sometimes the "dependency version source" is _not_ available via an API.
 To work around a missing API, you can create dependency "files". These files are served via HTTP(S), so that Renovate can access them.
 For example, imagine the following file `versiontracker.json` for the software `something``:
 
-```json
+```json5
 [
     {
         "version": "77"
@@ -153,7 +153,7 @@ For example, imagine the following file `versiontracker.json` for the software `
 By writing a custom datasource, Renovate can process the `versiontracker.json` file, see below.
 This example uses Nexus as the webserver.
 
-```json
+```json5
 {
   "customDatasources": {
     "nexus_generic": {
@@ -176,7 +176,7 @@ something_version: "77"
 
 And the following regex manager:
 
-```json
+```json5
 {
   "regexManagers": [
     {
