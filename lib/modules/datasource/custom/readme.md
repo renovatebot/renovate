@@ -101,7 +101,7 @@ You can use this configuration to request the newest version available to [K3s](
 
 ### Hashicorp
 
-You can use this configuration to request the newest versions of the hashicorp products:
+You can use this configuration to request the newest versions of the Hashicorp products:
 
 ```json
 {
@@ -126,16 +126,18 @@ You can use this configuration to request the newest versions of the hashicorp p
 }
 ```
 
-E.g. to have the latest Nomad version in your ansible variables, use this snippet after adding the above configuration:
+To have the latest Nomad version in your Ansible variables, use this snippet _after_ adding the above configuration:
 
 ```yaml
 # renovate: depName=nomad
 nomad_version: 1.6.0
 ```
 
-### Custom Offline Dependencies
+### Custom offline dependencies
 
-Sometimes the source of the dependency versions is not available via an API but has to be generated manually. For this purpose, you can manually create dependency "files" (similar to an API) served via http(s) for renovate to access. For example, imagine the following file `versiontracker.json` for the software `something``:
+Sometimes the "dependency version source" is _not_ available via an API.
+To work around a missing API, you can create dependency "files". These files are served via HTTP(S), so that Renovate can access them.
+For example, imagine the following file `versiontracker.json` for the software `something``:
 
 ```json
 [
@@ -148,7 +150,8 @@ Sometimes the source of the dependency versions is not available via an API but 
 ]
 ```
 
-Which can be ingested by renovate using the following custom datasource (using nexus as a webserver in this case):
+By writing a custom datasource, Renovate can process the `versiontracker.json` file, see below.
+This example uses Nexus as the webserver.
 
 ```json
 {
@@ -163,7 +166,8 @@ Which can be ingested by renovate using the following custom datasource (using n
 }
 ```
 
-This could be used to update ansible yaml files with the latest version through a regex manager, e.g. with the following ansible content:
+This could be used to update Ansible YAML files with the latest version through a regex manager.
+For example, with the following Ansible content:
 
 ```yaml
 # renovate: datasource=custom.nexus_generic depName=something versioning=loose
