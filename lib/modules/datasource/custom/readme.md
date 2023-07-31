@@ -18,7 +18,7 @@ Available template variables:
 
 - `packageName`
 
-```json5
+```json
 {
   regexManagers: [
     {
@@ -86,16 +86,16 @@ All available options:
 
 You can use this configuration to request the newest version available to [K3s](https://k3s.io/)
 
-```json5
+```json
 {
-  customDatasources: {
-    k3s: {
-      defaultRegistryUrlTemplate: 'https://update.k3s.io/v1-release/channels',
-      transformTemplates: [
-        '{"releases":[{"version": $$.(data[id = \'stable\'].latest),"sourceUrl":"https://github.com/k3s-io/k3s","changelogUrl":$join(["https://github.com/k3s-io/k3s/releases/tag/",data[id = \'stable\'].latest])}],"sourceUrl": "https://github.com/k3s-io/k3s","homepage": "https://k3s.io/"}',
-      ],
-    },
-  },
+  "customDatasources": {
+    "k3s": {
+      "defaultRegistryUrlTemplate": "https://update.k3s.io/v1-release/channels",
+      "transformTemplates": [
+        "{\"releases\":[{\"version\": $$.(data[id = 'stable'].latest),\"sourceUrl\":\"https://github.com/k3s-io/k3s\",\"changelogUrl\":$join([\"https://github.com/k3s-io/k3s/releases/tag/\",data[id = 'stable'].latest])}],\"sourceUrl\": \"https://github.com/k3s-io/k3s\",\"homepage\": \"https://k3s.io/\"}"
+      ]
+    }
+  }
 }
 ```
 
@@ -103,7 +103,7 @@ You can use this configuration to request the newest version available to [K3s](
 
 You can use this configuration to request the newest versions of the Hashicorp products:
 
-```json5
+```json
 {
   "regexManagers": [
     {
@@ -122,7 +122,7 @@ You can use this configuration to request the newest versions of the Hashicorp p
         "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"releaseTimestamp\": $v.timestamp_created, \"changelogUrl\": $v.url_changelog, \"sourceUrl\": $v.url_source_repository } }), \"homepage\": $[0].url_project_website, \"sourceUrl\": $[0].url_source_repository }"
       ]
     }
-  },
+  }
 }
 ```
 
@@ -139,21 +139,21 @@ Sometimes the "dependency version source" is _not_ available via an API.
 To work around a missing API, you can create dependency "files". These files are served via HTTP(S), so that Renovate can access them.
 For example, imagine the following file `versiontracker.json` for the software `something``:
 
-```json5
+```json
 [
     {
         "version": "77"
     },
     {
         "version": "76"
-    },
+    }
 ]
 ```
 
 By writing a custom datasource, Renovate can process the `versiontracker.json` file, see below.
 This example uses Nexus as the webserver.
 
-```json5
+```json
 {
   "customDatasources": {
     "nexus_generic": {
@@ -162,7 +162,7 @@ This example uses Nexus as the webserver.
         "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
       ]
     }
-  },
+  }
 }
 ```
 
@@ -176,7 +176,7 @@ something_version: "77"
 
 And the following regex manager:
 
-```json5
+```json
 {
   "regexManagers": [
     {
@@ -187,6 +187,6 @@ And the following regex manager:
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
-  ],
+  ]
 }
 ```
