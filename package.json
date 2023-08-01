@@ -335,7 +335,8 @@
     "ts-node": "10.9.1",
     "type-fest": "3.13.1",
     "typescript": "5.1.6",
-    "unified": "9.2.2"
+    "unified": "9.2.2",
+    "wrap-ansi": "7.0.0"
   },
   "files": [
     "dist",
