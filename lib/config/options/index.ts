@@ -370,7 +370,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.7.0',
+    default: 'ghcr.io/containerbase/sidecar:9.8.2',
     globalOnly: true,
   },
   {
@@ -999,7 +999,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure'],
+    supportedPlatforms: ['azure', 'gitlab'],
   },
   // depType
   {

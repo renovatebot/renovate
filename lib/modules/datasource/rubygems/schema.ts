@@ -1,41 +1,34 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
+import { filterMap } from '../../../util/filter-map';
+import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
 import type { Release } from '../types';
 
 export const MarshalledVersionInfo = LooseArray(
   z
-    .object({
-      number: z.string(),
-    })
-    .transform(({ number: version }) => ({ version }))
-).refine(
-  (value) => !is.emptyArray(value),
-  'Empty response from `/v1/dependencies` endpoint'
-);
+    .object({ number: z.string() })
+    .transform(({ number: version }): Release => ({ version }))
+)
+  .refine(
+    (value) => !is.emptyArray(value),
+    'Empty response from `/v1/dependencies` endpoint'
+  )
+  .transform((releases) => ({ releases }));
+type MarshalledVersionInfo = z.infer<typeof MarshalledVersionInfo>;
 
 export const GemMetadata = z
   .object({
-    name: z.string(),
-    version: z.string().optional().catch(undefined),
     changelog_uri: z.string().optional().catch(undefined),
     homepage_uri: z.string().optional().catch(undefined),
     source_code_uri: z.string().optional().catch(undefined),
   })
   .transform(
     ({
-      name: packageName,
-      version,
       changelog_uri: changelogUrl,
       homepage_uri: homepage,
       source_code_uri: sourceUrl,
-    }) => ({
-      packageName,
-      latestVersion: version,
-      changelogUrl,
-      homepage,
-      sourceUrl,
-    })
+    }) => ({ changelogUrl, homepage, sourceUrl })
   );
 export type GemMetadata = z.infer<typeof GemMetadata>;
 
@@ -93,5 +86,25 @@ export const GemVersions = LooseArray(
         return result;
       }
     )
-);
+)
+  .refine(
+    (value) => !is.emptyArray(value),
+    'Empty response from `/v1/gems` endpoint'
+  )
+  .transform((releases) => ({ releases }));
 export type GemVersions = z.infer<typeof GemVersions>;
+
+export const GemInfo = z
+  .string()
+  .transform((body) =>
+    filterMap(body.split(newlineRegex), (line) => {
+      const spaceIdx = line.indexOf(' ');
+      return spaceIdx > 0 ? line.slice(0, spaceIdx) : null;
+    }).map((version): Release => ({ version }))
+  )
+  .refine(
+    (value) => !is.emptyArray(value),
+    'Empty response from `/info` endpoint'
+  )
+  .transform((releases) => ({ releases }));
+export type GemInfo = z.infer<typeof GemInfo>;
