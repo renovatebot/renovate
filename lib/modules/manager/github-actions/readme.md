@@ -25,8 +25,8 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 }
 ```
 
-GitHub runners which are configured in variables are not considered by Renovate.
-E.g. the following runner configured in the `RUNNER` variable won't be considered for updates.
+Renovate ignores any GitHub runners which are configured in variables.
+For example, Renovate ignores the runner configured in the `RUNNER` variable:
 
 ```yaml
 name: build

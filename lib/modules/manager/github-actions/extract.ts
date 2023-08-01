@@ -10,14 +10,14 @@ import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { Workflow } from './types';
 
-const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
-const actionRe = regEx(
+const dockerActionRegex = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
+const actionRegex = regEx(
   /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?@?(?<tag>v?\d+(?:\.\d+(?:\.\d+)?)?))?)/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
-const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
-const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
+const shaRegex = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
+const shaShortRegex = regEx(/^[a-f0-9]{6,7}$/);
 
 function extractWithRegex(content: string): PackageDependency[] {
   logger.trace('github-actions.extractWithRegex()');
@@ -27,7 +27,7 @@ function extractWithRegex(content: string): PackageDependency[] {
       continue;
     }
 
-    const dockerMatch = dockerActionRe.exec(line);
+    const dockerMatch = dockerActionRegex.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
@@ -36,7 +36,7 @@ function extractWithRegex(content: string): PackageDependency[] {
       continue;
     }
 
-    const tagMatch = actionRe.exec(line);
+    const tagMatch = actionRegex.exec(line);
     if (tagMatch?.groups) {
       const {
         depName,
@@ -61,10 +61,10 @@ function extractWithRegex(content: string): PackageDependency[] {
         replaceString,
         autoReplaceStringTemplate: `${quotes}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
       };
-      if (shaRe.test(currentValue)) {
+      if (shaRegex.test(currentValue)) {
         dep.currentValue = tag;
         dep.currentDigest = currentValue;
-      } else if (shaShortRe.test(currentValue)) {
+      } else if (shaShortRegex.test(currentValue)) {
         dep.currentValue = tag;
         dep.currentDigestShort = currentValue;
       } else {
@@ -88,7 +88,7 @@ function extractContainer(container: unknown): PackageDependency | undefined {
   return undefined;
 }
 
-const runnerVersionRe = regEx(
+const runnerVersionRegex = regEx(
   /^\s*(?<depName>[\d\w]+)-(?<currentValue>[^\s]+)/
 );
 
@@ -102,7 +102,7 @@ function extractRunners(runner: unknown): PackageDependency[] {
 
   return runners
     .map((rnr) => {
-      const runnerVersionGroups = runnerVersionRe.exec(rnr)?.groups;
+      const runnerVersionGroups = runnerVersionRegex.exec(rnr)?.groups;
       if (!runnerVersionGroups) {
         return;
       }

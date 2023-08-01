@@ -6,7 +6,7 @@ export class GithubRunnersDatasource extends Datasource {
   static readonly id = 'github-runners';
 
   /**
-   * Please don't add runners until they are out of beta state and have the label "latest" assigned.
+   * Only add stable runners to the datasource. See datasource readme for details.
    */
   private static readonly releases: { [packageName: string]: Release[] } = {
     ubuntu: [{ version: '22.04' }, { version: '20.04' }],
