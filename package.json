@@ -337,7 +337,7 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "jackspeak": "2.1.1"
+    "jackspeak": "2.2.2"
   },
   "files": [
     "dist",
