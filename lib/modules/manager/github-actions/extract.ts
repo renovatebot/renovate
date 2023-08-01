@@ -88,7 +88,7 @@ function extractContainer(container: unknown): PackageDependency | undefined {
 }
 
 function extractRunners(runner: unknown): PackageDependency[] {
-  const runners = [];
+  const runners: string[] = [];
   if (is.string(runner)) {
     runners.push(runner);
   } else if (is.array(runner, is.string)) {

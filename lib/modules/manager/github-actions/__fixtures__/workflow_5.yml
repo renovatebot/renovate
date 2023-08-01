@@ -1,7 +1,16 @@
 jobs:
-  test:
+  test1:
     runs-on: ubuntu-latest
-  next-test:
+  test2:
     runs-on:
       ubuntu-22.04
+  test3:
     runs-on: "macos-12-xl"
+  test4:
+    runs-on: 'macos-latest'
+  test5:
+    runs-on: |
+      "windows-2019"
+  test6:
+    runs-on: >
+      "windows-2022"

@@ -11,7 +11,7 @@ export class GithubRunnersDatasource extends Datasource {
    *
    * Please don't add runners until they are out of beta state and have the label "latest" assigned.
    */
-  static readonly releases: { [packageName: string]: Release[] } = {
+  private static readonly releases: { [packageName: string]: Release[] } = {
     ubuntu: [{ version: '22.04' }, { version: '20.04' }],
     macos: [
       { version: '13' },
