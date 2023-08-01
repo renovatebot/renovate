@@ -1,4 +1,4 @@
-This datasource returns a list of all available runners hosted by GitHub based on https://github.com/actions/runner-images. Only stable runners are returned (no beta releases).
+This datasource returns a list of all available runners hosted by GitHub based on `https://github.com/actions/runner-images`. Only stable runners are returned (no beta releases).
 
 Examples: `windows-2019` / `ubuntu-22.04` / `macos-13`
 
