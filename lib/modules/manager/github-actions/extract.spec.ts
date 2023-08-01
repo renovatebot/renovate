@@ -1,7 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const workflow5 = `
+const runnerTestWorkflow = `
 jobs:
   test1:
     runs-on: ubuntu-latest
@@ -316,9 +316,64 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple action runners from yaml configuration file', () => {
-      const res = extractPackageFile(workflow5, 'workflow.yml');
+      const res = extractPackageFile(runnerTestWorkflow, 'workflow.yml');
 
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          replaceString: 'ubuntu-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '22.04',
+          replaceString: 'ubuntu-22.04',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '12-xl',
+          replaceString: 'macos-12-xl',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: 'latest',
+          replaceString: 'macos-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2019\n',
+          replaceString: 'windows-2019\n',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2022\n',
+          replaceString: 'windows-2022\n',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+        },
+      ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners')
       ).toHaveLength(6);
