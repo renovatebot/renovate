@@ -40,6 +40,7 @@ Renovate works on these platforms:
 - [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
 - [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
 - [Gerrit (experimental)](https://docs.renovatebot.com/modules/platform/gerrit/)
+- [SCM-Manager](https://scm-manager.org/)
 
 ## Who Uses Renovate?
 

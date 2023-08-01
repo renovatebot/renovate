@@ -316,7 +316,7 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'scmm'],
   },
   {
     name: 'dryRun',
@@ -780,7 +780,7 @@ const options: RenovateOptions[] = [
     description: 'Username for authentication.',
     stage: 'repository',
     type: 'string',
-    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server'],
+    supportedPlatforms: ['azure', 'bitbucket', 'bitbucket-server', 'scmm'],
     globalOnly: true,
   },
   {
@@ -2729,7 +2729,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['gitlab', 'bitbucket-server'],
+    supportedPlatforms: ['gitlab', 'bitbucket-server', 'scmm'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',

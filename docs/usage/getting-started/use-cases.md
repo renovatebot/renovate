@@ -22,8 +22,8 @@ Example package files include:
 Renovate:
 
 1. Scans your repositories to find package files and their dependencies
-1. Checks if any newer versions exist
-1. Raises Pull Requests for available updates
+2. Checks if any newer versions exist
+3. Raises Pull Requests for available updates
 
 The Pull Requests patch the package files directly, and include changelogs for the newer versions (if they are available).
 
