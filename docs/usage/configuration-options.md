@@ -3293,9 +3293,13 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
 
-## repoProblemsHeader
+## customizeDashboard
 
-This field will replace the header of the Repository Problems in dependency dashboard issue.
+You can use the `customizeDashboard` object to customize dependency dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
 
 ## respectLatest
 

@@ -617,6 +617,7 @@ export async function validateConfig(
                 'migratePresets',
                 'productLinks',
                 'secrets',
+                'customizeDashboard',
               ].includes(key)
             ) {
               const res = validatePlainObject(val);

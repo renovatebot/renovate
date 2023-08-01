@@ -174,11 +174,11 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       'repository problems'
     );
     newIssueBody += '## Repository problems\n\n';
-    if (config.repoProblemsHeader?.length) {
-      newIssueBody +=
-        template.compile(config.repoProblemsHeader, config) + '\n\n';
+    const repoProblemsHeader =
+      config.customizeDashboard?.['repoProblemsHeader'];
+    if (repoProblemsHeader) {
+      newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
     }
-    // newIssueBody += `${config.repoProblemsHeader}\n\n`;
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }
