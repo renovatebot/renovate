@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
+import { RE2 } from 're2-wasm';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { re2 } from '../expose.cjs';
 
 import { logger } from '../logger';
 
@@ -10,11 +10,10 @@ const cache = new Map<string, RegExp>();
 
 if (!process.env.RENOVATE_X_IGNORE_RE2) {
   try {
-    const RE2 = re2();
     // Test if native is working
-    new RE2('.*').exec('test');
+    new RE2('.*', 'u').exec('test');
     logger.debug('Using RE2 as regex engine');
-    RegEx = RE2;
+    RegEx = RE2 as unknown as RegExpConstructor; // type incompability
   } catch (err) {
     logger.warn({ err }, 'RE2 not usable, falling back to RegExp');
   }
@@ -43,7 +42,10 @@ export function regEx(
   }
 
   try {
-    const instance = new RegEx(pattern, flags);
+    const instance = new RegEx(
+      pattern,
+      flags ? (flags.includes('u') ? flags : `${flags}u`) : 'u'
+    );
     if (canBeCached) {
       cache.set(key, instance);
     }

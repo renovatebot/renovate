@@ -1,4 +1,4 @@
-import RE2 from 're2';
+import { RE2 } from 're2-wasm';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { isUUID, regEx } from './regex';
 
@@ -30,7 +30,7 @@ describe('util/regex', () => {
   });
 
   it('Falls back to RegExp', () => {
-    jest.doMock('re2', () => {
+    jest.doMock('re2-wasm', () => {
       throw new Error();
     });
 
