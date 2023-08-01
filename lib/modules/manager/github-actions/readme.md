@@ -24,3 +24,18 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
   "extends": ["helpers:pinGitHubActionDigests"]
 }
 ```
+
+GitHub runners which are configured in variables are not considered by Renovate.
+E.g. the following runner configured in the `RUNNER` variable won't be considered for updates.
+
+```yaml
+name: build
+on: [push]
+
+env:
+  RUNNER: ubuntu-20.04
+
+jobs:
+  build:
+    runs-on: ${{ env.RUNNER }}
+```
