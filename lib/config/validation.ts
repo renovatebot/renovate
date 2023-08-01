@@ -535,7 +535,7 @@ export async function validateConfig(
                 key === 'matchCurrentValue') &&
               // TODO: can be undefined ? #7154
               !rulesRe.test(parentPath!) && // Inside a packageRule
-              (parentPath || !isPreset) // top level in a preset
+              (is.string(parentPath) || !isPreset) // top level in a preset
             ) {
               errors.push({
                 topic: 'Configuration Error',

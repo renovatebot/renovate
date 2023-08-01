@@ -748,7 +748,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (
-        architecture ||
+        is.string(architecture) ||
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {

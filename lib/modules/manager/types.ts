@@ -117,6 +117,7 @@ export interface PackageDependency<T = Record<string, any>>
   versioning?: string;
   dataType?: string;
   enabled?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   bumpVersion?: ReleaseType | string;
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
@@ -238,7 +239,7 @@ export interface ManagerApi extends ModuleApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string
+    bumpVersion: ReleaseType
   ): Result<BumpPackageVersionResult>;
 
   detectGlobalConfig?(): Result<GlobalManagerConfig>;

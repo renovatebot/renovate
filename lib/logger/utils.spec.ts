@@ -70,7 +70,7 @@ describe('logger/utils', () => {
     function prepareIssues<T extends z.ZodType>(
       schema: T,
       input: unknown
-    ): unknown | null {
+    ): unknown {
       const error = getError(schema, input);
       return error ? prepareZodIssues(error.format()) : null;
     }

@@ -22,7 +22,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
 
-  if (options.headers?.authorization || options.noAuth) {
+  if (is.nonEmptyString(options.headers?.authorization) || options.noAuth) {
     return options;
   }
 

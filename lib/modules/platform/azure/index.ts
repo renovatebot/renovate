@@ -113,8 +113,6 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   return repos.map((repo) => `${repo.project?.name}/${repo.name}`);
 }
 
@@ -163,7 +161,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? JSON5.parse(raw) : null;
 }
@@ -578,7 +576,7 @@ export async function ensureComment({
   threads.forEach((thread) => {
     const firstCommentContent = thread.comments?.[0].content;
     if (
-      (topic && firstCommentContent?.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) === true ||
       (!topic && firstCommentContent === body)
     ) {
       threadIdFound = thread.id;
@@ -727,8 +725,6 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]

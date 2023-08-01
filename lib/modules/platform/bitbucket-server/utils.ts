@@ -157,12 +157,9 @@ function generateUrlFromEndpoint(
   const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      url.pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
     }scm`,
     repository,
   });
