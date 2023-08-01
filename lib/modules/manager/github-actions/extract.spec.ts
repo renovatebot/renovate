@@ -18,6 +18,8 @@ jobs:
   test6:
     runs-on: >
       windows-2022
+  test7:
+    runs-on: [windows-2022, selfhosted]
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -359,6 +361,15 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'windows',
           currentValue: '2019',
           replaceString: 'windows-2019',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2022',
+          replaceString: 'windows-2022',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate:
