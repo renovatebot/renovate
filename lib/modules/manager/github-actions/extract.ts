@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { isNotNullOrUndefined } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -87,6 +88,10 @@ function extractContainer(container: unknown): PackageDependency | undefined {
   return undefined;
 }
 
+const runnerVersionRe = regEx(
+  /^\s*(?<depName>[\d\w]+)-(?<currentValue>[^\s]+)/
+);
+
 function extractRunners(runner: unknown): PackageDependency[] {
   const runners: string[] = [];
   if (is.string(runner)) {
@@ -95,19 +100,28 @@ function extractRunners(runner: unknown): PackageDependency[] {
     runners.push(...runner);
   }
 
-  return runners.map((rnr) => {
-    const [depName, ...version] = rnr.split('-');
+  return runners
+    .map((rnr) => {
+      const runnerVersionGroups = runnerVersionRe.exec(rnr)?.groups;
+      if (!runnerVersionGroups) {
+        return;
+      }
 
-    return {
-      depName,
-      currentValue: version.join('-'),
-      replaceString: rnr,
-      depType: 'github-runner',
-      datasource: GithubRunnersDatasource.id,
-      autoReplaceStringTemplate:
-        '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
-    };
-  });
+      const { depName, currentValue } = runnerVersionGroups;
+
+      return runnerVersionGroups
+        ? {
+            depName,
+            currentValue,
+            replaceString: depName + '-' + currentValue,
+            depType: 'github-runner',
+            datasource: GithubRunnersDatasource.id,
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          }
+        : undefined;
+    })
+    .filter(isNotNullOrUndefined);
 }
 
 function extractWithYAMLParser(

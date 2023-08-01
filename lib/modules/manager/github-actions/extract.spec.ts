@@ -357,8 +357,8 @@ describe('modules/manager/github-actions/extract', () => {
         },
         {
           depName: 'windows',
-          currentValue: '2019\n',
-          replaceString: 'windows-2019\n',
+          currentValue: '2019',
+          replaceString: 'windows-2019',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate:
@@ -366,8 +366,8 @@ describe('modules/manager/github-actions/extract', () => {
         },
         {
           depName: 'windows',
-          currentValue: '2022\n',
-          replaceString: 'windows-2022\n',
+          currentValue: '2022',
+          replaceString: 'windows-2022',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate:
