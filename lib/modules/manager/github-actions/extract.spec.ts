@@ -387,7 +387,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners')
-      ).toHaveLength(6);
+      ).toHaveLength(7);
     });
   });
 });
