@@ -640,6 +640,15 @@ These datasources can be referred by RegexManagers or can be used to overwrite d
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
+## customizeDashboard
+
+You can use the `customizeDashboard` object to customize dependency dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
+
+
 ### defaultRegistryUrlTemplate
 
 `registryUrl` which is used, if none is return by extraction.
@@ -3297,14 +3306,6 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 ## replacement
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
-
-## customizeDashboard
-
-You can use the `customizeDashboard` object to customize dependency dashboard.
-
-Supported fields:
-
-- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
 
 ## respectLatest
 
