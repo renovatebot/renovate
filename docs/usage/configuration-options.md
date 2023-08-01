@@ -466,6 +466,11 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
+<!-- prettier-ignore -->
+!!! note
+    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
+    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
+
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
@@ -632,6 +637,38 @@ When using with `npm`, we recommend you:
 
 - Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
+
+## customDatasources
+
+Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
+These datasources can be referred by RegexManagers or can be used to overwrite default datasources.
+
+For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
+
+### defaultRegistryUrlTemplate
+
+`registryUrl` which is used, if none is return by extraction.
+As this is a template it can be dynamically set. E.g. add the `packageName` as part of the URL:
+
+```json5
+{
+  customDatasources: {
+    foo: {
+      defaultRegistryUrlTemplate: 'https://exmaple.foo.bar/v1/{{ packageName }}',
+    },
+  },
+}
+```
+
+### format
+
+Defines which format the API is returning.
+Only `json` is supported, but more are planned for future.
+
+### transformTemplates
+
+`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
+Use this if the API does not return a Renovate compatible schema.
 
 ## defaultRegistryUrls
 
@@ -838,7 +875,7 @@ For the full list of available managers, see the [Supported Managers](https://do
 Before you put any secrets in your repository configuration, encrypt the secrets.
 You can encrypt secrets using either a HTML page, or the CLI.
 
-To encrypt secrets for the hosted Mend Renovate app for github.com with a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form.
+To encrypt secrets for the Mend Renovate App for github.com with a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form.
 If you're self-hosting Renovate, you may download and edit the form, to use your own PGP public key.
 
 You can also encrypt secrets from the CLI, using the `curl`, `echo`, `jq`, `gpg`, `grep` and `tr` CLI programs.
@@ -1052,7 +1089,7 @@ If you want Renovate to run on a forked repository when in `autodiscover` mode t
 
 If you're running Renovate in some other mode, for example when giving a list of repositories to Renovate, but want to skip forked repositories: set `"forkProcessing": "disabled"` in your _global_ config.
 
-**When using the hosted GitHub Mend Renovate app**
+**When using the Mend Renovate App**
 
 The behavior of `forkProcessing` depends on how you allow Renovate to run on your account.
 
@@ -1073,7 +1110,12 @@ You can't use other filenames because Renovate only checks the default filename 
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
+The `gitAuthor` option accepts a [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant string.
+It's recommended to include a name followed by an email address, e.g.
+
+```
+Development Bot <dev-bot@my-software-company.com>
+```
 
 <!-- prettier-ignore -->
 !!! danger
@@ -1555,7 +1597,7 @@ Applicable for Composer only for now.
 
 ## ignorePrAuthor
 
-This is usually needed if someone needs to migrate bot accounts, including from hosted app to self-hosted.
+This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
 You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
 It's recommended to revert this setting once that transition period is over and all old PRs are resolved.
@@ -2013,6 +2055,23 @@ See also `matchPackagePrefixes`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### excludeRepositories
+
+Use this field to restrict rules to a particular repository. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "excludeRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+
 ### matchCategories
 
 Use `matchCategories` to restrict rules to a particular language or group.
@@ -2034,6 +2093,23 @@ The categories can be found in the [manager documentation](./modules/manager/ind
   ]
 }
 ```
+
+### matchRepositories
+
+Use this field to restrict rules to a particular repository. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
 
 ### matchBaseBranches
 
@@ -2187,7 +2263,7 @@ Use the syntax `!/ /` like this:
 
 ### matchFileNames
 
-Renovate will compare `matchFileNames` glob matching against the dependency's package file or lock file.
+Renovate will compare `matchFileNames` glob matching against the dependency's package file and also lock file if one exists.
 
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
@@ -2229,6 +2305,8 @@ The following example matches any file in directories starting with `app/`:
   ]
 }
 ```
+
+It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
 ### matchDepNames
 
@@ -2287,6 +2365,9 @@ See also `excludePackagePrefixes`.
 ```
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
+If matching against `depName`, use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
@@ -3332,7 +3413,7 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 
 Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
-To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
+To parse Cron syntax, Renovate uses [cron-parser](https://github.com/harrisiirak/cron-parser).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 <!-- prettier-ignore -->
@@ -3522,7 +3603,7 @@ Follow these steps:
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
-   If you're the account administrator, browse to the app (for example [https://github.com/apps/renovate](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
+   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
 
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 

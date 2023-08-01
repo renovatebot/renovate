@@ -117,6 +117,48 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid customDatasources content', async () => {
+      const config = {
+        customDatasources: {
+          foo: {
+            randomKey: '',
+            defaultRegistryUrlTemplate: [],
+            transformTemplates: [{}],
+          },
+        },
+      } as any;
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+        },
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.randomKey` configuration: key is not allowed',
+        },
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.transformTemplates` configuration: is not an array of string',
+        },
+      ]);
+    });
+
+    it('catches invalid customDatasources record type', async () => {
+      const config = {
+        customDatasources: {
+          randomKey: '',
+        },
+      } as any;
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customDatasources.randomKey` configuration: customDatasource is not an object',
+        },
+      ]);
+    });
+
     it('catches invalid baseBranches regex', async () => {
       const config = {
         baseBranches: ['/***$}{]][/'],

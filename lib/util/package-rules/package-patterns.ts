@@ -21,8 +21,9 @@ function matchPatternsAgainstName(
 export class PackagePatternsMatcher extends Matcher {
   override matches(
     { depName, packageName }: PackageRuleInputConfig,
-    { matchPackagePatterns }: PackageRule
+    packageRule: PackageRule
   ): boolean | null {
+    const { matchPackagePatterns } = packageRule;
     if (is.undefined(matchPackagePatterns)) {
       return null;
     }
@@ -38,8 +39,8 @@ export class PackagePatternsMatcher extends Matcher {
       return true;
     }
     if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
-      logger.once.warn(
-        { packageName, depName },
+      logger.once.info(
+        { packageRule, packageName, depName },
         'Use matchDepPatterns instead of matchPackagePatterns'
       );
       return true;

@@ -269,8 +269,8 @@ jobs:
       - name: Lint fenced code blocks
         run: yarn -s doc-fence-check
 
-      - name: Lint website docs
-        run: yarn -s lint-website-docs
+      - name: Lint documentation
+        run: yarn -s lint-documentation
 
   lint-other:
     needs: [setup]

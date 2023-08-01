@@ -1,6 +1,6 @@
-import { minimatch } from 'minimatch';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { minimatch } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
 
 export function getIncludedFiles(
@@ -13,7 +13,8 @@ export function getIncludedFiles(
   return fileList.filter((file) =>
     includePaths.some(
       (includePath) =>
-        file === includePath || minimatch(file, includePath, { dot: true })
+        file === includePath ||
+        minimatch(includePath, { dot: true }).match(file)
     )
   );
 }
@@ -30,7 +31,7 @@ export function filterIgnoredFiles(
       !ignorePaths.some(
         (ignorePath) =>
           file.includes(ignorePath) ||
-          minimatch(file, ignorePath, { dot: true })
+          minimatch(ignorePath, { dot: true }).match(file)
       )
   );
 }

@@ -103,56 +103,45 @@ This makes sure everyone on your team uses the latest versions.
 
 ## Version Upgrading
 
-Renovate also supports _upgrading_ versions in Docker tags, e.g. from `myimage:1.2.0` to `myimage:1.2.1` or `myimage:1.2` to `myimage:1.3`.
+Renovate also supports _upgrading_ versions in Docker tags, so from `myimage:1.2.0` to `myimage:1.2.1`, or from `myimage:1.2` to `myimage:1.3`.
 If a tag looks like a version, Renovate will upgrade it like a version.
 
-We recommend you use the `major.minor.patch` tagging scheme, e.g. change from `myimage:1` to `myimage:1.1.1`.
-This way you can see what the Renovate PR is going to change.
+We recommend you use the `major.minor.patch` tagging scheme, so change `myimage:1` to `myimage:1.1.1` first.
+This way you can see the changes in Renovate PRs.
 You can see the difference between a PR that upgrades `myimage` from `1.1.1` to `1.1.2` and a PR that changes the contents of the version you already use (`1.1.1`).
 
-By default, Renovate will upgrade minor/patch versions (like from `1.2.0` to `1.2.1`), but not upgrade major versions.
-If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
+By default, Renovate will upgrade `minor` and `patch` versions, so from `1.2.0` to `1.2.1`, but _not_ upgrade `major` versions.
+If you wish to enable `major` versions: add the preset `docker:enableMajor` to the `extends` array in your `renovate.json` file.
 
 Renovate has some Docker-specific intelligence when it comes to versions.
 For example:
 
 ### Ubuntu codenames
 
-Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release (e.g. from `ubuntu:xenial` to `ubuntu:focal`).
+Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release.
 
-For this to work you must follow this naming scheme:
-
-- The first term of the full codename is used (e.g. `bionic` for `Bionic Beaver` release)
-- The codename is in lowercase
+You must only use the _first_ term of the code name in _lowercase_.
+So use `jammy` for the Jammy Jellyfish release.
 
 For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 
-```dockerfile
-FROM ubuntu:yakkety
-```
-
-To:
-
-```dockerfile
-FROM ubuntu:focal
+```diff
+- FROM ubuntu:focal
++ FROM ubuntu:jammy
 ```
 
 ### Debian codenames
 
-Renovate understands [Debian release code names and rolling updates schedule](https://wiki.debian.org/DebianReleases) and will offer upgrades to the latest stable release (e.g. from `debian:stretch` to `debian:bullseye`).
+Renovate understands [Debian release code names and rolling updates schedule](https://wiki.debian.org/DebianReleases) and will offer upgrades to the latest stable release.
+For example from `debian:bullseye` to `debian:bookworm`.
 
-For this to work the codename must be in lowercase.
+The Debian codename must be in _lowercase_.
 
 For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 
-```dockerfile
-FROM debian:buster
-```
-
-To:
-
-```dockerfile
-FROM debian:bullseye
+```diff
+- FROM debian:bullseye
++ FROM debian:bookworm
 ```
 
 ## Configuring/Disabling
@@ -388,7 +377,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:35.158.0
+FROM renovate/renovate:36.25.5
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

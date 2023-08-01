@@ -6,8 +6,9 @@ import { Matcher } from './base';
 export class PackageNameMatcher extends Matcher {
   override matches(
     { depName, packageName }: PackageRuleInputConfig,
-    { matchPackageNames }: PackageRule
+    packageRule: PackageRule
   ): boolean | null {
+    const { matchPackageNames } = packageRule;
     if (is.undefined(matchPackageNames)) {
       return null;
     }
@@ -20,8 +21,8 @@ export class PackageNameMatcher extends Matcher {
     }
 
     if (matchPackageNames.includes(depName)) {
-      logger.once.warn(
-        { packageName, depName },
+      logger.once.info(
+        { packageRule, packageName, depName },
         'Use matchDepNames instead of matchPackageNames'
       );
       return true;
