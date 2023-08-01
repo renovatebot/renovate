@@ -6,9 +6,6 @@ export class GithubRunnersDatasource extends Datasource {
   static readonly id = 'github-runners';
 
   /**
-   * List of all available GitHub-hosted runners.
-   * Single source of truth: https://github.com/actions/runner-images
-   *
    * Please don't add runners until they are out of beta state and have the label "latest" assigned.
    */
   private static readonly releases: { [packageName: string]: Release[] } = {
