@@ -1,6 +1,25 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
+const workflow5 = `
+jobs:
+  test1:
+    runs-on: ubuntu-latest
+  test2:
+    runs-on:
+      ubuntu-22.04
+  test3:
+    runs-on: "macos-12-xl"
+  test4:
+    runs-on: 'macos-latest'
+  test5:
+    runs-on: |
+      windows-2019
+  test6:
+    runs-on: >
+      windows-2022
+`;
+
 describe('modules/manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
@@ -283,14 +302,12 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple action runners from yaml configuration file', () => {
-      const res = extractPackageFile(
-        Fixtures.get('workflow_5.yml'),
-        'workflow_5.yml'
-      );
+      const res = extractPackageFile(workflow5, 'workflow.yml');
+
       expect(res?.deps).toMatchSnapshot();
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners')
-      ).toHaveLength(2);
+      ).toHaveLength(6);
     });
   });
 });
