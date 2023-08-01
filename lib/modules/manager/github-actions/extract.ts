@@ -109,17 +109,15 @@ function extractRunners(runner: unknown): PackageDependency[] {
 
       const { depName, currentValue } = runnerVersionGroups;
 
-      return runnerVersionGroups
-        ? {
-            depName,
-            currentValue,
-            replaceString: depName + '-' + currentValue,
-            depType: 'github-runner',
-            datasource: GithubRunnersDatasource.id,
-            autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
-          }
-        : undefined;
+      return {
+        depName,
+        currentValue,
+        replaceString: depName + '-' + currentValue,
+        depType: 'github-runner',
+        datasource: GithubRunnersDatasource.id,
+        autoReplaceStringTemplate:
+          '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+      };
     })
     .filter(isNotNullOrUndefined);
 }
