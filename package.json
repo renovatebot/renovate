@@ -287,6 +287,7 @@
     "@types/nock": "10.0.3",
     "@types/node": "18.17.1",
     "@types/parse-link-header": "2.0.1",
+    "@types/prettier": "2.7.3",
     "@types/semver": "7.5.0",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.1",
@@ -327,7 +328,6 @@
     "nyc": "15.1.0",
     "rimraf": "5.0.1",
     "semantic-release": "21.0.7",
-    "strip-ansi": "6.0.1",
     "tar": "6.1.15",
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.1",
@@ -335,6 +335,9 @@
     "type-fest": "3.13.1",
     "typescript": "5.1.6",
     "unified": "9.2.2"
+  },
+  "resolutions": {
+    "jackspeak": "2.1.1"
   },
   "files": [
     "dist",
