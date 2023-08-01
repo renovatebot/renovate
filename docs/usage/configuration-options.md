@@ -648,7 +648,6 @@ Supported fields:
 
 - `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
 
-
 ### defaultRegistryUrlTemplate
 
 `registryUrl` which is used, if none is return by extraction.
