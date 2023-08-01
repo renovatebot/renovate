@@ -139,12 +139,12 @@ For example, imagine the following file `versiontracker.json` for the software `
 
 ```json
 [
-    {
-        "version": "77"
-    },
-    {
-        "version": "76"
-    }
+  {
+    "version": "77"
+  },
+  {
+    "version": "76"
+  }
 ]
 ```
 
