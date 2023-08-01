@@ -3,7 +3,7 @@
 exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action runners from yaml configuration file 1`] = `
 [
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -11,12 +11,48 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "ubuntu-latest",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
+    "currentValue": "22.04",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-22.04",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "12-xl",
     "datasource": "github-runners",
     "depName": "macos",
     "depType": "github-runner",
     "replaceString": "macos-12-xl",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "macos",
+    "depType": "github-runner",
+    "replaceString": "macos-latest",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
+    "currentValue": "2019
+",
+    "datasource": "github-runners",
+    "depName": "windows",
+    "depType": "github-runner",
+    "replaceString": "windows-2019
+",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
+    "currentValue": "2022
+",
+    "datasource": "github-runners",
+    "depName": "windows",
+    "depType": "github-runner",
+    "replaceString": "windows-2022
+",
   },
 ]
 `;
@@ -109,7 +145,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "versioning": "docker",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -117,7 +153,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "ubuntu-latest",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -125,7 +161,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "ubuntu-latest",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -178,7 +214,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -186,7 +222,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "ubuntu-latest",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -194,7 +230,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "ubuntu-latest",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -202,7 +238,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "ubuntu-latest",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -237,7 +273,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "postgres:10",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",
@@ -254,7 +290,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "node:16-bullseye",
   },
   {
-    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}",
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}-{{newValue}}{{/if}}",
     "currentValue": "latest",
     "datasource": "github-runners",
     "depName": "ubuntu",

@@ -61,57 +61,71 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_3.yml'),
         'workflow_3.yml'
       );
+
       expect(res?.deps).toMatchObject([
         {
-          currentValue: 'v0.13.1',
-          datasource: 'github-tags',
           depName: 'pascalgn/automerge-action',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
           depType: 'action',
           replaceString: '"pascalgn/automerge-action@v0.13.1"',
-          versioning: 'docker',
+          autoReplaceStringTemplate:
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          currentValue: 'v0.13.1',
         },
         {
-          currentValue: 'v2.3.5',
-          datasource: 'github-tags',
           depName: 'actions/checkout',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
           depType: 'action',
           replaceString:
             'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5',
-          versioning: 'docker',
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          currentValue: 'v2.3.5',
+          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
         },
         {
-          currentValue: 'v1',
-          datasource: 'github-tags',
           depName: 'actions/checkout',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
           depType: 'action',
           replaceString: 'actions/checkout@v1',
-          versioning: 'docker',
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          currentValue: 'v1',
         },
         {
-          currentValue: 'v1.1.2',
-          datasource: 'github-tags',
           depName: 'actions/checkout',
+          commitMessageTopic: '{{{depName}}} action',
+          datasource: 'github-tags',
+          versioning: 'docker',
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
-          versioning: 'docker',
+          autoReplaceStringTemplate:
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+          currentValue: 'v1.1.2',
         },
         {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentValue: 'latest',
-          datasource: 'github-runners',
           depName: 'ubuntu',
-          depType: 'github-runner',
+          currentValue: 'latest',
           replaceString: 'ubuntu-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
         },
         {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentValue: 'latest',
-          datasource: 'github-runners',
           depName: 'ubuntu',
-          depType: 'github-runner',
+          currentValue: 'latest',
           replaceString: 'ubuntu-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
         },
       ]);
     });
