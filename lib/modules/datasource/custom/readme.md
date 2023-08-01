@@ -169,7 +169,7 @@ For example, with the following Ansible content:
 
 ```yaml
 # renovate: datasource=custom.nexus_generic depName=something versioning=loose
-something_version: "77"
+something_version: '77'
 ```
 
 And the following regex manager:
@@ -181,7 +181,7 @@ And the following regex manager:
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.nexus_generic",
       "matchStrings": [
-        "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*\\w*:\\s*\"?(?<currentValue>.+?)\"?\\s"
+        "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
