@@ -67,7 +67,7 @@ export async function handleModifiedPr(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
 
-  if (dependencyDashboardCheck || config.rebaseRequested) {
+  if (!!dependencyDashboardCheck || config.rebaseRequested) {
     logger.debug('Manual rebase has been requested for PR');
     if (GlobalConfig.get('dryRun')) {
       logger.info(

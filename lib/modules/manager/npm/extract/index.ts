@@ -465,10 +465,10 @@ export async function extractPackageFile(
     logger.debug('Package file has no deps');
     if (
       !(
-        packageJsonName ||
-        packageFileVersion ||
-        npmrc ||
-        lernaJsonFile ||
+        !!packageJsonName ||
+        !!packageFileVersion ||
+        !!npmrc ||
+        !!lernaJsonFile ||
         workspacesPackages
       )
     ) {
