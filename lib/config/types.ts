@@ -396,9 +396,6 @@ export interface RenovateOptionBase {
     | 'postUpgradeTasks'
     | 'regexManagers';
 
-  // used by tests
-  relatedOptions?: string[];
-
   stage?: RenovateConfigStage;
 
   experimental?: boolean;
