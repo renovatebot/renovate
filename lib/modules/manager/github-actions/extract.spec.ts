@@ -20,6 +20,8 @@ jobs:
       windows-2022
   test7:
     runs-on: [windows-2022, selfhosted]
+  test8:
+     runs-on: \${{ env.RUNNER }}
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -66,68 +68,51 @@ describe('modules/manager/github-actions/extract', () => {
 
       expect(res?.deps).toMatchObject([
         {
-          depName: 'pascalgn/automerge-action',
-          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v0.13.1',
           datasource: 'github-tags',
-          versioning: 'docker',
+          depName: 'pascalgn/automerge-action',
           depType: 'action',
           replaceString: '"pascalgn/automerge-action@v0.13.1"',
-          autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
-          currentValue: 'v0.13.1',
+          versioning: 'docker',
         },
         {
-          depName: 'actions/checkout',
-          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v2.3.5',
           datasource: 'github-tags',
-          versioning: 'docker',
+          depName: 'actions/checkout',
           depType: 'action',
           replaceString:
             'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5',
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          currentValue: 'v2.3.5',
-          currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
+          versioning: 'docker',
         },
         {
-          depName: 'actions/checkout',
-          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v1',
           datasource: 'github-tags',
-          versioning: 'docker',
+          depName: 'actions/checkout',
           depType: 'action',
           replaceString: 'actions/checkout@v1',
-          autoReplaceStringTemplate:
-            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
-          currentValue: 'v1',
+          versioning: 'docker',
         },
         {
-          depName: 'actions/checkout',
-          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v1.1.2',
           datasource: 'github-tags',
-          versioning: 'docker',
+          depName: 'actions/checkout',
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
-          autoReplaceStringTemplate:
-            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
-          currentValue: 'v1.1.2',
+          versioning: 'docker',
         },
         {
-          depName: 'ubuntu',
           currentValue: 'latest',
-          replaceString: 'ubuntu-latest',
-          depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
         },
         {
-          depName: 'ubuntu',
           currentValue: 'latest',
-          replaceString: 'ubuntu-latest',
-          depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
         },
       ]);
     });

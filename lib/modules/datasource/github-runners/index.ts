@@ -8,7 +8,9 @@ export class GithubRunnersDatasource extends Datasource {
   /**
    * Only add stable runners to the datasource. See datasource readme for details.
    */
-  private static readonly releases: { [packageName: string]: Release[] } = {
+  private static readonly releases: {
+    [packageName: string]: Release[] | undefined;
+  } = {
     ubuntu: [{ version: '22.04' }, { version: '20.04' }],
     macos: [
       { version: '13' },
@@ -28,12 +30,14 @@ export class GithubRunnersDatasource extends Datasource {
 
   override getReleases({
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult> {
-    const releaseResult: ReleaseResult = {
-      releases: GithubRunnersDatasource.releases[packageName] || [],
-      sourceUrl: 'https://github.com/actions/runner-images',
-    };
-
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const releases = GithubRunnersDatasource.releases[packageName];
+    const releaseResult: ReleaseResult | null = releases
+      ? {
+          releases,
+          sourceUrl: 'https://github.com/actions/runner-images',
+        }
+      : null;
     return Promise.resolve(releaseResult);
   }
 }
