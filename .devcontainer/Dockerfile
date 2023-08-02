@@ -8,6 +8,6 @@ RUN install-apt make g++
 RUN install-tool python 3.11.4
 
 # renovate: datasource=npm
-RUN install-tool pnpm 8.6.11
+RUN install-tool corepack 0.19.0
 
 USER ubuntu
