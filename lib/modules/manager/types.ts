@@ -117,8 +117,7 @@ export interface PackageDependency<T = Record<string, any>>
   versioning?: string;
   dataType?: string;
   enabled?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  bumpVersion?: ReleaseType | string;
+  bumpVersion?: ReleaseType;
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
