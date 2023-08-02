@@ -10,14 +10,14 @@ This includes libraries and plugins as well as the Gradle Wrapper.
 
 ## LTS releases
 
-The `config:base` preset includes the `workarounds:javaLTSVersions` preset.
+The `config:recommended` preset includes the `workarounds:javaLTSVersions` preset.
 The workaround limits Renovate to upgrade to LTS versions of the Java runtime only.
 
 If you want Renovate to offer all `major` Java updates then add `workarounds:javaLTSVersions` to the `ignorePreset` array:
 
 ```json
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "ignorePresets": ["workarounds:javaLTSVersions"]
 }
 ```

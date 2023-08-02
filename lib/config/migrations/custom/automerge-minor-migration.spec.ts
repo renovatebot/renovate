@@ -19,13 +19,13 @@ describe('config/migrations/custom/automerge-minor-migration', () => {
       {
         automergeMinor: 'some-value',
         minor: {
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
       },
       {
         minor: {
           automerge: true,
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
       }
     );

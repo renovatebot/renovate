@@ -1,6 +1,9 @@
 import is from '@sindresorhus/is';
+import { GithubHttp } from '../../../util/http/github';
 import { getPrBodyStruct } from '../pr-body';
 import type { GhPr, GhRestPr } from './types';
+
+export const githubApi = new GithubHttp();
 
 /**
  * @see https://docs.github.com/en/rest/reference/pulls#list-pull-requests

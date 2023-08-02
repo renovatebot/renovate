@@ -6,12 +6,15 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
-import { regEx } from '../../util/regex';
-import { Result } from '../../util/result';
-import { uniq } from '../../util/uniq';
 import { trimTrailingSlash } from '../../util/url';
-import * as allVersioning from '../versioning';
 import datasources from './api';
+import {
+  applyConstraintsFiltering,
+  applyExtractVersion,
+  filterValidVersions,
+  getDatasourceFor,
+  sortAndRemoveDuplicates,
+} from './common';
 import { addMetaData } from './metadata';
 import { setNpmrc } from './npm';
 import { resolveRegistryUrl } from './npm/npmrc';
@@ -31,10 +34,6 @@ export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
-
-export function getDatasourceFor(datasource: string): DatasourceApi | null {
-  return datasources.get(datasource) ?? null;
-}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -237,20 +236,6 @@ function resolveRegistryUrls(
   return massageRegistryUrls(resolvedUrls);
 }
 
-export function getDefaultVersioning(
-  datasourceName: string | undefined
-): string {
-  if (!datasourceName) {
-    return 'semver';
-  }
-  const datasource = getDatasourceFor(datasourceName);
-  // istanbul ignore if: wrong regex manager config?
-  if (!datasource) {
-    logger.warn({ datasourceName }, 'Missing datasource!');
-  }
-  return datasource?.defaultVersioning ?? 'semver';
-}
-
 function applyReplacements(
   config: GetReleasesInternalConfig
 ): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
@@ -372,68 +357,12 @@ export async function getPkgReleases(
   if (!res) {
     return res;
   }
-  if (config.extractVersion) {
-    const extractVersionRegEx = regEx(config.extractVersion);
-    res.releases = res.releases
-      .map((release) => {
-        const version = extractVersionRegEx.exec(release.version)?.groups
-          ?.version;
-        if (version) {
-          return { ...release, version }; // overwrite version
-        }
-        return null; // filter out any we can't extract
-      })
-      .filter(is.truthy);
-  }
-  // Use the datasource's default versioning if none is configured
-  const versioning =
-    config.versioning ?? getDefaultVersioning(config.datasource);
-  const version = allVersioning.get(versioning);
 
-  // Filter and sort valid versions
-  res.releases = res.releases
-    .filter((release) => version.isVersion(release.version))
-    .sort((a, b) => version.sortVersions(a.version, b.version));
-
-  // Filter versions for uniqueness
-  res.releases = uniq(res.releases, (x, y) => x.version === y.version);
-
-  if (config?.constraintsFiltering === 'strict') {
-    // Filter releases for compatibility
-    for (const [constraintName, constraintValue] of Object.entries(
-      config.constraints ?? {}
-    )) {
-      if (version.isValid(constraintValue)) {
-        res.releases = res.releases.filter((release) => {
-          const constraint = release.constraints?.[constraintName];
-          if (!is.nonEmptyArray(constraint)) {
-            // A release with no constraints is OK
-            return true;
-          }
-
-          return constraint.some(
-            // If the constraint value is a subset of any release's constraints, then it's OK
-            // fallback to release's constraint match if subset is not supported by versioning
-            (releaseConstraint) =>
-              !releaseConstraint ||
-              (version.subset?.(constraintValue, releaseConstraint) ??
-                version.matches(constraintValue, releaseConstraint))
-          );
-        });
-      }
-    }
-  }
-  // Strip constraints from releases result
-  res.releases.forEach((release) => {
-    delete release.constraints;
-  });
+  applyExtractVersion(config, res);
+  filterValidVersions(config, res);
+  sortAndRemoveDuplicates(config, res);
+  applyConstraintsFiltering(config, res);
   return res;
-}
-
-export function getPkgReleasesWithResult(
-  config: GetPkgReleasesConfig
-): Promise<Result<ReleaseResult | null>> {
-  return Result.wrap(getPkgReleases(config));
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {

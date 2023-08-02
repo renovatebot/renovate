@@ -1,6 +1,5 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
@@ -13,6 +12,7 @@ import {
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
+import { minimatch } from '../../../../util/minimatch';
 import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
@@ -110,7 +110,7 @@ export async function postUpgradeCommandsExecutor(
 
       for (const relativePath of status.modified.concat(status.not_added)) {
         for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
+          if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(
               { file: relativePath, pattern },
               'Post-upgrade file saved'
@@ -138,7 +138,7 @@ export async function postUpgradeCommandsExecutor(
 
       for (const relativePath of status.deleted || []) {
         for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
+          if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(
               { file: relativePath, pattern },
               'Post-upgrade file removed'

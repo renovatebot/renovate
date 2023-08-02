@@ -1,5 +1,5 @@
+import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-
 export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
@@ -8,5 +8,7 @@ export const defaultConfig = {
     '(^|/)action\\.ya?ml$',
   ],
 };
+
+export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [GithubTagsDatasource.id];

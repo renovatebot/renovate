@@ -157,7 +157,7 @@ env:
   variables:
     RENOVATE_PLATFORM: 'codecommit'
     RENOVATE_REPOSITORIES: '["repoName1", "repoName2"]'
-    RENOVATE_CONFIG: '{"extends":["config:base"]}'
+    RENOVATE_CONFIG: '{"extends":["config:recommended"]}'
     LOG_LEVEL: 'debug'
     AWS_REGION: 'us-east-1'
 phases:
@@ -177,7 +177,7 @@ env:
   variables:
     RENOVATE_PLATFORM: 'codecommit'
     RENOVATE_REPOSITORIES: '["repoName1", "repoName2"]'
-    RENOVATE_CONFIG: '{"extends":["config:base"]}'
+    RENOVATE_CONFIG: '{"extends":["config:recommended"]}'
     LOG_LEVEL: 'debug'
     AWS_REGION: 'us-east-1'
 phases:

@@ -43,6 +43,7 @@ import type {
   Label,
   PR,
   PRMergeMethod,
+  PRUpdateParams,
   Repo,
   RepoSortMethod,
   SortMethod,
@@ -629,12 +630,16 @@ const platform: Platform = {
       title = DRAFT_PREFIX + title;
     }
 
-    await helper.updatePR(config.repository, number, {
+    const prUpdateParams: PRUpdateParams = {
       title,
-      base: targetBranch,
       ...(body && { body }),
       ...(state && { state }),
-    });
+    };
+    if (targetBranch) {
+      prUpdateParams.base = targetBranch;
+    }
+
+    await helper.updatePR(config.repository, number, prUpdateParams);
   },
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {

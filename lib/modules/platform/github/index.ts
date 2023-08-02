@@ -1,8 +1,8 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'node:url';
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -42,6 +42,7 @@ import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -60,7 +61,8 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { coerceRestPr } from './common';
+import { remoteBranchExists } from './branch';
+import { coerceRestPr, githubApi } from './common';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
@@ -85,8 +87,6 @@ import type {
 import { getUserDetails, getUserEmail } from './user';
 
 export const id = 'github';
-
-const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
@@ -187,9 +187,7 @@ export async function initPlatform({
   return platformResult;
 }
 
-// Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
-  logger.debug('Autodiscovering GitHub repositories');
+async function fetchRepositories(): Promise<GhRestRepo[]> {
   try {
     if (platformConfig.isGHApp) {
       const res = await githubApi.getJson<{
@@ -198,24 +196,34 @@ export async function getRepos(): Promise<string[]> {
         paginationField: 'repositories',
         paginate: 'all',
       });
-      return res.body.repositories
-        .filter(is.nonEmptyObject)
-        .filter((repo) => !repo.archived)
-        .map((repo) => repo.full_name);
+      return res.body.repositories;
     } else {
       const res = await githubApi.getJson<GhRestRepo[]>(
         `user/repos?per_page=100`,
         { paginate: 'all' }
       );
-      return res.body
-        .filter(is.nonEmptyObject)
-        .filter((repo) => !repo.archived)
-        .map((repo) => repo.full_name);
+      return res.body;
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
   }
+}
+
+// Get all repositories that the user has access to
+export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
+  logger.debug('Autodiscovering GitHub repositories');
+  return (await fetchRepositories())
+    .filter(is.nonEmptyObject)
+    .filter((repo) => !repo.archived)
+    .filter((repo) => {
+      if (config?.topics) {
+        const autodiscoverTopics = config.topics;
+        return repo.topics.some((topic) => autodiscoverTopics.includes(topic));
+      }
+      return true;
+    })
+    .map((repo) => repo.full_name);
 }
 
 async function getBranchProtection(
@@ -338,7 +346,7 @@ export async function createFork(
   }
   logger.info({ forkedRepo: forkedRepo.full_name }, 'Created forked repo');
   logger.debug(`Sleeping 30s after creating fork`);
-  await delay(30000);
+  await setTimeout(30000);
   return forkedRepo;
 }
 
@@ -751,8 +759,9 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+  const repository = config.repository!;
   try {
-    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    const commitUrl = `/repos/${repository}/git/commits/${sha}`;
     await githubApi.head(commitUrl, { memCache: false });
   } catch (err) {
     logger.error({ err, sha, branchName }, 'Commit not found');
@@ -760,16 +769,7 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
-  let branchExists = false;
-  let branchResult: undefined | HttpResponse<string>;
-  try {
-    branchResult = await githubApi.head(refUrl, { memCache: false });
-    branchExists = true;
-  } catch (err) {
-    if (err.statusCode !== 404) {
-      throw err;
-    }
-  }
+  const branchExists = await remoteBranchExists(repository, branchName);
 
   if (branchExists) {
     try {
@@ -778,17 +778,17 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
     } catch (err) {
       if (err.err?.response?.statusCode === 422) {
         logger.debug(
-          { branchResult, err },
+          { err },
           'Branch update failed due to reference not existing - will try to create'
         );
       } else {
-        logger.warn({ refUrl, err, branchResult }, 'Error updating branch');
+        logger.warn({ refUrl, err }, 'Error updating branch');
         throw err;
       }
     }
   }
 
-  await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
+  await githubApi.postJson(`/repos/${repository}/git/refs`, {
     body: { sha, ref: `refs/heads/${branchName}` },
   });
 }

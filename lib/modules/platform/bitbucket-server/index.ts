@@ -1,4 +1,4 @@
-import delay from 'delay';
+import { setTimeout } from 'timers/promises';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -110,7 +110,7 @@ export async function getRepos(): Promise<string[]> {
     );
     const result = repos.map(
       (r: { project: { key: string }; slug: string }) =>
-        `${r.project.key.toLowerCase()}/${r.slug}`
+        `${r.project.key}/${r.slug}`
     );
     logger.debug({ result }, 'result of getRepos()');
     return result;
@@ -349,7 +349,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
 // istanbul ignore next
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
-  await delay(1000);
+  await setTimeout(1000);
   // refresh cache
   await getPr(number, true);
 }
@@ -864,26 +864,26 @@ export async function updatePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
+    const body: any = {
+      title,
+      description,
+      version: pr.version,
+      reviewers: pr.reviewers
+        ?.filter((name: string) => !bitbucketInvalidReviewers?.includes(name))
+        .map((name: string) => ({ user: { name } })),
+    };
+    if (targetBranch) {
+      body.toRef = {
+        id: getNewBranchName(targetBranch),
+      };
+    }
+
     const { body: updatedPr } = await bitbucketServerHttp.putJson<{
       version: number;
       state: string;
     }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-      {
-        body: {
-          title,
-          description,
-          version: pr.version,
-          reviewers: pr.reviewers
-            ?.filter(
-              (name: string) => !bitbucketInvalidReviewers?.includes(name)
-            )
-            .map((name: string) => ({ user: { name } })),
-          toRef: {
-            id: getNewBranchName(targetBranch),
-          },
-        },
-      }
+      { body }
     );
 
     updatePrVersion(prNo, updatedPr.version);

@@ -58,7 +58,11 @@ describe('modules/manager/pep621/artifacts', () => {
 
     it('return processor result', async () => {
       const execSnapshots = mockExecAll();
-      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       fs.readLocalFile.mockResolvedValueOnce('old test content');
       fs.readLocalFile.mockResolvedValueOnce('new test content');
@@ -98,7 +102,7 @@ requires-python = "<3.9"
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/containerbase/sidecar',
           options: {
             encoding: 'utf-8',
           },
@@ -114,10 +118,9 @@ requires-python = "<3.9"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'containerbase/sidecar ' +
+            'ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
             'install-tool python 3.8.1 ' +
             '&& ' +
@@ -129,7 +132,6 @@ requires-python = "<3.9"
             cwd: '/tmp/github/some/repo',
             encoding: 'utf-8',
             env: {
-              BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
               CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             },
           },

@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { dirname, relative } from 'upath';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
@@ -124,14 +125,15 @@ export async function getLockedVersions(
         lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
       }
 
-      const parentDir = packageFile.packageFile
-        .replace(/\/package\.json$/, '')
-        .replace(/^package\.json$/, '.');
+      const packageDir = dirname(packageFile.packageFile);
+      const pnpmRootDir = dirname(pnpmShrinkwrap);
+      const relativeDir = relative(pnpmRootDir, packageDir) || '.';
+
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;
         // TODO: types (#7154)
         const lockedVersion = semver.valid(
-          lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[parentDir]?.[
+          lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[relativeDir]?.[
             depType!
           ]?.[depName!]
         );

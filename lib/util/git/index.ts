@@ -1,6 +1,6 @@
 import URL from 'node:url';
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import fs from 'fs-extra';
 // TODO: check if bug is fixed (#7154)
 // eslint-disable-next-line import/no-named-as-default
@@ -103,7 +103,7 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
 
     const nextDelay = delayFactor ^ ((round - 1) * delaySeconds);
     logger.trace({ nextDelay }, `Delay next round`);
-    await delay(1000 * nextDelay);
+    await setTimeout(1000 * nextDelay);
 
     round++;
   }
@@ -897,7 +897,9 @@ export async function hasDiff(
 ): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
+    return (
+      (await gitRetry(() => git.diff([sourceRef, targetRef, '--']))) !== ''
+    );
   } catch (err) {
     return true;
   }

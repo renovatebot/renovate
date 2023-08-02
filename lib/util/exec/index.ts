@@ -10,7 +10,6 @@ import {
   removeDockerContainer,
   sideCarImage,
 } from './docker';
-import { getChildProcessEnv } from './env';
 import { getHermitEnvs, isHermit } from './hermit';
 import type {
   DockerOptions,
@@ -20,37 +19,7 @@ import type {
   Opt,
   RawExecOptions,
 } from './types';
-
-export function getChildEnv({
-  extraEnv,
-  env: forcedEnv = {},
-}: ExecOptions): Record<string, string> {
-  const globalConfigEnv = GlobalConfig.get('customEnvVariables');
-
-  const inheritedKeys: string[] = [];
-  for (const [key, val] of Object.entries(extraEnv ?? {})) {
-    if (is.string(val)) {
-      inheritedKeys.push(key);
-    }
-  }
-
-  const parentEnv = getChildProcessEnv(inheritedKeys);
-  const combinedEnv = {
-    ...extraEnv,
-    ...parentEnv,
-    ...globalConfigEnv,
-    ...forcedEnv,
-  };
-
-  const result: Record<string, string> = {};
-  for (const [key, val] of Object.entries(combinedEnv)) {
-    if (is.string(val)) {
-      result[key] = `${val}`;
-    }
-  }
-
-  return result;
-}
+import { getChildEnv } from './utils';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv);
@@ -116,7 +85,6 @@ async function prepareRawExec(
   if (binarySource === 'docker' || binarySource === 'install') {
     logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
     opts.env ??= {};
-    opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
     opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
   }
 
@@ -133,7 +101,6 @@ async function prepareRawExec(
     const childEnv = getChildEnv(opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
-      'BUILDPACK_CACHE_DIR',
       'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);

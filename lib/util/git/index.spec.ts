@@ -18,7 +18,7 @@ import { setNoVerify } from '.';
 jest.mock('./conflicts-cache');
 jest.mock('./behind-base-branch-cache');
 jest.mock('./modified-cache');
-jest.mock('delay');
+jest.mock('timers/promises');
 jest.mock('../cache/repository');
 const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);

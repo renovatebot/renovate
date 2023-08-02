@@ -144,7 +144,7 @@ describe('config/presets/index', () => {
 
     it('throws noconfig', async () => {
       config.foo = 1;
-      config.extends = ['noconfig:base'];
+      config.extends = ['noconfig:recommended'];
       let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
@@ -154,7 +154,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Preset package is missing a renovate-config entry (noconfig:base)'
+        'Preset package is missing a renovate-config entry (noconfig:recommended)'
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -270,9 +270,9 @@ describe('config/presets/index', () => {
     });
 
     it('ignores presets', async () => {
-      config.extends = ['config:base'];
+      config.extends = ['config:recommended'];
       const res = await presets.resolveConfigPresets(config, {}, [
-        'config:base',
+        'config:recommended',
       ]);
       expect(config).toMatchObject(res);
       expect(res).toBeEmptyObject();

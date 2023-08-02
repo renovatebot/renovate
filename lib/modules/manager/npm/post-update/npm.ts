@@ -1,6 +1,5 @@
 // TODO: types (#7154)
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -20,11 +19,13 @@ import {
   readLocalFile,
   renameLocalFile,
 } from '../../../../util/fs';
+import { minimatch } from '../../../../util/minimatch';
 import { trimSlashes } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function generateLockFile(
   lockFileDir: string,
@@ -41,9 +42,12 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
-      constraint: config.constraints?.npm ?? config.extractedConstraints?.npm,
+      constraint:
+        config.constraints?.npm ??
+        getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
     };
     const commands: string[] = [];
     let cmdOptions = '';
@@ -67,7 +71,7 @@ export async function generateLockFile(
       cwdFile: lockFileName,
       extraEnv,
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
         npmToolConstraint,
       ],
       docker: {},
@@ -242,7 +246,7 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns ?? []) {
-          if (minimatch(workspaceDir, workspacePattern)) {
+          if (minimatch(workspacePattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;
           }

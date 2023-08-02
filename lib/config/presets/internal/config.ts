@@ -3,18 +3,6 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
-  base: {
-    description: 'Default base configuration for all languages.',
-    extends: [
-      ':dependencyDashboard',
-      ':semanticPrefixFixDepsChoreOthers',
-      ':ignoreModulesAndTests',
-      'group:monorepos',
-      'group:recommended',
-      'replacements:all',
-      'workarounds:all',
-    ],
-  },
   'best-practices': {
     configMigration: true,
     description: 'Preset with best practices from the Renovate maintainers.',
@@ -27,11 +15,24 @@ export const presets: Record<string, Preset> = {
   },
   'js-app': {
     description: 'Default configuration for webapps.',
-    extends: ['config:base', ':pinAllExceptPeerDependencies'],
+    extends: ['config:recommended', ':pinAllExceptPeerDependencies'],
   },
   'js-lib': {
     description: 'Default configuration for libraries.',
-    extends: ['config:base', ':pinOnlyDevDependencies'],
+    extends: ['config:recommended', ':pinOnlyDevDependencies'],
+  },
+  recommended: {
+    description:
+      'Recommended configuration for most users. It does not matter what programming language you use.',
+    extends: [
+      ':dependencyDashboard',
+      ':semanticPrefixFixDepsChoreOthers',
+      ':ignoreModulesAndTests',
+      'group:monorepos',
+      'group:recommended',
+      'replacements:all',
+      'workarounds:all',
+    ],
   },
   semverAllMonthly: {
     description:
