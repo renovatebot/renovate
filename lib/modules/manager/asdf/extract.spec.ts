@@ -658,7 +658,7 @@ dummy 1.2.3
           entry: 'nodejs 16.16.0 #sloppy-comment',
           expect: '16.16.0',
         },
-      ];
+      ] as const;
 
       describe.each(validComments)(
         'ignores proper comments at the end of lines',
