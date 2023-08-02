@@ -72,7 +72,7 @@ export class CustomDatasource extends Datasource {
   private async fetchPlainFormat(url: string): Promise<unknown> {
     const response = await this.http.get(url, {
       headers: {
-        'Content-Type': 'text/plain',
+        'Accept': 'text/plain',
       },
     });
     const contentType = response.headers['content-type'];
