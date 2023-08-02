@@ -250,7 +250,7 @@ export async function processBranch(
         if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
-          if (!(dependencyDashboardCheck || config.rebaseRequested)) {
+          if (!(!!dependencyDashboardCheck || config.rebaseRequested)) {
             return {
               branchExists,
               prNo: branchPr.number,
@@ -326,7 +326,7 @@ export async function processBranch(
       config.upgrades.some(
         (upgrade) =>
           (is.nonEmptyString(upgrade.minimumReleaseAge) &&
-            upgrade.releaseTimestamp) ||
+            is.nonEmptyString(upgrade.releaseTimestamp)) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!)
       )
     ) {

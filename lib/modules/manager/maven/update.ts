@@ -56,7 +56,7 @@ export function updateDependency({
 export function bumpPackageVersion(
   content: string,
   currentValue: string | undefined,
-  bumpVersion: ReleaseType | string
+  bumpVersion: ReleaseType
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
@@ -83,7 +83,7 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    const newPomVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+    const newPomVersion = semver.inc(currentValue, bumpVersion);
     if (!newPomVersion) {
       throw new Error('semver inc failed');
     }

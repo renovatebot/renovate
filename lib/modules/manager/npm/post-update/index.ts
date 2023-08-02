@@ -1,5 +1,4 @@
 // TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import detectIndent from 'detect-indent';

@@ -18,27 +18,25 @@ Available template variables:
 
 - `packageName`
 
-```json5
+```json
 {
-  regexManagers: [
+  "regexManagers": [
     {
-      fileMatch: ['k3s.version'],
-      matchStrings: ['(?<currentValue>\\S+)'],
-      // used for display and templating purposes, if combined with customDatasources
-      depNameTemplate: 'k3s',
-      versioningTemplate: 'semver-coerced',
-      // if the datasource is prefixed with `custom.`, Renovate will try to find customDatasource with a fitting name
-      datasourceTemplate: 'custom.k3s',
-    },
+      "fileMatch": ["k3s.version"],
+      "matchStrings": ["(?<currentValue>\\S+)"],
+      "depNameTemplate": "k3s",
+      "versioningTemplate": "semver-coerced",
+      "datasourceTemplate": "custom.k3s"
+    }
   ],
-  customDatasources: {
-    k3s: {
-      defaultRegistryUrlTemplate: 'https://update.k3s.io/v1-release/channels',
-      transformTemplates: [
-        '{"releases":[{"version": $$.(data[id = \'stable\'].latest),"sourceUrl":"https://github.com/k3s-io/k3s","changelogUrl":$join(["https://github.com/k3s-io/k3s/releases/tag/",data[id = \'stable\'].latest])}],"sourceUrl": "https://github.com/k3s-io/k3s","homepage": "https://k3s.io/"}',
-      ],
-    },
-  },
+  "customDatasources": {
+    "k3s": {
+      "defaultRegistryUrlTemplate": "https://update.k3s.io/v1-release/channels",
+      "transformTemplates": [
+        "{\"releases\":[{\"version\": $$.(data[id = 'stable'].latest),\"sourceUrl\":\"https://github.com/k3s-io/k3s\",\"changelogUrl\":$join([\"https://github.com/k3s-io/k3s/releases/tag/\",data[id = 'stable'].latest])}],\"sourceUrl\": \"https://github.com/k3s-io/k3s\",\"homepage\": \"https://k3s.io/\"}"
+      ]
+    }
+  }
 }
 ```
 
@@ -82,19 +80,111 @@ All available options:
 
 ## Examples
 
-# K3s
+### K3s
 
 You can use this configuration to request the newest version available to [K3s](https://k3s.io/)
 
-```json5
+```json
 {
-  customDatasources: {
-    k3s: {
-      defaultRegistryUrlTemplate: 'https://update.k3s.io/v1-release/channels',
-      transformTemplates: [
-        '{"releases":[{"version": $$.(data[id = \'stable\'].latest),"sourceUrl":"https://github.com/k3s-io/k3s","changelogUrl":$join(["https://github.com/k3s-io/k3s/releases/tag/",data[id = \'stable\'].latest])}],"sourceUrl": "https://github.com/k3s-io/k3s","homepage": "https://k3s.io/"}',
+  "customDatasources": {
+    "k3s": {
+      "defaultRegistryUrlTemplate": "https://update.k3s.io/v1-release/channels",
+      "transformTemplates": [
+        "{\"releases\":[{\"version\": $$.(data[id = 'stable'].latest),\"sourceUrl\":\"https://github.com/k3s-io/k3s\",\"changelogUrl\":$join([\"https://github.com/k3s-io/k3s/releases/tag/\",data[id = 'stable'].latest])}],\"sourceUrl\": \"https://github.com/k3s-io/k3s\",\"homepage\": \"https://k3s.io/\"}"
+      ]
+    }
+  }
+}
+```
+
+### Hashicorp
+
+You can use this configuration to request the newest versions of the Hashicorp products:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["\\.yml$"],
+      "datasourceTemplate": "custom.hashicorp",
+      "matchStrings": [
+        "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*\\w*:\\s*(?<currentValue>.*)\\s"
       ],
-    },
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
+  "customDatasources": {
+    "hashicorp": {
+      "defaultRegistryUrlTemplate": "https://api.releases.hashicorp.com/v1/releases/{{packageName}}?license_class=oss",
+      "transformTemplates": [
+        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"releaseTimestamp\": $v.timestamp_created, \"changelogUrl\": $v.url_changelog, \"sourceUrl\": $v.url_source_repository } }), \"homepage\": $[0].url_project_website, \"sourceUrl\": $[0].url_source_repository }"
+      ]
+    }
+  }
+}
+```
+
+To have the latest Nomad version in your Ansible variables, use this snippet _after_ adding the above configuration:
+
+```yaml
+# renovate: depName=nomad
+nomad_version: 1.6.0
+```
+
+### Custom offline dependencies
+
+Sometimes the "dependency version source" is _not_ available via an API.
+To work around a missing API, you can create dependency "files". These files are served via HTTP(S), so that Renovate can access them.
+For example, imagine the following file `versiontracker.json` for the software `something``:
+
+```json
+[
+  {
+    "version": "77"
   },
+  {
+    "version": "76"
+  }
+]
+```
+
+By writing a custom datasource, Renovate can process the `versiontracker.json` file, see below.
+This example uses Nexus as the webserver.
+
+```json
+{
+  "customDatasources": {
+    "nexus_generic": {
+      "defaultRegistryUrlTemplate": "https://nexus.example.com/repository/versiontrackers/{{packageName}}/versiontracker.json",
+      "transformTemplates": [
+        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
+      ]
+    }
+  }
+}
+```
+
+This could be used to update Ansible YAML files with the latest version through a regex manager.
+For example, with the following Ansible content:
+
+```yaml
+# renovate: datasource=custom.nexus_generic depName=something versioning=loose
+something_version: '77'
+```
+
+And the following regex manager:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["\\.yml$"],
+      "datasourceTemplate": "custom.nexus_generic",
+      "matchStrings": [
+        "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ]
 }
 ```

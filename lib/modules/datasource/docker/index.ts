@@ -713,7 +713,6 @@ export class DockerDatasource extends Datasource {
     );
     logger.debug(
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
@@ -748,7 +747,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (
-        architecture ||
+        is.string(architecture) ||
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
