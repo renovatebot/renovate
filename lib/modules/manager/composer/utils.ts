@@ -1,5 +1,5 @@
 // TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+ 
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';

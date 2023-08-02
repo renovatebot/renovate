@@ -29,7 +29,7 @@ describe('logger/utils', () => {
     const mockExit = jest.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+       
       throw new Error(`process.exit: ${number}`);
     });
     expect(() => {

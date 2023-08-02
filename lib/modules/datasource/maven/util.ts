@@ -362,13 +362,13 @@ export async function createUrlForDependencyPom(
     // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
     if (fullVersion !== null) {
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+       
       return `${version}/${dependency.name}-${fullVersion}.pom`;
     }
   }
 
   // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+   
   return `${version}/${dependency.name}-${version}.pom`;
 }
 

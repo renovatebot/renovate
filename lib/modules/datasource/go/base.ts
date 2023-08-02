@@ -1,5 +1,5 @@
 // TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+ 
 import URL from 'node:url';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';

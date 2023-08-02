@@ -27,7 +27,7 @@ export class GradleVersionDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GradleVersionDatasource.id}`,
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+     
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({

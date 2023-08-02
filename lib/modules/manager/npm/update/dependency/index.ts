@@ -131,11 +131,8 @@ export function updateDependency({
   }
   if (upgrade.npmPackageAlias) {
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     newValue = `npm:${upgrade.packageName}@${newValue}`;
   }
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
     const parsedContents: NpmPackage = JSON.parse(fileContent);
@@ -145,7 +142,6 @@ export function updateDependency({
     if (depType === 'packageManager') {
       oldVersion = parsedContents[depType];
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       newValue = `${depName}@${newValue}`;
     } else if (isOverrideObject(upgrade)) {
       overrideDepParents = managerData?.parents;
@@ -255,7 +251,6 @@ export function updateDependency({
             depName,
             depKey,
             // TODO: types (#7154)
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${depName}@${newValue}`
           );
         }

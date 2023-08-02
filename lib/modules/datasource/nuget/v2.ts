@@ -34,7 +34,7 @@ export async function getReleases(
       const releaseTimestamp = getPkgProp(pkgInfo, 'Published');
       dep.releases.push({
         // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+         
         version: removeBuildMeta(`${version}`),
         releaseTimestamp,
       });

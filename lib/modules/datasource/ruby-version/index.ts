@@ -30,7 +30,7 @@ export class RubyVersionDatasource extends Datasource {
       releases: [],
     };
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+     
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
     try {
       const response = await this.http.get(rubyVersionsUrl);

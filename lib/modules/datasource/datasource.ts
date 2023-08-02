@@ -33,7 +33,7 @@ export abstract class Datasource implements DatasourceApi {
 
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+   
   handleHttpErrors(err: HttpError): void {}
 
   protected handleGenericErrors(err: Error): never {

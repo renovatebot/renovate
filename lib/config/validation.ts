@@ -189,7 +189,7 @@ export async function validateConfig(
         optionParents[key] !== parentName
       ) {
         // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+         
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,

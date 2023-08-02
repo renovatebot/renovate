@@ -1,5 +1,5 @@
 // TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+ 
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';

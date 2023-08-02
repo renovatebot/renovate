@@ -7,7 +7,7 @@ export default function updateArtifacts({
   const res: UpdateArtifactsResult[] = [];
   updatedDeps.forEach((dep) => {
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+     
     logger.info(`Updating submodule ${dep.depName}`);
     res.push({
       file: { type: 'addition', path: dep.depName!, contents: '' },
