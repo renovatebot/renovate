@@ -278,7 +278,7 @@
     "@types/js-yaml": "4.0.5",
     "@types/json-dup-key-validator": "1.0.0",
     "@types/linkify-markdown": "1.0.1",
-    "@types/lodash": "4.14.195",
+    "@types/lodash": "4.14.196",
     "@types/luxon": "3.3.1",
     "@types/markdown-it": "12.2.3",
     "@types/markdown-table": "2.0.0",
