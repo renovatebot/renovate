@@ -78,7 +78,13 @@ All available options:
 }
 ```
 
-`Plain Format:`
+### Formats
+
+#### JSON
+If `json` is used processing works as described above.    
+The returned body will be directly interpreted as JSON and forwarded to the transformation rules.
+
+#### Plain
 
 If the format is set to `plain`, Renovate will call the HTTP endpoint with the `Accept` header value `text/plain`. The body of the response will be treated as plain text and will be converted into a JSON.
 
