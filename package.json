@@ -260,7 +260,7 @@
     "@jest/types": "29.6.1",
     "@ls-lint/ls-lint": "2.0.1",
     "@openpgp/web-stream-tools": "0.0.14",
-    "@renovate/eslint-plugin": "file:./tools/eslint",
+    "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
     "@swc/core": "1.3.73",
     "@types/auth-header": "1.0.2",
@@ -347,9 +347,6 @@
     "unified": "9.2.2"
   },
   "packageManager": "pnpm@8.6.11",
-  "resolutions": {
-    "jackspeak": "2.1.1"
-  },
   "files": [
     "dist",
     "renovate-schema.json"
