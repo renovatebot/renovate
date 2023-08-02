@@ -1981,10 +1981,7 @@ const options: RenovateOptions[] = [
     name: 'customizeDashboard',
     description: 'Customize sections in the dependency dashboard issue.',
     type: 'object',
-    default: {
-      repoProblemsHeader:
-        'These problems occurred while renovating this repository.',
-    },
+    default: {},
     additionalProperties: {
       type: 'string',
     },
