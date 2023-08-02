@@ -157,6 +157,7 @@ function generateUrlFromEndpoint(
   const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
+    // TODO: types (#7154)
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
       url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'

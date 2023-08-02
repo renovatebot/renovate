@@ -133,6 +133,7 @@ export function updateDependency({
     // TODO: types (#7154)
     newValue = `npm:${upgrade.packageName}@${newValue}`;
   }
+  // TODO: types (#7154)
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
     const parsedContents: NpmPackage = JSON.parse(fileContent);

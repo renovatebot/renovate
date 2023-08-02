@@ -367,7 +367,6 @@ export async function createUrlForDependencyPom(
   }
 
   // TODO: types (#7154)
-
   return `${version}/${dependency.name}-${version}.pom`;
 }
 

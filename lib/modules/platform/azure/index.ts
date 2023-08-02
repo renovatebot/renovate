@@ -725,6 +725,7 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
+      // TODO: types (#7154)
       pr.lastMergeSourceCommit?.commitId
     } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
