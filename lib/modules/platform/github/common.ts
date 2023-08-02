@@ -33,7 +33,7 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.labels = pr.labels.map(({ name }) => name);
   }
 
-  if (pr.assignee || is.nonEmptyArray(pr.assignees)) {
+  if (!!pr.assignee || is.nonEmptyArray(pr.assignees)) {
     result.hasAssignees = true;
   }
 

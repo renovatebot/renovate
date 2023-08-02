@@ -111,7 +111,6 @@ export function extractImage(image: Image): PackageDependency | null {
     }
 
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,

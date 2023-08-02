@@ -32,7 +32,7 @@ export async function ensureOnboardingPr(
   branches: BranchConfig[]
 ): Promise<void> {
   if (
-    config.repoIsOnboarded ||
+    config.repoIsOnboarded === true ||
     OnboardingState.onboardingCacheValid ||
     (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
   ) {

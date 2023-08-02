@@ -4,6 +4,7 @@ import {
   DefinitionNode,
   DocumentNode,
   FieldNode,
+  Kind,
   OperationDefinitionNode,
   SelectionNode,
   SelectionSetNode,
@@ -16,11 +17,11 @@ import {
 function isOperationDefinitionNode(
   def: DefinitionNode
 ): def is OperationDefinitionNode {
-  return def.kind === 'OperationDefinition';
+  return def.kind === Kind.OPERATION_DEFINITION;
 }
 
 function isFieldNode(sel: SelectionNode): sel is FieldNode {
-  return sel.kind === 'Field';
+  return sel.kind === Kind.FIELD;
 }
 
 interface Arguments {
@@ -51,14 +52,14 @@ function getArguments(key: string, val: ValueNode): Arguments {
   const result: Arguments = {};
   const kind = val.kind;
   if (
-    val.kind === 'IntValue' ||
-    val.kind === 'FloatValue' ||
-    val.kind === 'StringValue' ||
-    val.kind === 'BooleanValue' ||
-    val.kind === 'EnumValue'
+    val.kind === Kind.INT ||
+    val.kind === Kind.FLOAT ||
+    val.kind === Kind.STRING ||
+    val.kind === Kind.BOOLEAN ||
+    val.kind === Kind.ENUM
   ) {
     result[key] = val.value;
-  } else if (val.kind === 'ObjectValue') {
+  } else if (val.kind === Kind.OBJECT) {
     let childResult: Arguments = {};
     val.fields.forEach((fieldNode) => {
       const childKey = fieldNode.name.value;
@@ -66,15 +67,15 @@ function getArguments(key: string, val: ValueNode): Arguments {
       childResult = { ...childResult, ...childVal };
     });
     result[key] = childResult;
-  } else if (val.kind === 'ListValue') {
+  } else if (val.kind === Kind.LIST) {
     const results: Arguments[] = [];
     val.values.forEach((fieldNode) => {
       results.push(getArguments(key, fieldNode));
     });
     result[key] = results.map(({ [key]: x }) => x).flat();
-  } else if (val.kind === 'NullValue') {
+  } else if (val.kind === Kind.NULL) {
     result[key] = null;
-  } else if (val.kind === 'Variable') {
+  } else if (val.kind === Kind.VARIABLE) {
     result[key] = `$${val.name.value}`;
   } else {
     result[key] = `<<${kind}>>`;
@@ -131,18 +132,18 @@ function simplifySelectionSet(
 function getTypeName(typeNode: TypeNode): string {
   const kind = typeNode.kind;
 
-  if (typeNode.kind === 'NamedType') {
+  if (typeNode.kind === Kind.NAMED_TYPE) {
     return typeNode.name.value;
   }
 
   const childTypeNode = typeNode.type;
   const childTypeName = getTypeName(childTypeNode);
 
-  if (kind === 'ListType') {
+  if (kind === Kind.LIST_TYPE) {
     return `[${childTypeName}]`;
   }
 
-  if (kind === 'NonNullType') {
+  if (kind === Kind.NON_NULL_TYPE) {
     return `${childTypeName}!`;
   }
 

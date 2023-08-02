@@ -163,8 +163,9 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
-    (config.updatedArtifacts && config.updatedArtifacts.length > 0);
+    (is.array(config.updatedPackageFiles) &&
+      config.updatedPackageFiles.length > 0) ||
+    (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
 
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */
