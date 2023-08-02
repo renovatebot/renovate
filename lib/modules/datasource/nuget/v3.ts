@@ -124,6 +124,7 @@ export async function getReleases(
   );
   const catalogEntries = (await p.all(catalogPagesQueue))
     .flat()
+    .filter((entry) => versioning.isValid(entry.version))
     .sort((a, b) => versioning.sortVersions(a.version, b.version));
 
   let homepage: string | null = null;

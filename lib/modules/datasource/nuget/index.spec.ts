@@ -52,12 +52,6 @@ const nlogMocks = [
   },
 ];
 
-const nugetIndexV3AzureDevOps = Fixtures.get('azure_devops/v3_index.json');
-const pkgListV3RegistrationAzureDevOps = Fixtures.get(
-  'azure_devops/nunit/v3_registration.json'
-);
-const pkgInfoV3FromAzureDevOps = Fixtures.get('azure_devops/nunit/nuspec.xml');
-
 const configV3V2 = {
   datasource,
   versioning,
@@ -400,20 +394,43 @@ describe('modules/datasource/nuget/index', () => {
           '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json'
         )
         .twice()
-        .reply(200, nugetIndexV3AzureDevOps)
+        .reply(200, Fixtures.get('azure_devops/v3_index.json'))
         .get(
           '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2-semver2/nunit/index.json'
         )
-        .reply(200, pkgListV3RegistrationAzureDevOps)
+        .reply(200, Fixtures.get('azure_devops/nunit/v3_registration.json'))
         .get(
           '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.nuspec'
         )
-        .reply(200, pkgInfoV3FromAzureDevOps);
+        .reply(200, Fixtures.get('azure_devops/nunit/nuspec.xml'));
       const res = await getPkgReleases({
         ...configV3AzureDevOps,
       });
       expect(res).not.toBeNull();
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        homepage: 'https://nunit.org/',
+        registryUrl:
+          'https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
+        releases: [
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.5.7.10213',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.6.5',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.7.1',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '3.13.2',
+          },
+        ],
+        sourceUrl: 'https://github.com/nunit/nunit',
+      });
       expect(res?.sourceUrl).toBeDefined();
     });
 

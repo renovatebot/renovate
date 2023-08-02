@@ -394,32 +394,6 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is azure devops 1`] = `
-{
-  "homepage": "https://nunit.org/",
-  "registryUrl": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json",
-  "releases": [
-    {
-      "releaseTimestamp": "2021-12-03T03:20:52.000Z",
-      "version": "2.5.7.10213",
-    },
-    {
-      "releaseTimestamp": "2021-12-03T03:20:52.000Z",
-      "version": "2.6.5",
-    },
-    {
-      "releaseTimestamp": "2021-12-03T03:20:52.000Z",
-      "version": "2.7.1",
-    },
-    {
-      "releaseTimestamp": "2021-12-03T03:20:52.000Z",
-      "version": "3.13.2",
-    },
-  ],
-  "sourceUrl": "https://github.com/nunit/nunit",
-}
-`;
-
 exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 {
   "registryUrl": "https://myprivatefeed/index.json",
