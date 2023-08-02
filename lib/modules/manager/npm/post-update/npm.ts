@@ -204,7 +204,7 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr };
   }
-  return { lockFile };
+  return { error: !lockFile, lockFile };
 }
 
 export function divideWorkspaceAndRootDeps(
