@@ -396,11 +396,11 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Merge coverage reports
-        run: pnpm -s nyc merge ./coverage/json ./coverage/nyc/coverage.json
+        run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
       - name: Check coverage threshold
         run: |
-          pnpm -s nyc check-coverage -t ./coverage/nyc \
+          pnpm nyc check-coverage -t ./coverage/nyc \
             --branches 98 \
             --functions 100 \
             --lines 100 \
