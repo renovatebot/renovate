@@ -65,12 +65,14 @@
   },
   "keywords": [
     "automated",
+    "azure",
     "bazel",
     "bitbucket",
     "buildkite",
     "dependencies",
     "dependency",
     "docker",
+    "gitea",
     "github",
     "gitlab",
     "management",
@@ -79,6 +81,7 @@
     "npm",
     "outdated",
     "php",
+    "pnpm",
     "python",
     "update",
     "yarn"

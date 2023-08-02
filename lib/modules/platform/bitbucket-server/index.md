@@ -47,7 +47,7 @@ Once it's running and initialized, the quickest way to testing with Renovate is:
 At this point you should have a project ready for Renovate, and the `@renovate-bot` account ready to run on it. You can then run like this:
 
 ```
-yarn start --platform=bitbucket-server --endpoint=http://localhost:7990 --git-fs=http --username=renovate-bot --password=abc123456789! --log-level=debug --autodiscover=true
+pnpm start --platform=bitbucket-server --endpoint=http://localhost:7990 --git-fs=http --username=renovate-bot --password=abc123456789! --log-level=debug --autodiscover=true
 ```
 
 Alternatively using env:
@@ -59,7 +59,7 @@ export RENOVATE_GIT_FS=http
 export RENOVATE_USERNAME=renovate-bot
 export RENOVATE_PASSWORD=abc123456789!
 export LOG_LEVEL=debug
-yarn start --autodiscover=true
+pnpm start --autodiscover=true
 ```
 
 You should then get a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
