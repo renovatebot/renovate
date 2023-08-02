@@ -80,6 +80,38 @@ All available options:
 }
 ```
 
+`Plain Format:`
+
+If the format is set to `plain`, Renovate will call the HTTP endpoint with the `Accept` header value `text/plain`. The body of the response will be treated as plain text and will be converted into a JSON.
+
+Suppose the body of the HTTP response is as follows::
+
+```
+1.0.0
+2.0.0
+3.0.0
+```
+
+When Renovate receives this response with the `plain` format, it will convert it into the following:
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
 ## Examples
 
 # K3s
