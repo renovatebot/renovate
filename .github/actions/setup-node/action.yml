@@ -68,7 +68,7 @@ runs:
         timeout_minutes: 10
         max_attempts: 3
         command: |
-          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm install --ignore-scripts
           pnpm prepare:re2
 
     - name: Write `node_modules` cache

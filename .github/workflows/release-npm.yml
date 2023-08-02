@@ -65,7 +65,7 @@ jobs:
         with:
           timeout_minutes: 10
           max_attempts: 3
-          command: pnpm install --frozen-lockfile
+          command: pnpm install
 
       - name: Build ${{ env.NPM_VERSION }}
         run: pnpm build
