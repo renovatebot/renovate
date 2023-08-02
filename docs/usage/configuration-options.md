@@ -466,6 +466,11 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
+<!-- prettier-ignore -->
+!!! note
+    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
+    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
+
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
@@ -1105,7 +1110,12 @@ You can't use other filenames because Renovate only checks the default filename 
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
+The `gitAuthor` option accepts a [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant string.
+It's recommended to include a name followed by an email address, e.g.
+
+```
+Development Bot <dev-bot@my-software-company.com>
+```
 
 <!-- prettier-ignore -->
 !!! danger
@@ -2045,6 +2055,23 @@ See also `matchPackagePrefixes`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### excludeRepositories
+
+Use this field to restrict rules to a particular repository. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "excludeRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+
 ### matchCategories
 
 Use `matchCategories` to restrict rules to a particular language or group.
@@ -2066,6 +2093,23 @@ The categories can be found in the [manager documentation](./modules/manager/ind
   ]
 }
 ```
+
+### matchRepositories
+
+Use this field to restrict rules to a particular repository. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
 
 ### matchBaseBranches
 

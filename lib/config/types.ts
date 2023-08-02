@@ -338,11 +338,13 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  matchRepositories?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  excludeRepositories?: string[];
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -393,9 +395,6 @@ export interface RenovateOptionBase {
     | 'packageRules'
     | 'postUpgradeTasks'
     | 'regexManagers';
-
-  // used by tests
-  relatedOptions?: string[];
 
   stage?: RenovateConfigStage;
 
@@ -495,6 +494,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  repository?: string;
 }
 
 export interface ConfigMigration {

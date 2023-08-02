@@ -6,7 +6,7 @@ import type { BumpPackageVersionResult } from '../../../types';
 export function bumpPackageVersion(
   content: string,
   currentValue: string,
-  bumpVersion: ReleaseType | string
+  bumpVersion: ReleaseType
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
@@ -29,7 +29,7 @@ export function bumpPackageVersion(
         return { bumpedContent };
       }
     } else {
-      newPjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+      newPjVersion = semver.inc(currentValue, bumpVersion);
     }
     // TODO: fix types (#7154)
     logger.debug(`newPjVersion: ${newPjVersion!}`);

@@ -637,6 +637,16 @@ async function tryPrAutomerge(
   }
 }
 
+async function approvePr(pr: number): Promise<void> {
+  try {
+    await gitlabApi.postJson(
+      `projects/${config.repository}/merge_requests/${pr}/approve`
+    );
+  } catch (err) {
+    logger.warn({ err }, 'GitLab: Error approving merge request');
+  }
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -672,6 +682,10 @@ export async function createPr({
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
+  }
+
+  if (platformOptions?.autoApprove) {
+    await approvePr(pr.iid);
   }
 
   await tryPrAutomerge(pr.iid, platformOptions);
@@ -732,6 +746,10 @@ export async function updatePr({
     `projects/${config.repository}/merge_requests/${iid}`,
     { body }
   );
+
+  if (platformOptions?.autoApprove) {
+    await approvePr(iid);
+  }
 
   await tryPrAutomerge(iid, platformOptions);
 }

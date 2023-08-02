@@ -554,4 +554,12 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  typos: {
+    asdfPluginUrl: 'https://github.com/aschiavon91/asdf-typos',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'crate-ci/typos',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
 };
