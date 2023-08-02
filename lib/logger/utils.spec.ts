@@ -29,7 +29,6 @@ describe('logger/utils', () => {
     const mockExit = jest.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
       // TODO: types (#7154)
-       
       throw new Error(`process.exit: ${number}`);
     });
     expect(() => {

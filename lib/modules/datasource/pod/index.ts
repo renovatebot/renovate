@@ -208,7 +208,6 @@ export class PodDatasource extends Datasource {
     namespace: `datasource-${PodDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#7154)
-       
       `${registryUrl}:${packageName}`,
   })
   async getReleases({

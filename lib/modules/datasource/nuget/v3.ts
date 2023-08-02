@@ -169,7 +169,6 @@ export async function getReleases(
         packageBaseAddress
       )}${pkgName.toLowerCase()}/${
         // TODO: types (#7154)
-         
         latestStable
       }/${pkgName.toLowerCase()}.nuspec`;
       const metaresult = await http.get(nuspecUrl);

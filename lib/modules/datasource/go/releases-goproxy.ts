@@ -311,7 +311,6 @@ export class GoProxyDatasource extends Datasource {
     const goproxy = process.env.GOPROXY;
     const noproxy = GoProxyDatasource.parseNoproxy();
     // TODO: types (#7154)
-     
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

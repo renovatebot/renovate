@@ -19,7 +19,6 @@ export class PuppetForgeDatasource extends Datasource {
     // https://forgeapi.puppet.com
     const moduleSlug = packageName.replace('/', '-');
     // TODO: types (#7154)
-     
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
     let module: PuppetModule;

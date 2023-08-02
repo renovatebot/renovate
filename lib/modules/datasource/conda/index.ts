@@ -27,7 +27,6 @@ export class CondaDatasource extends Datasource {
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#7154)
-       
       `${registryUrl}:${packageName}`,
   })
   async getReleases({

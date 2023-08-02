@@ -36,7 +36,6 @@ export class GalaxyCollectionDatasource extends Datasource {
     const [namespace, projectName] = packageName.split('.');
 
     // TODO: types (#7154)
-     
     const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;

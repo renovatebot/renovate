@@ -1,5 +1,4 @@
 // TODO: types (#7154)
- 
 import URL from 'node:url';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';

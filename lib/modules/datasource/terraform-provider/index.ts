@@ -1,5 +1,4 @@
 // TODO: types (#7154)
- 
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';

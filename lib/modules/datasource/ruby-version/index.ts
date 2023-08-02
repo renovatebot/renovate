@@ -30,7 +30,6 @@ export class RubyVersionDatasource extends Datasource {
       releases: [],
     };
     // TODO: types (#7154)
-     
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
     try {
       const response = await this.http.get(rubyVersionsUrl);

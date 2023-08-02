@@ -30,7 +30,6 @@ export class DenoDatasource extends Datasource {
     namespace: `datasource-${DenoDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#7154)
-       
       `${registryUrl}:${packageName}`,
   })
   async getReleases({

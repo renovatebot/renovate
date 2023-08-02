@@ -1,5 +1,4 @@
 // TODO: types (#7154)
- 
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';

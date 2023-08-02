@@ -1,5 +1,4 @@
 // TODO: types (#7154)
- 
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';

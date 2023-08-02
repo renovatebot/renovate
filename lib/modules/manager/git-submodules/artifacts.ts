@@ -7,7 +7,6 @@ export default function updateArtifacts({
   const res: UpdateArtifactsResult[] = [];
   updatedDeps.forEach((dep) => {
     // TODO: types (#7154)
-     
     logger.info(`Updating submodule ${dep.depName}`);
     res.push({
       file: { type: 'addition', path: dep.depName!, contents: '' },

@@ -33,9 +33,8 @@ export class GalaxyDatasource extends Datasource {
     const projectName = lookUp[1];
 
     // TODO: types (#7154)
-     
     const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
-     
+
     const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 
     let raw: HttpResponse<GalaxyResult> | null = null;

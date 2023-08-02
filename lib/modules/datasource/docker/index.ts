@@ -713,7 +713,6 @@ export class DockerDatasource extends Datasource {
     );
     logger.debug(
       // TODO: types (#7154)
-       
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
