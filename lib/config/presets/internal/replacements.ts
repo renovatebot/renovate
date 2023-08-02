@@ -667,17 +667,6 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  'rollup-node-resolve-to-scoped': {
-    description: 'The node-resolve plugin for rollup became scoped.',
-    packageRules: [
-      {
-        matchDatasources: ['npm'],
-        matchPackageNames: ['rollup-plugin-node-resolve'],
-        replacementName: '@rollup/plugin-node-resolve',
-        replacementVersion: '6.0.0',
-      },
-    ],
-  },
   'rollup-babel-to-scoped': {
     description: 'The babel plugin for rollup became scoped.',
     packageRules: [
@@ -686,6 +675,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-babel'],
         replacementName: '@rollup/plugin-babel',
         replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'rollup-node-resolve-to-scoped': {
+    description: 'The node-resolve plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-node-resolve'],
+        replacementName: '@rollup/plugin-node-resolve',
+        replacementVersion: '6.0.0',
       },
     ],
   },
