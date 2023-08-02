@@ -3292,10 +3292,10 @@
   resolved "https://registry.yarnpkg.com/@types/linkify-markdown/-/linkify-markdown-1.0.1.tgz#0b750a592107dd46ecf2b5be0eeb7656b1fc814d"
   integrity sha512-RYDOtCol7/sHGhSJvWVnl0AmOdQQWgUYys6cwn5Lt3RiYhyhTLMLv7B9wdixMgCfnNt0MQj/YSGi3qN0IQqLeQ==
 
-"@types/lodash@4.14.195":
-  version "4.14.195"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.195.tgz#bafc975b252eb6cea78882ce8a7b6bf22a6de632"
-  integrity sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==
+"@types/lodash@4.14.196":
+  version "4.14.196"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.196.tgz#a7c3d6fc52d8d71328b764e28e080b4169ec7a95"
+  integrity sha512-22y3o88f4a94mKljsZcanlNWPzO0uBsBdzLAngf2tp533LzZcQzb6+eZPJ+vCTt+bqF2XnvT9gejTLsAcJAJyQ==
 
 "@types/luxon@3.3.1":
   version "3.3.1"
@@ -10421,10 +10421,10 @@ type-detect@4.0.8, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@3.13.1, type-fest@^3.0.0, type-fest@^3.12.0, type-fest@^3.8.0:
-  version "3.13.1"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.13.1.tgz#bb744c1f0678bea7543a2d1ec24e83e68e8c8706"
-  integrity sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==
+type-fest@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.0.0.tgz#1c87b05c3f0304a2f911b5a47bb45fa4d62031db"
+  integrity sha512-d/oYtUnPM9zar2fqqGLYPzgcY0qUlYK0evgNVti93xpzfjGkMgZHu9Lvgrkn0rqGXTgsFRxFamzjGoD9Uo+dgw==
 
 type-fest@^0.13.1:
   version "0.13.1"
@@ -10465,6 +10465,11 @@ type-fest@^2.12.2:
   version "2.19.0"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
   integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
+
+type-fest@^3.0.0, type-fest@^3.12.0, type-fest@^3.8.0:
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.13.1.tgz#bb744c1f0678bea7543a2d1ec24e83e68e8c8706"
+  integrity sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==
 
 typed-array-buffer@^1.0.0:
   version "1.0.0"

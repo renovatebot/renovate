@@ -278,7 +278,7 @@
     "@types/js-yaml": "4.0.5",
     "@types/json-dup-key-validator": "1.0.0",
     "@types/linkify-markdown": "1.0.1",
-    "@types/lodash": "4.14.195",
+    "@types/lodash": "4.14.196",
     "@types/luxon": "3.3.1",
     "@types/markdown-it": "12.2.3",
     "@types/markdown-table": "2.0.0",
@@ -332,7 +332,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.1",
     "ts-node": "10.9.1",
-    "type-fest": "3.13.1",
+    "type-fest": "4.0.0",
     "typescript": "5.1.6",
     "unified": "9.2.2"
   },
