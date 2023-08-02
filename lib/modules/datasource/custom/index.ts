@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
+import { newlineRegex } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { ReleaseResultZodSchema } from './schema';
@@ -72,14 +73,14 @@ export class CustomDatasource extends Datasource {
   private async fetchPlainFormat(url: string): Promise<unknown> {
     const response = await this.http.get(url, {
       headers: {
-        'Accept': 'text/plain',
+        Accept: 'text/plain',
       },
     });
     const contentType = response.headers['content-type'];
     if (!contentType?.startsWith('text/')) {
       return null;
     }
-    const versions = response.body.split('\n').map((version) => {
+    const versions = response.body.split(newlineRegex).map((version) => {
       return {
         version: version.trim(),
       };
