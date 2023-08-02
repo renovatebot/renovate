@@ -14,9 +14,9 @@ import {
   parseLinkHeader,
 } from '../../../util/url';
 import { id as dockerVersioningId } from '../../versioning/docker';
-import { isArtifactoryServer } from '../common';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { isArtifactoryServer } from '../util';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
