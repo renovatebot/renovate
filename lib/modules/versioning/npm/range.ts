@@ -203,7 +203,7 @@ export function getNewValue({
   }
   if (element.operator === '<=') {
     let res;
-    if (element.patch || suffix.length) {
+    if (!!element.patch || suffix.length) {
       res = `<=${newVersion}`;
     } else if (element.minor) {
       res = `<=${toVersionMajor}.${toVersionMinor}`;

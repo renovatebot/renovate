@@ -29,7 +29,6 @@ describe('logger/utils', () => {
     const mockExit = jest.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       throw new Error(`process.exit: ${number}`);
     });
     expect(() => {
@@ -70,7 +69,7 @@ describe('logger/utils', () => {
     function prepareIssues<T extends z.ZodType>(
       schema: T,
       input: unknown
-    ): unknown | null {
+    ): unknown {
       const error = getError(schema, input);
       return error ? prepareZodIssues(error.format()) : null;
     }

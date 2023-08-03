@@ -25,12 +25,19 @@ export function getDefaultVersioning(
   if (!datasourceName) {
     return defaultVersioning.id;
   }
+
   const datasource = getDatasourceFor(datasourceName);
-  // istanbul ignore if: wrong regex manager config?
+
   if (!datasource) {
     logger.warn({ datasourceName }, 'Missing datasource!');
+    return defaultVersioning.id;
   }
-  return datasource?.defaultVersioning ?? defaultVersioning.id;
+
+  if (!datasource.defaultVersioning) {
+    return defaultVersioning.id;
+  }
+
+  return datasource.defaultVersioning;
 }
 
 export function isGetPkgReleasesConfig(
@@ -133,13 +140,11 @@ export function applyConstraintsFiltering<
     const releaseConstraints = release.constraints;
     delete release.constraints;
 
-    // istanbul ignore if
     if (!configConstraints || !releaseConstraints) {
       return release;
     }
 
     for (const [name, configConstraint] of Object.entries(configConstraints)) {
-      // istanbul ignore if
       if (!versioning.isValid(configConstraint)) {
         continue;
       }

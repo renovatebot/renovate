@@ -1,5 +1,3 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import * as semver from 'semver';
 import { SemVer, parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
@@ -144,7 +142,7 @@ export function replaceRange({
   }
   if (element.operator === '<=') {
     let res;
-    if (element.patch || suffix.length) {
+    if (!!element.patch || suffix.length) {
       res = `<=${newVersion}`;
     } else if (element.minor) {
       res = `<=${toVersionMajor}.${toVersionMinor}`;

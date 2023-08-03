@@ -79,6 +79,7 @@ export async function checkOnboardingBranch(
     logger.debug('Onboarding PR already exists');
 
     if (
+      isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
       isOnboardingCacheValid(config.defaultBranch!, config.onboardingBranch!) &&
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
@@ -181,4 +182,14 @@ function isOnboardingCacheValid(
     onboardingBranchCache.configFileName &&
     onboardingBranchCache.configFileParsed
   );
+}
+
+function isConfigHashPresent(pr: Pr): boolean {
+  const platform = GlobalConfig.get('platform')!;
+  // if platform does not support html comments return true
+  if (!['github', 'gitlab', 'gitea'].includes(platform)) {
+    return true;
+  }
+
+  return !!pr.bodyStruct?.rawConfigHash;
 }
