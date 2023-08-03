@@ -352,8 +352,8 @@ devDependencies:
     specifier: 0.0.14
     version: 0.0.14(typescript@5.1.6)
   '@renovate/eslint-plugin':
-    specifier: file:tools/eslint
-    version: file:tools/eslint
+    specifier: link:tools/eslint
+    version: link:tools/eslint
   '@semantic-release/exec':
     specifier: 6.0.3
     version: 6.0.3(semantic-release@21.0.7)
@@ -10952,8 +10952,3 @@ packages:
   /zwitch@1.0.5:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
     dev: false
-
-  file:tools/eslint:
-    resolution: {directory: tools/eslint, type: directory}
-    name: '@renovatebot/eslint-plugin'
-    dev: true
