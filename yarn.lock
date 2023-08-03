@@ -1326,7 +1326,7 @@
     slash "^3.0.0"
     strip-ansi "^6.0.0"
 
-"@jest/environment@^29.6.2":
+"@jest/environment@29.6.2", "@jest/environment@^29.6.2":
   version "29.6.2"
   resolved "https://registry.yarnpkg.com/@jest/environment/-/environment-29.6.2.tgz#794c0f769d85e7553439d107d3f43186dc6874a9"
   integrity sha512-AEcW43C7huGd/vogTddNNTDRpO6vQ2zaQNrttvWV18ArBx9Z56h7BIsXkNFJVOO4/kblWEQz30ckw0+L3izc+Q==
@@ -1467,7 +1467,7 @@
     slash "^3.0.0"
     write-file-atomic "^4.0.2"
 
-"@jest/types@^29.6.1":
+"@jest/types@29.6.1", "@jest/types@^29.6.1":
   version "29.6.1"
   resolved "https://registry.yarnpkg.com/@jest/types/-/types-29.6.1.tgz#ae79080278acff0a6af5eb49d063385aaa897bf2"
   integrity sha512-tPKQNMPuXgvdOn2/Lg9HNfUvjYVGolt04Hp03f5hAk878uwOLikN+JzeLY0HcVgKgFl9Hs3EIqpu3WX27XNhnw==
@@ -3272,7 +3272,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/mdast@^3.0.0":
+"@types/mdast@3.0.12", "@types/mdast@^3.0.0":
   version "3.0.12"
   resolved "https://registry.yarnpkg.com/@types/mdast/-/mdast-3.0.12.tgz#beeb511b977c875a5b0cc92eab6fcac2f0895514"
   integrity sha512-DT+iNIRNX884cx0/Q1ja7NyUPpZuv0KPyL5rGNxm1WC1OtHstl7n4Jb7nk+xacNShQMbczJjt8uFzznpp6kYBg==
@@ -5461,7 +5461,7 @@ expect-more@1.3.0:
   resolved "https://registry.yarnpkg.com/expect-more/-/expect-more-1.3.0.tgz#fcc6e7477e36d91194d550684bf733a88228aaff"
   integrity sha512-HnXT5nJb9V3DMnr5RgA1TiKbu5kRaJ0GD1JkuhZvnr1Qe3HJq+ESnrcl/jmVUZ8Ycnl3Sp0OTYUhmO36d2+zow==
 
-expect@^29.6.2:
+expect@29.6.2, expect@^29.6.2:
   version "29.6.2"
   resolved "https://registry.yarnpkg.com/expect/-/expect-29.6.2.tgz#7b08e83eba18ddc4a2cf62b5f2d1918f5cd84521"
   integrity sha512-iAErsLxJ8C+S02QbLAwgSGSezLQK+XXRDt8IuFXFpwCNw2ECmzZSmjKcCaFVp5VRMk+WAvz6h6jokzEzBFZEuA==
@@ -6974,7 +6974,7 @@ jest-mock-extended@3.0.4:
   dependencies:
     ts-essentials "^7.0.3"
 
-jest-mock@^29.6.2:
+jest-mock@29.6.2, jest-mock@^29.6.2:
   version "29.6.2"
   resolved "https://registry.yarnpkg.com/jest-mock/-/jest-mock-29.6.2.tgz#ef9c9b4d38c34a2ad61010a021866dad41ce5e00"
   integrity sha512-hoSv3lb3byzdKfwqCuT6uTscan471GUECqgNYykg6ob0yiAw3zYc7OrPnI9Qv8Wwoa4lC7AZ9hyS4AiIx5U2zg==
@@ -7071,7 +7071,7 @@ jest-runtime@^29.6.2:
     slash "^3.0.0"
     strip-bom "^4.0.0"
 
-jest-snapshot@^29.6.2:
+jest-snapshot@29.6.2, jest-snapshot@^29.6.2:
   version "29.6.2"
   resolved "https://registry.yarnpkg.com/jest-snapshot/-/jest-snapshot-29.6.2.tgz#9b431b561a83f2bdfe041e1cab8a6becdb01af9c"
   integrity sha512-1OdjqvqmRdGNvWXr/YZHuyhh5DeaLp1p/F8Tht/MrMw4Kr1Uu/j4lRG+iKl1DAqUJDWxtQBMk41Lnf/JETYBRA==
@@ -8996,7 +8996,7 @@ pretty-bytes@^5.1.0:
   resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-5.6.0.tgz#356256f643804773c82f64723fe78c92c62beaeb"
   integrity sha512-FFw039TmrBqFK8ma/7OL3sDz/VytdtJr044/QUJtH0wK9lb9jLq9tJyIxUwtQJHwar2BqtiA4iCWSwo9JLkzFg==
 
-pretty-format@^29.4.1, pretty-format@^29.6.2:
+pretty-format@29.6.2, pretty-format@^29.4.1, pretty-format@^29.6.2:
   version "29.6.2"
   resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-29.6.2.tgz#3d5829261a8a4d89d8b9769064b29c50ed486a47"
   integrity sha512-1q0oC8eRveTg5nnBEWMXAU2qpv65Gnuf2eCQzSjxpWFkPaPARwqZZDGuNE0zPAZfTCHzIk3A8dIjwlQKKLphyg==

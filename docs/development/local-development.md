@@ -12,7 +12,7 @@ You need the following dependencies for local development:
 
 - Git `>=2.33.0`
 - Node.js `^18.12.0 || >=20.0.0`
-- Yarn `^1.22.5`
+- Yarn `^1.22.5` (use corepack)
 - C++ compiler
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
@@ -23,15 +23,14 @@ You can use the following commands on Ubuntu.
 
 ```sh
 curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
-sudo apt-get install -y git build-essential nodejs yarn
+sudo apt-get install -y git build-essential nodejs
+corepack enable
 ```
 
 #### Nix
 
-To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs yarn`.
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs yarn` and then `corepack enable`.
 
 #### Windows
 
@@ -41,7 +40,7 @@ If you already installed a part, skip the corresponding step.
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
+- Enable corepack: `corepack enable`
 
   You can see what versions you're using like this:
 

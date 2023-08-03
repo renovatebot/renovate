@@ -43,6 +43,10 @@ jobs:
         with:
           ref: ${{ env.GIT_SHA }}
 
+      - name: Enable corepack
+        shell: bash
+        run: corepack enable
+
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
