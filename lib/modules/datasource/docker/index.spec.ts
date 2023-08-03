@@ -40,6 +40,7 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
+    delete process.env.RENOVATE_PAGINATE_DOCKER_MAX_PAGES;
   });
 
   describe('getDigest', () => {
@@ -1037,6 +1038,41 @@ describe('modules/datasource/docker/index', () => {
       };
       const res = await getPkgReleases(config);
       expect(res?.releases).toHaveLength(1);
+    });
+
+    it('uses custom max pages', async () => {
+      process.env.RENOVATE_PAGINATE_DOCKER_MAX_PAGES = '2';
+      httpMock
+        .scope(baseUrl)
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/library/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          {
+            link: `<${baseUrl}/library/node/tags/list?n=1&page=1>; rel="next", `,
+          }
+        )
+        .get('/library/node/tags/list?n=1&page=1')
+        .reply(
+          200,
+          { tags: ['1.0.1'] },
+          {
+            link: `<${baseUrl}/library/node/tags/list?n=1&page=2>; rel="next", `,
+          }
+        )
+        .get('/')
+        .reply(200)
+        .get('/library/node/manifests/1.0.1')
+        .reply(200);
+
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(2);
     });
 
     it('uses custom registry in packageName', async () => {
