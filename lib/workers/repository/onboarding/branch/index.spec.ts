@@ -416,17 +416,23 @@ describe('workers/repository/onboarding/branch/index', () => {
       it('detects missing rebase checkbox', async () => {
         const pr = { bodyStruct: { rebaseRequested: undefined } };
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
         await checkOnboardingBranch(config);
+
         expect(logger.debug).toHaveBeenCalledWith(
           `No rebase checkbox was found in the onboarding PR`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
+        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('detects manual pr update requested', async () => {
         const pr = { bodyStruct: { rebaseRequested: true } };
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
         await checkOnboardingBranch(config);
+
         expect(logger.debug).toHaveBeenCalledWith(
           `Manual onboarding PR update requested`
         );
@@ -438,7 +444,9 @@ describe('workers/repository/onboarding/branch/index', () => {
       it('handles unchecked rebase checkbox', async () => {
         const pr = { bodyStruct: { rebaseRequested: false } };
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
         await checkOnboardingBranch(config);
+
         expect(OnboardingState.prUpdateRequested).toBeFalse();
         expect(git.mergeBranch).toHaveBeenCalledOnce();
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
