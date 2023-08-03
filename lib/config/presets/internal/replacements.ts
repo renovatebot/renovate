@@ -27,6 +27,7 @@ export const presets: Record<string, Preset> = {
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
       'replacements:renovate-pep440-to-renovatebot-pep440',
+      'replacements:rollup-babel-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
@@ -663,6 +664,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@renovate/pep440'],
         replacementName: '@renovatebot/pep440',
         replacementVersion: '1.0.0',
+      },
+    ],
+  },
+  'rollup-babel-to-scoped': {
+    description: 'The babel plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-babel'],
+        replacementName: '@rollup/plugin-babel',
+        replacementVersion: '5.0.0',
       },
     ],
   },
