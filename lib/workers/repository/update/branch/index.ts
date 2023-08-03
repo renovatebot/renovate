@@ -398,7 +398,7 @@ export async function processBranch(
       }
     }
 
-    const userRebaseRequested =
+    let userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
       !!config.dependencyDashboardRebaseAllOpen ||
       !!config.rebaseRequested;
@@ -410,6 +410,7 @@ export async function processBranch(
     } else if (dependencyDashboardCheck === 'global-config') {
       logger.debug(`Manual create/rebase requested via checkedBranches`);
       config.reuseExistingBranch = false;
+      userRebaseRequested = true;
     } else if (userApproveAllPendingPR) {
       logger.debug(
         'A user manually approved all pending PRs via the Dependency Dashboard.'
