@@ -95,6 +95,12 @@ describe('config/index', () => {
       expect(getManagerConfig(parentConfig, 'html')).toContainEntries([
         ['fileMatch', ['\\.html?$']],
       ]);
+      expect(getManagerConfig(parentConfig, 'custom.regex')).toContainEntries([
+        ['pinDigests', false],
+      ]);
+      expect(
+        getManagerConfig(parentConfig, 'custom.regex')
+      ).not.toContainEntries([['fileMatch', ['\\.html?$']]]);
     });
 
     it('filterConfig()', () => {
