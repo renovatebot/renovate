@@ -663,7 +663,7 @@ As this is a template it can be dynamically set. E.g. add the `packageName` as p
 ### format
 
 Defines which format the API is returning.
-The API returns the `json` or `plain` format types.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
 
 ### transformTemplates
 
