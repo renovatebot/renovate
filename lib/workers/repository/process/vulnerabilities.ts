@@ -43,7 +43,6 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
   private async initialize(): Promise<void> {

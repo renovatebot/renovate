@@ -1,5 +1,4 @@
 // TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import hasha from 'hasha';
 import semver from 'semver';
 import { logger } from '../../../logger';

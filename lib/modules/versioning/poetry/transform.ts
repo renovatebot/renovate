@@ -20,7 +20,7 @@ function parseLetterTag(letter?: string, number?: string): LetterTag | null {
     };
     return {
       letter: spellings[letter] || letter,
-      number: number === undefined ? '0' : number,
+      number: number ?? '0',
     };
   }
   if (letter === undefined && number !== undefined) {

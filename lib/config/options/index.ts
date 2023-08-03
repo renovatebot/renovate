@@ -74,7 +74,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     parent: 'customDatasources',
     default: 'json',
-    allowedValues: ['json'],
+    allowedValues: ['json', 'plain'],
     cli: false,
     env: false,
   },
@@ -370,7 +370,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.8.2',
+    default: 'ghcr.io/containerbase/sidecar:9.8.4',
     globalOnly: true,
   },
   {
