@@ -559,7 +559,7 @@ export class DockerDatasource extends Datasource {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
+    let page = 0;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
