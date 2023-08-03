@@ -130,8 +130,7 @@ export async function extractPackageFile(
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
-    const versionNode = findVersion(parsedXml);
-    packageFileVersion = versionNode?.val;
+    packageFileVersion = findVersion(parsedXml)?.val;
   } catch (err) {
     logger.debug({ err, packageFile }, `Failed to parse XML`);
   }
