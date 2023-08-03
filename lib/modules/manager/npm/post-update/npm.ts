@@ -51,7 +51,10 @@ export async function generateLockFile(
     };
     const commands: string[] = [];
     let cmdOptions = '';
-    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
+    if (
+      postUpdateOptions?.includes('npmDedupe') === true ||
+      skipInstalls === false
+    ) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {

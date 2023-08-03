@@ -235,7 +235,6 @@ export async function updateLockedDependency(
       if (!parentUpdateResult.files) {
         logger.debug(
           // TODO: types (#7154)
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
         );
         return { status: 'update-failed' };

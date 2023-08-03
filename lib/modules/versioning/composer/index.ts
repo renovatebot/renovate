@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
@@ -232,7 +233,10 @@ function getNewValue({
     const operator = currentValue.substring(0, 1);
     if (rangeStrategy === 'bump') {
       newValue = `${operator}${newVersion}`;
-    } else if ((currentMajor && toMajor > currentMajor) || !toMinor) {
+    } else if (
+      (is.number(currentMajor) && toMajor > currentMajor) ||
+      !toMinor
+    ) {
       // handle ~4.1 case
       newValue = `${operator}${toMajor}.0`;
     } else {
