@@ -464,7 +464,7 @@ jobs:
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: renovate-package
-          path: renovate-v0.0.0-semantic-release.tgz
+          path: renovate-0.0.0-semantic-release.tgz
 
   build-docs:
     needs: [lint-docs]
