@@ -27,11 +27,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_PAGINATE_DOCKER_MAX_PAGES`
-
-If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
-This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
-
 ## `RENOVATE_REUSE_PACKAGE_LOCK`
 
 If set to "false" (string), Renovate will remove any existing `package-lock.json` before trying to update it.
@@ -39,6 +34,11 @@ If set to "false" (string), Renovate will remove any existing `package-lock.json
 ## `RENOVATE_USER_AGENT`
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
+
+## `RENOVATE_X_DOCKER_MAX_PAGES`
+
+If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
+This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
 ## `RENOVATE_X_HARD_EXIT`
 

@@ -560,8 +560,8 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const pages = process.env.RENOVATE_PAGINATE_DOCKER_MAX_PAGES
-      ? parseInt(process.env.RENOVATE_PAGINATE_DOCKER_MAX_PAGES, 10)
+    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
+      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
       : 20;
     let foundMaxResultsError = false;
     do {

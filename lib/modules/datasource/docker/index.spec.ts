@@ -40,7 +40,7 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
-    delete process.env.RENOVATE_PAGINATE_DOCKER_MAX_PAGES;
+    delete process.env.RENOVATE_X_DOCKER_MAX_PAGES;
   });
 
   describe('getDigest', () => {
@@ -1041,7 +1041,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      process.env.RENOVATE_PAGINATE_DOCKER_MAX_PAGES = '2';
+      process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
