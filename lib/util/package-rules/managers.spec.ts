@@ -13,7 +13,7 @@ describe('util/package-rules/managers', () => {
           matchManagers: ['custom'],
         }
       );
-      expect(result).toBeTrue();
+      expect(result).toBeFalse();
     });
 
     it('should match custom managers separately', () => {
@@ -34,7 +34,7 @@ describe('util/package-rules/managers', () => {
           manager: 'npm',
         },
         {
-          matchManagers: ['npm', 'custom'],
+          matchManagers: ['npm', 'custom.regex'],
         }
       );
       expect(result).toBeTrue();

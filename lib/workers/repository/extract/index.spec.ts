@@ -32,7 +32,7 @@ describe('workers/repository/extract/index', () => {
     });
 
     it('skips non-enabled managers', async () => {
-      config.enabledManagers = ['npm', 'custom'];
+      config.enabledManagers = ['npm', 'custom.regex'];
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
