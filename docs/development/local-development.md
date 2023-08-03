@@ -75,7 +75,7 @@ To build the correct docker image:
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 ```
 
-Then you can run Yarn directly from Docker, for instance:
+Then you can run `pnpm` directly from Docker, for instance:
 
 ```
 docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local pnpm install
