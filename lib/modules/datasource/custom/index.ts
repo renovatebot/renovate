@@ -40,7 +40,7 @@ export class CustomDatasource extends Datasource {
     }
 
     const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
-    // TODO add here other format options than JSON
+    // TODO add here other format options than JSON and "plain"
     let response: unknown;
     try {
       if (format === 'plain') {
