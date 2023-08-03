@@ -63,9 +63,7 @@ runs:
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: |
-          pnpm install --ignore-scripts
-          pnpm prepare:re2
+        command: pnpm install
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
