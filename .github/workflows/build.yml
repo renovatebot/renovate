@@ -269,8 +269,8 @@ jobs:
       - name: Lint fenced code blocks
         run: yarn -s doc-fence-check
 
-      - name: Lint website docs
-        run: yarn -s lint-website-docs
+      - name: Lint documentation
+        run: yarn -s lint-documentation
 
   lint-other:
     needs: [setup]
@@ -464,7 +464,7 @@ jobs:
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: renovate-package
-          path: renovate-v0.0.0-semantic-release.tgz
+          path: renovate-0.0.0-semantic-release.tgz
 
   build-docs:
     needs: [lint-docs]
@@ -505,6 +505,10 @@ jobs:
         uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable corepack
+        shell: bash
+        run: corepack enable
 
       - name: Download package
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2

@@ -136,7 +136,7 @@ export function setNpmrc(input?: string): void {
       if (
         !exposeAllEnv &&
         key.endsWith('registry') &&
-        val &&
+        is.string(val) &&
         val.includes('localhost')
       ) {
         logger.debug(

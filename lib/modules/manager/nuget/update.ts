@@ -8,7 +8,7 @@ import { findVersion } from './util';
 export function bumpPackageVersion(
   content: string,
   currentValue: string | undefined,
-  bumpVersion: ReleaseType | string
+  bumpVersion: ReleaseType
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
@@ -54,7 +54,7 @@ export function bumpPackageVersion(
       startTagPosition
     );
 
-    const newProjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+    const newProjVersion = semver.inc(currentValue, bumpVersion);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
     }

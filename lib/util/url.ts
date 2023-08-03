@@ -74,6 +74,8 @@ export function getQueryString(params: Record<string, any>): string {
   for (const [k, v] of Object.entries(params)) {
     if (is.array<object>(v)) {
       for (const item of v) {
+        // TODO: fix me?
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         usp.append(k, item.toString());
       }
     } else {

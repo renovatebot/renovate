@@ -22,7 +22,7 @@ import type { GenerateLockFileResult } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 // Exported for testability
-export function getLernaVersion(
+export function getLernaConstraint(
   lernaPackageFile: Partial<PackageFile<NpmManagerData>>,
   lazyPkgJson: PackageJsonSchema
 ): string | null {
@@ -31,7 +31,6 @@ export function getLernaVersion(
   if (!constraint || !semver.validRange(constraint)) {
     logger.warn(
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
     );
     return null;
@@ -115,18 +114,22 @@ export async function generateLockFiles(
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
-    const lernaVersion =
+    const lernaConstraint =
       config.constraints?.lerna ??
-      getLernaVersion(lernaPackageFile, await lazyPgkJson.getValue());
+      getLernaConstraint(lernaPackageFile, await lazyPgkJson.getValue());
     if (
-      !is.string(lernaVersion) ||
-      (semver.valid(lernaVersion) && semver.gte(lernaVersion, '7.0.0'))
+      !is.string(lernaConstraint) ||
+      (semver.valid(lernaConstraint) &&
+        semver.gte(lernaConstraint, '7.0.0')) === true ||
+      (semver.validRange(lernaConstraint) &&
+        (semver.satisfies('7.0.0', lernaConstraint) ||
+          semver.satisfies('7.999.999', lernaConstraint)))
     ) {
-      logger.debug('Skipping lerna bootstrap');
+      logger.debug('Skipping lerna bootstrap for lerna >= 7.0.0');
       cmd.push(`${lernaClient} install ${cmdOptions}`);
     } else {
-      logger.debug(`Using lerna version ${lernaVersion}`);
-      toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
+      logger.debug(`Using lerna version ${lernaConstraint}`);
+      toolConstraints.push({ toolName: 'lerna', constraint: lernaConstraint });
       cmd.push('lerna info || echo "Ignoring lerna info failure"');
       cmd.push(`${lernaClient} install ${cmdOptions}`);
       cmd.push(lernaCommand);
