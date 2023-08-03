@@ -18,5 +18,8 @@ INFO: Validating renovate.json
 INFO: Config validated successfully
 ```
 
+The validator program fails with a non-zero exit code if there are any validation warnings or errors.
+You can pass the `--strict` flag to make it fail if a scanned config needs migration.
+
 You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
 Please check out the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
