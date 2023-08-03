@@ -84,7 +84,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('return releases for plain text api directly exposing in renovate format', async () => {
+    it('return releases for plain text API directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
           {
@@ -117,7 +117,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('return releases for plain text api and trim the content', async () => {
+    it('return releases for plain text API and trim the content', async () => {
       const expected = {
         releases: [
           {
@@ -150,7 +150,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('return releases for plain text api when only returns a single version', async () => {
+    it('return releases for plain text API when only returns a single version', async () => {
       const expected = {
         releases: [
           {
@@ -174,7 +174,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('return null for plain text api if the body is not what is expected', async () => {
+    it('return null for plain text API if the body is not what is expected', async () => {
       const expected = {
         releases: [
           {
