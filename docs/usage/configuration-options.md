@@ -663,7 +663,7 @@ As this is a template it can be dynamically set. E.g. add the `packageName` as p
 ### format
 
 Defines which format the API is returning.
-At this moment, `json` & `plain` are supported, but more formats are planned for the future
+The API returns the `json` or `plain` format types.
 
 ### transformTemplates
 
