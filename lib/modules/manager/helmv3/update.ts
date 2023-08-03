@@ -14,6 +14,7 @@ export function bumpPackageVersion(
   );
   let newChartVersion: string | null;
   let bumpedContent = content;
+
   try {
     newChartVersion = semver.inc(currentValue, bumpVersion);
     if (!newChartVersion) {
