@@ -311,7 +311,7 @@
     "diff": "5.1.0",
     "emojibase-data": "15.0.0",
     "eslint": "8.45.0",
-    "eslint-config-prettier": "8.8.0",
+    "eslint-config-prettier": "8.9.0",
     "eslint-formatter-gha": "1.4.2",
     "eslint-import-resolver-typescript": "3.5.5",
     "eslint-plugin-import": "2.27.5",

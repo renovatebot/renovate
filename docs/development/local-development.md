@@ -30,7 +30,7 @@ corepack enable
 
 #### Nix
 
-To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and `corepack enable`.
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `corepack enable`.
 
 #### Windows
 
