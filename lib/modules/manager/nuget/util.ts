@@ -84,7 +84,7 @@ export async function getConfiguredRegistries(
   return registries;
 }
 
-export function findVersion(parsedXml: XmlDocument): XmlElement | undefined {
+export function findVersion(parsedXml: XmlDocument): XmlElement | null {
   for (const tag of ['Version', 'VersionPrefix']) {
     for (const l1Elem of parsedXml.childrenNamed('PropertyGroup')) {
       for (const l2Elem of l1Elem.childrenNamed(tag)) {
@@ -92,5 +92,5 @@ export function findVersion(parsedXml: XmlDocument): XmlElement | undefined {
       }
     }
   }
-  return undefined;
+  return null;
 }
