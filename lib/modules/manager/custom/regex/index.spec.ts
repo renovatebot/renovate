@@ -9,7 +9,7 @@ const ansibleYamlContent = Fixtures.get(`ansible.yml`);
 const exampleJsonContent = Fixtures.get(`example.json`);
 const exampleGitlabCiYml = Fixtures.get(`gitlab-ci.yml`);
 
-describe('modules/manager/regex/index', () => {
+describe('modules/manager/custom/regex/index', () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,
@@ -144,7 +144,7 @@ describe('modules/manager/regex/index', () => {
   });
 
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
-    jest.mock('../../../logger');
+    jest.mock('../../../../logger');
     const config = {
       matchStrings: [
         'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
