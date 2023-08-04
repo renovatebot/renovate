@@ -6,6 +6,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
+import { AsyncResult, Result } from '../../util/result';
 import { trimTrailingSlash } from '../../util/url';
 import datasources from './api';
 import {
@@ -26,7 +27,6 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types';
-import { AsyncResult, Result } from '../../util/result';
 
 export * from './types';
 export { isGetPkgReleasesConfig } from './common';
