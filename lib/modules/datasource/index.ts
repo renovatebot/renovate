@@ -345,7 +345,7 @@ export function getRawPkgReleases(
     return AsyncResult.err('no-package-name');
   }
 
-  return Result.wrapNullable(getRawReleases(config), 'no-result')
+  return Result.wrapNullable(getRawReleases(config), 'no-result' as const)
     .catch((e) => {
       if (e instanceof ExternalHostError) {
         e.hostType = config.datasource;
