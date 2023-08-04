@@ -1,10 +1,10 @@
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
 import { getManagerList } from '../../lib/modules/manager';
+import { getCustomManagerList } from '../../lib/modules/manager/custom';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
-import { getCustomManagerList } from '../../lib/modules/manager/custom';
 
 const options = getOptions();
 const managers = new Set([...getManagerList(), ...getCustomManagerList()]);
