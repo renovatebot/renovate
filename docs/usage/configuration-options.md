@@ -192,7 +192,7 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 
 <!-- prettier-ignore -->
 !!! note
-    Branch automerge ignores the normal schedule and only follows the [`automergeSchedule`](#automergeschedule).
+    Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
 
 <!-- prettier-ignore -->
 !!! warning "Negative reviews on GitHub block Renovate automerge"
