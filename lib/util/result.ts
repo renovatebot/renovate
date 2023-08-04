@@ -60,6 +60,8 @@ type RawValue<T> = Exclude<
   SafeParseReturnType<unknown, NonNullable<T>> | Promise<unknown>
 >;
 
+type Nullable<T> = T | null | undefined;
+
 /**
  * Class for representing a result that can fail.
  *
@@ -188,25 +190,25 @@ export class Result<T, E = Error> {
    *   ```
    */
   static wrapNullable<T, E = Error, NullableError = Error>(
-    callback: () => T,
+    callback: () => Nullable<T>,
     nullableError: NonNullable<NullableError>
   ): Result<T, E | NullableError>;
   static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
-    callback: () => T,
+    callback: () => Nullable<T>,
     nullError: NonNullable<NullError>,
     undefinedError: NonNullable<UndefinedError>
   ): Result<T, E | NullError | UndefinedError>;
   static wrapNullable<T, E = Error, NullableError = Error>(
-    promise: Promise<T>,
+    promise: Promise<Nullable<T>>,
     nullableError: NonNullable<NullableError>
   ): AsyncResult<T, E | NullableError>;
   static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
-    promise: Promise<T>,
+    promise: Promise<Nullable<T>>,
     nullError: NonNullable<NullError>,
     undefinedError: NonNullable<UndefinedError>
   ): AsyncResult<T, E | NullError | UndefinedError>;
   static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
-    input: (() => T) | Promise<T>,
+    input: (() => Nullable<T>) | Promise<Nullable<T>>,
     arg2: NonNullable<NullError>,
     arg3?: NonNullable<UndefinedError>
   ):
@@ -477,7 +479,7 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
   }
 
   static wrapNullable<T, E, NullError, UndefinedError>(
-    promise: Promise<T>,
+    promise: Promise<Nullable<T>>,
     nullError: NonNullable<NullError>,
     undefinedError: NonNullable<UndefinedError>
   ): AsyncResult<T, E | NullError | UndefinedError> {
