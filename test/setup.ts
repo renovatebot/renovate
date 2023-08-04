@@ -165,10 +165,9 @@ declare global {
     type SpyInstance<T, Y extends any[]> = JestSpyInstance<(...args: Y) => T>;
 
     // Extension point for jest matchers
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface Expect {}
     // Extension point for jest matchers
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R> {}
   }
 }

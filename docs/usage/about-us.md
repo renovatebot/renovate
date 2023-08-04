@@ -2,7 +2,7 @@
 
 Renovate was created by [Mend](https://www.mend.io/) staff and they continue to work on Renovate.
 
-More than 830 outside contributors helped improve Renovate.
+More than 850 outside contributors helped improve Renovate.
 
 ## Special thanks
 

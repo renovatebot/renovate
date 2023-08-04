@@ -192,7 +192,6 @@ export async function validateConfig(
         optionParents[key] !== parentName
       ) {
         // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -322,12 +321,14 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchRepositories',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -536,7 +537,7 @@ export async function validateConfig(
                 key === 'matchCurrentValue') &&
               // TODO: can be undefined ? #7154
               !rulesRe.test(parentPath!) && // Inside a packageRule
-              (parentPath || !isPreset) // top level in a preset
+              (is.string(parentPath) || !isPreset) // top level in a preset
             ) {
               errors.push({
                 topic: 'Configuration Error',
@@ -613,7 +614,12 @@ export async function validateConfig(
                 }
               }
             } else if (
-              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+              [
+                'customEnvVariables',
+                'migratePresets',
+                'productLinks',
+                'secrets',
+              ].includes(key)
             ) {
               const res = validatePlainObject(val);
               if (res !== true) {

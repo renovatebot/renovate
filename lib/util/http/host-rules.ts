@@ -38,7 +38,11 @@ export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
-  if (res.token || res.username || res.password) {
+  if (
+    is.nonEmptyString(res.token) ||
+    is.nonEmptyString(res.username) ||
+    is.nonEmptyString(res.password)
+  ) {
     // do not fallback if we already have auth infos
     return res;
   }
@@ -102,9 +106,9 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
-    options.headers?.authorization ||
-    options.password ||
-    options.token
+    is.nonEmptyString(options.headers?.authorization) ||
+    is.nonEmptyString(options.password) ||
+    is.nonEmptyString(options.token)
   ) {
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
