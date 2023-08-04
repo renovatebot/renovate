@@ -152,13 +152,18 @@ async function generateHash() {
       .map((file) => file.name);
 
     for (const manager of managers) {
-      const hash = await getManagerHash(manager);
+      const hash = await getManagerHash(
+        manager === 'custom' ? 'custom/regex' : manager
+      );
       hashes.push(hash);
     }
 
     //add manager hashes to hashMap {key->manager, value->hash}
     hashes = (await Promise.all(hashes)).map(
-      (hash, index) => `hashMap.set('${managers[index]}','${hash}');`
+      (hash, index) =>
+        `hashMap.set('${
+          managers[index] === 'custom' ? 'regex' : managers[index]
+        }','${hash}');`
     );
 
     //write hashMap to fingerprint.generated.ts
