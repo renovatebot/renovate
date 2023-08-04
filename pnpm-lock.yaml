@@ -69,8 +69,8 @@ importers:
         specifier: 1.3.1
         version: 1.3.1
       '@renovatebot/pep440':
-        specifier: 2.1.20
-        version: 2.1.20
+        specifier: 3.0.3
+        version: 3.0.3
       '@renovatebot/ruby-semver':
         specifier: 3.0.10
         version: 3.0.10
@@ -2875,9 +2875,9 @@ packages:
       - encoding
     dev: false
 
-  /@renovatebot/pep440@2.1.20:
-    resolution: {integrity: sha512-Z6SLxecPwPUbzdfMVenF04fogoB0LVmaBa4IMzc3s2yV+bbDQUQTFhsmMhqxFfK2iRCKky3vDHspNFQ+gdThMQ==}
-    engines: {node: ^14.15.0 || >=16.13.0, yarn: ^1.17.0}
+  /@renovatebot/pep440@3.0.3:
+    resolution: {integrity: sha512-YADhU06jhwomSXkRN40mrqkKTnGW6+Vg0vWZkADhrhYfHyhCc7dPY87gMt3VRvHHq0cFTP/LkKWXRlhWpznkQg==}
+    engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
   /@renovatebot/ruby-semver@3.0.10:
@@ -5487,6 +5487,7 @@ packages:
 
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
+    requiresBuild: true
 
   /emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
@@ -6922,6 +6923,7 @@ packages:
   /is-fullwidth-code-point@3.0.0:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==}
     engines: {node: '>=8'}
+    requiresBuild: true
 
   /is-generator-fn@2.1.0:
     resolution: {integrity: sha512-cTIB4yPYL/Grw0EaSzASzg6bBy9gqCofvWN8okThAYIxKJZC+udlRAmGbM0XLeniEJSs8uEgHPGuHSe1XsOLSQ==}
@@ -9635,6 +9637,7 @@ packages:
 
   /safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
+    requiresBuild: true
 
   /safe-json-stringify@1.2.0:
     resolution: {integrity: sha512-gH8eh2nZudPQO6TytOvbxnuhYBOvDBBLW52tz5q6X58lJcd/tkmqFR+5Z9adS8aJtURSXWThWy/xJtJwixErvg==}
@@ -10066,6 +10069,7 @@ packages:
 
   /string_decoder@1.3.0:
     resolution: {integrity: sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==}
+    requiresBuild: true
     dependencies:
       safe-buffer: 5.2.1
 
