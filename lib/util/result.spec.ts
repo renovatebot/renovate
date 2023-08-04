@@ -40,7 +40,10 @@ describe('util/result', () => {
       });
 
       it('wraps nullable callback', () => {
-        const res = Result.wrapNullable(() => 42, 'oops');
+        const res: Result<number, 'oops'> = Result.wrapNullable(
+          (): number | null => 42,
+          'oops'
+        );
         expect(res).toEqual(Result.ok(42));
       });
 
@@ -225,7 +228,10 @@ describe('util/result', () => {
       });
 
       it('wraps nullable promise', async () => {
-        const res = Result.wrapNullable(Promise.resolve(42), 'oops');
+        const res: AsyncResult<number, 'oops'> = Result.wrapNullable(
+          Promise.resolve<number | null>(42),
+          'oops'
+        );
         await expect(res).resolves.toEqual(Result.ok(42));
       });
 
