@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compress, decompress } from '../../../compress';
+import { hash } from '../../../hash';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
 import { RepoCacheRecord, RepoCacheV13 } from '../schema';
@@ -72,8 +72,8 @@ export abstract class RepoCacheBase implements RepoCache {
 
   async save(): Promise<void> {
     const jsonStr = safeStringify(this.data);
-    const hash = await hasha.async(jsonStr);
-    if (hash === this.oldHash) {
+    const hashedJsonStr = hash(jsonStr);
+    if (hashedJsonStr === this.oldHash) {
       return;
     }
 
@@ -88,7 +88,7 @@ export abstract class RepoCacheBase implements RepoCache {
       repository,
       fingerprint,
       payload,
-      hash,
+      hash: hashedJsonStr,
     });
   }
 
@@ -101,6 +101,6 @@ export abstract class RepoCacheBase implements RepoCache {
       return undefined;
     }
     const jsonStr = safeStringify(this.data);
-    return hasha(jsonStr) !== this.oldHash;
+    return hash(jsonStr) !== this.oldHash;
   }
 }

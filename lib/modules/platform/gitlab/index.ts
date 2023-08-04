@@ -201,7 +201,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
@@ -227,7 +227,7 @@ function getRepoUrl(
 
   if (
     gitUrl === 'endpoint' ||
-    process.env.GITLAB_IGNORE_REPO_URL ||
+    is.nonEmptyString(process.env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
@@ -637,6 +637,16 @@ async function tryPrAutomerge(
   }
 }
 
+async function approvePr(pr: number): Promise<void> {
+  try {
+    await gitlabApi.postJson(
+      `projects/${config.repository}/merge_requests/${pr}/approve`
+    );
+  } catch (err) {
+    logger.warn({ err }, 'GitLab: Error approving merge request');
+  }
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -672,6 +682,10 @@ export async function createPr({
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
+  }
+
+  if (platformOptions?.autoApprove) {
+    await approvePr(pr.iid);
   }
 
   await tryPrAutomerge(pr.iid, platformOptions);
@@ -732,6 +746,10 @@ export async function updatePr({
     `projects/${config.repository}/merge_requests/${iid}`,
     { body }
   );
+
+  if (platformOptions?.autoApprove) {
+    await approvePr(iid);
+  }
 
   await tryPrAutomerge(iid, platformOptions);
 }

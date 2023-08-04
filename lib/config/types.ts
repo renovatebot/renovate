@@ -12,6 +12,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
@@ -276,7 +277,7 @@ export interface RenovateConfig
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json';
+  format?: 'json' | 'plain';
   transformTemplates?: string[];
 }
 
@@ -338,11 +339,13 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  matchRepositories?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  excludeRepositories?: string[];
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -393,9 +396,6 @@ export interface RenovateOptionBase {
     | 'packageRules'
     | 'postUpgradeTasks'
     | 'regexManagers';
-
-  // used by tests
-  relatedOptions?: string[];
 
   stage?: RenovateConfigStage;
 
@@ -458,7 +458,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
-  default?: any | null;
+  default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
@@ -495,6 +495,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  repository?: string;
 }
 
 export interface ConfigMigration {

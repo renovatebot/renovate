@@ -610,6 +610,29 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    // automerge should respect only automergeSchedule
+    // mock a case where branchPr does not exist, pr-creation is off-schedule, and the branch is configured for automerge
+    it('automerges when there is no pr and, pr-creation is off-schedule', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        })
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      config.automerge = true;
+      config.automergeType = 'branch';
+      await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
     it('returns if branch automerged', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
