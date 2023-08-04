@@ -2,6 +2,7 @@ import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
 import type { ManagerApi } from './types';
 import * as manager from '.';
+import { join } from 'upath';
 
 jest.mock('../../util/fs');
 
@@ -54,7 +55,7 @@ describe('modules/manager/index', () => {
 
     const loadedMgr = {
       ...loadModules(__dirname, validate),
-      ...loadModules(__dirname + '/custom', validate),
+      ...loadModules(join(__dirname, 'custom'), validate),
     };
     delete loadedMgr['custom'];
     expect(Array.from(mgrs.keys())).toEqual(Object.keys(loadedMgr).sort());
