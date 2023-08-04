@@ -13,12 +13,6 @@ export class ManagersMatcher extends Matcher {
     if (is.undefined(manager) || !manager) {
       return false;
     }
-    // if matchManagers includes 'custom'  match all custom managers
-    if (manager.startsWith('custom.')) {
-      if (matchManagers.includes('custom')) {
-        return true;
-      }
-    }
     return matchManagers.includes(manager);
   }
 }

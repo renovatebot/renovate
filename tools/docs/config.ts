@@ -4,9 +4,10 @@ import { getManagerList } from '../../lib/modules/manager';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
+import { getCustomManagerList } from '../../lib/modules/manager/custom';
 
 const options = getOptions();
-const managers = new Set(getManagerList());
+const managers = new Set([...getManagerList(), ...getCustomManagerList()]);
 
 /**
  * Merge string arrays one by one

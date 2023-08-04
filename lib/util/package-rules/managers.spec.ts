@@ -4,7 +4,7 @@ describe('util/package-rules/managers', () => {
   const managersMatcher = new ManagersMatcher();
 
   describe('match', () => {
-    it('should match against custom manager when matchManager=custom', () => {
+    it('should not match against custom manager when matchManager=custom', () => {
       const result = managersMatcher.matches(
         {
           manager: 'custom.regex',
