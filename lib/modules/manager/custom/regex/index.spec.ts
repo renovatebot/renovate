@@ -144,7 +144,6 @@ describe('modules/manager/custom/regex/index', () => {
   });
 
   it('extracts and does not apply a registryUrlTemplate if the result is an invalid url', async () => {
-    jest.mock('../../../../logger');
     const config = {
       matchStrings: [
         'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
