@@ -1,6 +1,6 @@
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { Lazy } from '../../../util/lazy';
+import { Yaml } from '../../../util/schema-utils';
 import { PubspecLockSchema } from './schema';
 
 export function lazyParsePubspeckLock(
@@ -14,16 +14,11 @@ function parsePubspecLock(
   fileName: string,
   fileContent: string
 ): PubspecLockSchema | null {
-  try {
-    const data = load(fileContent, { json: true });
-    const res = PubspecLockSchema.safeParse(data);
-    if (res.success) {
-      return res.data;
-    } else {
-      logger.debug(res.error, `Error parsing ${fileName} file`);
-    }
-  } catch (err) {
-    logger.debug({ err }, `Error parsing ${fileName} file`);
+  const res = Yaml.pipe(PubspecLockSchema).safeParse(fileContent);
+  if (res.success) {
+    return res.data;
+  } else {
+    logger.debug(res.error, `Error parsing ${fileName} file`);
   }
   return null;
 }
