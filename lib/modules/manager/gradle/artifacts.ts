@@ -36,7 +36,10 @@ async function getUpdatedLockfiles(
   const status = await getRepoStatus();
 
   for (const modifiedFile of status.modified) {
-    if (isLockFile(modifiedFile)) {
+    if (
+      isLockFile(modifiedFile) ||
+      modifiedFile.endsWith('verification-metadata.xml')
+    ) {
       const newContent = await readLocalFile(modifiedFile, 'utf8');
       if (oldLockFileContentMap[modifiedFile] !== newContent) {
         res.push({
@@ -96,7 +99,10 @@ export async function updateArtifacts({
 
   const fileList = await scm.getFileList();
   const lockFiles = fileList.filter((file) => isLockFile(file));
-  if (!lockFiles.length) {
+  const verificationMetadataFile = fileList.find((fileName) =>
+    fileName.endsWith('verification-metadata.xml')
+  );
+  if (!lockFiles.length && !verificationMetadataFile) {
     logger.debug('No Gradle dependency lockfiles found - skipping update');
     return null;
   }
@@ -148,13 +154,28 @@ export async function updateArtifacts({
       .map(quote)
       .join(' ')}`;
 
+    if (verificationMetadataFile) {
+      const hashTypes: string[] = [];
+      const verificationMetadata = await getFiles([verificationMetadataFile]);
+      ['md5', 'sha1', 'sha256', 'sha512'].forEach((hashType) => {
+        if (
+          verificationMetadata[verificationMetadataFile]?.includes(
+            `<${hashType}`
+          )
+        ) {
+          hashTypes.push(hashType);
+        }
+      });
+      cmd += ` --write-verification-metadata ${hashTypes.join(',')}`;
+    }
+
     if (
       config.isLockFileMaintenance === true ||
       !updatedDeps.length ||
       isGcvPropsFile(packageFileName)
     ) {
       cmd += ' --write-locks';
-    } else {
+    } else if (lockFiles.length) {
       const updatedDepNames = updatedDeps
         .map(({ depName, packageName }) => packageName ?? depName)
         .filter(is.nonEmptyStringAndNotWhitespace);
