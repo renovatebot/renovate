@@ -55,6 +55,8 @@ export async function checkOnboardingBranch(
   // TODO #7154
   const branchList = [onboardingBranch!];
   if (onboardingPr) {
+    logger.debug('Onboarding PR already exists');
+
     isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
     if (!isModified) {
@@ -76,7 +78,6 @@ export async function checkOnboardingBranch(
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
-    logger.debug('Onboarding PR already exists');
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
