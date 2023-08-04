@@ -26,6 +26,7 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types';
+import { AsyncResult, Result } from '../../util/result';
 
 export * from './types';
 export { isGetPkgReleasesConfig } from './common';
@@ -327,42 +328,49 @@ function getRawReleases(
   return promisedRes;
 }
 
-export async function getPkgReleases(
+export function getRawPkgReleases(
   config: GetPkgReleasesConfig
-): Promise<ReleaseResult | null> {
+): AsyncResult<
+  ReleaseResult,
+  Error | 'no-datasource' | 'no-package-name' | 'no-result'
+> {
   if (!config.datasource) {
     logger.warn('No datasource found');
-    return null;
+    return AsyncResult.err('no-datasource');
   }
+
   const packageName = config.packageName;
   if (!packageName) {
     logger.error({ config }, 'Datasource getReleases without packageName');
-    return null;
-  }
-  let res: ReleaseResult | null = null;
-  try {
-    res = clone(
-      await getRawReleases({
-        ...config,
-        packageName,
-      })
-    );
-  } catch (e) /* istanbul ignore next */ {
-    if (e instanceof ExternalHostError) {
-      e.hostType = config.datasource;
-      e.packageName = packageName;
-    }
-    throw e;
-  }
-  if (!res) {
-    return res;
+    return AsyncResult.err('no-package-name');
   }
 
-  applyExtractVersion(config, res);
-  filterValidVersions(config, res);
-  sortAndRemoveDuplicates(config, res);
-  applyConstraintsFiltering(config, res);
-  return res;
+  return Result.wrapNullable(getRawReleases(config), 'no-result')
+    .catch((e) => {
+      if (e instanceof ExternalHostError) {
+        e.hostType = config.datasource;
+        e.packageName = packageName;
+      }
+      return Result.err(e);
+    })
+    .transform(clone);
+}
+
+export async function getPkgReleases(
+  config: GetPkgReleasesConfig
+): Promise<ReleaseResult | null> {
+  const { val = null, err } = await getRawPkgReleases(config)
+    .transform((res) => applyExtractVersion(config, res))
+    .transform((res) => filterValidVersions(config, res))
+    .transform((res) => sortAndRemoveDuplicates(config, res))
+    .transform((res) => applyConstraintsFiltering(config, res))
+    .unwrap();
+
+  if (err instanceof Error) {
+    throw err;
+  }
+
+  return val;
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {
