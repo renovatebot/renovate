@@ -35,6 +35,11 @@ If set to "false" (string), Renovate will remove any existing `package-lock.json
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
 
+## `RENOVATE_X_DOCKER_MAX_PAGES`
+
+If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
+This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.

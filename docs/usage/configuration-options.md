@@ -191,6 +191,10 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 ```
 
 <!-- prettier-ignore -->
+!!! note
+    Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
+
+<!-- prettier-ignore -->
 !!! warning "Negative reviews on GitHub block Renovate automerge"
     Renovate won't automerge on GitHub if a PR has a negative review.
 
