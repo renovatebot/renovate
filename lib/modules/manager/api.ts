@@ -70,7 +70,7 @@ import * as preCommit from './pre-commit';
 import * as pub from './pub';
 import * as puppet from './puppet';
 import * as pyenv from './pyenv';
-import * as regex from './regex';
+import * as regex from './custom/regex';
 import * as rubyVersion from './ruby-version';
 import * as sbt from './sbt';
 import * as setupCfg from './setup-cfg';

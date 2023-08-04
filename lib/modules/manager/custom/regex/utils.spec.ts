@@ -1,4 +1,4 @@
-import { regEx } from '../../../util/regex';
+import { regEx } from '../../../../util/regex';
 import * as utils from './utils';
 
 describe('modules/manager/regex/utils', () => {
