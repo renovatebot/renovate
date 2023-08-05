@@ -89,11 +89,10 @@ export function generateFingerprintConfig(
       const managerConfig = getManagerConfig(config, manager);
       managerExtractConfigs.push({ ...managerConfig, fileList: [] });
     }
-    fingerprintManagerList.add(manager);
   }
 
   return {
-    managerList: fingerprintManagerList,
+    managerList,
     managers: managerExtractConfigs.map(getFilteredManagerConfig),
   };
 }
