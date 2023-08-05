@@ -1,7 +1,6 @@
 import { logger } from '../../../logger';
 import { Lazy } from '../../../util/lazy';
-import { Yaml } from '../../../util/schema-utils';
-import { PubspecLockSchema } from './schema';
+import { PubspecLockSchema, PubspecLockYaml } from './schema';
 
 export function lazyParsePubspeckLock(
   fileName: string,
@@ -14,7 +13,7 @@ function parsePubspecLock(
   fileName: string,
   fileContent: string
 ): PubspecLockSchema | null {
-  const res = Yaml.pipe(PubspecLockSchema).safeParse(fileContent);
+  const res = PubspecLockYaml.safeParse(fileContent);
   if (res.success) {
     return res.data;
   } else {

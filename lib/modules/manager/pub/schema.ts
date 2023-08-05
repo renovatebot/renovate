@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Yaml } from '../../../util/schema-utils';
 
 export const PubspecLockSchema = z.object({
   packages: z.record(z.any()),
@@ -9,3 +10,5 @@ export const PubspecLockSchema = z.object({
 });
 
 export type PubspecLockSchema = z.infer<typeof PubspecLockSchema>;
+
+export const PubspecLockYaml = Yaml.pipe(PubspecLockSchema);
