@@ -32,9 +32,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
 
     const fingerprintConfig = generateFingerprintConfig(config);
-    expect(fingerprintConfig.managerList).toEqual(
-      new Set(['npm', 'custom.regex'])
-    );
+    expect(fingerprintConfig.managerList).toEqual(new Set(['npm', 'regex']));
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
@@ -52,9 +50,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       skipInstalls: null,
     });
     expect(
-      fingerprintConfig.managers.find(
-        (manager) => manager.manager === 'custom.regex'
-      )
+      fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
     ).toEqual({
       fileMatch: ['js', '***$}{]]['],
       ignorePaths: ['ignore-path-1'],
@@ -64,7 +60,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       datasourceTemplate: 'maven',
       versioningTemplate: 'gradle',
       enabled: true,
-      manager: 'custom.regex',
+      manager: 'regex',
       npmrc: null,
       npmrcMerge: false,
       registryAliases: {
@@ -82,10 +78,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
     const fingerprintConfig = generateFingerprintConfig(config);
     expect(fingerprintConfig.managerList).toEqual(
-      new Set([
-        ...getManagerList(),
-        ...getCustomManagerList().map((m) => `custom.${m}`),
-      ])
+      new Set([...getManagerList(), ...getCustomManagerList()])
     );
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
@@ -121,9 +114,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       skipInstalls: null,
     });
     expect(
-      fingerprintConfig.managers.find(
-        (manager) => manager.manager === 'custom.regex'
-      )
+      fingerprintConfig.managers.find((manager) => manager.manager === 'regex')
     ).toBeUndefined();
   });
 });

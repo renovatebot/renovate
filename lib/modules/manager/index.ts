@@ -1,6 +1,6 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
-import * as CustomManager from './custom';
+import customManagers from './custom/api';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
@@ -17,10 +17,7 @@ export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
 ): ManagerApi[T] | undefined {
-  if (manager?.startsWith('custom.')) {
-    return CustomManager.get(manager, name);
-  }
-  return managers.get(manager)?.[name];
+  return managers.get(manager)?.[name] ?? customManagers.get(manager)?.[name];
 }
 export const getManagerList = (): string[] => managerList;
 export const getManagers = (): Map<string, ManagerApi> => managers;
@@ -64,16 +61,11 @@ export function extractPackageFile(
   fileName: string,
   config: ExtractConfig
 ): Result<PackageFileContent | null> {
-  if (!managers.has(manager)) {
-    if (manager.startsWith('custom.')) {
-      return CustomManager.extractPackageFile(content, fileName, {
-        ...config,
-        customType: manager.replace('custom.', ''),
-      });
-    }
+  const m = managers.get(manager)! ?? customManagers.get(manager)!;
+  if (!m) {
     return null;
   }
-  const m = managers.get(manager)!;
+
   return m.extractPackageFile
     ? m.extractPackageFile(content, fileName, config)
     : null;

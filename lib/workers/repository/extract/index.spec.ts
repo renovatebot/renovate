@@ -39,7 +39,7 @@ describe('workers/repository/extract/index', () => {
       ]);
       const res = await extractAllDependencies(config);
       expect(res).toMatchObject({
-        packageFiles: { npm: [{}], 'custom.regex': [{}] },
+        packageFiles: { npm: [{}], regex: [{}] },
       });
     });
 
@@ -62,7 +62,7 @@ describe('workers/repository/extract/index', () => {
       ]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
-      expect(Object.keys(res.packageFiles)).toContain('custom.regex');
+      expect(Object.keys(res.packageFiles)).toContain('regex');
     });
   });
 });

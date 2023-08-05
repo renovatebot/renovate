@@ -94,7 +94,7 @@ sidebar_label: ${displayName}
     }
     md += '\n\n';
 
-    if (!customManagersList.includes(manager) && manager !== 'custom') {
+    if (!customManagersList.includes(manager)) {
       const nameWithUrl = getNameWithUrl(manager, definition);
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {

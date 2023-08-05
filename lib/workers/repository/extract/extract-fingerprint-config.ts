@@ -38,7 +38,7 @@ function getFilteredManagerConfig(
   config: WorkerExtractConfig
 ): WorkerExtractConfig {
   return {
-    ...(config.manager === 'custom.regex' && getRegexManagerFields(config)),
+    ...(isCustomManager(config.manager) && getRegexManagerFields(config)),
     manager: config.manager,
     fileMatch: config.fileMatch,
     npmrc: config.npmrc,
@@ -56,13 +56,14 @@ export function generateFingerprintConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
-  const customManagerList = getCustomManagerList();
   let managerList: Set<string>;
-  const { enabledManagers } = config;
+  const enabledManagers = config.enabledManagers
+    ?.map((m) => m.replace('custom.', ''))
+    .filter(Boolean);
   if (enabledManagers?.length) {
     managerList = new Set(enabledManagers);
   } else {
-    managerList = new Set(getManagerList());
+    managerList = new Set([...getManagerList(), ...getCustomManagerList()]);
   }
 
   const fingerprintManagerList: Set<string> = new Set();
@@ -82,12 +83,7 @@ export function generateFingerprintConfig(
   };
 
   for (const manager of managerList) {
-    if (manager === 'custom') {
-      for (const customManager of customManagerList) {
-        fingerprintManagerList.add(`custom.${customManager}`);
-        handleCustomManager(`custom.${customManager}`, config);
-      }
-    } else if (manager.startsWith('custom.')) {
+    if (isCustomManager(manager)) {
       handleCustomManager(manager, config);
     } else {
       const managerConfig = getManagerConfig(config, manager);
@@ -100,4 +96,8 @@ export function generateFingerprintConfig(
     managerList: fingerprintManagerList,
     managers: managerExtractConfigs.map(getFilteredManagerConfig),
   };
+}
+
+function isCustomManager(manager: string): Boolean {
+  return !!getCustomManagerList().includes(manager);
 }

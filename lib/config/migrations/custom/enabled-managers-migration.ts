@@ -6,16 +6,9 @@ export class EnabledManagersMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.array(value)) {
-      const newValue = value.map((manager) => {
-        switch (manager) {
-          case 'yarn':
-            return 'npm';
-          case 'regex':
-            return 'custom.regex';
-          default:
-            return manager;
-        }
-      });
+      const newValue = value.map((manager) =>
+        manager === 'yarn' ? 'npm' : manager
+      );
       this.rewrite(newValue);
     }
   }

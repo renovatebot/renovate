@@ -9,27 +9,24 @@ import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
+function isCustomManager(manager: string): Boolean {
+  return !!getCustomManagerList().includes(manager);
+}
+
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
-  let managerList = getManagerList();
-  const customManagerList = getCustomManagerList();
-  const { enabledManagers } = config;
+  let managerList = [...getManagerList(), ...getCustomManagerList()];
+  // convert custom.regex -> regex
+  const enabledManagers = config.enabledManagers
+    ?.map((m) => m.replace('custom.', ''))
+    .filter(Boolean);
+
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
     managerList = managerList.filter((manager) =>
       enabledManagers.includes(manager)
     );
-
-    // handle custom managers
-    const enabledCustomMgrs = enabledManagers.filter((mgr) =>
-      mgr.startsWith('custom.')
-    );
-    for (const customMgr of enabledCustomMgrs) {
-      if (customManagerList.includes(customMgr.replace('custom.', ''))) {
-        managerList.push(customMgr);
-      }
-    }
   }
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
@@ -54,11 +51,7 @@ export async function extractAllDependencies(
   };
 
   for (const manager of managerList) {
-    if (manager === 'custom') {
-      for (const customManager of customManagerList) {
-        handleCustomManager(`custom.${customManager}`, config);
-      }
-    } else if (manager.startsWith('custom.')) {
+    if (isCustomManager(manager)) {
       handleCustomManager(manager, config);
     } else {
       const managerConfig = getManagerConfig(config, manager);

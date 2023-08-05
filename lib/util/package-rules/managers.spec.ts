@@ -4,22 +4,10 @@ describe('util/package-rules/managers', () => {
   const managersMatcher = new ManagersMatcher();
 
   describe('match', () => {
-    it('should not match against custom manager when matchManager=custom', () => {
-      const result = managersMatcher.matches(
-        {
-          manager: 'custom.regex',
-        },
-        {
-          matchManagers: ['custom'],
-        }
-      );
-      expect(result).toBeFalse();
-    });
-
     it('should match custom managers separately', () => {
       const result = managersMatcher.matches(
         {
-          manager: 'custom.regex',
+          manager: 'regex',
         },
         {
           matchManagers: ['custom.regex'],
@@ -46,7 +34,7 @@ describe('util/package-rules/managers', () => {
           manager: 'npm',
         },
         {
-          matchManagers: ['custom'],
+          matchManagers: ['docker'],
         }
       );
       expect(result).toBeFalse();

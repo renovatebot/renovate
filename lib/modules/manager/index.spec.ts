@@ -30,7 +30,7 @@ describe('modules/manager/index', () => {
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
-      expect(manager.get('custom.regex', 'extractPackageFile')).not.toBeNull();
+      expect(manager.get('regex', 'extractPackageFile')).not.toBeNull();
     });
   });
 
@@ -58,9 +58,10 @@ describe('modules/manager/index', () => {
 
     const loadedMgr = loadModules(__dirname, validate);
     const loadedCustomMgr = loadModules(join(__dirname, 'custom'), validate);
+    delete loadedMgr['custom']; // remove custom from here as it is just a wrapper and not an actual manager
 
-    expect(Array.from([...mgrs.keys(), ...customMgrs.keys()])).toEqual(
-      Object.keys({ ...loadedMgr, ...loadedCustomMgr })
+    expect(Array.from([...mgrs.keys(), ...customMgrs.keys()]).sort()).toEqual(
+      Object.keys({ ...loadedMgr, ...loadedCustomMgr }).sort()
     );
 
     for (const name of mgrs.keys()) {
@@ -126,7 +127,7 @@ describe('modules/manager/index', () => {
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
       expect(
-        manager.extractPackageFile('custom.dummy', '', 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {})
       ).not.toBeNull();
     });
 

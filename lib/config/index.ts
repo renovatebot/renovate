@@ -25,10 +25,7 @@ export function getManagerConfig(
     managerConfig.categories = categories;
   }
   // TODO: fix types #7154
-  managerConfig = mergeChildConfig(
-    managerConfig,
-    config[manager.replace('custom.', '')] as any
-  );
+  managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
   for (const i of [...getManagerList(), ...getCustomManagerList()]) {
     delete managerConfig[i];
   }
