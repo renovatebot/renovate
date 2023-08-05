@@ -21,8 +21,6 @@ const customManagersList = getCustomManagerList();
 function getTitle(manager: string, displayName: string): string {
   if (customManagersList.includes(manager)) {
     return `Custom Manager Support using ${manager}`;
-  } else if (manager === 'custom') {
-    return 'Custom Managers';
   }
   return `Automated Dependency Updates for ${displayName}`;
 }
@@ -144,7 +142,7 @@ sidebar_label: ${displayName}
         customManagersList.includes(manager) ? 'custom/' : '' + manager
       }/readme.md`
     );
-    if (!customManagersList.includes(manager) && manager !== 'custom') {
+    if (!customManagersList.includes(manager)) {
       md += '\n## Additional Information\n\n';
     }
     md += managerReadmeContent;
