@@ -11,7 +11,7 @@ import type {
   Result,
 } from './types';
 export { hashMap } from './fingerprint.generated';
-const managerList = Array.from(managers.keys()); // does not include custo, managers
+const managerList = Array.from(managers.keys()); // does not include custom managers
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
