@@ -1,4 +1,4 @@
-import { SafeParseReturnType, ZodError } from 'zod';
+import { SafeParseReturnType, ZodError, ZodType, ZodTypeDef } from 'zod';
 import { logger } from '../logger';
 
 type Val = NonNullable<unknown>;
@@ -53,6 +53,14 @@ function fromZodResult<ZodInput, ZodOutput extends Val>(
 ): Result<ZodOutput, ZodError<ZodInput>> {
   return input.success ? Result.ok(input.data) : Result.err(input.error);
 }
+
+type SchemaParseFn<T extends Val, Input = any> = (
+  input: unknown
+) => Result<T, ZodError<Input>>;
+
+type SchemaAsyncParseFn<T extends Val, Input = any> = (
+  input: unknown
+) => AsyncResult<T, ZodError<Input>>;
 
 /**
  * All non-nullable values that also are not Promises nor Zod results.
@@ -269,6 +277,34 @@ export class Result<T extends Val, E extends Val = Error> {
     } catch (error) {
       return Result.err(error);
     }
+  }
+
+  /**
+   * Wraps a Zod schema and returns a parse function that returns a `Result`.
+   */
+  static wrapSchema<
+    T extends Val,
+    Schema extends ZodType<T, ZodTypeDef, Input>,
+    Input = any
+  >(schema: Schema): SchemaParseFn<T, Input> {
+    return (input) => {
+      const result = schema.safeParse(input);
+      return fromZodResult(result);
+    };
+  }
+
+  /**
+   * Wraps a Zod schema and returns a parse function that returns an `AsyncResult`.
+   */
+  static wrapSchemaAsync<
+    T extends Val,
+    Schema extends ZodType<T, ZodTypeDef, Input>,
+    Input = any
+  >(schema: Schema): SchemaAsyncParseFn<T, Input> {
+    return (input) => {
+      const result = schema.safeParseAsync(input);
+      return AsyncResult.wrap(result);
+    };
   }
 
   /**

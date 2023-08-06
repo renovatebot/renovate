@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { ZodError, z } from 'zod';
 import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
 
@@ -83,6 +83,13 @@ describe('util/result', () => {
             ],
           })
         );
+      });
+
+      it('wraps Zod schema', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const parse = Result.wrapSchema(schema);
+        expect(parse('foo')).toEqual(Result.ok('FOO'));
+        expect(parse(42)).toMatchObject(Result.err(expect.any(ZodError)));
       });
     });
 
@@ -258,6 +265,17 @@ describe('util/result', () => {
       it('handles rejected nullable promise', async () => {
         const res = Result.wrapNullable(Promise.reject('oops'), 'nullable');
         await expect(res).resolves.toEqual(Result.err('oops'));
+      });
+
+      it('wraps Zod async schema', async () => {
+        const schema = z
+          .string()
+          .transform((x) => Promise.resolve(x.toUpperCase()));
+        const parse = Result.wrapSchemaAsync(schema);
+        await expect(parse('foo')).resolves.toEqual(Result.ok('FOO'));
+        await expect(parse(42)).resolves.toMatchObject(
+          Result.err(expect.any(ZodError))
+        );
       });
     });
 
