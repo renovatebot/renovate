@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { parsePubspecLock } from './utils';
 
 describe('modules/manager/pub/utils', () => {
-  describe('lazyParsePubspeckLock', () => {
+  describe('parsePubspeckLock', () => {
     const fileName = 'pubspec.lock';
 
     it('load and parse successfully', () => {
