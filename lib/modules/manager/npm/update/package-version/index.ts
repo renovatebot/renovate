@@ -3,10 +3,18 @@ import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import type { BumpPackageVersionResult } from '../../../types';
 
+type MirrorBumpVersion = `mirror:${string}`;
+
+function isMirrorBumpVersion(
+  bumpVersion: string
+): bumpVersion is MirrorBumpVersion {
+  return bumpVersion.startsWith('mirror:');
+}
+
 export function bumpPackageVersion(
   content: string,
   currentValue: string,
-  bumpVersion: ReleaseType
+  bumpVersion: ReleaseType | `mirror:${string}`
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
@@ -16,7 +24,7 @@ export function bumpPackageVersion(
   let newPjVersion: string | null;
   let bumpedContent = content;
   try {
-    if (bumpVersion.startsWith('mirror:')) {
+    if (isMirrorBumpVersion(bumpVersion)) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
       newPjVersion =
