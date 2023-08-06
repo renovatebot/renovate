@@ -28,7 +28,8 @@ describe('modules/manager/index', () => {
 
   describe('get()', () => {
     it('gets something', () => {
-      expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
+      expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull(); // gets built-in manager
+      expect(manager.get('regex', 'extractPackageFile')).not.toBeNull(); // gets custom manager
     });
   });
 
@@ -54,8 +55,8 @@ describe('modules/manager/index', () => {
     const mgrs = manager.getManagers();
 
     const loadedMgr = {
-      ...loadModules(__dirname, validate),
-      ...loadModules(join(__dirname, 'custom'), validate),
+      ...loadModules(__dirname, validate), // validate built-in managers
+      ...loadModules(join(__dirname, 'custom'), validate), // validate custom managers
     };
     delete loadedMgr['custom'];
     expect(Array.from(mgrs.keys())).toEqual(Object.keys(loadedMgr).sort());
