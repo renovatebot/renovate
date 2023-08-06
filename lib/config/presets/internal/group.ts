@@ -3,7 +3,7 @@ import * as monorepos from './monorepo';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
-/* eslint sort-keys: ['error', 'asc', {caseSensitive: false, natural: true}] */
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const staticGroups = {
   all: {
@@ -297,7 +297,7 @@ const staticGroups = {
   },
   nodeJs: {
     description:
-      'Group anything that looks like Node.js together so that it's updated together.',
+      "Group anything that looks like Node.js together so that it's updated together.",
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
