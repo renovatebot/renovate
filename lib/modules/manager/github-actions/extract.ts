@@ -10,14 +10,14 @@ import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { Workflow } from './types';
 
-const dockerActionRegex = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
-const actionRegex = regEx(
+const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
+const actionRe = regEx(
   /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?@?(?<tag>v?\d+(?:\.\d+(?:\.\d+)?)?))?)/
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
-const shaRegex = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
-const shaShortRegex = regEx(/^[a-f0-9]{6,7}$/);
+const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
+const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
 
 function extractWithRegex(content: string): PackageDependency[] {
   logger.trace('github-actions.extractWithRegex()');
@@ -27,7 +27,7 @@ function extractWithRegex(content: string): PackageDependency[] {
       continue;
     }
 
-    const dockerMatch = dockerActionRegex.exec(line);
+    const dockerMatch = dockerActionRe.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
@@ -36,7 +36,7 @@ function extractWithRegex(content: string): PackageDependency[] {
       continue;
     }
 
-    const tagMatch = actionRegex.exec(line);
+    const tagMatch = actionRe.exec(line);
     if (tagMatch?.groups) {
       const {
         depName,
@@ -61,10 +61,10 @@ function extractWithRegex(content: string): PackageDependency[] {
         replaceString,
         autoReplaceStringTemplate: `${quotes}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
       };
-      if (shaRegex.test(currentValue)) {
+      if (shaRe.test(currentValue)) {
         dep.currentValue = tag;
         dep.currentDigest = currentValue;
-      } else if (shaShortRegex.test(currentValue)) {
+      } else if (shaShortRe.test(currentValue)) {
         dep.currentValue = tag;
         dep.currentDigestShort = currentValue;
       } else {
