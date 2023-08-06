@@ -1,29 +1,30 @@
-import { Fixtures } from '../../../../test/fixtures';
-import { lazyParsePubspeckLock } from './utils';
+import { codeBlock } from 'common-tags';
+import { parsePubspecLock } from './utils';
 
 describe('modules/manager/pub/utils', () => {
   describe('lazyParsePubspeckLock', () => {
     const fileName = 'pubspec.lock';
-    const pubspecLock = Fixtures.get('pubspec.1.lock');
 
     it('load and parse successfully', () => {
-      const actual = lazyParsePubspeckLock(fileName, pubspecLock);
-      expect(actual.getValue()).toMatchObject({
+      const pubspecLock = codeBlock`
+        sdks:
+          dart: ">=3.0.0 <4.0.0"
+          flutter: ">=3.10.0"
+      `;
+      const actual = parsePubspecLock(fileName, pubspecLock);
+      expect(actual).toMatchObject({
         sdks: { dart: '>=3.0.0 <4.0.0', flutter: '>=3.10.0' },
       });
     });
 
     it('invalid yaml', () => {
-      const actual = lazyParsePubspeckLock(fileName, 'clearly-invalid');
-      expect(actual.getValue()).toBeNull();
+      const actual = parsePubspecLock(fileName, 'clearly-invalid');
+      expect(actual).toBeNull();
     });
 
     it('invalid schema', () => {
-      const actual = lazyParsePubspeckLock(
-        fileName,
-        'clearly:\n\tinvalid: lock'
-      );
-      expect(actual.getValue()).toBeNull();
+      const actual = parsePubspecLock(fileName, 'clearly:\n\tinvalid: lock');
+      expect(actual).toBeNull();
     });
   });
 });

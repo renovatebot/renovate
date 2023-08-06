@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { Yaml } from '../../../util/schema-utils';
 
 export const PubspecLockSchema = z.object({
-  packages: z.record(z.any()),
   sdks: z.object({
     dart: z.string(),
     flutter: z.string().optional(),

@@ -10,7 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { lazyParsePubspeckLock } from './utils';
+import { parsePubspecLock } from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -52,14 +52,15 @@ export async function updateArtifacts({
       );
     }
 
-    const oldLazyPubspecLock = lazyParsePubspeckLock(
-      lockFileName,
-      oldLockFileContent
-    );
-    const constraint = isFlutter
-      ? config.constraints?.flutter ??
-        oldLazyPubspecLock.getValue()?.sdks.flutter
-      : config.constraints?.dart ?? oldLazyPubspecLock.getValue()?.sdks.dart;
+    let constraint = config.constraints?.[toolName];
+    if (!constraint) {
+      const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
+      const pubspecLockSdks = pubspecLock?.sdks;
+      if (pubspecLockSdks) {
+        constraint = isFlutter ? pubspecLockSdks.flutter : pubspecLockSdks.dart;
+      }
+    }
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},

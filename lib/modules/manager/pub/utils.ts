@@ -1,15 +1,7 @@
 import { logger } from '../../../logger';
-import { Lazy } from '../../../util/lazy';
 import { PubspecLockSchema, PubspecLockYaml } from './schema';
 
-export function lazyParsePubspeckLock(
-  fileName: string,
-  fileContent: string
-): Lazy<PubspecLockSchema | null> {
-  return new Lazy(() => parsePubspecLock(fileName, fileContent));
-}
-
-function parsePubspecLock(
+export function parsePubspecLock(
   fileName: string,
   fileContent: string
 ): PubspecLockSchema | null {
@@ -17,7 +9,10 @@ function parsePubspecLock(
   if (res.success) {
     return res.data;
   } else {
-    logger.debug(res.error, `Error parsing ${fileName} file`);
+    logger.debug(
+      { err: res.error, fileName },
+      `Error parsing pubspec lockfile.`
+    );
   }
   return null;
 }

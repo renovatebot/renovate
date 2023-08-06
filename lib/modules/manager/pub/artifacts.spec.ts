@@ -1,6 +1,5 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -18,8 +17,8 @@ jest.mock('../../datasource');
 process.env.CONTAINERBASE = 'true';
 
 const lockFile = 'pubspec.lock';
-const oldLockFileContent = Fixtures.get('pubspec.1.lock');
-const newLockFileContent = Fixtures.get('pubspec.2.lock');
+const oldLockFileContent = 'Old pubspec.lock';
+const newLockFileContent = 'New pubspec.lock';
 const depName = 'depName';
 
 const datasource = mocked(_datasource);
