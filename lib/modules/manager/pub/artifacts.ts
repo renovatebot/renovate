@@ -55,10 +55,7 @@ export async function updateArtifacts({
     let constraint = config.constraints?.[toolName];
     if (!constraint) {
       const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
-      const pubspecLockSdks = pubspecLock?.sdks;
-      if (pubspecLockSdks) {
-        constraint = isFlutter ? pubspecLockSdks.flutter : pubspecLockSdks.dart;
-      }
+      constraint = pubspecLock?.sdks[toolName];
     }
 
     const execOptions: ExecOptions = {
