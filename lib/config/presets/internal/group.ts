@@ -3,7 +3,7 @@ import * as monorepos from './monorepo';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+/* eslint sort-keys: ['error', 'asc', {caseSensitive: false, natural: true}] */
 
 const staticGroups = {
   all: {
@@ -297,7 +297,7 @@ const staticGroups = {
   },
   nodeJs: {
     description:
-      "Group anything that looks like Node.js together so that it's updated together.",
+      'Group anything that looks like Node.js together so that it's updated together.',
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
@@ -335,6 +335,46 @@ const staticGroups = {
         groupName: 'postcss packages',
       },
     ],
+  },
+  pulumi: {
+    description: 'Group Pulumi packages together.',
+    packageRules: [
+      {
+        groupName: 'Pulumi Node',
+        groupSlug: 'pulumi-node',
+        description: 'Group Pulumi Node.JS packages together.',
+        matchPackagePrefixes: ['@pulumi/'],
+        matchDatasources: ['npm'],
+      },
+      {
+        groupName: 'Pulumi Python',
+        groupSlug: 'pulumi-node',
+        description: 'Group Pulumi Python packages together.',
+        matchPackagePrefixes: ['pulumi-'],
+        matchDatasources: ['pypi'],
+      },
+      {
+        groupName: 'Pulumi Go',
+        groupSlug: 'pulumi-go',
+        description: 'Group Pulumi Go packages together.',
+        matchPackagePrefixes: ['github.com/pulumi/'],
+        matchDatasources: ['go'],
+      },
+      {
+        groupName: 'Pulumi Java',
+        groupSlug: 'pulumi-java',
+        description: 'Group Pulumi Java packages together.',
+        matchPackagePrefixes: ['com.pulumi'],
+        matchDatasources: ['maven'],
+      },
+      {
+        groupName: 'Pulumi .NET',
+        groupSlug: 'pulumi-dotnet',
+        description: 'Group Pulumi .NET packages together.',
+        matchPackagePrefixes: ['Pulumi'],
+        matchDatasources: ['nuget'],
+      }
+    ]
   },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
