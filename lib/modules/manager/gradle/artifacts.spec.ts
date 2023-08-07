@@ -86,6 +86,8 @@ describe('modules/manager/gradle/artifacts', () => {
       } else if (fileName === 'gradle/wrapper/gradle-wrapper.properties') {
         content =
           'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.2-bin.zip';
+      } else if (fileName === 'gradle/verification-metadata.xml') {
+        content = '<sha256 value="hash" origin="test data"/>';
       }
 
       return Promise.resolve(content);
@@ -538,6 +540,114 @@ describe('modules/manager/gradle/artifacts', () => {
       { cmd: 'install-tool java 11.0.1' },
       {
         cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      },
+    ]);
+  });
+
+  it('updates verification metadata file', async () => {
+    const execSnapshots = mockExecAll();
+    scm.getFileList.mockResolvedValue([
+      'gradlew',
+      'build.gradle',
+      'gradle/wrapper/gradle-wrapper.properties',
+      'gradle/verification-metadata.xml',
+    ]);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+      })
+    );
+
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        { depName: 'org.junit.jupiter:junit-jupiter-api' },
+        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle/verification-metadata.xml',
+          contents: '<sha256 value="hash" origin="test data"/>',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './gradlew --console=plain -q properties',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+      {
+        cmd: './gradlew --console=plain -q :dependencies --write-verification-metadata sha256',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      },
+    ]);
+  });
+
+  it('updates verification metadata and lock file', async () => {
+    const execSnapshots = mockExecAll();
+    scm.getFileList.mockResolvedValue([
+      'gradlew',
+      'build.gradle',
+      'gradle.lockfile',
+      'gradle/wrapper/gradle-wrapper.properties',
+      'gradle/verification-metadata.xml',
+    ]);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['build.gradle', 'gradle.lockfile', 'gradle/verification-metadata.xml'],
+      })
+    );
+
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        { depName: 'org.junit.jupiter:junit-jupiter-api' },
+        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle/verification-metadata.xml',
+          contents: '<sha256 value="hash" origin="test data"/>',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './gradlew --console=plain -q properties',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+      {
+        cmd: './gradlew --console=plain -q :dependencies --write-verification-metadata sha256 --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
         options: {
           cwd: '/tmp/github/some/repo',
           stdio: ['pipe', 'ignore', 'pipe'],
