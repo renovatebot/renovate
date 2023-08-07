@@ -133,7 +133,7 @@ export async function updateArtifacts({
     const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
-    let cmd = `${gradlewName} --console=plain -q`;
+    const baseCmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
@@ -148,11 +148,15 @@ export async function updateArtifacts({
       ],
     };
 
-    const subprojects = await getSubProjectList(cmd, execOptions);
-    cmd += ` ${subprojects
-      .map((project) => project + ':dependencies')
-      .map(quote)
-      .join(' ')}`;
+    const subprojects = await getSubProjectList(baseCmd, execOptions);
+    let lockfileCmd =
+      baseCmd +
+      ` ${subprojects
+        .map((project) => project + ':dependencies')
+        .map(quote)
+        .join(' ')}`;
+
+    await writeLocalFile(packageFileName, newPackageFileContent);
 
     if (verificationMetadataFile) {
       const hashTypes: string[] = [];
@@ -164,7 +168,12 @@ export async function updateArtifacts({
           hashTypes.push(hashType);
         }
       });
-      cmd += ` --write-verification-metadata ${hashTypes.join(',')}`;
+      const verificationMetadataCmd =
+        baseCmd + ` --write-verification-metadata ${hashTypes.join(',')} help`;
+      await exec(verificationMetadataCmd, {
+        ...execOptions,
+        ignoreStdout: true,
+      });
     }
 
     if (
@@ -172,17 +181,16 @@ export async function updateArtifacts({
       !updatedDeps.length ||
       isGcvPropsFile(packageFileName)
     ) {
-      cmd += ' --write-locks';
+      lockfileCmd += ' --write-locks';
     } else if (lockFiles.length) {
       const updatedDepNames = updatedDeps
         .map(({ depName, packageName }) => packageName ?? depName)
         .filter(is.nonEmptyStringAndNotWhitespace);
 
-      cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
+      lockfileCmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
 
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    await exec(cmd, { ...execOptions, ignoreStdout: true });
+    await exec(lockfileCmd, { ...execOptions, ignoreStdout: true });
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');

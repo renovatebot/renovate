@@ -589,7 +589,14 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-verification-metadata sha256',
+        cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      },
+      {
+        cmd: './gradlew --console=plain -q :dependencies',
         options: {
           cwd: '/tmp/github/some/repo',
           stdio: ['pipe', 'ignore', 'pipe'],
@@ -651,7 +658,14 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-verification-metadata sha256 --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+        cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      },
+      {
+        cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
         options: {
           cwd: '/tmp/github/some/repo',
           stdio: ['pipe', 'ignore', 'pipe'],
