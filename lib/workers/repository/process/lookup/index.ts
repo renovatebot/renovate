@@ -6,13 +6,15 @@ import { logger } from '../../../../logger';
 import {
   Release,
   ReleaseResult,
-  getDatasourceFor,
-  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../modules/datasource';
+import {
+  getDatasourceFor,
+  getDefaultVersioning,
+} from '../../../../modules/datasource/common';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
@@ -388,7 +390,7 @@ export async function lookupUpdates(
       }
       // update digest for all
       for (const update of res.updates) {
-        if (pinDigests || currentDigest) {
+        if (pinDigests === true || currentDigest) {
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
@@ -436,10 +438,10 @@ export async function lookupUpdates(
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
-          (update.newName && update.newName !== packageName) ||
-          update.isReplacement ||
+          (is.string(update.newName) && update.newName !== packageName) ||
+          update.isReplacement === true ||
           update.newValue !== currentValue ||
-          update.isLockfileUpdate ||
+          update.isLockfileUpdate === true ||
           // TODO #7154
           (update.newDigest && !update.newDigest.startsWith(currentDigest!))
       );

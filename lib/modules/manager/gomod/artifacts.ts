@@ -264,9 +264,9 @@ export async function updateArtifacts({
 
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
-      (config.postUpdateOptions?.includes('gomodTidy') ||
-        config.postUpdateOptions?.includes('gomodTidy1.17') ||
-        config.postUpdateOptions?.includes('gomodTidyE') ||
+      (config.postUpdateOptions?.includes('gomodTidy') === true ||
+        config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
+        config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;

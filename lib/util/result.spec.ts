@@ -1,3 +1,4 @@
+import { ZodError, z } from 'zod';
 import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
 
@@ -39,7 +40,10 @@ describe('util/result', () => {
       });
 
       it('wraps nullable callback', () => {
-        const res = Result.wrapNullable(() => 42, 'oops');
+        const res: Result<number, 'oops'> = Result.wrapNullable(
+          (): number | null => 42,
+          'oops'
+        );
         expect(res).toEqual(Result.ok(42));
       });
 
@@ -67,6 +71,25 @@ describe('util/result', () => {
           throw 'oops';
         }, 'nullable');
         expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps zod parse result', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
+        expect(Result.wrap(schema.safeParse(42))).toMatchObject(
+          Result.err({
+            issues: [
+              { code: 'invalid_type', expected: 'string', received: 'number' },
+            ],
+          })
+        );
+      });
+
+      it('wraps Zod schema', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const parse = Result.wrapSchema(schema);
+        expect(parse('foo')).toEqual(Result.ok('FOO'));
+        expect(parse(42)).toMatchObject(Result.err(expect.any(ZodError)));
       });
     });
 
@@ -149,6 +172,12 @@ describe('util/result', () => {
           'Result: unhandled transform error'
         );
       });
+
+      it('automatically converts zod values', () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = Result.ok('foo').transform((x) => schema.safeParse(x));
+        expect(res).toEqual(Result.ok('FOO'));
+      });
     });
 
     describe('Catch', () => {
@@ -206,7 +235,10 @@ describe('util/result', () => {
       });
 
       it('wraps nullable promise', async () => {
-        const res = Result.wrapNullable(Promise.resolve(42), 'oops');
+        const res: AsyncResult<number, 'oops'> = Result.wrapNullable(
+          Promise.resolve<number | null>(42),
+          'oops'
+        );
         await expect(res).resolves.toEqual(Result.ok(42));
       });
 
@@ -233,6 +265,17 @@ describe('util/result', () => {
       it('handles rejected nullable promise', async () => {
         const res = Result.wrapNullable(Promise.reject('oops'), 'nullable');
         await expect(res).resolves.toEqual(Result.err('oops'));
+      });
+
+      it('wraps Zod async schema', async () => {
+        const schema = z
+          .string()
+          .transform((x) => Promise.resolve(x.toUpperCase()));
+        const parse = Result.wrapSchemaAsync(schema);
+        await expect(parse('foo')).resolves.toEqual(Result.ok('FOO'));
+        await expect(parse(42)).resolves.toMatchObject(
+          Result.err(expect.any(ZodError))
+        );
       });
     });
 
@@ -415,6 +458,22 @@ describe('util/result', () => {
           .transform(fn3);
 
         expect(res).toEqual(Result.ok('F-O-O'));
+      });
+
+      it('asynchronously transforms Result to zod values', async () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = await Result.ok('foo').transform((x) =>
+          Promise.resolve(schema.safeParse(x))
+        );
+        expect(res).toEqual(Result.ok('FOO'));
+      });
+
+      it('transforms AsyncResult to zod values', async () => {
+        const schema = z.string().transform((x) => x.toUpperCase());
+        const res = await AsyncResult.ok('foo').transform((x) =>
+          schema.safeParse(x)
+        );
+        expect(res).toEqual(Result.ok('FOO'));
       });
     });
 

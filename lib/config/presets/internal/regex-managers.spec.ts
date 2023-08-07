@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { regexMatches } from '../../../../test/util';
-import { extractPackageFile } from '../../../modules/manager/regex';
+import { extractPackageFile } from '../../../modules/manager/custom/regex';
 import { presets } from './regex-managers';
 
 describe('config/presets/internal/regex-managers', () => {

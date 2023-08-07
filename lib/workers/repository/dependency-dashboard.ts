@@ -107,7 +107,7 @@ export async function readDashboardBody(
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
-    config.dependencyDashboard ||
+    config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
@@ -202,9 +202,10 @@ export async function ensureDependencyDashboard(
   );
   if (
     !(
-      config.dependencyDashboard ||
-      config.dependencyDashboardApproval ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
+      config.dependencyDashboard === true ||
+      config.dependencyDashboardApproval === true ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+        true ||
       branches.some(
         (branch) =>
           !!branch.dependencyDashboardApproval ||
