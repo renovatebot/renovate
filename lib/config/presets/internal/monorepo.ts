@@ -249,6 +249,8 @@ const repoGroups = {
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
+  'testcontainers-node':
+    'https://github.com/testcontainers/testcontainers-node',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
