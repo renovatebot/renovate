@@ -38,7 +38,7 @@ async function getUpdatedLockfiles(
   for (const modifiedFile of status.modified) {
     if (
       isLockFile(modifiedFile) ||
-      modifiedFile.endsWith('verification-metadata.xml')
+      modifiedFile.endsWith('gradle/verification-metadata.xml')
     ) {
       const newContent = await readLocalFile(modifiedFile, 'utf8');
       if (oldLockFileContentMap[modifiedFile] !== newContent) {
@@ -100,7 +100,7 @@ export async function updateArtifacts({
   const fileList = await scm.getFileList();
   const lockFiles = fileList.filter((file) => isLockFile(file));
   const verificationMetadataFile = fileList.find((fileName) =>
-    fileName.endsWith('verification-metadata.xml')
+    fileName.endsWith('gradle/verification-metadata.xml')
   );
   if (!lockFiles.length && !verificationMetadataFile) {
     logger.debug('No Gradle dependency lockfiles found - skipping update');
