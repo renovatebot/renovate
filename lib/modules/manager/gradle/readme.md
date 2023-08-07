@@ -8,3 +8,7 @@ During [lock file maintenance](https://docs.renovatebot.com/configuration-option
 For regular dependency updates, renovate automatically updates lock state entries via the `--update-locks` command line flag.
 
 As the output of these commands can be very large, any text other than errors (in `stderr`) is discarded.
+
+### Verification Metadata
+
+If a gradle/verification-metadata.xml file exists, renovate will also update its content by using `--write-verification-metadata <hashTypes>`. It will check the file for existing hash types (e.g. sha256) and use them as `<hashTypes>`.
