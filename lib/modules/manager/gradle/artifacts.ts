@@ -149,35 +149,10 @@ export async function updateArtifacts({
     };
 
     const subprojects = await getSubProjectList(baseCmd, execOptions);
-    let lockfileCmd =
-      baseCmd +
-      ` ${subprojects
-        .map((project) => project + ':dependencies')
-        .map(quote)
-        .join(' ')}`;
-
-    await writeLocalFile(packageFileName, newPackageFileContent);
-
-    if (verificationMetadataFile) {
-      const hashTypes: string[] = [];
-      const verificationMetadata = await readLocalFile(
-        verificationMetadataFile
-      );
-      for (const hashType of ['sha256', 'sha512', 'pgp']) {
-        if (verificationMetadata?.includes(`<${hashType}`)) {
-          hashTypes.push(hashType);
-        }
-      }
-      if (!hashTypes.length) {
-        hashTypes.push('sha256');
-      }
-      const verificationMetadataCmd =
-        baseCmd + ` --write-verification-metadata ${hashTypes.join(',')} help`;
-      await exec(verificationMetadataCmd, {
-        ...execOptions,
-        ignoreStdout: true,
-      });
-    }
+    let lockfileCmd = `${baseCmd} ${subprojects
+      .map((project) => `${project}:dependencies`)
+      .map(quote)
+      .join(' ')}`;
 
     if (
       config.isLockFileMaintenance === true ||
@@ -193,7 +168,30 @@ export async function updateArtifacts({
       lockfileCmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
 
+    await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(lockfileCmd, { ...execOptions, ignoreStdout: true });
+
+    if (verificationMetadataFile) {
+      const hashTypes: string[] = [];
+      const verificationMetadata = await readLocalFile(
+        verificationMetadataFile
+      );
+      for (const hashType of ['sha256', 'sha512', 'pgp']) {
+        if (verificationMetadata?.includes(`<${hashType}`)) {
+          hashTypes.push(hashType);
+        }
+      }
+      if (!hashTypes.length) {
+        hashTypes.push('sha256');
+      }
+      const verificationMetadataCmd = `${baseCmd} --write-verification-metadata ${hashTypes.join(
+        ','
+      )} help`;
+      await exec(verificationMetadataCmd, {
+        ...execOptions,
+        ignoreStdout: true,
+      });
+    }
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');
