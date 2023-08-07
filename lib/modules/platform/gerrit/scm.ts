@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { logger } from '../../../logger';
 import * as git from '../../../util/git';
 import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
-import { toSha256 } from '../../../util/hasha';
+import { hash } from '../../../util/hash';
 import { DefaultGitScm } from '../default-scm';
 import { client } from './client';
 import type { GerritFindPRConfig } from './types';
@@ -154,5 +154,5 @@ export class GerritScm extends DefaultGitScm {
  * TODO: Gerrit don't accept longer Change-IDs (sha256), but what happens with this https://git-scm.com/docs/hash-function-transition/ ?
  */
 function generateChangeId(): string {
-  return 'I' + toSha256(randomUUID()).substring(0, 40);
+  return 'I' + hash(randomUUID(), 'sha1');
 }

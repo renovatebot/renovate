@@ -62,7 +62,7 @@ describe('modules/platform/gerrit/utils', () => {
       [undefined, '-is:wip'],
     ])(
       'maps pr state %p to gerrit filter %p',
-      (prState: any | undefined, filter: string) => {
+      (prState: any, filter: string) => {
         expect(utils.mapPrStateToGerritFilter(prState)).toEqual(filter);
       }
     );

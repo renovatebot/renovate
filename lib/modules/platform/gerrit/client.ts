@@ -202,7 +202,7 @@ class GerritClient {
 
   async checkIfApproved(changeId: number): Promise<boolean> {
     const change = await client.getChange(changeId);
-    const reviewLabels = change?.labels && change.labels['Code-Review'];
+    const reviewLabels = change?.labels?.['Code-Review'];
     return reviewLabels === undefined || reviewLabels.approved !== undefined;
   }
 
