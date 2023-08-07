@@ -6,7 +6,7 @@ describe('modules/manager/metadata', () => {
     .readdirSync(__dirname, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
-    .filter((name) => !name.startsWith('__'))
+    .filter((name) => !name.startsWith('__') || name === 'custom')
     .sort();
 
   it.each(managerList)('%s has readme with no h1 or h2', async (manager) => {

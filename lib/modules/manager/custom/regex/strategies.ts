@@ -20,13 +20,7 @@ export function handleAny(
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) =>
       createDependency(
-        {
-          groups:
-            matchResult.groups ??
-            // istanbul ignore next
-            {},
-          replaceString: matchResult[0],
-        },
+        { groups: matchResult.groups ?? {}, replaceString: matchResult[0] },
         config
       )
     )
@@ -49,9 +43,7 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups:
-        match.groups ?? // istanbul ignore next
-        {},
+      groups: match.groups ?? {},
       replaceString:
         match?.groups?.currentValue ?? match?.groups?.currentDigest
           ? match[0]
@@ -101,10 +93,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       },
       config
     );
-    return result
-      ? [result]
-      : // istanbul ignore next
-        [];
+    return result ? [result] : [];
   }
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     return processRecursive({

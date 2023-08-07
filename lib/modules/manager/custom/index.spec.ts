@@ -13,7 +13,10 @@ describe('modules/manager/custom/index', () => {
     expect(customManager.getCustomManagerList()).not.toBeNull();
   });
 
-  // for coverage
+  it('gets supportedDatasources', () => {
+    expect(customManager.supportedDatasources).toEqual(['*']);
+  });
+
   it('extractPackageFile', () => {
     expect(customManager.extractPackageFile('', '', {})).toEqual({ deps: [] });
   });

@@ -18,6 +18,9 @@ export function get<T extends keyof ManagerApi>(
 }
 
 // hollow function and constants to satisfy existing manager rules
+export const defaultConfig = {};
+export const supportedDatasources = ['*'];
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -25,5 +28,3 @@ export function extractPackageFile(
 ): Result<PackageFileContent | null> {
   return { deps: [] };
 }
-export const defaultConfig = {};
-export const supportedDatasources = ['*'];
