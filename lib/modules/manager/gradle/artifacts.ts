@@ -156,13 +156,11 @@ export async function updateArtifacts({
 
     if (verificationMetadataFile) {
       const hashTypes: string[] = [];
-      const verificationMetadata = await readLocalFile(verificationMetadataFile);
-      ['md5', 'sha1', 'sha256', 'sha512'].forEach((hashType) => {
-        if (
-          verificationMetadata?.includes(
-            `<${hashType}`
-          )
-        ) {
+      const verificationMetadata = await readLocalFile(
+        verificationMetadataFile
+      );
+      ['md5', 'sha1', 'sha256', 'sha512', 'pgp'].forEach((hashType) => {
+        if (verificationMetadata?.includes(`<${hashType}`)) {
           hashTypes.push(hashType);
         }
       });

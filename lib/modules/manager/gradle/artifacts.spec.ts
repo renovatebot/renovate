@@ -609,7 +609,11 @@ describe('modules/manager/gradle/artifacts', () => {
     ]);
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
-        modified: ['build.gradle', 'gradle.lockfile', 'gradle/verification-metadata.xml'],
+        modified: [
+          'build.gradle',
+          'gradle.lockfile',
+          'gradle/verification-metadata.xml',
+        ],
       })
     );
 
