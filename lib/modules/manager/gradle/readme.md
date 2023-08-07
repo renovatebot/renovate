@@ -9,6 +9,7 @@ For regular dependency updates, renovate automatically updates lock state entrie
 
 As the output of these commands can be very large, any text other than errors (in `stderr`) is discarded.
 
-### Verification Metadata
+### Verification metadata
 
-If a gradle/verification-metadata.xml file exists, renovate will also update its content by using `--write-verification-metadata <hashTypes>`. It will check the file for existing hash types (e.g. sha256) and use them as `<hashTypes>`.
+If Removate finds any `gradle/verification-metadata.xml` file, Renovate updates the content by using the `gradle --write-verification-metadata <hashTypes>` command.
+Renovate will check the file for existing hash types (like `sha256`) and use them as `<hashTypes>`.
