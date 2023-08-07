@@ -29,6 +29,8 @@ export function incLimitedValue(key: Limit, incBy = 1): void {
 
 export function isLimitReached(key: Limit): boolean {
   const limit = limits.get(key);
+  // TODO: fix me?
+  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
   if (!limit || limit.max === null) {
     return false;
   }

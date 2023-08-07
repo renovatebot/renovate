@@ -222,6 +222,7 @@ const repoGroups = {
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   sanity: 'https://github.com/sanity-io/sanity',
+  scaffdog: 'https://github.com/scaffdog/scaffdog',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
@@ -249,6 +250,8 @@ const repoGroups = {
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
+  'testcontainers-node':
+    'https://github.com/testcontainers/testcontainers-node',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',

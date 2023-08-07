@@ -1,6 +1,5 @@
 // TODO: types (#7154)
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -20,6 +19,7 @@ import {
   readLocalFile,
   renameLocalFile,
 } from '../../../../util/fs';
+import { minimatch } from '../../../../util/minimatch';
 import { trimSlashes } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
@@ -51,7 +51,10 @@ export async function generateLockFile(
     };
     const commands: string[] = [];
     let cmdOptions = '';
-    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
+    if (
+      postUpdateOptions?.includes('npmDedupe') === true ||
+      skipInstalls === false
+    ) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
@@ -171,7 +174,10 @@ export async function generateLockFile(
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile
     if (lockUpdates.length) {
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
-      if (lockFileParsed?.lockfileVersion === 2) {
+      if (
+        lockFileParsed?.lockfileVersion === 2 ||
+        lockFileParsed?.lockfileVersion === 3
+      ) {
         lockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
             | 'dependencies'
@@ -246,7 +252,7 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns ?? []) {
-          if (minimatch(workspaceDir, workspacePattern)) {
+          if (minimatch(workspacePattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;
           }

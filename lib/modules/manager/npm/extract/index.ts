@@ -36,6 +36,10 @@ function parseDepName(depType: string, key: string): string {
   return depName;
 }
 
+function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
+  return Object.values(lockFiles).filter(is.string).length > 1;
+}
+
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
 );
@@ -100,6 +104,12 @@ export async function extractPackageFile(
   lockFiles.npmLock = lockFiles.packageLock ?? lockFiles.shrinkwrapJson;
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
+
+  if (hasMultipleLockFiles(lockFiles)) {
+    logger.warn(
+      'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+    );
+  }
 
   let npmrc: string | undefined;
   const npmrcFileName = getSiblingFileName(packageFile, '.npmrc');
@@ -465,10 +475,10 @@ export async function extractPackageFile(
     logger.debug('Package file has no deps');
     if (
       !(
-        packageJsonName ||
-        packageFileVersion ||
-        npmrc ||
-        lernaJsonFile ||
+        !!packageJsonName ||
+        !!packageFileVersion ||
+        !!npmrc ||
+        !!lernaJsonFile ||
         workspacesPackages
       )
     ) {

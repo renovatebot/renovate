@@ -311,7 +311,6 @@ export class GoProxyDatasource extends Datasource {
     const goproxy = process.env.GOPROXY;
     const noproxy = GoProxyDatasource.parseNoproxy();
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

@@ -7,7 +7,7 @@ import type { BumpPackageVersionResult } from '../types';
 export function bumpPackageVersion(
   content: string,
   currentValue: string | undefined,
-  bumpVersion: ReleaseType | string
+  bumpVersion: ReleaseType
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
@@ -31,12 +31,21 @@ export function bumpPackageVersion(
   try {
     const project = new XmlDocument(content);
     const versionNode = project.descendantWithPath('PropertyGroup.Version')!;
+    const currentProjVersion = versionNode.val;
     const startTagPosition = versionNode.startTagPosition;
-    const versionPosition = content.indexOf(versionNode.val, startTagPosition);
+    const versionPosition = content.indexOf(
+      currentProjVersion,
+      startTagPosition
+    );
 
-    const newProjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+    const newProjVersion = semver.inc(currentValue, bumpVersion);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
+    }
+
+    if (currentProjVersion === newProjVersion) {
+      logger.debug('Version was already bumped');
+      return { bumpedContent };
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);
@@ -46,12 +55,6 @@ export function bumpPackageVersion(
       currentValue,
       newProjVersion
     );
-
-    if (bumpedContent === content) {
-      logger.debug('Version was already bumped');
-    } else {
-      logger.debug('project version bumped');
-    }
   } catch (err) {
     logger.warn(
       {
