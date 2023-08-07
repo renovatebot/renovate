@@ -312,8 +312,8 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'ubuntu-latest',
           depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
         },
         {
           depName: 'ubuntu',
@@ -321,8 +321,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'ubuntu-22.04',
           depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
           depName: 'macos',
@@ -330,8 +329,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'macos-12-xl',
           depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
           depName: 'macos',
@@ -339,8 +337,8 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'macos-latest',
           depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
         },
         {
           depName: 'windows',
@@ -348,8 +346,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'windows-2019',
           depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
           depName: 'windows',
@@ -357,8 +354,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'windows-2022',
           depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
           depName: 'windows',
@@ -366,8 +362,7 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString: 'windows-2022',
           depType: 'github-runner',
           datasource: 'github-runners',
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
       ]);
       expect(

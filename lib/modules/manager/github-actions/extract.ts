@@ -89,8 +89,32 @@ function extractContainer(container: unknown): PackageDependency | undefined {
 }
 
 const runnerVersionRegex = regEx(
-  /^\s*(?<depName>[\d\w]+)-(?<currentValue>[^\s]+)/
+  /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/
 );
+
+function extractRunner(runner: string): PackageDependency | undefined {
+  const runnerVersionGroups = runnerVersionRegex.exec(runner)?.groups;
+  if (!runnerVersionGroups) {
+    return;
+  }
+
+  const { depName, currentValue } = runnerVersionGroups;
+
+  const dependency: PackageDependency = {
+    depName,
+    currentValue,
+    replaceString: `${depName}-${currentValue}`,
+    depType: 'github-runner',
+    datasource: GithubRunnersDatasource.id,
+    autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+  };
+
+  if (!dockerVersioning.api.isValid(currentValue)) {
+    dependency.skipReason = 'invalid-version';
+  }
+
+  return dependency;
+}
 
 function extractRunners(runner: unknown): PackageDependency[] {
   const runners: string[] = [];
@@ -100,26 +124,7 @@ function extractRunners(runner: unknown): PackageDependency[] {
     runners.push(...runner);
   }
 
-  return runners
-    .map((rnr) => {
-      const runnerVersionGroups = runnerVersionRegex.exec(rnr)?.groups;
-      if (!runnerVersionGroups) {
-        return;
-      }
-
-      const { depName, currentValue } = runnerVersionGroups;
-
-      return {
-        depName,
-        currentValue,
-        replaceString: depName + '-' + currentValue,
-        depType: 'github-runner',
-        datasource: GithubRunnersDatasource.id,
-        autoReplaceStringTemplate:
-          '{{depName}}{{#if newValue}}-{{newValue}}{{/if}}',
-      };
-    })
-    .filter(isNotNullOrUndefined);
+  return runners.map(extractRunner).filter(isNotNullOrUndefined);
 }
 
 function extractWithYAMLParser(
