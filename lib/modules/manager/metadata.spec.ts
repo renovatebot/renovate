@@ -26,8 +26,6 @@ describe('modules/manager/metadata', () => {
         const readmeFilePath = `${__dirname}/${
           (customManagers.includes(manager) ? 'custom/' : '') + manager
         }/readme.md`;
-        // eslint-disable-next-line
-        console.log(readmeFilePath);
         readme = await fs.readFile(readmeFilePath, 'utf8');
       } catch (err) {
         // do nothing

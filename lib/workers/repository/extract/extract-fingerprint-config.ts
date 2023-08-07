@@ -4,7 +4,10 @@ import type {
   RenovateConfig,
 } from '../../../config/types';
 import { getManagerList } from '../../../modules/manager';
-import { getCustomManagerList } from '../../../modules/manager/custom';
+import {
+  getCustomManagerList,
+  isCustomManager,
+} from '../../../modules/manager/custom';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/types';
 import type { WorkerExtractConfig } from '../../types';
@@ -91,8 +94,4 @@ export function generateFingerprintConfig(
     managerList,
     managers: managerExtractConfigs.map(getFilteredManagerConfig),
   };
-}
-
-function isCustomManager(manager: string): Boolean {
-  return !!getCustomManagerList().includes(manager);
 }

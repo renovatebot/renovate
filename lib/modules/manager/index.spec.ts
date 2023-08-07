@@ -11,6 +11,7 @@ const datasources = getDatasourceList();
 
 describe('modules/manager/index', () => {
   describe('supportedDatasources', () => {
+    // no need to check custom maanagers as they support all datasources
     for (const m of manager.getManagerList()) {
       const supportedDatasources = manager.get(m, 'supportedDatasources');
 

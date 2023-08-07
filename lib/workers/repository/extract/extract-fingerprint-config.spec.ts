@@ -32,6 +32,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
 
     const fingerprintConfig = generateFingerprintConfig(config);
+
     expect(fingerprintConfig.managerList).toEqual(new Set(['npm', 'regex']));
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')

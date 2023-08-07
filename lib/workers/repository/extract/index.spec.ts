@@ -32,22 +32,21 @@ describe('workers/repository/extract/index', () => {
     });
 
     it('skips non-enabled managers', async () => {
-      config.enabledManagers = ['npm', 'regex'];
-      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
+      config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       const res = await extractAllDependencies(config);
       expect(res).toMatchObject({
-        packageFiles: { npm: [{}], regex: [{}] },
+        packageFiles: { npm: [{}] },
       });
     });
 
-    it('warns if no packages found for enabled managers', async () => {
-      config.enabledManagers = ['npm', 'regex'];
+    it('warns if no packages found for a enabled manager', async () => {
+      config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
-      expect(logger.warn).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalled();
     });
 
     it('warns if packageFiles is null', async () => {

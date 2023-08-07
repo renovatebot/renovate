@@ -3,15 +3,14 @@ import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList, hashMap } from '../../../modules/manager';
-import { getCustomManagerList } from '../../../modules/manager/custom';
+import {
+  getCustomManagerList,
+  isCustomManager,
+} from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
-
-function isCustomManager(manager: string): Boolean {
-  return !!getCustomManagerList().includes(manager);
-}
 
 export async function extractAllDependencies(
   config: RenovateConfig
@@ -98,7 +97,7 @@ export async function extractAllDependencies(
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
       if (!(enabledManager in extractResult.packageFiles)) {
-        logger.warn(
+        logger.debug(
           { manager: enabledManager },
           `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
         );

@@ -1,5 +1,6 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
+import { getCustomManagerList } from './custom';
 import customManagers from './custom/api';
 import type {
   ExtractConfig,
@@ -12,6 +13,7 @@ import type {
 } from './types';
 export { hashMap } from './fingerprint.generated';
 const managerList = Array.from(managers.keys()); // does not include custom managers
+const customManagerList = getCustomManagerList();
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
@@ -22,11 +24,11 @@ export function get<T extends keyof ManagerApi>(
 export const getManagerList = (): string[] => managerList;
 export const getManagers = (): Map<string, ManagerApi> => managers;
 
-// custom managers not included as they do not have global config
 export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
   let config: GlobalManagerConfig = {};
-  for (const managerName of managerList) {
-    const manager = managers.get(managerName)!;
+  for (const managerName of [...managerList, ...customManagerList]) {
+    const manager =
+      managers.get(managerName)! ?? customManagers.get(managerName)!;
     if (manager.detectGlobalConfig) {
       // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
       config = { ...config, ...(await manager.detectGlobalConfig()) };

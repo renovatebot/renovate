@@ -17,7 +17,11 @@ export function get<T extends keyof ManagerApi>(
   return customManagers.get(manager)?.[name];
 }
 
-// hollow function and constants to satisfy existing manager rules
+export function isCustomManager(manager: string): boolean {
+  return !!customManagerList.includes(manager);
+}
+
+// export hollow function and constants for validation as manager
 export const defaultConfig = {};
 export const supportedDatasources = ['*'];
 
