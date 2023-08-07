@@ -22,6 +22,10 @@ jobs:
     runs-on: [windows-2022, selfhosted]
   test8:
      runs-on: \${{ env.RUNNER }}
+  test9:
+     runs-on:
+       group: ubuntu-runners
+       labels: ubuntu-20.04-16core
 `;
 
 describe('modules/manager/github-actions/extract', () => {
