@@ -158,12 +158,6 @@ async function generateHash() {
       .map((file) => file.name)
       .filter((mgr) => mgr !== 'custom');
 
-    const customManagers = (
-      await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
-    )
-      .filter((file) => file.isDirectory())
-      .map((file) => file.name);
-
     // get custom managers list
     const customManagers = (
       await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })

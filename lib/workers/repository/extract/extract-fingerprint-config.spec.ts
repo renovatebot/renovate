@@ -20,7 +20,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
           notStable: 'http://some.link.2',
         },
       },
-      enabledManagers: ['npm', 'custom.regex'],
+      enabledManagers: ['npm', 'regex'],
       regexManagers: [
         {
           fileMatch: ['js', '***$}{]]['],

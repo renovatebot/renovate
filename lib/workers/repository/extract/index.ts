@@ -17,11 +17,7 @@ export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
   let managerList = [...getManagerList(), ...getCustomManagerList()];
-  // convert custom.regex -> regex
-  const enabledManagers = config.enabledManagers
-    ?.map((m) => m.replace('custom.', ''))
-    .filter(Boolean);
-
+  const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
     managerList = managerList.filter((manager) =>

@@ -13,16 +13,6 @@ export class ManagersMatcher extends Matcher {
     if (is.undefined(manager) || !manager) {
       return false;
     }
-
-    let modifiedMatchManagers: string[];
-    if (is.string(matchManagers)) {
-      modifiedMatchManagers = [matchManagers.replace('custom.', '')];
-    } else {
-      modifiedMatchManagers = matchManagers.map((m) =>
-        m.replace('custom.', '')
-      );
-    }
-
-    return modifiedMatchManagers.includes(manager);
+    return matchManagers.includes(manager);
   }
 }

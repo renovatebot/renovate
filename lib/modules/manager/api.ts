@@ -21,7 +21,6 @@ import * as cocoapods from './cocoapods';
 import * as composer from './composer';
 import * as conan from './conan';
 import * as cpanfile from './cpanfile';
-import * as regex from './custom/regex';
 import * as depsEdn from './deps-edn';
 import * as dockerCompose from './docker-compose';
 import * as dockerfile from './dockerfile';

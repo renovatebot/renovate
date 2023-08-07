@@ -16,7 +16,7 @@ export function check({
       resolvedRule.matchManagers.find(
         (confManager) =>
           !getManagerList().includes(confManager) &&
-          !getCustomManagerList().includes(confManager.replace('custom.', ''))
+          !getCustomManagerList().includes(confManager)
       )
     ) {
       managersErrMessage = `${currentPath}:

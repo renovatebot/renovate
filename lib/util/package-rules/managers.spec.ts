@@ -4,25 +4,13 @@ describe('util/package-rules/managers', () => {
   const managersMatcher = new ManagersMatcher();
 
   describe('match', () => {
-    it('should match custom managers separately', () => {
-      const result = managersMatcher.matches(
-        {
-          manager: 'regex',
-        },
-        {
-          matchManagers: ['custom.regex'],
-        }
-      );
-      expect(result).toBeTrue();
-    });
-
     it('should return true', () => {
       const result = managersMatcher.matches(
         {
           manager: 'npm',
         },
         {
-          matchManagers: ['npm', 'custom.regex'],
+          matchManagers: ['npm', 'regex'],
         }
       );
       expect(result).toBeTrue();

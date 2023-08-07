@@ -68,7 +68,7 @@ function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
     (manager) =>
       !getManagerList().includes(manager) &&
-      !getCustomManagerList().includes(manager.replace('custom.', ''))
+      !getCustomManagerList().includes(manager)
   );
 }
 

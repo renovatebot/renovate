@@ -57,7 +57,10 @@ describe('modules/manager/index', () => {
       ...loadModules(join(__dirname, 'custom'), validate), // validate custom managers
     };
     delete loadedMgr['custom'];
-    expect(Array.from(mgrs.keys())).toEqual(Object.keys(loadedMgr).sort());
+
+    expect(Array.from([...mgrs.keys(), ...customMgrs.keys()]).sort()).toEqual(
+      Object.keys(loadedMgr).sort()
+    );
 
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name)!;

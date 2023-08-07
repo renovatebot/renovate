@@ -57,16 +57,12 @@ export function generateFingerprintConfig(
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
   let managerList: Set<string>;
-  const enabledManagers = config.enabledManagers
-    ?.map((m) => m.replace('custom.', ''))
-    .filter(Boolean);
+  const { enabledManagers } = config;
   if (enabledManagers?.length) {
     managerList = new Set(enabledManagers);
   } else {
     managerList = new Set([...getManagerList(), ...getCustomManagerList()]);
   }
-
-  const fingerprintManagerList: Set<string> = new Set();
 
   const handleCustomManager = (
     customMgr: string,
