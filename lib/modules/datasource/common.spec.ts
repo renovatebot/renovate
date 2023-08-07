@@ -89,31 +89,28 @@ describe('modules/datasource/common', () => {
 
   describe('applyExtractVersion', () => {
     it('should return the same release result if extractVersion is not defined', () => {
-      const config = {};
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       };
-      const res = applyExtractVersion(config, releaseResult);
+      const res = applyExtractVersion(releaseResult, undefined);
       expect(res).toBe(releaseResult);
     });
 
     it('should extract version from release using provided regex', () => {
-      const config = { extractVersion: '^v(?<version>.+)$' };
       const releaseResult: ReleaseResult = {
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
       };
-      const res = applyExtractVersion(config, releaseResult);
+      const res = applyExtractVersion(releaseResult, '^v(?<version>.+)$');
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
     });
 
     it('should return null for releases with invalid version', () => {
-      const config = { extractVersion: '^v(?<version>.+)$' };
       const releaseResult: ReleaseResult = {
         releases: [{ version: 'v1.0.0' }, { version: 'invalid' }],
       };
-      const result = applyExtractVersion(config, releaseResult);
+      const result = applyExtractVersion(releaseResult, '^v(?<version>.+)$');
       expect(result).toEqual({
         releases: [{ version: '1.0.0' }],
       });
@@ -131,7 +128,7 @@ describe('modules/datasource/common', () => {
 
     it('should filter out invalid versions', () => {
       const config = { datasource: 'npm' };
-      const res = filterValidVersions(config, releaseResult);
+      const res = filterValidVersions(releaseResult, config);
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
@@ -139,7 +136,7 @@ describe('modules/datasource/common', () => {
 
     it('should use default versioning if none is specified', () => {
       const config = { datasource: 'foobar' };
-      const res = filterValidVersions(config, releaseResult);
+      const res = filterValidVersions(releaseResult, config);
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
@@ -147,7 +144,7 @@ describe('modules/datasource/common', () => {
 
     it('should use specified versioning if provided', () => {
       const config = { datasource: 'npm', versioning: 'semver' };
-      const res = filterValidVersions(config, releaseResult);
+      const res = filterValidVersions(releaseResult, config);
       expect(res).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
@@ -172,7 +169,7 @@ describe('modules/datasource/common', () => {
           { version: '3.0.0' },
         ],
       };
-      const result = sortAndRemoveDuplicates(config, releaseResult);
+      const result = sortAndRemoveDuplicates(releaseResult, config);
       expect(result).toEqual(expected);
     });
 
@@ -181,7 +178,7 @@ describe('modules/datasource/common', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       };
-      const result = sortAndRemoveDuplicates(config, releaseResult);
+      const result = sortAndRemoveDuplicates(releaseResult, config);
       expect(result).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
@@ -205,7 +202,7 @@ describe('modules/datasource/common', () => {
           { version: '2.0.0', constraints: { foo: ['^2.0.0'] } },
         ],
       };
-      expect(applyConstraintsFiltering(config, releaseResult)).toEqual({
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
     });
@@ -224,7 +221,7 @@ describe('modules/datasource/common', () => {
           { version: '3.0.0', constraints: { baz: ['^0.9.0'] } },
         ],
       };
-      expect(applyConstraintsFiltering(config, releaseResult)).toEqual({
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
     });

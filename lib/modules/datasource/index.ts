@@ -310,7 +310,7 @@ async function fetchReleases(
   return dep;
 }
 
-function getRawReleases(
+function fetchCachedReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
@@ -345,7 +345,7 @@ export function getRawPkgReleases(
     return AsyncResult.err('no-package-name');
   }
 
-  return Result.wrapNullable(getRawReleases(config), 'no-result' as const)
+  return Result.wrapNullable(fetchCachedReleases(config), 'no-result' as const)
     .catch((e) => {
       if (e instanceof ExternalHostError) {
         e.hostType = config.datasource;
@@ -356,14 +356,23 @@ export function getRawPkgReleases(
     .transform(clone);
 }
 
+export function applyDatasourceFilters(
+  releaseResult: ReleaseResult,
+  config: GetPkgReleasesConfig
+): ReleaseResult {
+  let res = releaseResult;
+  res = applyExtractVersion(res, config.extractVersion);
+  res = filterValidVersions(res, config);
+  res = sortAndRemoveDuplicates(res, config);
+  res = applyConstraintsFiltering(res, config);
+  return res;
+}
+
 export async function getPkgReleases(
   config: GetPkgReleasesConfig
 ): Promise<ReleaseResult | null> {
   const { val = null, err } = await getRawPkgReleases(config)
-    .transform((res) => applyExtractVersion(config, res))
-    .transform((res) => filterValidVersions(config, res))
-    .transform((res) => sortAndRemoveDuplicates(config, res))
-    .transform((res) => applyConstraintsFiltering(config, res))
+    .transform((res) => applyDatasourceFilters(res, config))
     .unwrap();
 
   if (err instanceof Error) {
