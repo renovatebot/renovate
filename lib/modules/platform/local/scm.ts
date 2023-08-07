@@ -50,7 +50,7 @@ export class LocalFs implements PlatformScm {
   }
 
   mergeAndPush(branchName: string): Promise<void> {
-    return Promise.resolve(undefined);
+    return Promise.resolve();
   }
 
   mergeToLocal(branchName: string): Promise<void> {
