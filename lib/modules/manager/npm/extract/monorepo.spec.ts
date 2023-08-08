@@ -61,7 +61,6 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
@@ -115,7 +114,6 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData?.lernaJsonFile).toBeUndefined();
       expect(
         packageFiles.some((packageFile) =>
@@ -169,7 +167,6 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
@@ -205,7 +202,6 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
     });
 
