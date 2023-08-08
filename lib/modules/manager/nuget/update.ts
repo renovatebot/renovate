@@ -3,6 +3,7 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { replaceAt } from '../../../util/string';
 import type { BumpPackageVersionResult } from '../types';
+import { findVersion } from './util';
 
 export function bumpPackageVersion(
   content: string,
@@ -30,8 +31,23 @@ export function bumpPackageVersion(
 
   try {
     const project = new XmlDocument(content);
-    const versionNode = project.descendantWithPath('PropertyGroup.Version')!;
+    const versionNode = findVersion(project);
+    if (!versionNode) {
+      logger.warn(
+        "Couldn't find Version or VersionPrefix in any PropertyGroup"
+      );
+      return { bumpedContent };
+    }
+
     const currentProjVersion = versionNode.val;
+    if (currentProjVersion !== currentValue) {
+      logger.warn(
+        { currentValue, currentProjVersion },
+        "currentValue passed to bumpPackageVersion() doesn't match value found"
+      );
+      return { bumpedContent };
+    }
+
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(
       currentProjVersion,
@@ -41,11 +57,6 @@ export function bumpPackageVersion(
     const newProjVersion = semver.inc(currentValue, bumpVersion);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
-    }
-
-    if (currentProjVersion === newProjVersion) {
-      logger.debug('Version was already bumped');
-      return { bumpedContent };
     }
 
     logger.debug(`newProjVersion: ${newProjVersion}`);
