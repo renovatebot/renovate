@@ -673,4 +673,59 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
   });
+
+  it('uses sha256 as default if only weak hash algorithms are found', async () => {
+    const execSnapshots = mockExecAll();
+    scm.getFileList.mockResolvedValue([
+      'gradlew',
+      'build.gradle',
+      'gradle/wrapper/gradle-wrapper.properties',
+      'gradle/verification-metadata.xml',
+    ]);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+      })
+    );
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+      let content = '';
+      if (fileName === 'gradle/verification-metadata.xml') {
+        content = '<sha1 value="hash" origin="test data"/>';
+      }
+      return Promise.resolve(content);
+    });
+
+    await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        { depName: 'org.junit.jupiter:junit-jupiter-api' },
+        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './gradlew --console=plain -q properties',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+      {
+        cmd: './gradlew --console=plain -q :dependencies',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      },
+      {
+        cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      },
+    ]);
+  });
 });
