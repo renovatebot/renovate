@@ -7,7 +7,8 @@ describe('modules/manager/pub/extract', () => {
 
     it('returns null if package does not contain any deps', () => {
       const content = codeBlock`
-        foo: bar
+        environment:
+          sdk: ^3.0.0
       `;
       const actual = extractPackageFile(content, packageFile);
       expect(actual).toBeNull();
