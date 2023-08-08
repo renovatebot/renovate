@@ -1,4 +1,3 @@
-import { version } from 'node:os';
 import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
