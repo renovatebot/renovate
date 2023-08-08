@@ -135,7 +135,7 @@
   "homepage": "https://renovatebot.com",
   "engines": {
     "node": "^18.12.0 || >=20.0.0",
-    "pnpm": "^8.6.11"
+    "pnpm": "^8.0.0"
   },
   "engines-next": {
     "description": "Versions other than the below are deprecated and a warning will be logged",
