@@ -1,5 +1,52 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/npm/extract/monorepo .extractPackageFile() skips lerna package settings if v7 or later 1`] = `
+[
+  {
+    "deps": [
+      {
+        "depName": "@org/a",
+      },
+      {
+        "depName": "@org/b",
+      },
+      {
+        "depName": "@org/c",
+      },
+      {
+        "currentValue": "^7.0.0",
+        "depName": "lerna",
+      },
+    ],
+    "managerData": {},
+    "packageFile": "package.json",
+  },
+  {
+    "deps": [
+      {
+        "depName": "@org/b",
+      },
+      {
+        "depName": "@org/c",
+      },
+      {
+        "depName": "bar",
+      },
+    ],
+    "managerData": {
+      "packageJsonName": "@org/a",
+    },
+    "packageFile": "packages/a/package.json",
+  },
+  {
+    "managerData": {
+      "packageJsonName": "@org/b",
+    },
+    "packageFile": "packages/b/package.json",
+  },
+]
+`;
+
 exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates internal packages 1`] = `
 [
   {
@@ -16,7 +63,8 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
         "depName": "@org/c",
       },
       {
-        "depName": "foo",
+        "currentValue": "6.1.0",
+        "depName": "lerna",
       },
     ],
     "managerData": {
@@ -88,7 +136,8 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
         "depName": "@org/c",
       },
       {
-        "depName": "foo",
+        "currentValue": "^6.0.0",
+        "depName": "lerna",
       },
     ],
     "managerData": {
@@ -147,6 +196,12 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
 exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
 [
   {
+    "deps": [
+      {
+        "currentValue": "^6.0.0",
+        "depName": "lerna",
+      },
+    ],
     "managerData": {
       "lernaClient": "yarn",
       "lernaJsonFile": "lerna.json",
