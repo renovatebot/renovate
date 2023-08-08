@@ -13,6 +13,7 @@ import type {
   BranchSummary,
   BranchUpgradeConfig,
 } from '../../types';
+import {coerceArray} from "../../../util/array";
 
 export function runRenovateRepoStats(
   config: RenovateConfig,
@@ -73,7 +74,7 @@ function filterDependencyLookupData(
     const upgradesFiltered: Partial<BranchUpgradeConfig>[] = [];
     const { branchName, prTitle, upgrades } = branch;
 
-    for (const upgrade of upgrades ?? []) {
+    for (const upgrade of coerceArray(upgrades)) {
       const {
         datasource,
         depName,
@@ -122,7 +123,7 @@ function filterDependencyDashboardData(
     const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
     const { branchName, prNo, prTitle, result, upgrades, prBlockedBy } = branch;
 
-    for (const upgrade of upgrades ?? []) {
+    for (const upgrade of coerceArray(upgrades)) {
       const {
         datasource,
         depName,
