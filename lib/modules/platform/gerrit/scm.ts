@@ -146,6 +146,19 @@ export class GerritScm extends DefaultGitScm {
   override deleteBranch(branchName: string): Promise<void> {
     return Promise.resolve();
   }
+
+  override async mergeToLocal(branchName: string): Promise<void> {
+    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
+    const change = await client
+      .findChanges(repository, searchConfig, true)
+      .then((res) => res.pop());
+    if (change) {
+      return super.mergeToLocal(
+        change.revisions![change.current_revision!].ref
+      );
+    }
+    return super.mergeToLocal(branchName);
+  }
 }
 
 /**

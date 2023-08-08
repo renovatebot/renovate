@@ -202,6 +202,50 @@ describe('modules/platform/gerrit/scm', () => {
     await expect(gerritScm.deleteBranch('branchName')).toResolve();
   });
 
+  describe('mergeToLocal', () => {
+    it('no change exists', async () => {
+      clientMock.findChanges.mockResolvedValueOnce([]);
+      git.mergeToLocal.mockResolvedValueOnce();
+
+      await expect(gerritScm.mergeToLocal('nonExistingChange')).toResolve();
+
+      expect(clientMock.findChanges).toHaveBeenCalledWith(
+        'test/repo',
+        {
+          branchName: 'nonExistingChange',
+          state: 'open',
+        },
+        true
+      );
+      expect(git.mergeToLocal).toHaveBeenCalledWith('nonExistingChange');
+    });
+
+    it('change exists', async () => {
+      const change = partial<GerritChange>({
+        current_revision: 'curSha',
+        revisions: {
+          curSha: partial<GerritRevisionInfo>({
+            ref: 'refs/changes/34/1234/1',
+          }),
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
+      git.mergeToLocal.mockResolvedValueOnce();
+
+      await expect(gerritScm.mergeToLocal('existingChange')).toResolve();
+
+      expect(clientMock.findChanges).toHaveBeenCalledWith(
+        'test/repo',
+        {
+          branchName: 'existingChange',
+          state: 'open',
+        },
+        true
+      );
+      expect(git.mergeToLocal).toHaveBeenCalledWith('refs/changes/34/1234/1');
+    });
+  });
+
   describe('commitFiles()', () => {
     it('commitFiles() - empty commit', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
