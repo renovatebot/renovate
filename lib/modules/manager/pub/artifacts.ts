@@ -24,6 +24,9 @@ export async function updateArtifacts({
   if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated pub deps - returning null');
     return null;
+  } else if (updatedDeps.length === 1 && updatedDeps[0].depName === 'flutter') {
+    logger.debug('Only updated flutter sdk - returning null');
+    return null;
   }
 
   const lockFileName = getSiblingFileName(packageFileName, 'pubspec.lock');
@@ -43,13 +46,13 @@ export async function updateArtifacts({
     if (isLockFileMaintenance) {
       cmd.push(`${toolName} pub upgrade`);
     } else {
-      cmd.push(
-        `${toolName} pub upgrade ${updatedDeps
-          .map((dep) => dep.depName)
-          .filter(is.string)
-          .map((dep) => quote(dep))
-          .join(' ')}`
-      );
+      const depNames = updatedDeps
+        .map((dep) => dep.depName)
+        .filter(is.string)
+        .filter((depName) => depName !== 'flutter')
+        .map((depName) => quote(depName))
+        .join(' ');
+      cmd.push(`${toolName} pub upgrade ${depNames}`);
     }
 
     let constraint = config.constraints?.[toolName];

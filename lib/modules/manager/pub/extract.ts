@@ -1,64 +1,74 @@
-import { load } from 'js-yaml';
-import { logger } from '../../../logger';
+import is from '@sindresorhus/is';
 import { DartDatasource } from '../../datasource/dart';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import type { PackageDependency, PackageFileContent } from '../types';
+import type { PubspecSchema } from './schema';
+import { parsePubspec } from './utils';
 
-function getDeps(
-  depsObj: { [x: string]: any },
-  preset: { depType: string }
+function extractFromSection(
+  pubspec: PubspecSchema,
+  sectionKey: keyof Pick<PubspecSchema, 'dependencies' | 'dev_dependencies'>
 ): PackageDependency[] {
-  if (!depsObj) {
+  const sectionContent = pubspec[sectionKey];
+  if (!sectionContent) {
     return [];
   }
-  return Object.keys(depsObj).reduce((acc, depName) => {
+
+  const datasource = DartDatasource.id;
+  const deps: PackageDependency[] = [];
+  for (const depName of Object.keys(sectionContent)) {
     if (depName === 'meta') {
-      return acc;
+      continue;
     }
 
-    const section = depsObj[depName];
-
-    let currentValue: string | null = null;
-    if (section?.version) {
-      currentValue = section.version.toString();
-    } else if (section) {
-      if (typeof section === 'string') {
-        currentValue = section;
-      }
-      if (typeof section === 'number') {
-        currentValue = section.toString();
+    let currentValue = sectionContent[depName];
+    if (!is.string(currentValue)) {
+      const version = currentValue.version;
+      if (version) {
+        currentValue = version;
+      } else {
+        continue;
       }
     }
 
-    const dep: PackageDependency = { ...preset, depName, currentValue };
+    deps.push({ depName, depType: sectionKey, currentValue, datasource });
+  }
 
-    return [...acc, dep];
-  }, [] as PackageDependency[]);
+  return deps;
+}
+
+function extractFlutter(pubspec: PubspecSchema): PackageDependency[] {
+  const currentValue = pubspec.environment.flutter;
+  if (!currentValue) {
+    return [];
+  }
+
+  return [
+    {
+      depName: 'flutter',
+      currentValue,
+      datasource: FlutterVersionDatasource.id,
+    },
+  ];
 }
 
 export function extractPackageFile(
   content: string,
   packageFile: string
 ): PackageFileContent | null {
-  try {
-    // TODO: fix me (#9610)
-    const doc = load(content, { json: true }) as any;
-    const deps = [
-      ...getDeps(doc.dependencies, {
-        depType: 'dependencies',
-      }),
-      ...getDeps(doc.dev_dependencies, {
-        depType: 'dev_dependencies',
-      }),
-    ];
+  const pubspec = parsePubspec(packageFile, content);
+  if (!pubspec) {
+    return null;
+  }
 
-    if (deps.length) {
-      return {
-        datasource: DartDatasource.id,
-        deps,
-      };
-    }
-  } catch (err) {
-    logger.debug({ packageFile, err }, `Could not parse YAML`);
+  const deps = [
+    ...extractFromSection(pubspec, 'dependencies'),
+    ...extractFromSection(pubspec, 'dev_dependencies'),
+    ...extractFlutter(pubspec),
+  ];
+
+  if (deps.length) {
+    return { deps };
   }
   return null;
 }
