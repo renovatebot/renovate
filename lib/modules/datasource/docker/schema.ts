@@ -18,8 +18,6 @@ export const ManifestObject = z.object({
 export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
-  // make it optional for easier testing
-  size: z.number().optional(),
 });
 /**
  * OCI platform properties
@@ -153,6 +151,3 @@ export const Manifest = ManifestObject.passthrough()
 
 export type Manifest = z.infer<typeof Manifest>;
 export const ManifestJson = Json.pipe(Manifest);
-
-export const OciConfig = z.union([OciImageConfig, OciHelmConfig]);
-export type OciConfig = z.infer<typeof OciConfig>;

@@ -34,7 +34,8 @@ import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
 import {
   DistributionManifest,
   ManifestJson,
-  OciConfig,
+  OciHelmConfig,
+  OciImageConfig,
   OciImageManifest,
 } from './schema';
 
@@ -171,7 +172,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     configDigest: string
-  ): Promise<HttpResponse<OciConfig> | undefined> {
+  ): Promise<HttpResponse<OciImageConfig> | undefined> {
     logger.trace(
       `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
     );
@@ -199,7 +200,52 @@ export class DockerDatasource extends Datasource {
         headers,
         noAuth: true,
       },
-      OciConfig
+      OciImageConfig
+    );
+  }
+
+  @cache({
+    namespace: 'datasource-docker-imageconfig',
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      configDigest: string
+    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
+    ttlMinutes: 1440 * 28,
+  })
+  public async getHelmConfig(
+    registryHost: string,
+    dockerRepository: string,
+    configDigest: string
+  ): Promise<HttpResponse<OciHelmConfig> | undefined> {
+    logger.trace(
+      `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
+    );
+
+    const headers = await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository
+    );
+    // istanbul ignore if: Should never happen
+    if (!headers) {
+      logger.warn('No docker auth found - returning');
+      return undefined;
+    }
+    const url = joinUrlParts(
+      registryHost,
+      'v2',
+      dockerRepository,
+      'blobs',
+      configDigest
+    );
+    return await this.http.getJson(
+      url,
+      {
+        headers,
+        noAuth: true,
+      },
+      OciHelmConfig
     );
   }
 
@@ -268,8 +314,8 @@ export class DockerDatasource extends Datasource {
           );
           return null;
         }
+      // istanbul ignore next: can't happen
       default:
-        // istanbul ignore next: can't happen
         return null;
     }
   }
@@ -299,7 +345,10 @@ export class DockerDatasource extends Datasource {
           'head'
         );
       } catch (_err) {
-        const err = _err instanceof ExternalHostError ? _err.err : _err;
+        const err =
+          _err instanceof ExternalHostError
+            ? _err.err
+            : /* istanbul ignore next: can never happen */ _err;
 
         if (
           typeof err.statusCode === 'number' &&
@@ -405,53 +454,54 @@ export class DockerDatasource extends Datasource {
       }
 
       switch (manifest.config.mediaType) {
-        case 'application/vnd.cncf.helm.config.v1+json':
+        case 'application/vnd.cncf.helm.config.v1+json': {
           if (labels[sourceLabel]) {
             // we already have the source url, so no need to pull the config
             return labels;
           }
+          const configResponse = await this.getHelmConfig(
+            registryHost,
+            dockerRepository,
+            manifest.config.digest
+          );
+
+          if (configResponse) {
+            // Helm chart
+            const url = findHelmSourceUrl(configResponse.body);
+            if (url) {
+              labels[sourceLabel] = url;
+            }
+          }
           break;
+        }
         case 'application/vnd.oci.image.config.v1+json':
-        case 'application/vnd.docker.container.image.v1+json':
+        case 'application/vnd.docker.container.image.v1+json': {
           if (labels[sourceLabel] && labels[gitRefLabel]) {
             // we already have the source url, so no need to pull the config
             return labels;
           }
+          const configResponse = await this.getImageConfig(
+            registryHost,
+            dockerRepository,
+            manifest.config.digest
+          );
+
+          // istanbul ignore if: should never happen
+          if (!configResponse) {
+            return labels;
+          }
+
+          const body = configResponse.body;
+          if (body.config) {
+            labels = { ...labels, ...body.config.Labels };
+          } else {
+            logger.debug(
+              { headers: configResponse.headers, body },
+              `manifest blob response body missing the "config" property`
+            );
+          }
           break;
-      }
-
-      if (!manifest.config?.digest) {
-        logger.debug(
-          { registryHost, dockerRepository, tag },
-          'No config digest found in manifest'
-        );
-        return labels;
-      }
-
-      const configResponse = await this.getImageConfig(
-        registryHost,
-        dockerRepository,
-        manifest.config.digest
-      );
-
-      if (!configResponse) {
-        return labels;
-      }
-
-      const body = configResponse.body;
-      if ('name' in body && 'version' in body) {
-        // Helm chart
-        const url = findHelmSourceUrl(body);
-        if (url) {
-          labels[sourceLabel] = url;
         }
-      } else if ('config' in body && body.config) {
-        labels = { ...labels, ...body.config.Labels };
-      } else {
-        logger.debug(
-          { headers: configResponse.headers, body },
-          `manifest blob response body missing the "config" property`
-        );
       }
 
       if (labels) {
@@ -783,7 +833,9 @@ export class DockerDatasource extends Datasource {
 
         if (architecture && manifestResponse) {
           const parse = ManifestJson.safeParse(manifestResponse.body);
-          const manifestList = parse.success ? parse.data : null;
+          const manifestList = parse.success
+            ? parse.data
+            : /* istanbul ignore next: hard to test */ null;
           if (
             manifestList &&
             (manifestList.mediaType ===

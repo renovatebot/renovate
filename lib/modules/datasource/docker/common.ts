@@ -7,6 +7,7 @@ import {
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { coerceArray } from '../../../util/array';
 import { detectPlatform } from '../../../util/common';
 import { parseGitUrl } from '../../../util/git/url';
 import { toSha256 } from '../../../util/hash';
@@ -93,7 +94,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using ecr auth for Docker registry`
       );
-      const [, region] = ecrRegex.exec(registryHost) ?? [];
+      const [, region] = coerceArray(ecrRegex.exec(registryHost));
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
