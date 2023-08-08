@@ -132,7 +132,7 @@ export function mapBranchStateContextToLabel(
   switch (context) {
     //TODO #21442
     case 'renovate/stability-days':
-      labelName = labelMapping?.minimumReleaseAgeLabel;
+      //not usefully for Gerrit, Renovate only creates the change after the minimumReleaseAge has been exceeded. That way the label would always be green...
       break;
     case 'renovate/merge-confidence':
       labelName = labelMapping?.mergeConfidenceLabel;

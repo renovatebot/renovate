@@ -51,7 +51,6 @@ let config: {
   config?: GerritProjectInfo;
   labels: Record<string, GerritLabelTypeInfo>;
   labelMappings?: {
-    minimumReleaseAgeLabel?: string;
     mergeConfidenceLabel?: string;
   };
   gerritUsername?: string;

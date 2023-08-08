@@ -469,14 +469,9 @@ describe('modules/platform/gerrit/index', () => {
       beforeEach(() => {
         writeToConfig({
           labelMappings: {
-            minimumReleaseAgeLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
           },
           labels: {
-            'Renovate-Stability': {
-              values: { '0': 'default', '-1': 'Unstable', '1': 'Stable' },
-              default_value: 0,
-            },
             'Renovate-Merge-Confidence': {
               values: { '0': 'default', '-1': 'Unsatisfied', '1': 'Satisfied' },
               default_value: 0,
@@ -487,22 +482,10 @@ describe('modules/platform/gerrit/index', () => {
 
       it.each([
         {
-          ctx: 'renovate/stability-days',
-          label: 'Renovate-Stability',
-          labelValue: { rejected: partial<GerritAccountInfo>({}) },
-          expectedState: 'red' as BranchStatus,
-        },
-        {
           ctx: 'renovate/merge-confidence',
           label: 'Renovate-Merge-Confidence',
           labelValue: { rejected: partial<GerritAccountInfo>({}) },
           expectedState: 'red' as BranchStatus,
-        },
-        {
-          ctx: 'renovate/stability-days',
-          label: 'Renovate-Stability',
-          labelValue: { approved: partial<GerritAccountInfo>({}) },
-          expectedState: 'green' as BranchStatus,
         },
         {
           ctx: 'renovate/merge-confidence',
@@ -558,14 +541,9 @@ describe('modules/platform/gerrit/index', () => {
       beforeEach(() => {
         writeToConfig({
           labelMappings: {
-            minimumReleaseAgeLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
           },
           labels: {
-            'Renovate-Stability': {
-              values: { '0': 'default', '-1': 'Unstable', '1': 'Stable' },
-              default_value: 0,
-            },
             'Renovate-Merge-Confidence': {
               values: { '0': 'default', '-1': 'Unsatisfied', '1': 'Satisfied' },
               default_value: 0,
@@ -575,24 +553,6 @@ describe('modules/platform/gerrit/index', () => {
       });
 
       it.each([
-        {
-          ctx: 'renovate/stability-days',
-          branchState: 'red' as BranchStatus,
-          expectedVote: -1,
-          expectedLabel: 'Renovate-Stability',
-        },
-        {
-          ctx: 'renovate/stability-days',
-          branchState: 'yellow' as BranchStatus,
-          expectedVote: -1,
-          expectedLabel: 'Renovate-Stability',
-        },
-        {
-          ctx: 'renovate/stability-days',
-          branchState: 'green' as BranchStatus,
-          expectedVote: 1,
-          expectedLabel: 'Renovate-Stability',
-        },
         {
           ctx: 'renovate/merge-confidence',
           branchState: 'red' as BranchStatus,

@@ -38,28 +38,20 @@ It works similar to the default option `"pr"`.
 
 ## Optional features
 
-The [`minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage) feature can be used.
+The [Merge Confidence](https://docs.renovatebot.com/merge-confidence/) feature can be used.
 It needs only a corresponding Gerrit-Label and the permission to set the min/max value.
 
-You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
-This is because Renovate will query the label and prevent `automerge` accordingly.
-
-The same applies to the [Merge Confidence feature](https://docs.renovatebot.com/merge-confidence/).
-
-The Gerrit-Label names can be configured in your Renovate config file:
+You must set a label, for Renovate to pass the information to the Gerrit changes.
 
 ```json
 {
   "gerritLabelMapping": {
-    "minimumReleaseAgeLabel": "Renovate-MinimumReleaseAge",
     "mergeConfidenceLabel": "Renovate-Merge-Confidence"
   }
 }
 ```
-
-## TODOS
-
-- Images in Markdown comments, needs [Gerrit-Feature](https://bugs.chromium.org/p/gerrit/issues/detail?id=2015)
+You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
+This is because Renovate will query the label and prevent `automerge` accordingly.
 
 ## Unsupported platform features/concepts
 
