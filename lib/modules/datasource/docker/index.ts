@@ -21,15 +21,22 @@ import {
   DOCKER_HUB,
   dockerDatasourceId,
   extractDigestFromResponseBody,
+  findHelmSourceUrl,
   findLatestStable,
   getAuthHeaders,
   getRegistryRepository,
   gitRefLabel,
   isDockerHost,
+  sourceLabel,
   sourceLabels,
 } from './common';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
-import type { Manifest, OciImageConfig } from './schema';
+import {
+  DistributionManifest,
+  ManifestJson,
+  OciConfig,
+  OciImageManifest,
+} from './schema';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -164,7 +171,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     configDigest: string
-  ): Promise<HttpResponse<OciImageConfig> | undefined> {
+  ): Promise<HttpResponse<OciConfig> | undefined> {
     logger.trace(
       `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
     );
@@ -186,10 +193,14 @@ export class DockerDatasource extends Datasource {
       'blobs',
       configDigest
     );
-    return await this.http.getJson<OciImageConfig>(url, {
-      headers,
-      noAuth: true,
-    });
+    return await this.http.getJson(
+      url,
+      {
+        headers,
+        noAuth: true,
+      },
+      OciConfig
+    );
   }
 
   private async getConfigDigest(
@@ -197,11 +208,23 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     tag: string
   ): Promise<string | null> {
+    return (
+      (await this.getManifest(registry, dockerRepository, tag))?.config
+        ?.digest ?? null
+    );
+  }
+
+  private async getManifest(
+    registry: string,
+    dockerRepository: string,
+    tag: string
+  ): Promise<OciImageManifest | DistributionManifest | null> {
     const manifestResponse = await this.getManifestResponse(
       registry,
       dockerRepository,
       tag
     );
+
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
@@ -209,82 +232,46 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    // TODO: validate schema
-    const manifest = JSON.parse(manifestResponse.body) as Manifest;
-    if (manifest.schemaVersion !== 2) {
+
+    // Softfail on invalid manifests
+    const parsed = ManifestJson.safeParse(manifestResponse.body);
+    if (!parsed.success) {
       logger.debug(
-        { registry, dockerRepository, tag },
-        'Manifest schema version is not 2'
+        { registry, dockerRepository, tag, err: parsed.error },
+        'Invalid manifest response'
       );
       return null;
     }
 
-    if (
-      manifest.mediaType ===
-      'application/vnd.docker.distribution.manifest.list.v2+json'
-    ) {
-      if (manifest.manifests.length) {
-        logger.trace(
-          { registry, dockerRepository, tag },
-          'Found manifest list, using first image'
-        );
-        return this.getConfigDigest(
-          registry,
-          dockerRepository,
-          manifest.manifests[0].digest
-        );
-      } else {
-        logger.debug(
-          { manifest },
-          'Invalid manifest list with no manifests - returning'
-        );
+    const manifest = parsed.data;
+
+    switch (manifest.mediaType) {
+      case 'application/vnd.docker.distribution.manifest.v2+json':
+      case 'application/vnd.oci.image.manifest.v1+json':
+        return manifest;
+      case 'application/vnd.docker.distribution.manifest.list.v2+json':
+      case 'application/vnd.oci.image.index.v1+json':
+        if (manifest.manifests.length) {
+          logger.trace(
+            { registry, dockerRepository, tag },
+            'Found manifest list, using first image'
+          );
+          return this.getManifest(
+            registry,
+            dockerRepository,
+            manifest.manifests[0].digest
+          );
+        } else {
+          logger.debug(
+            { manifest },
+            'Invalid manifest list with no manifests - returning'
+          );
+          return null;
+        }
+      default:
+        // istanbul ignore next: can't happen
         return null;
-      }
     }
-
-    if (
-      manifest.mediaType ===
-        'application/vnd.docker.distribution.manifest.v2+json' &&
-      is.string(manifest.config?.digest)
-    ) {
-      return manifest.config?.digest;
-    }
-
-    // OCI image lists are not required to specify a mediaType
-    if (
-      manifest.mediaType === 'application/vnd.oci.image.index.v1+json' ||
-      (!manifest.mediaType && 'manifests' in manifest)
-    ) {
-      if (manifest.manifests.length) {
-        logger.trace(
-          { registry, dockerRepository, tag },
-          'Found manifest index, using first image'
-        );
-        return this.getConfigDigest(
-          registry,
-          dockerRepository,
-          manifest.manifests[0].digest
-        );
-      } else {
-        logger.debug(
-          { manifest },
-          'Invalid manifest index with no manifests - returning'
-        );
-        return null;
-      }
-    }
-
-    // OCI manifests are not required to specify a mediaType
-    if (
-      (manifest.mediaType === 'application/vnd.oci.image.manifest.v1+json' ||
-        (!manifest.mediaType && 'config' in manifest)) &&
-      is.string(manifest.config?.digest)
-    ) {
-      return manifest.config?.digest;
-    }
-
-    logger.debug({ manifest }, 'Invalid manifest - returning');
-    return null;
   }
 
   @cache({
@@ -350,7 +337,13 @@ export class DockerDatasource extends Datasource {
         dockerRepository,
         configDigest
       );
-      if (configResponse) {
+
+      // TODO: fix me, architecture is required in spec
+      if (
+        configResponse &&
+        ('config' in configResponse.body ||
+          'architecture' in configResponse.body)
+      ) {
         const architecture = configResponse.body.architecture ?? null;
         logger.debug(
           `Current digest ${currentDigest} relates to architecture ${
@@ -393,35 +386,67 @@ export class DockerDatasource extends Datasource {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
     try {
       let labels: Record<string, string> | undefined = {};
-      const configDigest = await this.getConfigDigest(
+      const manifest = await this.getManifest(
         registryHost,
         dockerRepository,
         tag
       );
-      if (!configDigest) {
-        return {};
+
+      if (!manifest) {
+        logger.debug(
+          { registryHost, dockerRepository, tag },
+          'No manifest found'
+        );
+        return undefined;
       }
 
-      const headers = await getAuthHeaders(
-        this.http,
+      if ('annotations' in manifest && manifest.annotations) {
+        labels = manifest.annotations;
+      }
+
+      switch (manifest.config.mediaType) {
+        case 'application/vnd.cncf.helm.config.v1+json':
+          if (labels[sourceLabel]) {
+            // we already have the source url, so no need to pull the config
+            return labels;
+          }
+          break;
+        case 'application/vnd.oci.image.config.v1+json':
+        case 'application/vnd.docker.container.image.v1+json':
+          if (labels[sourceLabel] && labels[gitRefLabel]) {
+            // we already have the source url, so no need to pull the config
+            return labels;
+          }
+          break;
+      }
+
+      if (!manifest.config?.digest) {
+        logger.debug(
+          { registryHost, dockerRepository, tag },
+          'No config digest found in manifest'
+        );
+        return labels;
+      }
+
+      const configResponse = await this.getImageConfig(
         registryHost,
-        dockerRepository
+        dockerRepository,
+        manifest.config.digest
       );
-      // istanbul ignore if: Should never happen
-      if (!headers) {
-        logger.warn('No docker auth found - returning');
-        return {};
-      }
-      const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
-      const configResponse = await this.http.get(url, {
-        headers,
-        noAuth: true,
-      });
 
-      // TODO: validate schema
-      const body = JSON.parse(configResponse.body) as OciImageConfig;
-      if (body.config) {
-        labels = body.config.Labels;
+      if (!configResponse) {
+        return labels;
+      }
+
+      const body = configResponse.body;
+      if ('name' in body && 'version' in body) {
+        // Helm chart
+        const url = findHelmSourceUrl(body);
+        if (url) {
+          labels[sourceLabel] = url;
+        }
+      } else if ('config' in body && body.config) {
+        labels = { ...labels, ...body.config.Labels };
       } else {
         logger.debug(
           { headers: configResponse.headers, body },
@@ -757,15 +782,14 @@ export class DockerDatasource extends Datasource {
         );
 
         if (architecture && manifestResponse) {
-          // TODO: validate Schema
-          const manifestList = JSON.parse(manifestResponse.body) as Manifest;
+          const parse = ManifestJson.safeParse(manifestResponse.body);
+          const manifestList = parse.success ? parse.data : null;
           if (
-            manifestList.schemaVersion === 2 &&
+            manifestList &&
             (manifestList.mediaType ===
               'application/vnd.docker.distribution.manifest.list.v2+json' ||
               manifestList.mediaType ===
-                'application/vnd.oci.image.index.v1+json' ||
-              (!manifestList.mediaType && 'manifests' in manifestList))
+                'application/vnd.oci.image.index.v1+json')
           ) {
             for (const manifest of manifestList.manifests) {
               if (manifest.platform?.architecture === architecture) {
@@ -777,6 +801,10 @@ export class DockerDatasource extends Datasource {
         }
 
         if (!digest) {
+          logger.debug(
+            { registryHost, dockerRepository, newTag },
+            'Extraction digest from manifest response body is deprecated'
+          );
           digest = extractDigestFromResponseBody(manifestResponse!);
         }
       }

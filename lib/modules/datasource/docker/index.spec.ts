@@ -22,6 +22,10 @@ const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
 const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
 
+// jest
+//   .spyOn(logger.logger, 'debug')
+//   .mockImplementation((...args) => console.error(...args));
+
 function mockEcrAuthResolve(
   res: Partial<GetAuthorizationTokenCommandOutput> = {}
 ) {
@@ -452,7 +456,10 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(200, {
@@ -474,6 +481,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'arm',
                 os: 'linux',
@@ -483,6 +491,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: '386',
                 os: 'linux',
@@ -491,6 +500,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'amd64',
                 os: 'linux',
@@ -544,10 +554,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
-        .reply(200, {});
+        .reply(200, { config: {} });
       httpMock
         .scope(baseUrl)
         .get('/')
@@ -567,6 +580,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'arm',
                 os: 'linux',
@@ -576,6 +590,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: '386',
                 os: 'linux',
@@ -584,6 +599,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'amd64',
                 os: 'linux',
@@ -605,7 +621,7 @@ describe('modules/datasource/docker/index', () => {
         `Current digest ${currentDigest} relates to architecture null`
       );
       expect(res).toBe(
-        'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
+        'sha256:5194622ded36da4097a53c4ec9d85bba370d9e826e88a74fa910c46ddbf3208c'
       );
     });
 
@@ -636,7 +652,10 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.manifest.v1+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(200, {
@@ -658,6 +677,7 @@ describe('modules/datasource/docker/index', () => {
             manifests: [
               {
                 digest: 'some-new-image-digest',
+                mediaType: 'application/vnd.oci.image.manifest.v1+json',
                 platform: {
                   architecture: 'amd64',
                 },
@@ -710,7 +730,10 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(200, {
@@ -729,6 +752,7 @@ describe('modules/datasource/docker/index', () => {
           manifests: [
             {
               digest: 'some-new-image-digest',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
               platform: {
                 architecture: 'amd64',
               },
@@ -861,7 +885,10 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(404, {});
@@ -1280,12 +1307,16 @@ describe('modules/datasource/docker/index', () => {
           .reply(200, {
             schemaVersion: 2,
             mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-            config: { digest: 'some-config-digest' },
+            config: {
+              digest: 'some-config-digest',
+              mediaType: 'application/vnd.docker.container.image.v1+json',
+            },
           })
           .get('/')
           .reply(200)
           .get('/node/blobs/some-config-digest')
           .reply(200, {
+            architecture: 'amd64',
             config: {
               Labels: {
                 'org.opencontainers.image.source':
@@ -1680,10 +1711,14 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -1740,10 +1775,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
-        .reply(200, {}); // DockerDatasource.getLabels() inner response
+        .reply(200, { architecture: 'amd64' }); // DockerDatasource.getLabels() inner response
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
@@ -1781,16 +1819,25 @@ describe('modules/datasource/docker/index', () => {
           schemaVersion: 2,
           mediaType:
             'application/vnd.docker.distribution.manifest.list.v2+json',
-          manifests: [{ digest: 'some-image-digest' }],
+          manifests: [
+            {
+              digest: 'some-image-digest',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            },
+          ],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -1894,16 +1941,25 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.index.v1+json',
-          manifests: [{ digest: 'some-image-digest' }],
+          manifests: [
+            {
+              digest: 'some-image-digest',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+            },
+          ],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.manifest.v1+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -1940,15 +1996,24 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.index.v1+json',
-          manifests: [{ digest: 'some-image-digest' }],
+          manifests: [
+            {
+              digest: 'some-image-digest',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+            },
+          ],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -2022,7 +2087,10 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(302, undefined, {
@@ -2034,6 +2102,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/some-config-digest')
         .query({ 'X-Amz-Algorithm': 'xxxx' })
         .reply(200, {
+          architecture: 'amd64',
           config: {},
         });
       const res = await getPkgReleases({
@@ -2079,10 +2148,14 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/visualon/drone-git/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':

@@ -7,6 +7,8 @@ import {
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { detectPlatform } from '../../../util/common';
+import { parseGitUrl } from '../../../util/git/url';
 import { toSha256 } from '../../../util/hash';
 import * as hostRules from '../../../util/host-rules';
 import type { Http } from '../../../util/http';
@@ -24,14 +26,13 @@ import {
 } from '../../../util/url';
 import { api as dockerVersioning } from '../../versioning/docker';
 import { ecrRegex, getECRAuthToken } from './ecr';
+import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
 export const dockerDatasourceId = 'docker' as const;
 
-export const sourceLabels: string[] = [
-  'org.opencontainers.image.source',
-  'org.label-schema.vcs-url',
-];
+export const sourceLabel = 'org.opencontainers.image.source' as const;
+export const sourceLabels = [sourceLabel, 'org.label-schema.vcs-url'] as const;
 
 export const gitRefLabel = 'org.opencontainers.image.revision';
 
@@ -294,4 +295,34 @@ export function findLatestStable(tags: string[]): string | null {
     .sort((a, b) => dockerVersioning.sortVersions(a, b));
 
   return versions.pop() ?? tags.slice(-1).pop() ?? null;
+}
+
+const chartRepo = regEx(/charts?|helm|helm-charts/i);
+
+function isPossibleChartRepo(url: string): boolean {
+  if (detectPlatform(url) === null) {
+    return false;
+  }
+
+  const parsed = parseGitUrl(url);
+  return chartRepo.test(parsed.name);
+}
+
+export function findHelmSourceUrl(release: OciHelmConfig): string | null {
+  if (release.home && isPossibleChartRepo(release.home)) {
+    return release.home;
+  }
+
+  if (!release.sources?.length) {
+    return null;
+  }
+
+  for (const url of release.sources) {
+    if (isPossibleChartRepo(url)) {
+      return url;
+    }
+  }
+
+  // fallback
+  return release.sources[0];
 }
