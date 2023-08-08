@@ -2,7 +2,9 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import { isNotNullOrUndefined } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
@@ -112,6 +114,49 @@ function extractContainer(container: unknown): PackageDependency | undefined {
   return undefined;
 }
 
+const runnerVersionRegex = regEx(
+  /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/
+);
+
+function extractRunner(runner: string): PackageDependency | null {
+  const runnerVersionGroups = runnerVersionRegex.exec(runner)?.groups;
+  if (!runnerVersionGroups) {
+    return null;
+  }
+
+  const { depName, currentValue } = runnerVersionGroups;
+
+  if (!GithubRunnersDatasource.isValidRunner(depName, currentValue)) {
+    return null;
+  }
+
+  const dependency: PackageDependency = {
+    depName,
+    currentValue,
+    replaceString: `${depName}-${currentValue}`,
+    depType: 'github-runner',
+    datasource: GithubRunnersDatasource.id,
+    autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+  };
+
+  if (!dockerVersioning.api.isValid(currentValue)) {
+    dependency.skipReason = 'invalid-version';
+  }
+
+  return dependency;
+}
+
+function extractRunners(runner: unknown): PackageDependency[] {
+  const runners: string[] = [];
+  if (is.string(runner)) {
+    runners.push(runner);
+  } else if (is.array(runner, is.string)) {
+    runners.push(...runner);
+  }
+
+  return runners.map(extractRunner).filter(isNotNullOrUndefined);
+}
+
 function extractWithYAMLParser(
   content: string,
   packageFile: string
@@ -144,6 +189,8 @@ function extractWithYAMLParser(
         deps.push(dep);
       }
     }
+
+    deps.push(...extractRunners(job?.['runs-on']));
   }
 
   return deps;
