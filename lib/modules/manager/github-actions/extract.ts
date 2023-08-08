@@ -92,13 +92,17 @@ const runnerVersionRegex = regEx(
   /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/
 );
 
-function extractRunner(runner: string): PackageDependency | undefined {
+function extractRunner(runner: string): PackageDependency | null {
   const runnerVersionGroups = runnerVersionRegex.exec(runner)?.groups;
   if (!runnerVersionGroups) {
-    return;
+    return null;
   }
 
   const { depName, currentValue } = runnerVersionGroups;
+
+  if (!GithubRunnersDatasource.isValidRunner(depName, currentValue)) {
+    return null;
+  }
 
   const dependency: PackageDependency = {
     depName,

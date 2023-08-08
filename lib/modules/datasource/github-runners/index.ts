@@ -8,19 +8,26 @@ export class GithubRunnersDatasource extends Datasource {
   /**
    * Only add stable runners to the datasource. See datasource readme for details.
    */
-  private static readonly releases: {
-    [packageName: string]: Release[] | undefined;
-  } = {
-    ubuntu: [{ version: '22.04' }, { version: '20.04' }],
+  private static readonly releases: Record<string, Release[] | undefined> = {
+    ubuntu: [{ version: '22.04' }, { version: '20.04' }, { version: '18.04' }],
     macos: [
       { version: '13' },
       { version: '13-xl' },
       { version: '12' },
       { version: '12-xl' },
       { version: '11' },
+      { version: '10.15' },
     ],
     windows: [{ version: '2022' }, { version: '2019' }],
   };
+
+  public static isValidRunner(
+    runnerName: string,
+    runnerVersion: string
+  ): boolean {
+    const runnerReleases = GithubRunnersDatasource.releases[runnerName];
+    return !!runnerReleases?.some(({ version }) => version === runnerVersion);
+  }
 
   override readonly defaultVersioning = dockerVersioningId;
 
