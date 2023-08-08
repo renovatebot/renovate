@@ -667,7 +667,9 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
 
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toContain('platform is github');
+      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
+        'platform is github'
+      );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 
