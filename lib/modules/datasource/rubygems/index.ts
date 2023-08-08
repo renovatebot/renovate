@@ -13,10 +13,10 @@ import { MetadataCache } from './metadata-cache';
 import { GemInfo, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
 
-function unlessServerSide<T, E>(
-  err: E,
-  cb: () => AsyncResult<T, E>
-): AsyncResult<T, E> {
+function unlessServerSide<
+  T extends NonNullable<unknown>,
+  E extends NonNullable<unknown>
+>(err: E, cb: () => AsyncResult<T, E>): AsyncResult<T, E> {
   if (err instanceof HttpError && err.response?.statusCode) {
     const code = err.response.statusCode;
     if (code >= 500 && code <= 599) {

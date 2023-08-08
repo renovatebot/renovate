@@ -29,7 +29,7 @@ runs:
         }}-${{
           inputs.node-version
         }}-${{
-          hashFiles('yarn.lock')
+          hashFiles('pnpm-lock.yaml')
         }}' >> "$GITHUB_ENV"
 
     - name: Restore `node_modules`
@@ -55,7 +55,7 @@ runs:
       uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ env.CACHE_HIT != 'true' && 'yarn' || '' }}
+        cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
 
     - name: Install dependencies
       uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
@@ -63,9 +63,7 @@ runs:
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: |
-          yarn install --frozen-lockfile --ignore-scripts
-          yarn prepare:re2
+        command: pnpm install
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
@@ -79,7 +77,7 @@ runs:
       shell: bash
       run: >
         if [[ -d lib ]]; then
-          yarn prepare:generate;
+          pnpm prepare:generate;
         fi
 
     - name: Git config

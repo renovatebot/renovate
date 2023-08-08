@@ -38,7 +38,7 @@ env:
     data/
     tools/
     package.json
-    yarn.lock
+    pnpm-lock.yaml
     codecov.yml
 
 jobs:
@@ -121,7 +121,7 @@ jobs:
           FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
-          echo "$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
@@ -187,7 +187,7 @@ jobs:
           key: eslint-main-cache
 
       - name: Lint
-        run: yarn -s eslint-ci
+        run: pnpm eslint-ci
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -230,7 +230,7 @@ jobs:
           key: prettier-main-cache
 
       - name: Lint
-        run: yarn -s prettier --cache-location .cache/prettier
+        run: pnpm prettier --cache-location .cache/prettier
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -267,10 +267,10 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@8f3516061301755c97ff833a8e933f09282cc5b5 # v11.0.0
 
       - name: Lint fenced code blocks
-        run: yarn -s doc-fence-check
+        run: pnpm doc-fence-check
 
       - name: Lint documentation
-        run: yarn -s lint-documentation
+        run: pnpm lint-documentation
 
   lint-other:
     needs: [setup]
@@ -288,13 +288,13 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint project file structure
-        run: yarn -s ls-lint
+        run: pnpm ls-lint
 
       - name: Check git version
-        run: yarn -s git-check
+        run: pnpm git-check
 
       - name: Test schema
-        run: yarn -s test-schema
+        run: pnpm test-schema
 
   test:
     needs: [setup, prefetch]
@@ -331,7 +331,7 @@ jobs:
             }}-${{
               env.NODE_VERSION
             }}-${{
-              hashFiles('yarn.lock')
+              hashFiles('pnpm-lock.yaml')
             }}-${{
               matrix.cache-key
             }}
@@ -341,7 +341,7 @@ jobs:
         run: |
           for shard in ${{ matrix.shards }};
           do
-            TEST_SHARD="$shard" yarn -s jest \
+            TEST_SHARD="$shard" pnpm jest \
               --ci \
               --test-timeout ${{ matrix.test-timeout-milliseconds }} \
               --coverage ${{ matrix.coverage }}
@@ -396,11 +396,11 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Merge coverage reports
-        run: yarn -s nyc merge ./coverage/json ./coverage/nyc/coverage.json
+        run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
       - name: Check coverage threshold
         run: |
-          yarn -s nyc check-coverage -t ./coverage/nyc \
+          pnpm nyc check-coverage -t ./coverage/nyc \
             --branches 98 \
             --functions 100 \
             --lines 100 \
@@ -455,10 +455,10 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Build
-        run: yarn -s build
+        run: pnpm build
 
       - name: Pack
-        run: yarn -s test-e2e:pack
+        run: pnpm test-e2e:pack
 
       - name: Upload
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
@@ -482,7 +482,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Build
-        run: yarn -s build:docs
+        run: pnpm build:docs
 
       - name: Upload
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
@@ -516,10 +516,10 @@ jobs:
           name: renovate-package
 
       - name: Install dependencies
-        run: yarn -s test-e2e:install
+        run: pnpm test-e2e:install
 
       - name: E2E Test
-        run: yarn -s test-e2e:run
+        run: pnpm test-e2e:run
 
   release:
     needs:
@@ -564,8 +564,8 @@ jobs:
 
       - name: semantic-release
         run: |
-          echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' >> ./.npmrc
-          yarn -s semantic-release --dry-run ${{env.DRY_RUN}}
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
+          pnpm semantic-release --dry-run ${{env.DRY_RUN}}
           git checkout -- .npmrc
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
