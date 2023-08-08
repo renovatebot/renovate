@@ -10,7 +10,11 @@ describe('modules/datasource/github-runners/index', () => {
       });
 
       expect(res).toMatchObject({
-        releases: [{ version: '20.04' }, { version: '22.04' }],
+        releases: [
+          { version: '18.04' },
+          { version: '20.04' },
+          { version: '22.04' },
+        ],
       });
     });
 
