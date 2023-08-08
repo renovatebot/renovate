@@ -173,10 +173,14 @@ export async function getUpdatedPackageFiles(
         );
         firstUpdate = false;
         if (res) {
-          if (bumpPackageVersion && upgrade.bumpVersion) {
+          if (
+            bumpPackageVersion &&
+            upgrade.bumpVersion &&
+            upgrade.packageFileVersion
+          ) {
             const { bumpedContent } = await bumpPackageVersion(
               res,
-              upgrade.packageFileVersion!,
+              upgrade.packageFileVersion,
               upgrade.bumpVersion
             );
             res = bumpedContent;
@@ -202,10 +206,15 @@ export async function getUpdatedPackageFiles(
         fileContent: packageFileContent!,
         upgrade,
       });
-      if (bumpPackageVersion && upgrade.bumpVersion) {
+      if (
+        newContent &&
+        bumpPackageVersion &&
+        upgrade.bumpVersion &&
+        upgrade.packageFileVersion
+      ) {
         const { bumpedContent } = await bumpPackageVersion(
-          newContent!,
-          upgrade.packageFileVersion!,
+          newContent,
+          upgrade.packageFileVersion,
           upgrade.bumpVersion
         );
         newContent = bumpedContent;
