@@ -50,6 +50,7 @@ You must set a label, for Renovate to pass the information to the Gerrit changes
   }
 }
 ```
+
 You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
 This is because Renovate will query the label and prevent `automerge` accordingly.
 
