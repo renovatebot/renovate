@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
+import { coerceArray } from '../../../util/array';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
 import type {
   BranchCache,
@@ -13,7 +14,6 @@ import type {
   BranchSummary,
   BranchUpgradeConfig,
 } from '../../types';
-import {coerceArray} from "../../../util/array";
 
 export function runRenovateRepoStats(
   config: RenovateConfig,
