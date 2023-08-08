@@ -1,7 +1,12 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/github-actions/extract', () => {
+  beforeEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
@@ -35,6 +40,80 @@ describe('modules/manager/github-actions/extract', () => {
       expect(
         res?.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(8);
+    });
+
+    it('use github.com as registry when no settings provided', () => {
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://github.enterprise.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toEqual([
+        'https://github.enterprise.com',
+        'https://github.com',
+      ]);
+    });
+
+    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://github.enterprise.com/api/v3',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toEqual([
+        'https://github.enterprise.com',
+        'https://github.com',
+      ]);
+    });
+
+    it('use github.com only as registry when running against non-GitHub', () => {
+      GlobalConfig.set({
+        platform: 'bitbucket',
+        endpoint: 'https://bitbucket.enterprise.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('use github.com only as registry when running against github.com', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://github.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('use github.com only as registry when running against api.github.com', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://api.github.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
     it('extracts multiple action tag lines with double quotes and comments', () => {

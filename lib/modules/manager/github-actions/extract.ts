@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -17,7 +18,31 @@ const actionRe = regEx(
 const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
 const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
 
+// detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
+// This reflects the behavior of how GitHub looks up Actions
+// First on the Enterprise Server, then on GitHub.com
+function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
+  const endpoint = GlobalConfig.get('endpoint');
+  const registryUrls = ['https://github.com'];
+  if (endpoint && GlobalConfig.get('platform') === 'github') {
+    const parsedEndpoint = new URL(endpoint);
+
+    if (
+      parsedEndpoint.host !== 'github.com' &&
+      parsedEndpoint.host !== 'api.github.com'
+    ) {
+      registryUrls.unshift(
+        `${parsedEndpoint.protocol}//${parsedEndpoint.host}`
+      );
+      return { registryUrls };
+    }
+  }
+  return {};
+}
+
 function extractWithRegex(content: string): PackageDependency[] {
+  const customRegistryUrlsPackageDependency =
+    detectCustomGitHubRegistryUrlsForActions();
   logger.trace('github-actions.extractWithRegex()');
   const deps: PackageDependency[] = [];
   for (const line of content.split(newlineRegex)) {
@@ -58,6 +83,7 @@ function extractWithRegex(content: string): PackageDependency[] {
         depType: 'action',
         replaceString,
         autoReplaceStringTemplate: `${quotes}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
+        ...customRegistryUrlsPackageDependency,
       };
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;
