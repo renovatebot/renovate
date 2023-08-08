@@ -595,7 +595,7 @@ describe('modules/platform/gerrit/index', () => {
         await expect(
           gerrit.setBranchStatus({
             branchName: 'renovate/dependency-1.x',
-            context: 'renovate/stability-days',
+            context: 'renovate/merge-confidence',
             state: 'red',
             description: 'desc',
           })
