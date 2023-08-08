@@ -117,7 +117,7 @@ export interface PackageDependency<T = Record<string, any>>
   versioning?: string;
   dataType?: string;
   enabled?: boolean;
-  bumpVersion?: ReleaseType | string;
+  bumpVersion?: ReleaseType;
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
@@ -238,7 +238,7 @@ export interface ManagerApi extends ModuleApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string
+    bumpVersion: ReleaseType
   ): Result<BumpPackageVersionResult>;
 
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
@@ -273,6 +273,8 @@ export interface ManagerApi extends ModuleApi {
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>,
     ManagerData<T> {
+  // TODO: remove null
+  constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean | null;

@@ -47,6 +47,7 @@ export interface LookupUpdateConfig
   replacementName?: string;
   replacementNameTemplate?: string;
   replacementVersion?: string;
+  extractVersion?: string;
 }
 
 export interface UpdateResult {

@@ -107,7 +107,7 @@ export function extractPackageFile(
       }
       if (newSectionRecord) {
         sectionRecord = newSectionRecord;
-        // Propably there are also requirements in this line.
+        // Probably there are also requirements in this line.
         line = rawLine.replace(regEx(/^[^=]*=\s*/), '');
         line.split(';').forEach((part) => {
           const dep = parseDep(part, sectionName, sectionRecord);

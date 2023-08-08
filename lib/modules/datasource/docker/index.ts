@@ -14,9 +14,9 @@ import {
   parseLinkHeader,
 } from '../../../util/url';
 import { id as dockerVersioningId } from '../../versioning/docker';
-import { isArtifactoryServer } from '../common';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { isArtifactoryServer } from '../util';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
@@ -559,7 +559,10 @@ export class DockerDatasource extends Datasource {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
+    let page = 0;
+    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
+      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
+      : 20;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -594,7 +597,7 @@ export class DockerDatasource extends Datasource {
         url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
       }
       page += 1;
-    } while (url && page < 20);
+    } while (url && page < pages);
     return tags;
   }
 
@@ -713,7 +716,6 @@ export class DockerDatasource extends Datasource {
     );
     logger.debug(
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
@@ -748,7 +750,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (
-        architecture ||
+        is.string(architecture) ||
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {

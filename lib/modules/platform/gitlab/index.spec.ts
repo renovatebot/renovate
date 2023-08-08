@@ -2054,6 +2054,64 @@ describe('modules/platform/gitlab/index', () => {
         }
       `);
     });
+
+    it('auto-approves when enabled', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .post('/api/v4/projects/undefined/merge_requests/12345/approve')
+        .reply(200);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            autoApprove: true,
+          },
+        })
+      ).toStrictEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
+
+    it('should swallow an error on auto-approve', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .post('/api/v4/projects/undefined/merge_requests/12345/approve')
+        .replyWithError('some error');
+      await expect(
+        gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            autoApprove: true,
+          },
+        })
+      ).toResolve();
+    });
   });
 
   describe('getPr(prNo)', () => {
@@ -2312,6 +2370,37 @@ describe('modules/platform/gitlab/index', () => {
           prBody: 'body',
           state: 'closed',
           targetBranch: 'branch-b',
+        })
+      ).toResolve();
+    });
+
+    it('auto-approves when enabled', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ])
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200)
+        .post('/api/v4/projects/undefined/merge_requests/1/approve')
+        .reply(200);
+      await expect(
+        gitlab.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          platformOptions: {
+            autoApprove: true,
+          },
         })
       ).toResolve();
     });

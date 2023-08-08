@@ -9,7 +9,7 @@ import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
-import { toSha256 } from '../../../../util/hasha';
+import { toSha256 } from '../../../../util/hash';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {
@@ -32,7 +32,7 @@ export async function ensureOnboardingPr(
   branches: BranchConfig[]
 ): Promise<void> {
   if (
-    config.repoIsOnboarded ||
+    config.repoIsOnboarded === true ||
     OnboardingState.onboardingCacheValid ||
     (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
   ) {
@@ -60,8 +60,10 @@ export async function ensureOnboardingPr(
       return;
     }
   }
-  const { rebaseCheckBox, renovateConfigHashComment } =
-    await getRebaseCheckboxComponents(config);
+  const onboardingConfigHashComment = await getOnboardingConfigHashComment(
+    config
+  );
+  const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
     config.productLinks!.homepage
@@ -135,7 +137,7 @@ If you need any further assistance then you can also [request help here](${
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
 
-  prBody += renovateConfigHashComment;
+  prBody += onboardingConfigHashComment;
 
   logger.trace('prBody:\n' + prBody);
 
@@ -203,29 +205,23 @@ If you need any further assistance then you can also [request help here](${
   }
 }
 
-interface RebaseCheckboxComponents {
-  rebaseCheckBox: string;
-  renovateConfigHashComment: string;
-}
-
-async function getRebaseCheckboxComponents(
-  config: RenovateConfig
-): Promise<RebaseCheckboxComponents> {
+function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
   let rebaseCheckBox = '';
-  let renovateConfigHashComment = '';
-  if (!config.onboardingRebaseCheckbox) {
-    return { rebaseCheckBox, renovateConfigHashComment };
+  if (onboardingRebaseCheckbox) {
+    // Create markdown checkbox
+    rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
   }
 
-  // Create markdown checkbox
-  rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
+  return rebaseCheckBox;
+}
 
-  // Create hashMeta
+async function getOnboardingConfigHashComment(
+  config: RenovateConfig
+): Promise<string> {
   const configFile = defaultConfigFile(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
   const hash = toSha256(existingContents);
-  renovateConfigHashComment = `\n<!--renovate-config-hash:${hash}-->\n`;
 
-  return { rebaseCheckBox, renovateConfigHashComment };
+  return `\n<!--renovate-config-hash:${hash}-->\n`;
 }

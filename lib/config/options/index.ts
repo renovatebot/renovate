@@ -74,7 +74,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     parent: 'customDatasources',
     default: 'json',
-    allowedValues: ['json'],
+    allowedValues: ['json', 'plain'],
     cli: false,
     env: false,
   },
@@ -223,8 +223,6 @@ const options: RenovateOptions[] = [
     description: `Enable or disable Renovate bot.`,
     stage: 'package',
     type: 'boolean',
-    cli: false,
-    env: false,
   },
   {
     name: 'constraintsFiltering',
@@ -372,7 +370,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.3.0',
+    default: 'ghcr.io/containerbase/sidecar:9.8.7',
     globalOnly: true,
   },
   {
@@ -800,13 +798,13 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'autodiscoverTopics',
-    description: '',
+    description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',
     type: 'array',
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab'],
+    supportedPlatforms: ['github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -1001,7 +999,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure'],
+    supportedPlatforms: ['azure', 'gitlab'],
   },
   // depType
   {
@@ -1038,6 +1036,32 @@ const options: RenovateOptions[] = [
     allowString: true,
     parent: 'packageRules',
     stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchRepositories',
+    description:
+      'List of repositories to match (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludeRepositories',
+    description:
+      'List of repositories to exclude (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
     mergeable: true,
     cli: false,
     env: false,

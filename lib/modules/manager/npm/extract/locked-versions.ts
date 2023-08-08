@@ -46,7 +46,6 @@ export async function getLockedVersions(
         dep.lockedVersion =
           lockFileCache[yarnLock].lockedVersions?.[
             // TODO: types (#7154)
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${dep.depName}@${dep.currentValue}`
           ];
         if (

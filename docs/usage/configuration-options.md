@@ -191,6 +191,10 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 ```
 
 <!-- prettier-ignore -->
+!!! note
+    Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
+
+<!-- prettier-ignore -->
 !!! warning "Negative reviews on GitHub block Renovate automerge"
     Renovate won't automerge on GitHub if a PR has a negative review.
 
@@ -466,6 +470,11 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
+<!-- prettier-ignore -->
+!!! note
+    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
+    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
+
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
@@ -658,7 +667,7 @@ As this is a template it can be dynamically set. E.g. add the `packageName` as p
 ### format
 
 Defines which format the API is returning.
-Only `json` is supported, but more are planned for future.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
 
 ### transformTemplates
 
@@ -1105,7 +1114,12 @@ You can't use other filenames because Renovate only checks the default filename 
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.
-The `gitAuthor` option accepts a RFC5322-compliant string.
+The `gitAuthor` option accepts a [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant string.
+It's recommended to include a name followed by an email address, e.g.
+
+```
+Development Bot <dev-bot@my-software-company.com>
+```
 
 <!-- prettier-ignore -->
 !!! danger
@@ -2045,6 +2059,23 @@ See also `matchPackagePrefixes`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### excludeRepositories
+
+Use this field to restrict rules to a particular repository. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "excludeRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+
 ### matchCategories
 
 Use `matchCategories` to restrict rules to a particular language or group.
@@ -2066,6 +2097,23 @@ The categories can be found in the [manager documentation](./modules/manager/ind
   ]
 }
 ```
+
+### matchRepositories
+
+Use this field to restrict rules to a particular repository. e.g.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
 
 ### matchBaseBranches
 
@@ -3369,7 +3417,7 @@ To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 
 Technical details: We mostly rely on the text parsing of the library [@breejs/later](https://github.com/breejs/later) but only its concepts of "days", "time_before", and "time_after".
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
-To parse Cron syntax, Renovate uses [@cheap-glitch/mi-cron](https://github.com/cheap-glitch/mi-cron).
+To parse Cron syntax, Renovate uses [cron-parser](https://github.com/harrisiirak/cron-parser).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
 
 <!-- prettier-ignore -->
@@ -3558,8 +3606,8 @@ Follow these steps:
 1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
-1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
-   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
+1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Dependabot alerts".
+   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "Dependabot alerts" is mentioned
 
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
