@@ -103,7 +103,7 @@ export async function updateArtifacts({
     fileName.endsWith('gradle/verification-metadata.xml')
   );
   if (!lockFiles.length && !verificationMetadataFile) {
-    logger.debug('No Gradle dependency lockfiles found - skipping update');
+    logger.debug('No Gradle dependency lockfiles or verification metadata found - skipping update');
     return null;
   }
 
