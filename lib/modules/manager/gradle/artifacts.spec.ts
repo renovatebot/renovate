@@ -108,7 +108,7 @@ describe('modules/manager/gradle/artifacts', () => {
     ).toBeNull();
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
-      'No Gradle dependency lockfiles found - skipping update'
+      'No Gradle dependency lockfiles or verification metadata found - skipping update'
     );
     expect(execSnapshots).toBeEmptyArray();
   });

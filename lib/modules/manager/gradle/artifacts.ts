@@ -89,6 +89,32 @@ async function getGradleVersion(gradlewFile: string): Promise<string | null> {
   return extractResult ? extractResult.version : null;
 }
 
+async function updateVerificationMetadata(
+  verificationMetadataFile: string | undefined,
+  baseCmd: string,
+  execOptions: ExecOptions
+): Promise<void> {
+  if (verificationMetadataFile) {
+    const hashTypes: string[] = [];
+    const verificationMetadata = await readLocalFile(verificationMetadataFile);
+    for (const hashType of ['sha256', 'sha512', 'pgp']) {
+      if (verificationMetadata?.includes(`<${hashType}`)) {
+        hashTypes.push(hashType);
+      }
+    }
+    if (!hashTypes.length) {
+      hashTypes.push('sha256');
+    }
+    const verificationMetadataCmd = `${baseCmd} --write-verification-metadata ${hashTypes.join(
+      ','
+    )} help`;
+    await exec(verificationMetadataCmd, {
+      ...execOptions,
+      ignoreStdout: true,
+    });
+  }
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -103,7 +129,9 @@ export async function updateArtifacts({
     fileName.endsWith('gradle/verification-metadata.xml')
   );
   if (!lockFiles.length && !verificationMetadataFile) {
-    logger.debug('No Gradle dependency lockfiles or verification metadata found - skipping update');
+    logger.debug(
+      'No Gradle dependency lockfiles or verification metadata found - skipping update'
+    );
     return null;
   }
 
@@ -171,27 +199,11 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(lockfileCmd, { ...execOptions, ignoreStdout: true });
 
-    if (verificationMetadataFile) {
-      const hashTypes: string[] = [];
-      const verificationMetadata = await readLocalFile(
-        verificationMetadataFile
-      );
-      for (const hashType of ['sha256', 'sha512', 'pgp']) {
-        if (verificationMetadata?.includes(`<${hashType}`)) {
-          hashTypes.push(hashType);
-        }
-      }
-      if (!hashTypes.length) {
-        hashTypes.push('sha256');
-      }
-      const verificationMetadataCmd = `${baseCmd} --write-verification-metadata ${hashTypes.join(
-        ','
-      )} help`;
-      await exec(verificationMetadataCmd, {
-        ...execOptions,
-        ignoreStdout: true,
-      });
-    }
+    await updateVerificationMetadata(
+      verificationMetadataFile,
+      baseCmd,
+      execOptions
+    );
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');
