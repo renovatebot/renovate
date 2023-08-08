@@ -1,3 +1,4 @@
+import { version } from 'node:os';
 import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -26,7 +27,12 @@ export class GithubRunnersDatasource extends Datasource {
     runnerVersion: string
   ): boolean {
     const runnerReleases = GithubRunnersDatasource.releases[runnerName];
-    return !!runnerReleases?.some(({ version }) => version === runnerVersion);
+
+    return (
+      runnerReleases !== undefined &&
+      (runnerVersion === 'latest' ||
+        runnerReleases.some(({ version }) => version === runnerVersion))
+    );
   }
 
   override readonly defaultVersioning = dockerVersioningId;

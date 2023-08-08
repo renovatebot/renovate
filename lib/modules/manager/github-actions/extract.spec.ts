@@ -26,6 +26,8 @@ jobs:
      runs-on:
        group: ubuntu-runners
        labels: ubuntu-20.04-16core
+  test10:
+      runs-on: abc-123
 `;
 
 describe('modules/manager/github-actions/extract', () => {
