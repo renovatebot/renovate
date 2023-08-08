@@ -26,12 +26,15 @@ export class GithubRunnersDatasource extends Datasource {
     runnerVersion: string
   ): boolean {
     const runnerReleases = GithubRunnersDatasource.releases[runnerName];
+    if (!runnerReleases) {
+      return false;
+    }
 
-    return (
-      runnerReleases !== undefined &&
-      (runnerVersion === 'latest' ||
-        runnerReleases.some(({ version }) => version === runnerVersion))
+    const versionExists = runnerReleases.some(
+      ({ version }) => version === runnerVersion
     );
+
+    return runnerVersion === 'latest' || versionExists;
   }
 
   override readonly defaultVersioning = dockerVersioningId;
