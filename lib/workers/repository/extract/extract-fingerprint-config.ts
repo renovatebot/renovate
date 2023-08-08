@@ -4,7 +4,7 @@ import type {
   RenovateConfig,
 } from '../../../config/types';
 import { getManagerList } from '../../../modules/manager';
-import { validMatchFields } from '../../../modules/manager/regex/utils';
+import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/types';
 import type { WorkerExtractConfig } from '../../types';
 

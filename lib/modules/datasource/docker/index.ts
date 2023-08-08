@@ -559,7 +559,10 @@ export class DockerDatasource extends Datasource {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
+    let page = 0;
+    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
+      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
+      : 20;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -594,7 +597,7 @@ export class DockerDatasource extends Datasource {
         url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
       }
       page += 1;
-    } while (url && page < 20);
+    } while (url && page < pages);
     return tags;
   }
 

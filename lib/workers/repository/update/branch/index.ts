@@ -309,8 +309,10 @@ export async function processBranch(
           result: 'update-not-scheduled',
         };
       }
-      // istanbul ignore if
-      if (!branchPr) {
+      if (
+        !branchPr &&
+        !(config.automerge && config.automergeType === 'branch') // if branch is configured for automerge there's no need for a PR
+      ) {
         logger.debug('Skipping PR creation out of schedule');
         return {
           branchExists,
@@ -398,7 +400,7 @@ export async function processBranch(
       }
     }
 
-    const userRebaseRequested =
+    let userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
       !!config.dependencyDashboardRebaseAllOpen ||
       !!config.rebaseRequested;
@@ -410,6 +412,7 @@ export async function processBranch(
     } else if (dependencyDashboardCheck === 'global-config') {
       logger.debug(`Manual create/rebase requested via checkedBranches`);
       config.reuseExistingBranch = false;
+      userRebaseRequested = true;
     } else if (userApproveAllPendingPR) {
       logger.debug(
         'A user manually approved all pending PRs via the Dependency Dashboard.'

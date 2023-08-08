@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
+import { newlineRegex } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { ReleaseResultZodSchema } from './schema';
@@ -38,11 +39,15 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
-    const { defaultRegistryUrlTemplate, transformTemplates } = config;
-    // TODO add here other format options than JSON
+    const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
+    // TODO add here other format options than JSON and "plain"
     let response: unknown;
     try {
-      response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+      if (format === 'plain') {
+        response = await this.fetchPlainFormat(defaultRegistryUrlTemplate);
+      } else {
+        response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+      }
     } catch (e) {
       this.handleHttpErrors(e);
       return null;
@@ -63,5 +68,25 @@ export class CustomDatasource extends Datasource {
       logger.trace({ data }, 'Response that has failed validation');
       return null;
     }
+  }
+
+  private async fetchPlainFormat(url: string): Promise<unknown> {
+    const response = await this.http.get(url, {
+      headers: {
+        Accept: 'text/plain',
+      },
+    });
+    const contentType = response.headers['content-type'];
+    if (!contentType?.startsWith('text/')) {
+      return null;
+    }
+    const versions = response.body.split(newlineRegex).map((version) => {
+      return {
+        version: version.trim(),
+      };
+    });
+    return {
+      releases: versions,
+    };
   }
 }

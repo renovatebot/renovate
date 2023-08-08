@@ -8,6 +8,6 @@ RUN install-apt make g++
 RUN install-tool python 3.11.4
 
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool corepack 0.19.0
 
 USER ubuntu

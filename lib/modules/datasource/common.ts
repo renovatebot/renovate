@@ -53,14 +53,15 @@ export function isGetPkgReleasesConfig(
   );
 }
 
-export function applyExtractVersion<
-  Config extends Pick<GetPkgReleasesConfig, 'extractVersion'>
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
-  if (!config.extractVersion) {
+export function applyExtractVersion(
+  releaseResult: ReleaseResult,
+  extractVersion: string | undefined
+): ReleaseResult {
+  if (!extractVersion) {
     return releaseResult;
   }
 
-  const extractVersionRegEx = regEx(config.extractVersion);
+  const extractVersionRegEx = regEx(extractVersion);
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
     const version = extractVersionRegEx.exec(release.version)?.groups?.version;
     if (!version) {
@@ -76,7 +77,7 @@ export function applyExtractVersion<
 
 export function filterValidVersions<
   Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
+>(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
@@ -90,7 +91,7 @@ export function filterValidVersions<
 
 export function sortAndRemoveDuplicates<
   Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
+>(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
@@ -121,7 +122,7 @@ export function applyConstraintsFiltering<
     | 'constraints'
     | 'packageName'
   >
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
+>(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   if (config?.constraintsFiltering !== 'strict') {
     for (const release of releaseResult.releases) {
       delete release.constraints;

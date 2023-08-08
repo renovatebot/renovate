@@ -11,7 +11,7 @@ Options:
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | defaultRegistryUrlTemplate | ""      | url used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`                                                                                                                     |
+| format                     | "json"  | format used by the API. Available values are: `json`, `plain`                                                                                                            |
 | transformTemplates         | []      | [jsonata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
@@ -77,6 +77,46 @@ All available options:
   "homepage": "https://demo.org"
 }
 ```
+
+### Formats
+
+#### JSON
+
+If `json` is used processing works as described above.
+The returned body will be directly interpreted as JSON and forwarded to the transformation rules.
+
+#### Plain
+
+If the format is set to `plain`, Renovate will call the HTTP endpoint with the `Accept` header value `text/plain`.
+The body of the response will be treated as plain text and will be converted into JSON.
+
+Suppose the body of the HTTP response is as follows::
+
+```
+1.0.0
+2.0.0
+3.0.0
+```
+
+When Renovate receives this response with the `plain` format, it will convert it into the following:
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
 ## Examples
 

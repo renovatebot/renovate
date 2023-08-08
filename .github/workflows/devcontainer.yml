@@ -20,4 +20,4 @@ jobs:
       - name: Build and run dev container task
         uses: devcontainers/ci@57eaf0c9b518a76872bc429cdceefd65a912309b # v0.3.1900000329
         with:
-          runCmd: yarn build
+          runCmd: pnpm build
