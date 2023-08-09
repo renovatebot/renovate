@@ -1,4 +1,4 @@
-import type { CustomExtractConfig } from '../types';
+import type { CustomExtractConfig } from '../../types';
 
 export interface ExtractionTemplate {
   groups: Record<string, string>;

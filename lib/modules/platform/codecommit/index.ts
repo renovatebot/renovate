@@ -327,7 +327,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? JSON5.parse(raw) : null;
 }
@@ -631,7 +631,7 @@ export async function ensureComment({
     }
     const firstCommentContent = commentObj.comments[0].content;
     if (
-      (topic && firstCommentContent?.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) === true ||
       (!topic && firstCommentContent === body)
     ) {
       commentId = commentObj.comments[0].commentId;
@@ -711,7 +711,8 @@ export async function ensureCommentRemoval(
     for (const comment of commentObj.comments) {
       if (
         (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ||
+          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
+          true ||
         (removeConfig.type === 'by-content' &&
           removeConfig.content === comment.content?.trim())
       ) {
