@@ -64,25 +64,17 @@ export function generateFingerprintConfig(
     managerList = new Set(allManagersList);
   }
 
-  const handleCustomManager = (
-    customMgr: string,
-    config: RenovateConfig
-  ): void => {
-    // TODO: filter regexManagers using customType
-    for (const regexManager of config.regexManagers ?? []) {
-      const customManagerConfig = getManagerConfig(config, customMgr);
-      managerExtractConfigs.push({
-        ...mergeChildConfig(customManagerConfig, regexManager),
-        fileList: [],
-      });
-    }
-  };
-
   for (const manager of managerList) {
+    const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
-      handleCustomManager(manager, config);
+      // TODO: filter regexManagers using customType
+      for (const regexManager of config.regexManagers ?? []) {
+        managerExtractConfigs.push({
+          ...mergeChildConfig(managerConfig, regexManager),
+          fileList: [],
+        });
+      }
     } else {
-      const managerConfig = getManagerConfig(config, manager);
       managerExtractConfigs.push({ ...managerConfig, fileList: [] });
     }
   }

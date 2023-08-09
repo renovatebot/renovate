@@ -6,7 +6,7 @@ describe('modules/manager/custom/index', () => {
   });
 
   it('getCustomManagerList', () => {
-    expect(customManager.getCustomManagerList()).not.toBeNull();
+    expect(customManager.customManagerList).not.toBeNull();
   });
 
   describe('isCustomManager()', () => {

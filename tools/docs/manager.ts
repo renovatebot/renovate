@@ -19,7 +19,7 @@ const noCategoryDisplayName = 'No Category';
 
 function getTitle(manager: string, displayName: string): string {
   if (isCustomManager(manager)) {
-    return `Custom Manager Support using ${manager}`;
+    return `Custom Manager Support using ${displayName}`;
   }
   return `Automated Dependency Updates for ${displayName}`;
 }

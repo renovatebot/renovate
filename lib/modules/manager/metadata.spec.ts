@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { join } from 'upath';
-import { getCustomManagerList } from './custom';
+import { customManagerList as customManagers } from './custom';
 
 describe('modules/manager/metadata', () => {
   const managerList: string[] = fs
@@ -21,7 +21,6 @@ describe('modules/manager/metadata', () => {
     '%s has readme with no h1 or h2',
     async (manager) => {
       let readme: string | undefined;
-      const customManagers = getCustomManagerList();
       try {
         const readmeFilePath = `${__dirname}/${
           (customManagers.includes(manager) ? 'custom/' : '') + manager

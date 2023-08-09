@@ -1,6 +1,6 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
-import { getCustomManagerList } from './custom';
+import { customManagerList, isCustomManager } from './custom';
 import customManagers from './custom/api';
 import type {
   ExtractConfig,
@@ -12,22 +12,24 @@ import type {
   Result,
 } from './types';
 export { hashMap } from './fingerprint.generated';
+
 const managerList = Array.from(managers.keys()); // does not include custom managers
-const customManagerList = getCustomManagerList();
+export const getManagerList = (): string[] => managerList;
+export const getManagers = (): Map<string, ManagerApi> => managers;
 export const allManagersList = [...managerList, ...customManagerList];
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
 ): ManagerApi[T] | undefined {
-  return managers.get(manager)?.[name] ?? customManagers.get(manager)?.[name];
+  return isCustomManager(manager)
+    ? customManagers.get(manager)?.[name]
+    : managers.get(manager)?.[name];
 }
-export const getManagerList = (): string[] => managerList;
-export const getManagers = (): Map<string, ManagerApi> => managers;
 
 export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
   let config: GlobalManagerConfig = {};
-  for (const managerName of [...managerList, ...customManagerList]) {
+  for (const managerName of allManagersList) {
     const manager =
       managers.get(managerName)! ?? customManagers.get(managerName)!;
     if (manager.detectGlobalConfig) {

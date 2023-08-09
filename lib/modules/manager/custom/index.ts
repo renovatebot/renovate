@@ -1,8 +1,7 @@
 import type { ManagerApi } from '../types';
 import customManagers from './api';
 
-const customManagerList = Array.from(customManagers.keys());
-export const getCustomManagerList = (): string[] => customManagerList;
+export const customManagerList = Array.from(customManagers.keys());
 export const getCustomManagers = (): Map<string, ManagerApi> => customManagers;
 
 export function get<T extends keyof ManagerApi>(
