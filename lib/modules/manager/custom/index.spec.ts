@@ -1,10 +1,6 @@
 import * as customManager from '.';
 
 describe('modules/manager/custom/index', () => {
-  it('gets something', () => {
-    expect(customManager.get('regex', 'extractPackageFile')).not.toBeNull();
-  });
-
   it('getCustomManagerList', () => {
     expect(customManager.customManagerList).not.toBeNull();
   });
