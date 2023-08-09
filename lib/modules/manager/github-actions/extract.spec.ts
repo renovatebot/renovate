@@ -2,6 +2,35 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 
+const runnerTestWorkflow = `
+jobs:
+  test1:
+    runs-on: ubuntu-latest
+  test2:
+    runs-on:
+      ubuntu-22.04
+  test3:
+    runs-on: "macos-12-xl"
+  test4:
+    runs-on: 'macos-latest'
+  test5:
+    runs-on: |
+      windows-2019
+  test6:
+    runs-on: >
+      windows-2022
+  test7:
+    runs-on: [windows-2022, selfhosted]
+  test8:
+     runs-on: \${{ env.RUNNER }}
+  test9:
+     runs-on:
+       group: ubuntu-runners
+       labels: ubuntu-20.04-16core
+  test10:
+      runs-on: abc-123
+`;
+
 describe('modules/manager/github-actions/extract', () => {
   beforeEach(() => {
     GlobalConfig.reset();
@@ -121,6 +150,7 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_3.yml'),
         'workflow_3.yml'
       );
+
       expect(res?.deps).toMatchObject([
         {
           currentValue: 'v0.13.1',
@@ -154,6 +184,20 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
           versioning: 'docker',
+        },
+        {
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+        },
+        {
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
         },
       ]);
     });
@@ -341,6 +385,74 @@ describe('modules/manager/github-actions/extract', () => {
             'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0',
         },
       ]);
+    });
+
+    it('extracts multiple action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflow, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          replaceString: 'ubuntu-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '22.04',
+          replaceString: 'ubuntu-22.04',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '12-xl',
+          replaceString: 'macos-12-xl',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: 'latest',
+          replaceString: 'macos-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2019',
+          replaceString: 'windows-2019',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2022',
+          replaceString: 'windows-2022',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2022',
+          replaceString: 'windows-2022',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners')
+      ).toHaveLength(7);
     });
   });
 });

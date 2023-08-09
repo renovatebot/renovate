@@ -649,6 +649,14 @@ These datasources can be referred by RegexManagers or can be used to overwrite d
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
+## customizeDashboard
+
+You can use the `customizeDashboard` object to customize dependency dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
+
 ### defaultRegistryUrlTemplate
 
 `registryUrl` which is used, if none is return by extraction.
