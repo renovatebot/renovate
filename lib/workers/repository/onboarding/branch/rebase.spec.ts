@@ -4,8 +4,8 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
 import { toSha256 } from '../../../../util/hash';
-import { rebaseOnboardingBranch } from './rebase';
 import * as _config from './config';
+import { rebaseOnboardingBranch } from './rebase';
 
 const configModule: any = _config;
 
