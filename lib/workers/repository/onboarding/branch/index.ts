@@ -8,12 +8,9 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { type Pr, platform } from '../../../../modules/platform';
+import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
-import {
-  getBranchCommit,
-  mergeBranch,
-  setGitAuthor,
-} from '../../../../util/git';
+import { getBranchCommit, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { OnboardingState } from '../common';
@@ -132,7 +129,7 @@ export async function checkOnboardingBranch(
     // TODO #7154
     if (!isConflicted) {
       logger.debug('Merge onboarding branch in default branch');
-      await mergeBranch(onboardingBranch!, true);
+      await scm.mergeToLocal(onboardingBranch!);
     }
   }
   setOnboardingCache(

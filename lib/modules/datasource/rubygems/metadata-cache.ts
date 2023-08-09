@@ -23,14 +23,14 @@ export class MetadataCache {
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
     const hash = toSha256(versions.join(''));
 
-    const loadCache = (): AsyncResult<ReleaseResult, unknown> =>
+    const loadCache = (): AsyncResult<ReleaseResult, NonNullable<unknown>> =>
       Result.wrapNullable(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
-        'cache-not-found'
+        'cache-not-found' as const
       ).transform((cache) => {
         return hash === cache.hash
           ? Result.ok(cache.data)
-          : Result.err('cache-outdated');
+          : Result.err('cache-outdated' as const);
       });
 
     const saveCache = async (data: ReleaseResult): Promise<ReleaseResult> => {
