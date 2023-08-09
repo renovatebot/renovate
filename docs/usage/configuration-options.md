@@ -192,6 +192,10 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 ```
 
 <!-- prettier-ignore -->
+!!! note
+    Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
+
+<!-- prettier-ignore -->
 !!! warning "Negative reviews on GitHub block Renovate automerge"
     Renovate won't automerge on GitHub if a PR has a negative review.
 
@@ -646,6 +650,14 @@ These datasources can be referred by RegexManagers or can be used to overwrite d
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
+## customizeDashboard
+
+You can use the `customizeDashboard` object to customize dependency dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
+
 ### defaultRegistryUrlTemplate
 
 `registryUrl` which is used, if none is return by extraction.
@@ -664,7 +676,7 @@ As this is a template it can be dynamically set. E.g. add the `packageName` as p
 ### format
 
 Defines which format the API is returning.
-Only `json` is supported, but more are planned for future.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
 
 ### transformTemplates
 
@@ -3603,8 +3615,8 @@ Follow these steps:
 1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
-1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
-   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
+1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Dependabot alerts".
+   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "Dependabot alerts" is mentioned
 
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 

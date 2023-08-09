@@ -100,9 +100,6 @@ export async function parseConfigs(
   // Get global config
   logger.trace({ config }, 'Full config');
 
-  // Print config
-  logger.trace({ config }, 'Global config');
-
   // Massage endpoint to have a trailing slash
   if (config.endpoint) {
     logger.debug('Adding trailing slash to endpoint');

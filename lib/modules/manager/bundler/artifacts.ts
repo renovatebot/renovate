@@ -18,11 +18,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { isValid } from '../../versioning/ruby';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   getBundlerConstraint,
   getLockFilePath,
@@ -34,26 +30,6 @@ import {
 } from './host-rules';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
-
-export function buildArgs(config: UpdateArtifactsConfig): string[] {
-  const args: string[] = [];
-  // --major is the default and does not need to be handled separately.
-  switch (config.updateType) {
-    case 'patch':
-      args.push('--patch', '--strict');
-      break;
-    case 'minor':
-      args.push('--minor', '--strict');
-      break;
-  }
-
-  if (config.postUpdateOptions?.includes('bundlerConservative')) {
-    args.push('--conservative');
-  }
-
-  args.push('--update');
-  return args;
-}
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   if (!hostRule.resolvedHost || hostRule.resolvedHost.includes('-')) {
@@ -108,8 +84,6 @@ export async function updateArtifacts(
     return null;
   }
 
-  const args = buildArgs(config);
-
   const updatedDepNames = updatedDeps
     .map(({ depName }) => depName)
     .filter(is.nonEmptyStringAndNotWhitespace);
@@ -117,15 +91,33 @@ export async function updateArtifacts(
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    let cmd: string;
+    const commands: string[] = [];
 
     if (config.isLockFileMaintenance) {
-      cmd = 'bundler lock --update';
+      commands.push('bundler lock --update');
     } else {
-      cmd = `bundler lock ${args.join(' ')} ${updatedDepNames
-        .filter((dep) => dep !== 'ruby')
-        .map(quote)
-        .join(' ')}`;
+      const updateTypes = {
+        patch: '--patch --strict ',
+        minor: '--minor --strict ',
+        major: '',
+      };
+      for (const [updateType, updateArg] of Object.entries(updateTypes)) {
+        const deps = updatedDeps
+          .filter((dep) => (dep.updateType ?? 'major') === updateType)
+          .map((dep) => dep.depName)
+          .filter(is.string)
+          .filter((dep) => dep !== 'ruby');
+        let additionalArgs = '';
+        if (config.postUpdateOptions?.includes('bundlerConservative')) {
+          additionalArgs = '--conservative ';
+        }
+        if (deps.length) {
+          const cmd = `bundler lock ${updateArg}${additionalArgs}--update ${deps
+            .map(quote)
+            .join(' ')}`;
+          commands.push(cmd);
+        }
+      }
     }
 
     const bundlerHostRules = findAllAuthenticatable({
@@ -200,7 +192,7 @@ export async function updateArtifacts(
       ],
       preCommands,
     };
-    await exec(cmd, execOptions);
+    await exec(commands, execOptions);
 
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {

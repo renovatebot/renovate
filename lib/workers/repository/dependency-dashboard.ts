@@ -107,7 +107,7 @@ export async function readDashboardBody(
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
-    config.dependencyDashboard ||
+    config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
@@ -174,8 +174,11 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       'repository problems'
     );
     newIssueBody += '## Repository problems\n\n';
-    newIssueBody +=
-      'Renovate tried to update this repository, but found these problems.\n\n';
+    const repoProblemsHeader =
+      config.customizeDashboard?.['repoProblemsHeader'] ??
+      'These problems occurred while renovating this repository.';
+    newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
+
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }
@@ -199,9 +202,10 @@ export async function ensureDependencyDashboard(
   );
   if (
     !(
-      config.dependencyDashboard ||
-      config.dependencyDashboardApproval ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
+      config.dependencyDashboard === true ||
+      config.dependencyDashboardApproval === true ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+        true ||
       branches.some(
         (branch) =>
           !!branch.dependencyDashboardApproval ||

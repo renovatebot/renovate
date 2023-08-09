@@ -472,6 +472,28 @@ None detected
 "
 `;
 
+exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() contains logged problems with custom header 1`] = `
+"This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Repository problems
+
+platform is github
+
+ - ERROR: i am a non-duplicated problem
+
+## Pending Status Checks
+
+These updates await pending status checks. To force their creation now, click the checkbox below.
+
+ - [ ] <!-- approvePr-branch=branchName1 -->pr1
+
+## Detected dependencies
+
+None detected
+
+"
+`;
+
 exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
 "This is a header
 
