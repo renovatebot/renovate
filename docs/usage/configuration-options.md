@@ -3617,7 +3617,7 @@ Follow these steps:
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Dependabot alerts".
    If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "Dependabot alerts" is mentioned
 
-Once the above conditions are met, _and_ if GitHub finds a Dependabot alert for this repository, then Renovate tries to create a fix PR.
+Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
 You may use the `vulnerabilityAlerts` configuration object to customize vulnerability-fix PRs.
 For example, to set a custom label and assignee:
