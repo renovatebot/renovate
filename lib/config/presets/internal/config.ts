@@ -5,7 +5,7 @@ import type { Preset } from '../types';
 export const presets: Record<string, Preset> = {
   'best-practices': {
     configMigration: true,
-    description: 'Preset with best practices from the Renovate maintainers. Only for users that want to follow our best practices.',
+    description: 'Preset with best practices from the Renovate maintainers. Recommended for advanced users, who want to follow our best practices.',
     extends: [
       'config:recommended',
       'docker:pinDigests',
