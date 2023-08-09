@@ -42,8 +42,8 @@ importers:
         specifier: 0.41.1
         version: 0.41.1(@opentelemetry/api@1.4.1)
       '@opentelemetry/instrumentation':
-        specifier: 0.41.1
-        version: 0.41.1(@opentelemetry/api@1.4.1)
+        specifier: 0.41.2
+        version: 0.41.2(@opentelemetry/api@1.4.1)
       '@opentelemetry/instrumentation-bunyan':
         specifier: 0.32.0
         version: 0.32.0(@opentelemetry/api@1.4.1)
@@ -2544,7 +2544,7 @@ packages:
       '@opentelemetry/api': ^1.3.0
     dependencies:
       '@opentelemetry/api': 1.4.1
-      '@opentelemetry/instrumentation': 0.41.1(@opentelemetry/api@1.4.1)
+      '@opentelemetry/instrumentation': 0.41.2(@opentelemetry/api@1.4.1)
       '@types/bunyan': 1.8.7
       tslib: 2.6.1
     transitivePeerDependencies:
@@ -2575,6 +2575,22 @@ packages:
       '@opentelemetry/api': 1.4.1
       '@types/shimmer': 1.0.2
       import-in-the-middle: 1.4.1
+      require-in-the-middle: 7.2.0
+      semver: 7.5.4
+      shimmer: 1.2.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /@opentelemetry/instrumentation@0.41.2(@opentelemetry/api@1.4.1):
+    resolution: {integrity: sha512-rxU72E0pKNH6ae2w5+xgVYZLzc5mlxAbGzF4shxMVK8YC2QQsfN38B2GPbj0jvrKWWNUElfclQ+YTykkNg/grw==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+    dependencies:
+      '@opentelemetry/api': 1.4.1
+      '@types/shimmer': 1.0.2
+      import-in-the-middle: 1.4.2
       require-in-the-middle: 7.2.0
       semver: 7.5.4
       shimmer: 1.2.1
@@ -6759,6 +6775,15 @@ packages:
 
   /import-in-the-middle@1.4.1:
     resolution: {integrity: sha512-hGG0PcCsykVo8MBVH8l0uEWLWW6DXMgJA9jvC0yps6M3uIJ8L/tagTCbyF8Ud5TtqJ8/jmZL1YkyySyeVkVQrA==}
+    dependencies:
+      acorn: 8.10.0
+      acorn-import-assertions: 1.9.0(acorn@8.10.0)
+      cjs-module-lexer: 1.2.3
+      module-details-from-path: 1.0.3
+    dev: false
+
+  /import-in-the-middle@1.4.2:
+    resolution: {integrity: sha512-9WOz1Yh/cvO/p69sxRmhyQwrIGGSp7EIdcb+fFNVi7CzQGQB8U1/1XrKVSbEd/GNOAeM0peJtmi7+qphe7NvAw==}
     dependencies:
       acorn: 8.10.0
       acorn-import-assertions: 1.9.0(acorn@8.10.0)
