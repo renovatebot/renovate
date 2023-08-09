@@ -27,7 +27,7 @@ function extractFromSection(
       if (version) {
         currentValue = version;
       } else {
-        continue;
+        currentValue = '';
       }
     }
 

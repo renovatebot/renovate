@@ -57,6 +57,12 @@ describe('modules/manager/pub/extract', () => {
             datasource: dartDatasource,
           },
           {
+            currentValue: '',
+            depName: 'baz',
+            depType: 'dependencies',
+            datasource: dartDatasource,
+          },
+          {
             currentValue: '^0.1.0',
             depName: 'test',
             depType: 'dev_dependencies',

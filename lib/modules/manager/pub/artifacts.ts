@@ -50,7 +50,7 @@ export async function updateArtifacts({
         .map((dep) => dep.depName)
         .filter(is.string)
         .filter((depName) => depName !== 'flutter')
-        .map((depName) => quote(depName))
+        .map(quote)
         .join(' ');
       cmd.push(`${toolName} pub upgrade ${depNames}`);
     }
