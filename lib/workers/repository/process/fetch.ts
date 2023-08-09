@@ -75,7 +75,7 @@ async function fetchDepUpdates(
         Object.assign(dep, updateResult);
       } catch (err) {
         if (
-          packageFileConfig.repoIsOnboarded ||
+          packageFileConfig.repoIsOnboarded === true ||
           !(err instanceof ExternalHostError)
         ) {
           throw err;

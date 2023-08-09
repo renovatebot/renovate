@@ -48,4 +48,12 @@ export class LocalFs implements PlatformScm {
   checkoutBranch(branchName: string): Promise<CommitSha> {
     return Promise.resolve('');
   }
+
+  mergeAndPush(branchName: string): Promise<void> {
+    return Promise.resolve();
+  }
+
+  mergeToLocal(branchName: string): Promise<void> {
+    return Promise.resolve();
+  }
 }

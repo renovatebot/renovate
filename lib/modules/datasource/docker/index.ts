@@ -29,13 +29,7 @@ import {
   sourceLabels,
 } from './common';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
-import type {
-  Image,
-  ImageConfig,
-  ImageList,
-  OciImage,
-  OciImageList,
-} from './types';
+import type { Manifest, OciImageConfig } from './schema';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -170,7 +164,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     configDigest: string
-  ): Promise<HttpResponse<ImageConfig> | undefined> {
+  ): Promise<HttpResponse<OciImageConfig> | undefined> {
     logger.trace(
       `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
     );
@@ -192,7 +186,7 @@ export class DockerDatasource extends Datasource {
       'blobs',
       configDigest
     );
-    return await this.http.getJson<ImageConfig>(url, {
+    return await this.http.getJson<OciImageConfig>(url, {
       headers,
       noAuth: true,
     });
@@ -215,11 +209,8 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    const manifest = JSON.parse(manifestResponse.body) as
-      | ImageList
-      | Image
-      | OciImageList
-      | OciImage;
+    // TODO: validate schema
+    const manifest = JSON.parse(manifestResponse.body) as Manifest;
     if (manifest.schemaVersion !== 2) {
       logger.debug(
         { registry, dockerRepository, tag },
@@ -398,10 +389,10 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     tag: string
-  ): Promise<Record<string, string>> {
+  ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
     try {
-      let labels: Record<string, string> = {};
+      let labels: Record<string, string> | undefined = {};
       const configDigest = await this.getConfigDigest(
         registryHost,
         dockerRepository,
@@ -427,7 +418,8 @@ export class DockerDatasource extends Datasource {
         noAuth: true,
       });
 
-      const body = JSON.parse(configResponse.body);
+      // TODO: validate schema
+      const body = JSON.parse(configResponse.body) as OciImageConfig;
       if (body.config) {
         labels = body.config.Labels;
       } else {
@@ -559,7 +551,10 @@ export class DockerDatasource extends Datasource {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
+    let page = 0;
+    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
+      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
+      : 20;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -594,7 +589,7 @@ export class DockerDatasource extends Datasource {
         url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
       }
       page += 1;
-    } while (url && page < 20);
+    } while (url && page < pages);
     return tags;
   }
 
@@ -713,7 +708,6 @@ export class DockerDatasource extends Datasource {
     );
     logger.debug(
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
@@ -748,7 +742,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (
-        architecture ||
+        is.string(architecture) ||
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
@@ -763,11 +757,8 @@ export class DockerDatasource extends Datasource {
         );
 
         if (architecture && manifestResponse) {
-          const manifestList = JSON.parse(manifestResponse.body) as
-            | ImageList
-            | Image
-            | OciImageList
-            | OciImage;
+          // TODO: validate Schema
+          const manifestList = JSON.parse(manifestResponse.body) as Manifest;
           if (
             manifestList.schemaVersion === 2 &&
             (manifestList.mediaType ===
@@ -777,7 +768,7 @@ export class DockerDatasource extends Datasource {
               (!manifestList.mediaType && 'manifests' in manifestList))
           ) {
             for (const manifest of manifestList.manifests) {
-              if (manifest.platform['architecture'] === architecture) {
+              if (manifest.platform?.architecture === architecture) {
                 digest = manifest.digest;
                 break;
               }

@@ -201,7 +201,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
@@ -227,7 +227,7 @@ function getRepoUrl(
 
   if (
     gitUrl === 'endpoint' ||
-    process.env.GITLAB_IGNORE_REPO_URL ||
+    is.nonEmptyString(process.env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {

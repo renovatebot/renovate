@@ -133,7 +133,9 @@ sidebar_label: ${displayName}
       md += '```\n\n';
     }
     const managerReadmeContent = await readFile(
-      `lib/modules/manager/${manager}/readme.md`
+      `lib/modules/manager/${
+        manager === 'regex' ? 'custom/regex' : manager
+      }/readme.md`
     );
     if (manager !== 'regex') {
       md += '\n## Additional Information\n\n';

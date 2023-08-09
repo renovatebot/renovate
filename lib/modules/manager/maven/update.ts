@@ -55,7 +55,7 @@ export function updateDependency({
 
 export function bumpPackageVersion(
   content: string,
-  currentValue: string | undefined,
+  currentValue: string,
   bumpVersion: ReleaseType
 ): BumpPackageVersionResult {
   logger.debug(
@@ -63,11 +63,6 @@ export function bumpPackageVersion(
     'Checking if we should bump pom.xml version'
   );
   let bumpedContent = content;
-
-  if (!currentValue) {
-    logger.warn('Unable to bump pom.xml version, pom.xml has no version');
-    return { bumpedContent };
-  }
 
   if (!semver.valid(currentValue)) {
     logger.warn(

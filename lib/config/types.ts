@@ -12,6 +12,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
@@ -272,11 +273,12 @@ export interface RenovateConfig
   constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
+  customizeDashboard?: Record<string, string>;
 }
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json';
+  format?: 'json' | 'plain';
   transformTemplates?: string[];
 }
 
@@ -457,7 +459,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
-  default?: any | null;
+  default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
