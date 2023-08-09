@@ -12,7 +12,7 @@ import type {
 } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
-import { getConfiguredRegistries } from './util';
+import { findVersion, getConfiguredRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -123,14 +123,14 @@ export async function extractPackageFile(
   }
 
   let deps: PackageDependency[] = [];
-  let packageFileVersion = undefined;
+  let packageFileVersion: string | undefined;
   try {
     const parsedXml = new XmlDocument(content);
     deps = extractDepsFromXml(parsedXml).map((dep) => ({
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
-    packageFileVersion = parsedXml.valueWithPath('PropertyGroup.Version');
+    packageFileVersion = findVersion(parsedXml)?.val;
   } catch (err) {
     logger.debug({ err, packageFile }, `Failed to parse XML`);
   }

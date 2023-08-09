@@ -174,8 +174,11 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       'repository problems'
     );
     newIssueBody += '## Repository problems\n\n';
-    newIssueBody +=
-      'These problems occurred while renovating this repository.\n\n';
+    const repoProblemsHeader =
+      config.customizeDashboard?.['repoProblemsHeader'] ??
+      'These problems occurred while renovating this repository.';
+    newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
+
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }

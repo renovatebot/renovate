@@ -135,7 +135,7 @@
   "homepage": "https://renovatebot.com",
   "engines": {
     "node": "^18.12.0 || >=20.0.0",
-    "pnpm": "^8.6.11"
+    "pnpm": "^8.0.0"
   },
   "engines-next": {
     "description": "Versions other than the below are deprecated and a warning will be logged",
@@ -202,7 +202,7 @@
     "good-enough-parser": "1.1.23",
     "got": "11.8.6",
     "graph-data-structure": "3.3.0",
-    "handlebars": "4.7.7",
+    "handlebars": "4.7.8",
     "hasha": "5.2.2",
     "ignore": "5.2.4",
     "ini": "4.1.1",
@@ -285,13 +285,13 @@
     "@types/linkify-markdown": "1.0.1",
     "@types/lodash": "4.14.196",
     "@types/luxon": "3.3.1",
-    "@types/markdown-it": "12.2.3",
+    "@types/markdown-it": "13.0.0",
     "@types/markdown-table": "2.0.0",
     "@types/marshal": "0.5.1",
     "@types/mdast": "3.0.12",
     "@types/moo": "0.5.5",
     "@types/nock": "10.0.3",
-    "@types/node": "18.17.1",
+    "@types/node": "18.17.4",
     "@types/parse-link-header": "2.0.1",
     "@types/prettier": "2.7.3",
     "@types/semver": "7.5.0",
@@ -311,7 +311,7 @@
     "diff": "5.1.0",
     "emojibase-data": "15.0.0",
     "eslint": "8.46.0",
-    "eslint-config-prettier": "8.10.0",
+    "eslint-config-prettier": "9.0.0",
     "eslint-formatter-gha": "1.4.2",
     "eslint-import-resolver-typescript": "3.5.5",
     "eslint-plugin-import": "2.28.0",
@@ -345,7 +345,7 @@
     "typescript": "5.1.6",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@8.6.11",
+  "packageManager": "pnpm@8.6.12",
   "files": [
     "dist",
     "renovate-schema.json"

@@ -65,4 +65,12 @@ describe('modules/platform/local/scm', () => {
       expect(await localFs.getFileList()).toHaveLength(2);
     });
   });
+
+  it('mergeAndPush', async () => {
+    await expect(localFs.mergeAndPush('branchName')).resolves.toBeUndefined();
+  });
+
+  it('mergeBranch', async () => {
+    await expect(localFs.mergeToLocal('branchName')).resolves.toBeUndefined();
+  });
 });

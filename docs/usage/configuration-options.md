@@ -649,6 +649,14 @@ These datasources can be referred by RegexManagers or can be used to overwrite d
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
+## customizeDashboard
+
+You can use the `customizeDashboard` object to customize dependency dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
+
 ### defaultRegistryUrlTemplate
 
 `registryUrl` which is used, if none is return by extraction.
@@ -3606,13 +3614,13 @@ Follow these steps:
 1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
-1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
-   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "vulnerability alerts" is mentioned
+1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Dependabot alerts".
+   If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "Dependabot alerts" is mentioned
 
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
 You may use the `vulnerabilityAlerts` configuration object to customize vulnerability-fix PRs.
-For example, to set custom labels and assignees:
+For example, to set a custom label and assignee:
 
 ```json
 {
@@ -3626,7 +3634,14 @@ For example, to set custom labels and assignees:
 
 <!-- prettier-ignore -->
 !!! warning
-    There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
+    There's a small chance that a wrong vulnerability alert results in a flapping/looping vulnerability fix.
+    If you allow Renovate to `automerge` vulnerability fixes, please check if the automerged fix is correct.
+
+<!-- prettier-ignore -->
+!!! note
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+    This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
+    In short: vulnerability alerts "skip the line".
 
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 
