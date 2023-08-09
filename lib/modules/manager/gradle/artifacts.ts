@@ -97,13 +97,20 @@ async function updateVerificationMetadata(
   if (verificationMetadataFile) {
     const hashTypes: string[] = [];
     const verificationMetadata = await readLocalFile(verificationMetadataFile);
-    for (const hashType of ['sha256', 'sha512', 'pgp']) {
+    for (const hashType of ['sha256', 'sha512']) {
       if (verificationMetadata?.includes(`<${hashType}`)) {
         hashTypes.push(hashType);
       }
     }
     if (!hashTypes.length) {
       hashTypes.push('sha256');
+    }
+    if (
+      verificationMetadata?.includes(
+        '<verify-signatures>true</verify-signatures>'
+      )
+    ) {
+      hashTypes.push('pgp');
     }
     const verificationMetadataCmd = `${baseCmd} --write-verification-metadata ${hashTypes.join(
       ','
