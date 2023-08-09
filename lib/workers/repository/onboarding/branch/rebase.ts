@@ -12,6 +12,13 @@ export async function rebaseOnboardingBranch(
   previousConfigHash: string | undefined
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
+
+  // skip platforms that do not support html comments in pr
+  const pl = GlobalConfig.get('platform')!;
+  if (!['github', 'gitea', 'gitlab'].includes(pl)) {
+    return null;
+  }
+
   const configFile = defaultConfigFile(config);
   const contents = await getOnboardingConfigContents(config, configFile);
   const currentConfigHash = toSha256(contents);
