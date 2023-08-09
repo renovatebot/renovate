@@ -7,7 +7,7 @@ export const presets: Record<string, Preset> = {
     configMigration: true,
     description: 'Preset with best practices from the Renovate maintainers.',
     extends: [
-      'config:base',
+      'config:recommended',
       'docker:pinDigests',
       'helpers:pinGitHubActionDigests',
       ':pinDevDependencies',

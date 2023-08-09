@@ -9,4 +9,4 @@ fi
 
 set -x
 
-exec yarn install
+exec pnpm install

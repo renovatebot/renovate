@@ -254,7 +254,7 @@ const platform: Platform = {
     fileName: string,
     repoName?: string,
     branchOrTag?: string
-  ): Promise<any | null> {
+  ): Promise<any> {
     // TODO #7154
     const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
     return JSON5.parse(raw);

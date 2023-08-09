@@ -6,20 +6,22 @@ import { logger } from '../../../../logger';
 import {
   Release,
   ReleaseResult,
-  getDatasourceFor,
-  getDefaultVersioning,
+  applyDatasourceFilters,
   getDigest,
-  getPkgReleases,
+  getRawPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../modules/datasource';
+import {
+  getDatasourceFor,
+  getDefaultVersioning,
+} from '../../../../modules/datasource/common';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { clone } from '../../../../util/clone';
+import { assignKeys } from '../../../../util/assign-keys';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
-import { Result } from '../../../../util/result';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -80,12 +82,18 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-      const { res: lookupResult } = await Result.wrap(getPkgReleases(config));
-      if (!lookupResult.success) {
-        throw lookupResult.error;
+
+      const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
+        config
+      )
+        .transform((res) => applyDatasourceFilters(res, config))
+        .unwrap();
+
+      if (lookupError instanceof Error) {
+        throw lookupError;
       }
-      dependency = clone(lookupResult.value);
-      if (!dependency) {
+
+      if (lookupError) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: packageName,
@@ -96,21 +104,24 @@ export async function lookupUpdates(
         res.warnings.push(warning);
         return res;
       }
+
+      dependency = releaseResult;
+
       if (dependency.deprecationMessage) {
         logger.debug(
           `Found deprecationMessage for ${datasource} package ${packageName}`
         );
-        res.deprecationMessage = dependency.deprecationMessage;
       }
 
-      res.sourceUrl = dependency?.sourceUrl;
-      res.registryUrl = dependency?.registryUrl; // undefined when we fetched releases from multiple registries
-      if (dependency.sourceDirectory) {
-        res.sourceDirectory = dependency.sourceDirectory;
-      }
-      res.homepage = dependency.homepage;
-      res.changelogUrl = dependency.changelogUrl;
-      res.dependencyUrl = dependency?.dependencyUrl;
+      assignKeys(res, dependency, [
+        'deprecationMessage',
+        'sourceUrl',
+        'registryUrl',
+        'sourceDirectory',
+        'homepage',
+        'changelogUrl',
+        'dependencyUrl',
+      ]);
 
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning
@@ -380,7 +391,7 @@ export async function lookupUpdates(
       }
       // update digest for all
       for (const update of res.updates) {
-        if (pinDigests || currentDigest) {
+        if (pinDigests === true || currentDigest) {
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
@@ -428,10 +439,10 @@ export async function lookupUpdates(
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
-          (update.newName && update.newName !== packageName) ||
-          update.isReplacement ||
+          (is.string(update.newName) && update.newName !== packageName) ||
+          update.isReplacement === true ||
           update.newValue !== currentValue ||
-          update.isLockfileUpdate ||
+          update.isLockfileUpdate === true ||
           // TODO #7154
           (update.newDigest && !update.newDigest.startsWith(currentDigest!))
       );

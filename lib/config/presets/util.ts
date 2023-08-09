@@ -26,7 +26,7 @@ export async function fetchPreset({
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
   const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
-  let jsonContent: any | undefined;
+  let jsonContent: any;
   if (fileName === 'default') {
     try {
       jsonContent = await fetch(

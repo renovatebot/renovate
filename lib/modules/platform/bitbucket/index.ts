@@ -156,7 +156,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
@@ -297,8 +297,6 @@ export async function findPr({
   prTitle,
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
@@ -491,8 +489,6 @@ export async function setBranchStatus({
   };
 
   await bitbucketHttp.postJson(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
@@ -827,7 +823,6 @@ async function isAccountMemberOfWorkspace(
     if (err.statusCode === 404) {
       logger.debug(
         { err },
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `User ${reviewer.display_name} is not a member of the workspace ${workspace}. Will be removed from the PR`
       );
 
@@ -994,8 +989,6 @@ export async function mergePr({
   id: prNo,
   strategy: mergeStrategy,
 }: MergePRConfig): Promise<boolean> {
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610

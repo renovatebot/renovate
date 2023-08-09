@@ -9,19 +9,8 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-
-function getFlutterConstraint(lockFileContent: string): string | undefined {
-  return regEx(/^\tflutter: ['"](?<flutterVersion>.*)['"]$/m).exec(
-    lockFileContent
-  )?.groups?.flutterVersion;
-}
-
-function getDartConstraint(lockFileContent: string): string | undefined {
-  return regEx(/^\tdart: ['"](?<dartVersion>.*)['"]$/m).exec(lockFileContent)
-    ?.groups?.dartVersion;
-}
+import { parsePubspecLock } from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -63,9 +52,12 @@ export async function updateArtifacts({
       );
     }
 
-    const constraint = isFlutter
-      ? config.constraints?.flutter ?? getFlutterConstraint(oldLockFileContent)
-      : config.constraints?.dart ?? getDartConstraint(oldLockFileContent);
+    let constraint = config.constraints?.[toolName];
+    if (!constraint) {
+      const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
+      constraint = pubspecLock?.sdks[toolName];
+    }
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},

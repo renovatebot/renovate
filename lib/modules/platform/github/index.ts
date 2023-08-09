@@ -1,5 +1,3 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
@@ -61,7 +59,8 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { coerceRestPr } from './common';
+import { remoteBranchExists } from './branch';
+import { coerceRestPr, githubApi } from './common';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
@@ -86,8 +85,6 @@ import type {
 import { getUserDetails, getUserEmail } from './user';
 
 export const id = 'github';
-
-const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
@@ -260,7 +257,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
@@ -760,8 +757,9 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+  const repository = config.repository!;
   try {
-    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    const commitUrl = `/repos/${repository}/git/commits/${sha}`;
     await githubApi.head(commitUrl, { memCache: false });
   } catch (err) {
     logger.error({ err, sha, branchName }, 'Commit not found');
@@ -769,16 +767,7 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
-  let branchExists = false;
-  let branchResult: undefined | HttpResponse<string>;
-  try {
-    branchResult = await githubApi.head(refUrl, { memCache: false });
-    branchExists = true;
-  } catch (err) {
-    if (err.statusCode !== 404) {
-      throw err;
-    }
-  }
+  const branchExists = await remoteBranchExists(repository, branchName);
 
   if (branchExists) {
     try {
@@ -787,17 +776,17 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
     } catch (err) {
       if (err.err?.response?.statusCode === 422) {
         logger.debug(
-          { branchResult, err },
+          { err },
           'Branch update failed due to reference not existing - will try to create'
         );
       } else {
-        logger.warn({ refUrl, err, branchResult }, 'Error updating branch');
+        logger.warn({ refUrl, err }, 'Error updating branch');
         throw err;
       }
     }
   }
 
-  await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
+  await githubApi.postJson(`/repos/${repository}/git/refs`, {
     body: { sha, ref: `refs/heads/${branchName}` },
   });
 }
