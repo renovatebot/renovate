@@ -291,7 +291,7 @@
     "@types/mdast": "3.0.12",
     "@types/moo": "0.5.5",
     "@types/nock": "10.0.3",
-    "@types/node": "18.17.1",
+    "@types/node": "18.17.4",
     "@types/parse-link-header": "2.0.1",
     "@types/prettier": "2.7.3",
     "@types/semver": "7.5.0",
