@@ -20,7 +20,6 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { isValid } from '../../versioning/ruby';
 import type {
   UpdateArtifact,
-  UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
 import {
