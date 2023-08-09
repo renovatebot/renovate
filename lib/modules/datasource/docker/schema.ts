@@ -18,6 +18,7 @@ export const ManifestObject = z.object({
 export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
+  size: z.number().int().gt(0).optional(),
 });
 /**
  * OCI platform properties
