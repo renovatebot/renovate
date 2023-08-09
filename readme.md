@@ -20,7 +20,7 @@ Multi-platform and multi-language.
   - each week
   - each month
 - Relevant package files are discovered automatically
-- Supports monorepo architectures like Lerna or Yarn workspaces with no extra configuration
+- Supports monorepo architectures with workspaces with no extra configuration
 - Bot behavior is customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
 - Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
