@@ -6,13 +6,16 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
-import { regEx } from '../../util/regex';
-import { Result } from '../../util/result';
-import { uniq } from '../../util/uniq';
+import { AsyncResult, Result } from '../../util/result';
 import { trimTrailingSlash } from '../../util/url';
-import { defaultVersioning } from '../versioning';
-import * as allVersioning from '../versioning';
 import datasources from './api';
+import {
+  applyConstraintsFiltering,
+  applyExtractVersion,
+  filterValidVersions,
+  getDatasourceFor,
+  sortAndRemoveDuplicates,
+} from './common';
 import { addMetaData } from './metadata';
 import { setNpmrc } from './npm';
 import { resolveRegistryUrl } from './npm/npmrc';
@@ -32,10 +35,6 @@ export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
-
-export function getDatasourceFor(datasource: string): DatasourceApi | null {
-  return datasources.get(datasource) ?? null;
-}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -238,20 +237,6 @@ function resolveRegistryUrls(
   return massageRegistryUrls(resolvedUrls);
 }
 
-export function getDefaultVersioning(
-  datasourceName: string | undefined
-): string {
-  if (!datasourceName) {
-    return defaultVersioning.id;
-  }
-  const datasource = getDatasourceFor(datasourceName);
-  // istanbul ignore if: wrong regex manager config?
-  if (!datasource) {
-    logger.warn({ datasourceName }, 'Missing datasource!');
-  }
-  return datasource?.defaultVersioning ?? defaultVersioning.id;
-}
-
 function applyReplacements(
   config: GetReleasesInternalConfig
 ): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
@@ -325,7 +310,7 @@ async function fetchReleases(
   return dep;
 }
 
-function getRawReleases(
+function fetchCachedReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
@@ -343,112 +328,58 @@ function getRawReleases(
   return promisedRes;
 }
 
-export async function getPkgReleases(
+export function getRawPkgReleases(
   config: GetPkgReleasesConfig
-): Promise<ReleaseResult | null> {
+): AsyncResult<
+  ReleaseResult,
+  Error | 'no-datasource' | 'no-package-name' | 'no-result'
+> {
   if (!config.datasource) {
     logger.warn('No datasource found');
-    return null;
+    return AsyncResult.err('no-datasource');
   }
+
   const packageName = config.packageName;
   if (!packageName) {
     logger.error({ config }, 'Datasource getReleases without packageName');
-    return null;
+    return AsyncResult.err('no-package-name');
   }
-  let res: ReleaseResult | null = null;
-  try {
-    res = clone(
-      await getRawReleases({
-        ...config,
-        packageName,
-      })
-    );
-  } catch (e) /* istanbul ignore next */ {
-    if (e instanceof ExternalHostError) {
-      e.hostType = config.datasource;
-      e.packageName = packageName;
-    }
-    throw e;
-  }
-  if (!res) {
-    return res;
-  }
-  if (config.extractVersion) {
-    const extractVersionRegEx = regEx(config.extractVersion);
-    res.releases = res.releases
-      .map((release) => {
-        const version = extractVersionRegEx.exec(release.version)?.groups
-          ?.version;
-        if (version) {
-          return { ...release, version }; // overwrite version
-        }
-        return null; // filter out any we can't extract
-      })
-      .filter(is.truthy);
-  }
-  // Use the datasource's default versioning if none is configured
-  const versioning =
-    config.versioning ?? getDefaultVersioning(config.datasource);
-  const version = allVersioning.get(versioning);
 
-  // Filter and sort valid versions
-  res.releases = res.releases
-    .filter((release) => version.isVersion(release.version))
-    .sort((a, b) => version.sortVersions(a.version, b.version));
-
-  // Filter versions for uniqueness
-  res.releases = uniq(res.releases, (x, y) => x.version === y.version);
-
-  if (config?.constraintsFiltering === 'strict') {
-    const filteredReleases: string[] = [];
-    // Filter releases for compatibility
-    for (const [constraintName, constraintValue] of Object.entries(
-      config.constraints ?? {}
-    )) {
-      if (version.isValid(constraintValue)) {
-        res.releases = res.releases.filter((release) => {
-          const constraint = release.constraints?.[constraintName];
-          if (!is.nonEmptyArray(constraint)) {
-            // A release with no constraints is OK
-            return true;
-          }
-
-          const satisfiesConstraints = constraint.some(
-            // If the constraint value is a subset of any release's constraints, then it's OK
-            // fallback to release's constraint match if subset is not supported by versioning
-            (releaseConstraint) =>
-              !releaseConstraint ||
-              (version.subset?.(constraintValue, releaseConstraint) ??
-                version.matches(constraintValue, releaseConstraint))
-          );
-          if (!satisfiesConstraints) {
-            filteredReleases.push(release.version);
-          }
-          return satisfiesConstraints;
-        });
+  return Result.wrapNullable(fetchCachedReleases(config), 'no-result' as const)
+    .catch((e) => {
+      if (e instanceof ExternalHostError) {
+        e.hostType = config.datasource;
+        e.packageName = packageName;
       }
-    }
-    if (filteredReleases.length) {
-      logger.debug(
-        `Filtered ${
-          filteredReleases.length
-        } releases for ${packageName} due to constraintsFiltering=strict: ${filteredReleases.join(
-          ', '
-        )}`
-      );
-    }
-  }
-  // Strip constraints from releases result
-  res.releases.forEach((release) => {
-    delete release.constraints;
-  });
+      return Result.err(e);
+    })
+    .transform(clone);
+}
+
+export function applyDatasourceFilters(
+  releaseResult: ReleaseResult,
+  config: GetPkgReleasesConfig
+): ReleaseResult {
+  let res = releaseResult;
+  res = applyExtractVersion(res, config.extractVersion);
+  res = filterValidVersions(res, config);
+  res = sortAndRemoveDuplicates(res, config);
+  res = applyConstraintsFiltering(res, config);
   return res;
 }
 
-export function getPkgReleasesSafe(
+export async function getPkgReleases(
   config: GetPkgReleasesConfig
-): Promise<Result<ReleaseResult | null>> {
-  return Result.wrap(getPkgReleases(config));
+): Promise<ReleaseResult | null> {
+  const { val = null, err } = await getRawPkgReleases(config)
+    .transform((res) => applyDatasourceFilters(res, config))
+    .unwrap();
+
+  if (err instanceof Error) {
+    throw err;
+  }
+
+  return val;
 }
 
 export function supportsDigests(datasource: string | undefined): boolean {

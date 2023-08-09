@@ -149,7 +149,7 @@ export async function updateArtifacts({
       .join(' ')}`;
 
     if (
-      config.isLockFileMaintenance ||
+      config.isLockFileMaintenance === true ||
       !updatedDeps.length ||
       isGcvPropsFile(packageFileName)
     ) {

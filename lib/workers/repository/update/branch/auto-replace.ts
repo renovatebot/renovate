@@ -83,7 +83,7 @@ export async function confirmIfDepUpdated(
 
   if (
     upgrade.newDigest &&
-    (upgrade.isPinDigest || upgrade.currentDigest) &&
+    (upgrade.isPinDigest === true || upgrade.currentDigest) &&
     upgrade.newDigest !== newUpgrade.currentDigest
   ) {
     logger.debug(

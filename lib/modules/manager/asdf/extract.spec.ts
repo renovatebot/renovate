@@ -105,6 +105,7 @@ maestro 1.24.0
 detekt 1.21.0
 ktlint 0.48.1
 yamlfmt 0.9.0
+typos 1.16.1
 dummy 1.2.3
 `
       );
@@ -514,6 +515,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'google/yamlfmt',
             depName: 'yamlfmt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.16.1',
+            datasource: 'github-releases',
+            packageName: 'crate-ci/typos',
+            depName: 'typos',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

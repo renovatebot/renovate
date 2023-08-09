@@ -12,6 +12,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
@@ -143,6 +144,7 @@ export interface RepoGlobalConfig {
   containerbaseDir?: string;
   platform?: PlatformId;
   endpoint?: string;
+  includeMirrors?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -260,6 +262,7 @@ export interface RenovateConfig
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
+  customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
@@ -270,6 +273,13 @@ export interface RenovateConfig
   constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
+  customizeDashboard?: Record<string, string>;
+}
+
+export interface CustomDatasourceConfig {
+  defaultRegistryUrlTemplate?: string;
+  format?: 'json' | 'plain';
+  transformTemplates?: string[];
 }
 
 export interface AllConfig
@@ -330,11 +340,13 @@ export interface PackageRule
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  matchRepositories?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
+  excludeRepositories?: string[];
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -379,10 +391,12 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
-
-  // used by tests
-  relatedOptions?: string[];
+  parent?:
+    | 'customDatasources'
+    | 'hostRules'
+    | 'packageRules'
+    | 'postUpgradeTasks'
+    | 'regexManagers';
 
   stage?: RenovateConfigStage;
 
@@ -445,7 +459,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
-  default?: any | null;
+  default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
@@ -482,6 +496,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  repository?: string;
 }
 
 export interface ConfigMigration {

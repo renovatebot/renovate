@@ -779,10 +779,38 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeBranch(
-  branchName: string,
-  localOnly = false
-): Promise<void> {
+export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+  let status: StatusResult | undefined;
+  try {
+    await syncGit();
+    await writeGitAuthor();
+    await git.reset(ResetMode.HARD);
+    await gitRetry(() =>
+      git.checkout([
+        '-B',
+        config.currentBranch,
+        'origin/' + config.currentBranch,
+      ])
+    );
+    status = await git.status();
+    await fetchRevSpec(refSpecToMerge);
+    await gitRetry(() => git.merge(['FETCH_HEAD']));
+  } catch (err) {
+    logger.debug(
+      {
+        baseBranch: config.currentBranch,
+        baseSha: config.currentBranchSha,
+        refSpecToMerge,
+        status,
+        err,
+      },
+      'mergeLocally error'
+    );
+    throw err;
+  }
+}
+
+export async function mergeBranch(branchName: string): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -799,13 +827,8 @@ export async function mergeBranch(
       ])
     );
     status = await git.status();
-    if (localOnly) {
-      // merge commit, don't push to origin
-      await gitRetry(() => git.merge([branchName]));
-    } else {
-      await gitRetry(() => git.merge(['--ff-only', branchName]));
-      await gitRetry(() => git.push('origin', config.currentBranch));
-    }
+    await gitRetry(() => git.merge(['--ff-only', branchName]));
+    await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');
   } catch (err) {
     logger.debug(
@@ -897,7 +920,9 @@ export async function hasDiff(
 ): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
+    return (
+      (await gitRetry(() => git.diff([sourceRef, targetRef, '--']))) !== ''
+    );
   } catch (err) {
     return true;
   }

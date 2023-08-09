@@ -2,11 +2,11 @@
 
 As end user, you can choose from these ways to run Renovate:
 
-- You use the Mend Renovate app on GitHub, or
+- You use the Mend Renovate App, or
 - You self-host Renovate, for example by running the pre-built Docker image, or
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
-If you're using the Mend Renovate App on GitHub, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
+If you're using the Mend Renovate App, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
 
 ## Self-Hosting Renovate
 
@@ -104,11 +104,11 @@ Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbuc
 
 #### Forking Renovate app
 
-"Forking Renovate" is the sister app to the Mend Renovate App on GitHub.com.
+"Forking Renovate" is the sister app to the Mend Renovate App.
 The difference is that Forking Renovate does not need `write` permissions to create branches within the repo, and instead submits PRs from its own fork.
 Because of how it works, it functions on public repositories only and additionally cannot support `automerge` capabilities.
 
-[Install Forking Renovate from GitHub App](https://github.com/apps/forking-renovate).
+[Install Forking Renovate from GitHub App store](https://github.com/apps/forking-renovate).
 
 ##### Benefits
 
@@ -120,7 +120,6 @@ If you use Forking Renovate, you'll miss out on these features of the regular Re
 
 - Automerge
 - The `baseBranches` config option
-- The app dashboard (`app.renovatebot.com`)
 
 ### Hosting Renovate
 

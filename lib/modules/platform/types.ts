@@ -44,6 +44,7 @@ export interface RepoParams {
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
+  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
@@ -166,6 +167,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 
 export interface AutodiscoverConfig {
   topics?: string[];
+  includeMirrors?: boolean;
 }
 
 export interface Platform {
@@ -182,7 +184,7 @@ export interface Platform {
     fileName: string,
     repoName?: string,
     branchOrTag?: string
-  ): Promise<any | null>;
+  ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
@@ -233,4 +235,6 @@ export interface PlatformScm {
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<CommitSha>;
+  mergeToLocal(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string): Promise<void>;
 }

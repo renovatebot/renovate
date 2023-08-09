@@ -122,7 +122,7 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
 }
 
 export function find(search: HostRuleSearch): HostRuleSearchResult {
-  if (!(search.hostType || search.url)) {
+  if (!(!!search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }

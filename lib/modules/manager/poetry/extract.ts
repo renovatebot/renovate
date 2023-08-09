@@ -74,7 +74,7 @@ function extractFromSection(
       if (version) {
         currentValue = version;
         nestedVersion = true;
-        if (path || git) {
+        if (!!path || git) {
           skipReason = path ? 'path-dependency' : 'git-dependency';
         }
       } else if (path) {

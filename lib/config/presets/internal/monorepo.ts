@@ -178,7 +178,10 @@ const repoGroups = {
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
   nswag: 'https://github.com/RicoSuter/NSwag',
-  nuxtjs: 'https://github.com/nuxt/nuxt.js',
+  nuxtjs: [
+    'https://github.com/nuxt/nuxt.js', // old repo
+    'https://github.com/nuxt/nuxt',
+  ],
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
@@ -219,6 +222,7 @@ const repoGroups = {
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   sanity: 'https://github.com/sanity-io/sanity',
+  scaffdog: 'https://github.com/scaffdog/scaffdog',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
@@ -227,6 +231,7 @@ const repoGroups = {
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
+  'spectre-console': 'https://github.com/spectreconsole/spectre.console',
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
@@ -245,6 +250,8 @@ const repoGroups = {
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
+  'testcontainers-node':
+    'https://github.com/testcontainers/testcontainers-node',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
@@ -273,6 +280,7 @@ const repoGroups = {
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const orgGroups = {
+  'datatables-net': ['https://github.com/DataTables/'],
   hapijs: 'https://github.com/hapijs/',
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',

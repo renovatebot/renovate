@@ -110,7 +110,7 @@ export async function getRepos(): Promise<string[]> {
     );
     const result = repos.map(
       (r: { project: { key: string }; slug: string }) =>
-        `${r.project.key.toLowerCase()}/${r.slug}`
+        `${r.project.key}/${r.slug}`
     );
     logger.debug({ result }, 'result of getRepos()');
     return result;
@@ -144,7 +144,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);

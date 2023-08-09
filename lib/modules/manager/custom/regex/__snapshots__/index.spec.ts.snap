@@ -1,0 +1,445 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/custom/regex/index extracts and applies a registryUrlTemplate 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "registryUrls": [
+        "http://registry.gradle.com/",
+      ],
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+  ],
+  "matchStrings": [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+  ],
+  "registryUrlTemplate": "http://registry.{{depName}}.com/",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts and does not apply a registryUrlTemplate if the result is an invalid url 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+  ],
+  "matchStrings": [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+  ],
+  "registryUrlTemplate": "this-is-not-a-valid-url-{{depName}}",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts dependency with autoReplaceStringTemplate 1`] = `
+{
+  "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "my.new.registry/aRepository/andImage",
+  "deps": [
+    {
+      "currentValue": "1.18-alpine",
+      "datasource": "docker",
+      "depName": "my.new.registry/aRepository/andImage",
+      "replaceString": "image: my.old.registry/aRepository/andImage:1.18-alpine",
+    },
+  ],
+  "matchStrings": [
+    "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)",
+  ],
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts extractVersion 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "0.30",
+      "datasource": "github-tags",
+      "depName": "openresty/headers-more-nginx-module",
+      "extractVersion": "^v(?<version>.*)$",
+      "replaceString": "ENV NGINX_MODULE_HEADERS_MORE_VERSION=0.30 # github-tags/openresty/headers-more-nginx-module&versioning=loose&extractVersion=^v(?<version>.*)$
+",
+      "versioning": "loose",
+    },
+  ],
+  "matchStrings": [
+    "ENV NGINX_MODULE_HEADERS_MORE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?(\\&extractVersion=(?<extractVersion>.*?))?\\s",
+  ],
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts multiple dependencies 1`] = `
+{
+  "depTypeTemplate": "final",
+  "deps": [
+    {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "depType": "final",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+    {
+      "currentValue": "10.19.0",
+      "datasource": "github-tags",
+      "depName": "nodejs/node",
+      "depType": "final",
+      "replaceString": "ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+",
+      "versioning": "node",
+    },
+    {
+      "currentValue": "1.9.3",
+      "datasource": "github-releases",
+      "depName": "composer/composer",
+      "depType": "final",
+      "replaceString": "ENV COMPOSER_VERSION=1.9.3 # github-releases/composer/composer
+",
+      "versioning": "semver",
+    },
+    {
+      "currentValue": "1.9.0",
+      "datasource": "rubygems",
+      "depName": "cocoapods",
+      "depType": "final",
+      "replaceString": "ENV COCOAPODS_VERSION=1.9.0 # rubygems/cocoapods&versioning=ruby
+",
+      "versioning": "ruby",
+    },
+    {
+      "currentValue": "19.03.1",
+      "datasource": "github-releases",
+      "depName": "docker/docker-ce",
+      "depType": "final",
+      "replaceString": "ENV DOCKER_VERSION=19.03.1 # github-releases/docker/docker-ce&versioning=docker
+",
+      "versioning": "docker",
+    },
+    {
+      "currentValue": "1.0.0",
+      "datasource": "github-releases",
+      "depName": "python-poetry/poetry",
+      "depType": "final",
+      "replaceString": "ENV POETRY_VERSION=1.0.0 # github-releases/python-poetry/poetry
+",
+      "versioning": "semver",
+    },
+    {
+      "currentValue": "6.10.2",
+      "datasource": "npm",
+      "depName": "npm",
+      "depType": "final",
+      "replaceString": "ENV NPM_VERSION=6.10.2 # npm/npm
+",
+      "versioning": "semver",
+    },
+    {
+      "currentValue": "1.19.1",
+      "datasource": "npm",
+      "depName": "yarn",
+      "depType": "final",
+      "replaceString": "ENV YARN_VERSION=1.19.1 # npm/yarn
+",
+      "versioning": "semver",
+    },
+  ],
+  "matchStrings": [
+    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s",
+  ],
+  "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts multiple dependencies with multiple matchStrings 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+    {
+      "currentValue": "10.19.0",
+      "datasource": "github-tags",
+      "depName": "nodejs/node",
+      "replaceString": "ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+",
+      "versioning": "node",
+    },
+  ],
+  "matchStrings": [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+    "ENV NODE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+  ],
+  "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts registryUrl 1`] = `
+{
+  "datasourceTemplate": "helm",
+  "deps": [
+    {
+      "currentValue": "8.12.13",
+      "datasource": "helm",
+      "depName": "prometheus-operator",
+      "registryUrls": [
+        "https://charts.helm.sh/stable",
+      ],
+      "replaceString": "chart:
+          repository: https://charts.helm.sh/stable
+          name: prometheus-operator
+          version: 8.12.13
+",
+    },
+  ],
+  "matchStrings": [
+    "chart:
+ *repository: (?<registryUrl>.*?)
+ *name: (?<depName>.*?)
+ *version: (?<currentValue>.*)
+",
+  ],
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with combination strategy 1`] = `
+{
+  "datasourceTemplate": "docker",
+  "deps": [
+    {
+      "currentValue": "v2.21.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "prometheus_version: "v2.21.0" //",
+    },
+  ],
+  "matchStrings": [
+    "prometheus_image:\\s*"(?<depName>.*)"\\s*\\/\\/",
+    "prometheus_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with combination strategy and multiple matches 1`] = `
+{
+  "datasourceTemplate": "docker",
+  "deps": [
+    {
+      "currentValue": "0.12.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "someother_version: "0.12.0" //",
+    },
+  ],
+  "matchStrings": [
+    ".*_image:\\s*"(?<depName>.*)"\\s*\\/\\/",
+    ".*_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with combination strategy and non standard capture groups 1`] = `
+{
+  "datasourceTemplate": "docker",
+  "depNameTemplate": "{{{ registry }}}/{{{ repository }}}",
+  "deps": [
+    {
+      "currentValue": "v2.21.0",
+      "datasource": "docker",
+      "depName": "docker.io/prom/prometheus",
+      "replaceString": "prometheus_version: "v2.21.0" //",
+    },
+  ],
+  "matchStrings": [
+    "prometheus_registry:\\s*"(?<registry>.*)"\\s*\\/\\/",
+    "prometheus_repository:\\s*"(?<repository>.*)"\\s*\\/\\/",
+    "prometheus_tag:\\s*"(?<tag>.*)"\\s*\\/\\/",
+    "prometheus_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with combination strategy and registry url 1`] = `
+{
+  "datasourceTemplate": "helm",
+  "deps": [
+    {
+      "currentValue": "0.19.2",
+      "datasource": "helm",
+      "depName": "descheduler",
+      "registryUrls": [
+        "https://kubernetes-sigs.github.io/descheduler/",
+      ],
+      "replaceString": "CHART_VERSION: 0.19.2
+",
+    },
+  ],
+  "matchStrings": [
+    "CHART_VERSION: (?<currentValue>.*?)
+",
+    "CHART_REPOSITORY_URL: "(?<registryUrl>.*?)"",
+    "CHART_NAME: "(?<depName>.*?)"",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with combination strategy and templates 1`] = `
+{
+  "datasourceTemplate": "helm",
+  "depNameTemplate": "helm_repo/{{{ depName }}}",
+  "deps": [
+    {
+      "currentValue": "0.19.2",
+      "datasource": "helm",
+      "depName": "helm_repo/descheduler",
+      "registryUrls": [
+        "https://kubernetes-sigs.github.io/",
+      ],
+      "replaceString": "CHART_VERSION: 0.19.2
+",
+    },
+  ],
+  "matchStrings": [
+    "CHART_REPOSITORY_URL: "(?<registryUrl>.*)\\/(?<depName>[a-z]+)\\/"",
+    "CHART_VERSION: (?<currentValue>.*?)
+",
+  ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with recursive strategy and merged groups 1`] = `
+{
+  "depNameTemplate": "{{{ first }}}/{{{ second }}}/{{{ depName }}}",
+  "deps": [
+    {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "group1/group1/prom/prometheus",
+      "replaceString": ""name": "prom/prometheus",
+    "type": "docker",
+    "value": "v2.19.0"",
+    },
+    {
+      "currentValue": "7.2.2",
+      "datasource": "docker",
+      "depName": "group2/group2/grafana/grafana",
+      "replaceString": ""name": "grafana/grafana",
+    "type": "docker",
+    "value": "7.2.2"",
+    },
+    {
+      "currentValue": "1.6.1",
+      "datasource": "docker",
+      "depName": "backup/backup/grafana/loki",
+      "replaceString": ""name": "grafana/loki",
+      "type": "docker",
+      "value": "1.6.1"",
+    },
+    {
+      "currentValue": "3.9.0",
+      "datasource": "docker",
+      "depName": "setup/setup/python",
+      "replaceString": ""name": "python",
+      "type": "docker",
+      "value": "3.9.0"",
+    },
+  ],
+  "matchStrings": [
+    ""(?<first>[^"]*)":\\s*{[^}]*}",
+    ""(?<second>[^"]*)":\\s*\\{[^}]*}",
+    ""name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with recursive strategy and multiple layers  1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "1.6.1",
+      "datasource": "docker",
+      "depName": "grafana/loki",
+      "replaceString": ""name": "grafana/loki",
+      "type": "docker",
+      "value": "1.6.1"",
+    },
+  ],
+  "matchStrings": [
+    ""backup":\\s*{[^}]*}",
+    ""test":\\s*\\{[^}]*}",
+    ""name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with recursive strategy and multiple matches 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": ""name": "prom/prometheus",
+    "type": "docker",
+    "value": "v2.19.0"",
+    },
+    {
+      "currentValue": "7.2.2",
+      "datasource": "docker",
+      "depName": "grafana/grafana",
+      "replaceString": ""name": "grafana/grafana",
+    "type": "docker",
+    "value": "7.2.2"",
+    },
+  ],
+  "matchStrings": [
+    ""group.{1}":\\s*\\{[^}]*}",
+    ""name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
+
+exports[`modules/manager/custom/regex/index extracts with recursive strategy and single match 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": ""name": "prom/prometheus",
+    "type": "docker",
+    "value": "v2.19.0"",
+    },
+  ],
+  "matchStrings": [
+    ""group1":\\s*\\{[^}]*}",
+    ""name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;

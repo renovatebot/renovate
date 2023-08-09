@@ -1,6 +1,6 @@
-import hasha from 'hasha';
 import * as httpMock from '../../../../test/http-mock';
 import type { GithubDigestFile } from '../../../util/github/types';
+import { toSha256 } from '../../../util/hash';
 import { GitHubReleaseAttachmentMocker } from './test';
 
 import { GithubReleaseAttachmentsDatasource } from '.';
@@ -55,7 +55,7 @@ describe('modules/datasource/github-release-attachments/digest', () => {
         'asset.zip': content,
         'smallest.zip': '1'.repeat(8 * 1024),
       });
-      const contentDigest = await hasha.async(content, { algorithm: 'sha256' });
+      const contentDigest = toSha256(content);
 
       const digestAsset = await githubReleaseAttachments.findDigestAsset(
         release,
@@ -147,9 +147,7 @@ describe('modules/datasource/github-release-attachments/digest', () => {
         const release = releaseMock.withAssets('v1.0.1', {
           'asset.zip': updatedContent,
         });
-        const contentDigest = await hasha.async(updatedContent, {
-          algorithm: 'sha256',
-        });
+        const contentDigest = toSha256(updatedContent);
 
         const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
           digestAsset,

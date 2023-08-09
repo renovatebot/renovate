@@ -63,7 +63,7 @@ Normally a package manager parses or extracts all package files in _parallel_, a
 If the package manager you're adding works in _serial_, use this function instead.
 
 For example the npm and Yarn package manager must process the `package.json` and `package-lock` or `yarn.lock` files together.
-This allows features like Lerna and Workspaces to work.
+This allows features like Workspaces to work.
 This means that for npm or Yarn we need to iterate through all package files after the initial parsing.
 
 As another example, in order for Gradle to extract dependencies Renovate must first call a command via a child process.

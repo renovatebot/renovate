@@ -41,7 +41,6 @@ const updateArtifact: UpdateArtifact = {
 describe('modules/manager/pub/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
