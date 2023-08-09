@@ -3,11 +3,8 @@ import type {
   RegexManagerTemplates,
   RenovateConfig,
 } from '../../../config/types';
-import { getManagerList } from '../../../modules/manager';
-import {
-  getCustomManagerList,
-  isCustomManager,
-} from '../../../modules/manager/custom';
+import { allManagersList } from '../../../modules/manager';
+import { isCustomManager } from '../../../modules/manager/custom';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/types';
 import type { WorkerExtractConfig } from '../../types';
@@ -64,7 +61,7 @@ export function generateFingerprintConfig(
   if (enabledManagers?.length) {
     managerList = new Set(enabledManagers);
   } else {
-    managerList = new Set([...getManagerList(), ...getCustomManagerList()]);
+    managerList = new Set(allManagersList);
   }
 
   const handleCustomManager = (

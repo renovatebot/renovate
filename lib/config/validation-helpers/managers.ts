@@ -1,5 +1,4 @@
-import { getManagerList } from '../../modules/manager';
-import { getCustomManagerList } from '../../modules/manager/custom';
+import { allManagersList } from '../../modules/manager';
 import type { ValidationMessage } from '../types';
 import type { CheckManagerArgs } from './types';
 
@@ -14,18 +13,14 @@ export function check({
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(
-        (confManager) =>
-          !getManagerList().includes(confManager) &&
-          !getCustomManagerList().includes(confManager)
+        (confManager) => !allManagersList.includes(confManager)
       )
     ) {
       managersErrMessage = `${currentPath}:
         You have included an unsupported manager in a package rule. Your list: ${String(
           resolvedRule.matchManagers
         )}.
-        Supported managers are: (${getManagerList()
-          .concat(getCustomManagerList())
-          .join(', ')}).`;
+        Supported managers are: (${allManagersList.join(', ')}).`;
     }
   } else if (typeof resolvedRule.matchManagers !== 'undefined') {
     managersErrMessage = `${currentPath}: Managers should be type of List. You have included ${typeof resolvedRule.matchManagers}.`;

@@ -1,13 +1,12 @@
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
-import { getManagerList } from '../../lib/modules/manager';
-import { getCustomManagerList } from '../../lib/modules/manager/custom';
+import { allManagersList } from '../../lib/modules/manager';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
-const managers = new Set([...getManagerList(), ...getCustomManagerList()]);
+const managers = new Set(allManagersList);
 
 /**
  * Merge string arrays one by one

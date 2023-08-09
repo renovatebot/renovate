@@ -2,11 +2,8 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getManagerList, hashMap } from '../../../modules/manager';
-import {
-  getCustomManagerList,
-  isCustomManager,
-} from '../../../modules/manager/custom';
+import { allManagersList, hashMap } from '../../../modules/manager';
+import { isCustomManager } from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
@@ -15,7 +12,7 @@ import { getManagerPackageFiles } from './manager-files';
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
-  let managerList = [...getManagerList(), ...getCustomManagerList()];
+  let managerList = allManagersList;
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');

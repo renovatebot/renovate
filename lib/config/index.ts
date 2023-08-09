@@ -1,6 +1,5 @@
 import { logger } from '../logger';
-import { get, getManagerList } from '../modules/manager';
-import { getCustomManagerList } from '../modules/manager/custom';
+import { allManagersList, get } from '../modules/manager';
 import * as options from './options';
 import type {
   AllConfig,
@@ -26,7 +25,7 @@ export function getManagerConfig(
   }
   // TODO: fix types #7154
   managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
-  for (const i of [...getManagerList(), ...getCustomManagerList()]) {
+  for (const i of allManagersList) {
     delete managerConfig[i];
   }
   return managerConfig;
