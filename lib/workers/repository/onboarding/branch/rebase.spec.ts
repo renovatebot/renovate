@@ -29,6 +29,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         ...getConfig(),
         repository: 'some/repo',
       };
+      configModule.getOnboardingConfigContents.mockResolvedValue('');
     });
 
     it('does nothing if branch is up to date', async () => {
@@ -40,13 +41,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('rebases onboarding branch', async () => {
-      configModule.getOnboardingConfigContents.mockResolvedValueOnce('');
       await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
-      configModule.getOnboardingConfigContents.mockResolvedValueOnce('');
       await rebaseOnboardingBranch(
         {
           ...config,
@@ -64,7 +63,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
-      configModule.getOnboardingConfigContents.mockResolvedValueOnce('');
       await rebaseOnboardingBranch(
         {
           ...config,
@@ -82,7 +80,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('handles a missing previous config hash', async () => {
-      configModule.getOnboardingConfigContents.mockResolvedValueOnce('');
       await rebaseOnboardingBranch(config, undefined);
       expect(scm.commitAndPush).toHaveBeenCalled();
     });
@@ -96,14 +93,12 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('requests update if config hashes mismatch', async () => {
-      configModule.getOnboardingConfigContents.mockResolvedValueOnce('');
       await rebaseOnboardingBranch(config, hash);
       expect(scm.commitAndPush).toHaveBeenCalled();
     });
 
     it('dryRun=full', async () => {
       GlobalConfig.set({ localDir: '', dryRun: 'full', platform: 'github' });
-      configModule.getOnboardingConfigContents.mockResolvedValueOnce('');
       await rebaseOnboardingBranch(config, hash);
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would rebase files in onboarding branch'

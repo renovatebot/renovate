@@ -404,7 +404,9 @@ describe('workers/repository/onboarding/branch/index', () => {
         const pl = 'bitbucket';
         GlobalConfig.set({ platform: pl });
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({}));
+
         await checkOnboardingBranch(config);
+
         expect(logger.trace).toHaveBeenCalledWith(
           `Platform '${pl}' does not support extended markdown`
         );
