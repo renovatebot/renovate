@@ -89,11 +89,10 @@ async function getGradleVersion(gradlewFile: string): Promise<string | null> {
   return extractResult ? extractResult.version : null;
 }
 
-async function updateVerificationMetadata(
+async function buildUpdateVerificationMetadataCmd(
   verificationMetadataFile: string | undefined,
-  baseCmd: string,
-  execOptions: ExecOptions
-): Promise<void> {
+  baseCmd: string
+): Promise<string | undefined> {
   if (verificationMetadataFile) {
     const hashTypes: string[] = [];
     const verificationMetadata = await readLocalFile(verificationMetadataFile);
@@ -112,13 +111,9 @@ async function updateVerificationMetadata(
     ) {
       hashTypes.push('pgp');
     }
-    const verificationMetadataCmd = `${baseCmd} --write-verification-metadata ${hashTypes.join(
+    return `${baseCmd} --write-verification-metadata ${hashTypes.join(
       ','
     )} help`;
-    await exec(verificationMetadataCmd, {
-      ...execOptions,
-      ignoreStdout: true,
-    });
   }
 }
 
@@ -204,13 +199,17 @@ export async function updateArtifacts({
     }
 
     await writeLocalFile(packageFileName, newPackageFileContent);
-    await exec(lockfileCmd, { ...execOptions, ignoreStdout: true });
 
-    await updateVerificationMetadata(
-      verificationMetadataFile,
-      baseCmd,
-      execOptions
-    );
+    const cmds = [lockfileCmd];
+    const updateVerificationMetadataCmd =
+      await buildUpdateVerificationMetadataCmd(
+        verificationMetadataFile,
+        baseCmd
+      );
+    if (updateVerificationMetadataCmd) {
+      cmds.push(updateVerificationMetadataCmd);
+    }
+    await exec(cmds, { ...execOptions, ignoreStdout: true });
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');
