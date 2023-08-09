@@ -38,7 +38,11 @@ describe('modules/manager/index', () => {
   });
 
   it('validates', () => {
-    function validate(module: ManagerApi): boolean {
+    function validate(module: ManagerApi, moduleName: string): boolean {
+      // no need to validate custom as it is a wrapper and not an actual manager
+      if (moduleName === 'custom') {
+        return true;
+      }
       if (!module.defaultConfig) {
         return false;
       }
@@ -65,7 +69,7 @@ describe('modules/manager/index', () => {
 
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name)!;
-      expect(validate(mgr)).toBeTrue();
+      expect(validate(mgr, name)).toBeTrue();
     }
   });
 

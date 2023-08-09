@@ -1,9 +1,4 @@
-import type {
-  ExtractConfig,
-  ManagerApi,
-  PackageFileContent,
-  Result,
-} from '../types';
+import type { ManagerApi } from '../types';
 import customManagers from './api';
 
 const customManagerList = Array.from(customManagers.keys());
@@ -19,16 +14,4 @@ export function get<T extends keyof ManagerApi>(
 
 export function isCustomManager(manager: string): boolean {
   return !!customManagerList.includes(manager);
-}
-
-// export hollow function and constants for validation as manager
-export const defaultConfig = {};
-export const supportedDatasources = ['*'];
-
-export function extractPackageFile(
-  content: string,
-  packageFile: string,
-  config: ExtractConfig
-): Result<PackageFileContent | null> {
-  return { deps: [] };
 }
