@@ -266,7 +266,6 @@ describe('workers/global/config/parse/env', () => {
       beforeAll(() => {
         processExit = jest
           .spyOn(process, 'exit')
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
           .mockImplementation((() => {}) as never);
       });
 

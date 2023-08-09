@@ -18,10 +18,13 @@ export function getRollbackUpdate(
     );
     return null;
   }
-  const lessThanVersions = versions.filter((v) =>
-    // TODO #7154
-    version.isLessThanRange!(v.version, currentValue!)
-  );
+  const lessThanVersions = versions.filter((v) => {
+    try {
+      return version.isLessThanRange!(v.version, currentValue!);
+    } catch (err) /* istanbul ignore next */ {
+      return false;
+    }
+  });
   // istanbul ignore if
   if (!lessThanVersions.length) {
     logger.debug(

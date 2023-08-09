@@ -25,10 +25,15 @@ $ renovate-config-validator
  INFO: Config validated successfully
 ```
 
+### Strict mode
+
+By default, the validator program fails with a non-zero exit code if there are any validation warnings or errors.
+You can pass the `--strict` flag to make it fail if a scanned config needs migration.
+
 ### Pass files to check as CLI arguments
 
-Or you can pass the files to check to the `renovate-config-validator` program as CLI arguments.
-You can use this to check config files with non-default names, like when you're using preset repositories.
+You can pass the files to check to the `renovate-config-validator` program as CLI arguments.
+This can be handy to check config files with non-default names, like when you're using preset repositories.
 For example:
 
 ```console
@@ -43,4 +48,9 @@ $ renovate-config-validator first_config.json second_config.json
 ## Validate your config automatically
 
 You can create a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
+Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
+
+## Pre-commit hook
+
+You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
 Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
