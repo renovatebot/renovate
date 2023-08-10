@@ -161,13 +161,20 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
-    it('does not support GitHub fine-grained PATs', () => {
+    it('supports GitHub fine-grained PATs', () => {
       const envParam: NodeJS.ProcessEnv = {
         GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
         RENOVATE_TOKEN: 'a github.com token',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot({
         token: 'a github.com token',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+        ],
       });
     });
 

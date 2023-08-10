@@ -57,14 +57,6 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if fine-grained token', async () => {
-      await expect(
-        github.initPlatform({ token: 'github_pat_XXXXXX' })
-      ).rejects.toThrow(
-        'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
-      );
-    });
-
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(github.initPlatform({ token: '123test' })).rejects.toThrow();

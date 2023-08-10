@@ -133,11 +133,6 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-  if (token.startsWith('github_pat_')) {
-    throw new Error(
-      'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
-    );
-  }
   token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
