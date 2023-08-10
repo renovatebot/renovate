@@ -1,6 +1,5 @@
 // TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-import URL from 'url';
+import URL from 'node:url';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
@@ -172,7 +171,7 @@ export class BaseGoDatasource {
     goModule: string
   ): DataSource | null {
     const importMatch = regEx(
-      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
+      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)"\\s*\\/?>`
     ).exec(res);
 
     if (!importMatch) {
@@ -199,27 +198,34 @@ export class BaseGoDatasource {
     }
     // fall back to old behaviour if detection did not work
 
-    if (detectPlatform(goImportURL) === 'github') {
-      // split the go module from the URL: host/go/module -> go/module
-      // TODO: `parsedUrl.pathname` can be undefined
-      const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
-        .replace(regEx(/\.git$/), '')
-        .split('/')
-        .slice(-2)
-        .join('/');
+    switch (detectPlatform(goImportURL)) {
+      case 'github': {
+        // split the go module from the URL: host/go/module -> go/module
+        // TODO: `parsedUrl.pathname` can be undefined
+        const packageName = trimTrailingSlash(`${parsedUrl.pathname}`)
+          .replace(regEx(/\.git$/), '')
+          .split('/')
+          .slice(-2)
+          .join('/');
 
-      return {
-        datasource: GithubTagsDatasource.id,
-        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
-        packageName,
-      };
+        return {
+          datasource: GithubTagsDatasource.id,
+          registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+          packageName,
+        };
+      }
+      case 'azure': {
+        return {
+          datasource: GitTagsDatasource.id,
+          packageName: goImportURL.replace(regEx(/\.git$/), ''),
+        };
+      }
+      default: {
+        return {
+          datasource: GitTagsDatasource.id,
+          packageName: goImportURL,
+        };
+      }
     }
-
-    // Fall back to git tags
-
-    return {
-      datasource: GitTagsDatasource.id,
-      packageName: goImportURL,
-    };
   }
 }

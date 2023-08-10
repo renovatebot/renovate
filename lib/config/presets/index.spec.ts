@@ -23,27 +23,6 @@ const gitHub = mocked(_github);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
-npm.getPreset.mockImplementation(({ repo, presetName }) => {
-  if (repo === 'renovate-config-ikatyang') {
-    return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
-      'renovate-config'
-    ][presetName!];
-  }
-  if (repo === 'renovate-config-notfound') {
-    throw new Error(PRESET_DEP_NOT_FOUND);
-  }
-  if (repo === 'renovate-config-noconfig') {
-    throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
-  }
-  if (repo === 'renovate-config-throw') {
-    throw new Error('whoops');
-  }
-  if (repo === 'renovate-config-wrongpreset') {
-    throw new Error(PRESET_NOT_FOUND);
-  }
-  return null;
-});
-
 describe('config/presets/index', () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
@@ -51,6 +30,26 @@ describe('config/presets/index', () => {
     beforeEach(() => {
       config = {};
       memCache.init();
+      npm.getPreset.mockImplementation(({ repo, presetName }) => {
+        if (repo === 'renovate-config-ikatyang') {
+          return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
+            'renovate-config'
+          ][presetName!];
+        }
+        if (repo === 'renovate-config-notfound') {
+          throw new Error(PRESET_DEP_NOT_FOUND);
+        }
+        if (repo === 'renovate-config-noconfig') {
+          throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
+        }
+        if (repo === 'renovate-config-throw') {
+          throw new Error('whoops');
+        }
+        if (repo === 'renovate-config-wrongpreset') {
+          throw new Error(PRESET_NOT_FOUND);
+        }
+        return null;
+      });
     });
 
     it('returns same if no presets', async () => {
@@ -145,7 +144,7 @@ describe('config/presets/index', () => {
 
     it('throws noconfig', async () => {
       config.foo = 1;
-      config.extends = ['noconfig:base'];
+      config.extends = ['noconfig:recommended'];
       let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
@@ -155,7 +154,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Preset package is missing a renovate-config entry (noconfig:base)'
+        'Preset package is missing a renovate-config entry (noconfig:recommended)'
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -271,9 +270,9 @@ describe('config/presets/index', () => {
     });
 
     it('ignores presets', async () => {
-      config.extends = ['config:base'];
+      config.extends = ['config:recommended'];
       const res = await presets.resolveConfigPresets(config, {}, [
-        'config:base',
+        'config:recommended',
       ]);
       expect(config).toMatchObject(res);
       expect(res).toBeEmptyObject();

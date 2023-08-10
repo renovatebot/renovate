@@ -4,8 +4,10 @@ import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../modules/manager';
 import { ensureDir, getParentDir, readSystemFile } from '../../../../util/fs';
+import { addSecretForSanitizing } from '../../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
+import * as codespaces from './codespaces';
 import * as envParser from './env';
 import * as fileParser from './file';
 import { hostRulesFromEnv } from './host-rules-from-env';
@@ -24,6 +26,8 @@ export async function parseConfigs(
 
   let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
+
+  config = await codespaces.setConfig(config);
 
   const combinedConfig = config;
 
@@ -46,9 +50,15 @@ export async function parseConfigs(
   }
 
   if (!config.privateKeyOld && config.privateKeyPathOld) {
-    config.privateKey = await readSystemFile(config.privateKeyPathOld, 'utf8');
+    config.privateKeyOld = await readSystemFile(
+      config.privateKeyPathOld,
+      'utf8'
+    );
     delete config.privateKeyPathOld;
   }
+
+  addSecretForSanitizing(config.privateKey, 'global');
+  addSecretForSanitizing(config.privateKeyOld, 'global');
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
@@ -89,9 +99,6 @@ export async function parseConfigs(
   }
   // Get global config
   logger.trace({ config }, 'Full config');
-
-  // Print config
-  logger.trace({ config }, 'Global config');
 
   // Massage endpoint to have a trailing slash
   if (config.endpoint) {

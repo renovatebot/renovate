@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { Lockfile, PackageFile } from './schema';
 import {
   extractConstraints,
   findGithubToken,
@@ -21,114 +22,121 @@ describe('modules/manager/composer/utils', () => {
 
   describe('extractConstraints', () => {
     it('returns from require', () => {
-      expect(
-        extractConstraints(
-          { require: { php: '>=5.3.2', 'composer/composer': '1.1.0' } },
-          {}
-        )
-      ).toEqual({ php: '>=5.3.2', composer: '1.1.0' });
+      const file = PackageFile.parse({
+        require: { php: '>=5.3.2', 'composer/composer': '1.1.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({
+        php: '>=5.3.2',
+        composer: '1.1.0',
+      });
     });
 
     it('returns platform php version', () => {
-      expect(
-        extractConstraints(
-          {
-            config: { platform: { php: '7.4.27' } },
-            require: { php: '~7.4 || ~8.0' },
-          },
-          {}
-        )
-      ).toEqual({ composer: '1.*', php: '<=7.4.27' });
+      const file = PackageFile.parse({
+        config: { platform: { php: '7.4.27' } },
+        require: { php: '~7.4 || ~8.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({
+        composer: '1.*',
+        php: '<=7.4.27',
+      });
     });
 
     it('returns platform 0 minor php version', () => {
-      expect(
-        extractConstraints(
-          {
-            config: { platform: { php: '7.0.5' } },
-            require: { php: '^7.0 || ~8.0' },
-          },
-          {}
-        )
-      ).toEqual({ composer: '1.*', php: '<=7.0.5' });
+      const file = PackageFile.parse({
+        config: { platform: { php: '7.0.5' } },
+        require: { php: '^7.0 || ~8.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({
+        composer: '1.*',
+        php: '<=7.0.5',
+      });
     });
 
     it('returns platform 0 patch php version', () => {
-      expect(
-        extractConstraints(
-          {
-            config: { platform: { php: '7.4.0' } },
-            require: { php: '^7.0 || ~8.0' },
-          },
-          {}
-        )
-      ).toEqual({ composer: '1.*', php: '<=7.4.0' });
+      const file = PackageFile.parse({
+        config: { platform: { php: '7.4.0' } },
+        require: { php: '^7.0 || ~8.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({
+        composer: '1.*',
+        php: '<=7.4.0',
+      });
     });
 
     it('returns platform lowest minor php version', () => {
-      expect(
-        extractConstraints(
-          {
-            config: { platform: { php: '7' } },
-            require: { php: '^7.0 || ~8.0' },
-          },
-          {}
-        )
-      ).toEqual({ composer: '1.*', php: '<=7.0.0' });
+      const file = PackageFile.parse({
+        config: { platform: { php: '7' } },
+        require: { php: '^7.0 || ~8.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({
+        composer: '1.*',
+        php: '<=7.0.0',
+      });
     });
 
     it('returns platform lowest patch php version', () => {
-      expect(
-        extractConstraints(
-          {
-            config: { platform: { php: '7.4' } },
-            require: { php: '~7.4 || ~8.0' },
-          },
-          {}
-        )
-      ).toEqual({ composer: '1.*', php: '<=7.4.0' });
+      const file = PackageFile.parse({
+        config: { platform: { php: '7.4' } },
+        require: { php: '~7.4 || ~8.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({
+        composer: '1.*',
+        php: '<=7.4.0',
+      });
     });
 
     it('returns from require-dev', () => {
-      expect(
-        extractConstraints(
-          { 'require-dev': { 'composer/composer': '1.1.0' } },
-          {}
-        )
-      ).toEqual({ composer: '1.1.0' });
+      const file = PackageFile.parse({
+        'require-dev': { 'composer/composer': '1.1.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({ composer: '1.1.0' });
     });
 
     it('returns from composer platform require', () => {
-      expect(
-        extractConstraints({ require: { php: '^8.1', composer: '2.2.0' } }, {})
-      ).toEqual({ php: '^8.1', composer: '2.2.0' });
+      const file = PackageFile.parse({
+        require: { php: '^8.1', composer: '2.2.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({
+        php: '^8.1',
+        composer: '2.2.0',
+      });
     });
 
     it('returns from composer platform require-dev', () => {
-      expect(
-        extractConstraints({ 'require-dev': { composer: '^2.2' } }, {})
-      ).toEqual({ composer: '^2.2' });
+      const file = PackageFile.parse({ 'require-dev': { composer: '^2.2' } });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({ composer: '^2.2' });
     });
 
     it('returns from composer-runtime-api', () => {
-      expect(
-        extractConstraints(
-          { require: { 'composer-runtime-api': '^1.1.0' } },
-          {}
-        )
-      ).toEqual({ composer: '^1.1' });
+      const file = PackageFile.parse({
+        require: { 'composer-runtime-api': '^1.1.0' },
+      });
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({ composer: '^1.1' });
     });
 
     it('returns from plugin-api-version', () => {
-      expect(extractConstraints({}, { 'plugin-api-version': '1.1.0' })).toEqual(
-        {
-          composer: '^1.1',
-        }
-      );
+      const file = PackageFile.parse({});
+      const lockfile = Lockfile.parse({ 'plugin-api-version': '1.1.0' });
+      expect(extractConstraints(file, lockfile)).toEqual({
+        composer: '^1.1',
+      });
     });
 
     it('fallback to 1.*', () => {
-      expect(extractConstraints({}, {})).toEqual({ composer: '1.*' });
+      const file = PackageFile.parse({});
+      const lockfile = Lockfile.parse({});
+      expect(extractConstraints(file, lockfile)).toEqual({ composer: '1.*' });
     });
   });
 
@@ -276,27 +284,24 @@ describe('modules/manager/composer/utils', () => {
 
   describe('requireComposerDependencyInstallation', () => {
     it('returns true when symfony/flex has been installed', () => {
-      expect(
-        requireComposerDependencyInstallation({
-          packages: [{ name: 'symfony/flex', version: '1.17.1' }],
-        })
-      ).toBeTrue();
+      const lockfile = Lockfile.parse({
+        packages: [{ name: 'symfony/flex', version: '1.17.1' }],
+      });
+      expect(requireComposerDependencyInstallation(lockfile)).toBeTrue();
     });
 
     it('returns true when symfony/flex has been installed as dev dependency', () => {
-      expect(
-        requireComposerDependencyInstallation({
-          'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }],
-        })
-      ).toBeTrue();
+      const lockfile = Lockfile.parse({
+        'packages-dev': [{ name: 'symfony/flex', version: '1.17.1' }],
+      });
+      expect(requireComposerDependencyInstallation(lockfile)).toBeTrue();
     });
 
     it('returns false when symfony/flex has not been installed', () => {
-      expect(
-        requireComposerDependencyInstallation({
-          packages: [{ name: 'symfony/console', version: '5.4.0' }],
-        })
-      ).toBeFalse();
+      const lockfile = Lockfile.parse({
+        packages: [{ name: 'symfony/console', version: '5.4.0' }],
+      });
+      expect(requireComposerDependencyInstallation(lockfile)).toBeFalse();
     });
   });
 
@@ -308,21 +313,26 @@ describe('modules/manager/composer/utils', () => {
         matchHost: 'github.com',
         token: TOKEN_STRING,
       });
-      expect(
-        findGithubToken({
-          hostType: GitTagsDatasource.id,
-          url: 'https://github.com',
-        })
-      ).toEqual(TOKEN_STRING);
+
+      const foundHostRule = hostRules.find({
+        hostType: GitTagsDatasource.id,
+        url: 'https://github.com',
+      });
+
+      expect(findGithubToken(foundHostRule)).toEqual(TOKEN_STRING);
     });
 
-    it('returns undefined when no hostRule match search', () => {
-      expect(
-        findGithubToken({
-          hostType: GitTagsDatasource.id,
-          url: 'https://github.com',
-        })
-      ).toBeUndefined();
+    it('returns undefined when no token is defined', () => {
+      hostRules.add({
+        hostType: GitTagsDatasource.id,
+        matchHost: 'github.com',
+      });
+
+      const foundHostRule = hostRules.find({
+        hostType: GitTagsDatasource.id,
+        url: 'https://github.com',
+      });
+      expect(findGithubToken(foundHostRule)).toBeUndefined();
     });
 
     it('remove x-access-token token prefix', () => {
@@ -333,12 +343,12 @@ describe('modules/manager/composer/utils', () => {
         matchHost: 'github.com',
         token: TOKEN_STRING_WITH_PREFIX,
       });
-      expect(
-        findGithubToken({
-          hostType: GitTagsDatasource.id,
-          url: 'https://github.com',
-        })
-      ).toEqual(TOKEN_STRING);
+
+      const foundHostRule = hostRules.find({
+        hostType: GitTagsDatasource.id,
+        url: 'https://github.com',
+      });
+      expect(findGithubToken(foundHostRule)).toEqual(TOKEN_STRING);
     });
   });
 

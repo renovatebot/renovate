@@ -1,14 +1,14 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-import URL from 'url';
+import URL from 'node:url';
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import delay from 'delay';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -32,12 +32,15 @@ import type {
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
+import type { GithubHttpOptions } from '../../../util/http/github';
+import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -56,7 +59,8 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { coerceRestPr } from './common';
+import { remoteBranchExists } from './branch';
+import { coerceRestPr, githubApi } from './common';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
@@ -81,8 +85,6 @@ import type {
 import { getUserDetails, getUserEmail } from './user';
 
 export const id = 'github';
-
-const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
@@ -183,31 +185,43 @@ export async function initPlatform({
   return platformResult;
 }
 
-// Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
-  logger.debug('Autodiscovering GitHub repositories');
+async function fetchRepositories(): Promise<GhRestRepo[]> {
   try {
     if (platformConfig.isGHApp) {
       const res = await githubApi.getJson<{
-        repositories: { full_name: string }[];
+        repositories: GhRestRepo[];
       }>(`installation/repositories?per_page=100`, {
         paginationField: 'repositories',
         paginate: 'all',
       });
-      return res.body.repositories
-        .filter(is.nonEmptyObject)
-        .map((repo) => repo.full_name);
+      return res.body.repositories;
     } else {
-      const res = await githubApi.getJson<{ full_name: string }[]>(
+      const res = await githubApi.getJson<GhRestRepo[]>(
         `user/repos?per_page=100`,
         { paginate: 'all' }
       );
-      return res.body.filter(is.nonEmptyObject).map((repo) => repo.full_name);
+      return res.body;
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
   }
+}
+
+// Get all repositories that the user has access to
+export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
+  logger.debug('Autodiscovering GitHub repositories');
+  return (await fetchRepositories())
+    .filter(is.nonEmptyObject)
+    .filter((repo) => !repo.archived)
+    .filter((repo) => {
+      if (config?.topics) {
+        const autodiscoverTopics = config.topics;
+        return repo.topics.some((topic) => autodiscoverTopics.includes(topic));
+      }
+      return true;
+    })
+    .map((repo) => repo.full_name);
 }
 
 async function getBranchProtection(
@@ -243,24 +257,10 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
-}
-
-export async function getForkOrgs(token: string): Promise<string[]> {
-  // This function will be adapted later to support configured forkOrgs
-  if (!config.renovateForkUser) {
-    try {
-      logger.debug('Determining fork user from API');
-      const userDetails = await getUserDetails(platformConfig.endpoint, token);
-      config.renovateForkUser = userDetails.username;
-    } catch (err) {
-      logger.debug({ err }, 'Error getting username for forkToken');
-    }
-  }
-  return config.renovateForkUser ? [config.renovateForkUser] : [];
 }
 
 export async function listForks(
@@ -291,28 +291,38 @@ export async function listForks(
 
 export async function findFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrg?: string
 ): Promise<GhRestRepo | null> {
   const forks = await listForks(token, repository);
-  const orgs = await getForkOrgs(token);
-  if (!orgs.length) {
+  if (forkOrg) {
+    logger.debug(`Searching for forked repo in forkOrg (${forkOrg})`);
+    const forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
+    if (forkedRepo) {
+      logger.debug(`Found repo in forkOrg: ${forkedRepo.full_name}`);
+      return forkedRepo;
+    }
+    logger.debug(`No repo found in forkOrg`);
+  }
+  logger.debug(`Searching for forked repo in user account`);
+  try {
+    const { username } = await getUserDetails(platformConfig.endpoint, token);
+    const forkedRepo = forks.find((repo) => repo.owner.login === username);
+    if (forkedRepo) {
+      logger.debug(`Found repo in user account: ${forkedRepo.full_name}`);
+      return forkedRepo;
+    }
+  } catch (err) {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
-  let forkedRepo: GhRestRepo | undefined;
-  for (const forkOrg of orgs) {
-    logger.debug(`Searching for forked repo in ${forkOrg}`);
-    forkedRepo = forks.find((repo) => repo.owner.login === forkOrg);
-    if (forkedRepo) {
-      logger.debug(`Found existing forked repo: ${forkedRepo.full_name}`);
-      break;
-    }
-  }
-  return forkedRepo ?? null;
+  logger.debug(`No repo found in user account`);
+  return null;
 }
 
 export async function createFork(
   token: string,
-  repository: string
+  repository: string,
+  forkOrg?: string
 ): Promise<GhRestRepo> {
   let forkedRepo: GhRestRepo | undefined;
   try {
@@ -320,6 +330,7 @@ export async function createFork(
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
+          organization: forkOrg ? forkOrg : undefined,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
@@ -331,8 +342,9 @@ export async function createFork(
   if (!forkedRepo) {
     throw new Error(REPOSITORY_CANNOT_FORK);
   }
-  logger.debug(`Created forked repo ${forkedRepo.full_name}, now sleeping 30s`);
-  await delay(30000);
+  logger.info({ forkedRepo: forkedRepo.full_name }, 'Created forked repo');
+  logger.debug(`Sleeping 30s after creating fork`);
+  await setTimeout(30000);
   return forkedRepo;
 }
 
@@ -340,6 +352,7 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkOrg,
   forkToken,
   renovateUsername,
   cloneSubmodules,
@@ -388,9 +401,20 @@ export async function initRepo({
         name: config.repositoryName,
       },
     });
+
+    if (res?.errors) {
+      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
+        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+      }
+      logger.debug({ res }, 'Unexpected Graph QL errors');
+      throw new Error(PLATFORM_UNKNOWN_ERROR);
+    }
+
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
+      logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     // istanbul ignore if
@@ -402,7 +426,7 @@ export async function initRepo({
       repo.nameWithOwner.toUpperCase() !== repository.toUpperCase()
     ) {
       logger.debug(
-        { repository, this_repository: repo.nameWithOwner },
+        { desiredRepo: repository, foundRepo: repo.nameWithOwner },
         'Repository has been renamed'
       );
       throw new Error(REPOSITORY_RENAMED);
@@ -466,11 +490,12 @@ export async function initRepo({
 
   if (forkToken) {
     logger.debug('Bot is in fork mode');
+    config.forkOrg = forkOrg;
     config.forkToken = forkToken;
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
-    let forkedRepo = await findFork(forkToken, repository);
+    let forkedRepo = await findFork(forkToken, repository, forkOrg);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
       const forkDefaultBranch = forkedRepo.default_branch;
@@ -548,7 +573,7 @@ export async function initRepo({
       }
     } else {
       logger.debug('Forked repo is not found - attempting to create it');
-      forkedRepo = await createFork(forkToken, repository);
+      forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
     }
   }
@@ -590,15 +615,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
       config.repoForceRebase = false;
       const branchProtection = await getBranchProtection(config.defaultBranch);
       logger.debug('Found branch protection');
-      if (
-        branchProtection.required_pull_request_reviews
-          ?.required_approving_review_count > 0
-      ) {
-        logger.debug(
-          'Branch protection: PR Reviews are required before merging'
-        );
-        config.prReviewsRequired = true;
-      }
       if (branchProtection.required_status_checks) {
         if (branchProtection.required_status_checks.strict) {
           logger.debug(
@@ -718,7 +734,7 @@ export async function findPr({
       return false;
     }
 
-    if (prTitle && prTitle !== p.title) {
+    if (prTitle && prTitle.toUpperCase() !== p.title.toUpperCase()) {
       return false;
     }
 
@@ -739,6 +755,41 @@ export async function findPr({
 }
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
+
+async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+  const repository = config.repository!;
+  try {
+    const commitUrl = `/repos/${repository}/git/commits/${sha}`;
+    await githubApi.head(commitUrl, { memCache: false });
+  } catch (err) {
+    logger.error({ err, sha, branchName }, 'Commit not found');
+    throw err;
+  }
+
+  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
+  const branchExists = await remoteBranchExists(repository, branchName);
+
+  if (branchExists) {
+    try {
+      await githubApi.patchJson(refUrl, { body: { sha, force: true } });
+      return;
+    } catch (err) {
+      if (err.err?.response?.statusCode === 422) {
+        logger.debug(
+          { err },
+          'Branch update failed due to reference not existing - will try to create'
+        );
+      } else {
+        logger.warn({ refUrl, err }, 'Error updating branch');
+        throw err;
+      }
+    }
+  }
+
+  await githubApi.postJson(`/repos/${repository}/git/refs`, {
+    body: { sha, ref: `refs/heads/${branchName}` },
+  });
+}
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<GhPr | null> {
@@ -774,12 +825,13 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
     }
     const { sha, number } = autoclosedPr;
     try {
-      await githubApi.postJson(`repos/${config.repository}/git/refs`, {
-        body: { ref: `refs/heads/${branchName}`, sha },
-      });
+      await ensureBranchSha(branchName, sha!);
       logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
-      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      logger.debug(
+        { err, branchName, sha, autoclosedPr },
+        'Could not recreate autoclosed branch - skipping reopen'
+      );
       return null;
     }
     try {
@@ -817,7 +869,9 @@ async function getStatus(
   )}/status`;
 
   return (
-    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, { useCache })
+    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, {
+      memCache: useCache,
+    })
   ).body;
 }
 
@@ -932,7 +986,9 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  return (await githubApi.getJson<GhBranchStatus[]>(url, { useCache })).body;
+  return (
+    await githubApi.getJson<GhBranchStatus[]>(url, { memCache: useCache })
+  ).body;
 }
 
 interface GithubToRenovateStatusMapping {
@@ -1058,7 +1114,7 @@ export async function getIssue(
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
         `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { useCache }
+        { memCache: useCache }
       )
     ).body.body;
     return {
@@ -1134,7 +1190,7 @@ export async function ensureIssue({
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
-          logger.warn(`Closing duplicate issue ${i.number}`);
+          logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
           // TODO #7154
           await closeIssue(i.number!);
         }
@@ -1515,6 +1571,7 @@ export async function createPr({
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
+      !config.forkOrg &&
       platformOptions?.forkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
@@ -1544,12 +1601,16 @@ export async function updatePr({
   prTitle: title,
   prBody: rawBody,
   state,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
+  }
+  if (targetBranch) {
+    patchBody.base = targetBranch;
   }
   if (state) {
     patchBody.state = state;
@@ -1582,40 +1643,18 @@ export async function mergePr({
   id: prNo,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
-  // istanbul ignore if
-  if (config.prReviewsRequired) {
-    logger.debug(
-      { branch: branchName, prNo },
-      'Branch protection: Attempting to merge PR when PR reviews are enabled'
-    );
-    const repository = config.parentRepo ?? config.repository;
-    const reviews = await githubApi.getJson<{ state: string }[]>(
-      `repos/${repository}/pulls/${prNo}/reviews`
-    );
-    const isApproved = reviews.body.some(
-      (review) => review.state === 'APPROVED'
-    );
-    if (!isApproved) {
-      logger.debug(
-        { branch: branchName, prNo },
-        'Branch protection: Cannot automerge PR until there is an approving review'
-      );
-      return false;
-    }
-    logger.debug('Found approving reviews');
-  }
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;
-  const options: any = {
-    body: {} as { merge_method?: string },
+  const options: GithubHttpOptions = {
+    body: {},
   };
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;
   }
   let automerged = false;
-  let automergeResult: any;
+  let automergeResult: HttpResponse<unknown>;
   if (config.mergeMethod) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
     options.body.merge_method = config.mergeMethod;
@@ -1625,13 +1664,37 @@ export async function mergePr({
       automerged = true;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
-        // istanbul ignore next
+        const body = err.response?.body;
+        if (
+          is.nonEmptyString(body?.message) &&
+          regEx(/^Required status check ".+" is expected\.$/).test(body.message)
+        ) {
+          logger.debug(
+            { response: body },
+            `GitHub blocking PR merge -- Missing required status check(s)`
+          );
+          return false;
+        }
+        if (
+          is.nonEmptyString(body?.message) &&
+          (body.message.includes('approving review') ||
+            body.message.includes('code owner review'))
+        ) {
+          logger.debug(
+            { response: body },
+            `GitHub blocking PR merge -- Needs approving review(s)`
+          );
+          return false;
+        }
         logger.debug(
-          { response: err.response ? err.response.body : undefined },
+          { response: body },
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
-        logger.warn({ err }, `Failed to ${config.mergeMethod} merge PR`);
+        logger.warn(
+          { mergeMethod: config.mergeMethod, err },
+          'Failed to merge PR'
+        );
         return false;
       }
     }
@@ -1663,7 +1726,7 @@ export async function mergePr({
     }
   }
   logger.debug(
-    { automergeResult: automergeResult.body, pr: prNo },
+    { automergeResult: automergeResult!.body, pr: prNo },
     'PR merged'
   );
   const cachedPr = config.prList?.find(({ number }) => number === prNo);
@@ -1782,21 +1845,7 @@ async function pushFiles(
       { body: { message, tree: treeSha, parents: [parentCommitSha] } }
     );
     const remoteCommitSha = commitRes.body.sha;
-
-    // Create branch if it didn't already exist, update it otherwise
-    if (git.branchExists(branchName)) {
-      // This is the equivalent of a git force push
-      // We are using this REST API because the GraphQL API doesn't support force push
-      await githubApi.patchJson(
-        `/repos/${config.repository}/git/refs/heads/${branchName}`,
-        { body: { sha: remoteCommitSha, force: true } }
-      );
-    } else {
-      await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
-        body: { ref: `refs/heads/${branchName}`, sha: remoteCommitSha },
-      });
-    }
-
+    await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {
     logger.debug({ branchName, err }, 'Platform-native commit: unknown error');
@@ -1824,6 +1873,6 @@ export async function commitFiles(
   // Replace locally created branch with the remotely created one
   // and return the remote commit SHA
   await git.resetToCommit(commitResult.parentCommitSha);
-  const commitSha = await git.fetchCommit(config);
+  const commitSha = await git.fetchBranch(branchName);
   return commitSha;
 }

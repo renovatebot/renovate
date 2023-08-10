@@ -3,10 +3,8 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import {
-  getDefaultConfig,
-  getDefaultVersioning,
-} from '../../../modules/datasource';
+import { getDefaultConfig } from '../../../modules/datasource';
+import { getDefaultVersioning } from '../../../modules/datasource/common';
 import type {
   PackageDependency,
   PackageFile,
@@ -21,11 +19,24 @@ import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
+async function withLookupStats<T>(
+  datasource: string,
+  callback: () => Promise<T>
+): Promise<T> {
+  const start = Date.now();
+  const result = await callback();
+  const duration = Date.now() - start;
+  const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
+  lookups.push({ datasource, duration });
+  memCache.set('lookup-stats', lookups);
+  return result;
+}
+
 async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  let dep = clone(indep);
+  const dep = clone(indep);
   dep.updates = [];
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
@@ -58,18 +69,13 @@ async function fetchDepUpdates(
   } else {
     if (depConfig.datasource) {
       try {
-        const start = Date.now();
-        dep = {
-          ...dep,
-          ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-        };
-        const duration = Date.now() - start;
-        const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
-        lookups.push({ datasource: depConfig.datasource, duration });
-        memCache.set('lookup-stats', lookups);
+        const updateResult = await withLookupStats(depConfig.datasource, () =>
+          lookupUpdates(depConfig as LookupUpdateConfig)
+        );
+        Object.assign(dep, updateResult);
       } catch (err) {
         if (
-          packageFileConfig.repoIsOnboarded ||
+          packageFileConfig.repoIsOnboarded === true ||
           !(err instanceof ExternalHostError)
         ) {
           throw err;
@@ -84,7 +90,7 @@ async function fetchDepUpdates(
         });
       }
     }
-    dep.updates = dep.updates ?? [];
+    dep.updates ??= [];
   }
   return dep;
 }
@@ -95,14 +101,13 @@ async function fetchManagerPackagerFileUpdates(
   pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;
-  if (pFile.extractedConstraints) {
-    pFile.constraints = {
-      ...pFile.extractedConstraints,
-      ...pFile.constraints,
-    };
-    delete pFile.extractedConstraints;
-  }
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
+  if (pFile.extractedConstraints) {
+    packageFileConfig.constraints = {
+      ...pFile.extractedConstraints,
+      ...config.constraints,
+    };
+  }
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => (): Promise<PackageDependency> =>

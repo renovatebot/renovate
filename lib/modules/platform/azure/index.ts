@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import {
   GitPullRequest,
@@ -8,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import delay from 'delay';
 import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,
@@ -16,7 +16,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -48,7 +48,6 @@ import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
@@ -57,7 +56,6 @@ import {
 
 interface Config {
   repoForceRebase: boolean;
-  defaultMergeMethod: GitPullRequestMergeStrategy;
   mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
@@ -115,8 +113,6 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   return repos.map((repo) => `${repo.project?.name}/${repo.name}`);
 }
 
@@ -143,7 +139,7 @@ export async function getRawFile(
 
   const versionDescriptor: GitVersionDescriptor = {
     version: branchOrTag,
-  } as GitVersionDescriptor;
+  } satisfies GitVersionDescriptor;
 
   const buf = await azureApiGit.getItemContent(
     repoId,
@@ -165,7 +161,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? JSON5.parse(raw) : null;
 }
@@ -202,14 +198,6 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-  const names = getProjectAndRepo(repository);
-  config.defaultMergeMethod = await azureHelper.getMergeMethod(
-    // TODO #7154
-    repo.id!,
-    names.project,
-    null,
-    defaultBranch
-  );
   config.mergeMethods = {};
   config.repoForceRebase = false;
 
@@ -307,7 +295,9 @@ export async function findPr({
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+      );
     }
 
     switch (state) {
@@ -425,6 +415,20 @@ export async function getBranchStatus(
   return 'green';
 }
 
+async function getMergeStrategy(
+  targetRefName: string
+): Promise<GitPullRequestMergeStrategy> {
+  return (
+    config.mergeMethods[targetRefName] ??
+    (config.mergeMethods[targetRefName] = await azureHelper.getMergeMethod(
+      config.repoId,
+      config.project,
+      targetRefName,
+      config.defaultBranch
+    ))
+  );
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -455,6 +459,7 @@ export async function createPr({
     config.repoId
   );
   if (platformOptions?.usePlatformAutomerge) {
+    const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -462,7 +467,7 @@ export async function createPr({
           id: pr.createdBy!.id,
         },
         completionOptions: {
-          mergeStrategy: config.defaultMergeMethod,
+          mergeStrategy,
           deleteSourceBranch: true,
           mergeCommitMessage: title,
         },
@@ -472,7 +477,7 @@ export async function createPr({
       pr.pullRequestId!
     );
   }
-  if (platformOptions?.azureAutoApprove) {
+  if (platformOptions?.autoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
@@ -506,6 +511,8 @@ export async function updatePr({
   prTitle: title,
   prBody: body,
   state,
+  platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -514,18 +521,39 @@ export async function updatePr({
     title,
   };
 
+  if (targetBranch) {
+    objToUpdate.targetRefName = getNewBranchName(targetBranch);
+  }
+
   if (body) {
     objToUpdate.description = max4000Chars(sanitize(body));
   }
 
   if (state === 'open') {
     await azureApiGit.updatePullRequest(
-      { status: PullRequestStatus.Active },
+      {
+        status: PullRequestStatus.Active,
+      },
       config.repoId,
       prNo
     );
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
+  }
+  if (platformOptions?.autoApprove) {
+    const pr = await azureApiGit.getPullRequestById(prNo, config.project);
+    await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy!.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      // TODO #7154
+      pr.pullRequestId!,
+      pr.createdBy!.id!
+    );
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
@@ -548,7 +576,7 @@ export async function ensureComment({
   threads.forEach((thread) => {
     const firstCommentContent = thread.comments?.[0].content;
     if (
-      (topic && firstCommentContent?.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) === true ||
       (!topic && firstCommentContent === body)
     ) {
       threadIdFound = thread.id;
@@ -682,21 +710,12 @@ export async function mergePr({
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
-  // TODO #7154
-  const mergeMethod =
-    config.mergeMethods[pr.targetRefName!] ??
-    (config.mergeMethods[pr.targetRefName!] = await azureHelper.getMergeMethod(
-      config.repoId,
-      config.project,
-      pr.targetRefName,
-      config.defaultBranch
-    ));
-
+  const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,
     completionOptions: {
-      mergeStrategy: mergeMethod,
+      mergeStrategy,
       deleteSourceBranch: true,
       mergeCommitMessage: pr.title,
     },
@@ -707,10 +726,9 @@ export async function mergePr({
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       pr.lastMergeSourceCommit?.commitId
-    } using mergeStrategy ${mergeMethod} (${
-      GitPullRequestMergeStrategy[mergeMethod]
+    } using mergeStrategy ${mergeStrategy} (${
+      GitPullRequestMergeStrategy[mergeStrategy]
     })`
   );
 
@@ -731,7 +749,7 @@ export async function mergePr({
         `Updated PR to closed status but change has not taken effect yet. Retrying...`
       );
 
-      await delay(sleepMs);
+      await setTimeout(sleepMs);
       pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
       isClosed = pr.status === PullRequestStatus.Completed;
     }
@@ -758,6 +776,10 @@ export function massageMarkdown(input: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -908,8 +930,4 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }

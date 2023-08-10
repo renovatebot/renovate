@@ -254,5 +254,223 @@ describe('modules/datasource/conan/index', () => {
         })
       ).toBeNull();
     });
+
+    it('artifactory sourceurl', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/search?q=arti')
+        .reply(
+          200,
+          { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
+          {
+            'x-jfrog-version': 'latest',
+          }
+        );
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/arti/1.1.1/_/_/latest')
+        .reply(200, {
+          revision: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          time: '2032-06-23T00:00:00.000+0000',
+        });
+      httpMock
+        .scope(
+          'https://fake.artifactory.com/artifactory/api/storage/test-repo/'
+        )
+        .get(
+          '/_/arti/1.1.1/_/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/export/conanfile.py?properties=conan.package.url'
+        )
+        .reply(200, {
+          properties: {
+            'conan.package.url': 'https://fake.conan.url.com',
+          },
+        });
+
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl:
+          'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.1.1',
+          },
+        ],
+      });
+    });
+
+    it('artifactory header without api', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com')
+        .get('/v2/conans/search?q=arti')
+        .reply(
+          200,
+          { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
+          {
+            'x-jfrog-version': 'latest',
+          }
+        );
+      config.registryUrls = ['https://fake.artifactory.com'];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl: 'https://fake.artifactory.com',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.1.1',
+          },
+        ],
+      });
+    });
+
+    it('artifactory invalid version', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo')
+        .get('/v2/conans/search?q=arti')
+        .reply(
+          200,
+          {
+            results: ['arti/invalid_version@_/_'],
+          },
+          { 'x-jfrog-version': 'latest' }
+        );
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl:
+          'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+        releases: [],
+      });
+    });
+
+    it('non artifactory header', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo')
+        .get('/v2/conans/search?q=arti')
+        .reply(200, {}, { 'x-jfrog-invalid-header': 'latest' });
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toBeNull();
+    });
+
+    it('artifactory no package url', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/search?q=arti')
+        .reply(
+          200,
+          { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
+          {
+            'x-jfrog-version': 'latest',
+          }
+        );
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/arti/1.1.1/_/_/latest')
+        .reply(200, {
+          revision: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          time: '2032-06-23T00:00:00.000+0000',
+        });
+      httpMock
+        .scope(
+          'https://fake.artifactory.com/artifactory/api/storage/test-repo/'
+        )
+        .get(
+          '/_/arti/1.1.1/_/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/export/conanfile.py?properties=conan.package.url'
+        )
+        .reply(200);
+
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl:
+          'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.1.1',
+          },
+        ],
+      });
+    });
+
+    it('artifactory http error', async () => {
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/search?q=arti')
+        .reply(
+          200,
+          { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
+          {
+            'x-jfrog-version': 'latest',
+          }
+        );
+      httpMock
+        .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
+        .get('/v2/conans/arti/1.1.1/_/_/latest')
+        .reply(404);
+
+      config.registryUrls = [
+        'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+      ];
+      config.packageName = 'arti';
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'arti/1.1@_/_',
+        })
+      ).toEqual({
+        registryUrl:
+          'https://fake.artifactory.com/artifactory/api/conan/test-repo',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.1.1',
+          },
+        ],
+      });
+    });
   });
 });

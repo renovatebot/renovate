@@ -3,6 +3,8 @@ import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
@@ -14,12 +16,13 @@ import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import { hashBody } from '../pr-body';
 import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
+import * as branch from './branch';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
 
-jest.mock('delay');
+jest.mock('timers/promises');
 
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http/queue');
@@ -35,7 +38,6 @@ describe('modules/platform/github/index', () => {
 
     setBaseUrl(githubApiHost);
 
-    git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
@@ -175,14 +177,47 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             full_name: 'a/b',
+            archived: false,
           },
           {
             full_name: 'c/d',
+            archived: false,
+          },
+          {
+            full_name: 'e/f',
+            archived: true,
           },
           null,
         ]);
       const repos = await github.getRepos();
       expect(repos).toMatchSnapshot();
+    });
+
+    it('should filters repositories by topics', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user/repos?per_page=100')
+        .reply(200, [
+          {
+            full_name: 'a/b',
+            archived: false,
+            topics: [],
+          },
+          {
+            full_name: 'c/d',
+            archived: false,
+            topics: ['managed-by-renovate'],
+          },
+          {
+            full_name: 'e/f',
+            archived: true,
+            topics: ['managed-by-renovate'],
+          },
+          null,
+        ]);
+
+      const repos = await github.getRepos({ topics: ['managed-by-renovate'] });
+      expect(repos).toEqual(['c/d']);
     });
 
     it('should return an array of repos when using Github App endpoint', async () => {
@@ -209,7 +244,7 @@ describe('modules/platform/github/index', () => {
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
 
     it('should return an array of repos when using GitHub App Installation Token', async () => {
@@ -228,16 +263,22 @@ describe('modules/platform/github/index', () => {
           repositories: [
             {
               full_name: 'a/b',
+              archived: false,
             },
             {
               full_name: 'c/d',
+              archived: false,
+            },
+            {
+              full_name: 'e/f',
+              archived: true,
             },
             null,
           ],
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
 
@@ -384,26 +425,24 @@ describe('modules/platform/github/index', () => {
       scope.get('/user').reply(200, {
         login: 'forked',
       });
-      // getBranchCommit
       scope.post(`/repos/${repo}/forks`).reply(500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkOrg: 'forked',
         })
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
 
-    it('should update fork when using forkToken', async () => {
+    it('should update fork when using forkToken and forkOrg', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
-      scope.get('/user').reply(200, {
-        login: 'forked',
-      });
       scope.patch('/repos/forked/repo/git/refs/heads/master').reply(200);
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkOrg: 'forked',
       });
       expect(config).toMatchSnapshot();
     });
@@ -531,6 +570,40 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
 
+    it('throws unexpected graphql errors', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'SOME_ERROR_TYPE',
+              message: 'Some error message',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_UNKNOWN_ERROR);
+    });
+
+    it('throws graphql rate limit error', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMITED',
+              message: 'API rate limit exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
     it('should throw error if renamed', async () => {
       httpMock
         .scope(githubApiHost)
@@ -642,10 +715,10 @@ describe('modules/platform/github/index', () => {
 
   describe('getPrList()', () => {
     const t = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
-    const t1 = t.plus({ minutes: 1 }).toISO();
-    const t2 = t.plus({ minutes: 2 }).toISO();
-    const t3 = t.plus({ minutes: 3 }).toISO();
-    const t4 = t.plus({ minutes: 4 }).toISO();
+    const t1 = t.plus({ minutes: 1 }).toISO()!;
+    const t2 = t.plus({ minutes: 2 }).toISO()!;
+    const t3 = t.plus({ minutes: 3 }).toISO()!;
+    const t4 = t.plus({ minutes: 4 }).toISO()!;
 
     const pr1: GhRestPr = {
       number: 1,
@@ -854,13 +927,19 @@ describe('modules/platform/github/index', () => {
           },
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ days: 6 }).toISO(),
             updated_at: '01-09-2022',
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
@@ -873,6 +952,7 @@ describe('modules/platform/github/index', () => {
           updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const pr = await github.getBranchPr('somebranch');
       const pr2 = await github.getBranchPr('somebranch');
@@ -944,16 +1024,23 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              repo: { full_name: 'some/repo' },
+              sha: '123',
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(422);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getBranchPr('somebranch');
@@ -970,14 +1057,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
-        .post('/repos/some/repo/git/refs')
-        .reply(422);
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockRejectedValueOnce('oops');
 
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getBranchPr('somebranch');
@@ -2096,7 +2188,7 @@ describe('modules/platform/github/index', () => {
             state: 'closed',
           },
         ]);
-      await github.initRepo({ repository: 'some/repo' } as never);
+      await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -2760,6 +2852,22 @@ describe('modules/platform/github/index', () => {
 
       await expect(github.updatePr(pr)).toResolve();
     });
+
+    it('should update target branch', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: 'closed',
+        targetBranch: 'new_base',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
   });
 
   describe('mergePr(prNo)', () => {
@@ -2801,6 +2909,48 @@ describe('modules/platform/github/index', () => {
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .replyWithError('merge error');
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle merge block', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Required status check "build" is expected.' });
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle approvers required', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
+        message: 'Waiting on code owner review from org/team.',
+      });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1234,
@@ -3181,7 +3331,7 @@ describe('modules/platform/github/index', () => {
           files,
         })
       );
-      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
+      git.fetchBranch.mockImplementation(() => Promise.resolve('0abcdef'));
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -3222,7 +3372,6 @@ describe('modules/platform/github/index', () => {
     it('commits and returns SHA string', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(false);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -3234,8 +3383,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3249,7 +3401,6 @@ describe('modules/platform/github/index', () => {
     it('performs rebase', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(true);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -3261,8 +3412,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3271,6 +3425,92 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBe('0abcdef');
+    });
+
+    it('continues if rebase fails due to 422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(422)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+
+    it('aborts if rebase fails due to non-422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(404);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it("aborts if commit SHA doesn't exist", async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
     });
   });
 });

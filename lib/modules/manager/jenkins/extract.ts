@@ -27,7 +27,7 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
       );
     }
   } else {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
   }
 
   if (
@@ -50,7 +50,10 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
   return dep;
 }
 
-function extractYaml(content: string): PackageDependency[] {
+function extractYaml(
+  content: string,
+  packageFile: string
+): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   try {
@@ -64,7 +67,7 @@ function extractYaml(content: string): PackageDependency[] {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error parsing Jenkins plugins');
+    logger.debug({ err, packageFile }, 'Error parsing Jenkins plugins');
   }
   return deps;
 }
@@ -97,13 +100,13 @@ function extractText(content: string): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string
 ): PackageFileContent | null {
-  logger.trace('jenkins.extractPackageFile()');
+  logger.trace(`jenkins.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
-  if (YamlExtension.test(fileName)) {
-    deps.push(...extractYaml(content));
+  if (YamlExtension.test(packageFile)) {
+    deps.push(...extractYaml(content, packageFile));
   } else {
     deps.push(...extractText(content));
   }

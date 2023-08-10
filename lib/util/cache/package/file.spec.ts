@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import cacache from 'cacache';
 import { cleanup, get, init, set } from './file';
 

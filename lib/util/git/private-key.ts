@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
@@ -6,6 +6,7 @@ import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../exec';
 import { newlineRegex } from '../regex';
+import { addSecretForSanitizing } from '../sanitize';
 
 let gitPrivateKey: string | undefined;
 let keyId: string | undefined;
@@ -14,6 +15,7 @@ export function setPrivateKey(key: string | undefined): void {
   if (!is.nonEmptyStringAndNotWhitespace(key)) {
     return;
   }
+  addSecretForSanitizing(key.trim(), 'global');
   logger.debug(
     'gitPrivateKey: successfully set (but not yet written/configured)'
   );

@@ -56,3 +56,29 @@ export function looseEquals(
 export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
+
+export function titleCase(input: string): string {
+  const words = input.toLowerCase().split(' ');
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    words[i] = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }
+
+  return words.join(' ');
+}
+
+/**
+ * Sometimes we extract small strings from a multi-megabyte files.
+ * If we then save them in the in-memory cache, V8 may not free
+ * the initial buffer, which can lead to memory leaks:
+ *
+ *   https://bugs.chromium.org/p/v8/issues/detail?id=2869
+ *
+ */
+export function copystr(x: string): string {
+  const len = Buffer.byteLength(x, 'utf8');
+  const buf = Buffer.allocUnsafeSlow(len);
+  buf.write(x, 'utf8');
+  return buf.toString('utf8');
+}

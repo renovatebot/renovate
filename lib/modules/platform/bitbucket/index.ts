@@ -1,9 +1,9 @@
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -47,6 +47,7 @@ import type {
   RepoInfoBody,
 } from './types';
 import * as utils from './utils';
+import { mergeBodyTransformer } from './utils';
 
 export const id = 'bitbucket';
 
@@ -82,7 +83,7 @@ export async function initPlatform({
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
   const options: HttpOptions = {
-    useCache: false,
+    memCache: false,
   };
   if (token) {
     options.token = token;
@@ -116,9 +117,14 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = await utils.accumulateValues<{ full_name: string }>(
-      `/2.0/repositories/?role=contributor`
-    );
+    const repos = (
+      await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
+        `/2.0/repositories/?role=contributor`,
+        {
+          paginate: true,
+        }
+      )
+    ).body.values;
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
@@ -153,7 +159,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   // TODO #7154
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
@@ -207,6 +213,7 @@ export async function initRepo({
       ...config,
       owner: info.owner,
       mergeMethod: info.mergeMethod,
+      is_private: info.is_private,
       repositoryUrl: info.repositoryUrl,
       hasBitbucketIssuesEnabled: info.has_issues,
       hasJiraProjectLinked: false,
@@ -310,7 +317,12 @@ export async function getPrList(): Promise<Pr[]> {
     if (renovateUserUuid && !config.ignorePrAuthor) {
       url += `&q=author.uuid="${renovateUserUuid}"`;
     }
-    const prs = await utils.accumulateValues(url, undefined, undefined, 50);
+    const prs = (
+      await bitbucketHttp.getJson<PagedResult<PrResponse>>(url, {
+        paginate: true,
+        pagelen: 50,
+      })
+    ).body.values;
     config.prList = prs.map(utils.prInfo);
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
@@ -322,19 +334,45 @@ export async function findPr({
   prTitle,
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
     (p) =>
       p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
+      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
       matchesState(p.state, state)
   );
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
+
+  /**
+   * Bitbucket doesn't support renaming or reopening declined PRs.
+   * Instead, we have to use comment-driven signals.
+   */
+  if (pr?.state === 'closed') {
+    const reopenComments = await comments.reopenComments(config, pr.number);
+
+    if (is.nonEmptyArray(reopenComments)) {
+      if (config.is_private) {
+        // Only workspace members could have commented on a private repository
+        logger.debug(
+          `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`
+        );
+        return null;
+      }
+
+      for (const comment of reopenComments) {
+        if (await isAccountMemberOfWorkspace(comment.user, config.repository)) {
+          logger.debug(
+            `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`
+          );
+          return null;
+        }
+      }
+    }
+  }
+
   return pr ?? null;
 }
 
@@ -398,16 +436,18 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
-  return utils.accumulateValues<BitbucketStatus>(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
-    'get',
-    { useCache }
-  );
+  return (
+    await bitbucketHttp.getJson<PagedResult<BitbucketStatus>>(
+      `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
+      {
+        paginate: true,
+        memCache,
+      }
+    )
+  ).body.values;
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
@@ -486,8 +526,6 @@ export async function setBranchStatus({
   };
 
   await bitbucketHttp.postJson(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
@@ -553,6 +591,10 @@ export function massageMarkdown(input: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"'
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
@@ -743,9 +785,15 @@ async function sanitizeReviewers(
   if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
     const sanitizedReviewers: Account[] = [];
 
+    const MSG_AUTHOR_AND_REVIEWER =
+      'is the author and cannot be included as a reviewer.';
+    const MSG_MALFORMED_REVIEWERS_LIST = 'Malformed reviewers list';
+    const MSG_NOT_WORKSPACE_MEMBER =
+      'is not a member of this workspace and cannot be added to this pull request';
+
     for (const msg of err.body.error.fields.reviewers) {
       // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-      if (msg === 'Malformed reviewers list') {
+      if (msg === MSG_MALFORMED_REVIEWERS_LIST) {
         logger.debug(
           { err },
           'PR contains reviewers that may be either inactive or no longer a member of this workspace. Will try setting only active reviewers'
@@ -765,11 +813,7 @@ async function sanitizeReviewers(
           }
         }
         // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
-      } else if (
-        msg.endsWith(
-          'is not a member of this workspace and cannot be added to this pull request'
-        )
-      ) {
+      } else if (msg.endsWith(MSG_NOT_WORKSPACE_MEMBER)) {
         logger.debug(
           { err },
           'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers'
@@ -778,6 +822,17 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still a member of this workspace
         for (const reviewer of reviewers) {
           if (await isAccountMemberOfWorkspace(reviewer, config.repository)) {
+            sanitizedReviewers.push(reviewer);
+          }
+        }
+      } else if (msg.endsWith(MSG_AUTHOR_AND_REVIEWER)) {
+        logger.debug(
+          { err },
+          'PR contains reviewer accounts which are also the author. Will try setting only non-author reviewers'
+        );
+        const author = msg.replace(MSG_AUTHOR_AND_REVIEWER, '').trim();
+        for (const reviewer of reviewers) {
+          if (reviewer.display_name !== author) {
             sanitizedReviewers.push(reviewer);
           }
         }
@@ -809,7 +864,6 @@ async function isAccountMemberOfWorkspace(
     if (err.statusCode === 404) {
       logger.debug(
         { err },
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `User ${reviewer.display_name} is not a member of the workspace ${workspace}. Will be removed from the PR`
       );
 
@@ -838,11 +892,15 @@ export async function createPr({
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
       await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
-        `/2.0/repositories/${config.repository}/effective-default-reviewers`
+        `/2.0/repositories/${config.repository}/effective-default-reviewers`,
+        {
+          paginate: true,
+        }
       )
     ).body;
     reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
       uuid: reviewer.user.uuid,
+      display_name: reviewer.user.display_name,
     }));
   }
 
@@ -912,6 +970,7 @@ export async function updatePr({
   prTitle: title,
   prBody: description,
   state,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
@@ -922,15 +981,22 @@ export async function updatePr({
   ).body;
 
   try {
+    const body: any = {
+      title,
+      description: sanitize(description),
+      reviewers: pr.reviewers,
+    };
+    if (targetBranch) {
+      body.destination = {
+        branch: {
+          name: targetBranch,
+        },
+      };
+    }
+
     await bitbucketHttp.putJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-      {
-        body: {
-          title,
-          description: sanitize(description),
-          reviewers: pr.reviewers,
-        },
-      }
+      { body }
     );
   } catch (err) {
     // Try sanitizing reviewers
@@ -964,8 +1030,6 @@ export async function mergePr({
   id: prNo,
   strategy: mergeStrategy,
 }: MergePRConfig): Promise<boolean> {
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   logger.debug(`mergePr(${prNo}, ${branchName}, ${mergeStrategy})`);
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610
@@ -988,8 +1052,4 @@ export async function mergePr({
     return false;
   }
   return true;
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }

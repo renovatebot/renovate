@@ -1,10 +1,10 @@
-import hasha from 'hasha';
 import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compress } from '../../../compress';
+import { hash } from '../../../hash';
 import { CACHE_REVISION } from '../common';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import type { RepoCacheData } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';
@@ -20,7 +20,7 @@ async function createCacheRecord(
   const fingerprint = '0123456789abcdef';
 
   const jsonStr = JSON.stringify(data);
-  const hash = hasha(jsonStr);
+  const hashedJsonStr = hash(jsonStr);
   const payload = await compress(jsonStr);
 
   return {
@@ -28,7 +28,7 @@ async function createCacheRecord(
     repository,
     fingerprint,
     payload,
-    hash,
+    hash: hashedJsonStr,
   };
 }
 

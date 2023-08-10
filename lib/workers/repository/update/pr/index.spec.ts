@@ -21,13 +21,13 @@ import type { PrCache } from '../../../../util/cache/repository/types';
 import { fingerprint } from '../../../../util/fingerprint';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { embedChangelog } from '../../changelog';
+import { embedChangelogs } from '../../changelog';
 import * as _statusChecks from '../branch/status-checks';
 import * as _prBody from './body';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
 import * as _participants from './participants';
 import * as _prCache from './pr-cache';
-import { generatePrFingerprintConfig } from './pr-fingerprint';
+import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
 import { ensurePr } from '.';
 
 jest.mock('../../../../util/git');
@@ -65,6 +65,7 @@ describe('workers/repository/update/pr/index', () => {
       title: prTitle,
       bodyStruct,
       state: 'open',
+      targetBranch: 'base',
     };
 
     const config: BranchConfig = {
@@ -101,7 +102,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
-        config.fetchReleaseNotes = true;
+        config.fetchReleaseNotes = 'pr';
 
         const res = await ensurePr(config);
 
@@ -270,12 +271,12 @@ describe('workers/repository/update/pr/index', () => {
 
     describe('Update', () => {
       it('updates PR due to title change', async () => {
-        const changedPr: Pr = { ...pr, title: 'Another title' };
+        const changedPr: Pr = { ...pr, title: 'Another title' }; // user changed the prTitle
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
 
         const res = await ensurePr(config);
 
-        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(res).toEqual({ type: 'with-pr', pr }); // we redo the prTitle as per config
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
@@ -288,13 +289,13 @@ describe('workers/repository/update/pr/index', () => {
       it('updates PR due to body change', async () => {
         const changedPr: Pr = {
           ...pr,
-          bodyStruct: getPrBodyStruct(`${body} updated`),
+          bodyStruct: getPrBodyStruct(`${body} updated`), // user changed prBody
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
 
         const res = await ensurePr(config);
 
-        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(res).toEqual({ type: 'with-pr', pr }); // we redo the prBody as per config
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
@@ -302,6 +303,32 @@ describe('workers/repository/update/pr/index', () => {
           { pr: changedPr.number, prTitle },
           `PR updated`
         );
+      });
+
+      it('updates PR target branch if base branch changed in config', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, baseBranch: 'new_base' }); // user changed base branch in config
+
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
+        expect(logger.logger.info).toHaveBeenCalledWith(
+          { pr: pr.number, prTitle },
+          `PR updated`
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            oldBaseBranch: 'base',
+            newBaseBranch: 'new_base',
+          },
+          'PR base branch has changed'
+        );
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, targetBranch: 'new_base' }, // updated target branch of pr
+        });
       });
 
       it('ignores reviewable content ', async () => {
@@ -394,6 +421,23 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).not.toHaveBeenCalled();
+      });
+
+      it('forces PR on dashboard check', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          reviewers: ['somebody'],
+          dependencyDashboardChecks: {
+            'renovate-branch': 'approvePr',
+          },
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('adds assignees for PR automerge with red status', async () => {
@@ -780,7 +824,7 @@ describe('workers/repository/update/pr/index', () => {
       it('does not update lastEdited pr-cache when pr fingerprint is same but pr was edited within 24hrs', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
+          bodyFingerprint: fingerprint(generatePrBodyFingerprintConfig(config)),
           lastEdited: new Date().toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
@@ -797,25 +841,22 @@ describe('workers/repository/update/pr/index', () => {
         );
         expect(prCache.setPrCache).toHaveBeenCalledWith(
           sourceBranch,
-          cachedPr.fingerprint,
+          cachedPr.bodyFingerprint,
           false
         );
       });
 
       it('updates pr-cache when pr fingerprint is different', async () => {
-        platform.getBranchPr.mockResolvedValue({
-          ...existingPr,
-          title: 'Another title',
-        });
+        platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: 'old',
+          bodyFingerprint: 'old',
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         const res = await ensurePr(config);
         expect(res).toEqual({
           type: 'with-pr',
-          pr: { ...existingPr, title: 'Another title' },
+          pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR fingerprints mismatch, processing PR'
@@ -827,11 +868,16 @@ describe('workers/repository/update/pr/index', () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
+          bodyFingerprint: fingerprint(
+            generatePrBodyFingerprintConfig({
+              ...config,
+              fetchReleaseNotes: 'pr',
+            })
+          ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr(config);
+        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: existingPr,
@@ -839,7 +885,50 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
         );
-        expect(embedChangelog).toHaveBeenCalledTimes(0);
+        expect(embedChangelogs).toHaveBeenCalledTimes(0);
+      });
+
+      it('updates PR when rebase requested by user regardless of pr-cache state', async () => {
+        config.repositoryCache = 'enabled';
+        platform.getBranchPr.mockResolvedValue({
+          number,
+          sourceBranch,
+          title: prTitle,
+          bodyStruct: {
+            hash: 'hash-with-checkbox-checked',
+            rebaseRequested: true,
+          },
+          state: 'open',
+        });
+        cachedPr = {
+          bodyFingerprint: fingerprint(
+            generatePrBodyFingerprintConfig({
+              ...config,
+              fetchReleaseNotes: 'pr',
+            })
+          ),
+          lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: {
+            number,
+            sourceBranch,
+            title: prTitle,
+            bodyStruct,
+            state: 'open',
+            targetBranch: 'base',
+          },
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR rebase requested, so skipping cache check'
+        );
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          `Pull Request #${number} does not need updating`
+        );
+        expect(embedChangelogs).toHaveBeenCalledTimes(1);
       });
 
       it('logs when cache is enabled but pr-cache is absent', async () => {

@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
+import * as allVersioning from '../../versioning';
 import { Datasource } from '../datasource';
 import type {
   DigestConfig,
@@ -11,13 +12,20 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
+import { isArtifactoryServer } from '../util';
 import {
   conanDatasourceRegex,
   datasource,
   defaultRegistryUrl,
   getConanPackage,
 } from './common';
-import type { ConanJSON, ConanRevisionsJSON, ConanYAML } from './types';
+import type {
+  ConanJSON,
+  ConanProperties,
+  ConanRevisionJSON,
+  ConanRevisionsJSON,
+  ConanYAML,
+} from './types';
 
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
@@ -94,7 +102,6 @@ export class ConanDatasource extends Datasource {
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
@@ -117,6 +124,7 @@ export class ConanDatasource extends Datasource {
       { packageName, registryUrl },
       'Looking up conan api dependency'
     );
+
     if (registryUrl) {
       const url = ensureTrailingSlash(registryUrl);
       const lookupUrl = joinUrlParts(
@@ -142,6 +150,60 @@ export class ConanDatasource extends Datasource {
                 dep.releases.push(result);
               }
             }
+          }
+
+          try {
+            if (isArtifactoryServer(rep)) {
+              const conanApiRegexp =
+                /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^/]+)/;
+              const groups = url.match(conanApiRegexp)?.groups;
+              if (!groups) {
+                return dep;
+              }
+              const semver = allVersioning.get('semver');
+
+              const sortedReleases = dep.releases
+                .filter((release) => semver.isVersion(release.version))
+                .sort((a, b) => semver.sortVersions(a.version, b.version));
+
+              const latestVersion = sortedReleases.at(-1)?.version;
+
+              if (!latestVersion) {
+                return dep;
+              }
+              logger.debug(
+                `Conan package ${packageName} has latest version ${latestVersion}`
+              );
+
+              const latestRevisionUrl = joinUrlParts(
+                url,
+                `v2/conans/${conanPackage.conanName}/${latestVersion}/${conanPackage.userAndChannel}/latest`
+              );
+              const revResp = await this.http.getJson<ConanRevisionJSON>(
+                latestRevisionUrl
+              );
+              const packageRev = revResp.body.revision;
+
+              const [user, channel] = conanPackage.userAndChannel.split('/');
+              const packageUrl = joinUrlParts(
+                `${groups.host}/artifactory/api/storage/${groups.repo}`,
+                `${user}/${conanPackage.conanName}/${latestVersion}/${channel}/${packageRev}/export/conanfile.py?properties=conan.package.url`
+              );
+              const packageUrlResp = await this.http.getJson<ConanProperties>(
+                packageUrl
+              );
+
+              if (
+                packageUrlResp.body.properties &&
+                'conan.package.url' in packageUrlResp.body.properties
+              ) {
+                const conanPackageUrl =
+                  packageUrlResp.body.properties['conan.package.url'][0];
+                dep.sourceUrl = conanPackageUrl;
+              }
+            }
+          } catch (err) {
+            logger.debug({ err }, "Couldn't determine Conan package url");
           }
           return dep;
         }

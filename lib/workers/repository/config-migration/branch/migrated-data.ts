@@ -5,8 +5,8 @@ import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import { prettier } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
+import { scm } from '../../../../modules/platform/scm';
 import { readLocalFile } from '../../../../util/fs';
-import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
 
 export interface MigratedData {
@@ -43,7 +43,7 @@ export async function applyPrettierFormatting(
 ): Promise<string> {
   try {
     logger.trace('applyPrettierFormatting - START');
-    const fileList = await getFileList();
+    const fileList = await scm.getFileList();
     let prettierExists = fileList.some((file) =>
       prettierConfigFilenames.has(file)
     );

@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
@@ -33,7 +33,7 @@ describe('modules/platform/azure/index', () => {
     jest.mock('../../../util/git');
     jest.mock('../../../util/host-rules');
     jest.mock('../../../logger');
-    jest.mock('delay');
+    jest.mock('timers/promises');
     hostRules = require('../../../util/host-rules');
     require('../../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
@@ -730,47 +730,127 @@ describe('modules/platform/azure/index', () => {
       expect(pr).toMatchSnapshot();
     });
 
-    it('should create and return a PR object with auto-complete set', async () => {
-      await initRepo({ repository: 'some/repo' });
-      const prResult = {
-        pullRequestId: 456,
-        title: 'The Title',
-        createdBy: {
-          id: 123,
-        },
-      };
-      const prUpdateResult = {
-        ...prResult,
-        autoCompleteSetBy: {
-          id: prResult.createdBy.id,
-        },
-        completionOptions: {
-          squashMerge: true,
-          deleteSourceBranch: true,
-          mergeCommitMessage: 'The Title',
-        },
-      };
-      const updateFn = jest
-        .fn(() => prUpdateResult)
-        .mockName('updatePullRequest');
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            createPullRequest: jest.fn(() => prResult),
-            createPullRequestLabel: jest.fn(() => ({})),
+    describe('when usePlatformAutomerge is set', () => {
+      it('should create and return a PR object with auto-complete set', async () => {
+        await initRepo({ repository: 'some/repo' });
+        const prResult = {
+          pullRequestId: 456,
+          title: 'The Title',
+          createdBy: {
+            id: '123',
+          },
+        };
+        const prUpdateResult = {
+          ...prResult,
+          autoCompleteSetBy: {
+            id: prResult.createdBy.id,
+          },
+          completionOptions: {
+            squashMerge: true,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'The Title',
+          },
+        };
+        const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            createPullRequest: jest.fn().mockResolvedValue(prResult),
+            createPullRequestLabel: jest.fn().mockResolvedValue({}),
             updatePullRequest: updateFn,
-          } as any)
-      );
-      const pr = await azure.createPr({
-        sourceBranch: 'some-branch',
-        targetBranch: 'dev',
-        prTitle: 'The Title',
-        prBody: 'Hello world',
-        labels: ['deps', 'renovate'],
-        platformOptions: { usePlatformAutomerge: true },
+          })
+        );
+        const pr = await azure.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'dev',
+          prTitle: 'The Title',
+          prBody: 'Hello world',
+          labels: ['deps', 'renovate'],
+          platformOptions: { usePlatformAutomerge: true },
+        });
+        expect(updateFn).toHaveBeenCalled();
+        expect(pr).toMatchSnapshot();
       });
-      expect(updateFn).toHaveBeenCalled();
-      expect(pr).toMatchSnapshot();
+
+      it('should only call getMergeMethod once per run', async () => {
+        await initRepo({ repository: 'some/repo' });
+        const prResult = [
+          {
+            pullRequestId: 456,
+            title: 'The Title',
+            createdBy: {
+              id: '123',
+            },
+          },
+          {
+            pullRequestId: 457,
+            title: 'The Second Title',
+            createdBy: {
+              id: '123',
+            },
+          },
+        ];
+        const prUpdateResults = [
+          {
+            ...prResult[0],
+            autoCompleteSetBy: {
+              id: prResult[0].createdBy.id,
+            },
+            completionOptions: {
+              squashMerge: true,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          },
+          {
+            ...prResult[1],
+            autoCompleteSetBy: {
+              id: prResult[1].createdBy.id,
+            },
+            completionOptions: {
+              squashMerge: true,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Second Title',
+            },
+          },
+        ];
+        const updateFn = jest.fn(() =>
+          Promise.resolve(prUpdateResults.shift()!)
+        );
+
+        azureHelper.getMergeMethod.mockResolvedValueOnce(
+          GitPullRequestMergeStrategy.Squash
+        );
+
+        azureApi.gitApi.mockResolvedValue(
+          partial<IGitApi>({
+            createPullRequest: jest.fn(() =>
+              Promise.resolve(prResult.shift()!)
+            ),
+            createPullRequestLabel: jest.fn().mockResolvedValue({}),
+            updatePullRequest: updateFn,
+          })
+        );
+        await azure.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'dev',
+          prTitle: 'The Title',
+          prBody: 'Hello world',
+          labels: ['deps', 'renovate'],
+          platformOptions: { usePlatformAutomerge: true },
+        });
+
+        await azure.createPr({
+          sourceBranch: 'some-other-branch',
+          targetBranch: 'dev',
+          prTitle: 'The Second Title',
+          prBody: 'Hello world',
+          labels: ['deps', 'renovate'],
+          platformOptions: { usePlatformAutomerge: true },
+        });
+
+        expect(updateFn).toHaveBeenCalledTimes(2);
+        expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('should create and return an approved PR object', async () => {
@@ -805,14 +885,14 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { azureAutoApprove: true },
+        platformOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
   });
 
-  describe('updatePr(prNo, title, body)', () => {
+  describe('updatePr(prNo, title, body, platformOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = jest.fn();
@@ -826,6 +906,7 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
+        targetBranch: 'new_base',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -880,6 +961,43 @@ describe('modules/platform/azure/index', () => {
         state: 'open',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
+    });
+
+    it('should re-approve the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      };
+      const updateFn = jest.fn(() => prUpdateResult);
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            updatePullRequest: jest.fn(() => prResult),
+            createPullRequestReviewer: updateFn,
+            getPullRequestById: jest.fn(() => ({
+              pullRequestId: prResult.pullRequestId,
+              createdBy: prResult.createdBy,
+            })),
+          } as any)
+      );
+      const pr = await azure.updatePr({
+        number: prResult.pullRequestId,
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        platformOptions: { autoApprove: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
     });
   });
 
@@ -1307,7 +1425,6 @@ describe('modules/platform/azure/index', () => {
         branchName: branchNameMock,
         id: pullRequestIdMock,
       });
-
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
       expect(res).toBeTrue();
     });
@@ -1335,24 +1452,15 @@ describe('modules/platform/azure/index', () => {
       azureHelper.getMergeMethod = jest
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
-
       const res = await azure.mergePr({
         branchName: branchNameMock,
         id: pullRequestIdMock,
       });
-
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
         expectedNumRetries + 1
       );
       expect(logger.warn).toHaveBeenCalled();
       expect(res).toBeTrue();
-    });
-  });
-
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await azure.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
     });
   });
 

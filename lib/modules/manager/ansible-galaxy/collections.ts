@@ -30,7 +30,11 @@ function interpretLine(
     }
     case 'source': {
       localDependency.managerData.source = value;
-      localDependency.registryUrls = value ? [value] : [];
+      if (value?.startsWith('git@')) {
+        localDependency.packageName = value;
+      } else {
+        localDependency.registryUrls = value ? [value] : [];
+      }
       break;
     }
     case 'type': {
@@ -120,7 +124,7 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
   }
 
   if (!dependency.currentValue && !dep.skipReason) {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
   }
   return true;
 }

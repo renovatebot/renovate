@@ -1,0 +1,89 @@
+# This is the composite action:
+#   https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+#
+# Composite actions have some limitations:
+#   - many contexts are unavailable, e.g. `runner`
+#   - `env` can be specified per-step only
+#   - if `run` is used, `shell` must be explicitly specified
+name: 'Setup Node and install dependencies'
+description: 'Setup Node and install dependencies using cache'
+inputs:
+  node-version:
+    description: 'Node version'
+    required: true
+  os:
+    description: 'Composite actions do not support `runner.os`, so it must be passed in as an input'
+    required: true
+  save-cache:
+    description: 'Save cache when needed'
+    required: false
+    default: 'false'
+runs:
+  using: 'composite'
+  steps:
+    - name: Calculate `CACHE_KEY`
+      shell: bash
+      run: |
+        echo 'CACHE_KEY=node_modules-${{
+          inputs.os
+        }}-${{
+          inputs.node-version
+        }}-${{
+          hashFiles('pnpm-lock.yaml')
+        }}' >> "$GITHUB_ENV"
+
+    - name: Restore `node_modules`
+      id: node-modules-restore
+      uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: node_modules
+        key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
+
+    - name: Calculate `CACHE_HIT`
+      shell: bash
+      run: |
+        echo 'CACHE_HIT=${{
+          (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
+        }}' >> "$GITHUB_ENV"
+
+    - name: Enable corepack
+      shell: bash
+      run: corepack enable
+
+    - name: Setup Node
+      uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
+
+    - name: Install dependencies
+      uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
+      if: env.CACHE_HIT != 'true'
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: pnpm install
+
+    - name: Write `node_modules` cache
+      if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
+      uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      with:
+        path: node_modules
+        key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
+
+    - name: Generate files
+      shell: bash
+      run: >
+        if [[ -d lib ]]; then
+          pnpm prepare:generate;
+        fi
+
+    - name: Git config
+      shell: bash
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.symlinks true
+        git config --global user.email 'renovate@whitesourcesoftware.com'
+        git config --global user.name  'Renovate Bot'

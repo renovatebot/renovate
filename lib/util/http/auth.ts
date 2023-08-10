@@ -6,10 +6,23 @@ import {
 } from '../../constants';
 import type { GotOptions } from './types';
 
-export function applyAuthorization(inOptions: GotOptions): GotOptions {
+export type AuthGotOptions = Pick<
+  GotOptions,
+  | 'hostType'
+  | 'headers'
+  | 'noAuth'
+  | 'context'
+  | 'token'
+  | 'username'
+  | 'password'
+>;
+
+export function applyAuthorization<GotOptions extends AuthGotOptions>(
+  inOptions: GotOptions
+): GotOptions {
   const options: GotOptions = { ...inOptions };
 
-  if (options.headers?.authorization || options.noAuth) {
+  if (is.nonEmptyString(options.headers?.authorization) || options.noAuth) {
     return options;
   }
 

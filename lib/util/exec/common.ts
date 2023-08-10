@@ -1,4 +1,4 @@
-import { ChildProcess, spawn } from 'child_process';
+import { ChildProcess, spawn } from 'node:child_process';
 import { ExecError, ExecErrorData } from './exec-error';
 import type { ExecResult, RawExecOptions } from './types';
 

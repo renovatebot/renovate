@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getLanguageList, getManagerList } from '../modules/manager';
+import { getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -24,7 +24,7 @@ let optionParents: Record<string, RenovateOptions['parent']>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = getLanguageList().concat(getManagerList());
+const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
@@ -52,15 +52,6 @@ function isManagerPath(parentPath: string): boolean {
 
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
-}
-
-function validateAliasObject(val: Record<string, unknown>): true | string {
-  for (const [key, value] of Object.entries(val)) {
-    if (!is.urlString(value)) {
-      return key;
-    }
-  }
-  return true;
 }
 
 function validatePlainObject(val: Record<string, unknown>): true | string {
@@ -198,7 +189,6 @@ export async function validateConfig(
         optionParents[key] !== parentName
       ) {
         // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -311,9 +301,9 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'matchFiles',
-              'matchPaths',
+              'matchFileNames',
               'matchLanguages',
+              'matchCategories',
               'matchBaseBranches',
               'matchManagers',
               'matchDatasources',
@@ -328,11 +318,14 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
+              'matchConfidence',
+              'matchRepositories',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -541,7 +534,7 @@ export async function validateConfig(
                 key === 'matchCurrentValue') &&
               // TODO: can be undefined ? #7154
               !rulesRe.test(parentPath!) && // Inside a packageRule
-              (parentPath || !isPreset) // top level in a preset
+              (is.string(parentPath) || !isPreset) // top level in a preset
             ) {
               errors.push({
                 topic: 'Configuration Error',
@@ -569,15 +562,62 @@ export async function validateConfig(
         ) {
           if (is.plainObject(val)) {
             if (key === 'registryAliases') {
-              const res = validateAliasObject(val);
+              const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({
                   topic: 'Configuration Error',
-                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a url`,
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
+            } else if (key === 'customDatasources') {
+              const allowedKeys = [
+                'description',
+                'defaultRegistryUrlTemplate',
+                'format',
+                'transformTemplates',
+              ];
+              for (const [
+                customDatasourceName,
+                customDatasourceValue,
+              ] of Object.entries(val)) {
+                if (!is.plainObject(customDatasourceValue)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${customDatasourceName}\` configuration: customDatasource is not an object`,
+                  });
+                  continue;
+                }
+                for (const [subKey, subValue] of Object.entries(
+                  customDatasourceValue
+                )) {
+                  if (!allowedKeys.includes(subKey)) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
+                    });
+                  } else if (subKey === 'transformTemplates') {
+                    if (!is.array(subValue, is.string)) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
+                      });
+                    }
+                  } else if (!is.string(subValue)) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                    });
+                  }
+                }
+              }
             } else if (
-              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+              [
+                'customEnvVariables',
+                'migratePresets',
+                'productLinks',
+                'secrets',
+                'customizeDashboard',
+              ].includes(key)
             ) {
               const res = validatePlainObject(val);
               if (res !== true) {

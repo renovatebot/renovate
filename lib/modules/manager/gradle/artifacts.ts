@@ -6,14 +6,14 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
-import { getFileList, getFiles, getRepoStatus } from '../../../util/git';
+import { getFiles, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
+import { scm } from '../../platform/scm';
 import {
   extraEnv,
   extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
-  nullRedirectionCommand,
   prepareGradleCommand,
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -94,7 +94,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gradle.updateArtifacts(${packageFileName})`);
 
-  const fileList = await getFileList();
+  const fileList = await scm.getFileList();
   const lockFiles = fileList.filter((file) => isLockFile(file));
   if (!lockFiles.length) {
     logger.debug('No Gradle dependency lockfiles found - skipping update');
@@ -148,7 +148,11 @@ export async function updateArtifacts({
       .map(quote)
       .join(' ')}`;
 
-    if (config.isLockFileMaintenance || isGcvPropsFile(packageFileName)) {
+    if (
+      config.isLockFileMaintenance === true ||
+      !updatedDeps.length ||
+      isGcvPropsFile(packageFileName)
+    ) {
       cmd += ' --write-locks';
     } else {
       const updatedDepNames = updatedDeps
@@ -158,16 +162,8 @@ export async function updateArtifacts({
       cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
 
-    // `./gradlew :dependencies` command can output huge text due to `:dependencies`
-    // that renders dependency graphs. Given the output can exceed `ExecOptions.maxBuffer` size,
-    // drop stdout from the command.
-    //
-    // Note: Windows without docker doesn't supported this yet
-    const nullRedirection = nullRedirectionCommand();
-    cmd += nullRedirection;
-
     await writeLocalFile(packageFileName, newPackageFileContent);
-    await exec(cmd, execOptions);
+    await exec(cmd, { ...execOptions, ignoreStdout: true });
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');

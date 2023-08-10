@@ -43,11 +43,11 @@ describe('modules/manager/mint/extract', () => {
         deps: [
           {
             depName: 'yonaskolb/xcodegen',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'realm/SwiftLint',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
         ],
       });
@@ -69,7 +69,7 @@ describe('modules/manager/mint/extract', () => {
           },
           {
             depName: 'yonaskolb/xcodegen',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'realm/SwiftLint',
@@ -99,7 +99,7 @@ describe('modules/manager/mint/extract', () => {
           },
           {
             depName: 'yonaskolb/xcodegen',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'realm/SwiftLint',

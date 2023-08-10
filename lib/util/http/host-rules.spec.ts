@@ -2,13 +2,14 @@ import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
 import { dnsLookup } from './dns';
 import { applyHostRules } from './host-rules';
+import type { GotOptions } from './types';
 
 const url = 'https://github.com';
 
 jest.mock('global-agent');
 
 describe('util/http/host-rules', () => {
-  const options = {
+  const options: GotOptions = {
     hostType: 'github',
   };
 

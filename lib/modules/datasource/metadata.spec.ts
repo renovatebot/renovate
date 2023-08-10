@@ -78,7 +78,7 @@ describe('modules/datasource/metadata', () => {
     });
   });
 
-  test.each`
+  it.each`
     sourceUrl                                                                  | expectedSourceUrl                            | expectedSourceDirectory
     ${'https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus'} | ${'https://github.com/bitnami/charts'}       | ${'bitnami/kube-prometheus'}
     ${'https://gitlab.com/group/sub-group/repo/tree/main/some/path'}           | ${'https://gitlab.com/group/sub-group/repo'} | ${'some/path'}
@@ -98,7 +98,7 @@ describe('modules/datasource/metadata', () => {
     }
   );
 
-  test.each`
+  it.each`
     sourceUrl
     ${'https://github.com/bitnami'}
     ${'https://github.com/bitnami/charts'}
@@ -297,7 +297,7 @@ describe('modules/datasource/metadata', () => {
       expect(massageUrl('not a url')).toMatch('');
     });
 
-    test.each`
+    it.each`
       sourceUrl
       ${'git@github.com:user/repo'}
       ${'http://github.com/user/repo'}
@@ -311,7 +311,7 @@ describe('modules/datasource/metadata', () => {
       expect(massageUrl(sourceUrl)).toBe('https://github.com/user/repo');
     });
 
-    test.each`
+    it.each`
       sourceUrl
       ${'http://gitlab.com/user/repo'}
       ${'git://gitlab.com/user/repo'}
@@ -323,7 +323,7 @@ describe('modules/datasource/metadata', () => {
       expect(massageUrl(sourceUrl)).toBe('https://gitlab.com/user/repo');
     });
 
-    test.each`
+    it.each`
       sourceUrl
       ${'git@example.com:user/repo'}
       ${'http://example.com/user/repo'}
@@ -484,7 +484,7 @@ describe('modules/datasource/metadata', () => {
     });
   });
 
-  test.each`
+  it.each`
     sourceUrl                              | homepage                                                                   | expected
     ${'not a url'}                         | ${'https://gitlab.com/org/repo'}                                           | ${false}
     ${'https://gitlab.com/org/repo'}       | ${'not a url'}                                                             | ${false}

@@ -5,14 +5,17 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { TravisMatrixItem, TravisYaml } from './types';
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   let doc: TravisYaml;
   try {
     doc = load(content, {
       json: true,
     }) as TravisYaml;
   } catch (err) {
-    logger.warn({ err, content }, 'Failed to parse .travis.yml file.');
+    logger.debug({ err, packageFile }, 'Failed to parse .travis.yml file.');
     return null;
   }
   let deps: PackageDependency[] = [];

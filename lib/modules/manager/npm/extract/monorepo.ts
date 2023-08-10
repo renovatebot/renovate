@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import { logger } from '../../../../logger';
 import { getParentDir, getSiblingFileName } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
@@ -10,7 +11,27 @@ export async function detectMonorepos(
   packageFiles: Partial<PackageFile<NpmManagerData>>[]
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
-  logger.debug('Detecting Lerna and Yarn Workspaces');
+  logger.debug('Detecting workspaces');
+  // ignore lerna if using v7 or later by deleting all metadata
+  for (const p of packageFiles) {
+    if (p.managerData?.lernaJsonFile) {
+      const lernaConstraint = p.deps?.find(
+        (dep) => dep.depName === 'lerna'
+      )?.currentValue;
+      if (
+        !lernaConstraint ||
+        !semver.validRange(lernaConstraint) ||
+        semver.intersects(lernaConstraint, '>=7.0.0')
+      ) {
+        logger.debug('Deleting lerna metadata as v7 or later is in use');
+        delete p.managerData.lernaJsonFile;
+        delete p.managerData.lernaPackages;
+        delete p.managerData.lernaClient;
+      } else {
+        logger.debug('Detected lerna <7');
+      }
+    }
+  }
   for (const p of packageFiles) {
     const { packageFile, npmrc, managerData = {}, skipInstalls } = p;
     const {
@@ -42,7 +63,10 @@ export async function detectMonorepos(
         .filter(Boolean);
 
       p.deps?.forEach((dep) => {
-        if (internalPackageNames.includes(dep.depName)) {
+        if (
+          is.string(dep.depName) &&
+          internalPackageNames.includes(dep.depName)
+        ) {
           dep.isInternal = true;
         }
       });
@@ -56,7 +80,7 @@ export async function detectMonorepos(
         subPackage.managerData.yarnLock ??= yarnLock;
         subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
-        subPackage.managerData.hasWorkspaces = !!workspacesPackages;
+        subPackage.managerData.workspacesPackages = workspacesPackages;
         subPackage.npmrc ??= npmrc;
 
         if (p.extractedConstraints) {

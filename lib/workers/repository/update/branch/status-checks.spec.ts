@@ -1,4 +1,4 @@
-import { getConfig, platform } from '../../../../../test/util';
+import { partial, platform } from '../../../../../test/util';
 import {
   ConfidenceConfig,
   StabilityConfig,
@@ -12,10 +12,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     let config: StabilityConfig;
 
     beforeEach(() => {
-      config = {
-        ...getConfig(),
+      config = partial<StabilityConfig>({
         branchName: 'renovate/some-branch',
-      };
+      });
     });
 
     afterEach(() => {
@@ -55,7 +54,6 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     beforeEach(() => {
       config = {
-        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
     });

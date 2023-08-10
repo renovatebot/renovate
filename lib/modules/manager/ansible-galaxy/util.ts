@@ -1,7 +1,7 @@
 import { regEx } from '../../../util/regex';
 
 export const newBlockRegEx = /^\s*-\s*((\w+):\s*(.*))$/;
-export const blockLineRegEx = /^\s*((\w+):\s*(.*))$/;
+export const blockLineRegEx = /^\s*((\w+):\s*(\S+))\s*$/;
 export const galaxyDepRegex = /[\w-]+\.[\w-]+/;
 export const dependencyRegex = /^dependencies:/;
 export const galaxyRegEx = regEx(

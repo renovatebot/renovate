@@ -279,7 +279,7 @@ describe('modules/manager/composer/extract', () => {
     });
 
     it('extracts dependencies with lock file', async () => {
-      fs.readLocalFile.mockResolvedValue('some content');
+      fs.readLocalFile.mockResolvedValue('{}');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(33);

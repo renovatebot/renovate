@@ -161,6 +161,23 @@ describe('config/decrypt', () => {
       );
     });
 
+    it('handles PGP multi-org constraint', async () => {
+      GlobalConfig.set({ privateKey: privateKeyPgp });
+      config.encrypted = {
+        token:
+          'wcFMAw+4H7SgaqGOAQ//Yk4RTQoLEhO0TKxN2IUBrCi88ts+CG1SXKeL06sJ2qikN/3n2JYAGGKgkHRICfu5dOnsjyFdLJ1XWUrbsM3XgVWikMbrmzD1Xe7N5DsoZXlt4Wa9pZ+IkZuE6XcKKu9whIJ22ciEwCzFwDmk/CBshdCCVVQ3IYuM6uibEHn/AHQ8K15XhraiSzF6DbJpevs5Cy7b5YHFyE936H25CVnouUQnMPsirpQq3pYeMq/oOtV/m4mfRUUQ7MUxvtrwE4lq4hLjFu5n9rwlcqaFPl7I7BEM++1c9LFpYsP5mTS7hHCZ9wXBqER8fa3fKYx0bK1ihCpjP4zUkR7P/uhWDArXamv7gHX2Kj/Qsbegn7KjTdZlggAmaJl/CuSgCbhySy+E55g3Z1QFajiLRpQ5+RsWFDbbI08YEgzyQ0yNCaRvrkgo7kZ1D95rEGRfY96duOQbjzOEqtvYmFChdemZ2+f9Kh/JH1+X9ynxY/zYe/0p/U7WD3QNTYN18loc4aXiB1adXD5Ka2QfNroLudQBmLaJpJB6wASFfuxddsD5yRnO32NSdRaqIWC1x6ti3ZYJZ2RsNwJExPDzjpQTuMOH2jtpu3q7NHmW3snRKy2YAL2UjI0YdeKIlhc/qLCJt9MRcOxWYvujTMD/yGprhG44qf0jjMkJBu7NjuVIMONujabl9b7SUQGfO/t+3rMuC68bQdCGLlO8gf3hvtD99utzXphi6idjC0HKSW/9KzuMkm+syGmIAYq/0L3EFvpZ38uq7z8KzwFFQHI3sBA34bNEr5zpU5OMWg',
+      };
+      let res = await decryptConfig(config, repository);
+      expect(res.encrypted).toBeUndefined();
+      expect(res.token).toBe('123');
+      res = await decryptConfig(config, 'def/ghi');
+      expect(res.encrypted).toBeUndefined();
+      expect(res.token).toBe('123');
+      await expect(decryptConfig(config, 'wrong/org')).rejects.toThrow(
+        CONFIG_VALIDATION
+      );
+    });
+
     it('handles PGP org/repo constraint', async () => {
       GlobalConfig.set({ privateKey: privateKeyPgp });
       config.encrypted = {
@@ -168,6 +185,23 @@ describe('config/decrypt', () => {
           'wcFMAw+4H7SgaqGOAQ//Wp7N0PaDZp0uOdwsc1CuqAq0UPcq+IQdHyKpJs3tHiCecXBHogy4P+rY9nGaUrVneCr4HexuKGuyJf1yl0ZqFffAUac5PjF8eDvjukQGOUq4aBlOogJCEefnuuVxVJx+NRR5iF1P6v57bmI1c+zoqZI/EQB30KU6O1BsdGPLUA/+R3dwCZd5Mbd36s34eYBasqcY9/QbqFcpElXMEPMse3kMCsVXPbZ+UMjtPJiBPUmtJq+ifnu1LzDrfshusSQMwgd/QNk7nEsijiYKllkWhHTP6g7zigvJ46x0h6AYS108YiuK3B9XUhXN9m05Ac6KTEEUdRI3E/dK2dQuRkLjXC8wceQm4A19Gm0uHoMIJYOCbiVoBCH6ayvKbZWZV5lZ4D1JbDNGmKeIj6OX9XWEMKiwTx0Xe89V7BdJzwIGrL0TCLtXuYWZ/R2k+UuBqtgzr44BsBqMpKUA0pcGBoqsEou1M05Ae9fJMF6ADezF5UQZPxT1hrMldiTp3p9iHGfWN2tKHeoW/8CqlIqg9JEkTc+Pl/L9E6ndy5Zjf097PvcmSGhxUQBE7XlrZoIlGhiEU/1HPMen0UUIs0LUu1ywpjCex2yTWnU2YmEwy0MQI1sekSr96QFxDDz9JcynYOYbqR/X9pdxEWyzQ+NJ3n6K97nE1Dj9Sgwu7mFGiUdNkf/SUAF0eZi/eXg71qumpMGBd4eWPtgkeMPLHjvMSYw9vBUfcoKFz6RJ4woG0dw5HOFkPnIjXKWllnl/o01EoBp/o8uswsIS9Nb8i+bp27U6tAHE',
       };
       const res = await decryptConfig(config, repository);
+      expect(res.encrypted).toBeUndefined();
+      expect(res.token).toBe('123');
+      await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
+        CONFIG_VALIDATION
+      );
+    });
+
+    it('handles PGP multi-org/repo constraint', async () => {
+      GlobalConfig.set({ privateKey: privateKeyPgp });
+      config.encrypted = {
+        token:
+          'wcFMAw+4H7SgaqGOARAAibXL3zr0KZawiND868UGdPpGRo1aVZfn0NUBHpm8mXfgB1rBHaLsP7qa8vxDHpwH9DRD1IyB4vvPUwtu7wmuv1Vtr596tD40CCcCZYB5JjZLWRF0O0xaZFCOi7Z9SqqdaOQoMScyvPO+3/lJkS7zmLllJFH0mQoX5Cr+owUAMSWqbeCQ9r/KAXpnhmpraDjTav48WulcdTMc8iQ/DHimcdzHErLOAjtiQi4OUe1GnDCcN76KQ+c+ZHySnkXrYi/DhOOu9qB4glJ5n68NueFja+8iR39z/wqCI6V6TIUiOyjFN86iVyNPQ4Otem3KuNwrnwSABLDqP491eUNjT8DUDffsyhNC9lnjQLmtViK0EN2yLVpMdHq9cq8lszBChB7gobD9rm8nUHnTuLf6yJvZOj6toD5Yqj8Ibj58wN90Q8CUsBp9/qp0J+hBVUPOx4sT6kM2p6YarlgX3mrIW5c1U+q1eDbCddLjHiU5cW7ja7o+cqlA6mbDRu3HthjBweiXTicXZcRu1o/wy/+laQQ95x5FzAXDnOwQUHBmpTDI3tUJvQ+oy8XyBBbyC0LsBye2c2SLkPJ4Ai3IMR+Mh8puSzVywTbneiAQNBzJHlj5l85nCF2tUjvNo3dWC+9mU5sfXg11iEC6LRbg+icjpqRtTjmQURtciKDUbibWacwU5T/SVAGPXnW7adBOS0PZPIZQcSwjchOdOl0IjzBy6ofu7ODdn2CXZXi8zbevTICXsHvjnW4MAj5oXrStxK3LkWyM3YBOLe7sOfWvWz7n9TM3dHg032navQ',
+      };
+      let res = await decryptConfig(config, repository);
+      expect(res.encrypted).toBeUndefined();
+      expect(res.token).toBe('123');
+      res = await decryptConfig(config, 'def/def');
       expect(res.encrypted).toBeUndefined();
       expect(res.token).toBe('123');
       await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(

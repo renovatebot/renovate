@@ -38,17 +38,20 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
+  forkOrg?: string;
   forkToken?: string;
   forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
+  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
+  targetBranch: string;
 }
 
 export interface PrBodyStruct {
@@ -89,7 +92,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove?: boolean;
+  autoApprove?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
@@ -112,6 +115,7 @@ export interface UpdatePrConfig {
   prTitle: string;
   prBody?: string;
   state?: 'open' | 'closed';
+  targetBranch?: string;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -162,6 +166,11 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export interface AutodiscoverConfig {
+  topics?: string[];
+  includeMirrors?: boolean;
+}
+
 export interface Platform extends IssueCollectorAPI {
   // findIssue(title: string): Promise<Issue | null>;
   // getIssueList(): Promise<Issue[]>;
@@ -176,7 +185,7 @@ export interface Platform extends IssueCollectorAPI {
     fileName: string,
     repoName?: string,
     branchOrTag?: string
-  ): Promise<any | null>;
+  ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   // ensureIssueClosing(title: string): Promise<void>;
@@ -189,7 +198,7 @@ export interface Platform extends IssueCollectorAPI {
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
-  getRepos(): Promise<string[]>;
+  getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
@@ -225,4 +234,8 @@ export interface PlatformScm {
   getBranchCommit(branchName: string): Promise<CommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
+  getFileList(): Promise<string[]>;
+  checkoutBranch(branchName: string): Promise<CommitSha>;
+  mergeToLocal(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string): Promise<void>;
 }

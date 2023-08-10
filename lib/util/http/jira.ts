@@ -1,7 +1,12 @@
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
+import type {
+  HttpOptions,
+  HttpRequestOptions,
+  HttpResponse,
+  InternalHttpOptions,
+} from './types';
 import { Http } from '.';
 
-let baseUrl = 'https://api.atlassian.com/';
+let baseUrl: string;
 
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
@@ -14,7 +19,7 @@ export class JiraHttp extends Http {
 
   protected override request<T>(
     url: string | URL,
-    options?: InternalHttpOptions
+    options?: InternalHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
     return super.request<T>(url, opts);

@@ -23,12 +23,12 @@
 
     The Renovate team
 
-'logs:problem':
+'needs-logs':
   comment: >
     Hi there,
 
 
-    We have found that there's a problem with the logs.
+    This issue or discussion is missing some logs, making it difficult or impossible to help you.
     Depending on which situation applies follow one, some or all of these instructions.
 
 
@@ -95,6 +95,12 @@
 
     </details>
 
+
+    Good luck,
+
+
+    The Renovate team
+
 'new package manager':
   comment: >
     Hi there,
@@ -133,11 +139,17 @@
 
 
     You're skipping code tests with `istanbul ignore`.
+
+
     Please only skip tests if:
       - you cannot test the code, or
       - the code is very difficult to test, or
       - the edge case won't usually happen at runtime
-    If you skip a test then always comment why:
+
+
+    If you skip a test, always comment why:
+
+
     ```ts
     // istanbul ignore next: typescript strict null check
     if (!url) {
@@ -156,7 +168,7 @@
     Hi there,
 
 
-    You are using simple `done` comments which cause a lot of noise.
+    You are using `done` comments which cause a lot of noise.
     Instead, please use GitHub's web interface to request another review.
     Please read our [contributing guidelines](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
 
@@ -165,6 +177,26 @@
 
 
     The Renovate team
+
+'pr:discussion-first':
+  comment: >
+    **Please create a GitHub Discussion before continuing with this PR.**
+
+
+    Thank you for your PR, but we need to discuss the requirements and implementation first.
+    This PR will be closed, but you can reopen it after the discussion has been resolved.
+
+
+    Thanks, the Renovate team
+  close: true
+
+'needs-details':
+  comment: >
+    Hi there,
+
+
+    This discussion is missing some details, making it difficult or impossible to help you.
+    Please try again to provide more details.
 
 'needs-discussion':
   unlabel:
@@ -175,19 +207,25 @@
   comment: >
     **Please create a GitHub Discussion instead of this issue.**
 
-    As this issue has been labeled as `needs-discussion` by a maintainer it is being automatically closed and locked. It will later be deleted to avoid polluting repository searches with duplicate or incorrect content.
 
-    This doesn't necessarily mean that what you've reported isn't a problem or a reasonable idea, but it does mean that it should be raised as a Discussion first and not an Issue. Please create a Discussion now, assuming you still wish to discuss it.
+    We only want Renovate maintainers to create new Issues. If needed, a Renovate maintainer will create an Issue after your Discussion been triaged and confirmed. As a Renovate user, please create a GitHub Discussion in this repo instead.
 
-    Thanks, The Renovate team
+
+    This Issue will now be closed and locked. We may later batch-delete this issue. This way we keep Issues actionable, and free of duplicates or wrong bug reports.
+
+
+    Thanks, the Renovate team
   close: true
+  close-reason: 'not planned'
   lock: true
   lock-reason: 'resolved'
 
-'needs-code-formatting':
+'format-code-comments':
   comment: >
-    Hi, you need to format code or logs here so that they're more readable for others.
+    Hi, please format any copy/pasted code or logs so they're readable.
+
 
     You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
 
-    Thanks, The Renovate team
+
+    Thanks, the Renovate team

@@ -13,7 +13,7 @@ const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
-    test.each`
+    it.each`
       module                     | datasource          | packageName
       ${'gopkg.in/foo'}          | ${'github-tags'}    | ${'go-foo/foo'}
       ${'gopkg.in/foo/bar'}      | ${'github-tags'}    | ${'foo/bar'}
@@ -343,6 +343,25 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           registryUrl: 'https://gitlab.com',
           packageName: 'golang/myrepo',
+        });
+      });
+
+      it('handles go-import with azure devops source', async () => {
+        const meta =
+          '<meta name="go-import" content="dev.azure.com/my-organization/my-project/_git/my-repo.git git https://dev.azure.com/my-organization/my-project/_git/my-repo.git" />';
+        httpMock
+          .scope('https://dev.azure.com')
+          .get('/my-organization/my-project/_git/my-repo.git?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'dev.azure.com/my-organization/my-project/_git/my-repo.git'
+        );
+
+        expect(res).toEqual({
+          datasource: GitTagsDatasource.id,
+          packageName:
+            'https://dev.azure.com/my-organization/my-project/_git/my-repo',
         });
       });
 

@@ -11,8 +11,11 @@ import {
 const dependencyBlockExtractionRegex = regEx(/^\s*(?<type>[a-z_]+)\s+{\s*$/);
 const contentCheckList = ['terraform {'];
 
-export function extractPackageFile(content: string): PackageFileContent | null {
-  logger.trace({ content }, 'terragrunt.extractPackageFile()');
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
+  logger.trace({ content }, `terragrunt.extractPackageFile(${packageFile!})`);
   if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
   }
@@ -50,7 +53,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting terragrunt plugins');
+    logger.debug({ err, packageFile }, 'Error extracting terragrunt plugins');
   }
   deps.forEach((dep) => {
     // TODO #7154

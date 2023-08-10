@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { Buffer } from 'node:buffer';
 import {
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
@@ -12,7 +12,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, PrState } from '../../../types';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -208,7 +208,9 @@ export async function findPr({
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+      );
     }
 
     switch (state) {
@@ -307,6 +309,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
+    )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
@@ -321,7 +327,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? JSON5.parse(raw) : null;
 }
@@ -563,11 +569,6 @@ export function deleteLabel(prNumber: number, label: string): Promise<void> {
   return Promise.resolve();
 }
 
-/* istanbul ignore next */
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
-}
-
 // Returns the combined status for a branch.
 /* istanbul ignore next */
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
@@ -630,7 +631,7 @@ export async function ensureComment({
     }
     const firstCommentContent = commentObj.comments[0].content;
     if (
-      (topic && firstCommentContent?.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) === true ||
       (!topic && firstCommentContent === body)
     ) {
       commentId = commentObj.comments[0].commentId;
@@ -710,7 +711,8 @@ export async function ensureCommentRemoval(
     for (const comment of commentObj.comments) {
       if (
         (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ||
+          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
+          true ||
         (removeConfig.type === 'by-content' &&
           removeConfig.content === comment.content?.trim())
       ) {

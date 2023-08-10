@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { parse } from '../../../util/html';
@@ -21,9 +21,9 @@ export class PypiDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  override readonly defaultRegistryUrls = [
-    process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/',
-  ];
+  static readonly defaultURL =
+    process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+  override readonly defaultRegistryUrls = [PypiDatasource.defaultURL];
 
   override readonly defaultVersioning = pep440.id;
 

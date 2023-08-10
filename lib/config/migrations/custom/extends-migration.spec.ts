@@ -72,4 +72,15 @@ describe('config/migrations/custom/extends-migration', () => {
     );
     GlobalConfig.reset();
   });
+
+  it('migrate merge confidence config preset to internal preset', () => {
+    expect(ExtendsMigration).toMigrate(
+      {
+        extends: ['github>whitesource/merge-confidence:beta'],
+      },
+      {
+        extends: ['mergeConfidence:all-badges'],
+      }
+    );
+  });
 });

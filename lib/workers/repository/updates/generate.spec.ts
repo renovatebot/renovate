@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -46,6 +46,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
+      expect(res.recreateClosed).toBe(false);
     });
 
     it('handles lockFileMaintenance', () => {
@@ -67,6 +68,7 @@ describe('workers/repository/updates/generate', () => {
             branchName: 'some-branch',
             prTitle: 'some-title',
             isLockFileMaintenance: true,
+            recreateClosed: true,
           },
         ],
       });
@@ -142,6 +144,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
+      expect(res.recreateClosed).toBe(false);
     });
 
     it('groups multiple upgrades same version', () => {
@@ -214,9 +217,10 @@ describe('workers/repository/updates/generate', () => {
         foo: '1.0.0',
         bar: '2.0.0',
       });
+      expect(res.recreateClosed).toBe(false);
     });
 
-    it('groups major updates with different versions but same newValue, no recreateClosed', () => {
+    it('groups major updates with different versions but same newValue, no recreateWhen', () => {
       const branch = [
         {
           manager: 'some-manager',
@@ -282,7 +286,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('Grouped pin & pinDigest can be recreated', () => {
+    it('recreates grouped pin & pinDigest', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -304,7 +308,31 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('Grouped pin can be recreated', () => {
+    it('does not recreate grouped pin & pinDigest when closed if recreateWhen=never', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v2',
+          newDigest: 'dc323e67f16fb5f7663d20ff7941f27f5809e9b6',
+          recreateWhen: 'never',
+        },
+        {
+          ...requiredDefaultOptions,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+          recreateWhen: 'never',
+        },
+      ] as BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeFalse();
+    });
+
+    it('recreates grouped pin', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -331,7 +359,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('grouped pinDigest can be recreated', () => {
+    it('recreates grouped pinDigest', () => {
       const branch = [
         {
           ...requiredDefaultOptions,
@@ -355,6 +383,61 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('skips appending baseBranch and updateType to prTitle when prTitleStrict is true', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          depName: 'depB',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+          commitMessageExtra:
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
+          foo: 1,
+          newValue: '5.1.2',
+          newVersion: '5.1.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
+          prTitleStrict: true,
+        },
+        {
+          manager: 'some-manager',
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+          commitMessageExtra:
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
+          foo: 1,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
+          prTitleStrict: true,
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        foo: 2,
+        isGroup: true,
+        recreateClosed: true,
+        prTitle: 'some-group',
+        commitMessage: 'some-group',
+        groupName: 'some-group',
+        releaseTimestamp: '2017-02-08T20:01:41+00:00',
+      });
     });
 
     it('groups multiple upgrades different version', () => {
@@ -448,7 +531,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeUndefined();
+      expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
@@ -491,7 +574,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeUndefined();
+      expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
@@ -1336,6 +1419,30 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
       expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
+    });
+
+    it('merges additionalReviewers', () => {
+      const upgrades = [
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          additionalReviewers: ['foo'],
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          additionalReviewers: ['bar'],
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(upgrades);
+      expect(res.additionalReviewers).toEqual(['foo', 'bar']);
     });
   });
 });

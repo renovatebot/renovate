@@ -7,15 +7,24 @@ description: Go modules support in Renovate
 
 Renovate supports upgrading dependencies in `go.mod` files and their accompanying `go.sum` checksums.
 
+If you're self-hosting Renovate, you may use these environment variables:
+
+- `GOPROXY`
+- `GONOPROXY`
+- `GOPRIVATE`
+- `GOINSECURE`
+
+To learn what these variables do, read the [Go Modules Reference about the`GOPROXY` protocol](https://go.dev/ref/mod#module-proxy).
+
 ## How It Works
 
 1. Renovate searches in each repository for any `go.mod` files
 1. Renovate extracts existing dependencies from `require` statements
 1. Renovate resolves the dependency's source repository and checks for SemVer tags if found. Otherwise commits and `v0.0.0-....` syntax will be used
 1. If Renovate finds an update, Renovate will update `go.mod` to the new value
-1. Renovate runs `go get` to update the `go.sum` files
-1. If the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate uses [mod](https://github.com/marwan-at-work/mod) to update import paths on major updates, which can update any Go source file
-1. If the user has any of the available `gomodTidy` options (e.g. `gomodTidy1.17`) in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions), then Renovate runs `go mod tidy` with the respective options (multiple options are allowed).
+1. Renovate runs `go get` to update the `go.sum` files (you can configure which directory are included using the `goGetDirs` option)
+1. If the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](./configuration-options.md#postupdateoptions) array, then Renovate uses [mod](https://github.com/marwan-at-work/mod) to update import paths on major updates, which can update any Go source file
+1. If the user has any of the available `gomodTidy` options (e.g. `gomodTidy1.17`) in the [`postUpdateOptions`](./configuration-options.md#postupdateoptions), then Renovate runs `go mod tidy` with the respective options (multiple options are allowed).
 1. `go mod vendor` is run if vendored modules are detected
 1. A PR will be created with `go.mod`,`go.sum`, and any updated vendored files updated in the one commit
 1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
@@ -39,7 +48,7 @@ To enable this replace massaging behavior, add `gomodMassage` to your `postUpdat
 
 ### Module Tidying
 
-Go Modules tidying is not enabled by default, and is opt-in via the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) config option.
+Go Modules tidying is not enabled by default, and is opt-in via the [`postUpdateOptions`](./configuration-options.md#postupdateoptions) config option.
 The reason for this is that a `go mod tidy` command may make changes to `go.mod` and `go.sum` that are completely unrelated to the updated module(s) in the PR, and so may be confusing to some users.
 
 ### Module Vendoring

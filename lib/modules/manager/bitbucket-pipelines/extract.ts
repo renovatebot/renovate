@@ -1,18 +1,44 @@
 import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
-import { getDep } from '../dockerfile/extract';
+import { newlineRegex } from '../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../types';
+import {
+  addDepAsBitbucketTag,
+  addDepAsDockerImage,
+  addDepFromObject,
+  dockerImageObjectRegex,
+  dockerImageRegex,
+  pipeRegex,
+} from './util';
 
-const pipeRegex = regEx(`^\\s*-\\s?pipe:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
-const dockerImageRegex = regEx(`^\\s*-?\\s?image:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
-
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile: string
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
   try {
-    const lines = content.split(newlineRegex);
-    for (const line of lines) {
+    const lines = content
+      .replaceAll(/^\s*\r?\n/gm, '') // replace empty lines
+      .replaceAll(/^\s*#.*\r?\n/gm, '') // replace comment lines
+      .split(newlineRegex);
+    const len = lines.length;
+    for (let lineIdx = 0; lineIdx < len; lineIdx++) {
+      const line = lines[lineIdx];
+
+      const dockerImageObjectGroups = dockerImageObjectRegex.exec(line)?.groups;
+      if (dockerImageObjectGroups) {
+        // image object
+        // https://support.atlassian.com/bitbucket-cloud/docs/docker-image-options/
+        lineIdx = addDepFromObject(
+          deps,
+          lines,
+          lineIdx,
+          len,
+          dockerImageObjectGroups.spaces
+        );
+        continue;
+      }
+
       const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {
         const pipe = pipeMatch[1];
@@ -23,6 +49,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         } else {
           addDepAsBitbucketTag(deps, pipe);
         }
+        continue;
       }
 
       const dockerImageMatch = dockerImageRegex.exec(line);
@@ -32,32 +59,13 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting Bitbucket Pipes dependencies');
+    logger.debug(
+      { err, packageFile },
+      'Error extracting Bitbucket Pipes dependencies'
+    );
   }
   if (!deps.length) {
     return null;
   }
   return { deps };
-}
-function addDepAsBitbucketTag(
-  deps: PackageDependency<Record<string, any>>[],
-  pipe: string
-): void {
-  const [depName, currentValue] = pipe.split(':');
-  const dep: PackageDependency = {
-    depName,
-    currentValue,
-    datasource: BitbucketTagsDatasource.id,
-  };
-  dep.depType = 'bitbucket-tags';
-  deps.push(dep);
-}
-
-function addDepAsDockerImage(
-  deps: PackageDependency<Record<string, any>>[],
-  currentDockerImage: string
-): void {
-  const dep = getDep(currentDockerImage);
-  dep.depType = 'docker';
-  deps.push(dep);
 }

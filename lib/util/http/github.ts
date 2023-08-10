@@ -19,6 +19,7 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
+  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -210,7 +211,7 @@ function getGraphqlPageSize(
     if (now > expiry) {
       const newPageSize = Math.min(oldPageSize * 2, MAX_GRAPHQL_PAGE_SIZE);
       if (newPageSize < MAX_GRAPHQL_PAGE_SIZE) {
-        const timestamp = now.toISO();
+        const timestamp = now.toISO()!;
 
         logger.debug(
           { fieldName, oldPageSize, newPageSize, timestamp },
@@ -241,7 +242,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   const oldPageSize = getGraphqlPageSize(fieldName);
   if (newPageSize !== oldPageSize) {
     const now = DateTime.local();
-    const pageLastResizedAt = now.toISO();
+    const pageLastResizedAt = now.toISO()!;
     logger.debug(
       { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
       'GraphQL page size: shrinking'
@@ -271,7 +272,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GithubHttpOptions,
+    options?: InternalHttpOptions & GithubHttpOptions & HttpRequestOptions<T>,
     okToRetry = true
   ): Promise<HttpResponse<T>> {
     const opts: GithubHttpOptions = {

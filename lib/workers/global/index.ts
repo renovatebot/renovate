@@ -37,10 +37,13 @@ export async function getRepositoryConfig(
   );
   // TODO: types (#7154)
   const platform = GlobalConfig.get('platform')!;
-  repoConfig.localDir = upath.join(
-    repoConfig.baseDir,
-    `./repos/${platform}/${repoConfig.repository}`
-  );
+  repoConfig.localDir =
+    platform === 'local'
+      ? process.cwd()
+      : upath.join(
+          repoConfig.baseDir,
+          `./repos/${platform}/${repoConfig.repository}`
+        );
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
   return configParser.filterConfig(repoConfig, 'repository');

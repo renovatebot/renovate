@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { partial } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import type { GithubTagItem } from '../../../util/github/graphql/types';
 import * as hostRules from '../../../util/host-rules';
@@ -77,11 +78,11 @@ describe('modules/datasource/github-tags/index', () => {
           releaseTimestamp: '2021-01-01',
           hash: '123',
         },
-        {
+        partial<GithubTagItem>({
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
           releaseTimestamp: '2022-01-01',
-        } as GithubTagItem,
+        }),
       ]);
       const res = await github.getDigest({ packageName }, 'v2.0.0');
       expect(res).toBeNull();

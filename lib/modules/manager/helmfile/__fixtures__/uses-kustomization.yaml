@@ -1,0 +1,10 @@
+repositories:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+
+releases:
+    - name: my-chart
+      chart: ../charts/my-chart
+    - name: memcached
+      version: 6.0.0
+      chart: bitnami/memcached

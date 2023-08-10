@@ -13,7 +13,7 @@ This document tries to list out the most commonly seen limitations and describe 
 ## Time/schedule based limitations
 
 When a user configures a schedule in their repo config, they may think that this schedule "controls" when Renovate runs.
-In actuality, Renovate may be running frequently, but just skipping updates to the repo if the configured schedule is not met.
+In actuality, Renovate may be running frequently, but skipping updates to the repo if the configured schedule is not met.
 Additionally, the Renovate admin may have put the bot on its own schedule, or the job queue may be too long, so Renovate doesn't even get a chance to run on your repository during a certain scheduled time window.
 
 For scheduled action to take place, both these need to happen:
@@ -21,9 +21,9 @@ For scheduled action to take place, both these need to happen:
 - The bot needs to run against your repository
 - The current time needs to fall within your repository's configured schedule
 
-### GitHub hosted app scheduled jobs
+### The Mend Renovate app and scheduled jobs
 
-On the GitHub hosted app Mend checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
+The Mend Renovate App checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
 
 For this reason, you should set your schedule window to at least three or four hours.
 This makes it likely that Renovate bot checks your repository at least once during the schedule.

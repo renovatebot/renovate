@@ -24,6 +24,7 @@ export function extractPackageFile(
       const replaceString = fragment.value;
       if (
         replaceString.startsWith('container_pull') ||
+        replaceString.startsWith('oci_pull') ||
         replaceString.startsWith('git_repository') ||
         replaceString.startsWith('go_repository')
       ) {

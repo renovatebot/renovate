@@ -504,8 +504,6 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
@@ -531,8 +529,6 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
@@ -1230,6 +1226,22 @@ describe('modules/platform/gitea/index', () => {
       });
     });
 
+    it('should update pull target branch', async () => {
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
+      await initFakeRepo();
+      await gitea.updatePr({
+        number: 1,
+        prTitle: 'New Title',
+        targetBranch: 'New Base',
+      });
+
+      expect(helper.updatePR).toHaveBeenCalledTimes(1);
+      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
+        title: 'New Title',
+        base: 'New Base',
+      });
+    });
+
     it('should update pull request with title and body', async () => {
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
@@ -1916,18 +1928,13 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
-  describe('getVulnerabilityAlerts', () => {
-    it('should return an empty list - unsupported by platform', async () => {
-      expect(await gitea.getVulnerabilityAlerts()).toEqual([]);
-    });
-  });
-
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -1937,7 +1944,8 @@ describe('modules/platform/gitea/index', () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'different/repo' });
       const res = await gitea.getJsonFile('file.json', 'different/repo');
       expect(res).toEqual(data);
@@ -1947,7 +1955,8 @@ describe('modules/platform/gitea/index', () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json', 'some/repo', 'dev');
       expect(res).toEqual(data);
@@ -1962,7 +1971,8 @@ describe('modules/platform/gitea/index', () => {
       `;
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: json5Data,
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1971,7 +1981,8 @@ describe('modules/platform/gitea/index', () => {
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });

@@ -11,7 +11,7 @@ import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 
 async function getOnboardingConfig(
   config: RenovateConfig
-): Promise<RenovateSharedConfig> {
+): Promise<RenovateSharedConfig | undefined> {
   let onboardingConfig = clone(config.onboardingConfig);
 
   let orgPreset: string | undefined;

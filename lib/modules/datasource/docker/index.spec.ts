@@ -8,17 +8,11 @@ import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
-import {
-  EXTERNAL_HOST_ERROR,
-  PAGE_NOT_FOUND_ERROR,
-} from '../../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
-import { Http } from '../../../util/http';
-import { DockerDatasource, getAuthHeaders, getRegistryRepository } from '.';
+import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
-
-const http = new Http(DockerDatasource.id);
 
 jest.mock('../../../util/host-rules');
 
@@ -46,169 +40,7 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
-  });
-
-  describe('getRegistryRepository', () => {
-    it('handles local registries', () => {
-      const res = getRegistryRepository(
-        'registry:5000/org/package',
-        'https://index.docker.io'
-      );
-      expect(res).toStrictEqual({
-        dockerRepository: 'org/package',
-        registryHost: 'https://registry:5000',
-      });
-    });
-
-    it('supports registryUrls', () => {
-      const res = getRegistryRepository(
-        'my.local.registry/prefix/image',
-        'https://my.local.registry/prefix'
-      );
-      expect(res).toStrictEqual({
-        dockerRepository: 'prefix/image',
-        registryHost: 'https://my.local.registry',
-      });
-    });
-
-    it('supports http registryUrls', () => {
-      const res = getRegistryRepository(
-        'my.local.registry/prefix/image',
-        'http://my.local.registry/prefix'
-      );
-      expect(res).toStrictEqual({
-        dockerRepository: 'prefix/image',
-        registryHost: 'http://my.local.registry',
-      });
-    });
-
-    it('supports schemeless registryUrls', () => {
-      const res = getRegistryRepository(
-        'my.local.registry/prefix/image',
-        'my.local.registry/prefix'
-      );
-      expect(res).toStrictEqual({
-        dockerRepository: 'prefix/image',
-        registryHost: 'https://my.local.registry',
-      });
-    });
-  });
-
-  describe('getAuthHeaders', () => {
-    it('throw page not found exception', async () => {
-      httpMock
-        .scope('https://my.local.registry')
-        .get('/v2/repo/tags/list?n=1000')
-        .reply(404, {});
-
-      await expect(
-        getAuthHeaders(
-          http,
-          'https://my.local.registry',
-          'repo',
-          'https://my.local.registry/v2/repo/tags/list?n=1000'
-        )
-      ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
-    });
-
-    it('returns "authType token" if both provided', async () => {
-      httpMock
-        .scope('https://my.local.registry')
-        .get('/v2/', undefined, { badheaders: ['authorization'] })
-        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({
-        authType: 'some-authType',
-        token: 'some-token',
-      });
-
-      const headers = await getAuthHeaders(
-        http,
-        'https://my.local.registry',
-        'https://my.local.registry/prefix'
-      );
-
-      // do not inline, otherwise we get false positive from codeql
-      expect(headers).toMatchInlineSnapshot(`
-        {
-          "authorization": "some-authType some-token",
-        }
-      `);
-    });
-
-    it('returns "Bearer token" if only token provided', async () => {
-      httpMock
-        .scope('https://my.local.registry')
-        .get('/v2/', undefined, { badheaders: ['authorization'] })
-        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({
-        token: 'some-token',
-      });
-
-      const headers = await getAuthHeaders(
-        http,
-        'https://my.local.registry',
-        'https://my.local.registry/prefix'
-      );
-
-      // do not inline, otherwise we get false positive from codeql
-      expect(headers).toMatchInlineSnapshot(`
-        {
-          "authorization": "Bearer some-token",
-        }
-      `);
-    });
-
-    it('fails', async () => {
-      httpMock
-        .scope('https://my.local.registry')
-        .get('/v2/', undefined, { badheaders: ['authorization'] })
-        .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
-      httpMock.clear(false);
-
-      httpMock
-        .scope('https://my.local.registry')
-        .get('/v2/', undefined, { badheaders: ['authorization'] })
-        .reply(401, '', {});
-
-      const headers = await getAuthHeaders(
-        http,
-        'https://my.local.registry',
-        'https://my.local.registry/prefix'
-      );
-
-      expect(headers).toBeNull();
-    });
-
-    it('use resources URL and resolve scope in www-authenticate header', async () => {
-      httpMock
-        .scope('https://my.local.registry')
-        .get('/v2/my/node/resource')
-        .reply(401, '', {
-          'www-authenticate':
-            'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry",scope="repository:my/node:whatever"',
-        })
-        .get(
-          '/oauth2/token?service=my.local.registry&scope=repository:my/node:whatever'
-        )
-        .reply(200, { token: 'some-token' });
-
-      const headers = await getAuthHeaders(
-        http,
-        'https://my.local.registry',
-        'my/node/prefix',
-        'https://my.local.registry/v2/my/node/resource'
-      );
-
-      // do not inline, otherwise we get false positive from codeql
-      expect(headers).toMatchInlineSnapshot(`
-        {
-          "authorization": "Bearer some-token",
-        }
-      `);
-    });
+    delete process.env.RENOVATE_X_DOCKER_MAX_PAGES;
   });
 
   describe('getDigest', () => {
@@ -546,7 +378,7 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
       httpMock
         .scope(authUrl)
-        .get('/token?service=&scope=repository:library/some-other-dep:pull')
+        .get('/token?scope=repository:library/some-other-dep:pull')
         .reply(200, { access_token: 'test' });
       const res = await getDigest(
         { datasource: 'docker', packageName: 'some-other-dep' },
@@ -1086,6 +918,79 @@ describe('modules/datasource/docker/index', () => {
       );
       expect(res).toBeNull();
     });
+
+    it('falls back to library/ prefix on non-namespaced images with existing digest', async () => {
+      const currentDigest =
+          'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        newDigest =
+          'sha256:1111111111111111111111111111111111111111111111111111111111111111';
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(4)
+        .reply(200)
+        .head(`/some-dep/manifests/${currentDigest}`)
+        .reply(500)
+        .head(`/some-dep/manifests/3.17`)
+        .reply(404)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          'docker-content-digest': currentDigest,
+        })
+        .head('/library/some-dep/manifests/3.17')
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          'docker-content-digest': newDigest,
+        });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          currentDigest,
+          registryUrls: ['https://registry.company.com'],
+        },
+        '3.17'
+      );
+
+      expect(res).toBe(newDigest);
+    });
+
+    it('falls back to library/ prefix on non-namespaced images without existing digest', async () => {
+      const newDigest =
+        'sha256:1111111111111111111111111111111111111111111111111111111111111111';
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .head(`/some-dep/manifests/3.17`)
+        .reply(404)
+        .head('/library/some-dep/manifests/3.17')
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          'docker-content-digest': newDigest,
+        });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          registryUrls: ['https://registry.company.com'],
+        },
+        '3.17'
+      );
+
+      expect(res).toBe(newDigest);
+    });
   });
 
   describe('getReleases', () => {
@@ -1133,6 +1038,41 @@ describe('modules/datasource/docker/index', () => {
       };
       const res = await getPkgReleases(config);
       expect(res?.releases).toHaveLength(1);
+    });
+
+    it('uses custom max pages', async () => {
+      process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
+      httpMock
+        .scope(baseUrl)
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/library/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          {
+            link: `<${baseUrl}/library/node/tags/list?n=1&page=1>; rel="next", `,
+          }
+        )
+        .get('/library/node/tags/list?n=1&page=1')
+        .reply(
+          200,
+          { tags: ['1.0.1'] },
+          {
+            link: `<${baseUrl}/library/node/tags/list?n=1&page=2>; rel="next", `,
+          }
+        )
+        .get('/')
+        .reply(200)
+        .get('/library/node/manifests/1.0.1')
+        .reply(200);
+
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(2);
     });
 
     it('uses custom registry in packageName', async () => {
@@ -1757,7 +1697,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -1808,7 +1748,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -1862,7 +1802,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
         sourceUrl: 'https://github.com/renovatebot/renovate',
@@ -1889,7 +1829,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -1913,7 +1853,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -1934,7 +1874,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -1975,7 +1915,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2020,7 +1960,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2050,7 +1990,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2100,14 +2040,13 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
     });
 
     it('supports ghcr', async () => {
-      hostRules.find.mockResolvedValue({} as never);
       httpMock
         .scope('https://ghcr.io/v2', {
           badheaders: ['authorization'],
@@ -2156,7 +2095,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'ghcr.io/visualon/drone-git',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://ghcr.io',
         sourceUrl: 'https://github.com/visualon/drone-git',
         releases: [{ version: '1.0.0' }],

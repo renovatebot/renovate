@@ -1,7 +1,7 @@
 import { api as semver } from '.';
 
 describe('modules/versioning/npm/index', () => {
-  test.each`
+  it.each`
     version                                          | isValid
     ${'17.04.0'}                                     | ${false}
     ${'1.2.3'}                                       | ${true}
@@ -27,7 +27,7 @@ describe('modules/versioning/npm/index', () => {
     expect(res).toBe(isValid);
   });
 
-  test.each`
+  it.each`
     versions                                          | range      | maxSatisfying
     ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'*'}     | ${'3.0.0'}
     ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'x'}     | ${'3.0.0'}
@@ -43,7 +43,7 @@ describe('modules/versioning/npm/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version            | isSingle
     ${'1.2.3'}         | ${true}
     ${'1.2.3-alpha.1'} | ${true}
@@ -55,7 +55,7 @@ describe('modules/versioning/npm/index', () => {
     expect(res).toBe(isSingle);
   });
 
-  test.each`
+  it.each`
     a                     | b                     | expected
     ${'1.0.0'}            | ${'1.0.0'}            | ${true}
     ${'1.0.0'}            | ${'>=1.0.0'}          | ${true}
@@ -75,7 +75,7 @@ describe('modules/versioning/npm/index', () => {
     expect(semver.subset!(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     currentValue            | rangeStrategy        | currentVersion   | newVersion              | expected
     ${'=1.0.0'}             | ${'bump'}            | ${'1.0.0'}       | ${'1.1.0'}              | ${'=1.1.0'}
     ${'^1.0'}               | ${'bump'}            | ${'1.0.0'}       | ${'1.0.7'}              | ${'^1.0.7'}

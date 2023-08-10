@@ -1,5 +1,3 @@
-import { z } from 'zod';
-import dataFiles from '../../../data-files.generated';
 import type { Preset } from '../types';
 import {
   PresetTemplate,
@@ -10,7 +8,7 @@ import {
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {
   all: {
-    description: 'All replacements.',
+    description: 'Apply crowd-sourced package replacement rules.',
     extends: [
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
@@ -29,11 +27,13 @@ export const presets: Record<string, Preset> = {
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
       'replacements:renovate-pep440-to-renovatebot-pep440',
+      'replacements:rollup-babel-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
     ],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   'apollo-server-to-scoped': {
     description: '`apollo-server` packages became scoped.',
@@ -110,24 +110,32 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         description:
-          'Replace `containerbase/buildpack` with `containerbase/base`.',
+          'Replace `containerbase/(buildpack|base)` and `renovate/buildpack` with `ghcr.io/containerbase/base`.',
         matchDatasources: ['docker'],
-        matchPackageNames: ['containerbase/buildpack'],
-        replacementName: 'containerbase/base',
-      },
-      {
-        description:
-          'Replace `docker.io/containerbase/buildpack` with `docker.io/containerbase/base`.',
-        matchDatasources: ['docker'],
-        matchPackageNames: ['docker.io/containerbase/buildpack'],
-        replacementName: 'docker.io/containerbase/base',
-      },
-      {
-        description:
-          'Replace `ghcr.io/containerbase/buildpack` with `ghcr.io/containerbase/base`.',
-        matchDatasources: ['docker'],
-        matchPackageNames: ['ghcr.io/containerbase/buildpack'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?containerbase/(?:buildpack|base)$',
+          '^ghcr\\.io/containerbase/buildpack$',
+          '^(?:docker\\.io/)?renovate/buildpack$',
+        ],
         replacementName: 'ghcr.io/containerbase/base',
+      },
+      {
+        description:
+          'Replace `containerbase/node` and `renovate/node` with `ghcr.io/containerbase/node`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        replacementName: 'ghcr.io/containerbase/node',
+      },
+      {
+        description:
+          'Replace `containerbase/sidecar` and `renovate/sidecar` with `ghcr.io/containerbase/sidecar`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$',
+        ],
+        replacementName: 'ghcr.io/containerbase/sidecar',
       },
       {
         description:
@@ -551,6 +559,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'k8s-registry-move': {
+    description:
+      'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
+        replacementNameTemplate:
+          "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}",
+      },
+    ],
+  },
   'middie-to-scoped': {
     description: '`middie` became scoped.',
     packageRules: [
@@ -647,6 +667,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-babel-to-scoped': {
+    description: 'The babel plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-babel'],
+        replacementName: '@rollup/plugin-babel',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
   'rollup-node-resolve-to-scoped': {
     description: 'The node-resolve plugin for rollup became scoped.',
     packageRules: [
@@ -735,26 +766,6 @@ const mui: PresetTemplate = {
   title: 'material-ui-to-mui',
 };
 
-const K8sImagesSchema = z.array(z.string());
-
-const k8sImages = K8sImagesSchema.parse(
-  JSON.parse(dataFiles.get('data/k8s-images.json')!)
-);
-const k8Registry: PresetTemplate = {
-  description:
-    'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
-  packageRules: [
-    {
-      matchDatasources: ['docker'],
-      replacements: k8sImages.map((k8sImage) => [
-        [`k8s.gcr.io/${k8sImage}`],
-        `registry.k8s.io/${k8sImage}`,
-      ]),
-    },
-  ],
-  title: 'k8s-registry-move',
-};
-
 const messageFormat: PresetTemplate = {
   description:
     'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
@@ -787,4 +798,4 @@ const messageFormat: PresetTemplate = {
   title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
 };
 
-addPresets(presets, messageFormat, mui, k8Registry);
+addPresets(presets, messageFormat, mui);

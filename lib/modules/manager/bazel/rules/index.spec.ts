@@ -349,6 +349,34 @@ describe('modules/manager/bazel/rules/index', () => {
     });
   });
 
+  describe('oci', () => {
+    it('extracts oci dependencies', () => {
+      expect(
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+      ).toBeEmptyArray();
+
+      expect(
+        extractDepsFromFragmentData({
+          rule: 'oci_pull',
+          name: 'foo_bar',
+          tag: '1.2.3',
+          digest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          image: 'example.com/foo/bar',
+        })
+      ).toEqual([
+        {
+          currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'foo_bar',
+          depType: 'oci_pull',
+          packageName: 'example.com/foo/bar',
+          versioning: 'docker',
+        },
+      ]);
+    });
+  });
+
   describe('maven', () => {
     it('extracts maven dependencies', () => {
       expect(

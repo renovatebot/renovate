@@ -15,6 +15,11 @@ import type {
   CargoSection,
 } from './types';
 
+function getCargoIndexEnv(registryName: string): string | null {
+  const registry = registryName.toUpperCase().replaceAll('-', '_');
+  return process.env[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
+}
+
 function extractFromSection(
   parsedContent: CargoSection,
   section: keyof CargoSection,
@@ -47,7 +52,9 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (registryName) {
-          const registryUrl = cargoRegistries[registryName];
+          const registryUrl =
+            cargoRegistries[registryName] ?? getCargoIndexEnv(registryName);
+
           if (registryUrl) {
             registryUrls = [registryUrl];
           } else {
@@ -143,10 +150,10 @@ function extractCargoRegistries(config: CargoConfig | null): CargoRegistries {
 
 export async function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   _config?: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  logger.trace(`cargo.extractPackageFile(${fileName})`);
+  logger.trace(`cargo.extractPackageFile(${packageFile})`);
 
   const cargoConfig = await readCargoConfig();
   const cargoRegistries = extractCargoRegistries(cargoConfig);
@@ -155,7 +162,7 @@ export async function extractPackageFile(
   try {
     cargoManifest = parse(content);
   } catch (err) {
-    logger.debug({ err }, 'Error parsing Cargo.toml file');
+    logger.debug({ err, packageFile }, 'Error parsing Cargo.toml file');
     return null;
   }
   /*
@@ -220,7 +227,10 @@ export async function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  const lockFileName = await findLocalSiblingOrParent(fileName, 'Cargo.lock');
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFile,
+    'Cargo.lock'
+  );
   const res: PackageFileContent = { deps };
   // istanbul ignore if
   if (lockFileName) {

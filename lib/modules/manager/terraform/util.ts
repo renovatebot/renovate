@@ -55,7 +55,7 @@ export async function extractLocksForPackageFile(
   fileName: string
 ): Promise<ProviderLock[]> {
   const locks: ProviderLock[] = [];
-  const lockFilePath = findLockFile(fileName);
+  const lockFilePath = await findLockFile(fileName);
   if (lockFilePath) {
     const lockFileContent = await readLockFile(lockFilePath);
     if (lockFileContent) {

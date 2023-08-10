@@ -80,7 +80,7 @@ export function parseGcv(
         currentValue: versionAndPosition.version,
         lockedVersion: lockFileMap.get(propDep)?.version,
         depType: lockFileMap.get(propDep)?.depType,
-      } as PackageDependency<GradleManagerData>;
+      } satisfies PackageDependency<GradleManagerData>;
       extractedDeps.push(newDep);
       // Remove from the lockfile map so the same exact lib will not be included in globbing
       lockFileMap.delete(propDep);
@@ -102,7 +102,7 @@ export function parseGcv(
           lockedVersion: lockVersionAndDepType.version,
           depType: lockVersionAndDepType.depType,
           groupName: propDepGlob,
-        } as PackageDependency<GradleManagerData>;
+        } satisfies PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
         // Remove from the lockfile map so the same lib will not be included in more generic globs later
         lockFileMap.delete(exactDep);
@@ -119,7 +119,7 @@ function globToRegex(depName: string): RegExp {
     depName
       .replace(/\*/g, '_WC_CHAR_')
       .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replace('_WC_CHAR_', '.*?')
+      .replace(/_WC_CHAR_/g, '.*?')
   );
 }
 

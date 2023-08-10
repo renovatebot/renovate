@@ -1,7 +1,7 @@
 import { api as semverRuby } from '.';
 
 describe('modules/versioning/ruby/index', () => {
-  test.each`
+  it.each`
     a              | b              | expected
     ${'1.0.0'}     | ${'1'}         | ${true}
     ${'1.2.0'}     | ${'1.2'}       | ${true}
@@ -15,7 +15,7 @@ describe('modules/versioning/ruby/index', () => {
     expect(semverRuby.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version            | major | minor   | patch
     ${'1'}             | ${1}  | ${null} | ${null}
     ${'1.2'}           | ${1}  | ${2}    | ${null}
@@ -30,7 +30,7 @@ describe('modules/versioning/ruby/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version                     | expected
     ${'0'}                      | ${true}
     ${'v0'}                     | ${true}
@@ -53,7 +53,7 @@ describe('modules/versioning/ruby/index', () => {
     expect(!!semverRuby.isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                 | b                 | expected
     ${'2'}            | ${'1'}            | ${true}
     ${'2.2'}          | ${'2.1'}          | ${true}
@@ -92,7 +92,7 @@ describe('modules/versioning/ruby/index', () => {
     expect(semverRuby.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                     | expected
     ${'1'}                      | ${true}
     ${'1.2'}                    | ${true}
@@ -110,14 +110,14 @@ describe('modules/versioning/ruby/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                                     | expected
     ${['1.2.3-beta', '2.0.1', '1.3.4', '1.2.3']} | ${['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']}
   `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
     expect(versions.sort(semverRuby.sortVersions)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     versions                                                          | range                 | expected
     ${['2.1.5', '2.1.6']}                                             | ${'~> 2.1'}           | ${'2.1.5'}
     ${['2.1.6', '2.1.5']}                                             | ${'~> 2.1.6'}         | ${'2.1.6'}
@@ -132,7 +132,7 @@ describe('modules/versioning/ruby/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                                          | range                 | expected
     ${['2.1.5', '2.1.6']}                                             | ${'~> 2.1'}           | ${'2.1.6'}
     ${['2.1.6', '2.1.5']}                                             | ${'~> 2.1.6'}         | ${'2.1.6'}
@@ -147,7 +147,7 @@ describe('modules/versioning/ruby/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | range                | expected
     ${'1.2'}   | ${'>= 1.2'}          | ${true}
     ${'1.2.3'} | ${'~> 1.2.1'}        | ${true}
@@ -164,7 +164,7 @@ describe('modules/versioning/ruby/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version          | range                  | expected
     ${'1.2.2'}       | ${'< 1.2.2'}           | ${true}
     ${'1.1.4'}       | ${'>= 1.1.5, < 2.0'}   | ${true}
@@ -183,7 +183,7 @@ describe('modules/versioning/ruby/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version                                | expected
     ${'1'}                                 | ${true}
     ${'1.2'}                               | ${true}
@@ -197,7 +197,7 @@ describe('modules/versioning/ruby/index', () => {
     expect(!!semverRuby.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version               | expected
     ${'1'}                | ${true}
     ${'1.1'}              | ${true}
@@ -221,7 +221,7 @@ describe('modules/versioning/ruby/index', () => {
     expect(!!semverRuby.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                     | expected
     ${'1'}                      | ${true}
     ${'1.2'}                    | ${true}
@@ -250,7 +250,7 @@ describe('modules/versioning/ruby/index', () => {
     expect(!!semverRuby.isSingleVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     currentValue             | rangeStrategy        | currentVersion | newVersion   | expected
     ${'1.0.3'}               | ${'pin'}             | ${'1.0.3'}     | ${'1.2.3'}   | ${'1.2.3'}
     ${'v1.0.3'}              | ${'pin'}             | ${'1.0.3'}     | ${'1.2.3'}   | ${'v1.2.3'}

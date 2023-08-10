@@ -3,19 +3,19 @@ import { ApiCache } from './api-cache';
 
 describe('modules/platform/github/api-cache', () => {
   const now = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
-  const t1 = now.plus({ years: 1 }).toISO();
+  const t1 = now.plus({ years: 1 }).toISO()!;
   const t1_http = now.plus({ years: 1 }).toHTTP();
 
-  const t2 = now.plus({ years: 2 }).toISO();
+  const t2 = now.plus({ years: 2 }).toISO()!;
   const t2_http = now.plus({ years: 2 }).toHTTP();
 
-  const t3 = now.plus({ years: 3 }).toISO();
+  const t3 = now.plus({ years: 3 }).toISO()!;
   const t3_http = now.plus({ years: 3 }).toHTTP();
 
-  const t4 = now.plus({ years: 4 }).toISO();
+  const t4 = now.plus({ years: 4 }).toISO()!;
   const t4_http = now.plus({ years: 4 }).toHTTP();
 
-  const t5 = now.plus({ years: 5 }).toISO();
+  const t5 = now.plus({ years: 5 }).toISO()!;
   const t5_http = now.plus({ years: 5 }).toHTTP();
 
   it('stores and retrieves items', () => {

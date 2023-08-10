@@ -10,6 +10,7 @@ export interface Config {
   prList: Pr[];
   repository: string;
   ignorePrAuthor: boolean;
+  is_private: boolean;
   repositoryUrl: string;
   hasJiraProjectLinked: boolean;
   jiraProjectKey: string;
@@ -17,6 +18,7 @@ export interface Config {
 }
 
 export interface PagedResult<T = any> {
+  page?: number;
   pagelen: number;
   size?: number;
   next?: string;
@@ -30,7 +32,6 @@ export interface RepoInfo {
   mergeMethod: string;
   has_issues: boolean;
   uuid: string;
-  repositoryUrl: string;
 }
 
 export interface RepoBranchingModel {
@@ -60,6 +61,8 @@ export interface RepoInfoBody {
   mainbranch: { name: string };
   has_issues: boolean;
   uuid: string;
+  full_name: string;
+  is_private: boolean;
   links: {
     html: {
       href: string;
@@ -71,6 +74,8 @@ export interface MergeRequestBody {
   close_source_branch?: boolean;
   message?: string;
   merge_strategy?: BitbucketMergeStrategy;
+  full_name: string;
+  is_private: boolean;
 }
 
 export interface PrResponse {

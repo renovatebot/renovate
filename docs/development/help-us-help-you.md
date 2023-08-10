@@ -48,7 +48,7 @@ If you feel frustrated because better documentation would have prevented you fro
 Sometimes people appear to feel frustrated that their issue or discussion has not got enough attention, and they start commenting on other issues with text such as "I'm also having problems with Gradle! See issue #xyz".
 Such comments appear intended to "pressure" Renovate maintainers into taking notice, and rarely do they benefit the people subscribed to the other, mostly-unrelated issues.
 Please do not do it.
-Select the "Subscribe" button on other issues if you just want to follow them.
+Instead, use the "Subscribe" button to follow issues.
 
 ## Reproduce repositories on github.com
 
@@ -68,7 +68,7 @@ Unless you're planning to work on the feature or fix yourself, please be respect
 If you've been asked to give us the logs in an issue or discussion, please don't copy/paste the entire output and expect someone else to sort through thousands of lines to help you.
 A full log dump takes a lot of time to scroll through, and it is next to impossible to do so from mobile.
 
-Instead, please select the logs relevant to your problem and paste just those.
+Instead, please select the logs relevant to your problem and paste only the relevant logs.
 If it turns out there's a need for the full dump, someone can ask you for it later.
 
 ## Avoid unjustified bug reports
@@ -77,5 +77,5 @@ Don't raise a bug report unless it's definitely a bug.
 "I don't like this" or "I didn't expect this to happen" is not the same thing as a bug.
 
 Many unjustified bug reports are filed because people they think it will get them more attention.
-Instead, you may be just wasting maintainer time because we have to reclassify your invalid bug report or convert it to a discussion, and you are much less likely to get the attention you're hoping for.
+Instead, you may be wasting maintainer time because we have to reclassify your invalid bug report or convert it to a discussion, and you are much less likely to get the attention you're hoping for.
 If in doubt, start a discussion instead.

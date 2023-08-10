@@ -3,7 +3,7 @@ import { HermitVersioning } from './index';
 describe('modules/versioning/hermit/index', () => {
   const versioning = new HermitVersioning();
 
-  test.each`
+  it.each`
     version      | expected
     ${'1'}       | ${true}
     ${'1.2'}     | ${true}
@@ -16,7 +16,7 @@ describe('modules/versioning/hermit/index', () => {
     expect(versioning.isStable(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                     | expected
     ${'1'}                      | ${true}
     ${'1rc1'}                   | ${true}
@@ -43,7 +43,7 @@ describe('modules/versioning/hermit/index', () => {
     expect(versioning.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version         | major   | minor   | patch
     ${'17'}         | ${17}   | ${0}    | ${0}
     ${'17.2'}       | ${17}   | ${2}    | ${0}
@@ -62,7 +62,7 @@ describe('modules/versioning/hermit/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version       | other        | expected
     ${'1'}        | ${'1.2'}     | ${false}
     ${'@1'}       | ${'@1.2'}    | ${false}
@@ -80,7 +80,7 @@ describe('modules/versioning/hermit/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version      | range              | expected
     ${'0.6.1'}   | ${'>0.6.0 <0.7.0'} | ${true}
     ${'0.6.1'}   | ${'<0.7.0'}        | ${true}
@@ -107,7 +107,7 @@ describe('modules/versioning/hermit/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version           | other             | expected
     ${'@1'}           | ${'@1.2'}         | ${true}
     ${'@1.2'}         | ${'@1.2'}         | ${false}
@@ -136,7 +136,7 @@ describe('modules/versioning/hermit/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version           | other             | expected
     ${'@1'}           | ${'@1.2'}         | ${false}
     ${'@1.2'}         | ${'@1.2'}         | ${false}

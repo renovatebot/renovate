@@ -17,6 +17,9 @@ export interface RegistryInfo {
   /** parsed URL of the registry */
   url: URL;
 
+  /** whether the registry uses sparse indexing (rfc-2789) */
+  isSparse: boolean;
+
   /** path where the registry is cloned */
   clonePath?: string;
 }

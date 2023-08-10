@@ -22,10 +22,6 @@ export function updateLockedDependency(
     logger.warn({ err }, 'Failed to parse yarn files');
     return { status: 'update-failed' };
   }
-  if ('__metadata' in yarnLock) {
-    logger.debug('Yarn 2+ unsupported');
-    return { status: 'unsupported' };
-  }
   try {
     const lockedDeps = getLockedDependencies(yarnLock, depName, currentVersion);
     if (!lockedDeps.length) {
@@ -44,6 +40,12 @@ export function updateLockedDependency(
         `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
       );
       return { status: 'update-failed' };
+    }
+    if ('__metadata' in yarnLock) {
+      logger.debug(
+        'Cannot patch Yarn 2+ lock file directly - falling back to using yarn'
+      );
+      return { status: 'unsupported' };
     }
     logger.debug(
       `Found matching dependencies with length ${lockedDeps.length}`

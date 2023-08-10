@@ -1,5 +1,4 @@
 // TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import detectIndent from 'detect-indent';
@@ -119,7 +118,7 @@ export function determineLockFileDirs(
     } else if (
       packageFile.managerData?.lernaJsonFile &&
       packageFile.managerData.yarnLock &&
-      !packageFile.managerData.hasWorkspaces
+      !packageFile.managerData.workspacesPackages?.length
     ) {
       lernaJsonFiles.push(packageFile.managerData.lernaJsonFile);
     } else {

@@ -1,23 +1,21 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
-import type { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
+  isValidLocalPath,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth';
-import { find, getAll } from '../../../util/host-rules';
+import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
-import { createURLFromHostOrURL, validateUrl } from '../../../util/url';
 import { isValid } from '../../versioning/semver';
 import type {
   PackageDependency,
@@ -26,93 +24,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-const githubApiUrls = new Set([
-  'github.com',
-  'api.github.com',
-  'https://api.github.com',
-  'https://api.github.com/',
-]);
-
 const { major, valid } = semver;
-
-function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
-  let environmentVariables: NodeJS.ProcessEnv = {};
-
-  // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
-  const githubToken = find({
-    hostType: 'github',
-    url: 'https://api.github.com/',
-  });
-
-  if (githubToken?.token) {
-    environmentVariables = getGitAuthenticatedEnvironmentVariables(
-      'https://github.com/',
-      githubToken
-    );
-  }
-
-  // get extra host rules for other git-based Go Module hosts
-  // filter rules without `matchHost` and `token` and github api github rules
-  const hostRules = getAll()
-    .filter((r) => r.matchHost && r.token)
-    .filter((r) => !githubToken || !githubApiUrls.has(r.matchHost!));
-
-  const goGitAllowedHostType = new Set<string>([
-    // All known git platforms
-    'azure',
-    'bitbucket',
-    'bitbucket-server',
-    'gitea',
-    'github',
-    'gitlab',
-  ] satisfies PlatformId[]);
-
-  // for each hostRule without hostType we add additional authentication variables to the environmentVariables
-  for (const hostRule of hostRules) {
-    if (hostRule.hostType === 'go' || !hostRule.hostType) {
-      environmentVariables = addAuthFromHostRule(
-        hostRule,
-        environmentVariables
-      );
-    }
-  }
-
-  // for each hostRule with hostType we add additional authentication variables to the environmentVariables
-  for (const hostRule of hostRules) {
-    if (hostRule.hostType && goGitAllowedHostType.has(hostRule.hostType)) {
-      environmentVariables = addAuthFromHostRule(
-        hostRule,
-        environmentVariables
-      );
-    }
-  }
-  return environmentVariables;
-}
-
-function addAuthFromHostRule(
-  hostRule: HostRule,
-  env: NodeJS.ProcessEnv
-): NodeJS.ProcessEnv {
-  let environmentVariables = env;
-  const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
-  if (validateUrl(httpUrl)) {
-    logger.debug(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `Adding Git authentication for Go Module retrieval for ${httpUrl} using token auth.`
-    );
-    environmentVariables = getGitAuthenticatedEnvironmentVariables(
-      httpUrl!,
-      hostRule,
-      environmentVariables
-    );
-  } else {
-    logger.warn(
-      `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`
-    );
-  }
-  return environmentVariables;
-}
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -124,7 +36,10 @@ function getUpdateImportPathCmds(
   );
   if (invalidMajorDeps.length > 0) {
     invalidMajorDeps.forEach(({ depName }) =>
-      logger.warn(`Could not get major version of ${depName!}. Ignoring`)
+      logger.warn(
+        { depName },
+        'Ignoring dependency: Could not get major version'
+      )
     );
   }
 
@@ -283,7 +198,7 @@ export async function updateArtifacts({
         GOINSECURE: process.env.GOINSECURE,
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
-        ...getGitEnvironmentVariables(),
+        ...getGitEnvironmentVariables(['go']),
       },
       docker: {},
       toolConstraints: [
@@ -296,7 +211,25 @@ export async function updateArtifacts({
 
     const execCommands: string[] = [];
 
-    let args = 'get -d -t ./...';
+    let goGetDirs: string | undefined;
+    if (config.goGetDirs) {
+      goGetDirs = config.goGetDirs
+        .filter((dir) => {
+          const isValid = isValidLocalPath(dir);
+          if (!isValid) {
+            logger.warn({ dir }, 'Invalid path in goGetDirs');
+          }
+          return isValid;
+        })
+        .map(quote)
+        .join(' ');
+
+      if (goGetDirs === '') {
+        throw new Error('Invalid goGetDirs');
+      }
+    }
+
+    let args = `get -d -t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
@@ -331,9 +264,9 @@ export async function updateArtifacts({
 
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
-      (config.postUpdateOptions?.includes('gomodTidy') ||
-        config.postUpdateOptions?.includes('gomodTidy1.17') ||
-        config.postUpdateOptions?.includes('gomodTidyE') ||
+      (config.postUpdateOptions?.includes('gomodTidy') === true ||
+        config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
+        config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;

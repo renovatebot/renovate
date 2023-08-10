@@ -1,5 +1,5 @@
-import type { Stats } from 'fs';
-import os from 'os';
+import type { Stats } from 'node:fs';
+import os from 'node:os';
 import is from '@sindresorhus/is';
 import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../../config/global';

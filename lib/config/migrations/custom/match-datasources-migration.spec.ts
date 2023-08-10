@@ -4,10 +4,15 @@ describe('config/migrations/custom/match-datasources-migration', () => {
   it('should migrate properly', () => {
     expect(MatchDatasourcesMigration).toMigrate(
       {
-        matchDatasources: ['adoptium-java', 'dotnet', 'npm'],
+        matchDatasources: ['adoptium-java', 'dotnet', 'npm', 'node'],
       },
       {
-        matchDatasources: ['java-version', 'dotnet-version', 'npm'],
+        matchDatasources: [
+          'java-version',
+          'dotnet-version',
+          'npm',
+          'node-version',
+        ],
       }
     );
   });

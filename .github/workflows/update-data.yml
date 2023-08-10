@@ -15,25 +15,29 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Enable corepack
+        shell: bash
+        run: corepack enable
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+          cache: pnpm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install
 
       - name: Update static data
-        run: yarn run update-static-data
+        run: pnpm run update-static-data
 
       - name: Run Prettier
-        run: yarn prettier-fix
+        run: pnpm prettier-fix
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # v5.0.2
         with:
           author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
           branch: 'chore/update-static-data'

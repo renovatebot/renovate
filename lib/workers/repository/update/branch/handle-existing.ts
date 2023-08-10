@@ -26,7 +26,7 @@ export async function handleClosedPr(
       content = template.compile(userStrings.ignoreOther, config);
     }
     content +=
-      '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+      '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
     if (!config.suppressNotifications!.includes('prIgnoreNotification')) {
       if (GlobalConfig.get('dryRun')) {
         logger.info(
@@ -47,8 +47,6 @@ export async function handleClosedPr(
         await scm.deleteBranch(config.branchName);
       }
     }
-  } else if (pr.state === 'merged') {
-    logger.debug(`Merged PR with PrNo: ${pr.number} is blocking this branch`);
   }
 }
 
@@ -69,7 +67,7 @@ export async function handleModifiedPr(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
 
-  if (dependencyDashboardCheck || config.rebaseRequested) {
+  if (!!dependencyDashboardCheck || config.rebaseRequested) {
     logger.debug('Manual rebase has been requested for PR');
     if (GlobalConfig.get('dryRun')) {
       logger.info(

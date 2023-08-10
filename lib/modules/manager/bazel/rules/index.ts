@@ -7,9 +7,11 @@ import { GitTarget, gitRules } from './git';
 import { GoTarget, goRules } from './go';
 import { HttpTarget, httpRules } from './http';
 import { MavenTarget, mavenRules } from './maven';
+import { OciTarget, ociRules } from './oci';
 
 const Target = z.union([
   DockerTarget,
+  OciTarget,
   GitTarget,
   GoTarget,
   HttpTarget,
@@ -22,6 +24,7 @@ const Target = z.union([
  */
 const supportedRules = [
   ...dockerRules,
+  ...ociRules,
   ...gitRules,
   ...goRules,
   ...httpRules,

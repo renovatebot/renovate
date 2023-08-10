@@ -1,6 +1,8 @@
+import * as hostRules from '../../../../../lib/util/host-rules';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
-import { getConfig, partial } from '../../../../../test/util';
+import { partial } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
@@ -11,10 +13,15 @@ import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
+import { id as nodeVersioningId } from '../../../../modules/versioning/node';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
+import type { HostRule } from '../../../../types';
+import * as memCache from '../../../../util/cache/memory';
 import * as githubGraphql from '../../../../util/github/graphql';
+import { initConfig, resetConfig } from '../../../../util/merge-confidence';
+import * as McApi from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
@@ -36,6 +43,11 @@ let config: LookupUpdateConfig;
 describe('workers/repository/process/lookup/index', () => {
   const getGithubReleases = jest.spyOn(
     GithubReleasesDatasource.prototype,
+    'getReleases'
+  );
+
+  const getGithubTags = jest.spyOn(
+    GithubTagsDatasource.prototype,
     'getReleases'
   );
 
@@ -67,6 +79,7 @@ describe('workers/repository/process/lookup/index', () => {
   // TODO: fix mocks
   afterEach(() => {
     httpMock.clear(false);
+    hostRules.clear();
   });
 
   describe('.lookupUpdates()', () => {
@@ -74,6 +87,15 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
+    });
+
+    it('handles error result from getPkgReleasesWithResult', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'some-dep';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope('https://registry.npmjs.org').get('/some-dep').reply(500);
+      await expect(lookup.lookupUpdates(config)).rejects.toThrow();
     });
 
     it('returns rollback for pinned version', async () => {
@@ -992,11 +1014,28 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('should allow unstable versions in same major for node', async () => {
+      config.currentValue = '20.3.0';
+      config.packageName = 'node';
+      config.datasource = GithubTagsDatasource.id;
+      config.versioning = nodeVersioningId;
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: '20.3.0' },
+          { version: '20.3.1' },
+          { version: '21.0.0' },
+        ],
+      });
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        { newValue: '20.3.1', updateType: 'patch' },
+      ]);
+    });
+
     it('should return pendingChecks', async () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';
       config.datasource = GithubReleasesDatasource.id;
-      config.stabilityDays = 14;
+      config.minimumReleaseAge = '14 days';
       config.internalChecksFilter = 'strict';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -1019,7 +1058,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';
       config.datasource = GithubReleasesDatasource.id;
-      config.stabilityDays = 3;
+      config.minimumReleaseAge = '3 days';
       config.internalChecksFilter = 'strict';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -1866,15 +1905,15 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
-          updateType: 'replacement',
-          newName: 'eclipse-temurin',
-          newValue: '17.0.0',
-        },
-        {
           updateType: 'major',
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
         },
       ]);
     });
@@ -1903,16 +1942,16 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
-          updateType: 'replacement',
-          newName: 'eclipse-temurin',
-          newValue: '17.0.0',
-          newDigest: 'sha256:abcdef1234567890',
-        },
-        {
           updateType: 'major',
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          newDigest: 'sha256:abcdef1234567890',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
           newDigest: 'sha256:0123456789abcdef',
         },
         {
@@ -1941,6 +1980,14 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles replacements - skips if package and replacement names match', async () => {
+      config.packageName = 'openjdk';
+      config.currentValue = undefined;
+      config.datasource = DockerDatasource.id;
+      config.replacementName = 'openjdk';
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([]);
+    });
+
     it('handles replacements - name and version', async () => {
       config.currentValue = '1.4.1';
       config.packageName = 'q';
@@ -1954,6 +2001,124 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'replacement',
           newName: 'r',
           newValue: '2.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - can template replacement name without a replacement version', async () => {
+      config.packageName = 'mirror.some.org/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'new.registry.io/library/openjdk',
+          newValue: '17.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - can template replacement name with a replacement version', async () => {
+      config.packageName = 'mirror.some.org/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.replacementVersion = '18.0.0';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'new.registry.io/library/openjdk',
+          newValue: '18.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - replacementName takes precedence over replacementNameTemplate', async () => {
+      config.packageName = 'mirror.some.org/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.replacementName = 'eclipse-temurin';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - can perform replacement even for invalid versioning', async () => {
+      config.packageName = 'adoptopenjdk/openjdk11';
+      config.currentValue = 'alpine-jre';
+      config.replacementName = 'eclipse-temurin';
+      config.replacementVersion = '17.0.0-jre-alpine';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'alpine-jre',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0-jre-alpine',
         },
       ]);
     });
@@ -1978,6 +2143,98 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: `rollback`,
         },
       ]);
+    });
+
+    describe('handles merge confidence', () => {
+      const defaultApiBaseUrl = 'https://developer.mend.io/';
+      const getMergeConfidenceSpy = jest.spyOn(
+        McApi,
+        'getMergeConfidenceLevel'
+      );
+      const hostRule: HostRule = {
+        hostType: 'merge-confidence',
+        token: 'some-token',
+      };
+
+      beforeEach(() => {
+        hostRules.add(hostRule);
+        initConfig();
+        memCache.reset();
+      });
+
+      afterEach(() => {
+        resetConfig();
+      });
+
+      it('gets a merge confidence level for a given update when corresponding packageRule is in use', async () => {
+        const datasource = NpmDatasource.id;
+        const packageName = 'webpack';
+        const newVersion = '3.8.1';
+        const currentValue = '3.7.0';
+        config.packageRules = [{ matchConfidence: ['high'] }];
+        config.currentValue = currentValue;
+        config.packageName = packageName;
+        config.datasource = datasource;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+        httpMock
+          .scope(defaultApiBaseUrl)
+          .get(
+            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`
+          )
+          .reply(200, { confidence: 'high' });
+
+        const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
+
+        expect(lookupUpdates).toMatchObject([
+          {
+            mergeConfidenceLevel: `high`,
+          },
+        ]);
+      });
+
+      it('does not get a merge confidence level when no packageRule is set', async () => {
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
+
+        expect(getMergeConfidenceSpy).toHaveBeenCalledTimes(0);
+        expect(lookupUpdates).not.toMatchObject([
+          {
+            mergeConfidenceLevel: expect.anything(),
+          },
+        ]);
+      });
+
+      it('does not set merge confidence value when API is not in use', async () => {
+        const datasource = NpmDatasource.id;
+        config.packageRules = [{ matchConfidence: ['high'] }];
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = datasource;
+        hostRules.clear(); // reset merge confidence
+        initConfig();
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
+
+        expect(lookupUpdates).not.toMatchObject([
+          {
+            mergeConfidenceLevel: expect.anything(),
+          },
+        ]);
+      });
     });
   });
 });

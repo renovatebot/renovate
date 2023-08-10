@@ -22,6 +22,9 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
+// support install mode
+process.env.CONTAINERBASE = 'true';
+
 const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/mix/artifacts', () => {
@@ -87,7 +90,11 @@ describe('modules/manager/mix/artifacts', () => {
 
   it('returns updated mix.lock', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
@@ -127,9 +134,42 @@ describe('modules/manager/mix/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('uses constaints on install mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          constraints: { erlang: '26.0.0', elixir: '1.14.5' },
+        },
+      })
+    ).toEqual([
+      {
+        file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 26.0.0' },
+      { cmd: 'install-tool elixir 1.14.5' },
+      { cmd: 'mix deps.update plug' },
+    ]);
+  });
+
   it('authenticates to private repositories', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
@@ -189,7 +229,11 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns updated mix.lock in subdir', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('subdir/mix.lock');
     mockExecAll();
     expect(

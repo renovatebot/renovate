@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { codeBlock } from 'common-tags';
 import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';

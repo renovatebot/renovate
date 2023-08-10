@@ -17,24 +17,12 @@ import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import { dependencyPattern } from '../pip_requirements/extract';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { PoetryFile, PoetryLock, PoetrySource } from './types';
 
-function getPythonConstraint(
-  existingLockFileContent: string,
-  config: UpdateArtifactsConfig
+export function getPythonConstraint(
+  existingLockFileContent: string
 ): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
   try {
     const data = parse(existingLockFileContent) as PoetryLock;
     if (is.string(data?.metadata?.['python-versions'])) {
@@ -48,7 +36,35 @@ function getPythonConstraint(
 
 const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
-function getPoetryRequirement(pyProjectContent: string): string | null {
+const poetryConstraint: Record<string, string> = {
+  '1.0': '<1.1.0',
+  '1.1': '<1.3.0',
+  '2.0': '>=1.3.0',
+};
+
+export function getPoetryRequirement(
+  pyProjectContent: string,
+  existingLockFileContent: string
+): undefined | string | null {
+  // Read Poetry version from first line of poetry.lock
+  const firstLine = existingLockFileContent.split('\n')[0];
+  const poetryVersionMatch = firstLine.match(/by Poetry ([\d\\.]+)/);
+  if (poetryVersionMatch?.[1]) {
+    logger.debug('Using poetry version from poetry.lock header');
+    return poetryVersionMatch[1];
+  }
+  try {
+    const data = parse(existingLockFileContent) as PoetryLock;
+    const lockVersion = data?.metadata?.['lock-version'];
+    if (is.string(lockVersion)) {
+      if (poetryConstraint[lockVersion]) {
+        logger.debug('Using poetry version from poetry.lock metadata');
+        return poetryConstraint[lockVersion];
+      }
+    }
+  } catch (err) {
+    // Do nothing
+  }
   try {
     const pyproject: PoetryFile = parse(pyProjectContent);
     // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
@@ -173,12 +189,12 @@ export async function updateArtifacts({
           .join(' ')}`
       );
     }
-    const pythonConstraint = getPythonConstraint(
-      existingLockFileContent,
-      config
-    );
+    const pythonConstraint =
+      config?.constraints?.python ??
+      getPythonConstraint(existingLockFileContent);
     const poetryConstraint =
-      config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
+      config.constraints?.poetry ??
+      getPoetryRequirement(newPackageFileContent, existingLockFileContent);
     const extraEnv = {
       ...getSourceCredentialVars(newPackageFileContent, packageFileName),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),

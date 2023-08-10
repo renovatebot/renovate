@@ -1,14 +1,11 @@
-import is from '@sindresorhus/is';
 import { cache } from '../../../util/cache/package/decorator';
-import type { HttpResponse } from '../../../util/http/types';
+import * as p from '../../../util/promises';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
-  DotnetRelease,
-  DotnetReleases,
-  DotnetReleasesIndex,
-  DotnetReleasesIndexSchema,
-  DotnetReleasesSchema,
+  DotnetRuntimeReleases,
+  DotnetSdkReleases,
+  ReleasesIndex,
 } from './schema';
 
 export class DotnetVersionDatasource extends Datasource {
@@ -38,42 +35,29 @@ export class DotnetVersionDatasource extends Datasource {
       return null;
     }
 
-    let result: ReleaseResult | null = null;
-
-    let raw: HttpResponse<DotnetReleasesIndex> | null = null;
     try {
-      raw = await this.http.getJson(
-        this.defaultRegistryUrls[0],
-        DotnetReleasesIndexSchema
+      const registryUrl = this.defaultRegistryUrls[0];
+      const { body: urls } = await this.http.getJson(
+        registryUrl,
+        ReleasesIndex
       );
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
 
-    const body = raw?.body;
-    if (body) {
-      const releases: Release[] = [];
-      const { 'releases-index': releasesIndex } = body;
-
-      for (const { 'releases.json': releasesUrl } of releasesIndex) {
-        const channelReleases = await this.getChannelReleases(
-          releasesUrl,
-          packageName
-        );
-        if (channelReleases) {
-          releases.push(...channelReleases);
-        }
-      }
+      const channelReleases = await p.map(
+        urls,
+        (url) => this.getChannelReleases(url, packageName),
+        { concurrency: 1, stopOnError: true }
+      );
+      const releases = channelReleases.flat();
 
       const sourceUrl =
         packageName === 'dotnet-sdk'
           ? 'https://github.com/dotnet/sdk'
           : 'https://github.com/dotnet/runtime';
 
-      result = { releases, sourceUrl };
+      return { releases, sourceUrl };
+    } catch (err) {
+      this.handleGenericErrors(err);
     }
-
-    return result;
   }
 
   @cache({
@@ -85,43 +69,14 @@ export class DotnetVersionDatasource extends Datasource {
   async getChannelReleases(
     releaseUrl: string,
     packageName: string
-  ): Promise<Release[] | null> {
-    let result: Release[] = [];
-
-    let raw: HttpResponse<DotnetReleases> | null = null;
+  ): Promise<Release[]> {
+    const schema =
+      packageName === 'dotnet-sdk' ? DotnetSdkReleases : DotnetRuntimeReleases;
     try {
-      raw = await this.http.getJson(releaseUrl, DotnetReleasesSchema);
+      const { body } = await this.http.getJson(releaseUrl, schema);
+      return body;
     } catch (err) {
       this.handleGenericErrors(err);
     }
-
-    const body = raw?.body;
-    if (body) {
-      const type = DotnetVersionDatasource.getType(packageName);
-      const { releases: releases } = body;
-      result = releases
-        .filter(
-          (
-            release
-          ): release is {
-            [P in keyof DotnetRelease]: NonNullable<DotnetRelease[P]>;
-          } => {
-            return !is.nullOrUndefined(release[type]);
-          }
-        )
-        .map((release) => {
-          return {
-            version: release[type].version,
-            releaseTimestamp: release['release-date'],
-            changelogUrl: release['release-notes'],
-          };
-        });
-    }
-
-    return result;
-  }
-
-  private static getType(packageName: string): 'sdk' | 'runtime' {
-    return packageName === 'dotnet-sdk' ? 'sdk' : 'runtime';
   }
 }

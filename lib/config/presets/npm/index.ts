@@ -26,13 +26,11 @@ export async function getPreset({
   let dep: (NpmResponseVersion & { 'renovate-config'?: any }) | undefined;
   try {
     const registryUrl = resolveRegistryUrl(pkg);
+    logger.once.warn(
+      { registryUrl, pkg },
+      'Using npm packages for Renovate presets is now deprecated. Please migrate to repository-based presets instead.'
+    );
     const packageUrl = resolvePackageUrl(registryUrl, pkg);
-    // istanbul ignore if
-    if (!packageUrl.startsWith('https://registry.npmjs.org/')) {
-      logger.warn(
-        'npm presets from non-default registries are now deprecated. Please migrate to repository-based presets instead.'
-      );
-    }
     const body = (await http.getJson<NpmResponse>(packageUrl)).body;
     // TODO: check null #7154
     dep = body.versions![body['dist-tags']!.latest];

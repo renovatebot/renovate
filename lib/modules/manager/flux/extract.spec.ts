@@ -43,7 +43,7 @@ describe('modules/manager/flux/extract', () => {
           },
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
@@ -534,7 +534,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
@@ -591,7 +591,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
@@ -700,7 +700,7 @@ describe('modules/manager/flux/extract', () => {
           deps: [
             {
               autoReplaceStringTemplate:
-                '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+                '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
               currentDigest: undefined,
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
@@ -724,6 +724,49 @@ describe('modules/manager/flux/extract', () => {
           ],
           packageFile:
             'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
+        },
+      ]);
+    });
+
+    it('should handle HelmRepository with type OCI', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '0.4.0',
+              datasource: DockerDatasource.id,
+              depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              packageName:
+                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        },
+      ]);
+    });
+
+    it('should handle HelmRepository w/o type oci and url starts with oci', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource2.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '2.6.0',
+              datasource: DockerDatasource.id,
+              depName: 'kyverno',
+              packageName: 'ghcr.io/kyverno/charts/kyverno',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
         },
       ]);
     });

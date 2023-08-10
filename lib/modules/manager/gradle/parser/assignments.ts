@@ -7,7 +7,7 @@ import {
   increaseNestingDepth,
   prependNestingDepth,
   qStringValue,
-  qTemplateString,
+  qValueMatcher,
   qVariableAssignmentIdentifier,
   reduceNestingDepth,
   storeInTokenMap,
@@ -76,7 +76,7 @@ const qGroovySingleMapOfVarAssignment = q.alt(
     .handler(coalesceVariable)
     .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
     .op(':')
-    .join(qTemplateString)
+    .join(qValueMatcher)
     .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
     .handler(handleAssignment)
 );
@@ -117,7 +117,7 @@ const qKotlinSingleMapOfVarAssignment = qStringValue
   .handler(prependNestingDepth)
   .handler(coalesceVariable)
   .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
-  .join(qTemplateString)
+  .join(qValueMatcher)
   .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
   .handler(handleAssignment);
 
@@ -138,7 +138,7 @@ const qKotlinMapOfExpr = (
   );
 
 // val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")
-const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
+export const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
   .op('=')
   .sym('mapOf')
   .tree({

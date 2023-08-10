@@ -10,3 +10,8 @@ export interface PackageCache {
 
   cleanup?(): Promise<void>;
 }
+
+export interface DecoratorCachedRecord {
+  value: unknown;
+  cachedAt: string;
+}

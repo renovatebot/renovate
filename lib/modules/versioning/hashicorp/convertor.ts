@@ -10,11 +10,16 @@ import { regEx } from '../../../util/regex';
  * are made
  */
 export function hashicorp2npm(input: string): string {
+  if (!input) {
+    return input;
+  }
   return input
     .split(',')
     .map((single) => {
       const r = single.match(
-        regEx(/^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*)\s*$/)
+        regEx(
+          /^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*(\.\d+)*)\s*$/
+        )
       );
       if (!r) {
         logger.warn(
@@ -60,11 +65,14 @@ export function hashicorp2npm(input: string): string {
  * It cannot handle `*`, `1.x.x`, range with `-`, `||`
  */
 export function npm2hashicorp(input: string): string {
+  if (!input) {
+    return input;
+  }
   return input
     .split(' ')
     .map((single) => {
       const r = single.match(
-        regEx(/^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*)$/)
+        regEx(/^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*(\.\d+)*)$/)
       );
       if (!r) {
         throw new Error('invalid npm constraint');

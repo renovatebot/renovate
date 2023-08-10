@@ -5,6 +5,8 @@ import { logger } from '../../logger';
 import { getPkgReleases } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as gradleVersioningId } from '../../modules/versioning/gradle';
+import { id as mavenVersioningId } from '../../modules/versioning/maven';
 import { id as nodeVersioningId } from '../../modules/versioning/node';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
@@ -60,6 +62,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'golang',
     versioning: npmVersioningId,
   },
+  gradle: {
+    datasource: 'gradle-version',
+    packageName: 'gradle',
+    versioning: gradleVersioningId,
+  },
+  hashin: {
+    datasource: 'pypi',
+    packageName: 'hashin',
+    versioning: pep440VersioningId,
+  },
   helm: {
     datasource: 'github-releases',
     packageName: 'helm/helm',
@@ -74,6 +86,12 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'java-version',
     packageName: 'java',
     versioning: npmVersioningId,
+  },
+  /* not used in Renovate */
+  'java-maven': {
+    datasource: 'java-version',
+    packageName: 'java',
+    versioning: mavenVersioningId,
   },
   jb: {
     datasource: 'github-releases',
@@ -91,13 +109,18 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'lerna',
     versioning: npmVersioningId,
   },
+  maven: {
+    datasource: 'maven',
+    packageName: 'org.apache.maven:maven',
+    versioning: mavenVersioningId,
+  },
   nix: {
     datasource: 'github-tags',
     packageName: 'NixOS/nix',
     versioning: semverVersioningId,
   },
   node: {
-    datasource: 'node',
+    datasource: 'node-version',
     packageName: 'node',
     versioning: nodeVersioningId,
   },
@@ -107,10 +130,25 @@ const allToolConfig: Record<string, ToolConfig> = {
     hash: true,
     versioning: npmVersioningId,
   },
+  pdm: {
+    datasource: 'github-releases',
+    packageName: 'pdm-project/pdm',
+    versioning: semverVersioningId,
+  },
   php: {
     datasource: 'github-releases',
     packageName: 'containerbase/php-prebuild',
     versioning: composerVersioningId,
+  },
+  'pip-tools': {
+    datasource: 'pypi',
+    packageName: 'pip-tools',
+    versioning: pep440VersioningId,
+  },
+  pipenv: {
+    datasource: 'pypi',
+    packageName: 'pipenv',
+    versioning: pep440VersioningId,
   },
   pnpm: {
     datasource: 'npm',
@@ -164,14 +202,13 @@ export function supportsDynamicInstall(toolName: string): boolean {
 }
 
 export function isContainerbase(): boolean {
-  return !!process.env.CONTAINERBASE || !!process.env.BUILDPACK;
+  return !!process.env.CONTAINERBASE;
 }
 
 export function isDynamicInstall(
   toolConstraints?: Opt<ToolConstraint[]>
 ): boolean {
-  const { binarySource } = GlobalConfig.get();
-  if (binarySource !== 'install') {
+  if (GlobalConfig.get('binarySource') !== 'install') {
     return false;
   }
   if (!isContainerbase()) {
@@ -216,10 +253,13 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint;
+        return constraint.replace(/^=+/, '').trim();
       }
     } else {
-      logger.warn({ toolName, constraint }, 'Invalid tool constraint');
+      logger.warn(
+        { toolName, constraint, versioning: toolConfig.versioning },
+        'Invalid tool constraint'
+      );
       constraint = undefined;
     }
   }
@@ -228,6 +268,7 @@ export async function resolveConstraint(
   const releases = pkgReleases?.releases ?? [];
 
   if (!releases?.length) {
+    logger.warn({ toolConfig }, 'No tool releases found.');
     throw new Error('No tool releases found.');
   }
 

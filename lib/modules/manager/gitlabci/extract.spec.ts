@@ -111,7 +111,7 @@ describe('modules/manager/gitlabci/extract', () => {
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.4.yaml',
       ]);
       expect(res).toBeNull();
-      expect(logger.logger.warn).toHaveBeenCalled();
+      expect(logger.logger.debug).toHaveBeenCalled();
     });
 
     it('skips images with variables', async () => {

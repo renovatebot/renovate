@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -208,7 +208,6 @@ export class PodDatasource extends Datasource {
     namespace: `datasource-${PodDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `${registryUrl}:${packageName}`,
   })
   async getReleases({

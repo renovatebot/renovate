@@ -12,7 +12,7 @@ import { parseRepository, resolveAlias } from './utils';
 
 export async function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): Promise<PackageFileContent | null> {
   let chart: {
@@ -26,26 +26,26 @@ export async function extractPackageFile(
     chart = load(content, { json: true }) as any;
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
-        { fileName },
+        { packageFile },
         'Failed to find required fields in Chart.yaml'
       );
       return null;
     }
     if (chart.apiVersion !== 'v2') {
       logger.debug(
-        { fileName },
+        { packageFile },
         'Unsupported Chart apiVersion. Only v2 is supported.'
       );
       return null;
     }
   } catch (err) {
-    logger.debug(`Failed to parse helm Chart.yaml from ${fileName}`);
+    logger.debug({ packageFile }, `Failed to parse helm Chart.yaml`);
     return null;
   }
   const packageFileVersion = chart.version;
   let deps: PackageDependency[] = [];
   if (!is.nonEmptyArray(chart?.dependencies)) {
-    logger.debug(`Chart has no dependencies in ${fileName}`);
+    logger.debug(`Chart has no dependencies in ${packageFile}`);
     return null;
   }
   const validDependencies = chart.dependencies.filter(
@@ -82,7 +82,7 @@ export async function extractPackageFile(
     datasource: HelmDatasource.id,
     packageFileVersion,
   };
-  const lockFileName = getSiblingFileName(fileName, 'Chart.lock');
+  const lockFileName = getSiblingFileName(packageFile, 'Chart.lock');
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];

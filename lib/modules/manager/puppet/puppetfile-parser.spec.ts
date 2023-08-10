@@ -1,4 +1,4 @@
-import { EOL } from 'os';
+import { EOL } from 'node:os';
 import { Fixtures } from '../../../../test/fixtures';
 import { parsePuppetfile } from './puppetfile-parser';
 

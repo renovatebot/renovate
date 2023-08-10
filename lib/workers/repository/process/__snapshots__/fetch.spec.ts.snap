@@ -4,9 +4,6 @@ exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
 {
   "maven": [
     {
-      "constraints": {
-        "some": "constraint",
-      },
       "deps": [
         {
           "datasource": "maven",
@@ -18,6 +15,10 @@ exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
           ],
         },
       ],
+      "extractedConstraints": {
+        "other": "constraint",
+        "some": "constraint",
+      },
       "packageFile": "pom.xml",
     },
   ],

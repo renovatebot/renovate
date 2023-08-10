@@ -51,7 +51,7 @@ exports[`modules/manager/helmsman/extract extractPackageFile() extract deps 1`] 
     {
       "datasource": "helm",
       "depName": "strimzi-operator-missing-version",
-      "skipReason": "no-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "2.6.0",

@@ -2,7 +2,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { cachePathExists, outputCacheFile, readCacheFile } from '../../../fs';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
 
 export class RepoCacheLocal extends RepoCacheBase {

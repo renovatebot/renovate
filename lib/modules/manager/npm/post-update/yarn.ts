@@ -27,6 +27,7 @@ import type { PostUpdateConfig, Upgrade } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function checkYarnrc(
   lockFileDir: string
@@ -98,16 +99,18 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades, lockFileDir),
+      await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
       ? yarnUpdate.newValue
-      : config.constraints?.yarn;
+      : config.constraints?.yarn ??
+        getPackageManagerVersion('yarn', await lazyPgkJson.getValue());
     const minYarnVersion =
       semver.validRange(yarnCompatibility) &&
-      semver.minVersion(yarnCompatibility);
+      semver.minVersion(yarnCompatibility!);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
@@ -125,7 +128,10 @@ export async function generateLockFile(
       !!upgrades[0]?.managerData?.hasPackageManager;
 
     if (!isYarn1 && hasPackageManager) {
-      toolConstraints.push({ toolName: 'corepack' });
+      toolConstraints.push({
+        toolName: 'corepack',
+        constraint: config.constraints?.corepack,
+      });
     } else {
       toolConstraints.push(yarnTool);
       if (isYarn1 && minYarnVersion) {
@@ -221,11 +227,11 @@ export async function generateLockFile(
             .join(' ')}${cmdOptions}`
         );
       } else {
-        // `yarn up` updates to the latest release, so the range should be specified
+        // `yarn up -R` updates to the latest release in each range
         commands.push(
-          `yarn up ${lockUpdates
+          `yarn up -R ${lockUpdates
             // TODO: types (#7154)
-            .map((update) => `${update.depName!}@${update.newValue!}`)
+            .map((update) => `${update.depName!}`)
             .filter(uniqueStrings)
             .map(quote)
             .join(' ')}${cmdOptions}`

@@ -9,13 +9,15 @@ import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
-interface LegacyHostRule {
+export interface LegacyHostRule {
   hostName?: string;
   domainName?: string;
   baseUrl?: string;
+  host?: string;
+  endpoint?: string;
 }
 
-function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   const cloned: LegacyHostRule & HostRule = clone(rule);
   delete cloned.hostName;
   delete cloned.domainName;
@@ -120,11 +122,11 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
 }
 
 export function find(search: HostRuleSearch): HostRuleSearchResult {
-  if (!(search.hostType || search.url)) {
+  if (!(!!search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }
-  let res = {} as any as HostRule;
+  let res: HostRule = {};
   // First, apply empty rule matches
   hostRules
     .filter((rule) => isEmptyRule(rule))
@@ -193,5 +195,5 @@ export function getAll(): HostRule[] {
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
-  sanitize.clearSanitizedSecretsList();
+  sanitize.clearRepoSanitizedSecretsList();
 }

@@ -5,6 +5,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
+import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
@@ -20,23 +21,28 @@ export async function updateArtifacts({
     return null;
   }
 
-  let cmd: string;
+  let cmd = `nix \
+    --extra-experimental-features nix-command \
+    --extra-experimental-features flakes `;
+
+  const { token } = hostRules.find({
+    hostType: 'github',
+    url: 'https://api.github.com/',
+  });
+
+  if (token) {
+    cmd += `--extra-access-tokens github.com=${token} `;
+  }
 
   if (config.isLockFileMaintenance) {
-    cmd = `nix \
-    --extra-experimental-features nix-command \
-    --extra-experimental-features flakes \
-    flake update`;
+    cmd += 'flake update';
   } else {
     const inputs = updatedDeps
       .map(({ depName }) => depName)
       .filter(is.nonEmptyStringAndNotWhitespace)
       .map((depName) => `--update-input ${quote(depName)}`)
       .join(' ');
-    cmd = `nix \
-    --extra-experimental-features nix-command \
-    --extra-experimental-features flakes \
-    flake lock ${inputs}`;
+    cmd += `flake lock ${inputs}`;
   }
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,

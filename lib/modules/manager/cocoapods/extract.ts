@@ -82,9 +82,9 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string
 ): Promise<PackageFileContent | null> {
-  logger.trace('cocoapods.extractPackageFile()');
+  logger.trace(`cocoapods.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
   const lines: string[] = content.split(newlineRegex);
 
@@ -112,7 +112,7 @@ export async function extractPackageFile(
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: 'unknown-version',
+        skipReason: 'unspecified-version',
       };
 
       if (currentValue) {
@@ -146,7 +146,7 @@ export async function extractPackageFile(
     }
   }
   const res: PackageFileContent = { deps };
-  const lockFile = getSiblingFileName(fileName, 'Podfile.lock');
+  const lockFile = getSiblingFileName(packageFile, 'Podfile.lock');
   // istanbul ignore if
   if (await localPathExists(lockFile)) {
     res.lockFiles = [lockFile];

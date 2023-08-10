@@ -1,6 +1,5 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
@@ -13,6 +12,7 @@ import {
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
+import { minimatch } from '../../../../util/minimatch';
 import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
@@ -29,8 +29,12 @@ export async function postUpgradeCommandsExecutor(
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
-    GlobalConfig.get();
+  const allowedPostUpgradeCommands = GlobalConfig.get(
+    'allowedPostUpgradeCommands'
+  );
+  const allowPostUpgradeCommandTemplating = GlobalConfig.get(
+    'allowPostUpgradeCommandTemplating'
+  );
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -106,7 +110,7 @@ export async function postUpgradeCommandsExecutor(
 
       for (const relativePath of status.modified.concat(status.not_added)) {
         for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
+          if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(
               { file: relativePath, pattern },
               'Post-upgrade file saved'
@@ -134,7 +138,7 @@ export async function postUpgradeCommandsExecutor(
 
       for (const relativePath of status.deleted || []) {
         for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
+          if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(
               { file: relativePath, pattern },
               'Post-upgrade file removed'
@@ -158,16 +162,15 @@ export async function postUpgradeCommandsExecutor(
 export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
-  const { allowedPostUpgradeCommands } = GlobalConfig.get();
-
   const hasChangedFiles =
-    (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
-    (config.updatedArtifacts && config.updatedArtifacts.length > 0);
+    (is.array(config.updatedPackageFiles) &&
+      config.updatedPackageFiles.length > 0) ||
+    (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
 
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */
     !hasChangedFiles ||
-    is.emptyArray(allowedPostUpgradeCommands)
+    is.emptyArray(GlobalConfig.get('allowedPostUpgradeCommands'))
   ) {
     return null;
   }

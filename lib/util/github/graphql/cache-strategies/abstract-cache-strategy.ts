@@ -23,7 +23,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   /**
    * The time which is used during single cache access cycle.
    */
-  protected readonly now = DateTime.now();
+  protected readonly now = DateTime.now().toUTC();
 
   /**
    * Set of all versions which were reconciled
@@ -67,20 +67,20 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
 
     let result: GithubGraphqlCacheRecord<GithubItem> = {
       items: {},
-      createdAt: this.createdAt.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
 
     const storedData = await this.load();
     if (storedData) {
       const cacheTTLDuration = {
-        days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+        hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
       };
       if (!isDateExpired(this.now, storedData.createdAt, cacheTTLDuration)) {
         result = storedData;
       }
     }
 
-    this.createdAt = DateTime.fromISO(result.createdAt);
+    this.createdAt = DateTime.fromISO(result.createdAt).toUTC();
     this.items = result.items;
     return this.items;
   }
@@ -91,7 +91,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    */
   private isStabilized(item: GithubItem): boolean {
     const unstableDuration = {
-      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+      hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
     };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
@@ -150,7 +150,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   private async store(cachedItems: Record<string, GithubItem>): Promise<void> {
     const cacheRecord: GithubGraphqlCacheRecord<GithubItem> = {
       items: cachedItems,
-      createdAt: this.createdAt.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
     await this.persist(cacheRecord);
   }

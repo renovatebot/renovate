@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
+import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
 
@@ -159,6 +160,32 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         managerData: {
+          yarnLock: 'yarn.lock',
+        },
+      });
+    });
+
+    it('warns when multiple lock files found', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'yarn.lock') {
+          return Promise.resolve('# yarn.lock');
+        }
+        if (fileName === 'package-lock.json') {
+          return Promise.resolve('# package-lock.json');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultExtractConfig
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+      );
+      expect(res).toMatchObject({
+        managerData: {
+          npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
         },
       });
@@ -418,6 +445,7 @@ describe('modules/manager/npm/extract/index', () => {
         extractedConstraints: {
           node: '>= 8.9.2',
           npm: '^8.0.0',
+          pnpm: '^1.2.0',
           vscode: '>=1.49.3',
           yarn: 'disabled',
         },
@@ -434,7 +462,7 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'other',
             currentValue: 'latest',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'atom',
@@ -466,7 +494,7 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: 'disabled',
             datasource: 'npm',
             depType: 'engines',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'vscode',
@@ -489,6 +517,7 @@ describe('modules/manager/npm/extract/index', () => {
           yarn: '1.12.3',
           npm: '5.9.0',
           pnpm: '6.11.2',
+          invalid: '1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -505,13 +534,19 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: '6.11.2',
             depName: 'pnpm',
             prettyDepType: 'volta',
+          },
+          {
+            depType: 'volta',
+            currentValue: '1.0.0',
+            depName: 'invalid',
+            prettyDepType: 'volta',
             skipReason: 'unknown-volta',
           },
         ],
       });
     });
 
-    it('extracts volta yarn unknown-version', async () => {
+    it('extracts volta yarn unspecified-version', async () => {
       const pJson = {
         main: 'index.js',
         engines: {
@@ -548,7 +583,7 @@ describe('modules/manager/npm/extract/index', () => {
             depName: 'yarn',
             depType: 'volta',
             prettyDepType: 'volta',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
         ],
       });
@@ -627,7 +662,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         deps: [
-          { depName: 'a', skipReason: 'unknown-version' },
+          { depName: 'a', skipReason: 'unspecified-version' },
           { depName: 'b', skipReason: 'unversioned-reference' },
           {
             depName: 'c',
@@ -656,22 +691,22 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'g',
             currentValue: 'gitlab:owner/g#v1.0.0',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'h',
             currentValue: 'github:-hello/world#v1.0.0',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'i',
             currentValue: '@foo/bar#v2.0.0',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'j',
             currentValue: 'github:frank#v0.0.1',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'k',
@@ -869,6 +904,53 @@ describe('modules/manager/npm/extract/index', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('.extractAllPackageFiles()', () => {
+    it('runs', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(input02Content);
+      const res = await npmExtract.extractAllPackageFiles(
+        defaultExtractConfig,
+        ['package.json']
+      );
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '7.0.0',
+              datasource: 'npm',
+              depName: '@babel/core',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+            {
+              currentValue: '1.21.0',
+              datasource: 'npm',
+              depName: 'config',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+          ],
+          extractedConstraints: {},
+          managerData: {
+            hasPackageManager: false,
+            lernaClient: undefined,
+            lernaJsonFile: undefined,
+            lernaPackages: undefined,
+            npmLock: undefined,
+            packageJsonName: 'renovate',
+            pnpmShrinkwrap: undefined,
+            workspacesPackages: undefined,
+            yarnLock: undefined,
+            yarnZeroInstall: false,
+          },
+          npmrc: undefined,
+          packageFile: 'package.json',
+          packageFileVersion: '1.0.0',
+          skipInstalls: true,
+        },
+      ]);
     });
   });
 

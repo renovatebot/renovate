@@ -1,6 +1,5 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http } from '../../util/http';
-import type { HttpError } from '../../util/http';
+import { Http, HttpError } from '../../util/http';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -34,23 +33,29 @@ export abstract class Datasource implements DatasourceApi {
 
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  handleSpecificErrors(err: HttpError): void {}
+  handleHttpErrors(err: HttpError): void {}
 
-  protected handleGenericErrors(err: HttpError): never {
+  protected handleGenericErrors(err: Error): never {
     // istanbul ignore if: not easy testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    this.handleSpecificErrors(err);
-    if (err.response?.statusCode !== undefined) {
-      if (
-        err.response?.statusCode === 429 ||
-        (err.response?.statusCode >= 500 && err.response?.statusCode < 600)
-      ) {
-        throw new ExternalHostError(err);
+
+    if (err instanceof HttpError) {
+      this.handleHttpErrors(err);
+
+      const statusCode = err.response?.statusCode;
+      if (statusCode) {
+        if (statusCode === 429) {
+          throw new ExternalHostError(err);
+        }
+
+        if (statusCode >= 500 && statusCode < 600) {
+          throw new ExternalHostError(err);
+        }
       }
     }
+
     throw err;
   }
 }

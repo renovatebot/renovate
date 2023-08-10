@@ -26,46 +26,19 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/get-locked', ()
     });
 
     it('finds scoped', () => {
-      expect(getLockedDependencies(yarnLock3, '@actions/core', '1.6.0'))
+      expect(getLockedDependencies(yarnLock3, '@actions/core', '1.2.6'))
         .toMatchInlineSnapshot(`
         [
           {
-            "constraint": "1.6.0",
-            "depName": "@actions/core",
-            "depNameConstraint": "@actions/core@1.6.0",
-            "entry": {
-              "dependencies": {
-                "@actions/http-client": "^1.0.11",
-              },
-              "integrity": "sha512-NB1UAZomZlCV/LmJqkLhNTqtKfFXJZAUPcfl/zqG7EfsQdeUJtaWO98SGbuQ3pydJ3fHl2CvI/51OKYlCYYcaw==",
-              "resolved": "https://registry.yarnpkg.com/@actions/core/-/core-1.6.0.tgz#0568e47039bfb6a9170393a73f3b7eb3b22462cb",
-              "version": "1.6.0",
-            },
-          },
-          {
-            "constraint": "^1.2.0",
-            "depName": "@actions/core",
-            "depNameConstraint": "@actions/core@^1.2.0",
-            "entry": {
-              "dependencies": {
-                "@actions/http-client": "^1.0.11",
-              },
-              "integrity": "sha512-NB1UAZomZlCV/LmJqkLhNTqtKfFXJZAUPcfl/zqG7EfsQdeUJtaWO98SGbuQ3pydJ3fHl2CvI/51OKYlCYYcaw==",
-              "resolved": "https://registry.yarnpkg.com/@actions/core/-/core-1.6.0.tgz#0568e47039bfb6a9170393a73f3b7eb3b22462cb",
-              "version": "1.6.0",
-            },
-          },
-          {
             "constraint": "^1.2.6",
             "depName": "@actions/core",
-            "depNameConstraint": "@actions/core@^1.2.6",
+            "depNameConstraint": "@actions/core@npm:^1.2.6",
             "entry": {
-              "dependencies": {
-                "@actions/http-client": "^1.0.11",
-              },
-              "integrity": "sha512-NB1UAZomZlCV/LmJqkLhNTqtKfFXJZAUPcfl/zqG7EfsQdeUJtaWO98SGbuQ3pydJ3fHl2CvI/51OKYlCYYcaw==",
-              "resolved": "https://registry.yarnpkg.com/@actions/core/-/core-1.6.0.tgz#0568e47039bfb6a9170393a73f3b7eb3b22462cb",
-              "version": "1.6.0",
+              "checksum": "034e57fcb5f944d5fb0ef55be1b212dd88e23d1a50aaffda874cb94e8f4bfa633a66f108f26e81a7cce287cd2b349aa88c97d2023135c8879495326db37a7feb",
+              "languageName": "node",
+              "linkType": "hard",
+              "resolution": "@actions/core@npm:1.2.6",
+              "version": "1.2.6",
             },
           },
         ]

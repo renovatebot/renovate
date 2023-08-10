@@ -328,7 +328,7 @@ export function extractPackageFile(
       registryUrls: [REGISTRY_URLS.mavenCentral],
     });
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err, packageFile }, 'Sbt parsing error');
+    logger.debug({ err, packageFile }, 'Sbt parsing error');
   }
 
   if (!parsedResult) {

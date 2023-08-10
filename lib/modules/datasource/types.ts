@@ -1,4 +1,7 @@
-import type { ConstraintsFilter } from '../../config/types';
+import type {
+  ConstraintsFilter,
+  CustomDatasourceConfig,
+} from '../../config/types';
 import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
@@ -20,11 +23,14 @@ export interface DigestConfig {
 }
 
 export interface GetReleasesConfig {
+  customDatasources?: Record<string, CustomDatasourceConfig>;
+  datasource?: string;
   packageName: string;
   registryUrl?: string;
 }
 
 export interface GetPkgReleasesConfig {
+  customDatasources?: Record<string, CustomDatasourceConfig>;
   npmrc?: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
@@ -46,7 +52,7 @@ export interface Release {
   gitRef?: string;
   isDeprecated?: boolean;
   isStable?: boolean;
-  releaseTimestamp?: any;
+  releaseTimestamp?: string | null;
   version: string;
   newDigest?: string | undefined;
   constraints?: Record<string, string[]>;
@@ -103,7 +109,4 @@ export interface DatasourceApi extends ModuleApi {
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean | undefined;
-
-  /** optional URLs to add to docs as references */
-  urls?: string[];
 }

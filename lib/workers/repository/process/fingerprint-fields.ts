@@ -1,8 +1,8 @@
 import type { UpgradeFingerprintConfig } from '../../types';
 
-type BranchFingerprintFields = keyof UpgradeFingerprintConfig;
+type CommitFingerprintFields = keyof UpgradeFingerprintConfig;
 
-export const upgradeFingerprintFields: BranchFingerprintFields[] = [
+export const upgradeFingerprintFields: CommitFingerprintFields[] = [
   'autoReplaceStringTemplate',
   'currentDigest',
   'currentValue',

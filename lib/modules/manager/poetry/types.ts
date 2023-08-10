@@ -20,6 +20,7 @@ export interface PoetryFile {
 export interface PoetryDependency {
   path?: string;
   git?: string;
+  tag?: string;
   version?: string;
 }
 
@@ -39,6 +40,7 @@ export interface PoetryLockSection {
 
 export interface PoetryLock {
   metadata?: {
+    'lock-version'?: string;
     'python-versions'?: string;
   };
   package?: PoetryLockSection[];

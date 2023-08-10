@@ -12,6 +12,8 @@ import * as template from '../../util/template';
 import type { BranchConfig, SelectAllConfig } from '../types';
 import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
+import type { Vulnerability } from './process/types';
+import { Vulnerabilities } from './process/vulnerabilities';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -75,7 +77,8 @@ function getAllSelectedBranches(
 
 function getCheckedBranches(issueBody: string): Record<string, string> {
   let dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
+  for (const [, type, branchName] of issueBody?.matchAll(markedBranchesRe) ??
+    []) {
     dependencyDashboardChecks[branchName] = type;
   }
   dependencyDashboardChecks = getAllSelectedBranches(
@@ -105,7 +108,7 @@ export async function readDashboardBody(
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
-    config.dependencyDashboard ||
+    config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
@@ -116,7 +119,22 @@ export async function readDashboardBody(
     );
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      Object.assign(config, parseDashboardIssue(issue.body!));
+      const dashboardChecks = parseDashboardIssue(issue.body ?? '');
+
+      if (config.checkedBranches) {
+        const checkedBranchesRec: Record<string, string> = Object.fromEntries(
+          config.checkedBranches.map((branchName) => [
+            branchName,
+            'global-config',
+          ])
+        );
+        dashboardChecks.dependencyDashboardChecks = {
+          ...dashboardChecks.dependencyDashboardChecks,
+          ...checkedBranchesRec,
+        };
+      }
+
+      Object.assign(config, dashboardChecks);
     }
   }
 }
@@ -154,9 +172,16 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       )
   );
   if (repoProblems.size) {
+    logger.debug(
+      { repoProblems: Array.from(repoProblems) },
+      'repository problems'
+    );
     newIssueBody += '## Repository problems\n\n';
-    newIssueBody +=
-      'These problems occurred while renovating this repository.\n\n';
+    const repoProblemsHeader =
+      config.customizeDashboard?.['repoProblemsHeader'] ??
+      'These problems occurred while renovating this repository.';
+    newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
+
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }
@@ -170,6 +195,7 @@ export async function ensureDependencyDashboard(
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
+  logger.debug('ensureDependencyDashboard()');
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
@@ -179,9 +205,10 @@ export async function ensureDependencyDashboard(
   );
   if (
     !(
-      config.dependencyDashboard ||
-      config.dependencyDashboardApproval ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
+      config.dependencyDashboard === true ||
+      config.dependencyDashboardApproval === true ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+        true ||
       branches.some(
         (branch) =>
           !!branch.dependencyDashboardApproval ||
@@ -327,7 +354,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  const warn = getDepWarningsDashboard(packageFiles);
+  const warn = getDepWarningsDashboard(packageFiles, config);
   if (warn) {
     issueBody += warn;
     issueBody += '\n';
@@ -399,6 +426,9 @@ export async function ensureDependencyDashboard(
       'This repository currently has no open or pending branches.\n\n';
   }
 
+  // add CVE section
+  issueBody += await getDashboardMarkdownVulnerabilities(config, packageFiles);
+
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
@@ -414,7 +444,7 @@ export async function ensureDependencyDashboard(
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        updatedIssue.body!
+        updatedIssue.body ?? ''
       );
       for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];
@@ -455,4 +485,104 @@ function getFooter(config: RenovateConfig): string {
   }
 
   return footer;
+}
+
+export async function getDashboardMarkdownVulnerabilities(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>
+): Promise<string> {
+  let result = '';
+
+  if (
+    is.nullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
+    config.dependencyDashboardOSVVulnerabilitySummary === 'none'
+  ) {
+    return result;
+  }
+
+  result += '## Vulnerabilities\n\n';
+
+  const vulnerabilityFetcher = await Vulnerabilities.create();
+  const vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
+    config,
+    packageFiles
+  );
+
+  if (vulnerabilities.length === 0) {
+    result +=
+      'Renovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n';
+    return result;
+  }
+
+  const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
+    is.nullOrUndefined(value.fixedVersion)
+  );
+  const resolvedVulnerabilitiesLength =
+    vulnerabilities.length - unresolvedVulnerabilities.length;
+
+  result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
+  if (is.truthy(config.osvVulnerabilityAlerts)) {
+    result += ' CVEs have Renovate fixes.\n';
+  } else {
+    result +=
+      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n';
+  }
+
+  let renderedVulnerabilities: Vulnerability[];
+  switch (config.dependencyDashboardOSVVulnerabilitySummary) {
+    // filter vulnerabilities to display based on configuration
+    case 'unresolved':
+      renderedVulnerabilities = unresolvedVulnerabilities;
+      break;
+    default:
+      renderedVulnerabilities = vulnerabilities;
+  }
+
+  const managerRecords: Record<
+    string,
+    Record<string, Record<string, Vulnerability[]>>
+  > = {};
+  for (const vulnerability of renderedVulnerabilities) {
+    const { manager, packageFile } = vulnerability.packageFileConfig;
+    if (is.nullOrUndefined(managerRecords[manager!])) {
+      managerRecords[manager!] = {};
+    }
+    if (is.nullOrUndefined(managerRecords[manager!][packageFile])) {
+      managerRecords[manager!][packageFile] = {};
+    }
+    if (
+      is.nullOrUndefined(
+        managerRecords[manager!][packageFile][vulnerability.packageName]
+      )
+    ) {
+      managerRecords[manager!][packageFile][vulnerability.packageName] = [];
+    }
+    managerRecords[manager!][packageFile][vulnerability.packageName].push(
+      vulnerability
+    );
+  }
+
+  for (const [manager, packageFileRecords] of Object.entries(managerRecords)) {
+    result += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
+    for (const [packageFile, packageNameRecords] of Object.entries(
+      packageFileRecords
+    )) {
+      result += `<details><summary>${packageFile}</summary>\n<blockquote>\n\n`;
+      for (const [packageName, cves] of Object.entries(packageNameRecords)) {
+        result += `<details><summary>${packageName}</summary>\n<blockquote>\n\n`;
+        for (const vul of cves) {
+          const id = vul.vulnerability.id;
+          const suffix = is.nonEmptyString(vul.fixedVersion)
+            ? ` (fixed in ${vul.fixedVersion})`
+            : '';
+          result += `- [${id}](https://osv.dev/vulnerability/${id})${suffix}\n`;
+        }
+        result += `</blockquote>\n</details>\n\n`;
+      }
+      result += `</blockquote>\n</details>\n\n`;
+    }
+    result += `</blockquote>\n</details>\n\n`;
+  }
+
+  return result;
 }

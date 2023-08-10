@@ -82,6 +82,12 @@ Returns `true` if a given string is a substring.
 
 `{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
 
+### equals
+
+Returns `true` if two values equals (checks strict equality, i.e. `===`).
+
+`{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
+
 ### and
 
 Returns `true` only if all expressions are `true`.
@@ -103,6 +109,6 @@ This is for security reasons.
 
 `HOME is {{env.HOME}}`
 
-If you're self-hosting Renovate, you can expose additional variables with the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option.
+If you're self-hosting Renovate, you can expose additional variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option.
 
-You can also use the [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.
+You can also use the [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.

@@ -18,7 +18,7 @@ import { setNoVerify } from '.';
 jest.mock('./conflicts-cache');
 jest.mock('./behind-base-branch-cache');
 jest.mock('./modified-cache');
-jest.mock('delay');
+jest.mock('timers/promises');
 jest.mock('../cache/repository');
 const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
@@ -349,6 +349,22 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('mergeToLocal(branchName)', () => {
+    it('should perform a branch merge without push', async () => {
+      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      await git.mergeToLocal('renovate/future_branch');
+
+      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeTrue();
+      expect(pushSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw', async () => {
+      await expect(git.mergeToLocal('not_found')).rejects.toThrow();
+    });
+  });
+
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       await git.deleteBranch('renovate/past_branch');
@@ -500,7 +516,7 @@ describe('util/git/index', () => {
         message: 'Update something',
       };
       const commitSha = await git.commitFiles(commitConfig);
-      const remoteSha = await git.fetchCommit(commitConfig);
+      const remoteSha = await git.fetchBranch(commitConfig.branchName);
       expect(commitSha).toEqual(remoteSha);
     });
 

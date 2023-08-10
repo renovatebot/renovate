@@ -119,7 +119,7 @@ describe('modules/datasource/aws-rds/index', () => {
         datasource: AwsRdsDataSource.id,
         packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: true,
@@ -138,7 +138,7 @@ describe('modules/datasource/aws-rds/index', () => {
         datasource: AwsRdsDataSource.id,
         packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: false,

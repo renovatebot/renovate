@@ -18,5 +18,12 @@ describe('modules/platform/utils/read-only-issue-body', () => {
         )
       );
     });
+
+    it('removes the create-all-rate-limited-prs', () => {
+      const s = readOnlyIssueBody(issueBody);
+      expect(s).toEqual(
+        expect.not.stringMatching('Create all rate-limited PRs at once')
+      );
+    });
   });
 });

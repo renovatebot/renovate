@@ -9,6 +9,7 @@ export const PLATFORM_GPG_FAILED = 'gpg-failed';
 export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
+export const PLATFORM_UNKNOWN_ERROR = 'platform-unknown-error';
 
 // Issue Collector Error
 export const ISSUE_COLLECTOR_NOT_FOUND = 'issue-collector-not-found';
@@ -65,3 +66,6 @@ export const INVALID_PATH = 'invalid-path';
 
 // PAGE NOT FOUND
 export const PAGE_NOT_FOUND_ERROR = 'page-not-found';
+
+// Missing API required credentials
+export const MISSING_API_CREDENTIALS = 'missing-api-credentials';

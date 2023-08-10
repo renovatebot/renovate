@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import type { AllConfig } from '../../config/types';
 import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';

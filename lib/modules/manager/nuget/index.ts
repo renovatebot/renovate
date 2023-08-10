@@ -1,12 +1,10 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import { NugetDatasource } from '../../datasource/nuget';
 
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 export { bumpPackageVersion } from './update';
-
-export const language: ProgrammingLanguage = 'dotnet';
 
 export const defaultConfig = {
   fileMatch: [
@@ -16,6 +14,8 @@ export const defaultConfig = {
     '(^|/)global\\.json$',
   ],
 };
+
+export const categories: Category[] = ['dotnet'];
 
 export const supportedDatasources = [
   DotnetVersionDatasource.id,

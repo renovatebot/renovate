@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import {
   GetObjectCommand,
   GetObjectCommandInput,
@@ -12,7 +12,7 @@ import { partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { parseS3Url } from '../../../s3';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
 

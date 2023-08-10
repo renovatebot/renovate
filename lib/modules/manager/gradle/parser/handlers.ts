@@ -1,4 +1,4 @@
-import url from 'url';
+import URL from 'node:url';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { getSiblingFileName } from '../../../../util/fs';
@@ -8,9 +8,9 @@ import type { parseGradle as parseGradleCallback } from '../parser';
 import type { Ctx, GradleManagerData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
-  ANNOYING_METHODS,
   GRADLE_PLUGINS,
   REGISTRY_URLS,
+  findVariable,
   interpolateString,
   loadFromTokenMap,
 } from './common';
@@ -30,6 +30,12 @@ export function handleAssignment(ctx: Ctx): Ctx {
     ctx.tokenMap.templateStringTokens = valTokens;
     handleDepString(ctx);
     delete ctx.tokenMap.templateStringTokens;
+  } else if (valTokens[0].type === 'symbol') {
+    // foo = bar || foo = "${bar}"
+    const varData = findVariable(valTokens[0].value, ctx);
+    if (varData) {
+      ctx.globalVars[key] = { ...varData };
+    }
   } else {
     // = string value
     const dep = parseDependencyString(valTokens[0].value);
@@ -56,7 +62,7 @@ export function handleAssignment(ctx: Ctx): Ctx {
 export function handleDepString(ctx: Ctx): Ctx {
   const stringTokens = loadFromTokenMap(ctx, 'templateStringTokens');
 
-  const templateString = interpolateString(stringTokens, ctx.globalVars);
+  const templateString = interpolateString(stringTokens, ctx);
   if (!templateString) {
     return ctx;
   }
@@ -70,7 +76,7 @@ export function handleDepString(ctx: Ctx): Ctx {
   let fileReplacePosition: number | undefined;
   for (const token of stringTokens) {
     if (token.type === 'symbol') {
-      const varData = ctx.globalVars[token.value];
+      const varData = findVariable(token.value, ctx);
       if (varData) {
         packageFile = varData.packageFile;
         fileReplacePosition = varData.fileReplacePosition;
@@ -112,8 +118,8 @@ export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
   const moduleNameTokens = loadFromTokenMap(ctx, 'artifactId');
   const versionTokens = loadFromTokenMap(ctx, 'version');
 
-  const moduleName = interpolateString(moduleNameTokens, ctx.globalVars);
-  const versionValue = interpolateString(versionTokens, ctx.globalVars);
+  const moduleName = interpolateString(moduleNameTokens, ctx);
+  const versionValue = interpolateString(versionTokens, ctx);
   if (!moduleName || !versionValue) {
     return ctx;
   }
@@ -133,9 +139,9 @@ export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
 
   if (versionTokens.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
-    const varData = ctx.globalVars[versionTokens[0].value];
+    const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
       dep.groupName = varData.key;
       dep.currentValue = varData.value;
@@ -156,9 +162,9 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
   const artifactIdTokens = loadFromTokenMap(ctx, 'artifactId');
   const versionTokens = loadFromTokenMap(ctx, 'version');
 
-  const groupId = interpolateString(groupIdTokens, ctx.globalVars);
-  const artifactId = interpolateString(artifactIdTokens, ctx.globalVars);
-  const version = interpolateString(versionTokens, ctx.globalVars);
+  const groupId = interpolateString(groupIdTokens, ctx);
+  const artifactId = interpolateString(artifactIdTokens, ctx);
+  const version = interpolateString(versionTokens, ctx);
   if (!groupId || !artifactId || !version) {
     return ctx;
   }
@@ -171,9 +177,9 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
   const methodName = ctx.tokenMap.methodName ?? null;
   if (versionTokens.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
-    const varData = ctx.globalVars[versionTokens[0].value];
+    const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
       dep.groupName = varData.key;
       dep.managerData = {
@@ -190,10 +196,6 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
       fileReplacePosition: versionTokens[0].offset,
       packageFile: ctx.packageFile,
     };
-  }
-
-  if (methodName?.[0] && ANNOYING_METHODS.has(methodName[0].value)) {
-    dep.skipReason = 'ignored';
   }
 
   ctx.deps.push(dep);
@@ -225,9 +227,9 @@ export function handlePlugin(ctx: Ctx): Ctx {
 
   if (pluginVersion.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (pluginVersion[0].type === 'symbol') {
-    const varData = ctx.globalVars[pluginVersion[0].value];
+    const varData = findVariable(pluginVersion[0].value, ctx);
     if (varData) {
       dep.groupName = varData.key;
       dep.currentValue = varData.value;
@@ -236,7 +238,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
         packageFile: varData.packageFile,
       };
     } else {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
     }
   }
 
@@ -270,7 +272,7 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
 
   if (ctx.tokenMap.name) {
     const nameTokens = loadFromTokenMap(ctx, 'name');
-    const nameValue = interpolateString(nameTokens, localVariables);
+    const nameValue = interpolateString(nameTokens, ctx, localVariables);
     if (nameValue) {
       localVariables = {
         ...localVariables,
@@ -284,12 +286,13 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
 
   let registryUrl = interpolateString(
     loadFromTokenMap(ctx, 'registryUrl'),
+    ctx,
     localVariables
   );
   if (registryUrl) {
     registryUrl = registryUrl.replace(regEx(/\\/g), '');
     try {
-      const { host, protocol } = url.parse(registryUrl);
+      const { host, protocol } = URL.parse(registryUrl);
       if (host && protocol) {
         ctx.registryUrls.push({
           registryUrl,
@@ -308,8 +311,8 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
   const groupIdTokens = loadFromTokenMap(ctx, 'groupId');
   const artifactIdTokens = loadFromTokenMap(ctx, 'artifactId');
 
-  const groupId = interpolateString(groupIdTokens, ctx.globalVars);
-  const artifactId = interpolateString(artifactIdTokens, ctx.globalVars);
+  const groupId = interpolateString(groupIdTokens, ctx);
+  const artifactId = interpolateString(artifactIdTokens, ctx);
   if (!groupId || !artifactId) {
     return ctx;
   }
@@ -325,10 +328,7 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
   };
 
   if (ctx.tokenMap.version) {
-    const version = interpolateString(
-      loadFromTokenMap(ctx, 'version'),
-      ctx.globalVars
-    );
+    const version = interpolateString(loadFromTokenMap(ctx, 'version'), ctx);
     if (version) {
       handleLongFormDep(ctx);
     }
@@ -338,10 +338,7 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
 }
 
 export function handleApplyFrom(ctx: Ctx): Ctx {
-  let scriptFile = interpolateString(
-    loadFromTokenMap(ctx, 'scriptFile'),
-    ctx.globalVars
-  );
+  let scriptFile = interpolateString(loadFromTokenMap(ctx, 'scriptFile'), ctx);
   if (!scriptFile) {
     return ctx;
   }
@@ -349,7 +346,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
   if (ctx.tokenMap.parentPath) {
     const parentPath = interpolateString(
       loadFromTokenMap(ctx, 'parentPath'),
-      ctx.globalVars
+      ctx
     );
     if (parentPath && scriptFile) {
       scriptFile = upath.join(parentPath, scriptFile);
@@ -391,7 +388,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
 export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   const pluginName = loadFromTokenMap(ctx, 'pluginName')[0].value;
   const versionTokens = loadFromTokenMap(ctx, 'version');
-  const versionValue = interpolateString(versionTokens, ctx.globalVars);
+  const versionValue = interpolateString(versionTokens, ctx);
   if (!versionValue) {
     return ctx;
   }
@@ -412,9 +409,9 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
 
   if (versionTokens.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
-    const varData = ctx.globalVars[versionTokens[0].value];
+    const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
       dep.groupName = varData.key;
       dep.currentValue = varData.value;

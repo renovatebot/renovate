@@ -16,7 +16,7 @@ describe('modules/datasource/kubernetes-api/index', () => {
         packageName: 'CSIStorageCapacity',
       });
       expect(res).not.toBeNull();
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           { version: 'storage.k8s.io/v1beta1' },
           { version: 'storage.k8s.io/v1' },

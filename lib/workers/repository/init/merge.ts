@@ -17,17 +17,23 @@ import {
 import { logger } from '../../../logger';
 import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
+import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
-import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
+import {
+  getOnboardingConfigFromCache,
+  getOnboardingFileNameFromCache,
+  setOnboardingConfigDetails,
+} from '../onboarding/branch/onboarding-branch-cache';
+import { OnboardingState } from '../onboarding/common';
 import type { RepoFileConfig } from './types';
 
 async function detectConfigFile(): Promise<string | null> {
-  const fileList = await getFileList();
+  const fileList = await scm.getFileList();
   for (const fileName of configFileNames) {
     if (fileName === 'package.json') {
       try {
@@ -74,7 +80,13 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       delete cache.configFileName;
     }
   }
-  configFileName = (await detectConfigFile()) ?? undefined;
+
+  if (OnboardingState.onboardingCacheValid) {
+    configFileName = getOnboardingFileNameFromCache();
+  } else {
+    configFileName = (await detectConfigFile()) ?? undefined;
+  }
+
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
@@ -84,6 +96,16 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   // TODO #7154
   let configFileParsed: any;
   let configFileRaw: string | undefined | null;
+
+  if (OnboardingState.onboardingCacheValid) {
+    const cachedConfig = getOnboardingConfigFromCache();
+    const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
+    if (parsedConfig) {
+      setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
+      return { configFileName, configFileRaw, configFileParsed: parsedConfig };
+    }
+  }
+
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
@@ -171,6 +193,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
+
+  setOnboardingConfigDetails(configFileName, JSON.stringify(configFileParsed));
   return { configFileName, configFileRaw, configFileParsed };
 }
 
@@ -222,7 +246,6 @@ export async function mergeRenovateConfig(
   }
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
-  logger.debug({ config: migratedConfig }, 'migrated config');
   // TODO #7154
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets

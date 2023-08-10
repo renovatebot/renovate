@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import shell from 'shelljs';
 
 /**
  * Update given file with new provided data.
@@ -8,10 +7,10 @@ import shell from 'shelljs';
  */
 export async function updateJsonFile(file, newData) {
   try {
-    shell.echo(`Updating ${file}`);
+    console.log(`Updating ${file}`);
     await fs.writeFile(file, newData);
   } catch (e) {
-    shell.echo(e.toString());
-    shell.exit(1);
+    console.error(e.toString());
+    process.exit(1);
   }
 }

@@ -1,7 +1,7 @@
 import { api as semver } from '.';
 
 describe('modules/versioning/go-mod-directive/index', () => {
-  test.each`
+  it.each`
     version     | range     | expected
     ${'1.16.0'} | ${'1.16'} | ${true}
     ${'1.16.1'} | ${'1.16'} | ${true}
@@ -15,7 +15,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                          | range     | expected
     ${['1.16.0', '1.16.1', '1.17.0']} | ${'1.16'} | ${'1.17.0'}
   `(
@@ -25,7 +25,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | expected
     ${'1'}     | ${false}
     ${'1.2'}   | ${true}
@@ -34,7 +34,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     expect(!!semver.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | expected
     ${'1'}     | ${false}
     ${'1.2'}   | ${false}
@@ -43,7 +43,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     expect(!!semver.isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version     | range     | expected
     ${'1.15.0'} | ${'1.16'} | ${true}
     ${'1.19.0'} | ${'1.16'} | ${false}
@@ -54,7 +54,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                | range     | expected
     ${['1.15.0', '1.16.0', '1.16.1']}       | ${'1.16'} | ${'1.16.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'1.16'} | ${null}
@@ -65,7 +65,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue | rangeStrategy | currentVersion | newVersion  | expected
     ${'1.16'}    | ${'bump'}     | ${'1.16.4'}    | ${'1.17.0'} | ${'1.17'}
     ${'1.16'}    | ${'bump'}     | ${'1.16.4'}    | ${'1.16.4'} | ${'1.16'}
