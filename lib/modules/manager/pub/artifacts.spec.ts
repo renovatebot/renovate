@@ -4,6 +4,7 @@ import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import { range } from '../../../util/range';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
 import * as pub from '.';
@@ -19,7 +20,7 @@ process.env.CONTAINERBASE = 'true';
 const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
-const depNames = Array.from({ length: 3 }, (_, idx) => `depName${idx}`);
+const depNames = [...range(0, 3)].map((i) => `depName${i}`);
 const depNamesWithSpace = depNames.join(' ');
 const depNamesWithFlutter = [...depNames, 'flutter'];
 
