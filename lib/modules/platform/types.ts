@@ -172,10 +172,10 @@ export interface AutodiscoverConfig {
 }
 
 export interface Platform extends IssueCollectorAPI {
-  // findIssue(title: string): Promise<Issue | null>;
-  // getIssueList(): Promise<Issue[]>;
-  // getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  findIssue(title: string): Promise<Issue | null>;
+  getIssueList(): Promise<Issue[]>;
+  getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
+  getVulnerabilityAlerts?(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
     repoName?: string,

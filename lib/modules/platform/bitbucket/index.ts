@@ -47,7 +47,6 @@ import type {
   RepoInfoBody,
 } from './types';
 import * as utils from './utils';
-import { mergeBodyTransformer } from './utils';
 
 export const id = 'bitbucket';
 

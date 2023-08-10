@@ -202,6 +202,7 @@ async function lookupLabelByName(name: string): Promise<number | null> {
 }
 
 const platform: Platform = {
+  id,
   async initPlatform({
     endpoint,
     token,
@@ -373,7 +374,6 @@ const platform: Platform = {
       // Create new status for branch commit
       const branchCommit = git.getBranchCommit(branchName);
       // TODO: check branchCommit
-
       await helper.createCommitStatus(config.repository, branchCommit!, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,

@@ -2,6 +2,12 @@ import type { Pr } from '../types';
 
 export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
 
+export interface MergeRequestBody {
+  close_source_branch?: boolean;
+  message?: string;
+  merge_strategy?: BitbucketMergeStrategy;
+}
+
 export interface Config {
   defaultBranch: string;
   hasBitbucketIssuesEnabled: boolean;
@@ -32,6 +38,8 @@ export interface RepoInfo {
   mergeMethod: string;
   has_issues: boolean;
   uuid: string;
+  is_private: boolean;
+  repositoryUrl: string;
 }
 
 export interface RepoBranchingModel {
@@ -50,6 +58,7 @@ export interface BranchResponse {
 }
 
 export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
+
 export interface BitbucketStatus {
   key: string;
   state: BitbucketBranchState;
@@ -68,14 +77,6 @@ export interface RepoInfoBody {
       href: string;
     };
   };
-}
-
-export interface MergeRequestBody {
-  close_source_branch?: boolean;
-  message?: string;
-  merge_strategy?: BitbucketMergeStrategy;
-  full_name: string;
-  is_private: boolean;
 }
 
 export interface PrResponse {
@@ -102,11 +103,6 @@ export interface PrResponse {
   created_on: string;
 }
 
-export interface BranchResponse {
-  target: {
-    hash: string;
-  };
-}
 export interface Account {
   display_name?: string;
   uuid: string;
