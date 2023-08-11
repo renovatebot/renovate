@@ -1,4 +1,3 @@
-import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
@@ -15,34 +14,50 @@ import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { extractLockFileEntries } from './locked-version';
-import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
+import type {
+  PoetryDependencyRecord,
+  PoetryGroupRecord,
+  PoetrySchema,
+  PoetrySectionSchema,
+} from './schema';
+import { parsePoetry } from './utils';
 
 function extractFromDependenciesSection(
-  parsedFile: PoetryFile,
-  section: keyof Omit<PoetrySection, 'source' | 'group'>,
+  poetryFile: PoetrySchema,
+  section: keyof Omit<PoetrySectionSchema, 'source' | 'group'>,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
   return extractFromSection(
-    parsedFile.tool?.poetry?.[section],
+    poetryFile?.tool?.poetry?.[section],
     section,
     poetryLockfile
   );
 }
 
 function extractFromDependenciesGroupSection(
-  parsedFile: PoetryFile,
-  group: string,
+  groupSections: PoetryGroupRecord | undefined,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
-  return extractFromSection(
-    parsedFile.tool?.poetry?.group[group]?.dependencies,
-    group,
-    poetryLockfile
-  );
+  if (!groupSections) {
+    return [];
+  }
+
+  const deps = [];
+  for (const groupName of Object.keys(groupSections)) {
+    deps.push(
+      ...extractFromSection(
+        groupSections[groupName]?.dependencies,
+        groupName,
+        poetryLockfile
+      )
+    );
+  }
+
+  return deps;
 }
 
 function extractFromSection(
-  sectionContent: Record<string, PoetryDependency | string> | undefined,
+  sectionContent: PoetryDependencyRecord | undefined,
   depType: string,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
@@ -68,35 +83,39 @@ function extractFromSection(
       lockedVersion = poetryLockfile[packageName];
     }
     if (!is.string(currentValue)) {
-      const version = currentValue.version;
-      const path = currentValue.path;
-      const git = currentValue.git;
-      if (version) {
-        currentValue = version;
-        nestedVersion = true;
-        if (!!path || git) {
-          skipReason = path ? 'path-dependency' : 'git-dependency';
-        }
-      } else if (path) {
+      if (is.array(currentValue)) {
         currentValue = '';
-        skipReason = 'path-dependency';
-      } else if (git) {
-        if (currentValue.tag) {
-          currentValue = currentValue.tag;
-          datasource = GithubTagsDatasource.id;
-          const githubPackageName = extractGithubPackageName(git);
-          if (githubPackageName) {
-            packageName = githubPackageName;
+        skipReason = 'multiple-constraint-dep';
+      } else {
+        const version = currentValue.version;
+        const path = currentValue.path;
+        const git = currentValue.git;
+        if (version) {
+          currentValue = version;
+          nestedVersion = true;
+          if (!!path || git) {
+            skipReason = path ? 'path-dependency' : 'git-dependency';
+          }
+        } else if (path) {
+          currentValue = '';
+          skipReason = 'path-dependency';
+        } else if (git) {
+          if (currentValue.tag) {
+            currentValue = currentValue.tag;
+            datasource = GithubTagsDatasource.id;
+            const githubPackageName = extractGithubPackageName(git);
+            if (githubPackageName) {
+              packageName = githubPackageName;
+            } else {
+              skipReason = 'git-dependency';
+            }
           } else {
+            currentValue = '';
             skipReason = 'git-dependency';
           }
         } else {
           currentValue = '';
-          skipReason = 'git-dependency';
         }
-      } else {
-        currentValue = '';
-        skipReason = 'multiple-constraint-dep';
       }
     }
     const dep: PackageDependency = {
@@ -126,8 +145,8 @@ function extractFromSection(
   return deps;
 }
 
-function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
-  const sources = pyprojectfile.tool?.poetry?.source;
+function extractRegistries(poetryFile: PoetrySchema): string[] | undefined {
+  const sources = poetryFile?.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
     return undefined;
@@ -149,14 +168,8 @@ export async function extractPackageFile(
   packageFile: string
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
-  let pyprojectfile: PoetryFile;
-  try {
-    pyprojectfile = parse(content);
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Error parsing pyproject.toml file');
-    return null;
-  }
-  if (!pyprojectfile.tool?.poetry) {
+  const poetryFile = parsePoetry(packageFile, content);
+  if (!poetryFile?.tool?.poetry) {
     logger.debug({ packageFile }, `contains no poetry section`);
     return null;
   }
@@ -170,18 +183,19 @@ export async function extractPackageFile(
 
   const deps = [
     ...extractFromDependenciesSection(
-      pyprojectfile,
+      poetryFile,
       'dependencies',
       lockfileMapping
     ),
     ...extractFromDependenciesSection(
-      pyprojectfile,
+      poetryFile,
       'dev-dependencies',
       lockfileMapping
     ),
-    ...extractFromDependenciesSection(pyprojectfile, 'extras', lockfileMapping),
-    ...Object.keys(pyprojectfile.tool?.poetry?.group ?? []).flatMap((group) =>
-      extractFromDependenciesGroupSection(pyprojectfile, group, lockfileMapping)
+    ...extractFromDependenciesSection(poetryFile, 'extras', lockfileMapping),
+    ...extractFromDependenciesGroupSection(
+      poetryFile?.tool?.poetry?.group,
+      lockfileMapping
     ),
   ];
 
@@ -191,14 +205,14 @@ export async function extractPackageFile(
 
   const extractedConstraints: Record<string, any> = {};
 
-  if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
+  if (is.nonEmptyString(poetryFile?.tool?.poetry?.dependencies?.python)) {
     extractedConstraints.python =
-      pyprojectfile.tool?.poetry?.dependencies?.python;
+      poetryFile?.tool?.poetry?.dependencies?.python;
   }
 
   const res: PackageFileContent = {
     deps,
-    registryUrls: extractRegistries(pyprojectfile),
+    registryUrls: extractRegistries(poetryFile),
     extractedConstraints,
   };
   // Try poetry.lock first

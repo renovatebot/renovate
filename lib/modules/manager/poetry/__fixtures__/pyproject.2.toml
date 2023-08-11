@@ -5,10 +5,11 @@ description = ""
 authors = ["John Doe <john.doe@gmail.com>"]
 
 [tool.poetry.dependencies]
-dep1 = { version =  "*" }
+dep1 = { version = "*" }
 dep2 = { version = "^0.6.0" }
 dep3 = { path = "/some/path/", version = '^0.33.6' }
 dep4 = { path = "/some/path/" }
+dep5 = {}
 
 [tool.poetry.extras]
 extra_dep1 = "^0.8.3"
