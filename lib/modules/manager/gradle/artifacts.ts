@@ -92,10 +92,16 @@ async function getGradleVersion(gradlewFile: string): Promise<string | null> {
 async function buildUpdateVerificationMetadataCmd(
   verificationMetadataFile: string | undefined,
   baseCmd: string
-): Promise<string | undefined> {
-  if (verificationMetadataFile) {
-    const hashTypes: string[] = [];
-    const verificationMetadata = await readLocalFile(verificationMetadataFile);
+): Promise<string | null> {
+  if (!verificationMetadataFile) {
+    return null;
+  }
+  const hashTypes: string[] = [];
+  const verificationMetadata = await readLocalFile(verificationMetadataFile);
+  if (
+    verificationMetadata?.includes('<verify-metadata>true</verify-metadata>')
+  ) {
+    logger.debug('Dependency verification enabled - generating checksums');
     for (const hashType of ['sha256', 'sha512']) {
       if (verificationMetadata?.includes(`<${hashType}`)) {
         hashTypes.push(hashType);
@@ -104,17 +110,25 @@ async function buildUpdateVerificationMetadataCmd(
     if (!hashTypes.length) {
       hashTypes.push('sha256');
     }
-    if (
-      verificationMetadata?.includes(
-        '<verify-signatures>true</verify-signatures>'
-      )
-    ) {
-      hashTypes.push('pgp');
-    }
-    return `${baseCmd} --write-verification-metadata ${hashTypes.join(
-      ','
-    )} help`;
   }
+  if (
+    verificationMetadata?.includes(
+      '<verify-signatures>true</verify-signatures>'
+    )
+  ) {
+    logger.debug(
+      'Dependency signature verification enabled - generating PGP signatures'
+    );
+    // signature verification requires at least one checksum type as fallback.
+    if (!hashTypes.length) {
+      hashTypes.push('sha256');
+    }
+    hashTypes.push('pgp');
+  }
+  if (!hashTypes.length) {
+    return null;
+  }
+  return `${baseCmd} --write-verification-metadata ${hashTypes.join(',')} help`;
 }
 
 export async function updateArtifacts({
@@ -178,29 +192,33 @@ export async function updateArtifacts({
       ],
     };
 
-    const subprojects = await getSubProjectList(baseCmd, execOptions);
-    let lockfileCmd = `${baseCmd} ${subprojects
-      .map((project) => `${project}:dependencies`)
-      .map(quote)
-      .join(' ')}`;
+    const cmds = [];
+    let lockfileCmd = '';
+    if (lockFiles.length) {
+      const subprojects = await getSubProjectList(baseCmd, execOptions);
+      lockfileCmd = `${baseCmd} ${subprojects
+        .map((project) => `${project}:dependencies`)
+        .map(quote)
+        .join(' ')}`;
 
-    if (
-      config.isLockFileMaintenance === true ||
-      !updatedDeps.length ||
-      isGcvPropsFile(packageFileName)
-    ) {
-      lockfileCmd += ' --write-locks';
-    } else if (lockFiles.length) {
-      const updatedDepNames = updatedDeps
-        .map(({ depName, packageName }) => packageName ?? depName)
-        .filter(is.nonEmptyStringAndNotWhitespace);
+      if (
+        config.isLockFileMaintenance === true ||
+        !updatedDeps.length ||
+        isGcvPropsFile(packageFileName)
+      ) {
+        lockfileCmd += ' --write-locks';
+      } else {
+        const updatedDepNames = updatedDeps
+          .map(({ depName, packageName }) => packageName ?? depName)
+          .filter(is.nonEmptyStringAndNotWhitespace);
 
-      lockfileCmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
+        lockfileCmd += ` --update-locks ${updatedDepNames
+          .map(quote)
+          .join(',')}`;
+      }
+      cmds.push(lockfileCmd);
     }
 
-    await writeLocalFile(packageFileName, newPackageFileContent);
-
-    const cmds = [lockfileCmd];
     const updateVerificationMetadataCmd =
       await buildUpdateVerificationMetadataCmd(
         verificationMetadataFile,
@@ -209,6 +227,13 @@ export async function updateArtifacts({
     if (updateVerificationMetadataCmd) {
       cmds.push(updateVerificationMetadataCmd);
     }
+
+    if (!cmds.length) {
+      logger.debug('No lockfile update necessary');
+      return null;
+    }
+
+    await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(cmds, { ...execOptions, ignoreStdout: true });
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);

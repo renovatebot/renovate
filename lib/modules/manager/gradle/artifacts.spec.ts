@@ -87,7 +87,8 @@ describe('modules/manager/gradle/artifacts', () => {
         content =
           'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.2-bin.zip';
       } else if (fileName === 'gradle/verification-metadata.xml') {
-        content = '<sha256 value="hash" origin="test data"/>';
+        content =
+          '<verify-metadata>true</verify-metadata><sha256 value="hash" origin="test data"/>';
       }
 
       return Promise.resolve(content);
@@ -577,24 +578,12 @@ describe('modules/manager/gradle/artifacts', () => {
         file: {
           type: 'addition',
           path: 'gradle/verification-metadata.xml',
-          contents: '<sha256 value="hash" origin="test data"/>',
+          contents:
+            '<verify-metadata>true</verify-metadata><sha256 value="hash" origin="test data"/>',
         },
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q :dependencies',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          stdio: ['pipe', 'ignore', 'pipe'],
-        },
-      },
       {
         cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
         options: {
@@ -646,7 +635,8 @@ describe('modules/manager/gradle/artifacts', () => {
         file: {
           type: 'addition',
           path: 'gradle/verification-metadata.xml',
-          contents: '<sha256 value="hash" origin="test data"/>',
+          contents:
+            '<verify-metadata>true</verify-metadata><sha256 value="hash" origin="test data"/>',
         },
       },
     ]);
@@ -690,7 +680,8 @@ describe('modules/manager/gradle/artifacts', () => {
     fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
       let content = '';
       if (fileName === 'gradle/verification-metadata.xml') {
-        content = '<sha1 value="hash" origin="test data"/>';
+        content =
+          '<verify-metadata>true</verify-metadata><sha1 value="hash" origin="test data"/>';
       }
       return Promise.resolve(content);
     });
@@ -706,19 +697,6 @@ describe('modules/manager/gradle/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q :dependencies',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          stdio: ['pipe', 'ignore', 'pipe'],
-        },
-      },
       {
         cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
         options: {
@@ -762,25 +740,47 @@ describe('modules/manager/gradle/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q :dependencies',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          stdio: ['pipe', 'ignore', 'pipe'],
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q --write-verification-metadata pgp help',
+        cmd: './gradlew --console=plain -q --write-verification-metadata sha256,pgp help',
         options: {
           cwd: '/tmp/github/some/repo',
           stdio: ['pipe', 'ignore', 'pipe'],
         },
       },
     ]);
+  });
+
+  it('does not exec any commands when verification metadata exists, but neither checksum nor signature verification is enabled', async () => {
+    const execSnapshots = mockExecAll();
+    scm.getFileList.mockResolvedValue([
+      'gradlew',
+      'build.gradle',
+      'gradle/wrapper/gradle-wrapper.properties',
+      'gradle/verification-metadata.xml',
+    ]);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+      })
+    );
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+      let content = '';
+      if (fileName === 'gradle/verification-metadata.xml') {
+        content =
+          '<verify-metadata>false</verify-metadata><verify-signatures>false</verify-signatures>';
+      }
+      return Promise.resolve(content);
+    });
+
+    await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        { depName: 'org.junit.jupiter:junit-jupiter-api' },
+        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(execSnapshots).toMatchObject([]);
   });
 });
