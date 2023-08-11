@@ -69,6 +69,10 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     } else {
       // istanbul ignore next: we can ignore this
       logger.debug('No config file found on disk - skipping');
+      if(config.onboarding && config.requireConfig === "required"){
+        logger.fatal('No Config File Found ');
+        process.exit(1);
+      }
     }
   }
 
