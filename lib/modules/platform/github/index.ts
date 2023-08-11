@@ -38,6 +38,7 @@ import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
+import { isGithubFineGrainedPersonalAccessToken } from '../../manager/composer/utils';
 import type {
   AggregatedVulnerabilities,
   AutodiscoverConfig,
@@ -144,6 +145,21 @@ export async function initPlatform({
   }
 
   await detectGhe(token);
+  /**
+   * GHE requires version >=3.10 to support fine-grained access tokens
+   * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
+   */
+  if (isGithubFineGrainedPersonalAccessToken(token) && platformConfig.isGhe) {
+    if (!platformConfig.gheVersion) {
+      throw new Error(
+        'Init: Fine-grained Personal Access Tokens are not supported by unknown GitHub Enterprise Server API version and cannot be used with Renovate.'
+      );
+    } else if (semver.lt(platformConfig.gheVersion, '3.10.0')) {
+      throw new Error(
+        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version<3.10 and cannot be used with Renovate.'
+      );
+    }
+  }
 
   let renovateUsername: string;
   if (username) {

@@ -54,6 +54,15 @@ exports[`modules/platform/github/index initPlatform() should support default end
 }
 `;
 
+exports[`modules/platform/github/index initPlatform() should support fine-grained token with GHE >=3.10 1`] = `
+{
+  "endpoint": "https://ghe.renovatebot.com/",
+  "gitAuthor": "undefined <user@domain.com>",
+  "renovateUsername": "renovate-bot",
+  "token": "github_pat_XXXXXX",
+}
+`;
+
 exports[`modules/platform/github/index initPlatform() should support gitAuthor and username 1`] = `
 {
   "endpoint": "https://api.github.com/",

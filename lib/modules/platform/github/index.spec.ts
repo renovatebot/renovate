@@ -57,6 +57,50 @@ describe('modules/platform/github/index', () => {
       );
     });
 
+    it('should throw if using fine-grained token with GHE <3.10 ', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.9.0' });
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'github_pat_XXXXXX',
+        })
+      ).rejects.toThrow(
+        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version<3.10 and cannot be used with Renovate.'
+      );
+    });
+
+    it('should throw if using fine-grained token with GHE unknown version ', async () => {
+      httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'github_pat_XXXXXX',
+        })
+      ).rejects.toThrow(
+        'Init: Fine-grained Personal Access Tokens are not supported by unknown GitHub Enterprise Server API version and cannot be used with Renovate.'
+      );
+    });
+
+    it('should support fine-grained token with GHE >=3.10', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, [{ email: 'user@domain.com' }]);
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'github_pat_XXXXXX',
+        })
+      ).toMatchSnapshot();
+    });
+
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(github.initPlatform({ token: '123test' })).rejects.toThrow();
