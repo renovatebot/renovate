@@ -274,7 +274,7 @@
     "@types/common-tags": "1.8.1",
     "@types/conventional-commits-detector": "1.0.0",
     "@types/diff": "5.0.3",
-    "@types/eslint": "8.44.1",
+    "@types/eslint": "8.44.2",
     "@types/fs-extra": "11.0.1",
     "@types/git-url-parse": "9.0.1",
     "@types/github-url-from-git": "1.5.1",
