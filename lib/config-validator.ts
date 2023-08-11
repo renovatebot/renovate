@@ -58,6 +58,17 @@ type PackageJson = {
   'renovate-config'?: Record<string, RenovateConfig>;
 };
 
+let isFoundConfigFile = false;
+async function validateAndSetFlag(
+  file: string,
+  config: RenovateConfig,
+  strict: boolean,
+  isPreset = false
+): Promise<void> {
+  isFoundConfigFile = true;
+  await validate(file, config, strict, isPreset);
+}
+
 (async () => {
   const strictArgIndex = process.argv.indexOf('--strict');
   const strict = strictArgIndex >= 0;
@@ -75,7 +86,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict);
+          await validateAndSetFlag(file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -96,7 +107,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict);
+          await validateAndSetFlag(file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -112,12 +123,16 @@ type PackageJson = {
       ) as PackageJson;
       if (pkgJson.renovate) {
         logger.info(`Validating package.json > renovate`);
-        await validate('package.json > renovate', pkgJson.renovate, strict);
+        await validateAndSetFlag(
+          'package.json > renovate',
+          pkgJson.renovate,
+          strict
+        );
       }
       if (pkgJson['renovate-config']) {
         logger.info(`Validating package.json > renovate-config`);
         for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
-          await validate(
+          await validateAndSetFlag(
             'package.json > renovate-config',
             presetConfig,
             strict,
@@ -134,7 +149,7 @@ type PackageJson = {
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validate(file, fileConfig, strict);
+          await validateAndSetFlag(file, fileConfig, strict);
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -144,6 +159,12 @@ type PackageJson = {
       // ignore
     }
   }
+
+  if (!isFoundConfigFile) {
+    logger.error('No configuration files found.');
+    process.exit(1);
+  }
+
   if (returnVal !== 0) {
     process.exit(returnVal);
   }
