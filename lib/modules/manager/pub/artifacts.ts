@@ -12,6 +12,8 @@ import {
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { parsePubspecLock } from './utils';
 
+const SDK_NAMES = ['dart', 'flutter'];
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -23,9 +25,6 @@ export async function updateArtifacts({
 
   if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated pub deps - returning null');
-    return null;
-  } else if (updatedDeps.length === 1 && updatedDeps[0].depName === 'flutter') {
-    logger.debug('Only updated flutter sdk - returning null');
     return null;
   }
 
@@ -49,10 +48,21 @@ export async function updateArtifacts({
       const depNames = updatedDeps
         .map((dep) => dep.depName)
         .filter(is.string)
-        .filter((depName) => depName !== 'flutter')
-        .map(quote)
-        .join(' ');
-      cmd.push(`${toolName} pub upgrade ${depNames}`);
+        .map(quote);
+
+      if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
+        cmd.push(`${toolName} pub get`);
+      }
+      // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
+      // we use Flutter over Dart to run `pub get` as it is a Flutter project.
+      else if (
+        depNames.length === 2 &&
+        depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
+      ) {
+        cmd.push(`flutter pub get`);
+      } else {
+        cmd.push(`${toolName} pub upgrade ${depNames.join(' ')}`);
+      }
     }
 
     let constraint = config.constraints?.[toolName];
