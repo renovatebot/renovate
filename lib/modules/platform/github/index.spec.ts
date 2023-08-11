@@ -68,7 +68,7 @@ describe('modules/platform/github/index', () => {
           token: 'github_pat_XXXXXX',
         })
       ).rejects.toThrow(
-        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version<3.10 and cannot be used with Renovate.'
+        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.'
       );
     });
 
@@ -80,7 +80,7 @@ describe('modules/platform/github/index', () => {
           token: 'github_pat_XXXXXX',
         })
       ).rejects.toThrow(
-        'Init: Fine-grained Personal Access Tokens are not supported by unknown GitHub Enterprise Server API version and cannot be used with Renovate.'
+        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.'
       );
     });
 
@@ -98,7 +98,12 @@ describe('modules/platform/github/index', () => {
           endpoint: 'https://ghe.renovatebot.com',
           token: 'github_pat_XXXXXX',
         })
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: 'github_pat_XXXXXX',
+      });
     });
 
     it('should throw if user failure', async () => {

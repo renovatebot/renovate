@@ -150,13 +150,12 @@ export async function initPlatform({
    * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
    */
   if (isGithubFineGrainedPersonalAccessToken(token) && platformConfig.isGhe) {
-    if (!platformConfig.gheVersion) {
+    if (
+      !platformConfig.gheVersion ||
+      semver.lt(platformConfig.gheVersion, '3.10.0')
+    ) {
       throw new Error(
-        'Init: Fine-grained Personal Access Tokens are not supported by unknown GitHub Enterprise Server API version and cannot be used with Renovate.'
-      );
-    } else if (semver.lt(platformConfig.gheVersion, '3.10.0')) {
-      throw new Error(
-        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version<3.10 and cannot be used with Renovate.'
+        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.'
       );
     }
   }

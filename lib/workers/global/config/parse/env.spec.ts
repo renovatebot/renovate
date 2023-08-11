@@ -166,7 +166,7 @@ describe('workers/global/config/parse/env', () => {
         GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
         RENOVATE_TOKEN: 'a github.com token',
       };
-      expect(env.getConfig(envParam)).toMatchObject({
+      expect(env.getConfig(envParam)).toEqual({
         token: 'a github.com token',
         hostRules: [
           {
