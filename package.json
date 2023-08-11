@@ -169,7 +169,7 @@
     "@types/tmp": "0.2.3",
     "@yarnpkg/core": "3.5.2",
     "@yarnpkg/parsers": "2.5.1",
-    "agentkeepalive": "4.3.0",
+    "agentkeepalive": "4.4.0",
     "aggregate-error": "3.1.0",
     "auth-header": "1.0.0",
     "aws4": "1.12.0",

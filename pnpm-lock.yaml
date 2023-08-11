@@ -90,8 +90,8 @@ importers:
         specifier: 2.5.1
         version: 2.5.1
       agentkeepalive:
-        specifier: 4.3.0
-        version: 4.3.0
+        specifier: 4.4.0
+        version: 4.4.0
       aggregate-error:
         specifier: 3.1.0
         version: 3.1.0
@@ -4358,8 +4358,8 @@ packages:
       - supports-color
     dev: true
 
-  /agentkeepalive@4.3.0:
-    resolution: {integrity: sha512-7Epl1Blf4Sy37j4v9f9FjICCh4+KAQOyXgHEwlyBiAQLbhKdq/i2QQU3amQalS/wPhdPzDXPL5DMR5bkn+YeWg==}
+  /agentkeepalive@4.4.0:
+    resolution: {integrity: sha512-MysLRwkhsJTZKs+fsZIsTgBlr3IjQroonVJWMSqC9k3LS6f6ZifePl9fCqOtvc8p0CeYDSZVFvytdkwhOGaSZA==}
     engines: {node: '>= 8.0.0'}
     dependencies:
       debug: 4.3.4
@@ -7970,7 +7970,7 @@ packages:
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     requiresBuild: true
     dependencies:
-      agentkeepalive: 4.3.0
+      agentkeepalive: 4.4.0
       cacache: 17.1.3
       http-cache-semantics: 4.1.1
       http-proxy-agent: 5.0.0
