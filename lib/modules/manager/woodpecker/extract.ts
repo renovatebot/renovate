@@ -5,6 +5,18 @@ import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import type { WoodpeckerConfig } from './types';
 
+function woodpeckerVersionDecider(
+  woodpeckerConfig: WoodpeckerConfig
+): keyof WoodpeckerConfig {
+  if ('steps' in woodpeckerConfig) {
+    return 'steps';
+  } else if ('pipeline' in woodpeckerConfig) {
+    return 'pipeline';
+  }
+
+  throw new Error('No matching pipeline');
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -36,13 +48,20 @@ export function extractPackageFile(
     );
     return null;
   }
+  try {
+    const version = woodpeckerVersionDecider(config);
 
-  // Image name/tags for services are only eligible for update if they don't
-  // use variables and if the image is not built locally
-  const deps = Object.values(config.pipeline ?? {})
-    .filter((step) => is.string(step?.image))
-    .map((step) => getDep(step.image, true, extractConfig.registryAliases));
+    // Image name/tags for services are only eligible for update if they don't
+    // use variables and if the image is not built locally
+    const deps = Object.values(config[version] ?? {})
+      .filter((step) => is.string(step?.image))
+      .map((step) => getDep(step.image, true, extractConfig.registryAliases));
 
-  logger.trace({ deps }, 'Woodpecker Configuration image');
-  return deps.length ? { deps } : null;
+    logger.trace({ deps }, 'Woodpecker Configuration image');
+    return deps.length ? { deps } : null;
+  } catch (err) {
+    logger.debug({ packageFile, err }, 'Error identifying pipeline');
+
+    return null;
+  }
 }
