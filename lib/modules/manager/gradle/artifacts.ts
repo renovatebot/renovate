@@ -193,10 +193,9 @@ export async function updateArtifacts({
     };
 
     const cmds = [];
-    let lockfileCmd = '';
     if (lockFiles.length) {
       const subprojects = await getSubProjectList(baseCmd, execOptions);
-      lockfileCmd = `${baseCmd} ${subprojects
+      let lockfileCmd = `${baseCmd} ${subprojects
         .map((project) => `${project}:dependencies`)
         .map(quote)
         .join(' ')}`;
@@ -229,7 +228,7 @@ export async function updateArtifacts({
     }
 
     if (!cmds.length) {
-      logger.debug('No lockfile update necessary');
+      logger.debug('No lockfile or verification metadata update necessary');
       return null;
     }
 
