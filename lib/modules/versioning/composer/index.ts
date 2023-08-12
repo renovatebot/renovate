@@ -67,6 +67,17 @@ function normalizeVersion(input: string): string {
   return convertStabilityModifier(output);
 }
 
+/**
+ * @param intput Version in any format, it recognizes the specific patch format x.x.x-pXX
+ * @returns If input contains the specific patch, it returns the input with removed the patch and true, otherwise it retunrs the same string and false.
+ */
+function removeComposerSpecificPatchPart(input: string): [string, boolean] {
+  const pattern = regEx(/\-p[1-9][0-9]*$/ig);
+  const match = input.match(pattern);
+  
+  return match ? [input.replace(pattern, ''), true] : [input, false];
+}
+
 function composer2npm(input: string): string {
   return input
     .split(regEx(/\s*\|\|?\s*/g))
@@ -119,11 +130,26 @@ function getMinor(version: string): number | null {
 
 function getPatch(version: string): number | null {
   const semverVersion = semver.coerce(composer2npm(version));
+
+  // This returns only the numbers without the optional `-pXX` patch version supported by composer. Fixing that would require a bigger 
+  // refactoring, because the API supports only numbers.
   return semverVersion ? npm.getPatch(semverVersion) : null;
 }
 
 function isGreaterThan(a: string, b: string): boolean {
-  return npm.isGreaterThan(composer2npm(a), composer2npm(b));
+  const [aWithoutPatch, aContainsPatch] = removeComposerSpecificPatchPart(a);
+  const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);   
+
+  if (aContainsPatch == bContainsPatch) {
+    // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
+    return npm.isGreaterThan(composer2npm(a), composer2npm(b));
+  } else if (npm.equals(aWithoutPatch, bWithoutPatch)) {
+    // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
+    return aContainsPatch;
+  } else {
+    // All other cases can be compared correctly by npm
+    return npm.isGreaterThan(composer2npm(a), composer2npm(b));
+  }
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -134,10 +160,15 @@ function isSingleVersion(input: string): boolean {
   return !!input && npm.isSingleVersion(composer2npm(input));
 }
 
-function isStable(version: string): boolean {
-  // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568
-  // other cases can be considered as npm versioning
-  return !!(version && npm.isStable(composer2npm(version.replace(/\-p[1-9][0-9]*/, ''))));
+function isStable(version: string): boolean { 
+  if (!!version) {
+    // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568 but npm not. 
+    // In order to be able to use the standard npm.isStable function, we remove the potential patch version for the check.
+    const [withoutPatch, _] = removeComposerSpecificPatchPart(version);
+    return !!(version && npm.isStable(composer2npm(withoutPatch)));
+  }
+
+  return false;
 }
 
 export function isValid(input: string): boolean {
