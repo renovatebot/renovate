@@ -135,7 +135,9 @@ function isSingleVersion(input: string): boolean {
 }
 
 function isStable(version: string): boolean {
-  return !!(version && npm.isStable(composer2npm(version)));
+  // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568
+  // other cases can be considered as npm versioning
+  return !!(version && npm.isStable(composer2npm(version.replace(/\-p[1-9][0-9]*/, ''))));
 }
 
 export function isValid(input: string): boolean {

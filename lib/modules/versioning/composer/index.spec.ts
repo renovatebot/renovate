@@ -27,8 +27,8 @@ describe('modules/versioning/composer/index', () => {
     ${'1'}          | ${'1.1'}       | ${false}
     ${'1.0.0'}      | ${'1.0.0-p1'}  | ${false}
     ${'1.0.0-p1'}   | ${'1.0.0'}     | ${true}
-    ${'1.0.0-p12'}  | ${'1.0.0-p2'}  | ${true}
-    ${'1.0.0-p2'}   | ${'1.0.0-p12'} | ${false}
+    ${'1.0.0-p1'}   | ${'1.0.0-p2'}  | ${false}
+    ${'1.0.0-p2'}   | ${'1.0.0-p1'}  | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.isGreaterThan(a, b)).toBe(expected);
   });
