@@ -15,15 +15,20 @@ describe('modules/versioning/composer/index', () => {
     ${'1.0@alpha3'} | ${'1.0.0-alpha.3'} | ${true}
     ${'1.0@beta'}   | ${'1.0.0-beta'}    | ${true}
     ${'1.0@rc2'}    | ${'1.0.0-rc.2'}    | ${true}
+    ${'1.0.0'}      | ${'1.0.0-p1'}      | ${false}
   `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.equals(a, b)).toBe(expected);
   });
 
   it.each`
-    a           | b         | expected
-    ${'1.2.0'}  | ${'v1.2'} | ${false}
-    ${'v1.0.1'} | ${'1'}    | ${true}
-    ${'1'}      | ${'1.1'}  | ${false}
+    a               | b              | expected
+    ${'1.2.0'}      | ${'v1.2'}      | ${false}
+    ${'v1.0.1'}     | ${'1'}         | ${true}
+    ${'1'}          | ${'1.1'}       | ${false}
+    ${'1.0.0'}      | ${'1.0.0-p1'}  | ${false}
+    ${'1.0.0-p1'}   | ${'1.0.0'}     | ${true}
+    ${'1.0.0-p12'}  | ${'1.0.0-p2'}  | ${true}
+    ${'1.0.0-p2'}   | ${'1.0.0-p12'} | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.isGreaterThan(a, b)).toBe(expected);
   });
@@ -37,8 +42,11 @@ describe('modules/versioning/composer/index', () => {
   });
 
   it.each`
-    version   | expected
-    ${'v1.2'} | ${true}
+    version           | expected
+    ${'v1.2'}         | ${true}
+    ${'v1.2.4-p2'}    | ${true}
+    ${'v1.2.4-p12'}   | ${true}
+    ${'v1.2.4-beta5'} | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
     const res = !!semver.isStable(version);
     expect(res).toBe(expected);
@@ -71,6 +79,7 @@ describe('modules/versioning/composer/index', () => {
     ${'~1.0 || ~2.0'} | ${true}
     ${'<8.0-DEV'}     | ${true}
     ${'<8-DEV'}       | ${true}
+    ${'1.2.3-p1'}     | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     const res = !!semver.isValid(version);
     expect(res).toBe(expected);
@@ -91,6 +100,7 @@ describe('modules/versioning/composer/index', () => {
     ${['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0']}                                      | ${'~4'}      | ${'v4.2.0'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']}                                           | ${'~0.4'}    | ${'0.5.0'}
     ${['0.4.0', '0.5.0', '4.0.0-beta1', '4.0.0-beta2', '4.2.0-beta1', '4.2.0-beta2', '5.0.0']} | ${'~4@beta'} | ${'4.0.0-beta2'}
+    ${['0.4.0', '0.5.0', '4.0.0-p1', '4.0.0-p2', '4.2.0-p1', '4.2.0-p2', '5.0.0']}             | ${'~4@p'}    | ${'4.0.0-p2'}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -105,6 +115,7 @@ describe('modules/versioning/composer/index', () => {
     ${['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0']}                                | ${'~4'}      | ${'v4.0.0'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']}                                     | ${'~0.4'}    | ${'0.4.0'}
     ${['0.4.0', '0.5.0', '4.0.0-beta1', '4.0.0', '4.2.0-beta1', '4.2.0-beta2', '5.0.0']} | ${'~4@beta'} | ${'4.0.0-beta1'}
+    ${['0.4.0', '0.5.0', '4.0.0-p1', '4.0.0', '4.2.0-p1', '4.2.0-p2', '5.0.0']}          | ${'~4@p'}    | ${'4.0.0-p1'}
   `(
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -208,8 +219,9 @@ describe('modules/versioning/composer/index', () => {
   });
 
   it.each`
-    version    | expected
-    ${'1.2.0'} | ${true}
+    version       | expected
+    ${'1.2.0'}    | ${true}
+    ${'1.2.0-p1'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {
     expect(semver.isCompatible(version)).toBe(expected);
   });
