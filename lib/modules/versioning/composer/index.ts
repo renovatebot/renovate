@@ -72,7 +72,7 @@ function normalizeVersion(input: string): string {
  * @returns If input contains the specific patch, it returns the input with removed the patch and true, otherwise it retunrs the same string and false.
  */
 function removeComposerSpecificPatchPart(input: string): [string, boolean] {
-  const pattern = regEx(/\-p[1-9][0-9]*$/ig);
+  const pattern = regEx(/-p[1-9][0-9]*$/ig);
   const match = input.match(pattern);
   
   return match ? [input.replace(pattern, ''), true] : [input, false];
@@ -137,7 +137,7 @@ function getPatch(version: string): number | null {
 }
 
 function isGreaterThan(a: string, b: string): boolean {
-  return sortVersions(a, b) == 1;
+  return sortVersions(a, b) === 1;
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -149,10 +149,10 @@ function isSingleVersion(input: string): boolean {
 }
 
 function isStable(version: string): boolean { 
-  if (!!version) {
+  if (version) {
     // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568 but npm not. 
     // In order to be able to use the standard npm.isStable function, we remove the potential patch version for the check.
-    const [withoutPatch, _] = removeComposerSpecificPatchPart(version);
+    const [withoutPatch] = removeComposerSpecificPatchPart(version);
     return npm.isStable(composer2npm(withoutPatch));
   }
 
@@ -329,7 +329,7 @@ function sortVersions(a: string, b: string): number {
   const [aWithoutPatch, aContainsPatch] = removeComposerSpecificPatchPart(a);
   const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);   
 
-  if (aContainsPatch == bContainsPatch) {
+  if (aContainsPatch === bContainsPatch) {
     // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
     return npm.sortVersions(composer2npm(a), composer2npm(b));
   } else if (npm.equals(aWithoutPatch, bWithoutPatch)) {
