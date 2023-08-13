@@ -137,19 +137,7 @@ function getPatch(version: string): number | null {
 }
 
 function isGreaterThan(a: string, b: string): boolean {
-  const [aWithoutPatch, aContainsPatch] = removeComposerSpecificPatchPart(a);
-  const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);   
-
-  if (aContainsPatch == bContainsPatch) {
-    // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
-    return npm.isGreaterThan(composer2npm(a), composer2npm(b));
-  } else if (npm.equals(aWithoutPatch, bWithoutPatch)) {
-    // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
-    return aContainsPatch;
-  } else {
-    // All other cases can be compared correctly by npm
-    return npm.isGreaterThan(composer2npm(a), composer2npm(b));
-  }
+  return sortVersions(a, b) == 1;
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -165,7 +153,7 @@ function isStable(version: string): boolean {
     // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568 but npm not. 
     // In order to be able to use the standard npm.isStable function, we remove the potential patch version for the check.
     const [withoutPatch, _] = removeComposerSpecificPatchPart(version);
-    return !!(version && npm.isStable(composer2npm(withoutPatch)));
+    return npm.isStable(composer2npm(withoutPatch));
   }
 
   return false;
@@ -338,7 +326,19 @@ function getNewValue({
 }
 
 function sortVersions(a: string, b: string): number {
-  return npm.sortVersions(composer2npm(a), composer2npm(b));
+  const [aWithoutPatch, aContainsPatch] = removeComposerSpecificPatchPart(a);
+  const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);   
+
+  if (aContainsPatch == bContainsPatch) {
+    // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
+    return npm.sortVersions(composer2npm(a), composer2npm(b));
+  } else if (npm.equals(aWithoutPatch, bWithoutPatch)) {
+    // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
+    return aContainsPatch ? 1 : -1;
+  } else {
+    // All other cases can be compared correctly by npm
+    return npm.sortVersions(composer2npm(a), composer2npm(b));
+  }
 }
 
 function isCompatible(version: string): boolean {

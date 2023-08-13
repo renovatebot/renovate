@@ -214,6 +214,7 @@ describe('modules/versioning/composer/index', () => {
   it.each`
     versions                                                                      | expected
     ${['1.2.3-beta', '1.0.0-alpha24', '2.0.1', '1.3.4', '1.0.0-alpha9', '1.2.3']} | ${['1.0.0-alpha9', '1.0.0-alpha24', '1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']}
+    ${['1.2.3-p1', '1.2.3-p2', '1.2.3']}$                                         | ${['1.2.3', '1.2.3-p1', '1.2.3-p2']}$
   `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
     expect(versions.sort(semver.sortVersions)).toEqual(expected);
   });
