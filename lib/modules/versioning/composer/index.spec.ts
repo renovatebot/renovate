@@ -21,14 +21,14 @@ describe('modules/versioning/composer/index', () => {
   });
 
   it.each`
-    a               | b              | expected
-    ${'1.2.0'}      | ${'v1.2'}      | ${false}
-    ${'v1.0.1'}     | ${'1'}         | ${true}
-    ${'1'}          | ${'1.1'}       | ${false}
-    ${'1.0.0'}      | ${'1.0.0-p1'}  | ${false}
-    ${'1.0.0-p1'}   | ${'1.0.0'}     | ${true}
-    ${'1.0.0-p1'}   | ${'1.0.0-p2'}  | ${false}
-    ${'1.0.0-p2'}   | ${'1.0.0-p1'}  | ${true}
+    a             | b             | expected
+    ${'1.2.0'}    | ${'v1.2'}     | ${false}
+    ${'v1.0.1'}   | ${'1'}        | ${true}
+    ${'1'}        | ${'1.1'}      | ${false}
+    ${'1.0.0'}    | ${'1.0.0-p1'} | ${false}
+    ${'1.0.0-p1'} | ${'1.0.0'}    | ${true}
+    ${'1.0.0-p1'} | ${'1.0.0-p2'} | ${false}
+    ${'1.0.0-p2'} | ${'1.0.0-p1'} | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.isGreaterThan(a, b)).toBe(expected);
   });
@@ -214,7 +214,7 @@ describe('modules/versioning/composer/index', () => {
   it.each`
     versions                                                                      | expected
     ${['1.2.3-beta', '1.0.0-alpha24', '2.0.1', '1.3.4', '1.0.0-alpha9', '1.2.3']} | ${['1.0.0-alpha9', '1.0.0-alpha24', '1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']}
-    ${['1.2.3-p1', '1.2.3-p2', '1.2.3']}$                                         | ${['1.2.3', '1.2.3-p1', '1.2.3-p2']}$
+    ${['1.2.3-p1', '1.2.3-p2', '1.2.3']}                                          | ${['1.2.3', '1.2.3-p1', '1.2.3-p2']}
   `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
     expect(versions.sort(semver.sortVersions)).toEqual(expected);
   });

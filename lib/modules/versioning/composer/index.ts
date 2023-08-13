@@ -72,9 +72,9 @@ function normalizeVersion(input: string): string {
  * @returns If input contains the specific patch, it returns the input with removed the patch and true, otherwise it retunrs the same string and false.
  */
 function removeComposerSpecificPatchPart(input: string): [string, boolean] {
-  const pattern = regEx(/-p[1-9][0-9]*$/ig);
+  const pattern = regEx(/-p[1-9][0-9]*$/gi);
   const match = input.match(pattern);
-  
+
   return match ? [input.replace(pattern, ''), true] : [input, false];
 }
 
@@ -131,7 +131,7 @@ function getMinor(version: string): number | null {
 function getPatch(version: string): number | null {
   const semverVersion = semver.coerce(composer2npm(version));
 
-  // This returns only the numbers without the optional `-pXX` patch version supported by composer. Fixing that would require a bigger 
+  // This returns only the numbers without the optional `-pXX` patch version supported by composer. Fixing that would require a bigger
   // refactoring, because the API supports only numbers.
   return semverVersion ? npm.getPatch(semverVersion) : null;
 }
@@ -148,9 +148,9 @@ function isSingleVersion(input: string): boolean {
   return !!input && npm.isSingleVersion(composer2npm(input));
 }
 
-function isStable(version: string): boolean { 
+function isStable(version: string): boolean {
   if (version) {
-    // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568 but npm not. 
+    // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568 but npm not.
     // In order to be able to use the standard npm.isStable function, we remove the potential patch version for the check.
     const [withoutPatch] = removeComposerSpecificPatchPart(version);
     return npm.isStable(composer2npm(withoutPatch));
@@ -327,7 +327,7 @@ function getNewValue({
 
 function sortVersions(a: string, b: string): number {
   const [aWithoutPatch, aContainsPatch] = removeComposerSpecificPatchPart(a);
-  const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);   
+  const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);
 
   if (aContainsPatch === bContainsPatch) {
     // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
