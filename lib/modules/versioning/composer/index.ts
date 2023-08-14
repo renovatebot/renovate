@@ -75,7 +75,7 @@ function removeComposerSpecificPatchPart(input: string): [string, boolean] {
   const pattern = regEx(/-p[1-9][0-9]*$/gi);
   const match = input.match(pattern);
 
-  return match ? [input.replace(pattern, ''), true] : [input, false];
+  return match ? [input.replace(match[0], ''), true] : [input, false];
 }
 
 function composer2npm(input: string): string {
