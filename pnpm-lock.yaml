@@ -560,8 +560,8 @@ importers:
         specifier: 0.8.1
         version: 0.8.1
       memfs:
-        specifier: 4.2.0
-        version: 4.2.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.1)
+        specifier: 4.2.1
+        version: 4.2.1(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.1)
       mock-fs:
         specifier: 5.2.0
         version: 5.2.0
@@ -8025,8 +8025,8 @@ packages:
   /mdurl@1.0.1:
     resolution: {integrity: sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g==}
 
-  /memfs@4.2.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.1):
-    resolution: {integrity: sha512-V5/xE+zl6+soWxlBjiVTQSkfXybTwhEBj2I8sK9LaS5lcZsTuhRftakrcRpDY7Ycac2NTK/VzEtpKMp+gpymrQ==}
+  /memfs@4.2.1(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.1):
+    resolution: {integrity: sha512-CINEB6cNAAhLUfRGrB4lj2Pj47ygerEmw3jxPb6R1gkD6Jfp484gJLteQ6MzqIjGWtFWuVzDl+KN7HiipMuKSw==}
     engines: {node: '>= 4.0.0'}
     peerDependencies:
       tslib: '2'
