@@ -72,10 +72,11 @@ function normalizeVersion(input: string): string {
  * @returns If input contains the specific patch, it returns the input with removed the patch and true, otherwise it retunrs the same string and false.
  */
 function removeComposerSpecificPatchPart(input: string): [string, boolean] {
-  const pattern = regEx(/-p[1-9][0-9]*$/gi);
-  const match = input.match(pattern);
+  // the regex is based on the original from composer implementation https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L137
+  const pattern = /^v?[0-9]{1,5}(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?(?<suffix>-p[1-9][0-9]*)$/gi;
+  const match = pattern.exec(input);
 
-  return match ? [input.replace(match[0], ''), true] : [input, false];
+  return match ? [input.replace(match.groups!.suffix, ''), true] : [input, false];
 }
 
 function composer2npm(input: string): string {
