@@ -183,30 +183,30 @@ describe('modules/manager/woodpecker/extract', () => {
           },
         ],
       });
+    });
 
-      it('extracts the v.1.0.x version', () => {
-        const res = extractPackageFile(
-          `
+    it('extracts the v.1.0.x version', () => {
+      const res = extractPackageFile(
+        `
         steps:
           redis:
             image: quay.io/something/redis:alpine
           `,
-          '',
-          {}
-        );
-        expect(res).toEqual({
-          deps: [
-            {
-              depName: 'quay.io/something/redis',
-              currentValue: 'alpine',
-              currentDigest: undefined,
-              replaceString: 'quay.io/something/redis:alpine',
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              datasource: 'docker',
-            },
-          ],
-        });
+        '',
+        {}
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
       });
     });
   });
