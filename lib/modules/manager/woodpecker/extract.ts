@@ -7,14 +7,14 @@ import type { WoodpeckerConfig } from './types';
 
 function woodpeckerVersionDecider(
   woodpeckerConfig: WoodpeckerConfig
-): keyof WoodpeckerConfig {
+): keyof WoodpeckerConfig | null {
   if ('steps' in woodpeckerConfig) {
     return 'steps';
   } else if ('pipeline' in woodpeckerConfig) {
     return 'pipeline';
   }
 
-  throw new Error('No matching pipeline');
+  return null;
 }
 
 export function extractPackageFile(
@@ -48,20 +48,20 @@ export function extractPackageFile(
     );
     return null;
   }
-  try {
-    const version = woodpeckerVersionDecider(config);
 
-    // Image name/tags for services are only eligible for update if they don't
-    // use variables and if the image is not built locally
-    const deps = Object.values(config[version] ?? {})
-      .filter((step) => is.string(step?.image))
-      .map((step) => getDep(step.image, true, extractConfig.registryAliases));
+  const pipelineKey = woodpeckerVersionDecider(config);
 
-    logger.trace({ deps }, 'Woodpecker Configuration image');
-    return deps.length ? { deps } : null;
-  } catch (err) {
-    logger.debug({ packageFile, err }, 'Error identifying pipeline');
-
+  if (pipelineKey === null) {
+    logger.debug({ packageFile }, "Couldn't identify a pipeline");
     return null;
   }
+
+  // Image name/tags for services are only eligible for update if they don't
+  // use variables and if the image is not built locally
+  const deps = Object.values(config[pipelineKey] ?? {})
+    .filter((step) => is.string(step?.image))
+    .map((step) => getDep(step.image, true, extractConfig.registryAliases));
+
+  logger.trace({ deps }, 'Woodpecker Configuration image');
+  return deps.length ? { deps } : null;
 }
