@@ -13,6 +13,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { parsePubspecLock } from './utils';
 
 const SDK_NAMES = ['dart', 'flutter'];
+const PUB_GET_COMMAND = 'pub get --no-precompile';
 
 export async function updateArtifacts({
   packageFileName,
@@ -51,7 +52,7 @@ export async function updateArtifacts({
         .map(quote);
 
       if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
-        cmd.push(`${toolName} pub get`);
+        cmd.push(`${toolName} ${PUB_GET_COMMAND}`);
       }
       // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
       // we use Flutter over Dart to run `pub get` as it is a Flutter project.
@@ -59,7 +60,7 @@ export async function updateArtifacts({
         depNames.length === 2 &&
         depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
       ) {
-        cmd.push(`flutter pub get`);
+        cmd.push(`flutter ${PUB_GET_COMMAND}`);
       } else {
         cmd.push(`${toolName} pub upgrade ${depNames.join(' ')}`);
       }

@@ -95,7 +95,7 @@ describe('modules/manager/pub/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'flutter pub get',
+        cmd: 'flutter pub get --no-precompile',
       },
     ]);
   });
@@ -169,7 +169,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `${params.sdk} pub get`,
+          cmd: `${params.sdk} pub get --no-precompile`,
         },
       ]);
     });
