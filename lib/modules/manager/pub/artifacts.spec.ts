@@ -20,7 +20,8 @@ process.env.CONTAINERBASE = 'true';
 const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
-const depNames = ['dep1', 'dep2', 'dart', 'flutter'];
+const depNames = ['dep1', 'dep2', 'dep3'];
+const depNamesWithSdks = [...depNames, ...['dart', 'flutter']];
 const depNamesWithSpace = depNames.join(' ');
 
 const datasource = mocked(_datasource);
@@ -35,7 +36,7 @@ const config: UpdateArtifactsConfig = {};
 
 const updateArtifact: UpdateArtifact = {
   packageFileName: 'pubspec.yaml',
-  updatedDeps: depNames.map((depName) => {
+  updatedDeps: depNamesWithSdks.map((depName) => {
     return { depName };
   }),
   newPackageFileContent: '',
