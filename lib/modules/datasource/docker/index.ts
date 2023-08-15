@@ -707,7 +707,7 @@ export class DockerDatasource extends Datasource {
       registryUrl!
     );
     logger.debug(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
@@ -800,7 +800,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (manifestResponse) {
-        // TODO: fix types (#7154)
+        // TODO: fix types (#22198)
         logger.debug(`Got docker digest ${digest!}`);
       }
     } catch (err) /* istanbul ignore next */ {

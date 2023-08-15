@@ -207,7 +207,7 @@ export class PodDatasource extends Datasource {
     ttlMinutes: 30,
     namespace: `datasource-${PodDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl}:${packageName}`,
   })
   async getReleases({

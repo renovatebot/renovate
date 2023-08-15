@@ -36,7 +36,7 @@ export function findScheduleForCodename(
 
 export function findScheduleForVersion(version: string): NodeJsSchedule | null {
   const major = semver.getMajor(version);
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const schedule = nodeSchedule[`v${major!}`];
   return schedule;
 }

@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
@@ -60,7 +60,7 @@ async function fetchDepUpdates(
   depConfig = applyPackageRules(depConfig);
   depConfig.packageName ??= depConfig.depName;
   if (depConfig.ignoreDeps!.includes(depName!)) {
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
@@ -85,7 +85,7 @@ async function fetchDepUpdates(
         dep.warnings ??= [];
         dep.warnings.push({
           topic: 'Lookup Error',
-          // TODO: types (#7154)
+          // TODO: types (#22198)
           message: `${depName!}: ${cause.message}`,
         });
       }

@@ -24,7 +24,7 @@ export function updateAtPosition(
     return fileContent;
   }
   if (version === currentValue || upgrade.groupName) {
-    // TODO: validate newValue (#7154)
+    // TODO: validate newValue (#22198)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
   }

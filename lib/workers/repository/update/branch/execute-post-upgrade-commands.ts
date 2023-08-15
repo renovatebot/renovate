@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
@@ -58,7 +58,7 @@ export async function postUpgradeCommandsExecutor(
           } else {
             contents = file.contents;
           }
-          // TODO #7154
+          // TODO #22198
           await writeLocalFile(file.path, contents!);
         }
       }

@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -20,7 +20,7 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      // TODO: toolConstraint.constraint can be null or undefined? (#7154)
+      // TODO: toolConstraint.constraint can be null or undefined? (#22198)
       const major = api.getMajor(toolConstraint.constraint!);
       const minor = api.getMinor(toolConstraint.constraint!);
       args += api.matches(`${major}.${minor}`, '^2.2')

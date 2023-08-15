@@ -54,7 +54,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -70,7 +70,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -81,7 +81,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         'committed'
       );
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -96,7 +96,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         'committed'
       );
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);

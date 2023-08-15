@@ -82,7 +82,7 @@ function extractFromSection(
         dep.datasource = PypiDatasource.id;
       }
       if (nestedVersion) {
-        // TODO #7154
+        // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
       if (requirements.index) {

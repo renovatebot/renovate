@@ -30,7 +30,7 @@ export function getLernaConstraint(
     lazyPkgJson.dependencies?.lerna ?? lazyPkgJson.devDependencies?.lerna;
   if (!constraint || !semver.validRange(constraint)) {
     logger.warn(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
     );
     return null;
