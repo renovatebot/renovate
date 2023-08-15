@@ -209,5 +209,19 @@ describe('modules/manager/woodpecker/extract', () => {
         ],
       });
     });
+
+    it('return null when no pipeline provided', () => {
+      const res = extractPackageFile(
+        `
+        clone:
+          git:
+            image: woodpeckerci/plugin-git
+        `,
+        '',
+        {}
+      );
+      
+      expect(res).toBeNull();
+    });
   });
 });
