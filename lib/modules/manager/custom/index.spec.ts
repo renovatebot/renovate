@@ -2,7 +2,7 @@ import * as customManager from '.';
 
 describe('modules/manager/custom/index', () => {
   it('getCustomManagerList', () => {
-    expect(customManager.customManagerList).not.toBeNull();
+    expect(customManager.customManagerList).toBeArrayOf(expect.toBeString());
   });
 
   describe('isCustomManager()', () => {
