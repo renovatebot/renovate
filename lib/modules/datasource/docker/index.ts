@@ -30,6 +30,7 @@ import {
 } from './common';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
 import type { Manifest, OciImageConfig } from './schema';
+import type { DockerHubTags } from './types';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -819,6 +820,36 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
+  async getDockerHubTags(dockerRepository: string): Promise<string[] | null> {
+    if (!process.env.RENOVATE_X_DOCKER_HUB_TAGS) {
+      return null;
+    }
+    try {
+      let index = 0;
+      let tags: string[] = [];
+      let url:
+        | string
+        | undefined = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=100`;
+      do {
+        const res: DockerHubTags = (await this.http.getJson<DockerHubTags>(url))
+          .body;
+        tags = tags.concat(res.results.map((tag) => tag.name));
+        url = res.next;
+        index += 1;
+      } while (url && index < 100);
+      logger.debug(
+        `getDockerHubTags(${dockerRepository}): found ${tags.length} tags`
+      );
+      return tags;
+    } catch (err) {
+      logger.debug(
+        { dockerRepository, errMessage: err.message },
+        `No Docker Hub tags result - falling back to docker.io api`
+      );
+    }
+    return null;
+  }
+
   /**
    * docker.getReleases
    *
@@ -838,7 +869,11 @@ export class DockerDatasource extends Datasource {
       packageName,
       registryUrl!
     );
-    const tags = await this.getTags(registryHost, dockerRepository);
+    let tags: string[] | null = null;
+    if (registryHost === 'https://index.docker.io') {
+      tags = await this.getDockerHubTags(dockerRepository);
+    }
+    tags ??= await this.getTags(registryHost, dockerRepository);
     if (!tags) {
       return null;
     }
