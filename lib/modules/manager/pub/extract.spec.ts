@@ -5,21 +5,29 @@ describe('modules/manager/pub/extract', () => {
   describe('extractPackageFile', () => {
     const packageFile = 'pubspec.yaml';
 
-    it('returns null if package does not contain any deps', () => {
-      const content = codeBlock`
-        environment:
-          sdk: ^3.0.0
-      `;
-      const actual = extractPackageFile(content, packageFile);
-      expect(actual).toBeNull();
-    });
-
     it('returns null for invalid pubspec file', () => {
       const content = codeBlock`
         clarly: "invalid" "yaml"
       `;
       const actual = extractPackageFile(content, packageFile);
       expect(actual).toBeNull();
+    });
+
+    it('returns dart sdk only', () => {
+      const content = codeBlock`
+        environment:
+          sdk: ^3.0.0
+      `;
+      const actual = extractPackageFile(content, packageFile);
+      expect(actual).toEqual({
+        deps: [
+          {
+            currentValue: '^3.0.0',
+            depName: 'dart',
+            datasource: 'dart-version',
+          },
+        ],
+      });
     });
 
     it('returns valid dependencies', () => {
@@ -73,6 +81,11 @@ describe('modules/manager/pub/extract', () => {
             depName: 'build',
             depType: 'dev_dependencies',
             datasource: dartDatasource,
+          },
+          {
+            currentValue: '^3.0.0',
+            depName: 'dart',
+            datasource: 'dart-version',
           },
           {
             currentValue: '2.0.0',
