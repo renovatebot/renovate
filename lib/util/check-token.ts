@@ -4,6 +4,7 @@ import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import type { PackageFileContent } from '../modules/manager/types';
+import type { HostRuleSearchResult } from '../types';
 import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 
@@ -68,4 +69,57 @@ export function isGithubServerToServerToken(token: string): boolean {
 
 export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
   return token.startsWith('github_pat_');
+}
+
+export function findGithubToken(
+  searchResult: HostRuleSearchResult
+): string | undefined {
+  return searchResult?.token?.replace('x-access-token:', '');
+}
+
+export function takePersonalAccessTokenIfPossible(
+  githubToken: string | undefined,
+  gitTagsGithubToken: string | undefined
+): string | undefined {
+  if (gitTagsGithubToken && isGithubPersonalAccessToken(gitTagsGithubToken)) {
+    logger.debug('Using GitHub Personal Access Token (git-tags)');
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken && isGithubPersonalAccessToken(githubToken)) {
+    logger.debug('Using GitHub Personal Access Token');
+    return githubToken;
+  }
+
+  if (
+    gitTagsGithubToken &&
+    isGithubFineGrainedPersonalAccessToken(gitTagsGithubToken)
+  ) {
+    logger.debug('Using GitHub Fine-grained Personal Access Token (git-tags)');
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken && isGithubFineGrainedPersonalAccessToken(githubToken)) {
+    logger.debug('Using GitHub Fine-grained Personal Access Token');
+    return githubToken;
+  }
+
+  if (gitTagsGithubToken) {
+    if (isGithubServerToServerToken(gitTagsGithubToken)) {
+      logger.debug('Using GitHub Server-to-Server token (git-tags)');
+    } else {
+      logger.debug('Using unknown GitHub token type (git-tags)');
+    }
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken) {
+    if (isGithubServerToServerToken(githubToken)) {
+      logger.debug('Using GitHub Server-to-Server token');
+    } else {
+      logger.debug('Using unknown GitHub token type');
+    }
+  }
+
+  return githubToken;
 }

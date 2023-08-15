@@ -6,9 +6,11 @@ import type { PackageFileContent } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
 import {
   checkGithubToken,
+  findGithubToken,
   isGithubFineGrainedPersonalAccessToken,
   isGithubPersonalAccessToken,
   isGithubServerToServerToken,
+  takePersonalAccessTokenIfPossible,
 } from './check-token';
 
 jest.mock('./host-rules');
@@ -171,6 +173,117 @@ describe('util/check-token', () => {
 
     it('returns false when string is not a token at all', () => {
       expect(isGithubFineGrainedPersonalAccessToken('XXXXXX')).toBeFalse();
+    });
+  });
+
+  describe('findGithubToken', () => {
+    it('returns the token string when hostRule match search with a valid personal access token', () => {
+      const TOKEN_STRING = 'ghp_TOKEN';
+
+      expect(findGithubToken({ token: TOKEN_STRING })).toBe(TOKEN_STRING);
+    });
+
+    it('returns undefined when no token is defined', () => {
+      expect(findGithubToken({})).toBeUndefined();
+    });
+
+    it('remove x-access-token token prefix', () => {
+      const TOKEN_STRING_WITH_PREFIX = 'x-access-token:ghp_TOKEN';
+      const TOKEN_STRING = 'ghp_TOKEN';
+
+      expect(findGithubToken({ token: TOKEN_STRING_WITH_PREFIX })).toBe(
+        TOKEN_STRING
+      );
+    });
+  });
+
+  describe('takePersonalAccessTokenIfPossible', () => {
+    it('returns undefined when both token are undefined', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = undefined;
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBeUndefined();
+    });
+
+    it('returns gitTagsToken when both token are PAT', () => {
+      const githubToken = 'ghp_github';
+      const gitTagsGithubToken = 'ghp_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(gitTagsGithubToken);
+    });
+
+    it('returns githubToken is PAT and gitTagsGithubToken is not a PAT', () => {
+      const githubToken = 'ghp_github';
+      const gitTagsGithubToken = 'ghs_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(githubToken);
+    });
+
+    it('returns gitTagsToken when both token are set but not PAT', () => {
+      const githubToken = 'ghs_github';
+      const gitTagsGithubToken = 'ghs_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(gitTagsGithubToken);
+    });
+
+    it('returns gitTagsToken when gitTagsToken not PAT and gitTagsGithubToken is not set', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = 'ghs_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(gitTagsGithubToken);
+    });
+
+    it('returns githubToken when githubToken not PAT and gitTagsGithubToken is not set', () => {
+      const githubToken = 'ghs_gitTags';
+      const gitTagsGithubToken = undefined;
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(githubToken);
+    });
+
+    it('take personal assess token over fine grained token', () => {
+      const githubToken = 'ghp_github';
+      const gitTagsGithubToken = 'github_pat_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(githubToken);
+    });
+
+    it('take fine grained token over server to server token', () => {
+      const githubToken = 'github_pat_github';
+      const gitTagsGithubToken = 'ghs_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(githubToken);
+    });
+
+    it('take git-tags fine grained token', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = 'github_pat_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(gitTagsGithubToken);
+    });
+
+    it('take git-tags unknown token type when no other token is set', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = 'unknownTokenType_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(gitTagsGithubToken);
+    });
+
+    it('take github unknown token type when no other token is set', () => {
+      const githubToken = 'unknownTokenType';
+      const gitTagsGithubToken = undefined;
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toBe(githubToken);
     });
   });
 });
