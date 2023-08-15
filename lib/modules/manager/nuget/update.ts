@@ -7,7 +7,7 @@ import { findVersion } from './util';
 
 export function bumpPackageVersion(
   content: string,
-  currentValue: string | undefined,
+  currentValue: string,
   bumpVersion: ReleaseType
 ): BumpPackageVersionResult {
   logger.debug(
@@ -15,11 +15,6 @@ export function bumpPackageVersion(
     'Checking if we should bump project version'
   );
   let bumpedContent = content;
-
-  if (!currentValue) {
-    logger.warn('Unable to bump project version, project has no version');
-    return { bumpedContent };
-  }
 
   if (!semver.valid(currentValue)) {
     logger.warn(

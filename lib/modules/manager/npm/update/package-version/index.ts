@@ -23,6 +23,7 @@ export function bumpPackageVersion(
   // TODO: types (#7154)
   let newPjVersion: string | null;
   let bumpedContent = content;
+
   try {
     if (isMirrorBumpVersion(bumpVersion)) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
