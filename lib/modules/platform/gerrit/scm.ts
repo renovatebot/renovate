@@ -18,7 +18,7 @@ export class GerritScm extends DefaultGitScm {
   override async branchExists(branchName: string): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
-      .findChanges(repository, searchConfig)
+      .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
       return true;
@@ -31,7 +31,7 @@ export class GerritScm extends DefaultGitScm {
   ): Promise<CommitSha | null> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
-      .findChanges(repository, searchConfig)
+      .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
       return change.current_revision!;

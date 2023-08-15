@@ -161,10 +161,14 @@ describe('modules/platform/gerrit/scm', () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       git.branchExists.mockReturnValueOnce(true);
       await expect(gerritScm.branchExists('myBranchName')).resolves.toBeTrue();
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+        },
+        true
+      );
       expect(git.branchExists).toHaveBeenCalledWith('myBranchName');
     });
 
@@ -183,10 +187,14 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
         'shaHashValue'
       );
-      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
-        branchName: 'myBranchName',
-        state: 'open',
-      });
+      expect(clientMock.findChanges).toHaveBeenCalledWith(
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+        },
+        true
+      );
     });
 
     it('open change found for branchname -> return true', async () => {
