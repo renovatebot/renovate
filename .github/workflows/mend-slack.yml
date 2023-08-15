@@ -18,6 +18,6 @@ jobs:
         with:
           channel-id: 'C05NLTMGCJC'
           # For posting a simple plain text message
-          slack-message: "<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}>"
+          slack-message: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}>'
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
