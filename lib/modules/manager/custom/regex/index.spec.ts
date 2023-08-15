@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../../test/fixtures';
 import { logger } from '../../../../logger';
 import type { CustomExtractConfig } from '../../types';
-import { defaultConfig, extractPackageFile } from '.';
+import { defaultConfig, displayName, extractPackageFile } from '.';
 
 const dockerfileContent = Fixtures.get(`Dockerfile`);
 const ansibleYamlContent = Fixtures.get(`ansible.yml`);
@@ -14,6 +14,10 @@ describe('modules/manager/custom/regex/index', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,
     });
+  });
+
+  it('has displayName', () => {
+    expect(displayName).toBe('Regex');
   });
 
   it('extracts multiple dependencies', async () => {

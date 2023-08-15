@@ -1,4 +1,5 @@
 import { getManagers } from '../../modules/manager';
+import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import type { RenovateOptions } from '../types';
@@ -2667,7 +2668,8 @@ export function getOptions(): RenovateOptions[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, config] of getManagers().entries()) {
+  const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
+  for (const [name, config] of allManagers.entries()) {
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,

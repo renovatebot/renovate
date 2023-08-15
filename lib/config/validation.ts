@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getManagerList } from '../modules/manager';
+import { allManagersList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -65,7 +65,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !getManagerList().includes(manager)
+    (manager) => !allManagersList.includes(manager)
   );
 }
 
