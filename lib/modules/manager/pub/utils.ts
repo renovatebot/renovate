@@ -1,5 +1,23 @@
 import { logger } from '../../../logger';
-import { PubspecLockSchema, PubspecLockYaml } from './schema';
+import {
+  PubspecLockSchema,
+  PubspecLockYaml,
+  PubspecSchema,
+  PubspecYaml,
+} from './schema';
+
+export function parsePubspec(
+  fileName: string,
+  fileContent: string
+): PubspecSchema | null {
+  const res = PubspecYaml.safeParse(fileContent);
+  if (res.success) {
+    return res.data;
+  } else {
+    logger.debug({ err: res.error, fileName }, 'Error parsing pubspec.');
+  }
+  return null;
+}
 
 export function parsePubspecLock(
   fileName: string,
@@ -11,7 +29,7 @@ export function parsePubspecLock(
   } else {
     logger.debug(
       { err: res.error, fileName },
-      `Error parsing pubspec lockfile.`
+      'Error parsing pubspec lockfile.'
     );
   }
   return null;
