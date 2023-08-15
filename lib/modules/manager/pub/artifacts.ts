@@ -95,14 +95,13 @@ function getExecCommand(
   toolName: string,
   updatedDeps: Upgrade<Record<string, unknown>>[],
   isLockFileMaintenance: boolean
-): string[] {
-  const cmd: string[] = [];
+): string {
   if (isLockFileMaintenance) {
-    cmd.push(`${toolName} pub upgrade`);
+    return `${toolName} pub upgrade`;
   } else {
     const depNames = updatedDeps.map((dep) => dep.depName).filter(is.string);
     if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
-      cmd.push(`${toolName} ${PUB_GET_COMMAND}`);
+      return `${toolName} ${PUB_GET_COMMAND}`;
     }
     // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
     // we use Flutter over Dart to run `pub get` as it is a Flutter project.
@@ -110,15 +109,13 @@ function getExecCommand(
       depNames.length === 2 &&
       depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
     ) {
-      cmd.push(`flutter ${PUB_GET_COMMAND}`);
+      return `flutter ${PUB_GET_COMMAND}`;
     } else {
       const depNamesCmd = depNames
         .filter((depName) => !SDK_NAMES.includes(depName))
         .map(quote)
         .join(' ');
-      cmd.push(`${toolName} pub upgrade ${depNamesCmd}`);
+      return `${toolName} pub upgrade ${depNamesCmd}`;
     }
   }
-
-  return cmd;
 }
