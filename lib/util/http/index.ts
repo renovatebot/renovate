@@ -457,7 +457,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     let combinedOptions: any = {
       method: 'get',
       ...this.options,

@@ -215,7 +215,7 @@ describe('modules/manager/mix/artifacts', () => {
     expect(result).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
 
-    // TODO #7154
+    // TODO #22198
     const [updateResult] = result!;
     expect(updateResult).toEqual({
       file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },

@@ -215,7 +215,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       (option) => !!option.globalOnly === bot && !managers.has(option.name)
     )
     .forEach((option) => {
-      // TODO: fix types (#7154,#9610)
+      // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
 
       if (!indexed[option.name]) {

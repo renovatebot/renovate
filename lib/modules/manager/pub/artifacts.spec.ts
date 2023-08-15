@@ -4,6 +4,7 @@ import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import { range } from '../../../util/range';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
 import * as pub from '.';
@@ -19,7 +20,9 @@ process.env.CONTAINERBASE = 'true';
 const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
-const depName = 'depName';
+const depNames = [...range(0, 3)].map((i) => `depName${i}`);
+const depNamesWithSpace = depNames.join(' ');
+const depNamesWithFlutter = [...depNames, 'flutter'];
 
 const datasource = mocked(_datasource);
 
@@ -33,7 +36,9 @@ const config: UpdateArtifactsConfig = {};
 
 const updateArtifact: UpdateArtifact = {
   packageFileName: 'pubspec.yaml',
-  updatedDeps: [{ depName }],
+  updatedDeps: depNamesWithFlutter.map((depName) => {
+    return { depName };
+  }),
   newPackageFileContent: '',
   config,
 };
@@ -65,6 +70,15 @@ describe('modules/manager/pub/artifacts', () => {
     ).toBeNull();
   });
 
+  it('returns null if updatedDeps only contains flutter', async () => {
+    expect(
+      await pub.updateArtifacts({
+        ...updateArtifact,
+        updatedDeps: [{ depName: 'flutter' }],
+      })
+    ).toBeNull();
+  });
+
   describe.each([
     { sdk: 'dart', packageFileContent: '' },
     { sdk: 'flutter', packageFileContent: 'sdk: flutter' },
@@ -81,7 +95,7 @@ describe('modules/manager/pub/artifacts', () => {
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `${params.sdk} pub upgrade ${depName}`,
+          cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
         },
       ]);
     });
@@ -107,7 +121,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `${params.sdk} pub upgrade ${depName}`,
+          cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
         },
       ]);
     });
@@ -181,7 +195,7 @@ describe('modules/manager/pub/artifacts', () => {
             'bash -l -c "' +
             `install-tool ${params.sdk} 3.3.9` +
             ' && ' +
-            `${params.sdk} pub upgrade ${depName}` +
+            `${params.sdk} pub upgrade ${depNamesWithSpace}` +
             '"',
         },
       ]);
@@ -210,7 +224,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         { cmd: `install-tool ${params.sdk} 3.3.9` },
-        { cmd: `${params.sdk} pub upgrade ${depName}` },
+        { cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}` },
       ]);
     });
 

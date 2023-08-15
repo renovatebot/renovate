@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import detectIndent from 'detect-indent';
@@ -100,7 +100,7 @@ export function determineLockFileDirs(
     return {};
   }
 
-  // TODO #7154
+  // TODO #22198
   for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
     const packageFile = getPackageFile(p.path);
@@ -154,7 +154,7 @@ export async function writeExistingFiles(
     if (!packageFile.managerData) {
       continue;
     }
-    // TODO #7154
+    // TODO #22198
     const basedir = upath.dirname(packageFile.packageFile!);
     const npmrc = packageFile.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
@@ -203,7 +203,7 @@ export async function writeExistingFiles(
               upgrade.rangeStrategy === 'widen' &&
               upgrade.managerData.npmLock === npmLock
             ) {
-              // TODO #7154
+              // TODO #22198
               widens.push(upgrade.depName!);
             }
             const { depName } = upgrade;
@@ -230,7 +230,7 @@ export async function writeExistingFiles(
                 npmLockParsed.dependencies
               ) {
                 widens.forEach((depName) => {
-                  // TODO #7154
+                  // TODO #22198
                   delete npmLockParsed.dependencies![depName];
                 });
               }
@@ -281,7 +281,7 @@ export async function writeUpdatedPackageFiles(
       supportedLockFiles.some((fileName) => packageFile.path.endsWith(fileName))
     ) {
       logger.debug(`Writing lock file: ${packageFile.path}`);
-      // TODO #7154
+      // TODO #22198
 
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
@@ -291,11 +291,11 @@ export async function writeUpdatedPackageFiles(
     }
     logger.debug(`Writing ${packageFile.path}`);
     const detectedIndent =
-      // TODO #7154
+      // TODO #22198
 
       detectIndent(packageFile.contents!.toString()).indent || '  ';
 
-    // TODO #7154
+    // TODO #22198
 
     const massagedFile = JSON.parse(packageFile.contents!.toString());
     try {
@@ -604,7 +604,7 @@ export async function getAdditionalFiles(
         updatedArtifacts.push({
           type: 'addition',
           path: npmLock,
-          // TODO: can this be undefined? (#7154)
+          // TODO: can this be undefined? (#22198)
 
           contents: res.lockFile!.replace(tokenRe, ''),
         });
@@ -687,7 +687,7 @@ export async function getAdditionalFiles(
         updatedArtifacts.push({
           type: 'addition',
           path: lockFileName,
-          // TODO #7154
+          // TODO #22198
           contents: res.lockFile!,
         });
         await updateYarnOffline(lockFileDir, updatedArtifacts);
@@ -705,7 +705,7 @@ export async function getAdditionalFiles(
     await resetNpmrcContent(lockFileDir, npmrcContent);
     // istanbul ignore if: needs test
     if (existingYarnrcYmlContent) {
-      // TODO #7154
+      // TODO #22198
       await writeLocalFile(yarnRcYmlFilename!, existingYarnrcYmlContent);
     }
   }
@@ -758,7 +758,7 @@ export async function getAdditionalFiles(
         updatedArtifacts.push({
           type: 'addition',
           path: pnpmShrinkwrap,
-          // TODO: can be undefined? (#7154)
+          // TODO: can be undefined? (#22198)
           contents: res.lockFile!,
         });
       }
@@ -770,7 +770,7 @@ export async function getAdditionalFiles(
     let lockFile: string;
     logger.debug(`Finding package.json for lerna location "${lernaJsonFile}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      // TODO #7154
+      // TODO #22198
       (p) => getParentDir(p.packageFile!) === getParentDir(lernaJsonFile)
     );
     // istanbul ignore if: not sure how to test
@@ -856,13 +856,13 @@ export async function getAdditionalFiles(
         }
         logger.trace(`Checking for ${filename}`);
         const existingContent = await getFile(
-          // TODO #7154
+          // TODO #22198
           filename,
           config.reuseExistingBranch ? config.branchName : config.baseBranch
         );
         if (existingContent) {
           logger.trace('Found lock file');
-          // TODO #7154
+          // TODO #22198
           const lockFilePath = filename;
           logger.trace('Checking against ' + lockFilePath);
           try {
@@ -882,7 +882,7 @@ export async function getAdditionalFiles(
               logger.debug('File is updated: ' + lockFilePath);
               updatedArtifacts.push({
                 type: 'addition',
-                // TODO #7154
+                // TODO #22198
                 path: filename,
                 contents: newContent,
               });

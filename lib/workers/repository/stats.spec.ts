@@ -52,10 +52,10 @@ describe('workers/repository/stats', () => {
   describe('printRequestStats()', () => {
     it('runs', () => {
       const getStats: number[] = [30, 100, 10, 20];
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       memCache.get.mockImplementationOnce(() => getStats as any);
       const setStats: number[] = [110, 80, 20];
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       memCache.get.mockImplementationOnce(() => setStats as any);
       const httpStats: RequestStats[] = [
         {
@@ -101,7 +101,7 @@ describe('workers/repository/stats', () => {
           statusCode: 401,
         },
       ];
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       memCache.get.mockImplementationOnce(() => httpStats as any);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();

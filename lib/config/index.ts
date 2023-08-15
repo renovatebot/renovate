@@ -23,7 +23,7 @@ export function getManagerConfig(
   if (categories) {
     managerConfig.categories = categories;
   }
-  // TODO: fix types #7154
+  // TODO: fix types #22198
   managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
   for (const i of allManagersList) {
     delete managerConfig[i];

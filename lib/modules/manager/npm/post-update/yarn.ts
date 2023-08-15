@@ -204,7 +204,7 @@ export async function generateLockFile(
 
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
@@ -230,7 +230,7 @@ export async function generateLockFile(
         // `yarn up -R` updates to the latest release in each range
         commands.push(
           `yarn up -R ${lockUpdates
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             .map((update) => `${update.depName!}`)
             .filter(uniqueStrings)
             .map(quote)
