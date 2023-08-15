@@ -4,110 +4,173 @@ import { GithubReleasesDatasource } from '../modules/datasource/github-releases'
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import type { PackageFileContent } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
-import { checkGithubToken } from './check-token';
+import {
+  checkGithubToken,
+  isGithubFineGrainedPersonalAccessToken,
+  isGithubPersonalAccessToken,
+  isGithubServerToServerToken,
+} from './check-token';
 
 jest.mock('./host-rules');
 
 describe('util/check-token', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    memCache.reset();
-    GlobalConfig.set({ githubTokenWarn: true });
-  });
-
-  it('does nothing if data is empty', () => {
-    hostRules.find.mockReturnValue({});
-    checkGithubToken(undefined);
-    expect(logger.logger.trace).not.toHaveBeenCalled();
-    expect(logger.logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('returns early if GitHub token is found', () => {
-    hostRules.find.mockReturnValueOnce({ token: '123' });
-    checkGithubToken({});
-    expect(hostRules.find).toHaveBeenCalledWith({
-      hostType: 'github',
-      url: 'https://api.github.com',
+  describe('checkGithubToken', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      memCache.reset();
+      GlobalConfig.set({ githubTokenWarn: true });
     });
-    expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
-    expect(logger.logger.warn).not.toHaveBeenCalled();
-  });
 
-  it('returns early if token warnings are disabled', () => {
-    GlobalConfig.set({ githubTokenWarn: false });
-    hostRules.find.mockReturnValueOnce({});
-    checkGithubToken({});
-    expect(hostRules.find).toHaveBeenCalledWith({
-      hostType: 'github',
-      url: 'https://api.github.com',
+    it('does nothing if data is empty', () => {
+      hostRules.find.mockReturnValue({});
+      checkGithubToken(undefined);
+      expect(logger.logger.trace).not.toHaveBeenCalled();
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
-    expect(logger.logger.trace).toHaveBeenCalledWith(
-      'GitHub token warning is disabled'
-    );
-    expect(logger.logger.warn).not.toHaveBeenCalled();
-  });
 
-  it('does not warn if there is dependencies with GitHub sourceUrl', () => {
-    hostRules.find.mockReturnValueOnce({});
-    checkGithubToken({
-      npm: [{ deps: [{ depName: 'renovatebot/renovate' }] }],
+    it('returns early if GitHub token is found', () => {
+      hostRules.find.mockReturnValueOnce({ token: '123' });
+      checkGithubToken({});
+      expect(hostRules.find).toHaveBeenCalledWith({
+        hostType: 'github',
+        url: 'https://api.github.com',
+      });
+      expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
-    expect(logger.logger.warn).not.toHaveBeenCalled();
-  });
 
-  it('logs warning for github-tags datasource', () => {
-    hostRules.find.mockReturnValueOnce({});
-    checkGithubToken({
-      npm: [
-        {
-          deps: [
-            {
-              depName: 'foo/bar',
-              datasource: GithubTagsDatasource.id,
-            },
-          ],
-        },
-      ],
+    it('returns early if token warnings are disabled', () => {
+      GlobalConfig.set({ githubTokenWarn: false });
+      hostRules.find.mockReturnValueOnce({});
+      checkGithubToken({});
+      expect(hostRules.find).toHaveBeenCalledWith({
+        hostType: 'github',
+        url: 'https://api.github.com',
+      });
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'GitHub token warning is disabled'
+      );
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
-    expect(logger.logger.warn).toHaveBeenCalled();
-  });
 
-  it('logs warning for github-releases datasource', () => {
-    hostRules.find.mockReturnValueOnce({});
-    checkGithubToken({
-      npm: [
-        {
-          deps: [
-            {
-              depName: 'foo/bar',
-              datasource: GithubReleasesDatasource.id,
-            },
-          ],
-        },
-      ],
+    it('does not warn if there is dependencies with GitHub sourceUrl', () => {
+      hostRules.find.mockReturnValueOnce({});
+      checkGithubToken({
+        npm: [{ deps: [{ depName: 'renovatebot/renovate' }] }],
+      });
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
-    expect(logger.logger.warn).toHaveBeenCalled();
+
+    it('logs warning for github-tags datasource', () => {
+      hostRules.find.mockReturnValueOnce({});
+      checkGithubToken({
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'foo/bar',
+                datasource: GithubTagsDatasource.id,
+              },
+            ],
+          },
+        ],
+      });
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('logs warning for github-releases datasource', () => {
+      hostRules.find.mockReturnValueOnce({});
+      checkGithubToken({
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'foo/bar',
+                datasource: GithubReleasesDatasource.id,
+              },
+            ],
+          },
+        ],
+      });
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('logs warning once', () => {
+      hostRules.find.mockReturnValueOnce({});
+      const packageFiles: Record<string, PackageFileContent[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'foo/foo',
+                datasource: GithubTagsDatasource.id,
+              },
+              {
+                depName: 'bar/bar',
+                datasource: GithubReleasesDatasource.id,
+              },
+            ],
+          },
+        ],
+      };
+      checkGithubToken(packageFiles);
+      expect(logger.logger.warn).toHaveBeenCalledOnce();
+    });
   });
 
-  it('logs warning once', () => {
-    hostRules.find.mockReturnValueOnce({});
-    const packageFiles: Record<string, PackageFileContent[]> = {
-      npm: [
-        {
-          deps: [
-            {
-              depName: 'foo/foo',
-              datasource: GithubTagsDatasource.id,
-            },
-            {
-              depName: 'bar/bar',
-              datasource: GithubReleasesDatasource.id,
-            },
-          ],
-        },
-      ],
-    };
-    checkGithubToken(packageFiles);
-    expect(logger.logger.warn).toHaveBeenCalledOnce();
+  describe('isGithubPersonalAccessToken', () => {
+    it('returns true when string is a github personnal access token', () => {
+      expect(isGithubPersonalAccessToken('ghp_XXXXXX')).toBeTrue();
+    });
+
+    it('returns false when string is a github application token', () => {
+      expect(isGithubPersonalAccessToken('ghs_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is a github fine grained personal access token', () => {
+      expect(isGithubPersonalAccessToken('github_pat_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is not a token at all', () => {
+      expect(isGithubPersonalAccessToken('XXXXXX')).toBeFalse();
+    });
+  });
+
+  describe('isGithubServerToServerToken', () => {
+    it('returns true when string is a github server to server token', () => {
+      expect(isGithubServerToServerToken('ghs_XXXXXX')).toBeTrue();
+    });
+
+    it('returns false when string is a github personal access token token', () => {
+      expect(isGithubServerToServerToken('ghp_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is a github fine grained personal access token', () => {
+      expect(isGithubPersonalAccessToken('github_pat_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is not a token at all', () => {
+      expect(isGithubServerToServerToken('XXXXXX')).toBeFalse();
+    });
+  });
+
+  describe('isGithubFineGrainedPersonalAccessToken', () => {
+    it('returns true when string is a github fine grained personal access token', () => {
+      expect(
+        isGithubFineGrainedPersonalAccessToken('github_pat_XXXXXX')
+      ).toBeTrue();
+    });
+
+    it('returns false when string is a github personnal access token', () => {
+      expect(isGithubFineGrainedPersonalAccessToken('ghp_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is a github application token', () => {
+      expect(isGithubFineGrainedPersonalAccessToken('ghs_XXXXXX')).toBeFalse();
+    });
+
+    it('returns false when string is not a token at all', () => {
+      expect(isGithubFineGrainedPersonalAccessToken('XXXXXX')).toBeFalse();
+    });
   });
 });

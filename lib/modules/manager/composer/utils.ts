@@ -3,6 +3,11 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { HostRuleSearchResult } from '../../../types';
+import {
+  isGithubFineGrainedPersonalAccessToken,
+  isGithubPersonalAccessToken,
+  isGithubServerToServerToken,
+} from '../../../util/check-token';
 import type { ToolConstraint } from '../../../util/exec/types';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
@@ -116,18 +121,6 @@ export function findGithubToken(
   searchResult: HostRuleSearchResult
 ): string | undefined {
   return searchResult?.token?.replace('x-access-token:', '');
-}
-
-export function isGithubPersonalAccessToken(token: string): boolean {
-  return token.startsWith('ghp_');
-}
-
-export function isGithubServerToServerToken(token: string): boolean {
-  return token.startsWith('ghs_');
-}
-
-export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
-  return token.startsWith('github_pat_');
 }
 
 export function takePersonalAccessTokenIfPossible(

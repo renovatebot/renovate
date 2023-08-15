@@ -57,3 +57,15 @@ export function checkGithubToken(
     }
   }
 }
+
+export function isGithubPersonalAccessToken(token: string): boolean {
+  return token.startsWith('ghp_');
+}
+
+export function isGithubServerToServerToken(token: string): boolean {
+  return token.startsWith('ghs_');
+}
+
+export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
+  return token.startsWith('github_pat_');
+}
