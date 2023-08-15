@@ -220,7 +220,7 @@ describe('modules/manager/woodpecker/extract', () => {
         '',
         {}
       );
-      
+
       expect(res).toBeNull();
     });
   });
