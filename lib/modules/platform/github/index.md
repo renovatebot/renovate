@@ -39,7 +39,7 @@ When creating the GitHub App give it the following permissions:
 | Issues            | `read` + `write` |
 | Pull requests     | `read` + `write` |
 | Workflows         | `read` + `write` |
-| Administation     | `read`           |
+| Administration    | `read`           |
 | Dependabot alerts | `read`           |
 | Members           | `read`           |
 | Metadata          | `read`           |
