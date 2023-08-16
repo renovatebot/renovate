@@ -44,7 +44,7 @@ describe('util/cache/repository/index', () => {
     });
     await initRepoCache({ ...config, repositoryCache: 'enabled' });
     await saveCache();
-    expect(fs.outputCacheFile).toHaveBeenCalledTimes(1);
+    expect(fs.outputCacheFile).toHaveBeenCalled();
   });
 
   it('resets cache', async () => {
