@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import type { Merge } from 'type-fest';
 import type { RenovateConfig, ValidationMessage } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
@@ -49,7 +49,7 @@ export async function branchifyUpgrades(
       .filter((upgrade) => {
         const { manager, packageFile, depName, currentValue, newValue } =
           upgrade;
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         const upgradeKey = `${packageFile!}:${depName!}:${currentValue!}`;
         const previousNewValue = seenUpdates[upgradeKey];
         if (previousNewValue && previousNewValue !== newValue) {
@@ -77,7 +77,7 @@ export async function branchifyUpgrades(
     branches.push(branch);
   }
   removeMeta(['branch']);
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   const branchList = config.repoIsOnboarded
     ? branches.map((upgrade) => upgrade.branchName)

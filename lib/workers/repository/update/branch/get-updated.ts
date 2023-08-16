@@ -37,7 +37,7 @@ export async function getUpdatedPackageFiles(
     const manager = upgrade.manager!;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
-    // TODO: fix types, can be undefined (#7154)
+    // TODO: fix types, can be undefined (#22198)
     const newVersion = upgrade.newVersion!;
     const currentVersion = upgrade.currentVersion!;
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
@@ -277,7 +277,7 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        // TODO #7154
+        // TODO #22198
         newPackageFileContent: packageFile.contents!.toString(),
         config,
       });
@@ -308,7 +308,7 @@ export async function getUpdatedPackageFiles(
       const results = await updateArtifacts({
         packageFileName: packageFile.path,
         updatedDeps,
-        // TODO #7154
+        // TODO #22198
         newPackageFileContent: packageFile.contents!.toString(),
         config,
       });

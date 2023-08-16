@@ -93,7 +93,7 @@ describe('config/decrypt', () => {
         },
         'backend/package.json',
       ];
-      // TODO: fix types #7154
+      // TODO: fix types #22198
       const res = (await decryptConfig(config, repository)) as any;
       expect(res.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.encrypted).toBeUndefined();

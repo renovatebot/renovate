@@ -57,7 +57,7 @@ function getReadable(
   return readable;
 }
 
-// TODO: fix types, jest is using wrong overload (#7154)
+// TODO: fix types, jest is using wrong overload (#22198)
 function getSpawnStub(args: StubArgs): any {
   const {
     cmd,

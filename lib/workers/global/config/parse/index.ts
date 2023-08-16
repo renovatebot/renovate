@@ -69,7 +69,7 @@ export async function parseConfigs(
   // istanbul ignore if
   if (config.logFile) {
     logger.debug(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `Enabling ${config.logFileLevel!} logging to ${config.logFile}`
     );
     await ensureDir(getParentDir(config.logFile));

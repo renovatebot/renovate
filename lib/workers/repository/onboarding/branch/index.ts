@@ -48,7 +48,7 @@ export async function checkOnboardingBranch(
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
-  // TODO #7154
+  // TODO #22198
   const branchList = [onboardingBranch!];
   if (onboardingPr) {
     if (config.onboardingRebaseCheckbox) {
@@ -108,7 +108,7 @@ export async function checkOnboardingBranch(
     }
   }
   if (!GlobalConfig.get('dryRun')) {
-    // TODO #7154
+    // TODO #22198
     if (!isConflicted) {
       logger.debug('Merge onboarding branch in default branch');
       await scm.mergeToLocal(onboardingBranch!);

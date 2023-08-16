@@ -10,7 +10,7 @@ import {
 import type { LockFile } from './types';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
-  // TODO #7154
+  // TODO #22198
   const yarnLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const parsed = parseSyml(yarnLockRaw);

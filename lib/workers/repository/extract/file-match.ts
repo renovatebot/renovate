@@ -41,7 +41,7 @@ export function getFilteredFileList(
   fileList: string[]
 ): string[] {
   const { includePaths, ignorePaths } = config;
-  // TODO #7154
+  // TODO #22198
 
   let filteredList = getIncludedFiles(fileList, includePaths!);
   filteredList = filterIgnoredFiles(filteredList, ignorePaths!);
@@ -55,7 +55,7 @@ export function getMatchingFiles(
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles: string[] = [];
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   for (const match of fileMatch!) {
     logger.debug(`Using file match: ${match} for manager ${manager!}`);
     const re = regEx(match);

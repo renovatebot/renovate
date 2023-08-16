@@ -16,7 +16,7 @@ export function updateLockedDependency(
   );
   let yarnLock: YarnLock;
   try {
-    // TODO #7154
+    // TODO #22198
     yarnLock = parseSyml(lockFileContent!);
   } catch (err) {
     logger.warn({ err }, 'Failed to parse yarn files');
@@ -64,7 +64,7 @@ export function updateLockedDependency(
       );
       return { status: 'update-failed' };
     }
-    // TODO #7154
+    // TODO #22198
     let newLockFileContent = lockFileContent!;
     for (const dependency of updateLockedDeps) {
       const { depName, constraint, newVersion } = dependency;

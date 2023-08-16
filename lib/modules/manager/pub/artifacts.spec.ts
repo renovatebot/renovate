@@ -1,10 +1,10 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import { range } from '../../../util/range';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
 import * as pub from '.';
@@ -20,9 +20,9 @@ process.env.CONTAINERBASE = 'true';
 const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
-const depNames = [...range(0, 3)].map((i) => `depName${i}`);
+const depNames = ['dep1', 'dep2', 'dep3'];
+const depNamesWithSdks = [...depNames, ...['dart', 'flutter']];
 const depNamesWithSpace = depNames.join(' ');
-const depNamesWithFlutter = [...depNames, 'flutter'];
 
 const datasource = mocked(_datasource);
 
@@ -36,7 +36,7 @@ const config: UpdateArtifactsConfig = {};
 
 const updateArtifact: UpdateArtifact = {
   packageFileName: 'pubspec.yaml',
-  updatedDeps: depNamesWithFlutter.map((depName) => {
+  updatedDeps: depNamesWithSdks.map((depName) => {
     return { depName };
   }),
   newPackageFileContent: '',
@@ -70,13 +70,35 @@ describe('modules/manager/pub/artifacts', () => {
     ).toBeNull();
   });
 
-  it('returns null if updatedDeps only contains flutter', async () => {
+  it(`runs flutter pub get if only dart and flutter sdks are updated`, async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
     expect(
       await pub.updateArtifacts({
         ...updateArtifact,
-        updatedDeps: [{ depName: 'flutter' }],
+        newPackageFileContent: codeBlock`
+          environment:
+            sdk: ^3.0.0
+            flutter: 2.0.0
+        `,
+        updatedDeps: [{ depName: 'dart' }, { depName: 'flutter' }],
       })
-    ).toBeNull();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: lockFile,
+          contents: newLockFileContent,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'flutter pub get --no-precompile',
+      },
+    ]);
   });
 
   describe.each([
@@ -122,6 +144,33 @@ describe('modules/manager/pub/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
+        },
+      ]);
+    });
+
+    it(`runs ${params.sdk} pub get if only the sdk is updated`, async () => {
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+      expect(
+        await pub.updateArtifacts({
+          ...updateArtifact,
+          newPackageFileContent: params.packageFileContent,
+          updatedDeps: [{ depName: params.sdk }],
+        })
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: lockFile,
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `${params.sdk} pub get --no-precompile`,
         },
       ]);
     });

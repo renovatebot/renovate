@@ -71,7 +71,7 @@ export class ConanDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}-revisions`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl!}:${packageName}:${newValue!}`,
   })
   override async getDigest(
@@ -101,7 +101,7 @@ export class ConanDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl}:${packageName}`,
   })
   async getReleases({

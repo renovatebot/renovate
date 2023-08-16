@@ -87,7 +87,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       const indent = {
         type: undefined,
         amount: 0,
-        // TODO: incompatible types (#7154)
+        // TODO: incompatible types (#22198)
         indent: null as never,
       };
       mockedFunction(detectIndent).mockReturnValueOnce(indent);

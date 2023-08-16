@@ -3,7 +3,8 @@ import type {
   RegexManagerTemplates,
   RenovateConfig,
 } from '../../../config/types';
-import { getManagerList } from '../../../modules/manager';
+import { allManagersList } from '../../../modules/manager';
+import { isCustomManager } from '../../../modules/manager/custom';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/types';
 import type { WorkerExtractConfig } from '../../types';
@@ -37,7 +38,7 @@ function getFilteredManagerConfig(
   config: WorkerExtractConfig
 ): WorkerExtractConfig {
   return {
-    ...(config.manager === 'regex' && getRegexManagerFields(config)),
+    ...(isCustomManager(config.manager) && getRegexManagerFields(config)),
     manager: config.manager,
     fileMatch: config.fileMatch,
     npmrc: config.npmrc,
@@ -60,12 +61,13 @@ export function generateFingerprintConfig(
   if (enabledManagers?.length) {
     managerList = new Set(enabledManagers);
   } else {
-    managerList = new Set(getManagerList());
+    managerList = new Set(allManagersList);
   }
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
-    if (manager === 'regex') {
+    if (isCustomManager(manager)) {
+      // TODO: filter regexManagers using customType
       for (const regexManager of config.regexManagers ?? []) {
         managerExtractConfigs.push({
           ...mergeChildConfig(managerConfig, regexManager),

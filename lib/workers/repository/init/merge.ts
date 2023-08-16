@@ -93,7 +93,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   }
   cache.configFileName = configFileName;
   logger.debug(`Found ${configFileName} config file`);
-  // TODO #7154
+  // TODO #22198
   let configFileParsed: any;
   let configFileRaw: string | undefined | null;
 
@@ -109,7 +109,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
-      // TODO #7154
+      // TODO #22198
       (await readLocalFile('package.json', 'utf8'))!
     ).renovate;
     if (is.string(configFileParsed)) {
@@ -246,7 +246,7 @@ export async function mergeRenovateConfig(
   }
   delete migratedConfig.errors;
   delete migratedConfig.warnings;
-  // TODO #7154
+  // TODO #22198
   const repository = config.repository!;
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
