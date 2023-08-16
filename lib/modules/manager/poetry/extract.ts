@@ -23,12 +23,12 @@ import type {
 import { parsePoetry } from './utils';
 
 function extractFromDependenciesSection(
-  poetryFile: PoetrySchema,
+  parsedFile: PoetrySchema,
   section: keyof Omit<PoetrySectionSchema, 'source' | 'group'>,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
   return extractFromSection(
-    poetryFile?.tool?.poetry?.[section],
+    parsedFile?.tool?.poetry?.[section],
     section,
     poetryLockfile
   );
@@ -145,8 +145,8 @@ function extractFromSection(
   return deps;
 }
 
-function extractRegistries(poetryFile: PoetrySchema): string[] | undefined {
-  const sources = poetryFile?.tool?.poetry?.source;
+function extractRegistries(pyprojectFile: PoetrySchema): string[] | undefined {
+  const sources = pyprojectFile?.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
     return undefined;
@@ -168,8 +168,8 @@ export async function extractPackageFile(
   packageFile: string
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
-  const poetryFile = parsePoetry(packageFile, content);
-  if (!poetryFile?.tool?.poetry) {
+  const pyprojectFile = parsePoetry(packageFile, content);
+  if (!pyprojectFile?.tool?.poetry) {
     logger.debug({ packageFile }, `contains no poetry section`);
     return null;
   }
@@ -183,18 +183,18 @@ export async function extractPackageFile(
 
   const deps = [
     ...extractFromDependenciesSection(
-      poetryFile,
+      pyprojectFile,
       'dependencies',
       lockfileMapping
     ),
     ...extractFromDependenciesSection(
-      poetryFile,
+      pyprojectFile,
       'dev-dependencies',
       lockfileMapping
     ),
-    ...extractFromDependenciesSection(poetryFile, 'extras', lockfileMapping),
+    ...extractFromDependenciesSection(pyprojectFile, 'extras', lockfileMapping),
     ...extractFromDependenciesGroupSection(
-      poetryFile?.tool?.poetry?.group,
+      pyprojectFile?.tool?.poetry?.group,
       lockfileMapping
     ),
   ];
@@ -205,14 +205,14 @@ export async function extractPackageFile(
 
   const extractedConstraints: Record<string, any> = {};
 
-  if (is.nonEmptyString(poetryFile?.tool?.poetry?.dependencies?.python)) {
+  if (is.nonEmptyString(pyprojectFile?.tool?.poetry?.dependencies?.python)) {
     extractedConstraints.python =
-      poetryFile?.tool?.poetry?.dependencies?.python;
+      pyprojectFile?.tool?.poetry?.dependencies?.python;
   }
 
   const res: PackageFileContent = {
     deps,
-    registryUrls: extractRegistries(poetryFile),
+    registryUrls: extractRegistries(pyprojectFile),
     extractedConstraints,
   };
   // Try poetry.lock first

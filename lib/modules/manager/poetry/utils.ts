@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { PoetrySchema, PoetrySchemaToml } from './schema';
+import { type PoetrySchema, PoetrySchemaToml } from './schema';
 
 export function parsePoetry(
   fileName: string,
