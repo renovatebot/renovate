@@ -23,7 +23,7 @@ export async function extractPnpmFilters(
   fileName: string
 ): Promise<string[] | undefined> {
   try {
-    // TODO #7154
+    // TODO #22198
     const contents = load((await readLocalFile(fileName, 'utf8'))!, {
       json: true,
     }) as PnpmWorkspaceFile;
@@ -99,7 +99,7 @@ export async function detectPnpmWorkspaces(
     }
 
     // search for corresponding pnpm workspace
-    // TODO #7154
+    // TODO #22198
     const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
     if (pnpmWorkspace === null) {
       continue;

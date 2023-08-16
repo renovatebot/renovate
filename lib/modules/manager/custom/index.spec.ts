@@ -1,15 +1,14 @@
 import * as customManager from '.';
 
 describe('modules/manager/custom/index', () => {
-  it('has default config', () => {
-    expect(customManager.defaultConfig).toEqual({});
+  it('getCustomManagerList', () => {
+    expect(customManager.customManagerList).toBeArrayOf(expect.toBeString());
   });
 
-  it('gets supportedDatasources', () => {
-    expect(customManager.supportedDatasources).toEqual(['*']);
-  });
-
-  it('extractPackageFile', () => {
-    expect(customManager.extractPackageFile('', '', {})).toEqual({ deps: [] });
+  describe('isCustomManager()', () => {
+    it('works', () => {
+      expect(customManager.isCustomManager('npm')).toBe(false);
+      expect(customManager.isCustomManager('regex')).toBe(true);
+    });
   });
 });

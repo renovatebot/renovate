@@ -157,7 +157,7 @@ function generateUrlFromEndpoint(
   const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
       url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
@@ -174,7 +174,7 @@ function injectAuth(url: string, opts: HostRule): string {
     logger.debug(`Invalid url: ${url}`);
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  // TODO: null checks (#7154)
+  // TODO: null checks (#22198)
   repoUrl.username = opts.username!;
   repoUrl.password = opts.password!;
   return repoUrl.toString();

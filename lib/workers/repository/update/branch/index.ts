@@ -446,7 +446,7 @@ export async function processBranch(
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
       await scm.checkoutBranch(config.baseBranch);
@@ -821,7 +821,7 @@ export async function processBranch(
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         config.artifactErrors.forEach((error) => {
           content += `##### File name: ${error.lockFile!}\n\n`;
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;

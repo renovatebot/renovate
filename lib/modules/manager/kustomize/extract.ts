@@ -110,7 +110,7 @@ export function extractImage(image: Image): PackageDependency | null {
       };
     }
 
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,

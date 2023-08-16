@@ -96,7 +96,7 @@ ${
     } else {
       const pr = await platform.createPr({
         sourceBranch: branchName,
-        // TODO #7154
+        // TODO #22198
         targetBranch: config.defaultBranch!,
         prTitle,
         prBody,
