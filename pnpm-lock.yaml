@@ -422,8 +422,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@types/lodash':
-        specifier: 4.14.196
-        version: 4.14.196
+        specifier: 4.14.197
+        version: 4.14.197
       '@types/luxon':
         specifier: 3.3.1
         version: 3.3.1
@@ -3810,8 +3810,8 @@ packages:
     resolution: {integrity: sha512-RYDOtCol7/sHGhSJvWVnl0AmOdQQWgUYys6cwn5Lt3RiYhyhTLMLv7B9wdixMgCfnNt0MQj/YSGi3qN0IQqLeQ==}
     dev: true
 
-  /@types/lodash@4.14.196:
-    resolution: {integrity: sha512-22y3o88f4a94mKljsZcanlNWPzO0uBsBdzLAngf2tp533LzZcQzb6+eZPJ+vCTt+bqF2XnvT9gejTLsAcJAJyQ==}
+  /@types/lodash@4.14.197:
+    resolution: {integrity: sha512-BMVOiWs0uNxHVlHBgzTIqJYmj+PgCo4euloGF+5m4okL3rEYzM2EEv78mw8zWSMM57dM7kVIgJ2QDvwHSoCI5g==}
     dev: true
 
   /@types/luxon@3.3.1:
