@@ -50,3 +50,34 @@ These permissions will be requested and authorized on an individual-user basis.
 | Permission | The Mend Renovate App | Forking Renovate | Why                                                      |
 | ---------- | :-------------------: | :--------------: | -------------------------------------------------------- |
 | email      |        `read`         |  not applicable  | Per-user consent requested if logging into App dashboard |
+
+## Privacy
+
+I guess that The Mend Renovate App users fall under [Mend's Terms and Conditions](https://www.mend.io/free-developer-tools/terms-of-use/) and Mend's Privacy Policy??????
+
+We also need to distinguish between users who self-host the OSS version, and users on the Mend Renovate App.
+
+### Answer from rarkins in a Discussion
+
+Your understanding appears to be correct.
+I will elaborate below.
+
+Let's start with Renovate OSS, which is at the core.
+It sends no telemetry, sends only the absolutely required data for the task of checking for updates from repositories.
+It can operate disconnected from the internet e.g. talking only to Artifactory.
+
+Renovate On-Prem is a proprietary but free wrapper of Renovate OSS, so it shares these same characteristics.
+Although per my memory the terms and conditions say that telemetry may be collected for the purposes of improving the product etc., today it does not - there's no "phone home" for any reason including license validation (which is done locally).
+
+In general I would say that neither product cares about or sends personal data, although of course in some package ecosystems you might see usernames _of packages_ in the names, such as `@rarkins/test` on npm, or `github.com/rarkins/test` on GitHub.
+
+### Does `minimumReleaseAge` send data to Mend or others?
+
+`minimumReleaseAge` does not send any data to Mend or others, it uses the release timestamp from the registry for each version.
+
+### Does the Mend Hosted App store source code?
+
+Source code is not stored, other than the temporary clone.
+
+The app doesn't keep or cache any repo data between runs.
+The backend database keeps a list of dependencies and versions per repo, plus basic into about any Renovate PRs it's created.
