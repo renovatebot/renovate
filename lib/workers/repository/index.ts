@@ -1,3 +1,4 @@
+import { nameFromLevel } from 'bunyan';
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
@@ -9,7 +10,8 @@ import {
 } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
-import {getProblems, logger, setMeta} from '../../logger';
+import { getProblems, logger, setMeta } from '../../logger';
+import * as repositoryCache from '../../util/cache/repository';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -31,8 +33,6 @@ import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
 import { ProcessResult, processResult } from './result';
 import { printLookupStats, printRequestStats } from './stats';
-import * as repositoryCache from "../../util/cache/repository";
-import {nameFromLevel} from "bunyan";
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -67,18 +67,21 @@ export async function renovateRepository(
       config.semanticCommits = await detectSemanticCommits();
     }
 
+    if (
+      GlobalConfig.get('dryRun') !== 'lookup' &&
+      GlobalConfig.get('dryRun') !== 'extract'
+    ) {
       await instrument('onboarding', () =>
         ensureOnboardingPr(config, packageFiles, branches)
       );
       addSplit('onboarding');
-      const res = await instrument('update', () =>
-        updateRepo(config, branches)
-      );
-      setMeta({ repository: config.repository });
-      addSplit('update');
-      if (performExtract) {
-        await setBranchCache(branches); // update branch cache if performed extraction
-      }
+    }
+    const res = await instrument('update', () => updateRepo(config, branches));
+    setMeta({ repository: config.repository });
+    addSplit('update');
+    if (performExtract) {
+      await setBranchCache(branches); // update branch cache if performed extraction
+    }
 
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
@@ -146,12 +149,18 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
   };
 }
 
-function printRepositoryProblems(config: RenovateConfig) {
-  const repoProblems = new Set(getProblems().filter((problem) =>
-    problem.repository === config.repository && !problem.artifactErrors
-  ).map((problem) =>
-    `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
-  ));
+function printRepositoryProblems(config: RenovateConfig): void {
+  const repoProblems = new Set(
+    getProblems()
+      .filter(
+        (problem) =>
+          problem.repository === config.repository && !problem.artifactErrors
+      )
+      .map(
+        (problem) =>
+          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
+      )
+  );
   if (repoProblems.size) {
     logger.debug(
       { repoProblems: Array.from(repoProblems) },

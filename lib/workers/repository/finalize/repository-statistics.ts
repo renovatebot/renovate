@@ -9,10 +9,8 @@ import type {
 } from '../../../util/cache/repository/types';
 import type {
   BaseBranchMetadata,
-  BranchConfig,
   BranchMetadata,
   BranchSummary,
-  BranchUpgradeConfig,
 } from '../../types';
 
 export function runRenovateRepoStats(
@@ -119,9 +117,7 @@ function filterDependencyDashboardData(
   return branchesFiltered;
 }
 
-export function runBranchSummary(
-  config: RenovateConfig
-): void {
+export function runBranchSummary(config: RenovateConfig): void {
   const defaultBranch = config.defaultBranch;
   const { scan, branches } = getCache();
 
@@ -151,11 +147,8 @@ export function runBranchSummary(
 
   logger.debug(res, 'Branch summary');
 
-  let branchesInformation;
   if (branches?.length) {
-    branchesInformation = filterDependencyDashboardData(branches);
-  }
-  if (branchesInformation) {
+    const branchesInformation = filterDependencyDashboardData(branches);
     logger.debug({ branchesInformation }, 'branches info extended');
   }
 }

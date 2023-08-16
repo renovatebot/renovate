@@ -1,5 +1,3 @@
-import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
 import { RepoCacheNull } from './impl/null';
 import type { RepoCache, RepoCacheData } from './types';
 
@@ -20,7 +18,7 @@ export function getCache(): RepoCacheData {
 }
 
 export async function saveCache(): Promise<void> {
-    await repoCache.save();
+  await repoCache.save();
 }
 
 export function isCacheModified(): boolean | undefined {
