@@ -9,7 +9,7 @@ import {
 } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
-import { logger, setMeta } from '../../logger';
+import {getProblems, logger, setMeta} from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -31,6 +31,8 @@ import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
 import { ProcessResult, processResult } from './result';
 import { printLookupStats, printRequestStats } from './stats';
+import * as repositoryCache from "../../util/cache/repository";
+import {nameFromLevel} from "bunyan";
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -64,15 +66,11 @@ export async function renovateRepository(
     if (config.semanticCommits === 'auto') {
       config.semanticCommits = await detectSemanticCommits();
     }
-    if (
-      GlobalConfig.get('dryRun') !== 'lookup' &&
-      GlobalConfig.get('dryRun') !== 'extract'
-    ) {
+
       await instrument('onboarding', () =>
         ensureOnboardingPr(config, packageFiles, branches)
       );
       addSplit('onboarding');
-
       const res = await instrument('update', () =>
         updateRepo(config, branches)
       );
@@ -81,6 +79,11 @@ export async function renovateRepository(
       if (performExtract) {
         await setBranchCache(branches); // update branch cache if performed extraction
       }
+
+    if (
+      GlobalConfig.get('dryRun') !== 'lookup' &&
+      GlobalConfig.get('dryRun') !== 'extract'
+    ) {
       if (res === 'automerged') {
         if (canRetry) {
           logger.info('Renovating repository again after automerge result');
@@ -95,7 +98,9 @@ export async function renovateRepository(
       // TODO #22198
       repoResult = processResult(config, res!);
     }
-    runBranchSummary(config, branches);
+    printRepositoryProblems(config);
+    await repositoryCache.saveCache();
+    runBranchSummary(config);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
@@ -139,4 +144,18 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
     branchList: [config.onboardingBranch!], // to prevent auto closing
     packageFiles: {},
   };
+}
+
+function printRepositoryProblems(config: RenovateConfig) {
+  const repoProblems = new Set(getProblems().filter((problem) =>
+    problem.repository === config.repository && !problem.artifactErrors
+  ).map((problem) =>
+    `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
+  ));
+  if (repoProblems.size) {
+    logger.debug(
+      { repoProblems: Array.from(repoProblems) },
+      'repository problems'
+    );
+  }
 }

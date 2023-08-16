@@ -67,7 +67,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(true);
 
-      runBranchSummary(config, []);
+      runBranchSummary(config);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -128,7 +128,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 
-      runBranchSummary(config, []);
+      runBranchSummary(config);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -179,7 +179,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 
-      runBranchSummary(config, []);
+      runBranchSummary(config);
 
       expect(logger.debug).toHaveBeenCalledTimes(2);
     });
@@ -194,7 +194,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 
-      runBranchSummary(config, branchesJson);
+      runBranchSummary(config);
 
       expect(logger.debug).toHaveBeenCalledTimes(2);
     });

@@ -169,10 +169,6 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       )
   );
   if (repoProblems.size) {
-    logger.debug(
-      { repoProblems: Array.from(repoProblems) },
-      'repository problems'
-    );
     newIssueBody += '## Repository problems\n\n';
     const repoProblemsHeader =
       config.customizeDashboard?.['repoProblemsHeader'] ??

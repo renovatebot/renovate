@@ -20,11 +20,7 @@ export function getCache(): RepoCacheData {
 }
 
 export async function saveCache(): Promise<void> {
-  if (GlobalConfig.get('dryRun')) {
-    logger.info(`DRY-RUN: Would save repository cache.`);
-  } else {
     await repoCache.save();
-  }
 }
 
 export function isCacheModified(): boolean | undefined {
