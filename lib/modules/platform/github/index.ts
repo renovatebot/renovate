@@ -23,6 +23,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
@@ -38,7 +39,6 @@ import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
-import { isGithubFineGrainedPersonalAccessToken } from '../../manager/composer/utils';
 import type {
   AggregatedVulnerabilities,
   AutodiscoverConfig,
