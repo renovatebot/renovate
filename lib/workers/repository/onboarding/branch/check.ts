@@ -30,7 +30,7 @@ async function configFileExists(): Promise<boolean> {
 
 async function packageJsonConfigExists(): Promise<boolean> {
   try {
-    // TODO #7154
+    // TODO #22198
     const pJson = JSON.parse((await readLocalFile('package.json', 'utf8'))!);
     if (pJson.renovate) {
       return true;

@@ -20,9 +20,10 @@ export function bumpPackageVersion(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   let newPjVersion: string | null;
   let bumpedContent = content;
+
   try {
     if (isMirrorBumpVersion(bumpVersion)) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
@@ -39,7 +40,7 @@ export function bumpPackageVersion(
     } else {
       newPjVersion = semver.inc(currentValue, bumpVersion);
     }
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     logger.debug(`newPjVersion: ${newPjVersion!}`);
     bumpedContent = content.replace(
       regEx(`(?<version>"version":\\s*")[^"]*`),

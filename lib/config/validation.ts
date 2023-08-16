@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getManagerList } from '../modules/manager';
+import { allManagersList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -65,7 +65,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !getManagerList().includes(manager)
+    (manager) => !allManagersList.includes(manager)
   );
 }
 
@@ -171,7 +171,7 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          // TODO: validate string #7154
+          // TODO: validate string #22198
           let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
@@ -188,7 +188,7 @@ export async function validateConfig(
         optionParents[key] &&
         optionParents[key] !== parentName
       ) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -415,7 +415,7 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              // TODO: fix types #7154
+              // TODO: fix types #22198
               for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
@@ -532,7 +532,7 @@ export async function validateConfig(
               (selectors.includes(key) ||
                 key === 'matchCurrentVersion' ||
                 key === 'matchCurrentValue') &&
-              // TODO: can be undefined ? #7154
+              // TODO: can be undefined ? #22198
               !rulesRe.test(parentPath!) && // Inside a packageRule
               (is.string(parentPath) || !isPreset) // top level in a preset
             ) {
@@ -616,6 +616,7 @@ export async function validateConfig(
                 'migratePresets',
                 'productLinks',
                 'secrets',
+                'customizeDashboard',
               ].includes(key)
             ) {
               const res = validatePlainObject(val);

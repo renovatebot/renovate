@@ -49,7 +49,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
 
   describe('extractGradleVersion()', () => {
     it('works for undefined', () => {
-      // TODO #7154
+      // TODO #22198
       expect(extractGradleVersion(undefined as never)).toBeNull();
     });
   });

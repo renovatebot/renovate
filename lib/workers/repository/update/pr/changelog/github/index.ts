@@ -82,7 +82,7 @@ export async function getReleaseList(
   _release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const apiBaseUrl = project.apiBaseUrl!; // TODO #7154
+  const apiBaseUrl = project.apiBaseUrl!; // TODO #22198
   const repository = project.repository;
   const notesSourceUrl = joinUrlParts(
     apiBaseUrl,

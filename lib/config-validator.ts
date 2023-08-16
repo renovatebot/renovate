@@ -62,7 +62,7 @@ type PackageJson = {
   const strictArgIndex = process.argv.indexOf('--strict');
   const strict = strictArgIndex >= 0;
   if (strict) {
-    process.argv.splice(strictArgIndex);
+    process.argv.splice(strictArgIndex, 1);
   }
   if (process.argv.length > 2) {
     for (const file of process.argv.slice(2)) {

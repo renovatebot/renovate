@@ -1,0 +1,68 @@
+[
+  {
+    "branchName": "renovate/lodash-monorepo",
+    "prTitle": "Update dependency lodash to v4.17.21",
+    "upgrades": [
+      {
+        "datasource": "npm",
+        "depName": "lodash",
+        "fixedVersion": "4.17.20",
+        "currentVersion": "4.17.20",
+        "currentValue": "4.17.20",
+        "newValue": "4.17.21",
+        "newVersion": "4.17.21",
+        "packageFile": "package.json",
+        "updateType": "patch",
+        "packageName": "lodash"
+      }
+    ]
+  },
+  {
+    "branchName": "renovate/date-io-monorepo",
+    "prTitle": "Update date-io monorepo to v2.17.0",
+    "upgrades": [
+      {
+        "datasource": "npm",
+        "depName": "@date-io/date-fns",
+        "fixedVersion": "2.10.0",
+        "currentVersion": "2.10.0",
+        "currentValue": "2.10.0",
+        "newValue": "2.17.0",
+        "newVersion": "2.17.0",
+        "packageFile": "package.json",
+        "updateType": "minor",
+        "packageName": "@date-io/date-fns"
+      },
+      {
+        "datasource": "npm",
+        "depName": "@date-io/moment",
+        "fixedVersion": "2.10.0",
+        "currentVersion": "2.10.0",
+        "currentValue": "2.10.0",
+        "newValue": "2.17.0",
+        "newVersion": "2.17.0",
+        "packageFile": "package.json",
+        "updateType": "minor",
+        "packageName": "@date-io/moment"
+      }
+    ]
+  },
+  {
+    "branchName": "renovate/commander-11.x",
+    "prTitle": "Update dependency commander to v11",
+    "upgrades": [
+      {
+        "datasource": "npm",
+        "depName": "commander",
+        "fixedVersion": "2.20.3",
+        "currentVersion": "2.20.3",
+        "currentValue": "2.20.3",
+        "newValue": "11.0.0",
+        "newVersion": "11.0.0",
+        "packageFile": "package.json",
+        "updateType": "major",
+        "packageName": "commander"
+      }
+    ]
+  }
+]

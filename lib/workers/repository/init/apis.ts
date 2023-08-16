@@ -7,12 +7,12 @@ import {
 import { logger } from '../../../logger';
 import { RepoParams, RepoResult, platform } from '../../../modules/platform';
 
-// TODO: fix types (#7154)
+// TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
 
-// TODO #7154
+// TODO #22198
 const defaultConfigFile = (config: RenovateConfig): string =>
   configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
@@ -50,7 +50,7 @@ async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   }
 }
 
-// TODO: fix types (#7154)
+// TODO: fix types (#22198)
 async function getPlatformConfig(
   config: RepoParams
 ): Promise<WorkerPlatformConfig> {
@@ -61,7 +61,7 @@ async function getPlatformConfig(
   };
 }
 
-// TODO: fix types (#7154)
+// TODO: fix types (#22198)
 export async function initApis(
   input: RenovateConfig
 ): Promise<WorkerPlatformConfig> {

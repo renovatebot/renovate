@@ -78,7 +78,7 @@ describe('modules/manager/gradle/artifacts', () => {
       })
     );
 
-    // TODO: fix types, jest is using wrong overload (#7154)
+    // TODO: fix types, jest is using wrong overload (#22198)
     fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
       let content = '';
       if (fileName === 'gradle.lockfile') {

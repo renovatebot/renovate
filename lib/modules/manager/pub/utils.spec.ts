@@ -1,10 +1,46 @@
 import { codeBlock } from 'common-tags';
-import { parsePubspecLock } from './utils';
+import { parsePubspec, parsePubspecLock } from './utils';
 
 describe('modules/manager/pub/utils', () => {
-  describe('parsePubspeckLock', () => {
-    const fileName = 'pubspec.lock';
+  const fileName = 'fileName';
+  const invalidYaml = codeBlock`
+    clearly: "invalid" "yaml"
+  `;
+  const invalidSchema = codeBlock`
+    clearly: invalid
+  `;
 
+  describe('parsePubspec', () => {
+    it('load and parse successfully', () => {
+      const fileContent = codeBlock`
+        environment:
+          sdk: ">=3.0.0 <4.0.0"
+          flutter: ">=3.10.0"
+        dependencies:
+          dep1: 1.0.0
+        dev_dependencies:
+          dep2: 1.0.1
+      `;
+      const actual = parsePubspec(fileName, fileContent);
+      expect(actual).toMatchObject({
+        environment: { sdk: '>=3.0.0 <4.0.0', flutter: '>=3.10.0' },
+        dependencies: { dep1: '1.0.0' },
+        dev_dependencies: { dep2: '1.0.1' },
+      });
+    });
+
+    it('invalid yaml', () => {
+      const actual = parsePubspec(fileName, invalidYaml);
+      expect(actual).toBeNull();
+    });
+
+    it('invalid schema', () => {
+      const actual = parsePubspec(fileName, invalidSchema);
+      expect(actual).toBeNull();
+    });
+  });
+
+  describe('parsePubspeckLock', () => {
     it('load and parse successfully', () => {
       const pubspecLock = codeBlock`
         sdks:
@@ -18,12 +54,12 @@ describe('modules/manager/pub/utils', () => {
     });
 
     it('invalid yaml', () => {
-      const actual = parsePubspecLock(fileName, 'clearly-invalid');
+      const actual = parsePubspecLock(fileName, invalidYaml);
       expect(actual).toBeNull();
     });
 
     it('invalid schema', () => {
-      const actual = parsePubspecLock(fileName, 'clearly:\n\tinvalid: lock');
+      const actual = parsePubspecLock(fileName, invalidSchema);
       expect(actual).toBeNull();
     });
   });

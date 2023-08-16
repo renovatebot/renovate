@@ -202,7 +202,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any> {
-  // TODO #7154
+  // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -239,12 +239,12 @@ function getRepoUrl(
       );
     }
 
-    // TODO: null check (#7154)
+    // TODO: null check (#22198)
     const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,
       pathname: newPathname + '/' + repository + '.git',
@@ -255,7 +255,7 @@ function getRepoUrl(
 
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   repoUrl.auth = `oauth2:${opts.token!}`;
   return URL.format(repoUrl);
 }
@@ -383,7 +383,7 @@ async function getStatus(
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
   try {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const url = `projects/${
       config.repository
     }/repository/commits/${branchSha!}/statuses`;
@@ -730,7 +730,7 @@ export async function updatePr({
   const newState = {
     ['closed']: 'close',
     ['open']: 'reopen',
-    // TODO: null check (#7154)
+    // TODO: null check (#22198)
   }[state!];
 
   const body: any = {
@@ -868,7 +868,7 @@ export async function setBranchStatus({
   // First, get the branch commit SHA
   const branchSha = git.getBranchCommit(branchName);
   // Now, check the statuses for that commit
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const url = `projects/${config.repository}/statuses/${branchSha!}`;
   let state = 'success';
   if (renovateState === 'yellow') {
@@ -1217,7 +1217,7 @@ export async function ensureComment({
   let body: string;
   let commentId: number | undefined;
   let commentNeedsUpdating: boolean | undefined;
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;

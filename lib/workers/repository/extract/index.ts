@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getManagerList, hashMap } from '../../../modules/manager';
+import { allManagersList, hashMap } from '../../../modules/manager';
+import { isCustomManager } from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
@@ -11,7 +12,7 @@ import { getManagerPackageFiles } from './manager-files';
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
-  let managerList = getManagerList();
+  let managerList = allManagersList;
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
@@ -32,7 +33,8 @@ export async function extractAllDependencies(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
-    if (manager === 'regex') {
+    if (isCustomManager(manager)) {
+      // TODO: filter regexManagers using customType before
       for (const regexManager of config.regexManagers ?? []) {
         tryConfig(mergeChildConfig(managerConfig, regexManager));
       }

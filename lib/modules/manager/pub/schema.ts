@@ -1,5 +1,20 @@
 import { z } from 'zod';
-import { Yaml } from '../../../util/schema-utils';
+import { LooseRecord, Yaml } from '../../../util/schema-utils';
+
+const PubspecDependencySchema = LooseRecord(
+  z.string(),
+  z.union([z.string(), z.object({ version: z.string().optional() })])
+);
+
+export const PubspecSchema = z.object({
+  environment: z.object({ sdk: z.string(), flutter: z.string().optional() }),
+  dependencies: PubspecDependencySchema.optional(),
+  dev_dependencies: PubspecDependencySchema.optional(),
+});
+
+export type PubspecSchema = z.infer<typeof PubspecSchema>;
+
+export const PubspecYaml = Yaml.pipe(PubspecSchema);
 
 export const PubspecLockSchema = z.object({
   sdks: z.object({

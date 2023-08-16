@@ -203,7 +203,7 @@ export interface Platform {
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #7154
+    // TODO: can be undefined or null ? #22198
     context: string | null | undefined
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
@@ -235,4 +235,6 @@ export interface PlatformScm {
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<CommitSha>;
+  mergeToLocal(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string): Promise<void>;
 }

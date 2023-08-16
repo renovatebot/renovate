@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
-import { mergeBranch } from '../../../../util/git';
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
@@ -40,11 +39,11 @@ export async function tryBranchAutomerge(
     logger.debug(`Automerging branch`);
     try {
       if (GlobalConfig.get('dryRun')) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
         await scm.checkoutBranch(config.baseBranch!);
-        await mergeBranch(config.branchName!);
+        await scm.mergeAndPush(config.branchName!);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists

@@ -6,10 +6,7 @@ import { clearRenovateRefs } from '../../../util/git';
 import { configMigration } from '../config-migration';
 import { PackageFiles } from '../package-files';
 import { pruneStaleBranches } from './prune';
-import {
-  runBranchSummary,
-  runRenovateRepoStats,
-} from './repository-statistics';
+import { runRenovateRepoStats } from './repository-statistics';
 
 // istanbul ignore next
 export async function finalizeRepo(
@@ -34,7 +31,6 @@ export async function finalizeRepo(
     logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
-  runBranchSummary(config);
   runRenovateRepoStats(config, prList);
 }
 
