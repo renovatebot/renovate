@@ -28,7 +28,9 @@ export async function detectMonorepos(
         delete p.managerData.lernaPackages;
         delete p.managerData.lernaClient;
       } else {
-        logger.debug('Detected lerna <7');
+        logger.warn(
+          'Support for lerna <7 is now deprecated, please prioritize updating to v7'
+        );
       }
     }
   }
