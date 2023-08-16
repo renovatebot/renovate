@@ -14,6 +14,10 @@ import * as hostRules from '../../../util/host-rules';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const hexRepoUrl = 'https://hex.pm/';
+const hexRepoOrgUrlRegex = new RegExp(
+  `${hexRepoUrl}api/repos/([a-z0-9_]+)/`,
+  'g'
+);
 
 export async function updateArtifacts({
   packageFileName,
@@ -50,6 +54,24 @@ export async function updateArtifacts({
   }
 
   const organizations = new Set<string>();
+
+  const hexHostRulesWithMatchHost = hostRules
+    .getAll()
+    .filter(
+      (hostRule) =>
+        !!hostRule.matchHost && hexRepoOrgUrlRegex.test(hostRule.matchHost)
+    );
+
+  for (const { matchHost } of hexHostRulesWithMatchHost) {
+    if (matchHost) {
+      const result = hexRepoOrgUrlRegex.exec(matchHost);
+
+      if (result) {
+        const [, organization] = result;
+        organizations.add(organization);
+      }
+    }
+  }
 
   for (const { packageName } of updatedDeps) {
     if (packageName) {
