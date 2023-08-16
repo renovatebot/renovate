@@ -23,6 +23,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
@@ -133,11 +134,6 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-  if (token.startsWith('github_pat_')) {
-    throw new Error(
-      'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
-    );
-  }
   token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
@@ -149,6 +145,20 @@ export async function initPlatform({
   }
 
   await detectGhe(token);
+  /**
+   * GHE requires version >=3.10 to support fine-grained access tokens
+   * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
+   */
+  if (
+    isGithubFineGrainedPersonalAccessToken(token) &&
+    platformConfig.isGhe &&
+    (!platformConfig.gheVersion ||
+      semver.lt(platformConfig.gheVersion, '3.10.0'))
+  ) {
+    throw new Error(
+      'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.'
+    );
+  }
 
   let renovateUsername: string;
   if (username) {

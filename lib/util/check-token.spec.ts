@@ -246,7 +246,7 @@ describe('util/check-token', () => {
       ).toBe(githubToken);
     });
 
-    it('take personal assess token over fine grained token', () => {
+    it('take personal access token over fine grained token', () => {
       const githubToken = 'ghp_github';
       const gitTagsGithubToken = 'github_pat_gitTags';
       expect(
