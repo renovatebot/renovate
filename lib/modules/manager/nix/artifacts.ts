@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { logger } from '../../../logger';
+import { findGithubToken } from '../../../util/check-token';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
@@ -25,10 +26,10 @@ export async function updateArtifacts({
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes `;
 
-  const { token } = hostRules.find({
+  const token = findGithubToken(hostRules.find({
     hostType: 'github',
     url: 'https://api.github.com/',
-  });
+  }));
 
   if (token) {
     cmd += `--extra-access-tokens github.com=${token} `;
