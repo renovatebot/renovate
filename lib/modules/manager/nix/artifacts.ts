@@ -26,10 +26,12 @@ export async function updateArtifacts({
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes `;
 
-  const token = findGithubToken(hostRules.find({
-    hostType: 'github',
-    url: 'https://api.github.com/',
-  }));
+  const token = findGithubToken(
+    hostRules.find({
+      hostType: 'github',
+      url: 'https://api.github.com/',
+    })
+  );
 
   if (token) {
     cmd += `--extra-access-tokens github.com=${token} `;
