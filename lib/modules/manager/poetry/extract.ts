@@ -145,8 +145,8 @@ function extractFromSection(
   return deps;
 }
 
-function extractRegistries(pyprojectFile: PoetrySchema): string[] | undefined {
-  const sources = pyprojectFile?.tool?.poetry?.source;
+function extractRegistries(pyprojectfile: PoetrySchema): string[] | undefined {
+  const sources = pyprojectfile?.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
     return undefined;
@@ -168,8 +168,8 @@ export async function extractPackageFile(
   packageFile: string
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
-  const pyprojectFile = parsePoetry(packageFile, content);
-  if (!pyprojectFile?.tool?.poetry) {
+  const pyprojectfile = parsePoetry(packageFile, content);
+  if (!pyprojectfile?.tool?.poetry) {
     logger.debug({ packageFile }, `contains no poetry section`);
     return null;
   }
@@ -183,18 +183,18 @@ export async function extractPackageFile(
 
   const deps = [
     ...extractFromDependenciesSection(
-      pyprojectFile,
+      pyprojectfile,
       'dependencies',
       lockfileMapping
     ),
     ...extractFromDependenciesSection(
-      pyprojectFile,
+      pyprojectfile,
       'dev-dependencies',
       lockfileMapping
     ),
-    ...extractFromDependenciesSection(pyprojectFile, 'extras', lockfileMapping),
+    ...extractFromDependenciesSection(pyprojectfile, 'extras', lockfileMapping),
     ...extractFromDependenciesGroupSection(
-      pyprojectFile?.tool?.poetry?.group,
+      pyprojectfile?.tool?.poetry?.group,
       lockfileMapping
     ),
   ];
@@ -205,14 +205,14 @@ export async function extractPackageFile(
 
   const extractedConstraints: Record<string, any> = {};
 
-  if (is.nonEmptyString(pyprojectFile?.tool?.poetry?.dependencies?.python)) {
+  if (is.nonEmptyString(pyprojectfile?.tool?.poetry?.dependencies?.python)) {
     extractedConstraints.python =
-      pyprojectFile?.tool?.poetry?.dependencies?.python;
+      pyprojectfile?.tool?.poetry?.dependencies?.python;
   }
 
   const res: PackageFileContent = {
     deps,
-    registryUrls: extractRegistries(pyprojectFile),
+    registryUrls: extractRegistries(pyprojectfile),
     extractedConstraints,
   };
   // Try poetry.lock first
