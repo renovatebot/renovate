@@ -249,6 +249,7 @@ describe('modules/manager/mix/artifacts', () => {
     ]);
     hostRules.find.mockReturnValueOnce({ token: 'an_organization_token' });
     hostRules.find.mockReturnValueOnce({}); // unauthorized_organization token missing
+    hostRules.find.mockReturnValueOnce({ token: 'does_not_match_org_token' });
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
@@ -276,20 +277,34 @@ describe('modules/manager/mix/artifacts', () => {
       config,
     });
 
-    expect(result).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
-
-    // TODO #22198
-    const [updateResult] = result!;
-    expect(updateResult).toEqual({
-      file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
-    });
-
-    const [, packageUpdateCommand] = execSnapshots;
-    expect(packageUpdateCommand.cmd).toInclude(
-      'mix hex.organization auth an_organization --key an_organization_token && ' +
-        'mix deps.update some_package'
-    );
+    expect(result).toEqual([
+      {
+        file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
+      },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/containerbase/sidecar ' +
+          'bash -l -c "' +
+          'install-tool erlang 25.0.0.0' +
+          ' && ' +
+          'install-tool elixir v1.13.4' +
+          ' && ' +
+          'mix hex.organization auth an_organization --key an_organization_token' +
+          ' && ' +
+          'mix deps.update some_package' +
+          '"',
+      },
+    ]);
   });
 
   it('returns updated mix.lock in subdir', async () => {

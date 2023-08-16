@@ -10,12 +10,13 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const hexRepoUrl = 'https://hex.pm/';
-const hexRepoOrgUrlRegex = new RegExp(
-  `${hexRepoUrl}api/repos/([a-z0-9_]+)/`,
+const hexRepoOrgUrlRegex = regEx(
+  `https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`,
   'g'
 );
 
@@ -66,8 +67,8 @@ export async function updateArtifacts({
     if (matchHost) {
       const result = hexRepoOrgUrlRegex.exec(matchHost);
 
-      if (result) {
-        const [, organization] = result;
+      if (result?.groups) {
+        const { organization } = result.groups;
         organizations.add(organization);
       }
     }

@@ -1,47 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/mix/artifacts authenticates to private repositories configured in hostRules 1`] = `
-[
-  {
-    "file": {
-      "contents": "New mix.lock",
-      "path": "mix.lock",
-      "type": "addition",
-    },
-  },
-]
-`;
-
-exports[`modules/manager/mix/artifacts authenticates to private repositories configured in hostRules 2`] = `
-[
-  {
-    "cmd": "docker ps --filter name=renovate_sidecar -aq",
-    "options": {
-      "encoding": "utf-8",
-    },
-  },
-  {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix hex.organization auth an_organization --key an_organization_token && mix deps.update some_package"",
-    "options": {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": {
-        "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
 exports[`modules/manager/mix/artifacts authenticates to private repositories in updated dependecies 1`] = `
 [
   {
