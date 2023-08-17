@@ -449,12 +449,9 @@ export async function processBranch(
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (
-      !(
-        config.reuseExistingBranch &&
-        config.skipBranchUpdate &&
-        (GlobalConfig.get('dryRun') === 'lookup' ||
-          GlobalConfig.get('dryRun') === 'extract')
-      )
+      !(config.reuseExistingBranch && config.skipBranchUpdate) &&
+      GlobalConfig.get('dryRun') !== 'lookup' &&
+      GlobalConfig.get('dryRun') !== 'extract'
     ) {
       await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
