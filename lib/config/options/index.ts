@@ -2454,12 +2454,21 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'customType',
+    description:
+      ' Custom manager to use. Valid only within a `regexManagers` object.',
+    type: 'string',
+    format: 'regex',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchStrings',
     description:
       'Regex capture rule to use. Valid only within a `regexManagers` object.',
     type: 'array',
     subType: 'string',
-    format: 'regex',
     parent: 'regexManagers',
     cli: false,
     env: false,

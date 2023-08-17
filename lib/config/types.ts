@@ -193,7 +193,8 @@ export interface RegexManagerTemplates {
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
 }
-export interface RegExManager extends RegexManagerTemplates {
+export interface CustomManager extends RegexManagerTemplates {
+  customType: string;
   fileMatch: string[];
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
@@ -261,7 +262,7 @@ export interface RenovateConfig
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
-  regexManagers?: RegExManager[];
+  regexManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
