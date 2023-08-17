@@ -110,8 +110,7 @@ function calculateSatisfyingVersionIntenal(
  */
 function removeComposerSpecificPatchPart(input: string): [string, boolean] {
   // the regex is based on the original from composer implementation https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L137
-  const pattern =
-    /^v?[0-9]{1,5}(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?(?<suffix>-p[1-9][0-9]*)$/gi;
+  const pattern = /^v?\d+(\.\d+(\.\d+(\.\d+)?)?)?(?<suffix>-p[1-9]\d*)$/gi;
   const match = pattern.exec(input);
 
   return match
