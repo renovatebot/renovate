@@ -58,6 +58,7 @@ export interface PrBodyStruct {
   rawConfigHash?: string;
   rebaseRequested?: boolean;
   debugData?: PrDebugData;
+  labelsHash?: string;
 }
 
 /**
@@ -115,6 +116,8 @@ export interface UpdatePrConfig {
   prBody?: string;
   state?: 'open' | 'closed';
   targetBranch?: string;
+  addLabels?: string[] | null;
+  removeLabels?: string[] | null;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -200,6 +203,7 @@ export interface Platform {
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
+  addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,

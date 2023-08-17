@@ -622,11 +622,14 @@ const platform: Platform = {
     number,
     prTitle,
     prBody: body,
+    addLabels,
+    removeLabels,
     state,
     targetBranch,
   }: UpdatePrConfig): Promise<void> {
     let title = prTitle;
-    if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
+    const pr = (await getPrList()).find((pr) => pr.number === number);
+    if (pr?.isDraft) {
       title = DRAFT_PREFIX + title;
     }
 
@@ -639,6 +642,17 @@ const platform: Platform = {
       prUpdateParams.base = targetBranch;
     }
 
+    if (is.nonEmptyArray(addLabels)) {
+      for (const label of addLabels) {
+        await addLabel!(number, label);
+      }
+    }
+
+    if (is.nonEmptyArray(removeLabels)) {
+      for (const label of removeLabels) {
+        await deleteLabel(number, label);
+      }
+    }
     await helper.updatePR(config.repository, number, prUpdateParams);
   },
 
@@ -839,6 +853,16 @@ const platform: Platform = {
     }
   },
 
+  async addLabel(issue: number, labelName: string): Promise<void> {
+    logger.debug(`Adding label ${labelName} to Issue #${issue}`);
+    const label = await lookupLabelByName(labelName);
+    if (label) {
+      await helper.assignLabel(config.repository, issue, label);
+    } else {
+      logger.warn({ issue, labelName }, 'Failed to lookup label for addition');
+    }
+  },
+
   getRepoForceRebase(): Promise<boolean> {
     return Promise.resolve(false);
   },
@@ -959,6 +983,7 @@ const platform: Platform = {
 /* eslint-disable @typescript-eslint/unbound-method */
 export const {
   addAssignees,
+  addLabel,
   addReviewers,
   createPr,
   deleteLabel,

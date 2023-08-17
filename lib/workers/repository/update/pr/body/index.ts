@@ -6,6 +6,7 @@ import * as template from '../../../../../util/template';
 import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
 import { getDepWarningsPR, getWarnings } from '../../../errors-warnings';
+import { prepareLabels } from '../labels';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -100,6 +101,10 @@ export function getPrBody(
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
     prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
+
+    const prLabelsHash = toBase64(JSON.stringify(prepareLabels(config)));
+    prBody += `\n<!--labels:${prLabelsHash}-->\n`;
+
     prBody = platform.massageMarkdown(prBody);
 
     if (prBodyConfig?.rebasingNotice) {

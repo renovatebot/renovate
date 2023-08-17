@@ -1290,6 +1290,41 @@ describe('modules/platform/gitea/index', () => {
         state: 'closed',
       });
     });
+
+    it('should add and remove labels', async () => {
+      helper.getRepoLabels.mockResolvedValueOnce([
+        { id: 1, name: 'old_label', description: 'its a me', color: '#000000' },
+        {
+          id: 2,
+          name: 'new_label',
+          description: 'labelario',
+          color: '#ffffff',
+        },
+      ]);
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
+      await initFakeRepo();
+      await gitea.updatePr({
+        number: 1,
+        prTitle: 'New Title',
+        prBody: 'New Body',
+        state: 'closed',
+        addLabels: ['new_label'],
+        removeLabels: ['new_label'],
+      });
+
+      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
+        title: 'New Title',
+        body: 'New Body',
+        state: 'closed',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Deleting label old_label from Issue #1'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Adding label new_label to Issue #1'
+      );
+    });
   });
 
   describe('mergePr', () => {

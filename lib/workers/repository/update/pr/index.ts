@@ -43,6 +43,8 @@ import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
 } from './pr-fingerprint';
+import { fromBase64, toBase64 } from '../../../../util/string';
+import { regEx } from '../../../../util/regex';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -316,7 +318,7 @@ export async function ensurePr(
     }
   }
 
-  const prBody = getPrBody(
+  let prBody = getPrBody(
     config,
     {
       debugData: updatePrDebugData(
@@ -331,6 +333,16 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
 
+      const existingLabelsHash = existingPr.bodyStruct?.labelsHash;
+      // eslint-disable-next-line
+      console.log(existingPr.bodyStruct);
+      // remove labels hash from pr body if existing pr doesn't have one
+      if (!existingLabelsHash) {
+        // eslint-disable-next-line
+        console.log('mast kaam kiya rahul');
+        prBody = prBody.replace(regEx(/<!--labels:.*?-->/g), '');
+      }
+
       if (
         !existingPr.hasAssignees &&
         !hasNotIgnoredReviewers(existingPr, config) &&
@@ -341,6 +353,7 @@ export async function ensurePr(
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addParticipants(config, existingPr);
       }
+
       // Check if existing PR needs updating
       const existingPrTitle = stripEmojis(existingPr.title);
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
@@ -376,6 +389,27 @@ export async function ensurePr(
           'PR base branch has changed'
         );
         updatePrConfig.targetBranch = config.baseBranch;
+      }
+      if (existingLabelsHash) {
+        const newLabelsHash = toBase64(JSON.stringify(prepareLabels(config)));
+        if (existingLabelsHash !== newLabelsHash) {
+          logger.debug(
+            {
+              branchName,
+              oldLabels: existingLabelsHash
+                ? JSON.parse(fromBase64(existingLabelsHash))
+                : [],
+              newLabels: prepareLabels(config),
+            },
+            'PR labels have changed'
+          );
+          const [addLabels, removeLabels] = getChangedLabels(
+            existingLabelsHash,
+            newLabelsHash
+          );
+          updatePrConfig.addLabels = addLabels;
+          updatePrConfig.removeLabels = removeLabels;
+        }
       }
       if (existingPrTitle !== newPrTitle) {
         logger.debug(
@@ -521,4 +555,19 @@ export async function ensurePr(
     return { type: 'with-pr', pr: existingPr };
   }
   return { type: 'without-pr', prBlockedBy: 'Error' };
+}
+
+function getChangedLabels(
+  oldLabelsHash: string,
+  newLabelsHash: string
+): [string[] | null, string[] | null] {
+  const existingLabels: string[] = JSON.parse(fromBase64(oldLabelsHash));
+  const newLabels: string[] = JSON.parse(fromBase64(newLabelsHash));
+
+  const labelsToAdd =
+    newLabels?.filter((l) => !existingLabels?.includes(l)) ?? null;
+  const labelsToRemove =
+    existingLabels?.filter((l) => !newLabels?.includes(l)) ?? null;
+
+  return [labelsToAdd, labelsToRemove];
 }

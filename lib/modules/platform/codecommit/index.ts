@@ -320,7 +320,8 @@ export function massageMarkdown(input: string): string {
     .replace(
       regEx(/(?<hiddenComment><!--renovate-(?:debug|config-hash):.*?-->)/g),
       '[//]: # ($<hiddenComment>)'
-    );
+    )
+    .replace(regEx(/<!--labels:.*?-->/g), '');
 }
 
 export async function getJsonFile(

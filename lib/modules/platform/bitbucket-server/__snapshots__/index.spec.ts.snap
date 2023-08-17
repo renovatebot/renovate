@@ -198,6 +198,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path massageMa
 
 Empty comment.
 
+
 Followed by some information.
 "
 `;
@@ -401,6 +402,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path massageMarkd
 ---
 
 Empty comment.
+
 
 Followed by some information.
 "

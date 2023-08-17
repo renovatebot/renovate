@@ -306,6 +306,21 @@ export async function unassignLabel(
   await giteaHttp.deleteJson(url, options);
 }
 
+export async function assignLabel(
+  repoPath: string,
+  issue: number,
+  label: number,
+  options?: GiteaHttpOptions
+): Promise<void> {
+  const url = `${API_PATH}/repos/${repoPath}/issues/${issue}/labels`;
+  await giteaHttp.patchJson(url, {
+    ...options,
+    body: {
+      labels: [label],
+    },
+  });
+}
+
 export async function createComment(
   repoPath: string,
   issue: number,

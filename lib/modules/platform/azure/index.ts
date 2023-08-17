@@ -782,7 +782,8 @@ export function massageMarkdown(input: string): string {
       'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+    .replace(regEx(/<!--labels:.*?-->/g), '');
 }
 
 /* istanbul ignore next */

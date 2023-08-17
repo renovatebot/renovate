@@ -1600,6 +1600,8 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: rawBody,
+  addLabels: labelsToAdd,
+  removeLabels,
   state,
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
@@ -1622,12 +1624,26 @@ export async function updatePr({
   if (config.forkToken) {
     options.token = config.forkToken;
   }
+
   try {
+    // add and remove labels before updating pr body because if by some mishap
+    // labels aren't changed then pr body will have wrong labelsHash
+    if (labelsToAdd) {
+      await addLabels(prNo, labelsToAdd);
+    }
+
+    if (removeLabels) {
+      for (const label of removeLabels) {
+        await deleteLabel(prNo, label);
+      }
+    }
+
     const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,
       options
     );
     const result = coerceRestPr(ghPr);
+
     cachePr(result);
     logger.debug(`PR updated...prNo: ${prNo}`);
   } catch (err) /* istanbul ignore next */ {

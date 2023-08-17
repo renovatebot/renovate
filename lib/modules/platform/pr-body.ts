@@ -15,6 +15,7 @@ const renovateConfigHashRe = regEx(
 );
 
 const prCheckboxRe = regEx(/- (?<checkbox>\[[\sx]]) <!-- rebase-check -->/);
+const prLabelsRe = regEx(/\n?<!--labels:(?<labels>.*?)-->\n?/);
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(regEx(/\r?\n|\r|\s|#/g), '');
@@ -43,6 +44,14 @@ function isRebaseRequested(body: string): boolean | undefined {
   return match.groups?.checkbox === '[x]';
 }
 
+function getLabels(body: string): string | undefined {
+  const match = prLabelsRe.exec(body);
+  if (!match) {
+    return undefined;
+  }
+  return match.groups?.labels;
+}
+
 export function getRenovateDebugPayload(body: string): string | undefined {
   const match = prDebugDataRe.exec(body);
   return match?.groups?.payload;
@@ -61,6 +70,10 @@ export function getPrBodyStruct(
   const result: PrBodyStruct = { hash };
 
   const rebaseRequested = isRebaseRequested(body);
+  const labelsHash = getLabels(body);
+  if (labelsHash) {
+    result.labelsHash = labelsHash;
+  }
 
   if (!is.undefined(rebaseRequested)) {
     result.rebaseRequested = rebaseRequested;

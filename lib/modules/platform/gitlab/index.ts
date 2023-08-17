@@ -719,6 +719,8 @@ export async function updatePr({
   number: iid,
   prTitle,
   prBody: description,
+  addLabels,
+  removeLabels,
   state,
   platformOptions,
   targetBranch,
@@ -740,6 +742,13 @@ export async function updatePr({
   };
   if (targetBranch) {
     body.target_branch = targetBranch;
+  }
+  if (addLabels) {
+    body.add_labels = addLabels;
+  }
+
+  if (removeLabels) {
+    body.remove_labels = removeLabels;
   }
 
   await gitlabApi.putJson(

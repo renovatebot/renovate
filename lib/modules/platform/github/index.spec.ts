@@ -2868,6 +2868,44 @@ describe('modules/platform/github/index', () => {
 
       await expect(github.updatePr(pr)).toResolve();
     });
+
+    it('should add and remove labels', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: 'closed',
+        targetBranch: 'new_base',
+        addLabels: ['new_label'],
+        removeLabels: ['old_label'],
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .patch('/repos/some/repo/pulls/1234')
+        .reply(200, {
+          number: 91,
+          base: { sha: '1234' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'old title',
+          updated_at: '01-09-2022',
+          body: '<!--labels:WyJvbGRfbGFiZWwiXQ==-->', // equivalent to labels array : ['old_label]
+        })
+        .post('/repos/some/repo/issues/1234/labels')
+        .reply(200, pr)
+        .delete('/repos/some/repo/issues/1234/labels/old_label')
+        .reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Adding labels 'new_label' to #1234`
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Deleting label old_label from #1234`
+      );
+    });
   });
 
   describe('mergePr(prNo)', () => {
