@@ -1,67 +1,64 @@
 [
   {
-    "branchName": "renovate/lodash-monorepo",
-    "prTitle": "Update dependency lodash to v4.17.21",
+    "branchName": "renovate/got-11.x",
+    "prNo": null,
+    "prTitle": "Update dependency got to v11.8.6",
+    "result": "branch-limit-reached",
     "upgrades": [
       {
         "datasource": "npm",
-        "depName": "lodash",
-        "fixedVersion": "4.17.20",
-        "currentVersion": "4.17.20",
-        "currentValue": "4.17.20",
-        "newValue": "4.17.21",
-        "newVersion": "4.17.21",
+        "depName": "got",
+        "displayPending": "",
+        "fixedVersion": "11.0.0",
+        "currentVersion": "11.0.0",
+        "currentValue": "11.0.0",
+        "newValue": "11.8.6",
+        "newVersion": "11.8.6",
         "packageFile": "package.json",
-        "updateType": "patch",
-        "packageName": "lodash"
+        "updateType": "minor",
+        "packageName": "got"
       }
     ]
   },
   {
-    "branchName": "renovate/date-io-monorepo",
-    "prTitle": "Update date-io monorepo to v2.17.0",
+    "branchName": "renovate/requests-0.x",
+    "prNo": 5,
+    "prTitle": "Update dependency requests to v0.3.0",
+    "result": "done",
     "upgrades": [
       {
         "datasource": "npm",
-        "depName": "@date-io/date-fns",
-        "fixedVersion": "2.10.0",
-        "currentVersion": "2.10.0",
-        "currentValue": "2.10.0",
-        "newValue": "2.17.0",
-        "newVersion": "2.17.0",
+        "depName": "requests",
+        "displayPending": "",
+        "fixedVersion": "0.1.0",
+        "currentVersion": "0.1.0",
+        "currentValue": "0.1.0",
+        "newValue": "0.3.0",
+        "newVersion": "0.3.0",
         "packageFile": "package.json",
         "updateType": "minor",
-        "packageName": "@date-io/date-fns"
-      },
-      {
-        "datasource": "npm",
-        "depName": "@date-io/moment",
-        "fixedVersion": "2.10.0",
-        "currentVersion": "2.10.0",
-        "currentValue": "2.10.0",
-        "newValue": "2.17.0",
-        "newVersion": "2.17.0",
-        "packageFile": "package.json",
-        "updateType": "minor",
-        "packageName": "@date-io/moment"
+        "packageName": "requests"
       }
     ]
   },
   {
-    "branchName": "renovate/commander-11.x",
-    "prTitle": "Update dependency commander to v11",
+    "branchName": "renovate/got-13.x",
+    "prNo": null,
+    "prTitle": "Update dependency got to v13",
+    "result": "branch-limit-reached",
     "upgrades": [
       {
         "datasource": "npm",
-        "depName": "commander",
-        "fixedVersion": "2.20.3",
-        "currentVersion": "2.20.3",
-        "currentValue": "2.20.3",
-        "newValue": "11.0.0",
-        "newVersion": "11.0.0",
+        "depName": "got",
+        "displayPending": "",
+        "fixedVersion": "11.0.0",
+        "currentVersion": "11.0.0",
+        "currentValue": "11.0.0",
+        "newValue": "13.0.0",
+        "newVersion": "13.0.0",
         "packageFile": "package.json",
         "updateType": "major",
-        "packageName": "commander"
+        "packageName": "got"
       }
     ]
   }

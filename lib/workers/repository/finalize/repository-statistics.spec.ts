@@ -18,6 +18,7 @@ jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
 
 const prJson = Fixtures.getJson('./pr-list.json');
+const branchesJson = Fixtures.getJson('./branches.json');
 const result = Object.keys(prJson).map((key) => {
   return prJson[key];
 });
@@ -189,6 +190,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       };
       const cache = partial<RepoCacheData>({
         scan: {},
+        branches: branchesJson,
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
