@@ -22,8 +22,7 @@ export async function getGoogleAccessToken(): Promise<string | null> {
       'Could not extract access token from google getAccessToken response'
     );
   } catch (err) {
-    logger.trace({ err }, 'err');
-    logger.debug('google getAccessToken error');
+    logger.debug({ err }, 'google getAccessToken error');
   }
   return null;
 }
