@@ -17,6 +17,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -53,7 +54,6 @@ import {
   getStorageExtraCloneOpts,
   max4000Chars,
 } from './util';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 
 interface Config {
   repoForceRebase: boolean;
