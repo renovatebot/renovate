@@ -3,7 +3,11 @@ import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID_JSON,
+  PRESET_NOT_FOUND,
+} from '../util';
 import * as gitea from '.';
 
 jest.mock('../../../util/host-rules');
@@ -53,15 +57,29 @@ describe('config/presets/gitea/index', () => {
       );
       expect(res).toEqual({ from: 'api' });
     });
+
+    it('throws dep not found', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .reply(404);
+
+      await expect(
+        gitea.fetchJSONFile(
+          'some/repo',
+          'some-filename.json',
+          giteaApiHost,
+          null
+        )
+      ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
+    });
   });
 
   describe('getPreset()', () => {
-    it('tries default then renovate', async () => {
+    it('tries default', async () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
-        .reply(404, {})
-        .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow();

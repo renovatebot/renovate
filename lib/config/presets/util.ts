@@ -1,5 +1,4 @@
 import JSON5 from 'json5';
-import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { FetchPresetConfig, Preset } from './types';
@@ -28,27 +27,12 @@ export async function fetchPreset({
   const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
   let jsonContent: any;
   if (fileName === 'default') {
-    try {
-      jsonContent = await fetch(
-        repo,
-        buildFilePath('default.json'),
-        endpoint,
-        tag
-      );
-    } catch (err) {
-      if (err.message !== PRESET_DEP_NOT_FOUND) {
-        throw err;
-      }
-      jsonContent = await fetch(
-        repo,
-        buildFilePath('renovate.json'),
-        endpoint,
-        tag
-      );
-      logger.info(
-        'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
-      );
-    }
+    jsonContent = await fetch(
+      repo,
+      buildFilePath('default.json'),
+      endpoint,
+      tag
+    );
   } else {
     jsonContent = await fetch(
       repo,

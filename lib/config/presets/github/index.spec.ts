@@ -2,7 +2,11 @@ import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID_JSON,
+  PRESET_NOT_FOUND,
+} from '../util';
 import * as github from '.';
 
 jest.mock('../../../util/host-rules');
@@ -34,15 +38,29 @@ describe('config/presets/github/index', () => {
       );
       expect(res).toEqual({ from: 'api' });
     });
+
+    it('throws dep not found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .reply(404);
+
+      await expect(
+        github.fetchJSONFile(
+          'some/repo',
+          'some-filename.json',
+          githubApiHost,
+          undefined
+        )
+      ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
+    });
   });
 
   describe('getPreset()', () => {
-    it('tries default then renovate', async () => {
+    it('tries default', async () => {
       httpMock
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
-        .reply(404, {})
-        .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
       await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow();
