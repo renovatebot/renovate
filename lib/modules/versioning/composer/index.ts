@@ -68,15 +68,55 @@ function normalizeVersion(input: string): string {
 }
 
 /**
+ * @param versions Version list in any format, it recognizes the specific patch format x.x.x-pXX
+ * @param range Range in composer format
+ * @param minMode If true, it will calculate minSatisfyingVersion, if false, it calculates the maxSatisfyingVersion
+ * @returns min or max satisfyingVersion from the input
+ */
+function calculateSatisfyingVersionIntenal(
+  versions: string[],
+  range: string,
+  minMode: boolean
+): string | null {
+  // Because composer -p versions are considered stable, we have to remove the suffix for the npm.XXX functions.
+  const versionsMapped = versions.map((x) => {
+    return {
+      origianl: x,
+      cleaned: removeComposerSpecificPatchPart(x),
+      npmVariant: composer2npm(removeComposerSpecificPatchPart(x)[0]),
+    };
+  });
+
+  const npmVersions = versionsMapped.map((x) => x.npmVariant);
+  const npmVersion = minMode
+    ? npm.minSatisfyingVersion(npmVersions, composer2npm(range))
+    : npm.getSatisfyingVersion(npmVersions, composer2npm(range));
+
+  if (!npmVersion) {
+    return null;
+  }
+
+  // After we find the npm versions, we select from them back in the mapping the possible patches.
+  const candidates = versionsMapped
+    .filter((x) => x.npmVariant === npmVersion)
+    .sort((a, b) => (minMode ? 1 : -1) * sortVersions(a.origianl, b.origianl));
+
+  return candidates[0].origianl;
+}
+
+/**
  * @param intput Version in any format, it recognizes the specific patch format x.x.x-pXX
  * @returns If input contains the specific patch, it returns the input with removed the patch and true, otherwise it retunrs the same string and false.
  */
 function removeComposerSpecificPatchPart(input: string): [string, boolean] {
   // the regex is based on the original from composer implementation https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L137
-  const pattern = /^v?[0-9]{1,5}(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?(?<suffix>-p[1-9][0-9]*)$/gi;
+  const pattern =
+    /^v?[0-9]{1,5}(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?(?<suffix>-p[1-9][0-9]*)$/gi;
   const match = pattern.exec(input);
 
-  return match ? [input.replace(match.groups!.suffix, ''), true] : [input, false];
+  return match
+    ? [input.replace(match.groups!.suffix, ''), true]
+    : [input, false];
 }
 
 function composer2npm(input: string): string {
@@ -176,26 +216,14 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const npmVersions = versions.map(composer2npm);
-  const npmVersion = npm.getSatisfyingVersion(npmVersions, composer2npm(range));
-  if (!npmVersion) {
-    return null;
-  }
-  // get index of npmVersion in npmVersions
-  return versions[npmVersions.indexOf(npmVersion)] ?? npmVersion;
+  return calculateSatisfyingVersionIntenal(versions, range, false);
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  const npmVersions = versions.map(composer2npm);
-  const npmVersion = npm.minSatisfyingVersion(npmVersions, composer2npm(range));
-  if (!npmVersion) {
-    return null;
-  }
-  // get index of npmVersion in npmVersions
-  return versions[npmVersions.indexOf(npmVersion)] ?? npmVersion;
+  return calculateSatisfyingVersionIntenal(versions, range, true);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
