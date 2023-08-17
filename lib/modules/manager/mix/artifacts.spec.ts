@@ -230,12 +230,7 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('authenticates to private repositories configured in hostRules', async () => {
-    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
-    GlobalConfig.set({
-      ...adminConfig,
-      binarySource: 'docker',
-      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
-    });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
@@ -283,27 +278,12 @@ describe('modules/manager/mix/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool elixir v1.13.4' },
       {
-        cmd: 'docker ps --filter name=renovate_sidecar -aq',
+        cmd: 'mix hex.organization auth an_organization --key an_organization_token',
       },
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/containerbase/sidecar ' +
-          'bash -l -c "' +
-          'install-tool erlang 25.0.0.0' +
-          ' && ' +
-          'install-tool elixir v1.13.4' +
-          ' && ' +
-          'mix hex.organization auth an_organization --key an_organization_token' +
-          ' && ' +
-          'mix deps.update some_package' +
-          '"',
-      },
+      { cmd: 'mix deps.update some_package' },
     ]);
   });
 
