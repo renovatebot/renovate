@@ -36,7 +36,7 @@ describe('util/cache/repository/index', () => {
     expect(isCacheModified()).toBeUndefined();
   });
 
-  it('saves cache on dry run', async () => {
+  it('skips saves cache on dry run', async () => {
     GlobalConfig.set({
       cacheDir: '/tmp/cache',
       platform: 'github',
@@ -44,7 +44,8 @@ describe('util/cache/repository/index', () => {
     });
     await initRepoCache({ ...config, repositoryCache: 'enabled' });
     await saveCache();
-    expect(fs.outputCacheFile).toHaveBeenCalled();
+    expect(fs.outputCacheFile).not.toHaveBeenCalled();
+    expect(isCacheModified()).toBeUndefined();
   });
 
   it('resets cache', async () => {

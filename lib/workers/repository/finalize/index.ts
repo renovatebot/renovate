@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
+import * as repositoryCache from '../../../util/cache/repository';
 import { clearRenovateRefs } from '../../../util/git';
 import { configMigration } from '../config-migration';
 import { PackageFiles } from '../package-files';
@@ -13,6 +14,7 @@ export async function finalizeRepo(
   branchList: string[]
 ): Promise<void> {
   await configMigration(config, branchList);
+  await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
   await ensureIssuesClosing();
   await clearRenovateRefs();

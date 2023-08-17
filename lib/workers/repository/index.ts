@@ -11,7 +11,6 @@ import {
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { getProblems, logger, setMeta } from '../../logger';
-import * as repositoryCache from '../../util/cache/repository';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -102,7 +101,6 @@ export async function renovateRepository(
       repoResult = processResult(config, res!);
     }
     printRepositoryProblems(config);
-    await repositoryCache.saveCache();
     runBranchSummary(config);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
