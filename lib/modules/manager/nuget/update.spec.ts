@@ -67,11 +67,7 @@ describe('modules/manager/nuget/update', () => {
     });
 
     it('does not bump version if extract found no version', () => {
-      const { bumpedContent } = bumpPackageVersion(
-        minimumContent,
-        undefined,
-        'patch'
-      );
+      const { bumpedContent } = bumpPackageVersion(minimumContent, '', 'patch');
 
       expect(bumpedContent).toEqual(minimumContent);
     });
