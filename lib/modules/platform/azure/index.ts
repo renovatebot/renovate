@@ -17,6 +17,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -121,40 +122,52 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<string | null> {
-  const azureApiGit = await azureApi.gitApi();
+  try {
+    const azureApiGit = await azureApi.gitApi();
 
-  let repoId: string | undefined;
-  if (repoName) {
-    const repos = await azureApiGit.getRepositories();
-    const repo = getRepoByName(repoName, repos);
-    repoId = repo?.id;
-  } else {
-    repoId = config.repoId;
+    let repoId: string | undefined;
+    if (repoName) {
+      const repos = await azureApiGit.getRepositories();
+      const repo = getRepoByName(repoName, repos);
+      repoId = repo?.id;
+    } else {
+      repoId = config.repoId;
+    }
+
+    if (!repoId) {
+      logger.debug('No repoId so cannot getRawFile');
+      return null;
+    }
+
+    const versionDescriptor: GitVersionDescriptor = {
+      version: branchOrTag,
+    } satisfies GitVersionDescriptor;
+
+    const buf = await azureApiGit.getItemContent(
+      repoId,
+      fileName,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      branchOrTag ? versionDescriptor : undefined
+    );
+
+    const str = await streamToString(buf);
+    return str;
+  } catch (err) /* istanbul ignore next */ {
+    if (
+      err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
+    ) {
+      logger.debug(
+        'Azure DevOps is currently unavailable when attempting to fetch file - throwing ExternalHostError'
+      );
+      throw new ExternalHostError(err, id);
+    }
+    throw err;
   }
-
-  if (!repoId) {
-    logger.debug('No repoId so cannot getRawFile');
-    return null;
-  }
-
-  const versionDescriptor: GitVersionDescriptor = {
-    version: branchOrTag,
-  } satisfies GitVersionDescriptor;
-
-  const buf = await azureApiGit.getItemContent(
-    repoId,
-    fileName,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    branchOrTag ? versionDescriptor : undefined
-  );
-
-  const str = await streamToString(buf);
-  return str;
 }
 
 export async function getJsonFile(
