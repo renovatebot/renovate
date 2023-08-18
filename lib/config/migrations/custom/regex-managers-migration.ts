@@ -5,8 +5,7 @@ export class RegexManagersMigration extends AbstractMigration {
   override readonly propertyName = 'regexManagers';
 
   override run(value: unknown): void {
-    let regexManagers = (this.get('regexManagers') as CustomManager[]) ?? [];
-    regexManagers = Array.isArray(regexManagers) ? [...regexManagers] : [];
+    let regexManagers = (value as CustomManager[]) ?? [];
 
     regexManagers = regexManagers.map((mgr) => {
       let newMgr = { ...mgr };
