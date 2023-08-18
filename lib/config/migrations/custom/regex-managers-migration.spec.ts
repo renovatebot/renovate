@@ -41,5 +41,14 @@ describe('config/migrations/custom/regex-managers-migration', () => {
         ],
       }
     );
+
+    expect(RegexManagersMigration).toMigrate(
+      {
+        regexManagers: partial<CustomManager>([]),
+      },
+      {
+        regexManagers: [],
+      }
+    );
   });
 });
