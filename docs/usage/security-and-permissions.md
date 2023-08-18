@@ -24,7 +24,7 @@ Please do not create GitHub issues for security-related doubts or problems.
 
 ## Permissions
 
-We apply the Principle of Least Privilege (PoLP) but do need substantial privileges in order for our apps to work.
+We apply the Principle of Least Privilege (PoLP) but do need substantial privileges for our apps to work.
 
 ### Global Permissions
 
@@ -40,7 +40,7 @@ These permissions are always needed to run the respective app.
 | Commit statuses   |  `read` and `write`   | `read` and `write` | Read and write commit statuses for Renovate PRs               |
 | Issues            |  `read` and `write`   | `read` and `write` | Create dependency dashboard or Config Warning issues          |
 | Pull Requests     |  `read` and `write`   | `read` and `write` | Create update PRs                                             |
-| Workflows         |  `read` and `write`   |   not applicable   | Explicit permission needed in order to update workflows       |
+| Workflows         |  `read` and `write`   |   not applicable   | Explicit permission needed to update workflows                |
 
 ### User permissions
 
@@ -55,22 +55,22 @@ These permissions will be requested and authorized on an individual-user basis.
 
 ### Self-hosted (Renovate OSS CLI, Mend Renovate On-Premises)
 
-Renovate is designed to operate autonomously and directly with package and source repositories, so does not to "phone home", send telemetry, or need to request information from Mend or any project infrastructure.
+Renovate is designed to operate autonomously and directly with package and source repositories, so does not "phone home", send telemetry, or need to request information from Mend or any project infrastructure.
 An exception to this is when Merge Confidence badges are requested, because those are hosted on Mend servers.
 Such badges are public, do not require authentication, and Renovate does not identify the source user or repository when requesting them.
-Self-hosted Renovate does not send or submit any package data to Mend for the purpose of calculating Merge Confidence figures themselves.
+Self-hosted Renovate does not send or submit any package data to Mend for the purpose of calculating Merge Confidence figures.
 
-According to a strict definition, Renovate may "send data" to third party registries and source code hosts directly in order to achieve its purpose of looking up new releases.
+According to a strict definition, Renovate may "send data" to third-party registries and source code hosts directly to look up new releases.
 For example, if you have an `npm` package and do not configure a private registry then Renovate will query URLs on `https://registry.npmjs.org` including names of packages used in your repositories.
-You could avoid this by configuring private registries but then such registries would need to query public registries anyway.
-We are not aware of any public registries which reverse lookup IP addresses in order to correlate companies with packages.
+You could avoid this by configuring private registries but such registries need to query public registries anyway.
+We don't know of any public registries which reverse lookup IP addresses to associate companies with packages.
 
-### Hosted/SaaS (Mend Renovate App)
+### Hosted/SaaS (the Mend Renovate App)
 
-Users of The Mend Renovate App fall under [Mend's Terms of Service](https://www.mend.io/terms-of-service/) and Privacy Policy.
+Users of the Mend Renovate App fall under [Mend's Terms of Service](https://www.mend.io/terms-of-service/) and Privacy Policy.
 
-In this case the app needs to temporarily clone source code in order for Renovate to run, but it does not retain the source code anywhere after jobs are completed.
+In this case the app needs to temporarily clone source code for Renovate to run, but the app does not keep the source code anywhere after jobs are completed.
 
-Mend anonymizes and aggregates package use and update success within the hosted app in order to derive Merge Confidence scores.
+Mend anonymizes and aggregates package use and update success rates within the hosted app to derive Merge Confidence scores.
 
 The app database keeps a list of dependencies and versions per repo, plus basic into about any Renovate PRs it's created.
