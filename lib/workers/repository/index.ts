@@ -147,7 +147,7 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
   };
 }
 
-function printRepositoryProblems(config: RenovateConfig): void {
+export function printRepositoryProblems(config: RenovateConfig): void {
   const repoProblems = new Set(
     getProblems()
       .filter(
