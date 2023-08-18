@@ -2469,6 +2469,7 @@ const options: RenovateOptions[] = [
       'Regex capture rule to use. Valid only within a `regexManagers` object.',
     type: 'array',
     subType: 'string',
+    format: 'regex',
     parent: 'regexManagers',
     cli: false,
     env: false,
