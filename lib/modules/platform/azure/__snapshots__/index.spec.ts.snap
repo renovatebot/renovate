@@ -135,7 +135,7 @@ content",
 ]
 `;
 
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state, targetBranch) returns pr if found it all state 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -153,7 +153,7 @@ exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns
 }
 `;
 
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state, targetBranch) returns pr if found it close 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -171,7 +171,7 @@ exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns
 }
 `;
 
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state, targetBranch) returns pr if found it open 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -189,7 +189,43 @@ exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns
 }
 `;
 
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state, targetBranch) returns pr if found matches targetBranch 1`] = `
+{
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "createdAt": undefined,
+  "number": 2,
+  "pullRequestId": 2,
+  "sourceBranch": "branch-a",
+  "sourceRefName": "refs/heads/branch-a",
+  "state": "open",
+  "status": 1,
+  "targetBranch": "branch-c",
+  "targetRefName": "refs/heads/branch-c",
+  "title": "branch a pr",
+}
+`;
+
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state, targetBranch) returns first pr if found does not match targetBranch 1`] = `
+{
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "createdAt": undefined,
+  "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
+  "sourceRefName": "refs/heads/branch-a",
+  "state": "open",
+  "status": 1,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
+  "title": "branch a pr",
+}
+`;
+
+exports[`modules/platform/azure/index findPr(branchName, prTitle, state, targetBranch) returns pr if found not open 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

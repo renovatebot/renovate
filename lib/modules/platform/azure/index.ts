@@ -298,6 +298,7 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  targetBranch,
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
@@ -330,14 +331,24 @@ export async function findPr({
   if (prsFiltered.length === 0) {
     return null;
   }
+  if (targetBranch && prsFiltered.length > 1) {
+    const pr = prsFiltered.find((item) => item.targetBranch === targetBranch);
+    if (pr) {
+      return pr;
+    }
+  }
   return prsFiltered[0];
 }
 
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  logger.debug(`getBranchPr(${branchName})`);
+export async function getBranchPr(
+  branchName: string,
+  targetBranch?: string
+): Promise<Pr | null> {
+  logger.debug(`getBranchPr(${branchName}, ${targetBranch})`);
   const existingPr = await findPr({
     branchName,
     state: 'open',
+    targetBranch,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }

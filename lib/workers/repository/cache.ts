@@ -73,7 +73,7 @@ async function generateBranchCache(
     let isBehindBase: boolean | undefined;
     let isConflicted: boolean | undefined;
     if (baseBranchSha && branchSha) {
-      const branchPr = await platform.getBranchPr(branchName);
+      const branchPr = await platform.getBranchPr(branchName, baseBranch);
       if (branchPr) {
         prNo = branchPr.number;
       }
