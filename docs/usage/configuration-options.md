@@ -3029,6 +3029,18 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 !!! tip
     Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
 
+### customType
+
+`customType` should be a valid custom manager name. Currently we only have one ie. `regex`. In future we will be adding more.
+
+Example:
+
+```json
+{
+  "customType": "regex"
+}
+```
+
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
