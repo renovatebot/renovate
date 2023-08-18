@@ -18,6 +18,7 @@ jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
 
 const prJson = Fixtures.getJson('./pr-list.json');
+const branchesJson = Fixtures.getJson('./branches.json');
 const result = Object.keys(prJson).map((key) => {
   return prJson[key];
 });
@@ -66,7 +67,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(true);
 
-      runBranchSummary(config);
+      runBranchSummary(config, []);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -127,7 +128,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 
-      runBranchSummary(config);
+      runBranchSummary(config, []);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -153,11 +154,10 @@ describe('workers/repository/finalize/repository-statistics', () => {
       );
     });
 
-    it('logs extended branch info if branchSummaryExtended', () => {
+    it('logs extended branch info', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
-        branchSummaryExtended: true,
       };
       const branchCache = partial<BranchCache>({
         result: 'done',
@@ -171,7 +171,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
           },
         ]),
       });
-
       const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
       const cache = partial<RepoCacheData>({
         scan: {},
@@ -180,7 +179,22 @@ describe('workers/repository/finalize/repository-statistics', () => {
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 
-      runBranchSummary(config);
+      runBranchSummary(config, []);
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+    });
+
+    it('logs extended branch info on lookup only', () => {
+      const config: RenovateConfig = {
+        defaultBranch: 'main',
+      };
+      const cache = partial<RepoCacheData>({
+        scan: {},
+      });
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockReturnValueOnce(false);
+
+      runBranchSummary(config, branchesJson);
 
       expect(logger.debug).toHaveBeenCalledTimes(2);
     });

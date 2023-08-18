@@ -19,7 +19,7 @@ export class GitlabReleasesDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GitlabReleasesDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl}/${packageName}`,
   })
   async getReleases({

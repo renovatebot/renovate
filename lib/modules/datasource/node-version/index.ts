@@ -23,7 +23,7 @@ export class NodeVersionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({

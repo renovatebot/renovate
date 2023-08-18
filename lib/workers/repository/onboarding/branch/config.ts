@@ -20,7 +20,7 @@ async function getOnboardingConfig(
     'Checking if this org/owner has a default Renovate preset which can be used.'
   );
 
-  // TODO #7154
+  // TODO #22198
   const orgName = config.repository!.split('/')[0];
 
   // Check for org/renovate-config
@@ -40,7 +40,7 @@ async function getOnboardingConfig(
 
   if (!orgPreset) {
     // Check for org/.{{platform}}
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     try {
       const repo = `${orgName}/.${platform}`;

@@ -45,7 +45,7 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         dep.lockedVersion =
           lockFileCache[yarnLock].lockedVersions?.[
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             `${dep.depName}@${dep.currentValue}`
           ];
         if (
@@ -111,7 +111,7 @@ export async function getLockedVersions(
       }
 
       for (const dep of packageFile.deps) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         dep.lockedVersion = semver.valid(
           lockFileCache[npmLock].lockedVersions?.[dep.depName!]
         )!;
@@ -130,7 +130,7 @@ export async function getLockedVersions(
 
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         const lockedVersion = semver.valid(
           lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[relativeDir]?.[
             depType!

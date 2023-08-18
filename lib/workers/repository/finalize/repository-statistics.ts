@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
+import { coerceArray } from '../../../util/array';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
 import type {
   BranchCache,
@@ -8,8 +9,10 @@ import type {
 } from '../../../util/cache/repository/types';
 import type {
   BaseBranchMetadata,
+  BranchConfig,
   BranchMetadata,
   BranchSummary,
+  BranchUpgradeConfig,
 } from '../../types';
 
 export function runRenovateRepoStats(
@@ -63,6 +66,55 @@ function branchCacheToMetadata({
   };
 }
 
+function filterDependencyLookupData(
+  branches: BranchConfig[]
+): Partial<BranchConfig>[] {
+  const branchesFiltered: Partial<BranchConfig>[] = [];
+  for (const branch of branches) {
+    const upgradesFiltered: Partial<BranchUpgradeConfig>[] = [];
+    const { branchName, prTitle, upgrades } = branch;
+
+    for (const upgrade of coerceArray(upgrades)) {
+      const {
+        datasource,
+        depName,
+        fixedVersion,
+        currentVersion,
+        currentValue,
+        newValue,
+        newVersion,
+        packageFile,
+        updateType,
+        packageName,
+      } = upgrade;
+
+      const filteredUpgrade: Partial<BranchUpgradeConfig> = {
+        datasource,
+        depName,
+        fixedVersion,
+        currentVersion,
+        currentValue,
+        newValue,
+        newVersion,
+        packageFile,
+        updateType,
+        packageName,
+      };
+      upgradesFiltered.push(filteredUpgrade);
+    }
+
+    const filteredBranch: Partial<BranchConfig> = {
+      branchName,
+      prTitle,
+      result: 'no-work',
+      upgrades: upgradesFiltered as BranchUpgradeConfig[],
+    };
+    branchesFiltered.push(filteredBranch);
+  }
+
+  return branchesFiltered;
+}
+
 function filterDependencyDashboardData(
   branches: BranchCache[]
 ): Partial<BranchCache>[] {
@@ -71,7 +123,7 @@ function filterDependencyDashboardData(
     const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
     const { branchName, prNo, prTitle, result, upgrades, prBlockedBy } = branch;
 
-    for (const upgrade of upgrades ?? []) {
+    for (const upgrade of coerceArray(upgrades)) {
       const {
         datasource,
         depName,
@@ -116,7 +168,10 @@ function filterDependencyDashboardData(
   return branchesFiltered;
 }
 
-export function runBranchSummary(config: RenovateConfig): void {
+export function runBranchSummary(
+  config: RenovateConfig,
+  lookupBranchConfig: BranchConfig[]
+): void {
   const defaultBranch = config.defaultBranch;
   const { scan, branches } = getCache();
 
@@ -146,8 +201,13 @@ export function runBranchSummary(config: RenovateConfig): void {
 
   logger.debug(res, 'Branch summary');
 
+  let branchesInformation;
   if (branches?.length) {
-    const branchesInformation = filterDependencyDashboardData(branches);
+    branchesInformation = filterDependencyDashboardData(branches);
+  } else if (lookupBranchConfig?.length) {
+    branchesInformation = filterDependencyLookupData(lookupBranchConfig);
+  }
+  if (branchesInformation) {
     logger.debug({ branchesInformation }, 'branches info extended');
   }
 }

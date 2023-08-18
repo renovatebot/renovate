@@ -176,7 +176,7 @@ export async function extractPackageFile(
 
   // handle the lockfile
   const lockfileName = getSiblingFileName(packageFile, 'poetry.lock');
-  // TODO #7154
+  // TODO #22198
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
   const lockfileMapping = extractLockFileEntries(lockContents);

@@ -259,7 +259,7 @@ describe('workers/repository/update/pr/code-owners', () => {
     ];
     codeOwnerFilePaths.forEach((codeOwnerFilePath) => {
       it(`detects code owner file at '${codeOwnerFilePath}'`, async () => {
-        // TODO: fix types, jest is using wrong overload (#7154)
+        // TODO: fix types, jest is using wrong overload (#22198)
         fs.readLocalFile.mockImplementation((path): Promise<any> => {
           if (path === codeOwnerFilePath) {
             return Promise.resolve(['* @mike'].join('\n'));

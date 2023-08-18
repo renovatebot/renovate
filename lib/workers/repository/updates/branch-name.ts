@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import cleanGitRef from 'clean-git-ref';
 import slugify from 'slugify';
 import type { RenovateConfig } from '../../../config/types';
@@ -49,7 +49,7 @@ export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {
     logger.trace('Using group branchName template');
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.trace(
       `Dependency ${update.depName!} is part of group ${update.groupName}`
     );
@@ -98,7 +98,7 @@ export function generateBranchName(update: RenovateConfig): void {
 
     const hashedInput = hash(hashInput);
 
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     update.branchName = `${update.branchPrefix!}${hashedInput.slice(
       0,
       hashLength
