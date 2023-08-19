@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import type { SkipReason } from '../../../types';
 import { DartDatasource } from '../../datasource/dart';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
@@ -17,15 +18,21 @@ function extractFromSection(
 
   const deps: PackageDependency[] = [];
   for (const depName of Object.keys(sectionContent)) {
-    if (depName === 'meta') {
+    if (depName === 'meta' || depName === 'flutter_test') {
       continue;
     }
 
     let currentValue = sectionContent[depName];
+    let skipReason: SkipReason | undefined;
+
     if (!is.string(currentValue)) {
       const version = currentValue.version;
+      const path = currentValue.path;
       if (version) {
         currentValue = version;
+      } else if (path) {
+        currentValue = '';
+        skipReason = 'path-dependency';
       } else {
         currentValue = '';
       }
@@ -36,6 +43,7 @@ function extractFromSection(
       depType: sectionKey,
       currentValue,
       datasource: DartDatasource.id,
+      skipReason,
     });
   }
 
