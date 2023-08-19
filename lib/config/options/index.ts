@@ -2455,8 +2455,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'customType',
-    description:
-      ' Custom manager to use. Valid only within a `regexManagers` object.',
+    description: 'Custom manager to use. Valid only within a `regexManagers` object.',
     type: 'string',
     format: 'regex',
     parent: 'regexManagers',
