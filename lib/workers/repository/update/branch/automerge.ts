@@ -39,7 +39,7 @@ export async function tryBranchAutomerge(
     logger.debug(`Automerging branch`);
     try {
       if (GlobalConfig.get('dryRun')) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
         await scm.checkoutBranch(config.baseBranch!);

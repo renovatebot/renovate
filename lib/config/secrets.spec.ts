@@ -174,7 +174,7 @@ describe('config/secrets', () => {
         secrets: { SECRET_MANAGER: 'npm' },
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
-      // TODO fix me? #7154
+      // TODO fix me? #22198
       expect(() => applySecretsToConfig(config, null as never, false)).toThrow(
         CONFIG_VALIDATION
       );

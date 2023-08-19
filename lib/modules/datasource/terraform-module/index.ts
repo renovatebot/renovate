@@ -86,7 +86,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let pkgUrl: string;
 
     try {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
 
       pkgUrl = createSDBackendURL(
         registryUrl,
@@ -136,7 +136,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       pkgUrl = createSDBackendURL(
         registryUrl,
         'modules.v1',

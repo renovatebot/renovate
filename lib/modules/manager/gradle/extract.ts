@@ -78,7 +78,7 @@ async function parsePackageFiles(
     };
 
     try {
-      // TODO #7154
+      // TODO #22198
       const content = fileContents[packageFile]!;
       const packageFileDir = upath.dirname(toAbsolutePath(packageFile));
 
