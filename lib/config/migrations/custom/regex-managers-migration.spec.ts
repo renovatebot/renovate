@@ -14,7 +14,7 @@ describe('config/migrations/custom/regex-managers-migration', () => {
             versioningTemplate: 'gradle',
           },
           {
-            customType: 'jsonata',
+            customType: 'regex',
             fileMatch: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -32,7 +32,7 @@ describe('config/migrations/custom/regex-managers-migration', () => {
             versioningTemplate: 'gradle',
           },
           {
-            customType: 'jsonata',
+            customType: 'regex',
             fileMatch: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
