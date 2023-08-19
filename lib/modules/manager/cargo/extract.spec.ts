@@ -14,6 +14,9 @@ const cargo3toml = Fixtures.get('Cargo.3.toml');
 const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
+const cargo6configReplaceSourcetoml = Fixtures.get(
+  'Cargo.6.replace_source.config.toml'
+);
 const cargo6toml = Fixtures.get('Cargo.6.toml');
 
 describe('modules/manager/cargo/extract', () => {
@@ -108,6 +111,15 @@ describe('modules/manager/cargo/extract', () => {
 
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
       await writeLocalFile('.cargo/config', cargo6configtoml);
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+    });
+
+    it('extracts overridden registry indexes from .cargo/config.toml', async () => {
+      await writeLocalFile('.cargo/config.toml', cargo6configReplaceSourcetoml);
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -241,6 +253,50 @@ tokio = { version = "1.21.1" }`;
 
     it('ignore cargo config registries with missing index', async () => {
       await writeLocalFile('.cargo/config', '[registries.mine]\nfoo = "bar"');
+
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+    });
+
+    it('ignore cargo config source replaced registries with missing index', async () => {
+      await writeLocalFile(
+        '.cargo/config',
+        `[registries.mine]
+foo = "bar"
+
+[source.crates-io]
+replace-with = "mine"`
+      );
+
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+    });
+
+    it('ignore cargo config with circular registry source replacements', async () => {
+      await writeLocalFile(
+        '.cargo/config',
+        `[registries]
+private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
+
+[registries.mcorbin]
+index = "https://github.com/mcorbin/testregistry"
+
+[source.crates-io]
+replace-with = "mcorbin"
+
+[source.mcorbin]
+replace-with = "private-crates"
+
+[source.private-crates]
+replace-with = "mcorbin"
+`
+      );
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,

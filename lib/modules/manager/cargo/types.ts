@@ -28,10 +28,15 @@ export interface CargoManifest extends CargoSection {
 
 export interface CargoConfig {
   registries?: Record<string, CargoRegistry>;
+  source?: Record<string, CargoSource>;
 }
 
 export interface CargoRegistry {
   index?: string;
+}
+
+export interface CargoSource {
+  'replace-with'?: string;
 }
 
 export interface CargoRegistries {

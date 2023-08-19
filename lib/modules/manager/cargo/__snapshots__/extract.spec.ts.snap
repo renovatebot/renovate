@@ -406,6 +406,47 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts original pa
 ]
 `;
 
+exports[`modules/manager/cargo/extract extractPackageFile() extracts overridden registry indexes from .cargo/config.toml 1`] = `
+[
+  {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "registryUrls": [
+      "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
+    ],
+  },
+  {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "registryUrls": [
+      "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
+    ],
+  },
+  {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "registryUrls": [
+      "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
+    ],
+  },
+]
+`;
+
 exports[`modules/manager/cargo/extract extractPackageFile() extracts platform specific dependencies 1`] = `
 [
   {
@@ -710,6 +751,74 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
 `;
 
 exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config registries with missing index 1`] = `
+[
+  {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config source replaced registries with missing index 1`] = `
+[
+  {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "skipReason": "unknown-registry",
+  },
+  {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config with circular registry source replacements 1`] = `
 [
   {
     "currentValue": "0.1.0",
