@@ -493,6 +493,84 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts platform sp
 ]
 `;
 
+exports[`modules/manager/cargo/extract extractPackageFile() extracts registries overridden to the default 1`] = `
+[
+  {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+  },
+  {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+  },
+  {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/cargo/extract extractPackageFile() extracts registries with an empty config.toml 1`] = `
+[
+  {
+    "currentValue": "0.2.37",
+    "datasource": "crate",
+    "depName": "wasm-bindgen",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "target": "cfg(target_arch = "wasm32")",
+  },
+  {
+    "currentValue": "0.3.14",
+    "datasource": "crate",
+    "depName": "js-sys",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "target": "cfg(target_arch = "wasm32")",
+  },
+  {
+    "currentValue": "",
+    "datasource": "crate",
+    "depName": "js_relative_import",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "skipReason": "path-dependency",
+    "target": "cfg(target_arch = "wasm32")",
+  },
+  {
+    "currentValue": "0.3.14",
+    "datasource": "crate",
+    "depName": "web-sys",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "target": "cfg(target_arch = "wasm32")",
+  },
+]
+`;
+
 exports[`modules/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config (legacy path) 1`] = `
 [
   {
@@ -814,6 +892,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
     "managerData": {
       "nestedVersion": false,
     },
+    "skipReason": "unknown-registry",
   },
 ]
 `;
@@ -848,6 +927,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
     "managerData": {
       "nestedVersion": false,
     },
+    "skipReason": "unknown-registry",
   },
 ]
 `;

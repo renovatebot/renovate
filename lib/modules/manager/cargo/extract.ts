@@ -12,8 +12,10 @@ import type {
   CargoConfig,
   CargoManifest,
   CargoRegistries,
+  CargoRegistryUrl,
   CargoSection,
 } from './types';
+import { DEFAULT_REGISTRY_URL } from './types';
 
 const DEFAULT_REGISTRY_ID = 'crates-io';
 
@@ -55,10 +57,12 @@ function extractFromSection(
         nestedVersion = true;
         if (registryName) {
           const registryUrl =
-            cargoRegistries[registryName] ?? getCargoIndexEnv(registryName);
+            getCargoIndexEnv(registryName) ?? cargoRegistries[registryName];
 
           if (registryUrl) {
-            registryUrls = [registryUrl];
+            if (registryUrl !== DEFAULT_REGISTRY_URL) {
+              registryUrls = [registryUrl];
+            }
           } else {
             skipReason = 'unknown-registry';
           }
@@ -92,10 +96,17 @@ function extractFromSection(
     };
     if (registryUrls) {
       dep.registryUrls = registryUrls;
-    } else if (cargoRegistries[DEFAULT_REGISTRY_ID]) {
+    } else {
       // if we don't have an explicit registry URL check if the default registry has a non-standard url
-      dep.registryUrls = [cargoRegistries[DEFAULT_REGISTRY_ID]];
+      if (cargoRegistries[DEFAULT_REGISTRY_ID]) {
+        if (cargoRegistries[DEFAULT_REGISTRY_ID] !== DEFAULT_REGISTRY_URL) {
+          dep.registryUrls = [cargoRegistries[DEFAULT_REGISTRY_ID]];
+        }
+      } else {
+        skipReason = 'unknown-registry';
+      }
     }
+
     if (skipReason) {
       dep.skipReason = skipReason;
     }
@@ -133,32 +144,20 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
 }
 
 /** Extracts a map of cargo registries from a CargoConfig */
-function extractCargoRegistries(config: CargoConfig | null): CargoRegistries {
-  if (!config) {
-    return {};
-  }
-
+function extractCargoRegistries(config: CargoConfig): CargoRegistries {
   const result: CargoRegistries = {};
   // check if we're overriding our default registry index
-  const defaultIndexOverride = resolveRegistryIndex(
+  result[DEFAULT_REGISTRY_ID] = resolveRegistryIndex(
     DEFAULT_REGISTRY_ID,
     config
   );
-  if (defaultIndexOverride) {
-    result[DEFAULT_REGISTRY_ID] = defaultIndexOverride;
-  }
 
-  if (!config.registries) {
-    return result;
-  }
-
-  const { registries } = config;
-
-  for (const registryName of Object.keys(registries)) {
-    const registryIndex = resolveRegistryIndex(registryName, config);
-    if (registryIndex) {
-      result[registryName] = registryIndex;
-    }
+  const registryNames = new Set([
+    ...Object.keys(config.registries ?? {}),
+    ...Object.keys(config.source ?? {}),
+  ]);
+  for (const registryName of registryNames) {
+    result[registryName] = resolveRegistryIndex(registryName, config);
   }
 
   return result;
@@ -168,7 +167,7 @@ function resolveRegistryIndex(
   registryName: string,
   config: CargoConfig,
   originalNames: Set<string> = new Set()
-): string | null {
+): CargoRegistryUrl {
   // if we have a source replacement, follow that.
   // https://doc.rust-lang.org/cargo/reference/source-replacement.html
   const replacementName = config?.source?.[registryName]?.['replace-with'];
@@ -192,10 +191,12 @@ function resolveRegistryIndex(
     return registryIndex;
   } else {
     // we don't need an explicit index if we're using the default registry
-    if (registryName !== DEFAULT_REGISTRY_ID) {
+    if (registryName === DEFAULT_REGISTRY_ID) {
+      return DEFAULT_REGISTRY_URL;
+    } else {
       logger.debug(`${registryName} cargo registry is missing index`);
+      return null;
     }
-    return null;
   }
 }
 
@@ -206,7 +207,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`cargo.extractPackageFile(${packageFile})`);
 
-  const cargoConfig = await readCargoConfig();
+  const cargoConfig = (await readCargoConfig()) ?? {};
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
   let cargoManifest: CargoManifest;

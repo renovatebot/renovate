@@ -127,6 +127,31 @@ describe('modules/manager/cargo/extract', () => {
       expect(res?.deps).toHaveLength(3);
     });
 
+    it('extracts registries overridden to the default', async () => {
+      await writeLocalFile(
+        '.cargo/config.toml',
+        `[source.mcorbin]
+replace-with = "crates-io"
+
+[source.private-crates]
+replace-with = "mcorbin"`
+      );
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+    });
+
+    it('extracts registries with an empty config.toml', async () => {
+      await writeLocalFile('.cargo/config.toml', ``);
+      const res = await extractPackageFile(cargo5toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(4);
+    });
+
     it('extracts registry urls from environment', async () => {
       process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX =
         'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git';
