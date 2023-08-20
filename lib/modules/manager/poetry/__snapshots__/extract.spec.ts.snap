@@ -345,7 +345,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts mixed vers
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
@@ -420,7 +419,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
@@ -544,7 +542,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() handles multiple co
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
@@ -566,6 +563,5 @@ exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVers
   "extractedConstraints": {
     "python": "^3.9",
   },
-  "registryUrls": undefined,
 }
 `;

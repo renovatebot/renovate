@@ -1,13 +1,14 @@
-import { z } from 'zod';
+import { ZodEffects, ZodType, ZodTypeDef, z } from 'zod';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
-import { LooseRecord, Toml } from '../../../util/schema-utils';
+import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
+import { uniq } from '../../../util/uniq';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
-import type { PackageDependency } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 const PoetryPathDependency = z
   .object({
@@ -119,58 +120,117 @@ export const PoetryDependencyRecord = LooseRecord(
     dep.skipReason = 'invalid-version';
     return dep;
   })
-).transform((record) => {
-  for (const [depName, dep] of Object.entries(record)) {
-    dep.depName = depName;
-    if (!dep.packageName) {
-      const pep503NormalizeRegex = regEx(/[-_.]+/g);
-      const packageName = depName
-        .toLowerCase()
-        .replace(pep503NormalizeRegex, '-');
-      if (depName !== packageName) {
-        dep.packageName = packageName;
+)
+  .transform((record) => {
+    const deps: PackageDependency[] = [];
+    for (const [depName, dep] of Object.entries(record)) {
+      dep.depName = depName;
+      if (!dep.packageName) {
+        const pep503NormalizeRegex = regEx(/[-_.]+/g);
+        const packageName = depName
+          .toLowerCase()
+          .replace(pep503NormalizeRegex, '-');
+        if (depName !== packageName) {
+          dep.packageName = packageName;
+        }
       }
+      deps.push(dep);
     }
-  }
-  return record;
-});
-
+    return deps;
+  })
+  .catch([]);
 export type PoetryDependencyRecord = z.infer<typeof PoetryDependencyRecord>;
+
+function withDepType<
+  Output extends PackageDependency[],
+  Schema extends ZodType<Output, ZodTypeDef, unknown>
+>(schema: Schema, depType: string): ZodEffects<Schema> {
+  return schema.transform((deps) => {
+    for (const dep of deps) {
+      dep.depType = depType;
+    }
+    return deps;
+  });
+}
 
 export const PoetryGroupRecord = LooseRecord(
   z.string(),
-  z.object({
-    dependencies: PoetryDependencyRecord.optional(),
+  z
+    .object({ dependencies: PoetryDependencyRecord })
+    .transform(({ dependencies }) => dependencies)
+)
+  .transform((record) => {
+    const deps: PackageDependency[] = [];
+    for (const [groupName, group] of Object.entries(record)) {
+      for (const dep of Object.values(group)) {
+        dep.depType = groupName;
+        deps.push(dep);
+      }
+    }
+    return deps;
   })
-);
+  .catch([]);
 
 export type PoetryGroupRecord = z.infer<typeof PoetryGroupRecord>;
 
-export const PoetrySectionSchema = z.object({
-  dependencies: PoetryDependencyRecord.optional(),
-  'dev-dependencies': PoetryDependencyRecord.optional(),
-  extras: PoetryDependencyRecord.optional(),
-  group: PoetryGroupRecord.optional(),
-  source: z
-    .array(z.object({ name: z.string(), url: z.string().optional() }))
-    .optional(),
-});
+export const PoetrySectionSchema = z
+  .object({
+    dependencies: withDepType(PoetryDependencyRecord, 'dependencies'),
+    'dev-dependencies': withDepType(PoetryDependencyRecord, 'dev-dependencies'),
+    extras: withDepType(PoetryDependencyRecord, 'extras'),
+    group: PoetryGroupRecord,
+    source: LooseArray(
+      z.object({ url: z.string() }).transform(({ url }) => url)
+    )
+      .refine((urls) => urls.length > 0)
+      .transform((urls) => [
+        ...urls,
+        process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/',
+      ])
+      .transform((urls) => uniq(urls))
+      .optional()
+      .catch(undefined),
+  })
+  .transform(
+    ({
+      dependencies,
+      'dev-dependencies': devDependencies,
+      extras,
+      group,
+      source,
+    }) => {
+      const deps: PackageDependency[] = [
+        ...dependencies,
+        ...devDependencies,
+        ...extras,
+        ...group,
+      ];
+
+      const res: PackageFileContent = { deps };
+
+      if (source) {
+        res.registryUrls = source;
+      }
+
+      return res;
+    }
+  );
 
 export type PoetrySectionSchema = z.infer<typeof PoetrySectionSchema>;
 
-export const PoetrySchema = z.object({
-  tool: z
-    .object({
-      poetry: PoetrySectionSchema.optional(),
-    })
-    .optional(),
-  'build-system': z
-    .object({
-      requires: z.array(z.string()),
-      'build-backend': z.string().optional(),
-    })
-    .optional(),
-});
+export const PoetrySchema = z
+  .object({
+    tool: z
+      .object({ poetry: PoetrySectionSchema })
+      .transform(({ poetry }) => poetry),
+    'build-system': z
+      .object({
+        requires: z.array(z.string()),
+        'build-backend': z.string().optional(),
+      })
+      .optional(),
+  })
+  .transform(({ tool }) => tool);
 
 export type PoetrySchema = z.infer<typeof PoetrySchema>;
 
