@@ -16,8 +16,8 @@ describe('modules/manager/poetry/utils', () => {
       expect(actual).toMatchObject({
         tool: {
           poetry: {
-            dependencies: { dep1: '1.0.0' },
-            group: { dev: { dependencies: { dep2: '1.0.1' } } },
+            dependencies: { dep1: { depName: 'dep1' } },
+            group: { dev: { dependencies: { dep2: { depName: 'dep2' } } } },
           },
         },
       });

@@ -57,7 +57,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(8);
+      expect(res?.deps).toHaveLength(7);
     });
 
     it('handles case with no dependencies', async () => {
@@ -226,7 +226,6 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBeEmptyString();
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
     });
@@ -239,7 +238,6 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
     });
@@ -251,7 +249,6 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('aws-sam');
-      expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(1);
     });
@@ -264,7 +261,6 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBe('');
       expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
     });
@@ -277,7 +273,6 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
     });
