@@ -81,6 +81,15 @@ Then you can run `pnpm` directly from Docker, for instance:
 docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local pnpm install
 ```
 
+## Run GitHub Action build job locally with act
+
+1. Install act - [installation instructions](https://github.com/nektos/act#installation)
+1. Run (Pick the Large image)
+
+```
+act -W .github/workflows/build.yml -j build
+```
+
 ## Fork and Clone
 
 If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.

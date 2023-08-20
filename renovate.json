@@ -8,6 +8,9 @@
   "dockerfile": {
     "semanticCommitType": "build"
   },
+  "github-actions": {
+    "fileMatch": [".github/actions/setup-node/action.yml"]
+  },
   "packageRules": [
     {
       "matchPackageNames": ["containerbase/node"],
