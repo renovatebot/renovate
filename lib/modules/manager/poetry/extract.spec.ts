@@ -238,6 +238,7 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
+      expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
     });
@@ -249,6 +250,7 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('aws-sam');
+      expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(1);
     });
@@ -273,6 +275,7 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
+      expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
     });
