@@ -103,6 +103,8 @@ function extractFromSection(
           dep.registryUrls = [cargoRegistries[DEFAULT_REGISTRY_ID]];
         }
       } else {
+        // we always expect to have DEFAULT_REGISTRY_ID set, if it's not it means the config defines an alternative
+        // registry that we couldn't resolve.
         skipReason = 'unknown-registry';
       }
     }
