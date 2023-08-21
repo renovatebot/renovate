@@ -73,18 +73,14 @@ export async function renovateRepository(
         ensureOnboardingPr(config, packageFiles, branches)
       );
       addSplit('onboarding');
-    }
-    const res = await instrument('update', () => updateRepo(config, branches));
-    setMeta({ repository: config.repository });
-    addSplit('update');
-    if (performExtract) {
-      await setBranchCache(branches); // update branch cache if performed extraction
-    }
-
-    if (
-      GlobalConfig.get('dryRun') !== 'lookup' &&
-      GlobalConfig.get('dryRun') !== 'extract'
-    ) {
+      const res = await instrument('update', () =>
+        updateRepo(config, branches)
+      );
+      setMeta({ repository: config.repository });
+      addSplit('update');
+      if (performExtract) {
+        await setBranchCache(branches); // update branch cache if performed extraction
+      }
       if (res === 'automerged') {
         if (canRetry) {
           logger.info('Renovating repository again after automerge result');
