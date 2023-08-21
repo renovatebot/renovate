@@ -106,7 +106,7 @@ export const PoetryDependencyRecord = LooseRecord(
       return dep;
     }
 
-    // istanbul ignore if: should never happen
+    // istanbul ignore if: normaly should not happen
     if (!dep.currentValue) {
       dep.skipReason = 'unspecified-version';
       return dep;
