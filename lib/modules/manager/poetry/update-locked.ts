@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
+import { Result } from '../../../util/result';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import { extractLockFileEntries } from './locked-version';
+import { Lockfile } from './schema';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig
@@ -10,9 +11,14 @@ export function updateLockedDependency(
   logger.debug(
     `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
-  const locked = extractLockFileEntries(lockFileContent);
-  if (depName && locked[depName] === newVersion) {
-    return { status: 'already-updated' };
-  }
-  return { status: 'unsupported' };
+
+  const LockedVersionSchema = Lockfile.transform(({ lock }) => lock[depName]);
+  return Result.parse(LockedVersionSchema, lockFileContent)
+    .transform(
+      (lockedVersion): Result<UpdateLockedResult, 'not-implemented'> =>
+        lockedVersion === newVersion
+          ? Result.ok({ status: 'already-updated' })
+          : Result.err('not-implemented')
+    )
+    .unwrap({ status: 'unsupported' });
 }

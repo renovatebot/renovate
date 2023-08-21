@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseRecord, Toml } from '../../../util/schema-utils';
+import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 
 const PoetryDependencySchema = z.object({
   path: z.string().optional(),
@@ -53,3 +53,47 @@ export const PoetrySchema = z.object({
 export type PoetrySchema = z.infer<typeof PoetrySchema>;
 
 export const PoetrySchemaToml = Toml.pipe(PoetrySchema);
+
+const poetryConstraint: Record<string, string> = {
+  '1.0': '<1.1.0',
+  '1.1': '<1.3.0',
+  '2.0': '>=1.3.0',
+};
+
+export const Lockfile = Toml.pipe(
+  z.object({
+    package: LooseArray(
+      z
+        .object({
+          name: z.string(),
+          version: z.string(),
+        })
+        .transform(({ name, version }): [string, string] => [name, version])
+    )
+      .transform((entries) => Object.fromEntries(entries))
+      .catch({}),
+    metadata: z
+      .object({
+        'lock-version': z
+          .string()
+          .transform((lockVersion) => poetryConstraint[lockVersion])
+          .optional()
+          .catch(undefined),
+        'python-versions': z.string().optional().catch(undefined),
+      })
+      .transform(
+        ({
+          'lock-version': lockVersion,
+          'python-versions': pythonVersions,
+        }) => ({ lockVersion, pythonVersions })
+      )
+      .catch({
+        lockVersion: undefined,
+        pythonVersions: undefined,
+      }),
+  })
+).transform(({ package: lock, metadata: { lockVersion, pythonVersions } }) => ({
+  lock,
+  lockVersion,
+  pythonVersions,
+}));
