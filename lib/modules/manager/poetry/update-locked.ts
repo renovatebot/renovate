@@ -10,7 +10,7 @@ export function updateLockedDependency(
   logger.debug(
     `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
-  const locked = extractLockFileEntries(lockFileContent ?? '');
+  const locked = extractLockFileEntries(lockFileContent);
   if (depName && locked[depName] === newVersion) {
     return { status: 'already-updated' };
   }

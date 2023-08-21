@@ -1,25 +1,20 @@
-import { parse } from '@iarna/toml';
-import { logger } from '../../../logger';
-import type { PoetryLock } from './types';
+import { z } from 'zod';
+import { Result } from '../../../util/result';
+import { LooseArray, Toml } from '../../../util/schema-utils';
 
-export function extractLockFileEntries(
-  lockFileContent: string
-): Record<string, string> {
-  let poetryLockfile: PoetryLock = {};
-  try {
-    poetryLockfile = parse(lockFileContent);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing poetry.lock file');
-  }
+const Lockfile = Toml.pipe(
+  z.object({
+    package: LooseArray(
+      z
+        .object({
+          name: z.string(),
+          version: z.string(),
+        })
+        .transform(({ name, version }): [string, string] => [name, version])
+    ).transform((entries) => Object.fromEntries(entries)),
+  })
+).transform(({ package: mapping }) => mapping);
 
-  const lockfileMapping: Record<string, string> = {};
-  if (poetryLockfile?.package) {
-    // Create a package->version mapping
-    for (const poetryPackage of poetryLockfile.package) {
-      if (poetryPackage.name && poetryPackage.version) {
-        lockfileMapping[poetryPackage.name] = poetryPackage.version;
-      }
-    }
-  }
-  return lockfileMapping;
+export function extractLockFileEntries(input: unknown): Record<string, string> {
+  return Result.wrap(Lockfile.safeParse(input)).unwrap({});
 }
