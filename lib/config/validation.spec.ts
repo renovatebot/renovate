@@ -372,7 +372,7 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each fileMatch', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
             customType: 'regex',
@@ -493,7 +493,7 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each matchStrings', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
             customType: 'regex',
@@ -511,7 +511,7 @@ describe('config/validation', () => {
     });
 
     it('passes if regexManager fields are present', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
             customType: 'regex',
@@ -548,7 +548,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as any,
         true
       );
       expect(warnings).toHaveLength(0);
@@ -556,7 +556,7 @@ describe('config/validation', () => {
     });
 
     it('errors if regexManager fields are missing', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
             customType: 'regex',
@@ -680,7 +680,7 @@ describe('config/validation', () => {
     });
 
     it('errors if fileMatch has wrong parent', async () => {
-      const config = {
+      const config: RenovateConfig = {
         fileMatch: ['foo'],
         npm: {
           fileMatch: ['package\\.json'],
