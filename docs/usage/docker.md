@@ -214,7 +214,7 @@ module.exports = {
 };
 ```
 
-You can add additional host rules, read the [`hostRules` documentation](./configuration-options.md#hostrules) for more information.
+You can add more host rules, read the [`hostRules` documentation](./configuration-options.md#hostrules) for more information.
 
 #### Self-hosted Docker registry
 

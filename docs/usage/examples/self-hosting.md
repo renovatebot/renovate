@@ -411,7 +411,7 @@ The logging level output is controlled by the Bunyan logging library.
 ## Self-signed TLS/SSL certificates
 
 Renovate and invoked helper programs (like Git, or npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
-If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be told to trust these additional certificates.
+If the remote hosts uses self-signed certificates or certificate authorities then Renovate must be told to trust them.
 
 ### Renovate Node.js app
 
