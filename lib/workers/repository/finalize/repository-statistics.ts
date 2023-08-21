@@ -1,7 +1,6 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
-import { coerceArray } from '../../../util/array';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
 import type {
   BranchCache,
@@ -72,7 +71,7 @@ function filterDependencyDashboardData(
     const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
     const { branchName, prNo, prTitle, result, upgrades, prBlockedBy } = branch;
 
-    for (const upgrade of coerceArray(upgrades)) {
+    for (const upgrade of upgrades ?? []) {
       const {
         datasource,
         depName,

@@ -157,6 +157,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
+        branchSummaryExtended: true,
       };
       const branchCache = partial<BranchCache>({
         result: 'done',
@@ -170,6 +171,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
           },
         ]),
       });
+
       const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
       const cache = partial<RepoCacheData>({
         scan: {},
