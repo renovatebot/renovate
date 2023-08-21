@@ -64,16 +64,15 @@ const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional() })
     .transform(({ version: currentValue }): PackageDependency => {
-      const dep: PackageDependency = {
-        datasource: PypiDatasource.id,
-        managerData: { nestedVersion: true },
-      };
-
-      if (currentValue) {
-        dep.currentValue = currentValue;
+      if (!currentValue) {
+        return { datasource: PypiDatasource.id };
       }
 
-      return dep;
+      return {
+        datasource: PypiDatasource.id,
+        managerData: { nestedVersion: true },
+        currentValue,
+      };
     }),
   z.string().transform(
     (version): PackageDependency => ({
