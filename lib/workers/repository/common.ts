@@ -1,5 +1,5 @@
 import { nameFromLevel } from 'bunyan';
-import { RenovateConfig } from '../../config/types';
+import type { RenovateConfig } from '../../config/types';
 import { getProblems } from '../../logger';
 
 export function extractRepoProblems(config: RenovateConfig): Set<string> {
