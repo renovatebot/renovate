@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import ignore from 'ignore';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
