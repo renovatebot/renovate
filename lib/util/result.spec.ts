@@ -99,35 +99,6 @@ describe('util/result', () => {
           })
         );
       });
-
-      it('parses Zod schema', () => {
-        const schema = z
-          .string()
-          .transform((x) => x.toUpperCase())
-          .nullish();
-        expect(Result.parse(schema, 'foo')).toEqual(Result.ok('FOO'));
-        expect(Result.parse(schema, 42).unwrap()).toMatchObject({
-          err: { issues: [{ message: 'Expected string, received number' }] },
-        });
-        expect(Result.parse(schema, undefined).unwrap()).toMatchObject({
-          err: {
-            issues: [
-              {
-                message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
-              },
-            ],
-          },
-        });
-        expect(Result.parse(schema, null).unwrap()).toMatchObject({
-          err: {
-            issues: [
-              {
-                message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
-              },
-            ],
-          },
-        });
-      });
     });
 
     describe('Unwrapping', () => {
@@ -244,6 +215,56 @@ describe('util/result', () => {
           throw 'oops';
         });
         expect(result).toEqual(Result._uncaught('oops'));
+      });
+    });
+
+    describe('Parsing', () => {
+      it('parses Zod schema', () => {
+        const schema = z
+          .string()
+          .transform((x) => x.toUpperCase())
+          .nullish();
+
+        expect(Result.parse(schema, 'foo')).toEqual(Result.ok('FOO'));
+
+        expect(Result.parse(schema, 42).unwrap()).toMatchObject({
+          err: { issues: [{ message: 'Expected string, received number' }] },
+        });
+
+        expect(Result.parse(schema, undefined).unwrap()).toMatchObject({
+          err: {
+            issues: [
+              {
+                message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
+              },
+            ],
+          },
+        });
+
+        expect(Result.parse(schema, null).unwrap()).toMatchObject({
+          err: {
+            issues: [
+              {
+                message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
+              },
+            ],
+          },
+        });
+      });
+
+      it('parses Zod schema by piping from Result', () => {
+        const schema = z
+          .string()
+          .transform((x) => x.toUpperCase())
+          .nullish();
+
+        expect(Result.ok('foo').parse(schema)).toEqual(Result.ok('FOO'));
+
+        expect(Result.ok(42).parse(schema).unwrap()).toMatchObject({
+          err: { issues: [{ message: 'Expected string, received number' }] },
+        });
+
+        expect(Result.err('oops').parse(schema)).toEqual(Result.err('oops'));
       });
     });
   });
@@ -529,6 +550,33 @@ describe('util/result', () => {
         );
         expect(result).toEqual(Result.ok(42));
       });
+    });
+  });
+
+  describe('Parsing', () => {
+    it('parses Zod schema by piping from AsyncResult', async () => {
+      const schema = z
+        .string()
+        .transform((x) => x.toUpperCase())
+        .nullish();
+
+      expect(await AsyncResult.ok('foo').parse(schema)).toEqual(
+        Result.ok('FOO')
+      );
+
+      expect(await AsyncResult.ok(42).parse(schema).unwrap()).toMatchObject({
+        err: { issues: [{ message: 'Expected string, received number' }] },
+      });
+    });
+
+    it('handles uncaught error thrown in the steps before parsing', async () => {
+      const res = await AsyncResult.ok(42)
+        .transform(async (): Promise<number> => {
+          await Promise.resolve();
+          throw 'oops';
+        })
+        .parse(z.number().transform((x) => x + 1));
+      expect(res).toEqual(Result._uncaught('oops'));
     });
   });
 });
