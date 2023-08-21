@@ -151,7 +151,7 @@ FROM java:8@sha256:0e8b2a860
 
 With the above replacement scenario, the current dependency has a version of `8`, which also features several times within the digest section.
 
-When using the default `autoReplaceGlobalMatch` configuration, Renovate will attempt to replace all instances of `8` within the dependency string with the `replacementVersion` value of `11`.
+When using the default `autoReplaceGlobalMatch` configuration, Renovate will try to replace all instances of `8` within the dependency string with the `replacementVersion` value of `11`.
 This will replace more than is intended and will be caught during replacement validation steps, resulting in the replacement PR to not be created.
 
 When setting `autoReplaceGlobalMatch` configuration to `false`, Renovate will only replace the first occurrence of `8` and will successfully create a replacement PR.
