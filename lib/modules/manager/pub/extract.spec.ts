@@ -31,7 +31,10 @@ describe('modules/manager/pub/extract', () => {
     });
 
     it('returns valid dependencies', () => {
+      const dependenciesDepType = 'dependencies';
+      const devDependenciesDepType = 'dev_dependencies';
       const dartDatasource = 'dart';
+      const skipReason = undefined;
       const content = codeBlock`
         environment:
           sdk: ^3.0.0
@@ -44,10 +47,16 @@ describe('modules/manager/pub/extract', () => {
           baz:
             non-sense: true
           qux: false
+          path_dep:
+            path: path1
         dev_dependencies:
           test: ^0.1.0
           build:
             version: 0.0.1
+          flutter_test:
+            sdk: flutter
+          path_dev_dep:
+            path: path2
       `;
       const actual = extractPackageFile(content, packageFile);
       expect(actual).toEqual({
@@ -55,42 +64,63 @@ describe('modules/manager/pub/extract', () => {
           {
             currentValue: '1.0.0',
             depName: 'foo',
-            depType: 'dependencies',
+            depType: dependenciesDepType,
             datasource: dartDatasource,
+            skipReason,
           },
           {
             currentValue: '1.1.0',
             depName: 'bar',
-            depType: 'dependencies',
+            depType: dependenciesDepType,
             datasource: dartDatasource,
+            skipReason,
           },
           {
             currentValue: '',
             depName: 'baz',
-            depType: 'dependencies',
+            depType: dependenciesDepType,
             datasource: dartDatasource,
+            skipReason,
+          },
+          {
+            currentValue: '',
+            depName: 'path_dep',
+            depType: dependenciesDepType,
+            datasource: dartDatasource,
+            skipReason: 'path-dependency',
           },
           {
             currentValue: '^0.1.0',
             depName: 'test',
-            depType: 'dev_dependencies',
+            depType: devDependenciesDepType,
             datasource: dartDatasource,
+            skipReason,
           },
           {
             currentValue: '0.0.1',
             depName: 'build',
-            depType: 'dev_dependencies',
+            depType: devDependenciesDepType,
             datasource: dartDatasource,
+            skipReason,
+          },
+          {
+            currentValue: '',
+            depName: 'path_dev_dep',
+            depType: devDependenciesDepType,
+            datasource: dartDatasource,
+            skipReason: 'path-dependency',
           },
           {
             currentValue: '^3.0.0',
             depName: 'dart',
             datasource: 'dart-version',
+            skipReason,
           },
           {
             currentValue: '2.0.0',
             depName: 'flutter',
             datasource: 'flutter-version',
+            skipReason,
           },
         ],
       });

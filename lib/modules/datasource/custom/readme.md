@@ -171,6 +171,52 @@ To have the latest Nomad version in your Ansible variables, use this snippet _af
 nomad_version: 1.6.0
 ```
 
+### Grafana Dashboard
+
+You can use the following configuration to upgrade the Grafana Dashboards versions in your [grafana](https://github.com/grafana/helm-charts/blob/e5f1e9c4a4a3b43a820dc4b9eb16f3daa0b6e74f/charts/grafana/values.yaml#L685-L688)
+Helm chart:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["\\.yml$"],
+      "matchStrings": [
+        "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
+      ],
+      "versioningTemplate": "regex:^(?<major>\\d+)$",
+      "datasourceTemplate": "custom.grafana-dashboards"
+    }
+  ],
+  "customDatasources": {
+    "grafana-dashboards": {
+      "defaultRegistryUrlTemplate": "https://grafana.com/api/dashboards/{{packageName}}",
+      "format": "json",
+      "transformTemplates": [
+        "{\"releases\":[{\"version\": $string(revision)}]}"
+      ]
+    }
+  }
+}
+```
+
+Grafana Helm chart `values.yaml` snippet:
+
+```yml
+dashboards:
+  default:
+    1860-node-exporter-full:
+      # renovate: depName="Node Exporter Full"
+      gnetId: 1860
+      revision: 31
+      datasource: Prometheus
+    15760-kubernetes-views-pods:
+      # renovate: depName="Kubernetes / Views / Pods"
+      gnetId: 15760
+      revision: 20
+      datasource: Prometheus
+```
+
 ### Custom offline dependencies
 
 Sometimes the "dependency version source" is _not_ available via an API.
