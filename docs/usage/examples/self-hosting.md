@@ -77,7 +77,7 @@ spec:
           restartPolicy: Never
 ```
 
-And also this accompanying `secret.yaml`:
+And the `secret.yaml` that goes with it:
 
 ```yaml
 apiVersion: v1
