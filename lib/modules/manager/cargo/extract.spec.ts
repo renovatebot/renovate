@@ -15,6 +15,8 @@ const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
 const cargo6toml = Fixtures.get('Cargo.6.toml');
+const cargo7toml = Fixtures.get('Cargo.7.toml');
+const cargo7lock = Fixtures.get('Cargo.7.lock');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
@@ -257,6 +259,15 @@ tokio = { version = "1.21.1" }`;
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].packageName).toBe('boolector');
+    });
+
+    it('extracts locked versions', async () => {
+      await writeLocalFile('Cargo.lock', cargo7lock);
+
+      const res = await extractPackageFile(cargo7toml, 'Cargo.toml', config);
+      expect(res?.deps[0].lockedVersion).toBe('1.0.1');
+      expect(res?.deps[1].lockedVersion).toBe('2.0.1');
+      expect(res?.deps).toHaveLength(2);
     });
   });
 });

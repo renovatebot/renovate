@@ -113,6 +113,36 @@ describe('modules/manager/cargo/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('returns updated Cargo.lock with precise version update', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1',
+      },
+    ]);
+  });
+
   it('updates Cargo.lock based on the packageName, when given', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');

@@ -8,7 +8,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 
 async function cargoUpdate(
   manifestPath: string,
@@ -27,6 +27,27 @@ async function cargoUpdate(
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
   await exec(cmd, execOptions);
+}
+
+async function cargoUpdatePrecise(
+  manifestPath: string,
+  updatedDeps: Upgrade<Record<string, unknown>>[],
+  constraint: string | undefined
+): Promise<void> {
+  const cmds = updatedDeps
+    .filter((dep) => !!dep.lockedVersion)
+    .map(
+      (dep) =>
+        `cargo update --manifest-path ${quote(manifestPath)}` +
+        ` --package ${dep.packageName!}@${dep.lockedVersion}` +
+        (dep.newVersion ? ` --precise ${dep.newVersion}` : '')
+    );
+
+  const execOptions: ExecOptions = {
+    docker: {},
+    toolConstraints: [{ toolName: 'rust', constraint }],
+  };
+  await exec(cmds, execOptions);
 }
 
 export async function updateArtifacts({
@@ -64,11 +85,21 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    await cargoUpdate(
-      packageFileName,
-      isLockFileMaintenance,
-      config.constraints?.rust
-    );
+
+    if (isLockFileMaintenance) {
+      await cargoUpdate(packageFileName, true, config.constraints?.rust);
+    } else if (updatedDeps.find((dep) => dep.lockedVersion)) {
+      // If we can identify packages by their locked version, then update them precisely
+      await cargoUpdatePrecise(
+        packageFileName,
+        updatedDeps,
+        config.constraints?.rust
+      );
+    } else {
+      // If we can't identify packages by their locked version, then perform a full lockfile update
+      await cargoUpdate(packageFileName, false, config.constraints?.rust);
+    }
+
     logger.debug('Returning updated Cargo.lock');
     const newCargoLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newCargoLockContent) {

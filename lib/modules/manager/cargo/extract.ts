@@ -3,11 +3,13 @@ import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { CrateDatasource } from '../../datasource/crate';
+import { api as versioning } from '../../versioning/cargo';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { extractLockFileVersions } from './locked-version';
 import type {
   CargoConfig,
   CargoManifest,
@@ -232,9 +234,29 @@ export async function extractPackageFile(
     'Cargo.lock'
   );
   const res: PackageFileContent = { deps };
-  // istanbul ignore if
   if (lockFileName) {
+    logger.debug(
+      `Found lock file ${lockFileName} for packageFile: ${packageFile}`
+    );
     res.lockFiles = [lockFileName];
+
+    const versionsByPackage = await extractLockFileVersions(lockFileName);
+    for (const dep of deps) {
+      const packageName = dep.packageName ?? dep.depName!;
+      const versions = versionsByPackage.get(packageName) ?? [];
+      try {
+        const lockedVersion = versioning.getSatisfyingVersion(
+          versions,
+          dep.currentValue!
+        );
+        if (lockedVersion) {
+          dep.lockedVersion = lockedVersion;
+        }
+      } catch (err) {
+        logger.warn({ packageName, err }, 'Error finding satisfying version');
+      }
+    }
   }
+
   return res;
 }
