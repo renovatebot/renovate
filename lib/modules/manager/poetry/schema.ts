@@ -83,17 +83,22 @@ export const Lockfile = Toml.pipe(
       })
       .transform(
         ({
-          'lock-version': lockVersion,
+          'lock-version': poetryConstraint,
           'python-versions': pythonVersions,
-        }) => ({ lockVersion, pythonVersions })
+        }) => ({
+          poetryConstraint,
+          pythonVersions,
+        })
       )
       .catch({
-        lockVersion: undefined,
+        poetryConstraint: undefined,
         pythonVersions: undefined,
       }),
   })
-).transform(({ package: lock, metadata: { lockVersion, pythonVersions } }) => ({
-  lock,
-  lockVersion,
-  pythonVersions,
-}));
+).transform(
+  ({ package: lock, metadata: { poetryConstraint, pythonVersions } }) => ({
+    lock,
+    poetryConstraint,
+    pythonVersions,
+  })
+);
