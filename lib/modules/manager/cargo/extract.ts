@@ -170,7 +170,7 @@ function resolveRegistryIndex(
 ): CargoRegistryUrl {
   // if we have a source replacement, follow that.
   // https://doc.rust-lang.org/cargo/reference/source-replacement.html
-  const replacementName = config?.source?.[registryName]?.['replace-with'];
+  const replacementName = config.source?.[registryName]?.['replace-with'];
   if (replacementName) {
     logger.debug(
       `Replacing index of cargo registry ${registryName} with ${replacementName}`
@@ -186,7 +186,7 @@ function resolveRegistryIndex(
     );
   }
 
-  const registryIndex = config?.registries?.[registryName]?.index;
+  const registryIndex = config.registries?.[registryName]?.index;
   if (registryIndex) {
     return registryIndex;
   } else {
