@@ -106,7 +106,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       .map((line) => line.split('#')[0])
       // Remove empty lines
       .map((line) => line.trim())
-      .filter((line) => line)
+      .filter(is.nonEmptyString)
       // Extract pattern & usernames
       .map(extractOwnersFromLine);
 
