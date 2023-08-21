@@ -23,6 +23,7 @@ import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
 import { pruneStaleBranches } from './finalize/prune';
+import { runBranchSummary } from './finalize/repository-statistics';
 import { initRepo } from './init';
 import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
@@ -91,9 +92,10 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
-      // TODO #7154
+      // TODO #22198
       repoResult = processResult(config, res!);
     }
+    runBranchSummary(config, branches);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);

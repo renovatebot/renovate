@@ -352,7 +352,7 @@ export async function updateArtifacts({
       }
     }
 
-    // TODO: throws in tests (#7154)
+    // TODO: throws in tests (#22198)
     const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');

@@ -3620,7 +3620,7 @@ Follow these steps:
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
 You may use the `vulnerabilityAlerts` configuration object to customize vulnerability-fix PRs.
-For example, to set custom labels and assignees:
+For example, to set a custom label and assignee:
 
 ```json
 {
@@ -3634,7 +3634,14 @@ For example, to set custom labels and assignees:
 
 <!-- prettier-ignore -->
 !!! warning
-    There's a small chance that an incorrect vulnerability alert could result in flapping/looping vulnerability fixes, so observe carefully if enabling `automerge`.
+    There's a small chance that a wrong vulnerability alert results in a flapping/looping vulnerability fix.
+    If you allow Renovate to `automerge` vulnerability fixes, please check if the automerged fix is correct.
+
+<!-- prettier-ignore -->
+!!! note
+    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `prConcurrentLimit`, `branchConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+    This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
+    In short: vulnerability alerts "skip the line".
 
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 

@@ -26,6 +26,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
+      delete config.regexManagers; // for coverage
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('ansible');
     });
@@ -36,7 +37,9 @@ describe('workers/repository/extract/index', () => {
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       const res = await extractAllDependencies(config);
-      expect(res).toMatchObject({ packageFiles: { npm: [{}] } });
+      expect(res).toMatchObject({
+        packageFiles: { npm: [{}] },
+      });
     });
 
     it('warns if no packages found for a enabled manager', async () => {

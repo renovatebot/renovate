@@ -105,7 +105,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(false);
       prWorker.ensurePr = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
-      // TODO: incompatible types (#7154)
+      // TODO: incompatible types (#22198)
       config = {
         ...getConfig(),
         branchName: 'renovate/some-branch',
@@ -130,7 +130,7 @@ describe('workers/repository/update/branch/index', () => {
         }),
       });
       GlobalConfig.set(adminConfig);
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       sanitize.sanitize.mockImplementation((input) => input!);
       repoCache.getCache.mockReturnValue({});
     });

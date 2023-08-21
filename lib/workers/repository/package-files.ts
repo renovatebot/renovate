@@ -111,7 +111,7 @@ export class PackageFiles {
             const digest = dep.currentDigest;
             const version =
               ver && digest ? `${ver}@${digest}` : `${digest ?? ver!}`;
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             deps += ` - \`${dep.depName!} ${version}\`\n`;
           }
           deps += '\n</details>\n\n';

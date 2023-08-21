@@ -179,7 +179,7 @@ export async function extractPackageFile(
     | undefined;
   try {
     lernaJsonFile = getSiblingFileName(packageFile, 'lerna.json');
-    // TODO #7154
+    // TODO #22198
     lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, lernaJsonFile }, 'Could not parse lerna.json');
@@ -447,7 +447,7 @@ export async function extractPackageFile(
             dep.managerData = { key };
           }
           if (depType === 'overrides' && !is.string(val)) {
-            // TODO: fix type #7154
+            // TODO: fix type #22198
             deps.push(
               ...extractOverrideDepsRec(
                 [depName],
@@ -455,7 +455,7 @@ export async function extractPackageFile(
               )
             );
           } else {
-            // TODO: fix type #7154
+            // TODO: fix type #22198
             dep = { ...dep, ...extractDependency(depType, depName, val!) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];

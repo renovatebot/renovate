@@ -119,7 +119,7 @@ export async function getConcurrentBranchesRemaining(
 
       return concurrentRemaining;
     } catch (err) {
-      // TODO: #7154 should never throw
+      // TODO: #22198 should never throw
       logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }
