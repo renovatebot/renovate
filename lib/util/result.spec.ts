@@ -73,6 +73,21 @@ describe('util/result', () => {
         expect(res).toEqual(Result.err('oops'));
       });
 
+      it('wraps pure nullable value', () => {
+        const res = Result.wrapNullable(42, 'oops');
+        expect(res).toEqual(Result.ok(42));
+      });
+
+      it('wraps nullable value null', () => {
+        const res = Result.wrapNullable(null, 'oops');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps nullable value undefined', () => {
+        const res = Result.wrapNullable(undefined, 'oops');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
       it('wraps zod parse result', () => {
         const schema = z.string().transform((x) => x.toUpperCase());
         expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
