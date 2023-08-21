@@ -579,7 +579,7 @@ If the file exists and the config is disabled, Renovate will skip the repo witho
 Otherwise, it will continue as normal.
 
 This option is only useful where the ratio of disabled repos is quite high.
-It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
+You spend one extra API call per repo, but skip cloning disabled repositories.
 
 ## password
 
