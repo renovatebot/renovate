@@ -9,10 +9,8 @@ import type {
 } from '../../../util/cache/repository/types';
 import type {
   BaseBranchMetadata,
-  BranchConfig,
   BranchMetadata,
   BranchSummary,
-  BranchUpgradeConfig,
 } from '../../types';
 
 export function runRenovateRepoStats(
@@ -64,55 +62,6 @@ function branchCacheToMetadata({
     isModified,
     isPristine,
   };
-}
-
-function filterDependencyLookupData(
-  branches: BranchConfig[]
-): Partial<BranchConfig>[] {
-  const branchesFiltered: Partial<BranchConfig>[] = [];
-  for (const branch of branches) {
-    const upgradesFiltered: Partial<BranchUpgradeConfig>[] = [];
-    const { branchName, prTitle, upgrades } = branch;
-
-    for (const upgrade of coerceArray(upgrades)) {
-      const {
-        datasource,
-        depName,
-        fixedVersion,
-        currentVersion,
-        currentValue,
-        newValue,
-        newVersion,
-        packageFile,
-        updateType,
-        packageName,
-      } = upgrade;
-
-      const filteredUpgrade: Partial<BranchUpgradeConfig> = {
-        datasource,
-        depName,
-        fixedVersion,
-        currentVersion,
-        currentValue,
-        newValue,
-        newVersion,
-        packageFile,
-        updateType,
-        packageName,
-      };
-      upgradesFiltered.push(filteredUpgrade);
-    }
-
-    const filteredBranch: Partial<BranchConfig> = {
-      branchName,
-      prTitle,
-      result: 'no-work',
-      upgrades: upgradesFiltered as BranchUpgradeConfig[],
-    };
-    branchesFiltered.push(filteredBranch);
-  }
-
-  return branchesFiltered;
 }
 
 function filterDependencyDashboardData(
@@ -169,8 +118,7 @@ function filterDependencyDashboardData(
 }
 
 export function runBranchSummary(
-  config: RenovateConfig,
-  lookupBranchConfig: BranchConfig[]
+  config: RenovateConfig
 ): void {
   const defaultBranch = config.defaultBranch;
   const { scan, branches } = getCache();
@@ -201,13 +149,8 @@ export function runBranchSummary(
 
   logger.debug(res, 'Branch summary');
 
-  let branchesInformation;
   if (branches?.length) {
-    branchesInformation = filterDependencyDashboardData(branches);
-  } else if (lookupBranchConfig?.length) {
-    branchesInformation = filterDependencyLookupData(lookupBranchConfig);
-  }
-  if (branchesInformation) {
+    const branchesInformation = filterDependencyDashboardData(branches);
     logger.debug({ branchesInformation }, 'branches info extended');
   }
 }
