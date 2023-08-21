@@ -15,10 +15,10 @@ export function updateLockedDependency(
   const LockedVersionSchema = Lockfile.transform(({ lock }) => lock[depName]);
   return Result.parse(LockedVersionSchema, lockFileContent)
     .transform(
-      (lockedVersion): Result<UpdateLockedResult, 'not-implemented'> =>
+      (lockedVersion): UpdateLockedResult =>
         lockedVersion === newVersion
-          ? Result.ok({ status: 'already-updated' })
-          : Result.err('not-implemented')
+          ? { status: 'already-updated' }
+          : { status: 'unsupported' }
     )
     .unwrap({ status: 'unsupported' });
 }
