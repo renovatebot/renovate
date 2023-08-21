@@ -83,9 +83,7 @@ export async function getFile(
   if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
-      const result = await WrappedExceptionSchema.safeParseAsync(
-        JSON.parse(fileContent)
-      );
+      const result = WrappedExceptionSchema.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
           logger.warn(`Unable to find file ${filePath}`);
