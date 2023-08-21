@@ -11,5 +11,5 @@ export function getRangeStrategy({
   if (currentValue?.includes('<')) {
     return 'widen';
   }
-  return 'bump';
+  return 'update-lockfile';
 }
