@@ -3037,7 +3037,14 @@ Example:
 
 ```json
 {
-  "customType": "regex"
+  "regexManagers": [
+    {
+      "customType": "regex",
+      "matchStrings": [
+        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+      ]
+    }
+  ]
 }
 ```
 
