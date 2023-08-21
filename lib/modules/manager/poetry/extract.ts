@@ -104,7 +104,7 @@ export async function extractPackageFile(
     content
   ).unwrap();
   if (err) {
-    logger.debug({ packageFile, err }, `contains no poetry section`);
+    logger.debug({ packageFile, err }, `Poetry: error parsing pyproject.toml`);
     return null;
   }
 
