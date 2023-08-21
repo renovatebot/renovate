@@ -234,19 +234,19 @@ describe('modules/platform/azure/index', () => {
         state: 'open',
       });
       expect(res).toEqual({
-        "bodyStruct": {
-          "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        "createdAt": undefined,
-        "number": 1,
-        "pullRequestId": 1,
-        "sourceBranch": "branch-a",
-        "sourceRefName": "refs/heads/branch-a",
-        "state": "open",
-        "status": 1,
-        "targetBranch": "branch-b",
-        "targetRefName": "refs/heads/branch-b",
-        "title": "branch a pr",
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
       });
     });
 
@@ -275,19 +275,19 @@ describe('modules/platform/azure/index', () => {
         state: '!open',
       });
       expect(res).toEqual({
-        "bodyStruct": {
-          "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        "createdAt": undefined,
-        "number": 1,
-        "pullRequestId": 1,
-        "sourceBranch": "branch-a",
-        "sourceRefName": "refs/heads/branch-a",
-        "state": "merged",
-        "status": 3,
-        "targetBranch": "branch-b",
-        "targetRefName": "refs/heads/branch-b",
-        "title": "branch a pr",
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'merged',
+        status: 3,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
       });
     });
 
@@ -316,19 +316,19 @@ describe('modules/platform/azure/index', () => {
         state: 'closed',
       });
       expect(res).toEqual({
-        "bodyStruct": {
-          "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        "createdAt": undefined,
-        "number": 1,
-        "pullRequestId": 1,
-        "sourceBranch": "branch-a",
-        "sourceRefName": "refs/heads/branch-a",
-        "state": "closed",
-        "status": 2,
-        "targetBranch": "branch-b",
-        "targetRefName": "refs/heads/branch-b",
-        "title": "branch a pr",
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'closed',
+        status: 2,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
       });
     });
 
@@ -356,19 +356,19 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'branch a pr',
       });
       expect(res).toEqual({
-        "bodyStruct": {
-          "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        "createdAt": undefined,
-        "number": 1,
-        "pullRequestId": 1,
-        "sourceBranch": "branch-a",
-        "sourceRefName": "refs/heads/branch-a",
-        "state": "closed",
-        "status": 2,
-        "targetBranch": "branch-b",
-        "targetRefName": "refs/heads/branch-b",
-        "title": "branch a pr",
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'closed',
+        status: 2,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
       });
     });
 
@@ -405,19 +405,19 @@ describe('modules/platform/azure/index', () => {
         targetBranch: 'branch-c',
       });
       expect(res).toEqual({
-        "bodyStruct": {
-          "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        "createdAt": undefined,
-        "number": 2,
-        "pullRequestId": 2,
-        "sourceBranch": "branch-a",
-        "sourceRefName": "refs/heads/branch-a",
-        "state": "open",
-        "status": 1,
-        "targetBranch": "branch-c",
-        "targetRefName": "refs/heads/branch-c",
-        "title": "branch a pr",
+        createdAt: undefined,
+        number: 2,
+        pullRequestId: 2,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-c',
+        targetRefName: 'refs/heads/branch-c',
+        title: 'branch a pr',
       });
     });
 
@@ -454,19 +454,19 @@ describe('modules/platform/azure/index', () => {
         targetBranch: 'branch-d',
       });
       expect(res).toEqual({
-        "bodyStruct": {
-          "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        "createdAt": undefined,
-        "number": 1,
-        "pullRequestId": 1,
-        "sourceBranch": "branch-a",
-        "sourceRefName": "refs/heads/branch-a",
-        "state": "open",
-        "status": 1,
-        "targetBranch": "branch-b",
-        "targetRefName": "refs/heads/branch-b",
-        "title": "branch a pr",
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
       });
     });
 
