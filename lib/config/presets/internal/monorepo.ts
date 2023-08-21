@@ -426,6 +426,7 @@ const repoGroups = {
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
+  unocss: 'https://github.com/unocss/unocss',
   uppy: 'https://github.com/transloadit/uppy',
   vaadinWebComponents: 'https://github.com/vaadin/web-components',
   vitest: 'https://github.com/vitest-dev/vitest',

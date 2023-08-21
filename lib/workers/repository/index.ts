@@ -24,7 +24,6 @@ import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
 import { pruneStaleBranches } from './finalize/prune';
-import { runBranchSummary } from './finalize/repository-statistics';
 import { initRepo } from './init';
 import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
@@ -101,7 +100,6 @@ export async function renovateRepository(
       repoResult = processResult(config, res!);
     }
     printRepositoryProblems(config);
-    runBranchSummary(config);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);

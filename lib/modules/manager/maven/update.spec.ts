@@ -49,7 +49,7 @@ describe('modules/manager/maven/update', () => {
     it('does not bump version if pom.xml has no version', () => {
       const { bumpedContent } = pomUpdater.bumpPackageVersion(
         minimumContent,
-        undefined,
+        '',
         'patch'
       );
 

@@ -18,7 +18,6 @@ jest.mock('../../../modules/platform/github/pr');
 jest.mock('../../../util/http/github');
 
 const prJson = Fixtures.getJson('./pr-list.json');
-const branchesJson = Fixtures.getJson('./branches.json');
 const result = Object.keys(prJson).map((key) => {
   return prJson[key];
 });
@@ -154,7 +153,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       );
     });
 
-    it('logs extended branch info', () => {
+    it('logs extended branch info if branchSummaryExtended', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
@@ -175,22 +174,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const cache = partial<RepoCacheData>({
         scan: {},
         branches,
-      });
-      getCacheSpy.mockReturnValueOnce(cache);
-      isCacheModifiedSpy.mockReturnValueOnce(false);
-
-      runBranchSummary(config);
-
-      expect(logger.debug).toHaveBeenCalledTimes(2);
-    });
-
-    it('logs extended branch info on lookup only', () => {
-      const config: RenovateConfig = {
-        defaultBranch: 'main',
-      };
-      const cache = partial<RepoCacheData>({
-        scan: {},
-        branches: branchesJson,
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
