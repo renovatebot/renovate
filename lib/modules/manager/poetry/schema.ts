@@ -32,14 +32,21 @@ const PoetryGitDependency = z
   .object({
     git: z.string(),
     tag: z.string().optional().catch(undefined),
+    version: z.string().optional().catch(undefined),
   })
-  .transform(({ git, tag }): PackageDependency => {
+  .transform(({ git, tag, version }): PackageDependency => {
     if (!tag) {
-      return {
+      const res: PackageDependency = {
         datasource: GitRefsDatasource.id,
         packageName: git,
         skipReason: 'git-dependency',
       };
+
+      if (version) {
+        res.currentValue = version;
+      }
+
+      return res;
     }
 
     const parsedUrl = parseGitUrl(git);
@@ -107,7 +114,7 @@ export const PoetryDependencyRecord = LooseRecord(
       return dep;
     }
 
-    // istanbul ignore if: should never happen
+    // istanbul ignore if: normaly should not happen
     if (!dep.currentValue) {
       dep.skipReason = 'unspecified-version';
       return dep;
