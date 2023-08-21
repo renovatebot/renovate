@@ -6,7 +6,7 @@ const fromParam = regEx(/^\s*from\s*:\s*"([^"]+)"\s*$/);
 const fromRange = regEx(/^\s*"([^"]+)"\s*\.\.\.\s*$/);
 const binaryRange = regEx(/^\s*"([^"]+)"\s*(\.\.[.<])\s*"([^"]+)"\s*$/);
 const toRange = regEx(/^\s*(\.\.[.<])\s*"([^"]+)"\s*$/);
-const vPrefix = regEx(/v([0-9]+)/);
+const vPrefix = regEx(/^v([0-9]+)/);
 
 function toSemverRange(range: string): string | null {
   const fromParamMatch = fromParam.exec(range);
