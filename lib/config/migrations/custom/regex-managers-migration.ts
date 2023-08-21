@@ -7,7 +7,7 @@ export class RegexManagersMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.nonEmptyArray(value)) {
-      let regexManagers = (value as CustomManager[]).map((mgr) => {
+      const regexManagers = (value as CustomManager[]).map((mgr) => {
         if (mgr.customType) {
           return mgr;
         }
