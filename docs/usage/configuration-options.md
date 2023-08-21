@@ -3031,7 +3031,8 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 ### customType
 
-`customType` should be a valid custom manager name. Currently we only have one i.e. `"regex"`. In future we will be adding more.
+`customType` should be a valid custom manager name. Currently we only have one i.e. `"regex"`.
+In future we will be adding more.
 
 Example:
 
