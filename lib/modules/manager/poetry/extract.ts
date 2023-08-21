@@ -6,15 +6,16 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { Result } from '../../../util/result';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { extractLockFileEntries } from './locked-version';
-import type {
-  PoetryDependencyRecord,
-  PoetryGroupRecord,
-  PoetrySchema,
-  PoetrySectionSchema,
+import {
+  type PoetryDependencyRecord,
+  type PoetryGroupRecord,
+  type PoetrySchema,
+  PoetrySchemaToml,
+  type PoetrySectionSchema,
 } from './schema';
-import { parsePoetry } from './utils';
 
 function extractFromDependenciesSection(
   parsedFile: PoetrySchema,
@@ -98,9 +99,12 @@ export async function extractPackageFile(
   packageFile: string
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
-  const pyprojectfile = parsePoetry(packageFile, content);
-  if (!pyprojectfile?.tool?.poetry) {
-    logger.debug({ packageFile }, `contains no poetry section`);
+  const { val: pyprojectfile, err } = Result.parse(
+    PoetrySchemaToml,
+    content
+  ).unwrap();
+  if (err) {
+    logger.debug({ packageFile, err }, `contains no poetry section`);
     return null;
   }
 
