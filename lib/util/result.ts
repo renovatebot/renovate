@@ -1,4 +1,4 @@
-import { SafeParseReturnType, ZodError, ZodType, ZodTypeDef } from 'zod';
+import { SafeParseReturnType, ZodError, ZodType, ZodTypeDef, z } from 'zod';
 import { logger } from '../logger';
 
 type Val = NonNullable<unknown>;
@@ -53,14 +53,6 @@ function fromZodResult<ZodInput, ZodOutput extends Val>(
 ): Result<ZodOutput, ZodError<ZodInput>> {
   return input.success ? Result.ok(input.data) : Result.err(input.error);
 }
-
-type SchemaParseFn<T extends Val, Input = unknown> = (
-  input: unknown
-) => Result<T, ZodError<Input>>;
-
-type SchemaAsyncParseFn<T extends Val, Input = unknown> = (
-  input: unknown
-) => AsyncResult<T, ZodError<Input>>;
 
 /**
  * All non-nullable values that also are not Promises nor Zod results.
@@ -313,31 +305,37 @@ export class Result<T extends Val, E extends Val = Error> {
   }
 
   /**
-   * Wraps a Zod schema and returns a parse function that returns a `Result`.
+   * Given a `schema` and `input`, returns a `Result` with `val` being the parsed value.
+   * Additionally, `null` and `undefined` values are converted into Zod error.
    */
-  static wrapSchema<
-    T extends Val,
+  static parse<
+    T,
     Schema extends ZodType<T, ZodTypeDef, Input>,
     Input = unknown
-  >(schema: Schema): SchemaParseFn<T, Input> {
-    return (input) => {
-      const result = schema.safeParse(input);
-      return fromZodResult(result);
-    };
-  }
+  >(schema: Schema, input: unknown): Result<NonNullable<T>, ZodError<Input>> {
+    const parseResult = schema
+      .transform((result, ctx): NonNullable<T> => {
+        if (result === undefined) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
+          });
+          return z.NEVER;
+        }
 
-  /**
-   * Wraps a Zod schema and returns a parse function that returns an `AsyncResult`.
-   */
-  static wrapSchemaAsync<
-    T extends Val,
-    Schema extends ZodType<T, ZodTypeDef, Input>,
-    Input = unknown
-  >(schema: Schema): SchemaAsyncParseFn<T, Input> {
-    return (input) => {
-      const result = schema.safeParseAsync(input);
-      return AsyncResult.wrap(result);
-    };
+        if (result === null) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
+          });
+          return z.NEVER;
+        }
+
+        return result;
+      })
+      .safeParse(input);
+
+    return fromZodResult(parseResult);
   }
 
   /**
