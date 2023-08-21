@@ -117,9 +117,7 @@ function filterDependencyDashboardData(
   return branchesFiltered;
 }
 
-export function runBranchSummary(
-  config: RenovateConfig
-): void {
+export function runBranchSummary(config: RenovateConfig): void {
   const defaultBranch = config.defaultBranch;
   const { scan, branches } = getCache();
 

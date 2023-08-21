@@ -156,7 +156,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
     it('logs extended branch info if branchSummaryExtended', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
-        defaultBranch
+        defaultBranch,
       };
       const branchCache = partial<BranchCache>({
         result: 'done',
