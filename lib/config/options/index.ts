@@ -2458,7 +2458,7 @@ const options: RenovateOptions[] = [
     description:
       'Custom manager to use. Valid only within a `regexManagers` object.',
     type: 'string',
-    format: 'regex',
+    allowedValues: ['regex'],
     parent: 'regexManagers',
     cli: false,
     env: false,

@@ -10,11 +10,9 @@ export class RegexManagersMigration extends AbstractMigration {
       let regexManagers = value as CustomManager[];
 
       regexManagers = regexManagers.map((mgr) => {
-        let newMgr = { ...mgr };
-        if (!newMgr.customType) {
-          newMgr = Object.assign({ customType: 'regex' }, newMgr); // to make sure customType is at top, looks good when migration pr is created
-        }
-        return newMgr;
+        if (!mgr.customType) {
+          return Object.assign({ customType: 'regex' }, mgr); // to make sure customType is at top, looks good when migration pr is created
+        } else return mgr;
       });
 
       this.rewrite(regexManagers);
