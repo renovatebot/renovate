@@ -1,6 +1,6 @@
 # Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:diego-duy1@hotmail.com).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
 
