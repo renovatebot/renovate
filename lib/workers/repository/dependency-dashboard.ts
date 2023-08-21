@@ -1,18 +1,18 @@
 import is from '@sindresorhus/is';
-import { nameFromLevel } from 'bunyan';
-import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
-import { getProblems, logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
-import { platform } from '../../modules/platform';
-import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
-import { regEx } from '../../util/regex';
+import {nameFromLevel} from 'bunyan';
+import {GlobalConfig} from '../../config/global';
+import type {RenovateConfig} from '../../config/types';
+import {getProblems, logger} from '../../logger';
+import type {PackageFile} from '../../modules/manager/types';
+import {platform} from '../../modules/platform';
+import {GitHubMaxPrBodyLen} from '../../modules/platform/github';
+import {regEx} from '../../util/regex';
 import * as template from '../../util/template';
-import type { BranchConfig, SelectAllConfig } from '../types';
-import { getDepWarningsDashboard } from './errors-warnings';
-import { PackageFiles } from './package-files';
-import type { Vulnerability } from './process/types';
-import { Vulnerabilities } from './process/vulnerabilities';
+import type {BranchConfig, SelectAllConfig} from '../types';
+import {getDepWarningsDashboard} from './errors-warnings';
+import {PackageFiles} from './package-files';
+import type {Vulnerability} from './process/types';
+import {Vulnerabilities} from './process/vulnerabilities';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -155,9 +155,8 @@ function getListItem(branch: BranchConfig, type: string): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
-function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
-  let newIssueBody = issueBody;
-  const repoProblems = new Set(
+export function extractRepoProblems(config: RenovateConfig) {
+  return new Set(
     getProblems()
       .filter(
         (problem) =>
@@ -168,6 +167,11 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
           `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
       )
   );
+}
+
+function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
+  let newIssueBody = issueBody;
+  const repoProblems = extractRepoProblems(config);
   if (repoProblems.size) {
     newIssueBody += '## Repository problems\n\n';
     const repoProblemsHeader =

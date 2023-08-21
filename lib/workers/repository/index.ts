@@ -1,4 +1,3 @@
-import { nameFromLevel } from 'bunyan';
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
@@ -10,7 +9,7 @@ import {
 } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
-import { getProblems, logger, setMeta } from '../../logger';
+import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -20,7 +19,7 @@ import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
-import { ensureDependencyDashboard } from './dependency-dashboard';
+import {ensureDependencyDashboard, extractRepoProblems} from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
 import { pruneStaleBranches } from './finalize/prune';
@@ -142,17 +141,7 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
 }
 
 export function printRepositoryProblems(config: RenovateConfig): void {
-  const repoProblems = new Set(
-    getProblems()
-      .filter(
-        (problem) =>
-          problem.repository === config.repository && !problem.artifactErrors
-      )
-      .map(
-        (problem) =>
-          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
-      )
-  );
+  const repoProblems = extractRepoProblems(config);
   if (repoProblems.size) {
     logger.debug(
       { repoProblems: Array.from(repoProblems) },
