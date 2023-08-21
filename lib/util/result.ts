@@ -71,6 +71,26 @@ type RawValue<T extends Val> = Exclude<
   SafeParseReturnType<unknown, T> | Promise<unknown>
 >;
 
+function fromNullable<
+  T extends Val,
+  ErrForNull extends Val,
+  ErrForUndefined extends Val
+>(
+  input: Nullable<T>,
+  errForNull: ErrForNull,
+  errForUndefined: ErrForUndefined
+): Result<T, ErrForNull | ErrForUndefined> {
+  if (input === null) {
+    return Result.err(errForNull);
+  }
+
+  if (input === undefined) {
+    return Result.err(errForUndefined);
+  }
+
+  return Result.ok(input);
+}
+
 /**
  * Class for representing a result that can fail.
  *
@@ -246,10 +266,28 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
+    ErrForNullable extends Val = Error
+  >(
+    value: Nullable<T>,
+    errForNullable: ErrForNullable
+  ): Result<T, E | ErrForNullable>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
     ErrForNull extends Val = Error,
     ErrForUndefined extends Val = Error
   >(
-    input: (() => Nullable<T>) | Promise<Nullable<T>>,
+    value: Nullable<T>,
+    errForNull: ErrForNull,
+    errForUndefined: ErrForUndefined
+  ): Result<T, E | ErrForNull | ErrForUndefined>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNull extends Val = Error,
+    ErrForUndefined extends Val = Error
+  >(
+    input: (() => Nullable<T>) | Promise<Nullable<T>> | Nullable<T>,
     arg2: ErrForNull,
     arg3?: ErrForUndefined
   ):
@@ -262,21 +300,16 @@ export class Result<T extends Val, E extends Val = Error> {
       return AsyncResult.wrapNullable(input, errForNull, errForUndefined);
     }
 
-    try {
-      const result = input();
-
-      if (result === null) {
-        return Result.err(errForNull);
+    if (input instanceof Function) {
+      try {
+        const result = input();
+        return fromNullable(result, errForNull, errForUndefined);
+      } catch (error) {
+        return Result.err(error);
       }
-
-      if (result === undefined) {
-        return Result.err(errForUndefined);
-      }
-
-      return Result.ok(result);
-    } catch (error) {
-      return Result.err(error);
     }
+
+    return fromNullable(input, errForNull, errForUndefined);
   }
 
   /**
@@ -564,17 +597,7 @@ export class AsyncResult<T extends Val, E extends Val>
   ): AsyncResult<T, E | ErrForNull | ErrForUndefined> {
     return new AsyncResult(
       promise
-        .then((value) => {
-          if (value === null) {
-            return Result.err(errForNull);
-          }
-
-          if (value === undefined) {
-            return Result.err(errForUndefined);
-          }
-
-          return Result.ok(value);
-        })
+        .then((value) => fromNullable(value, errForNull, errForUndefined))
         .catch((err) => Result.err(err))
     );
   }
