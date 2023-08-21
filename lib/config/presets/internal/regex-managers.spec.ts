@@ -20,6 +20,9 @@ describe('config/presets/internal/regex-managers', () => {
         # renovate: datasource=npm depName=yarn
         ENV YARN_VERSION 3.3.1
 
+        # renovate: datasource=custom.hashicorp depName=consul
+        ENV CONSUL_VERSION 1.3.1
+
         RUN echo "FOO"
       `;
 
@@ -51,6 +54,13 @@ describe('config/presets/internal/regex-managers', () => {
           depName: 'yarn',
           replaceString:
             '# renovate: datasource=npm depName=yarn\nENV YARN_VERSION 3.3.1\n',
+        },
+        {
+          currentValue: '1.3.1',
+          datasource: 'custom.hashicorp',
+          depName: 'consul',
+          replaceString:
+            '# renovate: datasource=custom.hashicorp depName=consul\nENV CONSUL_VERSION 1.3.1\n',
         },
       ]);
     });
@@ -88,6 +98,8 @@ describe('config/presets/internal/regex-managers', () => {
           PNPM_VERSION: "7.25.1"
           # renovate: datasource=npm depName=yarn
           YARN_VERSION: '3.3.1'
+          # renovate: datasource=custom.hashicorp depName=consul
+          CONSUL_VERSION: 1.3.1
 
         jobs:
           lint:
@@ -129,6 +141,13 @@ describe('config/presets/internal/regex-managers', () => {
           depName: 'yarn',
           replaceString:
             "# renovate: datasource=npm depName=yarn\n  YARN_VERSION: '3.3.1'\n",
+        },
+        {
+          currentValue: '1.3.1',
+          datasource: 'custom.hashicorp',
+          depName: 'consul',
+          replaceString:
+            '# renovate: datasource=custom.hashicorp depName=consul\n  CONSUL_VERSION: 1.3.1\n',
         },
       ]);
     });
