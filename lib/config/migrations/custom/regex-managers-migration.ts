@@ -12,7 +12,9 @@ export class RegexManagersMigration extends AbstractMigration {
       regexManagers = regexManagers.map((mgr) => {
         if (!mgr.customType) {
           return Object.assign({ customType: 'regex' }, mgr); // to make sure customType is at top, looks good when migration pr is created
-        } else return mgr;
+        } else {
+          return mgr;
+        }
       });
 
       this.rewrite(regexManagers);
