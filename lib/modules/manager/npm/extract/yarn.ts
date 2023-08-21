@@ -85,3 +85,19 @@ export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   }
   return false;
 }
+
+export function getYarnVersionFromLock(lockfile: LockFile): string {
+  const { lockfileVersion, isYarn1 } = lockfile;
+  if (isYarn1) {
+    return '^1.22.18';
+  }
+  if (lockfileVersion && lockfileVersion >= 8) {
+    // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
+    return '^3.0.0';
+  } else if (lockfileVersion && lockfileVersion >= 6) {
+    // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
+    return '^2.2.0';
+  }
+
+  return '^2.0.0';
+}

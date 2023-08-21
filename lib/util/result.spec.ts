@@ -1,4 +1,4 @@
-import { ZodError, z } from 'zod';
+import { z } from 'zod';
 import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
 
@@ -73,6 +73,21 @@ describe('util/result', () => {
         expect(res).toEqual(Result.err('oops'));
       });
 
+      it('wraps pure nullable value', () => {
+        const res = Result.wrapNullable(42, 'oops');
+        expect(res).toEqual(Result.ok(42));
+      });
+
+      it('wraps nullable value null', () => {
+        const res = Result.wrapNullable(null, 'oops');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps nullable value undefined', () => {
+        const res = Result.wrapNullable(undefined, 'oops');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
       it('wraps zod parse result', () => {
         const schema = z.string().transform((x) => x.toUpperCase());
         expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
@@ -83,13 +98,6 @@ describe('util/result', () => {
             ],
           })
         );
-      });
-
-      it('wraps Zod schema', () => {
-        const schema = z.string().transform((x) => x.toUpperCase());
-        const parse = Result.wrapSchema(schema);
-        expect(parse('foo')).toEqual(Result.ok('FOO'));
-        expect(parse(42)).toMatchObject(Result.err(expect.any(ZodError)));
       });
     });
 
@@ -209,6 +217,56 @@ describe('util/result', () => {
         expect(result).toEqual(Result._uncaught('oops'));
       });
     });
+
+    describe('Parsing', () => {
+      it('parses Zod schema', () => {
+        const schema = z
+          .string()
+          .transform((x) => x.toUpperCase())
+          .nullish();
+
+        expect(Result.parse(schema, 'foo')).toEqual(Result.ok('FOO'));
+
+        expect(Result.parse(schema, 42).unwrap()).toMatchObject({
+          err: { issues: [{ message: 'Expected string, received number' }] },
+        });
+
+        expect(Result.parse(schema, undefined).unwrap()).toMatchObject({
+          err: {
+            issues: [
+              {
+                message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
+              },
+            ],
+          },
+        });
+
+        expect(Result.parse(schema, null).unwrap()).toMatchObject({
+          err: {
+            issues: [
+              {
+                message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
+              },
+            ],
+          },
+        });
+      });
+
+      it('parses Zod schema by piping from Result', () => {
+        const schema = z
+          .string()
+          .transform((x) => x.toUpperCase())
+          .nullish();
+
+        expect(Result.ok('foo').parse(schema)).toEqual(Result.ok('FOO'));
+
+        expect(Result.ok(42).parse(schema).unwrap()).toMatchObject({
+          err: { issues: [{ message: 'Expected string, received number' }] },
+        });
+
+        expect(Result.err('oops').parse(schema)).toEqual(Result.err('oops'));
+      });
+    });
   });
 
   describe('AsyncResult', () => {
@@ -265,17 +323,6 @@ describe('util/result', () => {
       it('handles rejected nullable promise', async () => {
         const res = Result.wrapNullable(Promise.reject('oops'), 'nullable');
         await expect(res).resolves.toEqual(Result.err('oops'));
-      });
-
-      it('wraps Zod async schema', async () => {
-        const schema = z
-          .string()
-          .transform((x) => Promise.resolve(x.toUpperCase()));
-        const parse = Result.wrapSchemaAsync(schema);
-        await expect(parse('foo')).resolves.toEqual(Result.ok('FOO'));
-        await expect(parse(42)).resolves.toMatchObject(
-          Result.err(expect.any(ZodError))
-        );
       });
     });
 
@@ -503,6 +550,33 @@ describe('util/result', () => {
         );
         expect(result).toEqual(Result.ok(42));
       });
+    });
+  });
+
+  describe('Parsing', () => {
+    it('parses Zod schema by piping from AsyncResult', async () => {
+      const schema = z
+        .string()
+        .transform((x) => x.toUpperCase())
+        .nullish();
+
+      expect(await AsyncResult.ok('foo').parse(schema)).toEqual(
+        Result.ok('FOO')
+      );
+
+      expect(await AsyncResult.ok(42).parse(schema).unwrap()).toMatchObject({
+        err: { issues: [{ message: 'Expected string, received number' }] },
+      });
+    });
+
+    it('handles uncaught error thrown in the steps before parsing', async () => {
+      const res = await AsyncResult.ok(42)
+        .transform(async (): Promise<number> => {
+          await Promise.resolve();
+          throw 'oops';
+        })
+        .parse(z.number().transform((x) => x + 1));
+      expect(res).toEqual(Result._uncaught('oops'));
     });
   });
 });
