@@ -15,7 +15,7 @@ import type {
   CargoRegistryUrl,
   CargoSection,
 } from './types';
-import { DEFAULT_REGISTRY_URL } from './types';
+import { DEFAULT_REGISTRY_URL } from './utils';
 
 const DEFAULT_REGISTRY_ID = 'crates-io';
 

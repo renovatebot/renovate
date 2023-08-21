@@ -14,9 +14,6 @@ const cargo3toml = Fixtures.get('Cargo.3.toml');
 const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
-const cargo6configReplaceSourcetoml = Fixtures.get(
-  'Cargo.6.replace_source.config.toml'
-);
 const cargo6toml = Fixtures.get('Cargo.6.toml');
 
 describe('modules/manager/cargo/extract', () => {
@@ -119,18 +116,67 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts overridden registry indexes from .cargo/config.toml', async () => {
-      await writeLocalFile('.cargo/config.toml', cargo6configReplaceSourcetoml);
+      await writeLocalFile(
+        '.cargo/config.toml',
+        codeBlock`[registries]
+private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
+
+[registries.mcorbin]
+index = "https://github.com/mcorbin/testregistry"
+
+[source.crates-io]
+replace-with = "mcorbin"
+
+[source.mcorbin]
+replace-with = "private-crates"`
+      );
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'crate',
+          depName: 'proprietary-crate',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+        {
+          currentValue: '3.0.0',
+          datasource: 'crate',
+          depName: 'mcorbin-test',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+      ]);
     });
 
     it('extracts registries overridden to the default', async () => {
       await writeLocalFile(
         '.cargo/config.toml',
-        `[source.mcorbin]
+        codeBlock`[source.mcorbin]
 replace-with = "crates-io"
 
 [source.private-crates]
@@ -139,8 +185,35 @@ replace-with = "mcorbin"`
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'crate',
+          depName: 'proprietary-crate',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+        },
+        {
+          currentValue: '3.0.0',
+          datasource: 'crate',
+          depName: 'mcorbin-test',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+        },
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+        },
+      ]);
     });
 
     it('extracts registries with an empty config.toml', async () => {
@@ -148,8 +221,49 @@ replace-with = "mcorbin"`
       const res = await extractPackageFile(cargo5toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(4);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.2.37',
+          datasource: 'crate',
+          depName: 'wasm-bindgen',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          target: 'cfg(target_arch = "wasm32")',
+        },
+        {
+          currentValue: '0.3.14',
+          datasource: 'crate',
+          depName: 'js-sys',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          target: 'cfg(target_arch = "wasm32")',
+        },
+        {
+          currentValue: '',
+          datasource: 'crate',
+          depName: 'js_relative_import',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          skipReason: 'path-dependency',
+          target: 'cfg(target_arch = "wasm32")',
+        },
+        {
+          currentValue: '0.3.14',
+          datasource: 'crate',
+          depName: 'web-sys',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          target: 'cfg(target_arch = "wasm32")',
+        },
+      ]);
     });
 
     it('extracts registry urls from environment', async () => {
@@ -289,7 +403,7 @@ tokio = { version = "1.21.1" }`;
     it('ignore cargo config source replaced registries with missing index', async () => {
       await writeLocalFile(
         '.cargo/config',
-        `[registries.mine]
+        codeBlock`[registries.mine]
 foo = "bar"
 
 [source.crates-io]
@@ -299,14 +413,44 @@ replace-with = "mine"`
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'crate',
+          depName: 'proprietary-crate',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          skipReason: 'unknown-registry',
+        },
+        {
+          currentValue: '3.0.0',
+          datasource: 'crate',
+          depName: 'mcorbin-test',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          skipReason: 'unknown-registry',
+        },
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          skipReason: 'unknown-registry',
+        },
+      ]);
     });
 
     it('ignore cargo config with circular registry source replacements', async () => {
       await writeLocalFile(
         '.cargo/config',
-        `[registries]
+        codeBlock`[registries]
 private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
 
 [registries.mcorbin]
@@ -326,8 +470,38 @@ replace-with = "mcorbin"
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'crate',
+          depName: 'proprietary-crate',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          skipReason: 'unknown-registry',
+        },
+        {
+          currentValue: '3.0.0',
+          datasource: 'crate',
+          depName: 'mcorbin-test',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          skipReason: 'unknown-registry',
+        },
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          skipReason: 'unknown-registry',
+        },
+      ]);
     });
 
     it('extracts original package name of renamed dependencies', async () => {
