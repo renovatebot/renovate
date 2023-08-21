@@ -305,43 +305,6 @@ export class Result<T extends Val, E extends Val = Error> {
   }
 
   /**
-   * Given a `schema` and `input`, returns a `Result` with `val` being the parsed value.
-   * Additionally, `null` and `undefined` values are converted into Zod error.
-   */
-  static parse<
-    T,
-    Schema extends ZodType<T, ZodTypeDef, Input>,
-    Input = unknown
-  >(
-    schema: Schema,
-    input: unknown
-  ): Result<NonNullable<z.infer<Schema>>, ZodError<Input>> {
-    const parseResult = schema
-      .transform((result, ctx): NonNullable<T> => {
-        if (result === undefined) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
-          });
-          return z.NEVER;
-        }
-
-        if (result === null) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
-          });
-          return z.NEVER;
-        }
-
-        return result;
-      })
-      .safeParse(input);
-
-    return fromZodResult(parseResult);
-  }
-
-  /**
    * Returns a discriminated union for type-safe consumption of the result.
    * When `fallback` is provided, the error is discarded and value is returned directly.
    * When error was uncaught during transformation, it's being re-thrown here.
@@ -520,6 +483,63 @@ export class Result<T extends Val, E extends Val = Error> {
       logger.warn({ err }, 'Result: unexpected error in catch handler');
       return Result._uncaught(err);
     }
+  }
+
+  /**
+   * Given a `schema` and `input`, returns a `Result` with `val` being the parsed value.
+   * Additionally, `null` and `undefined` values are converted into Zod error.
+   */
+  static parse<
+    T,
+    Schema extends ZodType<T, ZodTypeDef, Input>,
+    Input = unknown
+  >(
+    schema: Schema,
+    input: unknown
+  ): Result<NonNullable<z.infer<Schema>>, ZodError<Input>> {
+    const parseResult = schema
+      .transform((result, ctx): NonNullable<T> => {
+        if (result === undefined) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
+          });
+          return z.NEVER;
+        }
+
+        if (result === null) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
+          });
+          return z.NEVER;
+        }
+
+        return result;
+      })
+      .safeParse(input);
+
+    return fromZodResult(parseResult);
+  }
+
+  /**
+   * Given a `schema`, returns a `Result` with `val` being the parsed value.
+   * Additionally, `null` and `undefined` values are converted into Zod error.
+   */
+  parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
+    schema: Schema
+  ): Result<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
+    if (this.res.ok) {
+      return Result.parse(schema, this.res.val);
+    }
+
+    const err = this.res.err;
+
+    if (this.res._uncaught) {
+      return Result._uncaught(err);
+    }
+
+    return Result.err(err);
   }
 }
 
@@ -752,5 +772,22 @@ export class AsyncResult<T extends Val, E extends Val>
       result.catch(fn as never)
     );
     return AsyncResult.wrap(caughtAsyncResult);
+  }
+
+  /**
+   * Given a `schema`, returns a `Result` with `val` being the parsed value.
+   * Additionally, `null` and `undefined` values are converted into Zod error.
+   */
+  parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
+    schema: Schema
+  ): AsyncResult<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
+    return new AsyncResult(
+      this.asyncResult
+        .then((oldResult) => oldResult.parse(schema))
+        .catch(
+          /* istanbul ignore next: should never happen */
+          (err) => Result._uncaught(err)
+        )
+    );
   }
 }
