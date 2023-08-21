@@ -385,6 +385,12 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "skipReason": "path-dependency",
     },
     {
+      "datasource": "pypi",
+      "depName": "dep5",
+      "depType": "dependencies",
+      "skipReason": "unspecified-version",
+    },
+    {
       "currentValue": "^0.8.3",
       "datasource": "pypi",
       "depName": "extra_dep1",

@@ -62,13 +62,19 @@ const PoetryGitDependency = z
   });
 
 const PoetryPypiDependency = z.union([
-  z.object({ version: z.string() }).transform(
-    ({ version }): PackageDependency => ({
-      datasource: PypiDatasource.id,
-      currentValue: version,
-      managerData: { nestedVersion: true },
-    })
-  ),
+  z
+    .object({ version: z.string().optional() })
+    .transform(({ version: currentValue }): PackageDependency => {
+      if (!currentValue) {
+        return { datasource: PypiDatasource.id };
+      }
+
+      return {
+        datasource: PypiDatasource.id,
+        managerData: { nestedVersion: true },
+        currentValue,
+      };
+    }),
   z.string().transform(
     (version): PackageDependency => ({
       datasource: PypiDatasource.id,

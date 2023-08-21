@@ -57,7 +57,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(7);
+      expect(res?.deps).toHaveLength(8);
     });
 
     it('handles case with no dependencies', async () => {
