@@ -114,8 +114,8 @@ export class RubyGemsDatasource extends Datasource {
     const query = getQueryString({ gems: packageName });
     const url = `${path}?${query}`;
     const bufPromise = this.http.getBuffer(url);
-    return Result.wrap(bufPromise)
-      .transform(({ body }) => Marshal.parse(body) as NonNullable<unknown>)
-      .parse(MarshalledVersionInfo);
+    return Result.wrap(bufPromise).transform(({ body }) =>
+      MarshalledVersionInfo.safeParse(Marshal.parse(body))
+    );
   }
 }
