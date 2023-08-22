@@ -20,5 +20,5 @@ export function updateLockedDependency(
           ? { status: 'already-updated' }
           : { status: 'unsupported' }
     )
-    .unwrap({ status: 'unsupported' });
+    .unwrapOrElse({ status: 'unsupported' });
 }

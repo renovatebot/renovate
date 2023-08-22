@@ -306,31 +306,19 @@ export class Result<T extends Val, E extends Val = Error> {
 
   /**
    * Returns a discriminated union for type-safe consumption of the result.
-   * When `fallback` is provided, the error is discarded and value is returned directly.
    * When error was uncaught during transformation, it's being re-thrown here.
    *
    *   ```ts
    *
-   *   // DESTRUCTURING
    *   const { val, err } = Result.ok('foo').unwrap();
    *   expect(val).toBe('foo');
    *   expect(err).toBeUndefined();
    *
-   *   // FALLBACK
-   *   const value = Result.err('bar').unwrap('foo');
-   *   expect(val).toBe('foo');
-   *
    *   ```
    */
-  unwrap(): Res<T, E>;
-  unwrap(fallback: T): T;
-  unwrap(fallback?: T): Res<T, E> | T {
+  unwrap(): Res<T, E> {
     if (this.res.ok) {
-      return fallback === undefined ? this.res : this.res.val;
-    }
-
-    if (fallback !== undefined) {
-      return fallback;
+      return this.res;
     }
 
     if (this.res._uncaught) {
@@ -338,6 +326,29 @@ export class Result<T extends Val, E extends Val = Error> {
     }
 
     return this.res;
+  }
+
+  /**
+   * Returns a success value or a fallback value.
+   * When error was uncaught during transformation, it's being re-thrown here.
+   *
+   *   ```ts
+   *
+   *   const value = Result.err('bar').unwrapOrElse('foo');
+   *   expect(val).toBe('foo');
+   *
+   *   ```
+   */
+  unwrapOrElse(fallback: T): T {
+    if (this.res.ok) {
+      return this.res.val;
+    }
+
+    if (this.res._uncaught) {
+      throw this.res.err;
+    }
+
+    return fallback;
   }
 
   /**
@@ -625,28 +636,32 @@ export class AsyncResult<T extends Val, E extends Val>
 
   /**
    * Returns a discriminated union for type-safe consumption of the result.
-   * When `fallback` is provided, the error is discarded and value is returned directly.
    *
    *   ```ts
    *
-   *   // DESTRUCTURING
    *   const { val, err } = await Result.wrap(readFile('foo.txt')).unwrap();
    *   expect(val).toBe('foo');
    *   expect(err).toBeUndefined();
    *
-   *   // FALLBACK
-   *   const val = await Result.wrap(readFile('foo.txt')).unwrap('bar');
+   *   ```
+   */
+  unwrap(): Promise<Res<T, E>> {
+    return this.asyncResult.then<Res<T, E>>((res) => res.unwrap());
+  }
+
+  /**
+   * Returns a success value or a fallback value.
+   *
+   *   ```ts
+   *
+   *   const val = await Result.wrap(readFile('foo.txt')).unwrapOrElse('bar');
    *   expect(val).toBe('bar');
    *   expect(err).toBeUndefined();
    *
    *   ```
    */
-  unwrap(): Promise<Res<T, E>>;
-  unwrap(fallback: T): Promise<T>;
-  unwrap(fallback?: T): Promise<Res<T, E>> | Promise<T> {
-    return fallback === undefined
-      ? this.asyncResult.then<Res<T, E>>((res) => res.unwrap())
-      : this.asyncResult.then<T>((res) => res.unwrap(fallback));
+  unwrapOrElse(fallback: T): Promise<T> {
+    return this.asyncResult.then<T>((res) => res.unwrapOrElse(fallback));
   }
 
   /**
