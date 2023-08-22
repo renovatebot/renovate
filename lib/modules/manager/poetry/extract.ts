@@ -183,7 +183,7 @@ export async function extractPackageFile(
   const lockfileMapping = Result.parse(
     Lockfile.transform(({ lock }) => lock),
     lockContents
-  ).unwrap({});
+  ).unwrapOrElse({});
 
   const deps = [
     ...extractFromDependenciesSection(
