@@ -8,8 +8,7 @@ import {
 } from '../../../util/fs';
 import { Result } from '../../../util/result';
 import type { PackageFileContent } from '../types';
-import { extractLockFileEntries } from './locked-version';
-import { PoetrySchemaToml } from './schema';
+import { Lockfile, PoetrySchemaToml } from './schema';
 
 export async function extractPackageFile(
   content: string,
@@ -23,8 +22,11 @@ export async function extractPackageFile(
   }
 
   const lockfileName = getSiblingFileName(packageFile, 'poetry.lock');
-  const lockContents = (await readLocalFile(lockfileName, 'utf8'))!; // TODO #22198
-  const lockfileMapping = extractLockFileEntries(lockContents);
+  const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
+  const lockfileMapping = Result.parse(
+    Lockfile.transform(({ lock }) => lock),
+    lockContents
+  ).unwrap({});
 
   let pythonVersion: string | undefined;
   filterMap(res.deps, (dep) => {

@@ -248,3 +248,52 @@ export const PoetrySchema = z
 export type PoetrySchema = z.infer<typeof PoetrySchema>;
 
 export const PoetrySchemaToml = Toml.pipe(PoetrySchema);
+
+const poetryConstraint: Record<string, string> = {
+  '1.0': '<1.1.0',
+  '1.1': '<1.3.0',
+  '2.0': '>=1.3.0',
+};
+
+export const Lockfile = Toml.pipe(
+  z.object({
+    package: LooseArray(
+      z
+        .object({
+          name: z.string(),
+          version: z.string(),
+        })
+        .transform(({ name, version }): [string, string] => [name, version])
+    )
+      .transform((entries) => Object.fromEntries(entries))
+      .catch({}),
+    metadata: z
+      .object({
+        'lock-version': z
+          .string()
+          .transform((lockVersion) => poetryConstraint[lockVersion])
+          .optional()
+          .catch(undefined),
+        'python-versions': z.string().optional().catch(undefined),
+      })
+      .transform(
+        ({
+          'lock-version': poetryConstraint,
+          'python-versions': pythonVersions,
+        }) => ({
+          poetryConstraint,
+          pythonVersions,
+        })
+      )
+      .catch({
+        poetryConstraint: undefined,
+        pythonVersions: undefined,
+      }),
+  })
+).transform(
+  ({ package: lock, metadata: { poetryConstraint, pythonVersions } }) => ({
+    lock,
+    poetryConstraint,
+    pythonVersions,
+  })
+);
