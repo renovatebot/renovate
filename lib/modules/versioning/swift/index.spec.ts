@@ -10,7 +10,7 @@ const {
   matches,
 } = swift;
 
-describe('modules/versioning/swift/index', () => {
+describe('Users/chuck/code/cgrindel/renovate/fix_spm_version_logic/lib/modules/versioning/swift/index', () => {
   it.each`
     version            | expected
     ${'from: "1.2.3"'} | ${false}
@@ -108,8 +108,8 @@ describe('modules/versioning/swift/index', () => {
 
   it.each`
     currentValue           | rangeStrategy | currentVersion | newVersion  | expected
-    ${'1.2.3'}             | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.3'}
-    ${'1.2.3'}             | ${'auto'}     | ${'1.2.3'}     | ${'v1.2.4'} | ${'1.2.3'}
+    ${'1.2.3'}             | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'1.2.3'}             | ${'auto'}     | ${'1.2.3'}     | ${'v1.2.4'} | ${'1.2.4'}
     ${'from: "1.2.3"'}     | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'from: "1.2.4"'}
     ${'from: "1.2.3"'}     | ${'auto'}     | ${'1.2.3'}     | ${'v1.2.4'} | ${'from: "1.2.4"'}
     ${'from: "1.2.2"'}     | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'from: "1.2.4"'}
