@@ -220,7 +220,7 @@ dashboards:
 Sometimes the "dependency version source" is _not_ available via an API.
 To work around a missing API, you can create dependency "files".
 These files are served via HTTP(S), so that Renovate can access them.
-For example, imagine the following file `versiontracker.json` for the software `something``:
+For example, imagine the following file `versiontracker.json` for the software `something`:
 
 ```json
 [
