@@ -120,15 +120,26 @@ describe('util/result', () => {
 
       it('skips fallback for successful value', () => {
         const res: Result<number> = Result.ok(42);
-        expect(res.unwrap(-1)).toBe(42);
+        expect(res.unwrapOrElse(-1)).toBe(42);
       });
 
       it('uses fallback for error value', () => {
         const res: Result<number, string> = Result.err('oops');
-        expect(res.unwrap(42)).toBe(42);
+        expect(res.unwrapOrElse(42)).toBe(42);
       });
 
-      it('throws error uncaught in the failed transform', () => {
+      it('unwrapOrElse throws uncaught transform error', () => {
+        const res = Result.ok(42);
+        expect(() =>
+          res
+            .transform(() => {
+              throw 'oops';
+            })
+            .unwrapOrElse(0)
+        ).toThrow('oops');
+      });
+
+      it('unwrap throws uncaught transform error', () => {
         const res = Result.ok(42);
         expect(() =>
           res
@@ -345,12 +356,12 @@ describe('util/result', () => {
 
       it('skips fallback for successful AsyncResult', async () => {
         const res = Result.wrap(Promise.resolve(42));
-        await expect(res.unwrap(0)).resolves.toBe(42);
+        await expect(res.unwrapOrElse(0)).resolves.toBe(42);
       });
 
       it('uses fallback for error AsyncResult', async () => {
         const res = Result.wrap(Promise.reject('oops'));
-        await expect(res.unwrap(42)).resolves.toBe(42);
+        await expect(res.unwrapOrElse(42)).resolves.toBe(42);
       });
 
       it('returns ok-value for unwrapOrThrow', async () => {
