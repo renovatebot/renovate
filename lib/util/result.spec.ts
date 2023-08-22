@@ -169,6 +169,17 @@ describe('util/result', () => {
         const res = Result.err('oops');
         expect(res.unwrapOrNull()).toBeNull();
       });
+
+      it('unwrapOrNull throws uncaught transform error', () => {
+        const res = Result.ok(42);
+        expect(() =>
+          res
+            .transform(() => {
+              throw 'oops';
+            })
+            .unwrapOrNull()
+        ).toThrow('oops');
+      });
     });
 
     describe('Transforming', () => {
