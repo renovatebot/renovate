@@ -8,8 +8,8 @@ import {
 } from '../../../util/fs';
 import { Result } from '../../../util/result';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { extractLockFileEntries } from './locked-version';
 import {
+  Lockfile,
   type PoetryDependencyRecord,
   type PoetryGroupRecord,
   type PoetrySchema,
@@ -113,7 +113,10 @@ export async function extractPackageFile(
   // TODO #22198
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
-  const lockfileMapping = extractLockFileEntries(lockContents);
+  const lockfileMapping = Result.parse(
+    Lockfile.transform(({ lock }) => lock),
+    lockContents
+  ).unwrap({});
 
   const deps = [
     ...extractFromDependenciesSection(

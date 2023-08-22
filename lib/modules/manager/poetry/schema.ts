@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
-import { LooseRecord, Toml } from '../../../util/schema-utils';
+import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -188,3 +188,52 @@ export const PoetrySchema = z.object({
 export type PoetrySchema = z.infer<typeof PoetrySchema>;
 
 export const PoetrySchemaToml = Toml.pipe(PoetrySchema);
+
+const poetryConstraint: Record<string, string> = {
+  '1.0': '<1.1.0',
+  '1.1': '<1.3.0',
+  '2.0': '>=1.3.0',
+};
+
+export const Lockfile = Toml.pipe(
+  z.object({
+    package: LooseArray(
+      z
+        .object({
+          name: z.string(),
+          version: z.string(),
+        })
+        .transform(({ name, version }): [string, string] => [name, version])
+    )
+      .transform((entries) => Object.fromEntries(entries))
+      .catch({}),
+    metadata: z
+      .object({
+        'lock-version': z
+          .string()
+          .transform((lockVersion) => poetryConstraint[lockVersion])
+          .optional()
+          .catch(undefined),
+        'python-versions': z.string().optional().catch(undefined),
+      })
+      .transform(
+        ({
+          'lock-version': poetryConstraint,
+          'python-versions': pythonVersions,
+        }) => ({
+          poetryConstraint,
+          pythonVersions,
+        })
+      )
+      .catch({
+        poetryConstraint: undefined,
+        pythonVersions: undefined,
+      }),
+  })
+).transform(
+  ({ package: lock, metadata: { poetryConstraint, pythonVersions } }) => ({
+    lock,
+    poetryConstraint,
+    pythonVersions,
+  })
+);
