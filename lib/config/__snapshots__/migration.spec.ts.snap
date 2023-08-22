@@ -55,6 +55,7 @@ exports[`config/migration it migrates regexManagers 1`] = `
 {
   "regexManagers": [
     {
+      "customType": "regex",
       "fileMatch": [
         "(^|/|\\.)Dockerfile$",
         "(^|/)Dockerfile[^/]*$",
@@ -64,6 +65,7 @@ exports[`config/migration it migrates regexManagers 1`] = `
       ],
     },
     {
+      "customType": "regex",
       "fileMatch": [
         "(^|/|\\.)Dockerfile$",
         "(^|/)Dockerfile[^/]*$",

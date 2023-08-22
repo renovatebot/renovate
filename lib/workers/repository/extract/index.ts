@@ -34,9 +34,11 @@ export async function extractAllDependencies(
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
     if (isCustomManager(manager)) {
-      // TODO: filter regexManagers using customType before
-      for (const regexManager of config.regexManagers ?? []) {
-        tryConfig(mergeChildConfig(managerConfig, regexManager));
+      const filteredCustomManagers = (config.regexManagers ?? []).filter(
+        (mgr) => mgr.customType === manager
+      );
+      for (const customManager of filteredCustomManagers) {
+        tryConfig(mergeChildConfig(managerConfig, customManager));
       }
     } else {
       tryConfig(managerConfig);
