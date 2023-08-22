@@ -159,6 +159,16 @@ describe('util/result', () => {
         const res = Result.err('oops');
         expect(() => res.unwrapOrThrow()).toThrow('oops');
       });
+
+      it('unwrapOrNull returns value for ok-result', () => {
+        const res = Result.ok(42);
+        expect(res.unwrapOrNull()).toBe(42);
+      });
+
+      it('unwrapOrNull returns null for error result', () => {
+        const res = Result.err('oops');
+        expect(res.unwrapOrNull()).toBeNull();
+      });
     });
 
     describe('Transforming', () => {
@@ -372,6 +382,16 @@ describe('util/result', () => {
       it('rejects for error for unwrapOrThrow', async () => {
         const res = Result.wrap(Promise.reject('oops'));
         await expect(res.unwrapOrThrow()).rejects.toBe('oops');
+      });
+
+      it('unwrapOrNull returns value for ok-result', async () => {
+        const res = AsyncResult.ok(42);
+        await expect(res.unwrapOrNull()).resolves.toBe(42);
+      });
+
+      it('unwrapOrNull returns null for error result', async () => {
+        const res = AsyncResult.err('oops');
+        await expect(res.unwrapOrNull()).resolves.toBeNull();
       });
     });
 
