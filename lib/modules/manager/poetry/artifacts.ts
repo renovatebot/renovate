@@ -17,9 +17,8 @@ import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
 import { PypiDatasource } from '../../datasource/pypi';
-import { dependencyPattern } from '../pip_requirements/extract';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { Lockfile } from './schema';
+import { Lockfile, PoetrySchemaToml } from './schema';
 import type { PoetryFile, PoetryLock, PoetrySource } from './types';
 
 export function getPythonConstraint(
@@ -35,8 +34,6 @@ export function getPythonConstraint(
   }
   return undefined;
 }
-
-const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
 export function getPoetryRequirement(
   pyProjectContent: string,
@@ -59,33 +56,15 @@ export function getPoetryRequirement(
     return lockfilePoetryConstraint;
   }
 
-  try {
-    const pyproject: PoetryFile = parse(pyProjectContent);
-    // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
-    const buildBackend = pyproject['build-system']?.['build-backend'];
-    if (
-      (buildBackend === 'poetry.masonry.api' ||
-        buildBackend === 'poetry.core.masonry.api') &&
-      is.nonEmptyArray(pyproject['build-system']?.requires)
-    ) {
-      for (const requirement of pyproject['build-system']!.requires) {
-        if (is.nonEmptyString(requirement)) {
-          const pkgValMatch = pkgValRegex.exec(requirement);
-          if (pkgValMatch) {
-            const [, depName, , currVal] = pkgValMatch;
-            if (
-              (depName === 'poetry' || depName === 'poetry_core') &&
-              currVal
-            ) {
-              return currVal.trim();
-            }
-          }
-        }
-      }
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing pyproject.toml file');
+  const { val: pyprojectPoetryConstraint } = Result.parse(
+    PoetrySchemaToml.transform(({ poetryRequirement }) => poetryRequirement),
+    pyProjectContent
+  ).unwrap();
+  if (pyprojectPoetryConstraint) {
+    logger.debug('Using poetry version from pyproject.toml');
+    return pyprojectPoetryConstraint;
   }
+
   return null;
 }
 

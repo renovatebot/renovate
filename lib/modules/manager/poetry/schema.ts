@@ -8,6 +8,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
+import { dependencyPattern } from '../pip_requirements/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 const PoetryPathDependency = z
@@ -231,6 +232,23 @@ export const PoetrySectionSchema = z
 
 export type PoetrySectionSchema = z.infer<typeof PoetrySectionSchema>;
 
+const BuildSystemRequireVal = z
+  .string()
+  .nonempty()
+  .transform((val) => regEx(`^${dependencyPattern}$`).exec(val))
+  .pipe(
+    z.tuple([
+      z.unknown(),
+      z.string(),
+      z.unknown(),
+      z.string().trim().nonempty(),
+    ])
+  )
+  .transform(([, depName, , poetryRequirement]) => ({
+    depName,
+    poetryRequirement,
+  }));
+
 export const PoetrySchema = z
   .object({
     tool: z
@@ -238,12 +256,29 @@ export const PoetrySchema = z
       .transform(({ poetry }) => poetry),
     'build-system': z
       .object({
-        requires: z.array(z.string()),
-        'build-backend': z.string().optional(),
+        'build-backend': z.string().refine(
+          // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+          (buildBackend) =>
+            buildBackend === 'poetry.masonry.api' ||
+            buildBackend === 'poetry.core.masonry.api'
+        ),
+        requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
+          const req = vals.find(
+            ({ depName }) => depName === 'poetry' || depName === 'poetry_core'
+          );
+          return req?.poetryRequirement;
+        }),
       })
-      .optional(),
+      .transform(({ requires: poetryRequirement }) => poetryRequirement)
+      .optional()
+      .catch(undefined),
   })
-  .transform(({ tool }) => tool);
+  .transform(
+    ({ tool: packageFileContent, 'build-system': poetryRequirement }) => ({
+      packageFileContent,
+      poetryRequirement,
+    })
+  );
 
 export type PoetrySchema = z.infer<typeof PoetrySchema>;
 

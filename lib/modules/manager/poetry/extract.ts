@@ -15,7 +15,10 @@ export async function extractPackageFile(
   packageFile: string
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
-  const { val: res, err } = Result.parse(PoetrySchemaToml, content).unwrap();
+  const { val: res, err } = Result.parse(
+    PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent),
+    content
+  ).unwrap();
   if (err) {
     logger.debug({ packageFile, err }, `Poetry: error parsing pyproject.toml`);
     return null;
