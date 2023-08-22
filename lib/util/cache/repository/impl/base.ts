@@ -48,14 +48,13 @@ export abstract class RepoCacheBase implements RepoCache {
 
   async load(): Promise<void> {
     try {
-      const rawOldCache = await this.read();
-      if (!is.string(rawOldCache)) {
+      const oldCache = await this.read();
+      if (!is.string(oldCache)) {
         logger.debug(
-          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof rawOldCache}' instead - skipping`
+          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`
         );
         return;
       }
-      const oldCache = JSON.parse(rawOldCache) as unknown;
 
       const cacheV13 = RepoCacheV13.safeParse(oldCache);
       if (cacheV13.success) {
@@ -65,7 +64,7 @@ export abstract class RepoCacheBase implements RepoCache {
       }
 
       logger.debug('Repository cache is invalid');
-    } catch (err) {
+    } catch (err) /* istanbul ignore next: not easily testable */ {
       logger.debug({ err }, 'Error reading repository cache');
     }
   }

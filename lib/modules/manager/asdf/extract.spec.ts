@@ -532,6 +532,39 @@ dummy 1.2.3
       });
     });
 
+    it('can handle multiple tools with indented versions in one file', () => {
+      const res = extractPackageFile(
+        codeBlock`
+adr-tools 3.0.0
+argocd    2.5.4
+awscli    2.8.6
+`
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '3.0.0',
+            datasource: 'github-tags',
+            packageName: 'npryce/adr-tools',
+            depName: 'adr-tools',
+          },
+          {
+            currentValue: '2.5.4',
+            datasource: 'github-releases',
+            packageName: 'argoproj/argo-cd',
+            depName: 'argocd',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '2.8.6',
+            datasource: 'github-tags',
+            packageName: 'aws/aws-cli',
+            depName: 'awscli',
+          },
+        ],
+      });
+    });
+
     it('can handle flutter version channel', () => {
       const withChannel = extractPackageFile('flutter 3.10.0-stable');
       expect(withChannel).toEqual({
