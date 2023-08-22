@@ -8,17 +8,18 @@ import {
 } from '../../../util/fs';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { extractLockFileEntries } from './locked-version';
-import type {
-  PoetryDependencyRecord,
-  PoetryGroupRecord,
-  PoetrySchema,
-  PoetrySectionSchema,
+import {
+  Lockfile,
+  type PoetryDependencyRecord,
+  type PoetryGroupRecord,
+  type PoetrySchema,
+  type PoetrySectionSchema,
 } from './schema';
 import { parsePoetry } from './utils';
 
@@ -179,7 +180,10 @@ export async function extractPackageFile(
   // TODO #22198
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
-  const lockfileMapping = extractLockFileEntries(lockContents);
+  const lockfileMapping = Result.parse(
+    Lockfile.transform(({ lock }) => lock),
+    lockContents
+  ).unwrapOrElse({});
 
   const deps = [
     ...extractFromDependenciesSection(
