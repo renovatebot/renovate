@@ -10,7 +10,7 @@ const {
   matches,
 } = swift;
 
-describe('Users/chuck/code/cgrindel/renovate/fix_spm_version_logic/lib/modules/versioning/swift/index', () => {
+describe('modules/versioning/swift/index', () => {
   it.each`
     version            | expected
     ${'from: "1.2.3"'} | ${false}
