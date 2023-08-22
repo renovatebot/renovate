@@ -271,7 +271,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
 
-    // Attempt to fetch information about repository
+    // Try to fetch information about repository
     try {
       repo = await helper.getRepo(repository);
     } catch (err) {
@@ -909,7 +909,7 @@ const platform: Platform = {
       return;
     }
 
-    // Attempt to delete comment
+    // Try to delete comment
     try {
       await helper.deleteComment(config.repository, comment.id);
     } catch (err) {
