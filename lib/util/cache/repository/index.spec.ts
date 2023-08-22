@@ -1,16 +1,13 @@
-import { mocked } from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import * as _loggerModule from '../../../logger';
 import { printRepositoryProblems } from '../../../workers/repository';
 import * as _fs from '../../fs';
 import { initRepoCache } from './init';
 import type { RepoCacheConfig } from './types';
 import { getCache, isCacheModified, resetCache, saveCache } from '.';
 
-jest.mock('../../../logger');
 jest.mock('../../fs');
 
-const loggerModule = mocked(_loggerModule);
 const fs = mocked(_fs);
 
 describe('util/cache/repository/index', () => {
@@ -61,7 +58,7 @@ describe('util/cache/repository/index', () => {
   });
 
   it('prints repository problems', () => {
-    loggerModule.getProblems.mockReturnValueOnce([
+    logger.getProblems.mockReturnValueOnce([
       {
         repository: 'some/repo',
         level: 30,
@@ -70,8 +67,9 @@ describe('util/cache/repository/index', () => {
       },
       { repository: 'some/repo', level: 30, msg: 'Problem 2' },
     ]);
+
     printRepositoryProblems(config);
 
-    expect(_loggerModule.logger.debug).toHaveBeenCalled();
+    expect(logger.logger.debug).toHaveBeenCalled();
   });
 });
