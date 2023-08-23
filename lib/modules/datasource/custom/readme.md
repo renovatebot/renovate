@@ -3,7 +3,7 @@ This `custom` datasource allows requesting version data from generic HTTP(S) end
 ## Usage
 
 The `customDatasources` option takes a record of `customDatasource` configs.
-This example shows how to update the `k3s.version` file with a custom datasource and a [regexManagers](../../manager/regex/):
+This example shows how to update the `k3s.version` file with a custom datasource and a [regexManagers](../../manager/regex/index.md):
 
 Options:
 
