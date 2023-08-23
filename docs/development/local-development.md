@@ -58,7 +58,7 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 - Open the repository folder in VS Code
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
-The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run more commands.
 
 To build inside the container:
 
@@ -150,7 +150,7 @@ e.g. `pnpm jest composer -u` would update the saved snapshots for _all_ tests in
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
+Using `// istanbul ignore` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
