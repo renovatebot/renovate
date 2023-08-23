@@ -151,7 +151,7 @@ FROM java:8@sha256:0e8b2a860
 
 With the above replacement scenario, the current dependency has a version of `8`, which also features several times within the digest section.
 
-When using the default `autoReplaceGlobalMatch` configuration, Renovate will attempt to replace all instances of `8` within the dependency string with the `replacementVersion` value of `11`.
+When using the default `autoReplaceGlobalMatch` configuration, Renovate will try to replace all instances of `8` within the dependency string with the `replacementVersion` value of `11`.
 This will replace more than is intended and will be caught during replacement validation steps, resulting in the replacement PR to not be created.
 
 When setting `autoReplaceGlobalMatch` configuration to `false`, Renovate will only replace the first occurrence of `8` and will successfully create a replacement PR.
@@ -537,7 +537,7 @@ If enabled, Renovate raises a pull request when it needs to migrate the Renovate
 Renovate only performs `configMigration` on `.json` and `.json5` files.
 
 We're adding new features to Renovate bot often.
-Often you can keep using your Renovate config and benefit from the new features right away.
+Often you can keep using your Renovate config and use the new features right away.
 But sometimes you need to update your Renovate configuration.
 To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
 
@@ -1075,11 +1075,11 @@ Use `forkModeDisallowMaintainerEdits` to disallow maintainers from editing Renov
 
 If GitHub pull requests are created from a [fork repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo), the PR author can decide to allow upstream repository to modify the PR directly.
 
-Allowing maintainers to edit pull requests directly is helpful when Renovate pull requests require additional changes.
+Allowing maintainers to edit pull requests directly is helpful when Renovate pull requests require more changes.
 The reviewer can simply push to the pull request without having to create a new PR. [More details here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/allowing-changes-to-a-pull-request-branch-created-from-a-fork).
 
 You may decide to disallow edits to Renovate pull requests in order to workaround issues in Renovate where modified fork branches are not deleted properly: [See this issue](https://github.com/renovatebot/renovate/issues/16657).
-If this option is enabled, reviewers will need to create a new PR if additional changes are needed.
+If this option is enabled, reviewers will need to create a new PR if more changes are needed.
 
 <!-- prettier-ignore -->
 !!! note
@@ -2661,7 +2661,7 @@ Table with options:
     Post-upgrade tasks can only be used on self-hosted Renovate instances.
 
 Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
-The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
+The intention is to run any other command line tools that would modify existing files or generate new files when a dependency changes.
 
 Each command must match at least one of the patterns defined in `allowedPostUpgradeCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
@@ -3029,6 +3029,23 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 !!! tip
     Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
 
+### customType
+
+Example:
+
+```json
+{
+  "regexManagers": [
+    {
+      "customType": "regex",
+      "matchStrings": [
+        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+      ]
+    }
+  ]
+}
+```
+
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
@@ -3379,7 +3396,7 @@ The default value for `schedule` is "at any time", which is functionally the sam
 i.e. Renovate will run on the repository around the clock.
 
 The easiest way to define a schedule is to use a preset if one of them fits your requirements.
-See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think others would benefit from it too.
+See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think it would help others.
 
 Otherwise, here are some text schedules that are known to work:
 

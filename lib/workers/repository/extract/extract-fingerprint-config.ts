@@ -67,10 +67,12 @@ export function generateFingerprintConfig(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
-      // TODO: filter regexManagers using customType
-      for (const regexManager of config.regexManagers ?? []) {
+      const filteredCustomManagers = (config.regexManagers ?? []).filter(
+        (mgr) => mgr.customType === manager
+      );
+      for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
-          ...mergeChildConfig(managerConfig, regexManager),
+          ...mergeChildConfig(managerConfig, customManager),
           fileList: [],
         });
       }

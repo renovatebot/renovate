@@ -1,7 +1,6 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
-import detectIndent from 'detect-indent';
 import { dump, load } from 'js-yaml';
 import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../../constants/error-messages';
@@ -25,7 +24,7 @@ import { NpmDatasource } from '../../../datasource/npm';
 import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
-import type { NpmDepType, NpmManagerData } from '../types';
+import type { NpmManagerData } from '../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import * as lerna from './lerna';
 import * as npm from './npm';
@@ -290,38 +289,7 @@ export async function writeUpdatedPackageFiles(
       continue;
     }
     logger.debug(`Writing ${packageFile.path}`);
-    const detectedIndent =
-      // TODO #22198
-
-      detectIndent(packageFile.contents!.toString()).indent || '  ';
-
-    // TODO #22198
-
-    const massagedFile = JSON.parse(packageFile.contents!.toString());
-    try {
-      const { token } = hostRules.find({
-        hostType: 'github',
-        url: 'https://api.github.com/',
-      });
-      for (const upgrade of config.upgrades) {
-        // istanbul ignore if: test me
-        if (upgrade.gitRef && upgrade.packageFile === packageFile.path) {
-          massagedFile[upgrade.depType as NpmDepType][upgrade.depName!] =
-            massagedFile[upgrade.depType as NpmDepType][
-              upgrade.depName!
-            ].replace(
-              'git+https://github.com',
-              `git+https://${token}@github.com`
-            );
-        }
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'Error adding token to package files');
-    }
-    await writeLocalFile(
-      packageFile.path,
-      JSON.stringify(massagedFile, null, detectedIndent)
-    );
+    await writeLocalFile(packageFile.path, packageFile.contents!);
   }
 }
 
