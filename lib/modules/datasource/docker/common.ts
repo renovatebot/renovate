@@ -108,7 +108,10 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using google auth for Docker registry`
       );
-      const auth = await getGoogleAccessToken();
+      const accessToken = await getGoogleAccessToken();
+      const auth = Buffer.from(`${"oauth2accesstoken"}:${accessToken}`).toString(
+        'base64'
+      );
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
       }
