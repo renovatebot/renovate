@@ -2,12 +2,14 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
+import { ExecError } from '../../../util/exec/exec-error';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 
 async function cargoUpdate(
@@ -47,7 +49,26 @@ async function cargoUpdatePrecise(
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
-  await exec(cmds, execOptions);
+
+  try {
+    await exec(cmds, execOptions);
+  } catch (err) {
+    if (err instanceof ExecError) {
+      const pkg = err.cmd.match(regEx(/--package ([^@]+)@/))?.at(1);
+      const msg = err.stderr.match(regEx(/error: (.+)/))?.at(1);
+      if (pkg && msg) {
+        logger.warn(
+          { err },
+          `Could not update cargo package \`${pkg}\`: ${msg}`
+        );
+      } else if (pkg) {
+        logger.warn({ err }, `Could not update cargo package \`${pkg}\`.`);
+      } else {
+        logger.warn({ err }, `Command failed: \`${err.cmd}\`.`);
+      }
+    }
+    throw err;
+  }
 }
 
 export async function updateArtifacts({
