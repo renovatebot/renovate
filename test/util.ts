@@ -44,7 +44,7 @@ export function partial(obj: unknown = {}): unknown {
 export const fs = mocked(_fs);
 export const git = mocked(_git);
 
-// TODO: fix types, jest / typescript is using wrong overload (#7154)
+// TODO: fix types, jest / typescript is using wrong overload (#22198)
 export const platform = mocked(partial<Required<Platform>>(_platform));
 export const scm = mocked(_scm);
 export const env = mocked(_env);

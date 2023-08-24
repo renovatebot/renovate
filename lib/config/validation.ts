@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getManagerList } from '../modules/manager';
+import { allManagersList, getManagerList } from '../modules/manager';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -65,7 +65,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !getManagerList().includes(manager)
+    (manager) => !allManagersList.includes(manager)
   );
 }
 
@@ -171,7 +171,7 @@ export async function validateConfig(
       ];
       if ((key.endsWith('Template') || templateKeys.includes(key)) && val) {
         try {
-          // TODO: validate string #7154
+          // TODO: validate string #22198
           let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
@@ -188,8 +188,7 @@ export async function validateConfig(
         optionParents[key] &&
         optionParents[key] !== parentName
       ) {
-        // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        // TODO: types (#22198)
         const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -319,12 +318,14 @@ export async function validateConfig(
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
+              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchRepositories',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -400,6 +401,7 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'customType',
                 'description',
                 'fileMatch',
                 'matchStrings',
@@ -414,7 +416,7 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              // TODO: fix types #7154
+              // TODO: fix types #22198
               for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
@@ -430,53 +432,60 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  if (is.nonEmptyArray(regexManager.matchStrings)) {
-                    let validRegex = false;
-                    for (const matchString of regexManager.matchStrings) {
-                      try {
-                        regEx(matchString);
-                        validRegex = true;
-                      } catch (e) {
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message: `Invalid regExp for ${currentPath}: \`${String(
-                            matchString
-                          )}\``,
-                        });
-                      }
-                    }
-                    if (validRegex) {
-                      const mandatoryFields = [
-                        'depName',
-                        'currentValue',
-                        'datasource',
-                      ];
-                      for (const field of mandatoryFields) {
-                        if (
-                          !regexManager[`${field}Template`] &&
-                          !regexManager.matchStrings.some(
-                            (matchString: string) =>
-                              matchString.includes(`(?<${field}>`)
-                          )
-                        ) {
+                } else if (is.nonEmptyString(regexManager.customType)) {
+                  if (is.nonEmptyArray(regexManager.fileMatch)) {
+                    if (is.nonEmptyArray(regexManager.matchStrings)) {
+                      let validRegex = false;
+                      for (const matchString of regexManager.matchStrings) {
+                        try {
+                          regEx(matchString);
+                          validRegex = true;
+                        } catch (e) {
                           errors.push({
                             topic: 'Configuration Error',
-                            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                            message: `Invalid regExp for ${currentPath}: \`${String(
+                              matchString
+                            )}\``,
                           });
                         }
                       }
+                      if (validRegex) {
+                        const mandatoryFields = [
+                          'depName',
+                          'currentValue',
+                          'datasource',
+                        ];
+                        for (const field of mandatoryFields) {
+                          if (
+                            !regexManager[`${field}Template`] &&
+                            !regexManager.matchStrings.some(
+                              (matchString: string) =>
+                                matchString.includes(`(?<${field}>`)
+                            )
+                          ) {
+                            errors.push({
+                              topic: 'Configuration Error',
+                              message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                            });
+                          }
+                        }
+                      }
+                    } else {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                      });
                     }
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                      message: `Each Regex Manager must contain a non-empty fileMatch array`,
                     });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty customType string`,
                   });
                 }
               }
@@ -531,9 +540,9 @@ export async function validateConfig(
               (selectors.includes(key) ||
                 key === 'matchCurrentVersion' ||
                 key === 'matchCurrentValue') &&
-              // TODO: can be undefined ? #7154
+              // TODO: can be undefined ? #22198
               !rulesRe.test(parentPath!) && // Inside a packageRule
-              (parentPath || !isPreset) // top level in a preset
+              (is.string(parentPath) || !isPreset) // top level in a preset
             ) {
               errors.push({
                 topic: 'Configuration Error',
@@ -610,7 +619,13 @@ export async function validateConfig(
                 }
               }
             } else if (
-              ['customEnvVariables', 'migratePresets', 'secrets'].includes(key)
+              [
+                'customEnvVariables',
+                'migratePresets',
+                'productLinks',
+                'secrets',
+                'customizeDashboard',
+              ].includes(key)
             ) {
               const res = validatePlainObject(val);
               if (res !== true) {

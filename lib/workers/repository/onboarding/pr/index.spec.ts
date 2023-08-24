@@ -187,7 +187,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
         const hash =
-          '8d5d8373c3fc54803f573ea57ded60686a9df8eb0430ad25da281472eed9ce4e'; // no rebase checkbox PR hash
+          '30029ee05ed80b34d2f743afda6e78fe20247a1eedaa9ce6a8070045c229ebfa'; // no rebase checkbox PR hash
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         platform.getBranchPr.mockResolvedValue(

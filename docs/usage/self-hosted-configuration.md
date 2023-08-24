@@ -130,6 +130,14 @@ If using negations, all repositories except those who match the regex are added 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
 topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
 
+For example:
+
+```json
+{
+  "autodiscoverTopics": ["managed-by-renovate"]
+}
+```
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
@@ -564,14 +572,14 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 When this option is `true`, Renovate will do the following during repository initialization:
 
-- Attempt to fetch the default config file (`renovate.json`)
+- Try to fetch the default config file (`renovate.json`)
 - Check if the file contains `"enabled": false`
 
 If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
 Otherwise, it will continue as normal.
 
 This option is only useful where the ratio of disabled repos is quite high.
-It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
+You spend one extra API call per repo, but skip cloning disabled repositories.
 
 ## password
 
@@ -698,7 +706,7 @@ Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define additional settings:
+Elements in the `repositories` array can be an object if you wish to define more settings:
 
 ```js
 {
@@ -724,7 +732,7 @@ Set this to an S3 URI to enable S3 backed repository cache.
 
 <!-- prettier-ignore -->
 !!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running Renovate within an EC2 instance in an ECS cluster. In this case, no extra environment variables are required.
     Otherwise, the following environment variables should be set for the S3 client to work.
 
 ```

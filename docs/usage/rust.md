@@ -5,7 +5,7 @@ description: Rust crates support in Renovate
 
 # Automated Dependency Updates for Rust crates
 
-Renovate supports upgrading dependencies in `Cargo.toml` files and their accompanying `Cargo.lock` checksums.
+Renovate supports upgrading dependencies in `Cargo.toml` files and associated `Cargo.lock` checksums.
 
 ## How it works
 

@@ -107,7 +107,7 @@ export async function readDashboardBody(
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
-    config.dependencyDashboard ||
+    config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
@@ -140,13 +140,13 @@ function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (branch.prNo) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
@@ -174,8 +174,11 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       'repository problems'
     );
     newIssueBody += '## Repository problems\n\n';
-    newIssueBody +=
-      'These problems occurred while renovating this repository.\n\n';
+    const repoProblemsHeader =
+      config.customizeDashboard?.['repoProblemsHeader'] ??
+      'Renovate tried to run on this repository, but found these problems.';
+    newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
+
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }
@@ -199,9 +202,10 @@ export async function ensureDependencyDashboard(
   );
   if (
     !(
-      config.dependencyDashboard ||
-      config.dependencyDashboardApproval ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
+      config.dependencyDashboard === true ||
+      config.dependencyDashboardApproval === true ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+        true ||
       branches.some(
         (branch) =>
           !!branch.dependencyDashboardApproval ||

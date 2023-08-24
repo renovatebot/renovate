@@ -69,7 +69,7 @@ export async function parseConfigs(
   // istanbul ignore if
   if (config.logFile) {
     logger.debug(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `Enabling ${config.logFileLevel!} logging to ${config.logFile}`
     );
     await ensureDir(getParentDir(config.logFile));
@@ -99,9 +99,6 @@ export async function parseConfigs(
   }
   // Get global config
   logger.trace({ config }, 'Full config');
-
-  // Print config
-  logger.trace({ config }, 'Global config');
 
   // Massage endpoint to have a trailing slash
   if (config.endpoint) {

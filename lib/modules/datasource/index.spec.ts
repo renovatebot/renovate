@@ -7,6 +7,7 @@ import {
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { loadModules } from '../../util/modules';
 import datasources from './api';
+import { getDefaultVersioning } from './common';
 import { Datasource } from './datasource';
 import type {
   DatasourceApi,
@@ -17,7 +18,6 @@ import type {
 import {
   getDatasourceList,
   getDatasources,
-  getDefaultVersioning,
   getDigest,
   getPkgReleases,
   supportsDigests,
@@ -171,7 +171,7 @@ describe('modules/datasource/index', () => {
     it('returns null for null datasource', async () => {
       expect(
         await getPkgReleases({
-          datasource: null as never, // #7154
+          datasource: null as never, // #22198
           packageName: 'some/dep',
         })
       ).toBeNull();
@@ -182,7 +182,7 @@ describe('modules/datasource/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          packageName: null as never, // #7154
+          packageName: null as never, // #22198
         })
       ).toBeNull();
     });

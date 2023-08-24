@@ -350,7 +350,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     Fixtures.mock({});
     const execSnapshots = mockExecAll(new Error('some-error'));
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();

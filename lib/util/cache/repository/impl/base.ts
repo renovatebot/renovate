@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compress, decompress } from '../../../compress';
+import { hash } from '../../../hash';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
 import { RepoCacheRecord, RepoCacheV13 } from '../schema';
@@ -48,14 +48,13 @@ export abstract class RepoCacheBase implements RepoCache {
 
   async load(): Promise<void> {
     try {
-      const rawOldCache = await this.read();
-      if (!is.string(rawOldCache)) {
+      const oldCache = await this.read();
+      if (!is.string(oldCache)) {
         logger.debug(
-          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof rawOldCache}' instead - skipping`
+          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`
         );
         return;
       }
-      const oldCache = JSON.parse(rawOldCache) as unknown;
 
       const cacheV13 = RepoCacheV13.safeParse(oldCache);
       if (cacheV13.success) {
@@ -65,15 +64,15 @@ export abstract class RepoCacheBase implements RepoCache {
       }
 
       logger.debug('Repository cache is invalid');
-    } catch (err) {
+    } catch (err) /* istanbul ignore next: not easily testable */ {
       logger.debug({ err }, 'Error reading repository cache');
     }
   }
 
   async save(): Promise<void> {
     const jsonStr = safeStringify(this.data);
-    const hash = await hasha.async(jsonStr);
-    if (hash === this.oldHash) {
+    const hashedJsonStr = hash(jsonStr);
+    if (hashedJsonStr === this.oldHash) {
       return;
     }
 
@@ -88,7 +87,7 @@ export abstract class RepoCacheBase implements RepoCache {
       repository,
       fingerprint,
       payload,
-      hash,
+      hash: hashedJsonStr,
     });
   }
 
@@ -101,6 +100,6 @@ export abstract class RepoCacheBase implements RepoCache {
       return undefined;
     }
     const jsonStr = safeStringify(this.data);
-    return hasha(jsonStr) !== this.oldHash;
+    return hash(jsonStr) !== this.oldHash;
   }
 }

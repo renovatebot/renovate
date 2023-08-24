@@ -1,5 +1,4 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+// TODO: types (#22198)
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
@@ -82,13 +81,13 @@ export function updateDependency({
         'gomod: need to update digest'
       );
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
         `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
         `$<depPart>$<divider>${upgrade.newValue}`
       );

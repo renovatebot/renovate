@@ -94,9 +94,7 @@ export async function tryDecrypt(
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       try {
-        const decryptedObj = DecryptedObject.safeParse(
-          JSON.parse(decryptedObjStr)
-        );
+        const decryptedObj = DecryptedObject.safeParse(decryptedObjStr);
         // istanbul ignore if
         if (!decryptedObj.success) {
           const error = new Error('config-validation');

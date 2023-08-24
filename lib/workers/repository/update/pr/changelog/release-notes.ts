@@ -23,6 +23,8 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
+const repositoriesToSkipMdFetching = ['facebook/react-native'];
+
 export async function getReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
@@ -58,7 +60,7 @@ export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
     project.repository
   }`;
@@ -128,7 +130,7 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   const { packageName, repository } = project;
   const { version, gitRef } = release;
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
@@ -281,7 +283,7 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
     project.sourceDirectory ? `-${project.sourceDirectory}` : ''
   }-${project.apiBaseUrl!}`;
@@ -302,11 +304,11 @@ export async function getReleaseNotesMd(
   const { baseUrl, repository } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
-  const skippedRepos = ['facebook/react-native'];
-  // istanbul ignore if
-  if (skippedRepos.includes(repository)) {
+
+  if (shouldSkipChangelogMd(repository)) {
     return null;
   }
+
   const changelog = await getReleaseNotesMdFile(project);
   if (!changelog) {
     return null;
@@ -444,4 +446,12 @@ export async function addReleaseNotes(
     output.hasReleaseNotes = !!output.hasReleaseNotes || !!releaseNotes;
   }
   return output;
+}
+
+/**
+ * Skip fetching changelog/release-notes markdown files.
+ * Will force a fallback to using GitHub release notes
+ */
+export function shouldSkipChangelogMd(repository: string): boolean {
+  return repositoriesToSkipMdFetching.includes(repository);
 }

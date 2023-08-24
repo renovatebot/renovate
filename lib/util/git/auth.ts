@@ -36,7 +36,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token) {
     logger.warn(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `Could not create environment variable for ${matchHost!} as token was empty`
     );
     return { ...environmentVariables };
@@ -195,11 +195,7 @@ function addAuthFromHostRule(
   let environmentVariables = env;
   const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
   if (validateUrl(httpUrl)) {
-    logger.trace(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `Adding Git authentication for ${httpUrl} using token auth.`
-    );
+    logger.trace(`Adding Git authentication for ${httpUrl} using token auth.`);
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       httpUrl!,
       hostRule,

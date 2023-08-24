@@ -1,7 +1,30 @@
+import { ZodError, z } from 'zod';
+import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import type { HttpError } from '../../../util/http';
+import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { CdnjsResponse } from './types';
+import { ReleasesConfig } from '../schema';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+
+const Homepage = z.string().optional().catch(undefined);
+
+const Repository = z
+  .object({
+    type: z.literal('git'),
+    url: z.string(),
+  })
+  .transform(({ url }) => url)
+  .optional()
+  .catch(undefined);
+
+const Assets = z.array(
+  z.object({
+    version: z.string(),
+    files: z.string().array(),
+    sri: z.record(z.string()).optional(),
+  })
+);
 
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';
@@ -16,44 +39,68 @@ export class CdnJsDatasource extends Datasource {
 
   override readonly caching = true;
 
-  // this.handleErrors will always throw
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const result = Result.parse(ReleasesConfig, config)
+      .transform(({ packageName, registryUrl }) => {
+        const [library] = packageName.split('/');
+        const assetName = packageName.replace(`${library}/`, '');
 
-  async getReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // Each library contains multiple assets, so we cache at the library level instead of per-asset
-    const library = packageName.split('/')[0];
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
-    let result: ReleaseResult | null = null;
-    try {
-      const { assets, homepage, repository } = (
-        await this.http.getJson<CdnjsResponse>(url)
-      ).body;
-      if (!assets) {
-        return null;
-      }
-      const assetName = packageName.replace(`${library}/`, '');
-      const releases = assets
-        .filter(({ files }) => files.includes(assetName))
-        .map(({ version, sri }) => ({ version, newDigest: sri?.[assetName] }));
+        const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
 
-      result = { releases };
+        const schema = z.object({
+          homepage: Homepage,
+          repository: Repository,
+          assets: Assets.transform((assets) =>
+            assets
+              .filter(({ files }) => files.includes(assetName))
+              .map(({ version, sri }) => {
+                const res: Release = { version };
 
-      if (homepage) {
-        result.homepage = homepage;
-      }
-      if (repository?.url) {
-        result.sourceUrl = repository.url;
-      }
-    } catch (err) {
-      if (err.statusCode !== 404) {
-        throw new ExternalHostError(err);
-      }
+                const newDigest = sri?.[assetName];
+                if (newDigest) {
+                  res.newDigest = newDigest;
+                }
+
+                return res;
+              })
+          ),
+        });
+
+        return this.http.getJsonSafe(url, schema);
+      })
+      .transform(({ assets, homepage, repository }): ReleaseResult => {
+        const releases: Release[] = assets;
+
+        const res: ReleaseResult = { releases };
+
+        if (homepage) {
+          res.homepage = homepage;
+        }
+
+        if (repository) {
+          res.sourceUrl = repository;
+        }
+
+        return res;
+      });
+
+    const { val, err } = await result.unwrap();
+
+    if (err instanceof ZodError) {
+      logger.debug({ err }, 'cdnjs: validation error');
+      return null;
+    }
+
+    if (err) {
       this.handleGenericErrors(err);
     }
-    return result;
+
+    return val;
+  }
+
+  override handleHttpErrors(err: HttpError): void {
+    if (err.response?.statusCode !== 404) {
+      throw new ExternalHostError(err);
+    }
   }
 }

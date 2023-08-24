@@ -82,7 +82,7 @@ export async function renovateRepository(
       }
       if (res === 'automerged') {
         if (canRetry) {
-          logger.info('Renovating repository again after automerge result');
+          logger.info('Restarting repository job after automerge result');
           const recursiveRes = await renovateRepository(repoConfig, false);
           return recursiveRes;
         }
@@ -91,7 +91,7 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
-      // TODO #7154
+      // TODO #22198
       repoResult = processResult(config, res!);
     }
   } catch (err) /* istanbul ignore next */ {

@@ -201,8 +201,8 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
-  // TODO #7154
+): Promise<any> {
+  // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -227,7 +227,7 @@ function getRepoUrl(
 
   if (
     gitUrl === 'endpoint' ||
-    process.env.GITLAB_IGNORE_REPO_URL ||
+    is.nonEmptyString(process.env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
@@ -239,12 +239,12 @@ function getRepoUrl(
       );
     }
 
-    // TODO: null check (#7154)
+    // TODO: null check (#22198)
     const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol: protocol.slice(0, -1) || 'https',
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,
       pathname: newPathname + '/' + repository + '.git',
@@ -255,7 +255,7 @@ function getRepoUrl(
 
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   repoUrl.auth = `oauth2:${opts.token!}`;
   return URL.format(repoUrl);
 }
@@ -383,7 +383,7 @@ async function getStatus(
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
   try {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const url = `projects/${
       config.repository
     }/repository/commits/${branchSha!}/statuses`;
@@ -637,6 +637,16 @@ async function tryPrAutomerge(
   }
 }
 
+async function approvePr(pr: number): Promise<void> {
+  try {
+    await gitlabApi.postJson(
+      `projects/${config.repository}/merge_requests/${pr}/approve`
+    );
+  } catch (err) {
+    logger.warn({ err }, 'GitLab: Error approving merge request');
+  }
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -672,6 +682,10 @@ export async function createPr({
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
+  }
+
+  if (platformOptions?.autoApprove) {
+    await approvePr(pr.iid);
   }
 
   await tryPrAutomerge(pr.iid, platformOptions);
@@ -716,7 +730,7 @@ export async function updatePr({
   const newState = {
     ['closed']: 'close',
     ['open']: 'reopen',
-    // TODO: null check (#7154)
+    // TODO: null check (#22198)
   }[state!];
 
   const body: any = {
@@ -732,6 +746,10 @@ export async function updatePr({
     `projects/${config.repository}/merge_requests/${iid}`,
     { body }
   );
+
+  if (platformOptions?.autoApprove) {
+    await approvePr(iid);
+  }
 
   await tryPrAutomerge(iid, platformOptions);
 }
@@ -850,7 +868,7 @@ export async function setBranchStatus({
   // First, get the branch commit SHA
   const branchSha = git.getBranchCommit(branchName);
   // Now, check the statuses for that commit
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const url = `projects/${config.repository}/statuses/${branchSha!}`;
   let state = 'success';
   if (renovateState === 'yellow') {
@@ -1199,7 +1217,7 @@ export async function ensureComment({
   let body: string;
   let commentId: number | undefined;
   let commentNeedsUpdating: boolean | undefined;
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;

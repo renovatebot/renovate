@@ -25,6 +25,7 @@ import { GitRefsDatasource } from './git-refs';
 import { GitTagsDatasource } from './git-tags';
 import { GithubReleaseAttachmentsDatasource } from './github-release-attachments';
 import { GithubReleasesDatasource } from './github-releases';
+import { GithubRunnersDatasource } from './github-runners';
 import { GithubTagsDatasource } from './github-tags';
 import { GitlabPackagesDatasource } from './gitlab-packages';
 import { GitlabReleasesDatasource } from './gitlab-releases';
@@ -90,6 +91,7 @@ api.set(
   new GithubReleaseAttachmentsDatasource()
 );
 api.set(GithubReleasesDatasource.id, new GithubReleasesDatasource());
+api.set(GithubRunnersDatasource.id, new GithubRunnersDatasource());
 api.set(GithubTagsDatasource.id, new GithubTagsDatasource());
 api.set(GitlabPackagesDatasource.id, new GitlabPackagesDatasource());
 api.set(GitlabReleasesDatasource.id, new GitlabReleasesDatasource());

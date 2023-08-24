@@ -19,7 +19,7 @@ export function getPrList(
 
   for (const branch of branches) {
     const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
-    // TODO #7154
+    // TODO #22198
     prDesc += `<details>\n<summary>${branch.prTitle!.replace(
       prTitleRe,
       '@&#8203;$1'
@@ -43,12 +43,12 @@ export function getPrList(
           text += '  - Upgrade ';
         }
         if (upgrade.sourceUrl) {
-          // TODO: types (#7154)
+          // TODO: types (#22198)
           text += `[${upgrade.depName!}](${upgrade.sourceUrl})`;
         } else {
           text += upgrade.depName!.replace(prTitleRe, '@&#8203;$1');
         }
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         text += upgrade.isLockfileUpdate
           ? ` to \`${upgrade.newVersion!}\``
           : ` to \`${upgrade.newDigest ?? upgrade.newValue!}\``;
@@ -62,7 +62,7 @@ export function getPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
-  // TODO: type (#7154)
+  // TODO: type (#22198)
   const prHourlyLimit = config.prHourlyLimit!;
   if (
     prHourlyLimit > 0 &&

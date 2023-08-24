@@ -5,10 +5,11 @@ import type { ToolConstraint } from '../../../../util/exec/types';
 import { readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import type { LazyPackageJson } from './utils';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
-    // TODO #7154
+    // TODO #22198
     const constraint = (await readLocalFile(filename, 'utf8'))!
       .split(newlineRegex)[0]
       .replace(regEx(/^v/), '');
@@ -22,11 +23,10 @@ async function getNodeFile(filename: string): Promise<string | null> {
   return null;
 }
 
-function getPackageJsonConstraint(
-  config: Partial<PostUpdateConfig>
-): string | null {
-  const constraint: string =
-    config.constraints?.node ?? config.extractedConstraints?.node;
+async function getPackageJsonConstraint(
+  pkg: LazyPackageJson
+): Promise<string | null> {
+  const constraint = (await pkg.getValue()).engines?.node;
   if (constraint && semver.validRange(constraint)) {
     logger.debug(`Using node constraint "${constraint}" from package.json`);
     return constraint;
@@ -34,15 +34,19 @@ function getPackageJsonConstraint(
   return null;
 }
 
+// export only for testing
 export async function getNodeConstraint(
   config: Partial<PostUpdateConfig>,
-  lockFileDir: string
+  upgrades: Upgrade[],
+  lockFileDir: string,
+  pkg: LazyPackageJson
 ): Promise<string | null> {
-  // TODO: fix types (#7154)
   const constraint =
+    getNodeUpdate(upgrades) ??
+    config.constraints?.node ??
     (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
     (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
-    getPackageJsonConstraint(config);
+    (await getPackageJsonConstraint(pkg));
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
   }
@@ -56,10 +60,15 @@ export function getNodeUpdate(upgrades: Upgrade[]): string | undefined {
 export async function getNodeToolConstraint(
   config: Partial<PostUpdateConfig>,
   upgrades: Upgrade[],
-  lockFileDir: string
+  lockFileDir: string,
+  pkg: LazyPackageJson
 ): Promise<ToolConstraint> {
-  const constraint =
-    getNodeUpdate(upgrades) ?? (await getNodeConstraint(config, lockFileDir));
+  const constraint = await getNodeConstraint(
+    config,
+    upgrades,
+    lockFileDir,
+    pkg
+  );
 
   return {
     toolName: 'node',

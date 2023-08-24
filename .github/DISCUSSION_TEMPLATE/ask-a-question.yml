@@ -27,7 +27,7 @@ body:
         - 'Azure DevOps Server'
         - 'Bitbucket Cloud (bitbucket.org)'
         - 'Bitbucket Server'
-        - 'Gitea'
+        - 'Gitea or Forgejo'
         - 'github.com'
         - 'GitHub Enterprise Server'
         - 'gitlab.com'
@@ -40,6 +40,7 @@ body:
     attributes:
       label: Was this something which used to work for you, and then stopped?
       options:
+        - 'Placeholder value, please select the correct response from the dropdown'
         - 'It used to work, and then stopped'
         - 'I never saw this working'
     validations:
