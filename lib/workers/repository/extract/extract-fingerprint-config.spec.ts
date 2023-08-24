@@ -22,6 +22,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       enabledManagers: ['npm', 'regex'],
       regexManagers: [
         {
+          customType: 'regex',
           fileMatch: ['js', '***$}{]]['],
           matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
           datasourceTemplate: 'maven',
