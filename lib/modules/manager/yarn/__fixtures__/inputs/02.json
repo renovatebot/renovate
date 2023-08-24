@@ -1,0 +1,26 @@
+{
+  "name": "renovate",
+  "description": "Client node modules for renovate",
+  "version": "1.0.0",
+  "author": "Rhys Arkins <rhys@keylocation.sg>",
+  "bugs": "https://github.com/singapore/renovate/issues",
+  "contributors": [
+    {
+      "name": "Rhys Arkins"
+    }
+  ],
+  "dependencies": {
+    "@babel/core": "7.0.0",
+    "config": "1.21.0"
+  },
+  "homepage": "https://keylocation.sg",
+  "keywords": [
+    "Key Location",
+    "Singapore"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/singapore/renovate.git"
+  }
+}

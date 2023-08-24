@@ -1,0 +1,7 @@
+{
+  "name": "update-lockfile-massage-1",
+  "version": "1.0.0",
+  "dependencies": {
+    "postcss": "^8.0.0"
+  }
+}

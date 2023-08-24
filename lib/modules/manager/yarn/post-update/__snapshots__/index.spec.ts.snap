@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/npm/post-update/index updateYarnBinary() should return .yarnrc.yml content if it has been overwritten 1`] = `
+"yarnPath: .yarn/releases/yarn-3.0.2.cjs
+a: b
+"
+`;
+
+exports[`modules/manager/npm/post-update/index updateYarnBinary() should return .yarnrc.yml content if it has been overwritten 2`] = `
+[
+  {
+    "contents": "yarnPath: .yarn/releases/yarn-3.0.2.cjs
+a: b
+",
+    "path": "path/to/lockfile/.yarnrc.yml",
+    "type": "addition",
+  },
+  {
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
+    "type": "deletion",
+  },
+  {
+    "contents": "new yarn
+",
+    "isExecutable": true,
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs",
+    "type": "addition",
+  },
+]
+`;
+
+exports[`modules/manager/npm/post-update/index updateYarnBinary() should update the Yarn binary 1`] = `
+[
+  {
+    "contents": "yarnPath: .yarn/releases/yarn-3.0.2.cjs
+a: b
+",
+    "path": "path/to/lockfile/.yarnrc.yml",
+    "type": "addition",
+  },
+  {
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs",
+    "type": "deletion",
+  },
+  {
+    "contents": "new yarn
+",
+    "isExecutable": true,
+    "path": "path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs",
+    "type": "addition",
+  },
+]
+`;
