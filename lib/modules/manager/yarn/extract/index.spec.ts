@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
-import { fs } from '../../../../../test/util';
+import { fs, scm } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
@@ -790,10 +790,16 @@ describe('modules/manager/yarn/extract/index', () => {
 
   describe('.extractAllPackageFiles()', () => {
     it('runs', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(input02Content);
+      scm.getFileList.mockResolvedValue(['package.json', 'yarn.lock']);
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'package.json') {
+          return Promise.resolve(input02Content);
+        }
+        return Promise.resolve(null);
+      });
       const res = await npmExtract.extractAllPackageFiles(
         defaultExtractConfig,
-        ['package.json']
+        ['yarn.lock']
       );
       expect(res).toEqual([
         {

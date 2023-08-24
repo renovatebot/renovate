@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
-import { fs } from '../../../../../test/util';
+import { fs, scm } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
@@ -20,14 +20,13 @@ const vendorisedContent = Fixtures.get('is-object.json', '..');
 const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
 describe('modules/manager/pnpm/extract/index', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    fs.readLocalFile.mockResolvedValue(null);
+    fs.localPathExists.mockResolvedValue(false);
+    fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
+  });
   describe('.extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      fs.readLocalFile.mockResolvedValue(null);
-      fs.localPathExists.mockResolvedValue(false);
-      fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
-    });
-
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractPackageFile(
         'not json',
@@ -790,10 +789,16 @@ describe('modules/manager/pnpm/extract/index', () => {
 
   describe('.extractAllPackageFiles()', () => {
     it('runs', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(input02Content);
+      scm.getFileList.mockResolvedValue(['package.json', 'pnpm-lock.yaml']);
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'package.json') {
+          return Promise.resolve(input02Content);
+        }
+        return Promise.resolve(null);
+      });
       const res = await npmExtract.extractAllPackageFiles(
         defaultExtractConfig,
-        ['package.json']
+        ['pnpm-lock.yaml']
       );
       expect(res).toEqual([
         {
