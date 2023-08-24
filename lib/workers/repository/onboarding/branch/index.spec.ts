@@ -331,13 +331,13 @@ describe('workers/repository/onboarding/branch/index', () => {
       cache.getCache.mockReturnValue(dummyCache);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
-      onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
-      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('new-onboarding-sha');
       config.baseBranch = 'master';
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
+      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       await checkOnboardingBranch(config);
       expect(scm.mergeToLocal).toHaveBeenCalledOnce();
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(

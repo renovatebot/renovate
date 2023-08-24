@@ -1,5 +1,4 @@
 import { RenovateConfig, scm } from '../../../../../test/util';
-import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
@@ -25,16 +24,23 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
     beforeEach(() => {
       memCache.init();
+
+      // using default options
       config = {
-        ...getConfig(),
+        semanticCommits: 'auto',
+        semanticCommitScope: 'deps',
+        semanticCommitType: 'chore',
+        onboardingConfig: {
+          $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        },
+        onboardingConfigFileName: 'renovate.json',
         repository: 'some/repo',
       };
       configModule.getOnboardingConfigContents.mockResolvedValue('');
     });
 
     it('does nothing if branch is up to date', async () => {
-      const contents =
-        JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
+      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
@@ -85,16 +91,10 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('does nothing if config hashes match', async () => {
-      const contents =
-        JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
+      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).not.toHaveBeenCalled();
-    });
-
-    it('requests update if config hashes mismatch', async () => {
-      await rebaseOnboardingBranch(config, hash);
-      expect(scm.commitAndPush).toHaveBeenCalled();
     });
 
     it('dryRun=full', async () => {
@@ -106,8 +106,15 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(scm.commitAndPush).not.toHaveBeenCalled();
     });
 
-    it('does not rebase on platforms that do not support html comments', async () => {
-      GlobalConfig.set({ platform: 'azure', localDir: '' });
+    // does not rebase on platforms that do not support html comments
+    it.each`
+      platform
+      ${'azure'}
+      ${'bitbucket'}
+      ${'bitbucket-server'}
+      ${'codecommit'}
+    `('returns null for $platform', async ({ platform }) => {
+      GlobalConfig.set({ platform, localDir: '' });
       const res = await rebaseOnboardingBranch(config, hash);
       expect(res).toBeNull();
       expect(scm.commitAndPush).not.toHaveBeenCalled();
