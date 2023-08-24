@@ -3,10 +3,15 @@ import validateNpmPackageName from 'validate-npm-package-name';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import {
+  getParentDir,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
+import { scm } from '../../../platform/scm';
 import * as nodeVersioning from '../../../versioning/node';
 import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -19,6 +24,7 @@ import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
+import { matchesAnyPattern } from './utils';
 import { isZeroInstall } from './yarn';
 import {
   YarnConfig,
@@ -503,8 +509,46 @@ export async function postExtract(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  fileMatches: string[]
 ): Promise<PackageFile<NpmManagerData>[]> {
+  // We want to avoid any mistaken matches
+  const yarnLocks = fileMatches.filter(
+    (fileName) =>
+      fileName === 'pnpm-lock.yaml' || fileName.endsWith('/pnpm-lock.yaml')
+  );
+  let packageFiles: string[] = [];
+  for (const yarnLock of yarnLocks) {
+    // find sibling package.json file and parse it
+    const packageFile = getSiblingFileName(yarnLock, 'package.json');
+    const content = await readLocalFile(packageFile, 'utf8');
+    if (!content) {
+      continue;
+    }
+    let packageJson: any;
+    try {
+      packageJson = JSON.parse(content);
+      packageFiles.push(packageFile);
+    } catch (err) {
+      logger.debug({ packageFile }, `Invalid JSON`);
+      continue;
+    }
+    const workspaces = packageJson.workspaces as string[] | undefined;
+    if (workspaces?.length) {
+      logger.debug(`Detected Yarn workspaces in ${packageFile}`);
+      const internalPackagePatterns = (
+        is.array(workspaces) ? workspaces : [workspaces]
+      ).map((pattern) => getSiblingFileName(packageFile, pattern));
+      const internalPackageFiles = (await scm.getFileList()).filter(
+        (fileName) =>
+          matchesAnyPattern(getParentDir(fileName), internalPackagePatterns)
+      );
+      packageFiles.push(...internalPackageFiles);
+    }
+  }
+
+  // Deduplicate packageFiles
+  packageFiles = [...new Set(packageFiles)];
+
   const npmFiles: PackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');

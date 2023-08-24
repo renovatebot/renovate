@@ -15,7 +15,7 @@ export { getRangeStrategy } from './range';
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)package\\.json$'],
+  fileMatch: ['(^|/)pnpm-lock\\.yaml$'],
   versioning: npmVersioning.id,
   digest: {
     prBodyDefinitions: {
