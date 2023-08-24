@@ -534,7 +534,7 @@ export const presets: Record<string, Preset> = {
       'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchFileNames: ['**/*'],
         semanticCommitType: '{{arg0}}',
       },
     ],

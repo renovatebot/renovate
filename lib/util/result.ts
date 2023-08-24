@@ -363,6 +363,22 @@ export class Result<T extends Val, E extends Val = Error> {
   }
 
   /**
+   * Returns the ok-value or `null`.
+   * When error was uncaught during transformation, it's being re-thrown here.
+   */
+  unwrapOrNull(): T | null {
+    if (this.res.ok) {
+      return this.res.val;
+    }
+
+    if (this.res._uncaught) {
+      throw this.res.err;
+    }
+
+    return null;
+  }
+
+  /**
    * Transforms the ok-value, sync or async way.
    *
    * Transform functions SHOULD NOT throw.
@@ -670,6 +686,13 @@ export class AsyncResult<T extends Val, E extends Val>
   async unwrapOrThrow(): Promise<T> {
     const result = await this.asyncResult;
     return result.unwrapOrThrow();
+  }
+
+  /**
+   * Returns the ok-value or `null`.
+   */
+  unwrapOrNull(): Promise<T | null> {
+    return this.asyncResult.then<T | null>((res) => res.unwrapOrNull());
   }
 
   /**

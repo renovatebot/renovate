@@ -3029,6 +3029,23 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 !!! tip
     Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
 
+### customType
+
+Example:
+
+```json
+{
+  "regexManagers": [
+    {
+      "customType": "regex",
+      "matchStrings": [
+        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+      ]
+    }
+  ]
+}
+```
+
 ### matchStrings
 
 `matchStrings` should each be a valid regular expression, optionally with named capture groups.
