@@ -1183,4 +1183,26 @@ describe('modules/manager/composer/artifacts', () => {
       },
     ]);
   });
+
+  it('includes new dependency version in update command', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo', newVersion: '1.1.0' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update foo:1.1.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
 });
