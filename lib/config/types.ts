@@ -23,6 +23,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
@@ -126,6 +127,7 @@ export interface RepoGlobalConfig {
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
+  cacheTtlOverride?: Record<string, number>;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
@@ -182,6 +184,7 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
+
 export interface RegexManagerTemplates {
   depNameTemplate?: string;
   packageNameTemplate?: string;
@@ -195,6 +198,7 @@ export interface RegexManagerTemplates {
 }
 
 export type CustomManagerName = 'regex';
+
 export interface CustomManager extends RegexManagerTemplates {
   customType: CustomManagerName;
   fileMatch: string[];

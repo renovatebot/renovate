@@ -76,7 +76,8 @@ export function cache<T>({
       finalKey
     );
 
-    const softTtl = ttlMinutes;
+    const ttlOverride = getTtlOverride(namespace);
+    const softTtl = ttlOverride ?? ttlMinutes;
 
     const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
     let hardTtl = softTtl;
@@ -125,4 +126,12 @@ export function cache<T>({
 
     return newData;
   });
+}
+
+function getTtlOverride(namespace: string | HashFunction): number | undefined {
+  if (is.string(namespace)) {
+    return GlobalConfig.get('cacheTtlOverride', {})[namespace];
+  } else {
+    return undefined;
+  }
 }

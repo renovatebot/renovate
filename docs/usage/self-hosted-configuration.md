@@ -207,6 +207,21 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## cacheTtlOverride
+
+Utilize this key-value map to override default TTL values for a given namespace. This object contains pairs of namespace
+and corresponding TTL values in minutes.
+For instance, to replace the default TTL of 60 minutes for the Docker datasource "tags"
+namespace: `datasource-docker-tags` use the following:
+
+```json
+{
+  "cacheTtlOverride": {
+    "datasource-docker-tags": 120
+  }
+}
+```
+
 ## checkedBranches
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.

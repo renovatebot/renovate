@@ -2360,6 +2360,19 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'cacheTtlOverride',
+    description: 'An object that contains cache namespace TTL override values',
+    type: 'object',
+    stage: 'repository',
+    default: {},
+    additionalProperties: {
+      type: 'number',
+    },
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions to use in PR tables.',
     type: 'object',
