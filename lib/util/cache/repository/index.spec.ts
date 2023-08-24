@@ -40,7 +40,7 @@ describe('util/cache/repository/index', () => {
     GlobalConfig.set({
       cacheDir: '/tmp/cache',
       platform: 'github',
-      dryRun: true,
+      dryRun: 'full',
     });
     await initRepoCache({ ...config, repositoryCache: 'enabled' });
     await saveCache();
