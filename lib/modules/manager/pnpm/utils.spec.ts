@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import type { LockFile } from './types';
 import { composeLockFile, parseLockFile } from './utils';
 
-describe('modules/manager/npm/utils', () => {
+describe('modules/manager/pnpm/utils', () => {
   describe('parseLockFile', () => {
     it('parses lockfile string into an object', () => {
       const lockFile = Fixtures.get('lockfile-parsing/package-lock.json');

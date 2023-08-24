@@ -3,7 +3,7 @@ import { detectGlobalConfig } from '.';
 
 jest.mock('../../../util/fs');
 
-describe('modules/manager/npm/detect', () => {
+describe('modules/manager/yarn/detect', () => {
   describe('.detectGlobalConfig()', () => {
     it('detects .npmrc in home directory', async () => {
       fs.readSystemFile.mockResolvedValueOnce(

@@ -12,7 +12,7 @@ jest.mock('./node-version');
 
 process.env.CONTAINERBASE = 'true';
 
-describe('modules/manager/npm/post-update/npm', () => {
+describe('modules/manager/yarn/post-update/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();

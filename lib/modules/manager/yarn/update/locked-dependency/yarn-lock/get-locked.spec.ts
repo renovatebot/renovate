@@ -5,7 +5,7 @@ import { getLockedDependencies } from './get-locked';
 const yarnLock1 = parseSyml(Fixtures.get('express.yarn.lock'));
 const yarnLock3 = parseSyml(Fixtures.get('3.yarn.lock'));
 
-describe('modules/manager/npm/update/locked-dependency/yarn-lock/get-locked', () => {
+describe('modules/manager/yarn/update/locked-dependency/yarn-lock/get-locked', () => {
   describe('replaceConstraintVersion()', () => {
     it('finds unscoped', () => {
       expect(getLockedDependencies(yarnLock1, 'cookie', '0.1.0'))

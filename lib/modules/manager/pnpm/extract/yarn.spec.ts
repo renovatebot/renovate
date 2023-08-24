@@ -4,7 +4,7 @@ import { getYarnLock, getYarnVersionFromLock } from './yarn';
 
 jest.mock('../../../../util/fs');
 
-describe('modules/manager/npm/extract/yarn', () => {
+describe('modules/manager/pnpm/extract/yarn', () => {
   describe('.getYarnLock()', () => {
     it('returns empty if exception parsing', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');

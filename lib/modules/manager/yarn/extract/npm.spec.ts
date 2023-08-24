@@ -4,7 +4,7 @@ import { getNpmLock } from './npm';
 
 jest.mock('../../../../util/fs');
 
-describe('modules/manager/npm/extract/npm', () => {
+describe('modules/manager/yarn/extract/npm', () => {
   describe('.getNpmLock()', () => {
     it('returns null if failed to parse', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');

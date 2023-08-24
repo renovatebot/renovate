@@ -10,7 +10,7 @@ import {
   getPnpmLock,
 } from './pnpm';
 
-describe('modules/manager/npm/extract/pnpm', () => {
+describe('modules/manager/pnpm/extract/pnpm', () => {
   beforeAll(() => {
     GlobalConfig.set({ localDir: getFixturePath('pnpm-monorepo/', '..') });
   });

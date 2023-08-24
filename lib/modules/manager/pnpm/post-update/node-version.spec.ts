@@ -8,7 +8,7 @@ import {
 
 jest.mock('../../../../util/fs');
 
-describe('modules/manager/npm/post-update/node-version', () => {
+describe('modules/manager/pnpm/post-update/node-version', () => {
   const config = {
     packageFile: 'package.json',
     constraints: { node: '^12.16.0' },

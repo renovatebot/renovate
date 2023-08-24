@@ -6,7 +6,7 @@ import { updateLockedDependency } from '.';
 const yarnLock1 = Fixtures.get('express.yarn.lock');
 const yarn2Lock = Fixtures.get('yarn2.lock');
 
-describe('modules/manager/npm/update/locked-dependency/yarn-lock/index', () => {
+describe('modules/manager/pnpm/update/locked-dependency/yarn-lock/index', () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
 

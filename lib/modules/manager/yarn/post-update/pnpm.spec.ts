@@ -13,7 +13,7 @@ jest.mock('./node-version');
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
 
-describe('modules/manager/npm/post-update/pnpm', () => {
+describe('modules/manager/yarn/post-update/pnpm', () => {
   let config: PostUpdateConfig;
 
   beforeEach(() => {

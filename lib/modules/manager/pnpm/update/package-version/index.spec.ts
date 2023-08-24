@@ -1,6 +1,6 @@
 import * as npmUpdater from '../..';
 
-describe('modules/manager/npm/update/package-version/index', () => {
+describe('modules/manager/pnpm/update/package-version/index', () => {
   describe('.bumpPackageVersion()', () => {
     const content = JSON.stringify({
       name: 'some-package',

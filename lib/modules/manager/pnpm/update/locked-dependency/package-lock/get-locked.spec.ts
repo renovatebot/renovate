@@ -6,7 +6,7 @@ jest.mock('../../../../../../util/fs');
 const packageLockJson = Fixtures.getJson('package-lock.json');
 const bundledPackageLockJson = Fixtures.getJson('bundled.package-lock.json');
 
-describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked', () => {
+describe('modules/manager/pnpm/update/locked-dependency/package-lock/get-locked', () => {
   describe('getLockedDependencies()', () => {
     it('handles error', () => {
       expect(getLockedDependencies(null as any, 'some-dep', '1.0.0')).toEqual(

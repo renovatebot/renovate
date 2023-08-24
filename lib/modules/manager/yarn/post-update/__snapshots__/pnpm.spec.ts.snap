@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/npm/post-update/pnpm catches errors 1`] = `
+exports[`modules/manager/yarn/post-update/pnpm catches errors 1`] = `
 [
   {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
@@ -23,7 +23,7 @@ exports[`modules/manager/npm/post-update/pnpm catches errors 1`] = `
 ]
 `;
 
-exports[`modules/manager/npm/post-update/pnpm finds pnpm globally 1`] = `
+exports[`modules/manager/yarn/post-update/pnpm finds pnpm globally 1`] = `
 [
   {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
@@ -46,7 +46,7 @@ exports[`modules/manager/npm/post-update/pnpm finds pnpm globally 1`] = `
 ]
 `;
 
-exports[`modules/manager/npm/post-update/pnpm generates lock files 1`] = `
+exports[`modules/manager/yarn/post-update/pnpm generates lock files 1`] = `
 [
   {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
@@ -69,7 +69,7 @@ exports[`modules/manager/npm/post-update/pnpm generates lock files 1`] = `
 ]
 `;
 
-exports[`modules/manager/npm/post-update/pnpm performs lock file maintenance 1`] = `
+exports[`modules/manager/yarn/post-update/pnpm performs lock file maintenance 1`] = `
 [
   {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
@@ -92,7 +92,7 @@ exports[`modules/manager/npm/post-update/pnpm performs lock file maintenance 1`]
 ]
 `;
 
-exports[`modules/manager/npm/post-update/pnpm uses the new version if packageManager is updated 1`] = `
+exports[`modules/manager/yarn/post-update/pnpm uses the new version if packageManager is updated 1`] = `
 [
   {
     "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",

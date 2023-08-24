@@ -3,7 +3,7 @@ import { detectMonorepos } from './monorepo';
 
 jest.mock('./pnpm');
 
-describe('modules/manager/npm/extract/monorepo', () => {
+describe('modules/manager/pnpm/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('handles no monorepo', async () => {
       const packageFiles: Partial<PackageFile>[] = [

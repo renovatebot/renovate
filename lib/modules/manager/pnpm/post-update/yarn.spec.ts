@@ -37,7 +37,7 @@ const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
 env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
-describe('modules/manager/npm/post-update/yarn', () => {
+describe('modules/manager/pnpm/post-update/yarn', () => {
   beforeEach(() => {
     delete process.env.BUILDPACK;
     Fixtures.reset();

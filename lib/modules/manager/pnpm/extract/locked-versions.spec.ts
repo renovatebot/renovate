@@ -17,7 +17,7 @@ jest.mock('./yarn', () => ({
 }));
 jest.mock('./pnpm');
 
-describe('modules/manager/npm/extract/locked-versions', () => {
+describe('modules/manager/pnpm/extract/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     function getPackageFiles(
       yarnVersion: string

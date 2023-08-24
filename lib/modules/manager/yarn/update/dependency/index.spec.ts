@@ -7,7 +7,7 @@ const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
 const input01PMContent = readFixture('inputs/01-package-manager.json');
 
-describe('modules/manager/npm/update/dependency/index', () => {
+describe('modules/manager/yarn/update/dependency/index', () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {

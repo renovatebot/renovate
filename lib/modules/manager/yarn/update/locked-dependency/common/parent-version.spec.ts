@@ -4,7 +4,7 @@ import { findFirstParentVersion } from './parent-version';
 
 const expressJson = Fixtures.getJson('express.json');
 
-describe('modules/manager/npm/update/locked-dependency/common/parent-version', () => {
+describe('modules/manager/yarn/update/locked-dependency/common/parent-version', () => {
   describe('getLockedDependencies()', () => {
     it('finds indirect dependency', async () => {
       httpMock

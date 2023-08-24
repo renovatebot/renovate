@@ -19,7 +19,7 @@ const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const vendorisedContent = Fixtures.get('is-object.json', '..');
 const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
-describe('modules/manager/npm/extract/index', () => {
+describe('modules/manager/pnpm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();

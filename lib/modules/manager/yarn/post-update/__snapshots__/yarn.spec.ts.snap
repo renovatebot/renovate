@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/npm/post-update/yarn allows and ignore scripts 1`] = `
+exports[`modules/manager/yarn/post-update/yarn allows and ignore scripts 1`] = `
 [
   {
     "cmd": "yarn install --mode=update-lockfile",
@@ -27,7 +27,7 @@ exports[`modules/manager/npm/post-update/yarn allows and ignore scripts 1`] = `
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn catches errors 1`] = `
+exports[`modules/manager/yarn/post-update/yarn catches errors 1`] = `
 [
   {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
@@ -51,7 +51,7 @@ exports[`modules/manager/npm/post-update/yarn catches errors 1`] = `
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn does not use global cache if zero install is detected 1`] = `
+exports[`modules/manager/yarn/post-update/yarn does not use global cache if zero install is detected 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -78,7 +78,7 @@ exports[`modules/manager/npm/post-update/yarn does not use global cache if zero 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v1.22.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn generates lock files using yarn v1.22.0 1`] = `
 [
   {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
@@ -183,7 +183,7 @@ exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v1
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2.1.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn generates lock files using yarn v2.1.0 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -212,7 +212,7 @@ exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2.2.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn generates lock files using yarn v2.2.0 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -265,7 +265,7 @@ exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v3.0.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn generates lock files using yarn v3.0.0 1`] = `
 [
   {
     "cmd": "yarn install --mode=update-lockfile",
@@ -316,7 +316,7 @@ exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v3
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn only skips build if skipInstalls is false 1`] = `
+exports[`modules/manager/yarn/post-update/yarn only skips build if skipInstalls is false 1`] = `
 [
   {
     "cmd": "yarn install --mode=skip-build",
@@ -365,7 +365,7 @@ exports[`modules/manager/npm/post-update/yarn only skips build if skipInstalls i
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v1.22.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v1.22.0 1`] = `
 [
   {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
@@ -465,7 +465,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.1.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.1.0 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -493,7 +493,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.2.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.2.0 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -544,7 +544,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v3.0.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v3.0.0 1`] = `
 [
   {
     "cmd": "yarn install --mode=update-lockfile",
@@ -593,7 +593,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v1.22.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file maintenance using yarn v1.22.0 1`] = `
 [
   {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
@@ -693,7 +693,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance usi
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v2.1.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file maintenance using yarn v2.1.0 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -721,7 +721,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance usi
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v2.2.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file maintenance using yarn v2.2.0 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -772,7 +772,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance usi
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file updates and full install using yarn v1.22.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file updates and full install using yarn v1.22.0 1`] = `
 [
   {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
@@ -815,7 +815,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file updates and ful
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file updates using yarn v1.22.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file updates using yarn v1.22.0 1`] = `
 [
   {
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
@@ -858,7 +858,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file updates using y
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file updates using yarn v2.1.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file updates using yarn v2.1.0 1`] = `
 [
   {
     "cmd": "yarn install",
@@ -909,7 +909,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file updates using y
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs lock file updates using yarn v3.0.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs lock file updates using yarn v3.0.0 1`] = `
 [
   {
     "cmd": "yarn install --mode=update-lockfile",
@@ -958,7 +958,7 @@ exports[`modules/manager/npm/post-update/yarn performs lock file updates using y
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs yarn binary update using yarn v1.22.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs yarn binary update using yarn v1.22.0 1`] = `
 [
   {
     "cmd": "yarn set version 3.0.1",
@@ -1007,7 +1007,7 @@ exports[`modules/manager/npm/post-update/yarn performs yarn binary update using 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/yarn performs yarn binary update using yarn v2.1.0 1`] = `
+exports[`modules/manager/yarn/post-update/yarn performs yarn binary update using yarn v2.1.0 1`] = `
 [
   {
     "cmd": "yarn set version 3.0.1",

@@ -5,7 +5,7 @@ import {
   resolveRegistryUrl,
 } from './yarnrc';
 
-describe('modules/manager/npm/extract/yarnrc', () => {
+describe('modules/manager/yarn/extract/yarnrc', () => {
   describe('resolveRegistryUrl()', () => {
     it('considers default registry', () => {
       const registryUrl = resolveRegistryUrl('a-package', {

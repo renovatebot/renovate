@@ -6,7 +6,7 @@ jest.mock('../../../../../../util/fs');
 const packageJson = Fixtures.getJson('package.json');
 const packageLockJson = Fixtures.getJson('package-lock.json');
 
-describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constraints', () => {
+describe('modules/manager/pnpm/update/locked-dependency/package-lock/dep-constraints', () => {
   describe('findDepConstraints()', () => {
     it('finds indirect dependency', () => {
       expect(

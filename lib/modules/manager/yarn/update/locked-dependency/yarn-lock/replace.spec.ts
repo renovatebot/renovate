@@ -6,7 +6,7 @@ const yarnLock1 = Fixtures.get('express.yarn.lock');
 const yarnLock2 = Fixtures.get('2.yarn.lock');
 const yarn2Lock = Fixtures.get('yarn2.lock');
 
-describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () => {
+describe('modules/manager/yarn/update/locked-dependency/yarn-lock/replace', () => {
   describe('replaceConstraintVersion()', () => {
     it('returns same if Yarn 2+', () => {
       const res = replaceConstraintVersion(

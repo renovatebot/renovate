@@ -23,7 +23,7 @@ jest.mock('./npm');
 jest.mock('./yarn');
 jest.mock('./pnpm');
 
-describe('modules/manager/npm/post-update/index', () => {
+describe('modules/manager/yarn/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
   let updateConfig: PostUpdateConfig;
   const additionalFiles: AdditionalPackageFiles = {

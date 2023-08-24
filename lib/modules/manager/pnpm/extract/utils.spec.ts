@@ -1,6 +1,6 @@
 import { matchesAnyPattern } from './utils';
 
-describe('modules/manager/npm/extract/utils', () => {
+describe('modules/manager/pnpm/extract/utils', () => {
   describe('.matchesAnyPattern()', () => {
     it('matches package in nested directory', () => {
       const packageFile = 'packages/group/a/package.json';

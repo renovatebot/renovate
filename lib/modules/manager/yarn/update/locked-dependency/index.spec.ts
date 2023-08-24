@@ -25,7 +25,7 @@ const bundledPackageLockJson = Fixtures.get(
   './package-lock'
 );
 
-describe('modules/manager/npm/update/locked-dependency/index', () => {
+describe('modules/manager/yarn/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
     let config: UpdateLockedConfig;
 
