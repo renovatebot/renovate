@@ -167,7 +167,7 @@
     "@sindresorhus/is": "4.6.0",
     "@types/ms": "0.7.31",
     "@types/tmp": "0.2.3",
-    "@yarnpkg/core": "3.5.2",
+    "@yarnpkg/core": "3.5.3",
     "@yarnpkg/parsers": "2.5.1",
     "agentkeepalive": "4.5.0",
     "aggregate-error": "3.1.0",

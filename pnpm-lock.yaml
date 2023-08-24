@@ -84,8 +84,8 @@ importers:
         specifier: 0.2.3
         version: 0.2.3
       '@yarnpkg/core':
-        specifier: 3.5.2
-        version: 3.5.2(typanion@3.14.0)
+        specifier: 3.5.3
+        version: 3.5.3(typanion@3.14.0)
       '@yarnpkg/parsers':
         specifier: 2.5.1
         version: 2.5.1
@@ -4168,8 +4168,8 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@yarnpkg/core@3.5.2(typanion@3.14.0):
-    resolution: {integrity: sha512-IaKWHArtc0JAUXuDN2sSV57+yjemVsz//k8NjHT02AmUlCM7dOmIT/FeGfcVFZ6Zy8ZSwEwyzQLf3nxx5alzQg==}
+  /@yarnpkg/core@3.5.3(typanion@3.14.0):
+    resolution: {integrity: sha512-yyU/fA2aWQ53KD5vsthJRJKhNO4zFgaKLNM3X6JgfUPfLLNQJxHvFpB4+X+v9HxceokiDGx3hp0DaAUWjO2mEw==}
     engines: {node: '>=12 <14 || 14.2 - 14.9 || >14.10.0'}
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
