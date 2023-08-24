@@ -512,14 +512,16 @@ export async function extractAllPackageFiles(
   fileMatches: string[]
 ): Promise<PackageFile<NpmManagerData>[]> {
   // We want to avoid any mistaken matches
-  const yarnLocks = fileMatches.filter(
+  const pnpmLocks = fileMatches.filter(
     (fileName) =>
       fileName === 'pnpm-lock.yaml' || fileName.endsWith('/pnpm-lock.yaml')
   );
   let packageFiles: string[] = [];
-  for (const yarnLock of yarnLocks) {
+  for (const pnpmLock of pnpmLocks) {
+    console.warn(pnpmLock);
     // find sibling package.json file and parse it
-    const packageFile = getSiblingFileName(yarnLock, 'package.json');
+    const packageFile = getSiblingFileName(pnpmLock, 'package.json');
+    console.warn(packageFile);
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       continue;
@@ -552,7 +554,6 @@ export async function extractAllPackageFiles(
   const npmFiles: PackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    // istanbul ignore else
     if (content) {
       const deps = await extractPackageFile(content, packageFile, config);
       if (deps) {
