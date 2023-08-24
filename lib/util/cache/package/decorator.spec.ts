@@ -30,7 +30,6 @@ describe('util/cache/package/decorator', () => {
         return getValue();
       }
     }
-
     const obj = new Class();
 
     expect(await obj.fn()).toBe('111');
@@ -53,7 +52,6 @@ describe('util/cache/package/decorator', () => {
         return getValue();
       }
     }
-
     const obj = new Class();
 
     expect(await obj.fn()).toBe('111');
@@ -72,7 +70,6 @@ describe('util/cache/package/decorator', () => {
         return val;
       }
     }
-
     const obj = new Class();
 
     expect(await obj.fn(null)).toBeNull();
@@ -96,7 +93,6 @@ describe('util/cache/package/decorator', () => {
         return undefined;
       }
     }
-
     const obj = new Class();
 
     expect(await obj.fn()).toBeUndefined();
@@ -122,7 +118,6 @@ describe('util/cache/package/decorator', () => {
         return getValue();
       }
     }
-
     const obj = new Class();
     const arg: Arg = { foo: 'namespace', bar: 'key' };
 
@@ -144,7 +139,6 @@ describe('util/cache/package/decorator', () => {
         return getValue();
       }
     }
-
     const decorator = cache({ namespace: 'namespace', key: 'key' });
     const fn = decorator(Class.prototype, 'fn', undefined as never);
 
