@@ -82,7 +82,7 @@ export async function renovateRepository(
       }
       if (res === 'automerged') {
         if (canRetry) {
-          logger.info('Renovating repository again after automerge result');
+          logger.info('Restarting repository job after automerge result');
           const recursiveRes = await renovateRepository(repoConfig, false);
           return recursiveRes;
         }
