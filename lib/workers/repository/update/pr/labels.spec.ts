@@ -49,7 +49,7 @@ describe('workers/repository/update/pr/labels', () => {
     });
 
     it('null labels ignored', () => {
-      // TODO #7154
+      // TODO #22198
       const result = prepareLabels({
         labels: ['labelA', null] as never,
         // an empty space between two commas in an array is categorized as a null value

@@ -91,7 +91,7 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
-      // TODO #7154
+      // TODO #22198
       repoResult = processResult(config, res!);
     }
   } catch (err) /* istanbul ignore next */ {

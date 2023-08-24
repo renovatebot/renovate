@@ -19,7 +19,7 @@ export function getGitStatusContextCombinedName(
     return undefined;
   }
   const combinedName = `${context.genre ? `${context.genre}/` : ''}${
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     context.name!
   }`;
   logger.trace(`Got combined context name of ${combinedName}`);
@@ -95,7 +95,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   const createdAt = azurePr.creationDate?.toISOString();
 
-  // TODO #7154
+  // TODO #22198
   const state = stateMap[azurePr.status!] ?? 'open';
 
   const sourceRefName = azurePr.sourceRefName;

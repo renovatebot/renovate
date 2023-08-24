@@ -7,7 +7,7 @@ import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
 import { getPnpmLock } from './pnpm';
 import type { LockFile } from './types';
-import { getYarnLock } from './yarn';
+import { getYarnLock, getYarnVersionFromLock } from './yarn';
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[]
@@ -25,18 +25,10 @@ export async function getLockedVersions(
         logger.trace(`Retrieving/parsing ${yarnLock}`);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
-      const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
+      const { isYarn1 } = lockFileCache[yarnLock];
       let yarn: string | undefined;
       if (!isYarn1 && !packageFile.extractedConstraints?.yarn) {
-        if (lockfileVersion && lockfileVersion >= 8) {
-          // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
-          yarn = '^3.0.0';
-        } else if (lockfileVersion && lockfileVersion >= 6) {
-          // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
-          yarn = '^2.2.0';
-        } else {
-          yarn = '^2.0.0';
-        }
+        yarn = getYarnVersionFromLock(lockFileCache[yarnLock]);
       }
       if (yarn) {
         packageFile.extractedConstraints ??= {};
@@ -45,7 +37,7 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         dep.lockedVersion =
           lockFileCache[yarnLock].lockedVersions?.[
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             `${dep.depName}@${dep.currentValue}`
           ];
         if (
@@ -111,7 +103,7 @@ export async function getLockedVersions(
       }
 
       for (const dep of packageFile.deps) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         dep.lockedVersion = semver.valid(
           lockFileCache[npmLock].lockedVersions?.[dep.depName!]
         )!;
@@ -130,7 +122,7 @@ export async function getLockedVersions(
 
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         const lockedVersion = semver.valid(
           lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[relativeDir]?.[
             depType!

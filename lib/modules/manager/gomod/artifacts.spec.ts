@@ -901,7 +901,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    // TODO: #7154 can be null
+    // TODO: #22198 can be null
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(

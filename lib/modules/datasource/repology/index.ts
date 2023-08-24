@@ -205,7 +205,7 @@ export class RepologyDatasource extends Datasource {
 
     logger.trace(`repology.getReleases(${repoName}, ${pkgName})`);
     try {
-      // Attempt to retrieve (cached) package information from Repology
+      // Try to retrieve (cached) package information from Repology
       const pkg = await this.queryPackage(registryUrl, repoName, pkgName);
       if (!pkg) {
         return null;

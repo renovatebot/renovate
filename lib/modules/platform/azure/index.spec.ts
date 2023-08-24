@@ -1100,7 +1100,7 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('ensureCommentRemoval', () => {
-    // TODO: fix types #7154
+    // TODO: fix types #22198
     let gitApiMock: any;
 
     beforeEach(() => {

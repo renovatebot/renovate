@@ -24,6 +24,7 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
@@ -104,13 +105,13 @@ export async function generateLockFile(
       await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility = yarnUpdate
-      ? yarnUpdate.newValue
-      : config.constraints?.yarn ??
-        getPackageManagerVersion('yarn', await lazyPgkJson.getValue());
+    const yarnCompatibility =
+      (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
+      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+      getYarnVersionFromLock(await getYarnLock(lockFileName));
     const minYarnVersion =
       semver.validRange(yarnCompatibility) &&
-      semver.minVersion(yarnCompatibility!);
+      semver.minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
@@ -204,7 +205,7 @@ export async function generateLockFile(
 
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
@@ -230,7 +231,7 @@ export async function generateLockFile(
         // `yarn up -R` updates to the latest release in each range
         commands.push(
           `yarn up -R ${lockUpdates
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             .map((update) => `${update.depName!}`)
             .filter(uniqueStrings)
             .map(quote)
