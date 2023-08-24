@@ -27,8 +27,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       '@cdktf/hcl2json':
-        specifier: 0.17.3
-        version: 0.17.3
+        specifier: 0.18.0
+        version: 0.18.0
       '@iarna/toml':
         specifier: 3.0.0
         version: 3.0.0
@@ -240,8 +240,8 @@ importers:
         specifier: 3.3.6
         version: 3.3.6
       node-html-parser:
-        specifier: 6.1.5
-        version: 6.1.5
+        specifier: 6.1.6
+        version: 6.1.6
       openpgp:
         specifier: 5.9.0
         version: 5.9.0
@@ -1820,8 +1820,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /@cdktf/hcl2json@0.17.3:
-    resolution: {integrity: sha512-lczep0P2adwv08bf3mF1ScKyAD/Y502QVxGrYm8+E+3cl11qtFVblFJXRcAS288Opnqz1X0ekN4YCmkPawETbg==}
+  /@cdktf/hcl2json@0.18.0:
+    resolution: {integrity: sha512-wnnGTdXExmG+HCLsAsce3fOTDBpj8MpadMzKU7hxj+/xdGvACnU0JB7wcK0FRIKlbJFmxgwYzFmVrgd7z3Be/g==}
     dependencies:
       fs-extra: 11.1.1
     dev: false
@@ -8406,8 +8406,8 @@ packages:
     dev: false
     optional: true
 
-  /node-html-parser@6.1.5:
-    resolution: {integrity: sha512-fAaM511feX++/Chnhe475a0NHD8M7AxDInsqQpz6x63GRF7xYNdS8Vo5dKsIVPgsOvG7eioRRTZQnWBrhDHBSg==}
+  /node-html-parser@6.1.6:
+    resolution: {integrity: sha512-C/MGDQ2NjdjzUq41bW9kW00MPZecAe/oo89vZEFLDfWoQVDk/DdML1yuxVVKLDMFIFax2VTq6Vpfzyn7z5yYgQ==}
     dependencies:
       css-select: 5.1.0
       he: 1.2.0
