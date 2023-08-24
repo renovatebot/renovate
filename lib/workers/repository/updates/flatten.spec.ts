@@ -17,7 +17,7 @@ beforeEach(() => {
 describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
-      // TODO #7154
+      // TODO #22198
       config.lockFileMaintenance!.enabled = true;
       config.packageRules = [
         {

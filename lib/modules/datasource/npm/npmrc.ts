@@ -173,7 +173,7 @@ export function resolveRegistryUrl(packageName: string): string {
       !matchPackagePrefixes ||
       packageName.startsWith(matchPackagePrefixes[0])
     ) {
-      // TODO: fix types #7154
+      // TODO: fix types #22198
       registryUrl = registryUrls![0];
     }
   }

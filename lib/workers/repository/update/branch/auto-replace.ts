@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -25,7 +25,7 @@ export async function confirmIfDepUpdated(
     );
     // istanbul ignore if
     if (!newExtract) {
-      // TODO: fix types (#7154)
+      // TODO: fix types (#22198)
       logger.debug(`Could not extract ${packageFile!}`);
       return false;
     }
@@ -102,7 +102,7 @@ export async function confirmIfDepUpdated(
 }
 
 function getDepsSignature(deps: PackageDependency[]): string {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   return deps
     .map(
       (dep) =>
@@ -154,7 +154,7 @@ async function checkExistingBranch(
     );
     return null;
   }
-  // TODO: fix types (#7154)
+  // TODO: fix types (#22198)
   logger.debug(`Branch dep ${depName!} in ${packageFile!} is already updated`);
   return existingContent;
 }

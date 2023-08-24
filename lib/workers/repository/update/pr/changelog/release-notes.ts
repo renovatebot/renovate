@@ -60,7 +60,7 @@ export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
     project.repository
   }`;
@@ -130,7 +130,7 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   const { packageName, repository } = project;
   const { version, gitRef } = release;
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
@@ -283,7 +283,7 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
     project.sourceDirectory ? `-${project.sourceDirectory}` : ''
   }-${project.apiBaseUrl!}`;

@@ -28,9 +28,7 @@ export function getPythonConstraint(
     return python;
   }
   try {
-    const result = PipfileLockSchema.safeParse(
-      JSON.parse(existingLockFileContent)
-    );
+    const result = PipfileLockSchema.safeParse(existingLockFileContent);
     // istanbul ignore if: not easily testable
     if (!result.success) {
       logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
@@ -62,9 +60,7 @@ export function getPipenvConstraint(
     return pipenv;
   }
   try {
-    const result = PipfileLockSchema.safeParse(
-      JSON.parse(existingLockFileContent)
-    );
+    const result = PipfileLockSchema.safeParse(existingLockFileContent);
     // istanbul ignore if: not easily testable
     if (!result.success) {
       logger.warn({ error: result.error }, 'Invalid Pipfile.lock');

@@ -86,8 +86,7 @@ describe('modules/manager/composer/extract', () => {
             datasource: 'github-tags',
             depName: 'php',
             depType: 'require',
-            extractVersion: '^php-(?<version>.*)$',
-            packageName: 'php/php-src',
+            packageName: 'containerbase/php-prebuild',
           },
           {
             currentValue: '~1.0.12',

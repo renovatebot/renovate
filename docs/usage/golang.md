@@ -5,7 +5,7 @@ description: Go modules support in Renovate
 
 # Automated Dependency Updates for Go Modules
 
-Renovate supports upgrading dependencies in `go.mod` files and their accompanying `go.sum` checksums.
+Renovate supports upgrading dependencies in `go.mod` files and associated `go.sum` checksums.
 
 If you're self-hosting Renovate, you may use these environment variables:
 

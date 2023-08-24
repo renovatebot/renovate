@@ -257,7 +257,7 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  // TODO: #7154
+  // TODO: #22198
   image = dockerSidecarImage!;
 
   // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');

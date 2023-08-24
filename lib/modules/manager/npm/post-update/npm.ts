@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -164,7 +164,7 @@ export async function generateLockFile(
     }
 
     // Read the result
-    // TODO #7154
+    // TODO #22198
     lockFile = (await readLocalFile(
       upath.join(lockFileDir, filename),
       'utf8'
@@ -183,7 +183,7 @@ export async function generateLockFile(
             | 'dependencies'
             | 'optionalDependencies';
 
-          // TODO #7154
+          // TODO #22198
           if (
             lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
           ) {
