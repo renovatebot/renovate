@@ -27,7 +27,10 @@ export async function rebaseOnboardingBranch(
     logger.debug('Onboarding branch is up to date');
     return null;
   }
-  logger.debug('Rebasing onboarding branch');
+  logger.debug(
+    { previousConfigHash, currentConfigHash },
+    'Rebasing onboarding branch'
+  );
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
