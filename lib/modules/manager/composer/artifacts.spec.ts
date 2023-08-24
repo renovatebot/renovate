@@ -92,14 +92,17 @@ describe('modules/manager/composer/artifacts', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1' },
+          { depName: 'bar', newVersion: '2' },
+        ],
         newPackageFileContent: '{}',
         config,
       })
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
+        cmd: 'composer update foo:1 bar:2 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -1146,14 +1149,17 @@ describe('modules/manager/composer/artifacts', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1' },
+          { depName: 'bar', newVersion: '2' },
+        ],
         newPackageFileContent: '{}',
         config,
       })
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader',
+        cmd: 'composer update foo:1 bar:2 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
