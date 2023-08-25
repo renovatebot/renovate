@@ -76,7 +76,7 @@ export function cache<T>({
       finalKey
     );
 
-    const ttlOverride = getTtlOverride(namespace);
+    const ttlOverride = getTtlOverride(finalNamespace);
     const softTtl = ttlOverride ?? ttlMinutes;
 
     const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
