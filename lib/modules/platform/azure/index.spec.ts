@@ -208,7 +208,7 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
-  describe('findPr(branchName, prTitle, state)', () => {
+  describe('findPr(branchName, prTitle, state, targetBranch)', () => {
     it('returns pr if found it open', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -233,7 +233,21 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'branch a pr',
         state: 'open',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('returns pr if found not open', async () => {
@@ -260,7 +274,21 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'branch a pr',
         state: '!open',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'merged',
+        status: 3,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('returns pr if found it close', async () => {
@@ -287,7 +315,21 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'branch a pr',
         state: 'closed',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'closed',
+        status: 2,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('returns pr if found it all state', async () => {
@@ -313,7 +355,117 @@ describe('modules/platform/azure/index', () => {
         branchName: 'branch-a',
         prTitle: 'branch a pr',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'closed',
+        status: 2,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
+    });
+
+    it('returns pr if found matches targetBranch', async () => {
+      azureApi.gitApi.mockImplementationOnce(() =>
+        partial<IGitApi>({
+          getPullRequests: jest
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+              {
+                pullRequestId: 2,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-c',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+            ]),
+          getPullRequestCommits: jest.fn().mockReturnValue([]),
+        })
+      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+        targetBranch: 'branch-c',
+      });
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 2,
+        pullRequestId: 2,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-c',
+        targetRefName: 'refs/heads/branch-c',
+        title: 'branch a pr',
+      });
+    });
+
+    it('returns first pr if found does not match targetBranch', async () => {
+      azureApi.gitApi.mockImplementationOnce(() =>
+        partial<IGitApi>({
+          getPullRequests: jest
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+              {
+                pullRequestId: 2,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-c',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+            ]),
+          getPullRequestCommits: jest.fn().mockReturnValue([]),
+        })
+      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+        targetBranch: 'branch-d',
+      });
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('catches errors', async () => {
@@ -342,7 +494,7 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
-  describe('getBranchPr(branchName)', () => {
+  describe('getBranchPr(branchName, targetBranch)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockResolvedValue(
@@ -364,6 +516,7 @@ describe('modules/platform/azure/index', () => {
               {
                 pullRequestId: 1,
                 sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
                 title: 'branch a pr',
                 status: 1,
               },
@@ -372,7 +525,7 @@ describe('modules/platform/azure/index', () => {
           getPullRequestLabels: jest.fn().mockResolvedValue([]),
         })
       );
-      const pr = await azure.getBranchPr('branch-a');
+      const pr = await azure.getBranchPr('branch-a', 'branch-b');
       expect(pr).toEqual({
         bodyStruct: {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
@@ -385,7 +538,8 @@ describe('modules/platform/azure/index', () => {
         sourceRefName: 'refs/heads/branch-a',
         state: 'open',
         status: 1,
-        targetBranch: undefined,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
         title: 'branch a pr',
       });
     });

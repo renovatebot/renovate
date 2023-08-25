@@ -48,7 +48,10 @@ async function raiseWarningIssue(
     )}\`\n`;
   }
 
-  const pr = await platform.getBranchPr(config.onboardingBranch!);
+  const pr = await platform.getBranchPr(
+    config.onboardingBranch!,
+    config.baseBranch
+  );
   if (pr?.state === 'open') {
     await handleOnboardingPr(pr, body);
     return;
