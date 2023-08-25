@@ -2365,9 +2365,6 @@ const options: RenovateOptions[] = [
     type: 'object',
     stage: 'repository',
     default: {},
-    additionalProperties: {
-      type: 'number',
-    },
     globalOnly: true,
     experimental: true,
     advancedUse: true,

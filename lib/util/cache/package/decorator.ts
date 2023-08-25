@@ -76,7 +76,7 @@ export function cache<T>({
       finalKey
     );
 
-    const ttlOverride = getTtlOverride(namespace);
+    const ttlOverride = getTtlOverride(finalNamespace);
     const softTtl = ttlOverride ?? ttlMinutes;
 
     const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
@@ -128,10 +128,10 @@ export function cache<T>({
   });
 }
 
-function getTtlOverride(namespace: string | HashFunction): number | undefined {
-  if (is.string(namespace)) {
-    return GlobalConfig.get('cacheTtlOverride', {})[namespace];
-  } else {
-    return undefined;
+function getTtlOverride(namespace: string): number | undefined {
+  const ttl: unknown = GlobalConfig.get('cacheTtlOverride', {})[namespace];
+  if (is.number(ttl)) {
+    return ttl;
   }
+  return undefined;
 }
