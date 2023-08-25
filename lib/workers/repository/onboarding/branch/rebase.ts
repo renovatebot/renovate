@@ -16,6 +16,7 @@ export async function rebaseOnboardingBranch(
   // skip platforms that do not support html comments in pr
   const pl = GlobalConfig.get('platform')!;
   if (!['github', 'gitea', 'gitlab'].includes(pl)) {
+    logger.debug(`Skipping rebase as ${pl} does not support html comments`);
     return null;
   }
 
@@ -32,16 +33,16 @@ export async function rebaseOnboardingBranch(
     'Rebasing onboarding branch'
   );
 
+  if (GlobalConfig.get('dryRun')) {
+    logger.info('DRY-RUN: Would rebase files in onboarding branch');
+    return null;
+  }
+
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
     configFile
   );
   const commitMessage = commitMessageFactory.create();
-
-  if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would rebase files in onboarding branch');
-    return null;
-  }
 
   // TODO #7154
   return scm.commitAndPush({

@@ -1,4 +1,4 @@
-import { RenovateConfig, scm } from '../../../../../test/util';
+import { RenovateConfig, mocked, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
@@ -6,7 +6,7 @@ import { toSha256 } from '../../../../util/hash';
 import * as _config from './config';
 import { rebaseOnboardingBranch } from './rebase';
 
-const configModule: any = _config;
+const configModule: any = mocked(_config);
 
 jest.mock('./config');
 
@@ -118,6 +118,9 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       const res = await rebaseOnboardingBranch(config, hash);
       expect(res).toBeNull();
       expect(scm.commitAndPush).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Skipping rebase as ${platform} does not support html comments`
+      );
     });
   });
 });
