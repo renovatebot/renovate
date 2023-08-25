@@ -40,7 +40,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
     dep.datasource = TerraformProviderDatasource.id;
 
     if (is.nonEmptyString(dep.managerData?.source)) {
-      // TODO #7154
+      // TODO #22198
       const source = this.sourceExtractionRegex.exec(dep.managerData!.source);
       if (!source?.groups) {
         dep.skipReason = 'unsupported-url';

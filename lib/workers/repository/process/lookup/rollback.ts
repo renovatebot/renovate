@@ -63,14 +63,14 @@ export function getRollbackUpdate(
     return null;
   }
   const newValue = version.getNewValue({
-    // TODO #7154
+    // TODO #22198
     currentValue: currentValue!,
     rangeStrategy: 'replace',
     newVersion,
   });
   return {
     bucket: 'rollback',
-    // TODO #7154
+    // TODO #22198
     newMajor: version.getMajor(newVersion)!,
     newValue: newValue!,
     newVersion,

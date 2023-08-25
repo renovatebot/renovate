@@ -59,8 +59,8 @@ Read the [GitHub docs, Applying suggested changes](https://docs.github.com/en/pu
 
 ## Resolve review comments instead of commenting
 
-A maintainer/contributor can ask you to make changes, without providing a suggestion that you can apply.
-In this case you need to do some work yourself to address the feedback.
+A maintainer/contributor can ask you to make changes, without giving you a _suggestion_ that you can apply.
+In this case you should make the necessary changes.
 
 Once you've done the work, resolve the conversation by selecting the **Resolve conversation** button in the PR overview.
 Avoid posting comments like "I've done the work", or "Done".

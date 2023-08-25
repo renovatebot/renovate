@@ -26,7 +26,10 @@ export async function tryBranchAutomerge(
   if (!isScheduledNow(config, 'automergeSchedule')) {
     return 'off schedule';
   }
-  const existingPr = await platform.getBranchPr(config.branchName!);
+  const existingPr = await platform.getBranchPr(
+    config.branchName!,
+    config.baseBranch
+  );
   if (existingPr) {
     return 'automerge aborted - PR exists';
   }
@@ -39,7 +42,7 @@ export async function tryBranchAutomerge(
     logger.debug(`Automerging branch`);
     try {
       if (GlobalConfig.get('dryRun')) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
         await scm.checkoutBranch(config.baseBranch!);

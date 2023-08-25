@@ -264,16 +264,16 @@ function getNewValue({
     const operator = currentValue.substring(0, 1);
     // handle ~0.4 case first
     if (toMajor === 0) {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       newValue = `${operator}0.${toMinor!}`;
     } else {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       newValue = `${operator}${toMajor!}.0`;
     }
   } else if (regEx(/^[~^]([0-9]*)$/).test(currentValue)) {
     // handle ~4 case
     const operator = currentValue.substring(0, 1);
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     newValue = `${operator}${toMajor!}`;
   } else if (
     toMajor &&

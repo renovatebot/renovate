@@ -131,7 +131,7 @@ For the npm package approach or Docker images, you will need some form of VM or 
 In all the above cases you must make sure that some form of cron-like capability exists to schedule when Renovate runs.
 We recommend that you run Renovate hourly, if possible.
 
-Mend Renovate On-Premises and Mend Remediate both run as long-lived containers, so they do not need any additional cron-like concept as it is built-in.
+Mend Renovate On-Premises and Mend Remediate both run as long-lived containers, so they do not need any cron-like concept as it is built-in.
 
 ### Global config
 

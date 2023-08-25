@@ -1,4 +1,5 @@
 import { getManagers } from '../../modules/manager';
+import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import type { RenovateOptions } from '../types';
@@ -370,7 +371,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.10.3',
+    default: 'ghcr.io/containerbase/sidecar:9.19.0',
     globalOnly: true,
   },
   {
@@ -858,7 +859,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Additional Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
+      'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -2393,7 +2394,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyNotes',
     description:
-      'List of additional notes/templates to include in the Pull Request body.',
+      'List of extra notes or templates to include in the Pull Request body.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -2451,6 +2452,16 @@ const options: RenovateOptions[] = [
     stage: 'package',
     cli: true,
     mergeable: true,
+  },
+  {
+    name: 'customType',
+    description:
+      'Custom manager to use. Valid only within a `regexManagers` object.',
+    type: 'string',
+    allowedValues: ['regex'],
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
   },
   {
     name: 'matchStrings',
@@ -2667,7 +2678,8 @@ export function getOptions(): RenovateOptions[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, config] of getManagers().entries()) {
+  const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
+  for (const [name, config] of allManagers.entries()) {
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,

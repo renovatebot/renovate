@@ -140,7 +140,7 @@ export async function extract(
     const extractResult = (await extractAllDependencies(config)) || {};
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     cache.scan[baseBranch!] = {
       sha: baseBranchSha!,
       configHash,

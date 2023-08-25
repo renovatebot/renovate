@@ -14,6 +14,11 @@ const basicEnvVars = [
   'DOCKER_HOST',
   'DOCKER_TLS_VERIFY',
   'DOCKER_CERT_PATH',
+  // Custom certificte variables
+  // https://github.com/containerbase/base/blob/main/docs/custom-root-ca.md
+  'SSL_CERT_DIR',
+  'SSL_CERT_FILE',
+  'NODE_EXTRA_CA_CERTS',
 ];
 
 export function getChildProcessEnv(
@@ -29,5 +34,12 @@ export function getChildProcessEnv(
       env[envVar] = process.env[envVar];
     }
   });
+
+  // Copy containerbase url replacements
+  for (const key of Object.keys(process.env)) {
+    if (/^URL_REPLACE_\d+_(?:FROM|TO)$/.test(key)) {
+      env[key] = process.env[key];
+    }
+  }
   return env;
 }

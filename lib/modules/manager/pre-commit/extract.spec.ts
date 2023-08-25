@@ -37,7 +37,7 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('returns null for no file content', () => {
-      // TODO #7154
+      // TODO #22198
       const result = extractPackageFile(null as never, filename);
       expect(result).toBeNull();
     });

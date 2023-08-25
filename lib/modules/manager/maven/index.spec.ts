@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import type { PackageDependency, PackageFileContent } from '../types';
