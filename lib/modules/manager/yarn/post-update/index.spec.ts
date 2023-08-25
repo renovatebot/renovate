@@ -5,8 +5,6 @@ import { fs, git, logger, partial, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { FileChange } from '../../../../util/git/types';
 import type { PostUpdateConfig } from '../../types';
-import * as npm from './npm';
-import * as pnpm from './pnpm';
 import type { AdditionalPackageFiles } from './types';
 import * as yarn from './yarn';
 import {
@@ -391,13 +389,9 @@ describe('modules/manager/yarn/post-update/index', () => {
   });
 
   describe('getAdditionalFiles()', () => {
-    const spyNpm = jest.spyOn(npm, 'generateLockFile');
     const spyYarn = jest.spyOn(yarn, 'generateLockFile');
-    const spyPnpm = jest.spyOn(pnpm, 'generateLockFile');
 
     beforeEach(() => {
-      spyNpm.mockResolvedValue({});
-      spyPnpm.mockResolvedValue({});
       spyYarn.mockResolvedValue({});
     });
 
@@ -411,39 +405,6 @@ describe('modules/manager/yarn/post-update/index', () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-    });
-
-    it('works for npm', async () => {
-      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-      // TODO: fix types, jest is using wrong overload (#22198)
-      fs.readLocalFile.mockImplementation((f): Promise<any> => {
-        if (f === '.npmrc') {
-          return Promise.resolve('# dummy');
-        }
-        return Promise.resolve('');
-      });
-      expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [
-          {
-            type: 'addition',
-            path: 'package-lock.json',
-            contents: '{}',
-          },
-        ],
-      });
-
-      expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
-      expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
-      expect(fs.deleteLocalFile.mock.calls).toMatchObject([
-        ['randomFolder/.npmrc'],
-        ['packages/pnpm/.npmrc'],
-      ]);
     });
 
     it('works for yarn', async () => {
@@ -460,39 +421,6 @@ describe('modules/manager/yarn/post-update/index', () => {
             type: 'addition',
             path: 'yarn.lock',
             contents: '{}',
-          },
-        ],
-      });
-      expect(fs.deleteLocalFile).toHaveBeenCalled();
-    });
-
-    it('works for pnpm', async () => {
-      spyPnpm.mockResolvedValueOnce({
-        error: false,
-        lockFile: 'some-contents:',
-      });
-      expect(
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-            upgrades: [
-              {
-                isRemediation: true,
-                packageFile: 'packages/pnpm/package.json',
-              },
-            ],
-          },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [
-          {
-            type: 'addition',
-            path: 'packages/pnpm/pnpm-lock.yaml',
-            contents: 'some-contents:',
           },
         ],
       });
@@ -569,21 +497,6 @@ describe('modules/manager/yarn/post-update/index', () => {
       });
     });
 
-    it('fails for npm', async () => {
-      spyNpm.mockResolvedValueOnce({ error: true, stderr: 'some-error' });
-      expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [
-          { lockFile: 'package-lock.json', stderr: 'some-error' },
-        ],
-        updatedArtifacts: [],
-      });
-    });
-
     it('fails for yarn', async () => {
       spyYarn.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
       expect(
@@ -593,30 +506,6 @@ describe('modules/manager/yarn/post-update/index', () => {
         )
       ).toStrictEqual({
         artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
-        updatedArtifacts: [],
-      });
-    });
-
-    it('fails for pnpm', async () => {
-      spyPnpm.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
-      expect(
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            upgrades: [
-              {
-                isRemediation: true,
-                packageFile: 'packages/pnpm/package.json',
-              },
-            ],
-          },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [
-          { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
-        ],
         updatedArtifacts: [],
       });
     });

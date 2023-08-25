@@ -3,13 +3,11 @@ import { logger } from '../../../../logger';
 import { getParentDir, getSiblingFileName } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
-import { detectPnpmWorkspaces } from './pnpm';
 import { matchesAnyPattern } from './utils';
 
-export async function detectMonorepos(
+export function detectMonorepos(
   packageFiles: Partial<PackageFile<NpmManagerData>>[]
-): Promise<void> {
-  await detectPnpmWorkspaces(packageFiles);
+): void {
   logger.debug('Detecting workspaces');
   for (const p of packageFiles) {
     const { packageFile, npmrc, managerData = {}, skipInstalls } = p;

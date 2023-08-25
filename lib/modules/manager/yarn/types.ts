@@ -73,10 +73,6 @@ export type NpmDepType =
 
 export interface NpmLockFiles {
   yarnLock?: string;
-  packageLock?: string;
-  shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
-  npmLock?: string;
 }
 
 export interface NpmManagerData extends NpmLockFiles, Record<string, any> {

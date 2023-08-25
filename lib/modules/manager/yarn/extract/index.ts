@@ -42,10 +42,6 @@ function parseDepName(depType: string, key: string): string {
   return depName;
 }
 
-function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
-  return Object.values(lockFiles).filter(is.string).length > 1;
-}
-
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
 );
@@ -91,13 +87,10 @@ export async function extractPackageFile(
 
   const lockFiles: NpmLockFiles = {
     yarnLock: 'yarn.lock',
-    packageLock: 'package-lock.json',
-    shrinkwrapJson: 'npm-shrinkwrap.json',
-    pnpmShrinkwrap: 'pnpm-lock.yaml',
   };
 
   for (const [key, val] of Object.entries(lockFiles) as [
-    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
+    'yarnLock',
     string
   ][]) {
     const filePath = getSiblingFileName(packageFile, val);
@@ -106,15 +99,6 @@ export async function extractPackageFile(
     } else {
       lockFiles[key] = undefined;
     }
-  }
-  lockFiles.npmLock = lockFiles.packageLock ?? lockFiles.shrinkwrapJson;
-  delete lockFiles.packageLock;
-  delete lockFiles.shrinkwrapJson;
-
-  if (hasMultipleLockFiles(lockFiles)) {
-    logger.warn(
-      'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
-    );
   }
 
   let npmrc: string | undefined;
@@ -171,8 +155,6 @@ export async function extractPackageFile(
   if (is.string(repoLegacyYarnrc)) {
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
-
-  let hasFancyRefs = false;
 
   const depTypes = {
     dependencies: 'dependency',
@@ -269,7 +251,6 @@ export async function extractPackageFile(
 
     if (dep.currentValue.startsWith('npm:')) {
       dep.npmPackageAlias = true;
-      hasFancyRefs = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.packageName = valSplit[0];
@@ -286,7 +267,6 @@ export async function extractPackageFile(
     }
     if (dep.currentValue.startsWith('file:')) {
       dep.skipReason = 'file';
-      hasFancyRefs = true;
       return dep;
     }
     if (yarnConfig) {
@@ -467,20 +447,6 @@ export async function extractPackageFile(
       return null;
     }
   }
-  let skipInstalls = config.skipInstalls;
-  if (skipInstalls === null) {
-    if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
-      // https://github.com/npm/cli/issues/1432
-      // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
-      //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
-      //  - Also, do not skip install if Yarn zero-install is used
-      logger.debug('Automatically setting skipInstalls to false');
-      skipInstalls = false;
-    } else {
-      skipInstalls = true;
-    }
-  }
 
   return {
     deps,
@@ -495,7 +461,6 @@ export async function extractPackageFile(
       ),
       workspacesPackages,
     },
-    skipInstalls,
     extractedConstraints,
   };
 }

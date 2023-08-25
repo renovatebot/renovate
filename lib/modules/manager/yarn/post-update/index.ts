@@ -15,7 +15,6 @@ import {
 } from '../../../../util/fs';
 import { getFile, getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
-import * as hostRules from '../../../../util/host-rules';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
 import { NpmDatasource } from '../../../datasource/npm';
@@ -24,8 +23,6 @@ import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
 import { composeLockFile, parseLockFile } from '../utils';
-import * as npm from './npm';
-import * as pnpm from './pnpm';
 import { processHostRules } from './rules';
 import type {
   AdditionalPackageFiles,
@@ -477,84 +474,10 @@ export async function getAdditionalFiles(
 
   const env = {
     ...getChildProcessEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('npm'),
     YARN_CACHE_FOLDER: await ensureCacheDir('yarn'),
     YARN_GLOBAL_FOLDER: await ensureCacheDir('berry'),
-    npm_config_store: await ensureCacheDir('pnpm'),
     NODE_ENV: 'dev',
   };
-
-  let token: string | undefined;
-  try {
-    ({ token } = hostRules.find({
-      hostType: 'github',
-      url: 'https://api.github.com/',
-    }));
-    token = token ? /* istanbul ignore next */ `${token}@` : token;
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error getting token for packageFile');
-  }
-  const tokenRe = regEx(`${token ?? ''}`, 'g', false);
-  for (const npmLock of dirs.npmLockDirs) {
-    const lockFileDir = upath.dirname(npmLock);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
-    await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
-    const fileName = upath.basename(npmLock);
-    logger.debug(`Generating ${fileName} for ${lockFileDir}`);
-    const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.managerData?.npmLock === npmLock
-    );
-    const res = await npm.generateLockFile(
-      lockFileDir,
-      env,
-      fileName,
-      config,
-      upgrades
-    );
-    if (res.error) {
-      // istanbul ignore if
-      if (res.stderr?.includes('No matching version found for')) {
-        for (const upgrade of config.upgrades) {
-          if (
-            res.stderr.includes(
-              `No matching version found for ${upgrade.depName}`
-            )
-          ) {
-            logger.debug(
-              { dependency: upgrade.depName, type: 'npm' },
-              'lock file failed for the dependency being updated - skipping branch creation'
-            );
-            const err = new Error(
-              'lock file failed for the dependency being updated - skipping branch creation'
-            );
-            throw new ExternalHostError(err, NpmDatasource.id);
-          }
-        }
-      }
-      artifactErrors.push({
-        lockFile: npmLock,
-        stderr: res.stderr,
-      });
-    } else {
-      const existingContent = await getFile(
-        npmLock,
-        config.reuseExistingBranch ? config.branchName : config.baseBranch
-      );
-      if (res.lockFile === existingContent) {
-        logger.debug(`${npmLock} hasn't changed`);
-      } else {
-        logger.debug(`${npmLock} needs updating`);
-        updatedArtifacts.push({
-          type: 'addition',
-          path: npmLock,
-          // TODO: can this be undefined? (#22198)
-
-          contents: res.lockFile!.replace(tokenRe, ''),
-        });
-      }
-    }
-    await resetNpmrcContent(lockFileDir, npmrcContent);
-  }
 
   for (const yarnLock of dirs.yarnLockDirs) {
     const lockFileDir = upath.dirname(yarnLock);
@@ -651,62 +574,6 @@ export async function getAdditionalFiles(
       // TODO #22198
       await writeLocalFile(yarnRcYmlFilename!, existingYarnrcYmlContent);
     }
-  }
-
-  for (const pnpmShrinkwrap of dirs.pnpmShrinkwrapDirs) {
-    const lockFileDir = upath.dirname(pnpmShrinkwrap);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
-    await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
-    logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
-    const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.managerData?.pnpmShrinkwrap === pnpmShrinkwrap
-    );
-    const res = await pnpm.generateLockFile(lockFileDir, env, config, upgrades);
-    if (res.error) {
-      // istanbul ignore if
-      if (res.stdout?.includes(`No compatible version found:`)) {
-        for (const upgrade of config.upgrades) {
-          if (
-            res.stdout.includes(
-              `No compatible version found: ${upgrade.depName}`
-            )
-          ) {
-            logger.debug(
-              { dependency: upgrade.depName, type: 'pnpm' },
-              'lock file failed for the dependency being updated - skipping branch creation'
-            );
-            throw new ExternalHostError(
-              Error(
-                'lock file failed for the dependency being updated - skipping branch creation'
-              ),
-              NpmDatasource.id
-            );
-          }
-        }
-      }
-      artifactErrors.push({
-        lockFile: pnpmShrinkwrap,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
-      });
-    } else {
-      const existingContent = await getFile(
-        pnpmShrinkwrap,
-        config.reuseExistingBranch ? config.branchName : config.baseBranch
-      );
-      if (res.lockFile === existingContent) {
-        logger.debug("pnpm-lock.yaml hasn't changed");
-      } else {
-        logger.debug('pnpm-lock.yaml needs updating');
-        updatedArtifacts.push({
-          type: 'addition',
-          path: pnpmShrinkwrap,
-          // TODO: can be undefined? (#22198)
-          contents: res.lockFile!,
-        });
-      }
-    }
-    await resetNpmrcContent(lockFileDir, npmrcContent);
   }
 
   return { artifactErrors, updatedArtifacts };
