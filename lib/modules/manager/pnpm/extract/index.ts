@@ -3,15 +3,10 @@ import validateNpmPackageName from 'validate-npm-package-name';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import {
-  getParentDir,
-  getSiblingFileName,
-  readLocalFile,
-} from '../../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
-import { scm } from '../../../platform/scm';
 import * as nodeVersioning from '../../../versioning/node';
 import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -22,16 +17,7 @@ import type {
 } from '../../types';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
-import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
-import { matchesAnyPattern } from './utils';
-import { isZeroInstall } from './yarn';
-import {
-  YarnConfig,
-  loadConfigFromLegacyYarnrc,
-  loadConfigFromYarnrcYml,
-  resolveRegistryUrl,
-} from './yarnrc';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -90,14 +76,11 @@ export async function extractPackageFile(
   }
 
   const lockFiles: NpmLockFiles = {
-    yarnLock: 'yarn.lock',
-    packageLock: 'package-lock.json',
-    shrinkwrapJson: 'npm-shrinkwrap.json',
     pnpmShrinkwrap: 'pnpm-lock.yaml',
   };
 
   for (const [key, val] of Object.entries(lockFiles) as [
-    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
+    'pnpmShrinkwrap',
     string
   ][]) {
     const filePath = getSiblingFileName(packageFile, val);
@@ -156,23 +139,6 @@ export async function extractPackageFile(
   } else if (is.string(config.npmrc)) {
     npmrc = config.npmrc;
   }
-
-  const yarnrcYmlFileName = getSiblingFileName(packageFile, '.yarnrc.yml');
-  const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
-
-  let yarnConfig: YarnConfig | null = null;
-  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
-  if (is.string(repoYarnrcYml)) {
-    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
-  }
-
-  const legacyYarnrcFileName = getSiblingFileName(packageFile, '.yarnrc');
-  const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
-  if (is.string(repoLegacyYarnrc)) {
-    yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
-  }
-
-  let hasFancyRefs = false;
 
   const depTypes = {
     dependencies: 'dependency',
@@ -269,7 +235,6 @@ export async function extractPackageFile(
 
     if (dep.currentValue.startsWith('npm:')) {
       dep.npmPackageAlias = true;
-      hasFancyRefs = true;
       const valSplit = dep.currentValue.replace('npm:', '').split('@');
       if (valSplit.length === 2) {
         dep.packageName = valSplit[0];
@@ -286,14 +251,7 @@ export async function extractPackageFile(
     }
     if (dep.currentValue.startsWith('file:')) {
       dep.skipReason = 'file';
-      hasFancyRefs = true;
       return dep;
-    }
-    if (yarnConfig) {
-      const registryUrlFromYarnConfig = resolveRegistryUrl(depName, yarnConfig);
-      if (registryUrlFromYarnConfig) {
-        dep.registryUrls = [registryUrlFromYarnConfig];
-      }
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
@@ -467,20 +425,6 @@ export async function extractPackageFile(
       return null;
     }
   }
-  let skipInstalls = config.skipInstalls;
-  if (skipInstalls === null) {
-    if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
-      // https://github.com/npm/cli/issues/1432
-      // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
-      //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
-      //  - Also, do not skip install if Yarn zero-install is used
-      logger.debug('Automatically setting skipInstalls to false');
-      skipInstalls = false;
-    } else {
-      skipInstalls = true;
-    }
-  }
 
   return {
     deps,
@@ -489,13 +433,11 @@ export async function extractPackageFile(
     managerData: {
       ...lockFiles,
       packageJsonName,
-      yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager
       ),
       workspacesPackages,
     },
-    skipInstalls,
     extractedConstraints,
   };
 }
@@ -503,7 +445,6 @@ export async function extractPackageFile(
 export async function postExtract(
   packageFiles: PackageFile<NpmManagerData>[]
 ): Promise<void> {
-  await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
 
@@ -524,25 +465,11 @@ export async function extractAllPackageFiles(
     if (!content) {
       continue;
     }
-    let packageJson: any;
     try {
-      packageJson = JSON.parse(content);
       packageFiles.push(packageFile);
     } catch (err) {
       logger.debug({ packageFile }, `Invalid JSON`);
       continue;
-    }
-    const workspaces = packageJson.workspaces as string[] | undefined;
-    if (workspaces?.length) {
-      logger.debug(`Detected Yarn workspaces in ${packageFile}`);
-      const internalPackagePatterns = (
-        is.array(workspaces) ? workspaces : [workspaces]
-      ).map((pattern) => getSiblingFileName(packageFile, pattern));
-      const internalPackageFiles = (await scm.getFileList()).filter(
-        (fileName) =>
-          matchesAnyPattern(getParentDir(fileName), internalPackagePatterns)
-      );
-      packageFiles.push(...internalPackageFiles);
     }
   }
 

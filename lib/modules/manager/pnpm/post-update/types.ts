@@ -3,8 +3,6 @@ import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 
 export interface DetermineLockFileDirsResult {
-  yarnLockDirs: string[];
-  npmLockDirs: string[];
   pnpmShrinkwrapDirs: string[];
 }
 
@@ -39,8 +37,4 @@ export interface PnpmLockFile {
   dependencies: PnpmDependencySchema;
   devDependencies: PnpmDependencySchema;
   optionalDependencies: PnpmDependencySchema;
-}
-
-export interface YarnRcYmlFile {
-  yarnPath?: string | null;
 }

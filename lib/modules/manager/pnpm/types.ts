@@ -72,7 +72,6 @@ export type NpmDepType =
   | 'resolutions';
 
 export interface NpmLockFiles {
-  yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
   pnpmShrinkwrap?: string;
@@ -83,6 +82,5 @@ export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
   hasPackageManager?: boolean;
   packageJsonName?: string;
   parents?: string[];
-  yarnZeroInstall?: boolean;
   workspacesPackages?: string[] | string;
 }

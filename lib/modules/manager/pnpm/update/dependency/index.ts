@@ -196,52 +196,6 @@ export function updateDependency({
       );
       return fileContent;
     }
-    if (parsedContents?.resolutions) {
-      let depKey: string | undefined;
-      if (parsedContents.resolutions[depName]) {
-        depKey = depName;
-      } else if (parsedContents.resolutions[`**/${depName}`]) {
-        depKey = `**/${depName}`;
-      }
-      if (depKey) {
-        // istanbul ignore if
-        if (parsedContents.resolutions[depKey] !== oldVersion) {
-          logger.debug(
-            {
-              depName,
-              depKey,
-              oldVersion,
-              resolutionsVersion: parsedContents.resolutions[depKey],
-            },
-            'Upgraded dependency exists in yarn resolutions but is different version'
-          );
-        }
-        newFileContent = replaceAsString(
-          parsedContents,
-          newFileContent,
-          'resolutions',
-          depKey,
-          // TODO #22198
-          parsedContents.resolutions[depKey]!,
-          // TODO #22198
-          newValue!
-        );
-        if (upgrade.newName) {
-          if (depKey === `**/${depName}`) {
-            // handles the case where a replacement is in a resolution
-            upgrade.newName = `**/${upgrade.newName}`;
-          }
-          newFileContent = replaceAsString(
-            parsedContents,
-            newFileContent,
-            'resolutions',
-            depKey,
-            depKey,
-            upgrade.newName
-          );
-        }
-      }
-    }
     if (parsedContents?.dependenciesMeta) {
       for (const [depKey] of Object.entries(parsedContents.dependenciesMeta)) {
         if (depKey.startsWith(depName + '@')) {

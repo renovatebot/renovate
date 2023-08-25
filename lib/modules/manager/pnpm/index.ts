@@ -4,11 +4,7 @@ import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
 
 export { extractAllPackageFiles } from './extract';
-export {
-  bumpPackageVersion,
-  updateDependency,
-  updateLockedDependency,
-} from './update';
+export { bumpPackageVersion, updateDependency } from './update';
 export { getRangeStrategy } from './range';
 
 export const supportsLockFileMaintenance = true;

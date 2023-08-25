@@ -27,8 +27,7 @@ export interface LockFile {
     string,
     Record<string, Record<string, string>>
   >;
-  lockfileVersion?: number; // cache version for Yarn
-  isYarn1?: boolean;
+  lockfileVersion?: number;
 }
 
 export interface PnpmWorkspaceFile {
