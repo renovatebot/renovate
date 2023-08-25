@@ -213,12 +213,12 @@ describe('modules/manager/woodpecker/extract', () => {
     it('should parse multiple sources of dependencies together', () => {
       const res = extractPackageFile(
         `
-        steps:
-          redis:
-            image: quay.io/something/redis:alpine
         clone:
           git:
             image: woodpeckerci/plugin-git:latest
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
         `,
         '',
         {}
