@@ -481,8 +481,6 @@ describe('util/git/auth', () => {
       });
     });
 
-
-
     it('returns no environment variables when hostType is not supported', () => {
       add({
         hostType: 'custom',

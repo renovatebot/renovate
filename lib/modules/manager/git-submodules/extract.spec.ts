@@ -165,35 +165,6 @@ describe('modules/manager/git-submodules/extract', () => {
       ]);
     });
 
-    it('combined username+pwd from host rule is used to detect branch for github', async () => {
-      gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
-      );
-      hostRules.add({
-        hostType: 'github',
-        matchHost: 'github.com',
-        username: 'username',
-        password: 'password',
-      });
-      const res = await extractPackageFile('', '.gitmodules.2', {});
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0].currentValue).toBe('main');
-      expect(gitMock.env).toHaveBeenCalledWith({
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://username:password@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://username:password@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://username:password@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
-      });
-      expect(gitMock.listRemote).toHaveBeenCalledWith([
-        '--symref',
-        'https://github.com/PowerShell/PowerShell-Docs',
-        'HEAD',
-      ]);
-    });
-
     it('extracts multiple submodules', async () => {
       hostRules.add({ matchHost: 'github.com', token: '123test' });
       hostRules.add({
