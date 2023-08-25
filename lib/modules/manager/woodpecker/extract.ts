@@ -7,20 +7,11 @@ import type { WoodpeckerConfig } from './types';
 
 function woodpeckerVersionDecider(
   woodpeckerConfig: WoodpeckerConfig
-): Array<keyof WoodpeckerConfig> {
-  const keys: Array<keyof WoodpeckerConfig> = [];
-
-  if ('clone' in woodpeckerConfig) {
-    keys.push('clone');
-  }
-
-  if ('steps' in woodpeckerConfig) {
-    keys.push('steps');
-  } else if ('pipeline' in woodpeckerConfig) {
-    keys.push('pipeline');
-  }
-
-  return keys;
+): (keyof WoodpeckerConfig)[] {
+  const keys = ['clone', 'steps', 'pipeline'];
+  return Object.keys(woodpeckerConfig).filter((key) =>
+    keys.includes(key)
+  ) as (keyof WoodpeckerConfig)[];
 }
 
 export function extractPackageFile(
