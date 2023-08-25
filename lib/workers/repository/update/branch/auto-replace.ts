@@ -26,7 +26,27 @@ export async function confirmIfDepUpdated(
     // istanbul ignore if
     if (!newExtract) {
       // TODO: fix types (#22198)
-      logger.debug(`Could not extract ${packageFile!}`);
+      logger.debug(
+        `Could not extract ${packageFile!} (manager=${manager}) after autoreplace. Did the autoreplace make the file unparseable?`
+      );
+      logger.trace(
+        { packageFile, content: newContent },
+        'packageFile content after autoreplace'
+      );
+      return false;
+    }
+    // istanbul ignore if
+    if (!newExtract.deps?.length) {
+      logger.debug(
+        `Extracted ${packageFile!} after autoreplace has no deps array. Did the autoreplace make the file unparseable?`
+      );
+      return false;
+    }
+    // istanbul ignore if
+    if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
+      logger.debug(
+        `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`
+      );
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];

@@ -1,14 +1,14 @@
 import is from '@sindresorhus/is';
-import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
-import { getProblems, logger } from '../../logger';
+import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import type { BranchConfig, SelectAllConfig } from '../types';
+import { extractRepoProblems } from './common';
 import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 import type { Vulnerability } from './process/types';
@@ -157,26 +157,12 @@ function getListItem(branch: BranchConfig, type: string): string {
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
-  const repoProblems = new Set(
-    getProblems()
-      .filter(
-        (problem) =>
-          problem.repository === config.repository && !problem.artifactErrors
-      )
-      .map(
-        (problem) =>
-          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
-      )
-  );
+  const repoProblems = extractRepoProblems(config);
   if (repoProblems.size) {
-    logger.debug(
-      { repoProblems: Array.from(repoProblems) },
-      'repository problems'
-    );
     newIssueBody += '## Repository problems\n\n';
     const repoProblemsHeader =
       config.customizeDashboard?.['repoProblemsHeader'] ??
-      'These problems occurred while renovating this repository.';
+      'Renovate tried to run on this repository, but found these problems.';
     newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
 
     for (const repoProblem of repoProblems) {
