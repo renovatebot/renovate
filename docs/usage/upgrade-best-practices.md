@@ -118,7 +118,7 @@ Finally, when you're updating often, you'll start looking for ways to automate t
 You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.
 Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](https://docs.renovatebot.com/presets-default/#automergepatch) preset.
 
-You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md/#github-merge-queue) to speed up the merge process.
+You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md#github-merge-queue) to speed up the merge process.
 Renovate does not support GitLab's Merge Trains, see [issue #5573](https://github.com/renovatebot/renovate/issues/5573).
 
 ## Starting from a new project
@@ -212,7 +212,7 @@ Focus on the process, not on the people.
 - Make sure building the project is as fast as it can be
 - Have automated tests for the critical path of your project
 - Run the automated tests on every PR
-- Enable [GitHub Merge Queue](./key-concepts/automerge.md/#github-merge-queue) to speed up merges
+- Enable [GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
 
 ### Talk with your team about the update process
 
