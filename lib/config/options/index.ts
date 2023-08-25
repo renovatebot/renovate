@@ -1025,8 +1025,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     mergeable: true,
-    cli: false,
-    env: false,
   },
   {
     name: 'matchCategories',
@@ -2358,6 +2356,16 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     default: 24 * 60,
     globalOnly: true,
+  },
+  {
+    name: 'cacheTtlOverride',
+    description: 'An object that contains cache namespace TTL override values',
+    type: 'object',
+    stage: 'repository',
+    default: {},
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'prBodyDefinitions',
