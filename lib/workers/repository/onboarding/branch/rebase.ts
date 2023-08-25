@@ -24,7 +24,7 @@ export async function rebaseOnboardingBranch(
   const currentConfigHash = toSha256(contents);
 
   if (previousConfigHash === currentConfigHash) {
-    logger.debug('Onboarding branch is up to date');
+    logger.debug('No rebase needed');
     return null;
   }
   logger.debug(
