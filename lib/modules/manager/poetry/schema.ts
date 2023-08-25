@@ -132,23 +132,25 @@ export const PoetryDependencies = LooseRecord(
     dep.skipReason = 'invalid-version';
     return dep;
   })
-).transform((record) => {
-  const deps: PackageDependency[] = [];
-  for (const [depName, dep] of Object.entries(record)) {
-    dep.depName = depName;
-    if (!dep.packageName) {
-      const pep503NormalizeRegex = regEx(/[-_.]+/g);
-      const packageName = depName
-        .toLowerCase()
-        .replace(pep503NormalizeRegex, '-');
-      if (depName !== packageName) {
-        dep.packageName = packageName;
+)
+  .transform((record) => {
+    const deps: PackageDependency[] = [];
+    for (const [depName, dep] of Object.entries(record)) {
+      dep.depName = depName;
+      if (!dep.packageName) {
+        const pep503NormalizeRegex = regEx(/[-_.]+/g);
+        const packageName = depName
+          .toLowerCase()
+          .replace(pep503NormalizeRegex, '-');
+        if (depName !== packageName) {
+          dep.packageName = packageName;
+        }
       }
+      deps.push(dep);
     }
-    deps.push(dep);
-  }
-  return deps;
-});
+    return deps;
+  })
+  .catch([]);
 
 function withDepType<
   Output extends PackageDependency[],
@@ -167,16 +169,18 @@ export const PoetryGroupDependencies = LooseRecord(
   z
     .object({ dependencies: PoetryDependencies })
     .transform(({ dependencies }) => dependencies)
-).transform((record) => {
-  const deps: PackageDependency[] = [];
-  for (const [groupName, group] of Object.entries(record)) {
-    for (const dep of Object.values(group)) {
-      dep.depType = groupName;
-      deps.push(dep);
+)
+  .transform((record) => {
+    const deps: PackageDependency[] = [];
+    for (const [groupName, group] of Object.entries(record)) {
+      for (const dep of Object.values(group)) {
+        dep.depType = groupName;
+        deps.push(dep);
+      }
     }
-  }
-  return deps;
-});
+    return deps;
+  })
+  .catch([]);
 
 export const PoetrySectionSchema = z
   .object({
@@ -231,18 +235,18 @@ const BuildSystemRequireVal = z
   .string()
   .nonempty()
   .transform((val) => regEx(`^${dependencyPattern}$`).exec(val))
-  .pipe(
-    z.tuple([
-      z.unknown(),
-      z.string(),
-      z.unknown(),
-      z.string().trim().nonempty(),
-    ])
-  )
-  .transform(([, depName, , poetryRequirement]) => ({
-    depName,
-    poetryRequirement,
-  }));
+  .transform((match, ctx) => {
+    if (!match) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'invalid requirement',
+      });
+      return z.NEVER;
+    }
+
+    const [, depName, , poetryRequirement] = match;
+    return { depName, poetryRequirement };
+  });
 
 export const PoetrySchema = z
   .object({
