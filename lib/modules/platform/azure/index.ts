@@ -166,6 +166,12 @@ export async function getRawFile(
       );
       throw new ExternalHostError(err, id);
     }
+    if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
+      throw new ExternalHostError(err, id);
+    }
+    if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+      throw new ExternalHostError(err, id);
+    }
     throw err;
   }
 }
