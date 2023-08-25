@@ -179,7 +179,9 @@ export async function updateArtifacts({
         (
           'update ' +
           updatedDeps
-            .map((dep) => dep.depName)
+            .map((dep) =>
+              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName
+            )
             .filter(is.string)
             .map((dep) => quote(dep))
             .join(' ')
