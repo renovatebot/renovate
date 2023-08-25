@@ -1025,8 +1025,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     mergeable: true,
-    cli: false,
-    env: false,
   },
   {
     name: 'matchCategories',
