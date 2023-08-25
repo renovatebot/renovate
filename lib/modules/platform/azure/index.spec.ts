@@ -375,7 +375,7 @@ describe('modules/platform/azure/index', () => {
     it('returns pr if found matches targetBranch', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
-          ({
+          partial<IGitApi>({
             getPullRequests: jest
               .fn()
               .mockReturnValue([])
@@ -396,7 +396,7 @@ describe('modules/platform/azure/index', () => {
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
+          })
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
@@ -424,7 +424,7 @@ describe('modules/platform/azure/index', () => {
     it('returns first pr if found does not match targetBranch', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
-          ({
+          partial<IGitApi>({
             getPullRequests: jest
               .fn()
               .mockReturnValue([])
@@ -445,7 +445,7 @@ describe('modules/platform/azure/index', () => {
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
+          })
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
