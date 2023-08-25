@@ -210,8 +210,7 @@ Results which are soft expired are reused in the following manner:
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
-For instance, to override the default TTL of 60 minutes for the Docker datasource "tags"
-namespace: `datasource-docker-tags` use the following:
+For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
 
 ```json
 {
