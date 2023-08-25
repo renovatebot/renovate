@@ -377,30 +377,19 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "datasource": "pypi",
       "depName": "dep3",
       "depType": "dependencies",
-      "managerData": {
-        "nestedVersion": true,
-      },
       "skipReason": "path-dependency",
     },
     {
-      "currentValue": "",
       "datasource": "pypi",
       "depName": "dep4",
       "depType": "dependencies",
-      "managerData": {
-        "nestedVersion": false,
-      },
       "skipReason": "path-dependency",
     },
     {
-      "currentValue": "",
       "datasource": "pypi",
       "depName": "dep5",
       "depType": "dependencies",
-      "managerData": {
-        "nestedVersion": false,
-      },
-      "versioning": "pep440",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "^0.8.3",
@@ -504,7 +493,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "packageName": "dev-dep2",
-    "skipReason": "unspecified-version",
+    "skipReason": "invalid-version",
   },
   {
     "currentValue": "^0.8.3",
@@ -554,13 +543,9 @@ exports[`modules/manager/poetry/extract extractPackageFile() handles multiple co
 {
   "deps": [
     {
-      "currentValue": "",
       "datasource": "pypi",
       "depName": "foo",
       "depType": "dependencies",
-      "managerData": {
-        "nestedVersion": false,
-      },
       "skipReason": "multiple-constraint-dep",
     },
   ],

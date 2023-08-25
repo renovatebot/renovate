@@ -1,18 +1,17 @@
-This `custom` datasource allows requesting version data from generic HTTP endpoints.
+This `custom` datasource allows requesting version data from generic HTTP(S) endpoints.
 
 ## Usage
 
 The `customDatasources` option takes a record of `customDatasource` configs.
-This example shows how to update the `k3s.version` file with a custom datasource and
-a [regexManagers](../../manager/regex/):
+This example shows how to update the `k3s.version` file with a custom datasource and a [regexManagers](../../manager/regex/index.md):
 
 Options:
 
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| defaultRegistryUrlTemplate | ""      | url used if no `registryUrl` is provided when looking up new releases                                                                                                    |
+| defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
 | format                     | "json"  | format used by the API. Available values are: `json`, `plain`                                                                                                            |
-| transformTemplates         | []      | [jsonata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
+| transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
 
@@ -40,7 +39,7 @@ Available template variables:
 }
 ```
 
-After all transformations, the resulting json has to follow this formats:
+After all transformations, the resulting JSON must match one of these formats:
 
 Minimal-supported object:
 
@@ -90,7 +89,7 @@ The returned body will be directly interpreted as JSON and forwarded to the tran
 If the format is set to `plain`, Renovate will call the HTTP endpoint with the `Accept` header value `text/plain`.
 The body of the response will be treated as plain text and will be converted into JSON.
 
-Suppose the body of the HTTP response is as follows::
+Suppose the body of the HTTP response is as follows:
 
 ```
 1.0.0
@@ -173,8 +172,7 @@ nomad_version: 1.6.0
 
 ### Grafana Dashboard
 
-You can use the following configuration to upgrade the Grafana Dashboards versions in your [grafana](https://github.com/grafana/helm-charts/blob/e5f1e9c4a4a3b43a820dc4b9eb16f3daa0b6e74f/charts/grafana/values.yaml#L685-L688)
-Helm chart:
+You can use the following configuration to upgrade the Grafana Dashboards versions in your [Grafana Helm chart](https://github.com/grafana/helm-charts/blob/e5f1e9c4a4a3b43a820dc4b9eb16f3daa0b6e74f/charts/grafana/values.yaml#L685-L688):
 
 ```json
 {
@@ -220,8 +218,9 @@ dashboards:
 ### Custom offline dependencies
 
 Sometimes the "dependency version source" is _not_ available via an API.
-To work around a missing API, you can create dependency "files". These files are served via HTTP(S), so that Renovate can access them.
-For example, imagine the following file `versiontracker.json` for the software `something``:
+To work around a missing API, you can create dependency "files".
+These files are served via HTTP(S), so that Renovate can access them.
+For example, imagine the following file `versiontracker.json` for the software `something`:
 
 ```json
 [

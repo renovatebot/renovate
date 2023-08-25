@@ -75,7 +75,7 @@ function getNewValue({ currentValue, newVersion }: NewValueConfig): string {
     return currentValue.replace(version, cleanNewVersion);
   }
 
-  return currentValue;
+  return cleanNewVersion;
 }
 
 export { toSemverRange, getNewValue };
