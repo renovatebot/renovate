@@ -92,25 +92,23 @@ const PoetryPypiDependency = z.union([
   ),
 ]);
 
-const PoetryDependencySchema = z.union([
-  PoetryPathDependency,
-  PoetryGitDependency,
-  PoetryPypiDependency,
-]);
-
-const PoetryArraySchema = z.array(z.unknown()).transform(
+const PoetryArrayDependency = z.array(z.unknown()).transform(
   (): PackageDependency => ({
     datasource: PypiDatasource.id,
     skipReason: 'multiple-constraint-dep',
   })
 );
 
-const PoetryValue = z.union([PoetryDependencySchema, PoetryArraySchema]);
-type PoetryValue = z.infer<typeof PoetryValue>;
+const PoetryDependency = z.union([
+  PoetryPathDependency,
+  PoetryGitDependency,
+  PoetryPypiDependency,
+  PoetryArrayDependency,
+]);
 
-export const PoetryDependencyRecord = LooseRecord(
+export const PoetryDependencies = LooseRecord(
   z.string(),
-  PoetryValue.transform((dep) => {
+  PoetryDependency.transform((dep) => {
     if (dep.skipReason) {
       return dep;
     }
@@ -134,26 +132,23 @@ export const PoetryDependencyRecord = LooseRecord(
     dep.skipReason = 'invalid-version';
     return dep;
   })
-)
-  .transform((record) => {
-    const deps: PackageDependency[] = [];
-    for (const [depName, dep] of Object.entries(record)) {
-      dep.depName = depName;
-      if (!dep.packageName) {
-        const pep503NormalizeRegex = regEx(/[-_.]+/g);
-        const packageName = depName
-          .toLowerCase()
-          .replace(pep503NormalizeRegex, '-');
-        if (depName !== packageName) {
-          dep.packageName = packageName;
-        }
+).transform((record) => {
+  const deps: PackageDependency[] = [];
+  for (const [depName, dep] of Object.entries(record)) {
+    dep.depName = depName;
+    if (!dep.packageName) {
+      const pep503NormalizeRegex = regEx(/[-_.]+/g);
+      const packageName = depName
+        .toLowerCase()
+        .replace(pep503NormalizeRegex, '-');
+      if (depName !== packageName) {
+        dep.packageName = packageName;
       }
-      deps.push(dep);
     }
-    return deps;
-  })
-  .catch([]);
-export type PoetryDependencyRecord = z.infer<typeof PoetryDependencyRecord>;
+    deps.push(dep);
+  }
+  return deps;
+});
 
 function withDepType<
   Output extends PackageDependency[],
@@ -167,34 +162,34 @@ function withDepType<
   });
 }
 
-export const PoetryGroupRecord = LooseRecord(
+export const PoetryGroupDependencies = LooseRecord(
   z.string(),
   z
-    .object({ dependencies: PoetryDependencyRecord })
+    .object({ dependencies: PoetryDependencies })
     .transform(({ dependencies }) => dependencies)
-)
-  .transform((record) => {
-    const deps: PackageDependency[] = [];
-    for (const [groupName, group] of Object.entries(record)) {
-      for (const dep of Object.values(group)) {
-        dep.depType = groupName;
-        deps.push(dep);
-      }
+).transform((record) => {
+  const deps: PackageDependency[] = [];
+  for (const [groupName, group] of Object.entries(record)) {
+    for (const dep of Object.values(group)) {
+      dep.depType = groupName;
+      deps.push(dep);
     }
-    return deps;
-  })
-  .catch([]);
-
-export type PoetryGroupRecord = z.infer<typeof PoetryGroupRecord>;
+  }
+  return deps;
+});
 
 export const PoetrySectionSchema = z
   .object({
-    dependencies: withDepType(PoetryDependencyRecord, 'dependencies'),
-    'dev-dependencies': withDepType(PoetryDependencyRecord, 'dev-dependencies'),
-    extras: withDepType(PoetryDependencyRecord, 'extras'),
-    group: PoetryGroupRecord,
+    dependencies: withDepType(PoetryDependencies, 'dependencies'),
+    'dev-dependencies': withDepType(PoetryDependencies, 'dev-dependencies'),
+    extras: withDepType(PoetryDependencies, 'extras'),
+    group: PoetryGroupDependencies,
     source: LooseArray(
-      z.object({ url: z.string() }).transform(({ url }) => url)
+      z
+        .object({
+          url: z.string(),
+        })
+        .transform(({ url }) => url)
     )
       .refine((urls) => urls.length > 0)
       .transform((urls) => [
@@ -209,21 +204,21 @@ export const PoetrySectionSchema = z
     ({
       dependencies,
       'dev-dependencies': devDependencies,
-      extras,
-      group,
-      source,
+      extras: extraDependencies,
+      group: groupDependencies,
+      source: registryUrls,
     }) => {
       const deps: PackageDependency[] = [
         ...dependencies,
         ...devDependencies,
-        ...extras,
-        ...group,
+        ...extraDependencies,
+        ...groupDependencies,
       ];
 
       const res: PackageFileContent = { deps };
 
-      if (source) {
-        res.registryUrls = source;
+      if (registryUrls) {
+        res.registryUrls = registryUrls;
       }
 
       return res;
