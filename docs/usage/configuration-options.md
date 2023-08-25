@@ -645,7 +645,7 @@ When using with `npm`, we recommend you:
 ## customDatasources
 
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
-These datasources can be referred by CustomManagers or can be used to overwrite default datasources.
+These datasources can be referred by RegexManagers or can be used to overwrite default datasources.
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
@@ -3009,9 +3009,9 @@ You can select which behavior you want from Renovate:
 We recommend that you stick with the default setting for this option.
 Only change this setting if you really need to.
 
-## customManagers
+## regexManagers
 
-Use `customManagers` entries to configure the `regex` manager in Renovate.
+Use `regexManagers` entries to configure the `regex` manager in Renovate.
 
 You can define custom managers to handle:
 
@@ -3037,7 +3037,7 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Custom Manager Presets](https://docs.renovatebot.com/presets-custom-managers/), they may have what you need.
+    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regex-managers/), they may have what you need.
 
 ### customType
 
@@ -3045,7 +3045,7 @@ Example:
 
 ```json
 {
-  "customManagers": [
+  "regexManagers": [
     {
       "customType": "regex",
       "matchStrings": [
@@ -3089,7 +3089,7 @@ renovate.json:
 
 ```json
 {
-  "customManagers": [
+  "regexManagers": [
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStringsStrategy": "any",
@@ -3130,7 +3130,7 @@ renovate.json:
 
 ```json
 {
-  "customManagers": [
+  "regexManagers": [
     {
       "fileMatch": ["^example.json$"],
       "matchStringsStrategy": "recursive",
@@ -3188,7 +3188,7 @@ renovate.json:
 
 ```json
 {
-  "customManagers": [
+  "regexManagers": [
     {
       "fileMatch": ["^main.yml$"],
       "matchStringsStrategy": "combination",
@@ -3281,7 +3281,7 @@ regex definition:
 
 ```json
 {
-  "customManagers": [
+  "regexManagers": [
     {
       "fileMatch": ["values.yaml$"],
       "matchStrings": [

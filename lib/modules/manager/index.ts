@@ -103,3 +103,15 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
 
   return config.rangeStrategy;
 }
+
+export function getEnabledManagersList(enabledManagers?: string[]): string[] {
+  if (enabledManagers?.length) {
+    return allManagersList.filter(
+      (manager) =>
+        enabledManagers.includes(manager) ||
+        enabledManagers.includes(`custom.${manager}`)
+    );
+  }
+
+  return allManagersList;
+}

@@ -3,7 +3,7 @@ import type {
   RegexManagerTemplates,
   RenovateConfig,
 } from '../../../config/types';
-import { allManagersList } from '../../../modules/manager';
+import { getEnabledManagersList } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/types';
@@ -56,25 +56,15 @@ export function generateFingerprintConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
-  let managerList: Set<string>;
-  const { enabledManagers } = config;
-  if (enabledManagers?.length) {
-    managerList = new Set(
-      allManagersList.filter(
-        (manager) =>
-          enabledManagers.includes(manager) ||
-          enabledManagers.includes(`custom.${manager}`)
-      )
-    );
-  } else {
-    managerList = new Set(allManagersList);
-  }
+  const managerList: Set<string> = new Set(
+    getEnabledManagersList(config.enabledManagers)
+  );
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
       const filteredCustomManagers = (config.regexManagers ?? []).filter(
-        (mgr) => mgr.customType === manager.replace('custom.', '')
+        (mgr) => mgr.customType === manager
       );
       for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
