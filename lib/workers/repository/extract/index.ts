@@ -12,7 +12,7 @@ import { getManagerPackageFiles } from './manager-files';
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
-  let managerList = getEnabledManagersList(config.enabledManagers);
+  const managerList = getEnabledManagersList(config.enabledManagers);
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
 
