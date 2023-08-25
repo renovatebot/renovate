@@ -19,7 +19,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
           notStable: 'http://some.link.2',
         },
       },
-      enabledManagers: ['npm', 'regex'],
+      enabledManagers: ['npm', 'custom.regex'],
       regexManagers: [
         {
           customType: 'regex',

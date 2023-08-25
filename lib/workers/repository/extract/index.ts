@@ -16,8 +16,10 @@ export async function extractAllDependencies(
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
-    managerList = managerList.filter((manager) =>
-      enabledManagers.includes(manager)
+    managerList = managerList.filter(
+      (manager) =>
+        enabledManagers.includes(manager) ||
+        enabledManagers.includes(`custom.${manager}`)
     );
   }
   const extractList: WorkerExtractConfig[] = [];
@@ -35,7 +37,7 @@ export async function extractAllDependencies(
     managerConfig.manager = manager;
     if (isCustomManager(manager)) {
       const filteredCustomManagers = (config.regexManagers ?? []).filter(
-        (mgr) => mgr.customType === manager
+        (mgr) => mgr.customType === manager.replace('custom.', '')
       );
       for (const customManager of filteredCustomManagers) {
         tryConfig(mergeChildConfig(managerConfig, customManager));
@@ -87,7 +89,7 @@ export async function extractAllDependencies(
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
       if (!(enabledManager in extractResult.packageFiles)) {
-        logger.debug(
+        logger.warn(
           { manager: enabledManager },
           `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
         );

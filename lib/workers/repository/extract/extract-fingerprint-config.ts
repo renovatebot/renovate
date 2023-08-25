@@ -59,7 +59,13 @@ export function generateFingerprintConfig(
   let managerList: Set<string>;
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
-    managerList = new Set(enabledManagers);
+    managerList = new Set(
+      allManagersList.filter(
+        (manager) =>
+          enabledManagers.includes(manager) ||
+          enabledManagers.includes(`custom.${manager}`)
+      )
+    );
   } else {
     managerList = new Set(allManagersList);
   }
@@ -68,7 +74,7 @@ export function generateFingerprintConfig(
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
       const filteredCustomManagers = (config.regexManagers ?? []).filter(
-        (mgr) => mgr.customType === manager
+        (mgr) => mgr.customType === manager.replace('custom.', '')
       );
       for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
