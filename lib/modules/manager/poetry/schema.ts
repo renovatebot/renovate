@@ -132,25 +132,23 @@ export const PoetryDependencies = LooseRecord(
     dep.skipReason = 'invalid-version';
     return dep;
   })
-)
-  .transform((record) => {
-    const deps: PackageDependency[] = [];
-    for (const [depName, dep] of Object.entries(record)) {
-      dep.depName = depName;
-      if (!dep.packageName) {
-        const pep503NormalizeRegex = regEx(/[-_.]+/g);
-        const packageName = depName
-          .toLowerCase()
-          .replace(pep503NormalizeRegex, '-');
-        if (depName !== packageName) {
-          dep.packageName = packageName;
-        }
+).transform((record) => {
+  const deps: PackageDependency[] = [];
+  for (const [depName, dep] of Object.entries(record)) {
+    dep.depName = depName;
+    if (!dep.packageName) {
+      const pep503NormalizeRegex = regEx(/[-_.]+/g);
+      const packageName = depName
+        .toLowerCase()
+        .replace(pep503NormalizeRegex, '-');
+      if (depName !== packageName) {
+        dep.packageName = packageName;
       }
-      deps.push(dep);
     }
-    return deps;
-  })
-  .catch([]);
+    deps.push(dep);
+  }
+  return deps;
+});
 
 function withDepType<
   Output extends PackageDependency[],
@@ -169,25 +167,26 @@ export const PoetryGroupDependencies = LooseRecord(
   z
     .object({ dependencies: PoetryDependencies })
     .transform(({ dependencies }) => dependencies)
-)
-  .transform((record) => {
-    const deps: PackageDependency[] = [];
-    for (const [groupName, group] of Object.entries(record)) {
-      for (const dep of Object.values(group)) {
-        dep.depType = groupName;
-        deps.push(dep);
-      }
+).transform((record) => {
+  const deps: PackageDependency[] = [];
+  for (const [groupName, group] of Object.entries(record)) {
+    for (const dep of Object.values(group)) {
+      dep.depType = groupName;
+      deps.push(dep);
     }
-    return deps;
-  })
-  .catch([]);
+  }
+  return deps;
+});
 
 export const PoetrySectionSchema = z
   .object({
-    dependencies: withDepType(PoetryDependencies, 'dependencies'),
-    'dev-dependencies': withDepType(PoetryDependencies, 'dev-dependencies'),
-    extras: withDepType(PoetryDependencies, 'extras'),
-    group: PoetryGroupDependencies,
+    dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
+    'dev-dependencies': withDepType(
+      PoetryDependencies,
+      'dev-dependencies'
+    ).optional(),
+    extras: withDepType(PoetryDependencies, 'extras').optional(),
+    group: PoetryGroupDependencies.optional(),
     source: LooseArray(
       z
         .object({
@@ -206,10 +205,10 @@ export const PoetrySectionSchema = z
   })
   .transform(
     ({
-      dependencies,
-      'dev-dependencies': devDependencies,
-      extras: extraDependencies,
-      group: groupDependencies,
+      dependencies = [],
+      'dev-dependencies': devDependencies = [],
+      extras: extraDependencies = [],
+      group: groupDependencies = [],
       source: registryUrls,
     }) => {
       const deps: PackageDependency[] = [
