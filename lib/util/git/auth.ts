@@ -58,10 +58,22 @@ export function getGitAuthenticatedEnvironmentVariables(
       gitConfigCount = 0;
     }
   }
+  let authenticationRules: AuthenticationRule[];
+  if (token) {
+    authenticationRules = getAuthenticationRulesWithToken(
+      originalGitUrl,
+      hostType,
+      token
+    );
+  } else {
+    const encodedUsername = encodeURIComponent(username!);
+    const encodedPassword = encodeURIComponent(password!);
 
-  const authenticationRules = token
-    ? getAuthenticationRulesWithToken(originalGitUrl, hostType, token)
-    : getAuthenticationRules(originalGitUrl, `${username}:${password}`);
+    authenticationRules = getAuthenticationRules(
+      originalGitUrl,
+      `${encodedUsername}:${encodedPassword}`
+    );
+  }
 
   // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
   // add the two new config key and value to the returnEnvironmentVariables object
@@ -154,10 +166,7 @@ export function getGitEnvironmentVariables(
     url: 'https://api.github.com/',
   });
 
-  if (
-    gitHubHostRule?.token ??
-    (gitHubHostRule?.username && gitHubHostRule?.password)
-  ) {
+  if (gitHubHostRule?.token) {
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       'https://github.com/',
       gitHubHostRule

@@ -460,6 +460,29 @@ describe('util/git/auth', () => {
       });
     });
 
+    it('returns environment variables with URL encoded username and password', () => {
+      add({
+        hostType: 'gitlab',
+        matchHost: 'https://gitlab.example.com',
+        username: 'user @ :$ abc',
+        password: 'abc @ blub pass0:',
+      });
+      expect(getGitEnvironmentVariables()).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
+        GIT_CONFIG_VALUE_1: 'git@gitlab.example.com:',
+        GIT_CONFIG_VALUE_2: 'https://gitlab.example.com/',
+      });
+    });
+
+
+
     it('returns no environment variables when hostType is not supported', () => {
       add({
         hostType: 'custom',
