@@ -2467,6 +2467,19 @@ These updates have all been created already. Click a checkbox below to force a r
       ).toBe("The source contains 'Ruby' at: 2.7.6.219");
     });
 
+    it('replaces PR with MR including pluralization', () => {
+      expect(
+        gitlab.massageMarkdown(
+          'A Pull Request is a PR, multiple Pull Requests are PRs.'
+        )
+      ).toBe('A Merge Request is a MR, multiple Merge Requests are MRs.');
+    });
+
+    it('avoids false positives when replacing PR with MR', () => {
+      const nothingToReplace = 'PROCESSING APPROPRIATE SUPPRESS NOPR';
+      expect(gitlab.massageMarkdown(nothingToReplace)).toBe(nothingToReplace);
+    });
+
     it('returns updated pr body', async () => {
       jest.mock('../utils/pr-body');
       const { smartTruncate } = require('../utils/pr-body');
