@@ -373,8 +373,8 @@ const staticGroups = {
         groupSlug: 'pulumi-dotnet',
         matchDatasources: ['nuget'],
         matchPackagePrefixes: ['Pulumi'],
-      }
-    ]
+      },
+    ],
   },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
