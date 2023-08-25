@@ -360,7 +360,7 @@ function sortVersions(a: string, b: string): number {
   if (aContainsPatch === bContainsPatch) {
     // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
     return npm.sortVersions(composer2npm(a), composer2npm(b));
-  } else if (npm.equals(aWithoutPatch, bWithoutPatch)) {
+  } else if (npm.equals(composer2npm(aWithoutPatch), composer2npm(bWithoutPatch))) {
     // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
     return aContainsPatch ? 1 : -1;
   } else {
