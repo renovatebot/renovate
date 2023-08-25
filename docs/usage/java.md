@@ -101,7 +101,7 @@ Any repository URLs found within will be added as `registryUrls` to extracted de
 ## Custom registry support, and authentication
 
 The manager for Gradle makes use of the `maven` datasource.
-Renovate can be configured to access additional repositories and access repositories authenticated.
+Renovate can be configured to access more repositories and access repositories authenticated.
 
 This example shows how you can use a `config.js` file to configure Renovate for use with Artifactory.
 We're using environment variables to pass the Artifactory username and password to Renovate bot.

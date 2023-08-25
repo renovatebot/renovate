@@ -20,6 +20,7 @@ export async function prAlreadyExisted(
     branchName: config.branchName,
     prTitle: config.prTitle,
     state: '!open',
+    targetBranch: config.baseBranch,
   });
 
   if (!pr && config.branchPrefix !== config.branchPrefixOld) {
@@ -30,6 +31,7 @@ export async function prAlreadyExisted(
       ),
       prTitle: config.prTitle,
       state: '!open',
+      targetBranch: config.baseBranch,
     });
     if (pr) {
       logger.debug('Found closed PR with branchPrefixOld');

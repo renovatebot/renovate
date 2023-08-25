@@ -15,7 +15,7 @@ describe('modules/manager/bazelisk/extract', () => {
     });
 
     it('supports ranges', () => {
-      const res = extractPackageFile('5.2\n');
+      const res = extractPackageFile('5.2');
       expect(res.deps).toEqual([
         {
           currentValue: '5.2',

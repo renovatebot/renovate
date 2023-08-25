@@ -31,7 +31,7 @@ export async function ensureConfigMigrationPr(
   );
 
   const prTitle = commitMessageFactory.getPrTitle();
-  const existingPr = await platform.getBranchPr(branchName);
+  const existingPr = await platform.getBranchPr(branchName, config.baseBranch);
   const filename = migratedConfigData.filename;
   logger.debug('Filling in config migration PR template');
   let prBody = `The Renovate config in this repository needs migrating. Typically this is because one or more configuration options you are using have been renamed.

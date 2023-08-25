@@ -53,6 +53,7 @@ export async function extractPackageFile(
   }
 
   const extractedConstraints: Record<string, any> = {};
+
   if (is.nonEmptyString(pythonVersion)) {
     extractedConstraints.python = pythonVersion;
   }

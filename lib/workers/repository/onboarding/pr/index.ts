@@ -41,7 +41,10 @@ export async function ensureOnboardingPr(
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
   // TODO #22198
-  const existingPr = await platform.getBranchPr(config.onboardingBranch!);
+  const existingPr = await platform.getBranchPr(
+    config.onboardingBranch!,
+    config.defaultBranch
+  );
   if (existingPr) {
     // skip pr-update if branch is conflicted
     if (
