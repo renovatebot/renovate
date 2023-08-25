@@ -25,32 +25,31 @@ $ renovate-config-validator
  INFO: Config validated successfully
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    The `renovate-config-validator` program is meant to validate one file per run.
+    Avoid checking multiple files in one run.
+
 ### Strict mode
 
 By default, the validator program fails with a non-zero exit code if there are any validation warnings or errors.
 You can pass the `--strict` flag to make it fail if a scanned config needs migration.
 
-### Pass files to check as CLI arguments
+### Pass file to check as CLI arguments
 
-You can pass the files to check to the `renovate-config-validator` program as CLI arguments.
-This can be handy to check config files with non-default names, like when you're using preset repositories.
+You can pass the file you want to check to the `renovate-config-validator` program with a CLI argument.
+This can be handy to check a config file with a non-default name, like when you're using preset repositories.
 For example:
 
 ```console
 $ npm install --global renovate
 added 750 packages, and audited 751 packages in 51s
-$ renovate-config-validator first_config.json second_config.json
+$ renovate-config-validator first_config.jsonn
  INFO: Validating first_config_.json
- INFO: Validating second_config.json
  INFO: Config validated successfully
 ```
 
 ## Validate your config automatically
 
 You can create a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
-Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
-
-## Pre-commit hook
-
-You can configure a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
 Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
