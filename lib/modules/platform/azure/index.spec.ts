@@ -373,30 +373,29 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('returns pr if found matches targetBranch', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          partial<IGitApi>({
-            getPullRequests: jest
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-b',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Active,
-                },
-                {
-                  pullRequestId: 2,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-c',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Active,
-                },
-              ]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
-          })
+      azureApi.gitApi.mockImplementationOnce(() =>
+        partial<IGitApi>({
+          getPullRequests: jest
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+              {
+                pullRequestId: 2,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-c',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+            ]),
+          getPullRequestCommits: jest.fn().mockReturnValue([]),
+        })
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
@@ -422,30 +421,29 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('returns first pr if found does not match targetBranch', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          partial<IGitApi>({
-            getPullRequests: jest
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-b',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Active,
-                },
-                {
-                  pullRequestId: 2,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-c',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Active,
-                },
-              ]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
-          })
+      azureApi.gitApi.mockImplementationOnce(() =>
+        partial<IGitApi>({
+          getPullRequests: jest
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+              {
+                pullRequestId: 2,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-c',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+            ]),
+          getPullRequestCommits: jest.fn().mockReturnValue([]),
+        })
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
