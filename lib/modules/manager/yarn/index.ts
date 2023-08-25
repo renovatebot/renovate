@@ -3,7 +3,6 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
 
-export { detectGlobalConfig } from './detect';
 export { extractAllPackageFiles } from './extract';
 export {
   bumpPackageVersion,
