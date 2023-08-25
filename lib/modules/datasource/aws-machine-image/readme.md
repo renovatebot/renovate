@@ -61,9 +61,11 @@ Here's an example of using the regex manager:
 module.exports = {
   regexManagers: [
     {
+
+      customType: "regex",
       fileMatch: ['.*'],
       matchStrings: [
-        '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
+        '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*awsConfig=(?<registryUrl>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
       ],
       datasourceTemplate: 'aws-machine-image',
       versioningTemplate: 'aws-machine-image',
@@ -79,10 +81,11 @@ Or as JSON:
   'regexManagers':
     [
       {
+        'customType': "regex",
         'fileMatch': ['.*'],
         'matchStrings':
           [
-            ".*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
+            ".*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*awsConfig=(?<registryUrl>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",
           ],
         'datasourceTemplate': 'aws-machine-image',
         'versioningTemplate': 'aws-machine-image',
@@ -102,6 +105,12 @@ my_ami1: ami-02ce3d9008cab69cb
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
 # currentImageName=unknown
 my_ami2: ami-0083e9407e275acf2
+
+# Using custom aws config
+# amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
+# currentImageName=unknown
+# awsConfig={"profile":"test","region":"eu-central-1"}
+ami = "ami-0083e9407e275acf2"
 ```
 
 ```typescript
