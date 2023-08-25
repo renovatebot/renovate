@@ -3037,7 +3037,7 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-customManagers/), they may have what you need.
+    Look at our [Custom Manager Presets](https://docs.renovatebot.com/presets-custom-managers/), they may have what you need.
 
 ### customType
 
