@@ -19,6 +19,7 @@ import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
+import { extractRepoProblems } from './common';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
@@ -63,6 +64,7 @@ export async function renovateRepository(
     if (config.semanticCommits === 'auto') {
       config.semanticCommits = await detectSemanticCommits();
     }
+
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
@@ -71,7 +73,6 @@ export async function renovateRepository(
         ensureOnboardingPr(config, packageFiles, branches)
       );
       addSplit('onboarding');
-
       const res = await instrument('update', () =>
         updateRepo(config, branches)
       );
@@ -82,7 +83,7 @@ export async function renovateRepository(
       }
       if (res === 'automerged') {
         if (canRetry) {
-          logger.info('Renovating repository again after automerge result');
+          logger.info('Restarting repository job after automerge result');
           const recursiveRes = await renovateRepository(repoConfig, false);
           return recursiveRes;
         }
@@ -94,6 +95,7 @@ export async function renovateRepository(
       // TODO #22198
       repoResult = processResult(config, res!);
     }
+    printRepositoryProblems(config);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
@@ -137,4 +139,14 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
     branchList: [config.onboardingBranch!], // to prevent auto closing
     packageFiles: {},
   };
+}
+
+export function printRepositoryProblems(config: RenovateConfig): void {
+  const repoProblems = extractRepoProblems(config);
+  if (repoProblems.size) {
+    logger.debug(
+      { repoProblems: Array.from(repoProblems) },
+      'repository problems'
+    );
+  }
 }
