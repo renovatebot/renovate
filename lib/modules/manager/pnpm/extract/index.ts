@@ -518,10 +518,8 @@ export async function extractAllPackageFiles(
   );
   let packageFiles: string[] = [];
   for (const pnpmLock of pnpmLocks) {
-    console.warn(pnpmLock);
     // find sibling package.json file and parse it
     const packageFile = getSiblingFileName(pnpmLock, 'package.json');
-    console.warn(packageFile);
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       continue;

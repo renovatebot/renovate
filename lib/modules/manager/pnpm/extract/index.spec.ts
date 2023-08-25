@@ -26,6 +26,7 @@ describe('modules/manager/pnpm/extract/index', () => {
     fs.localPathExists.mockResolvedValue(false);
     fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
   });
+
   describe('.extractPackageFile()', () => {
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractPackageFile(
