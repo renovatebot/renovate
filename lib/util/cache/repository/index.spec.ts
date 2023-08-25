@@ -1,5 +1,6 @@
-import { mocked } from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import { printRepositoryProblems } from '../../../workers/repository';
 import * as _fs from '../../fs';
 import { initRepoCache } from './init';
 import type { RepoCacheConfig } from './types';
@@ -54,5 +55,21 @@ describe('util/cache/repository/index', () => {
     expect(fs.outputCacheFile).toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
     expect(isCacheModified()).toBeUndefined();
+  });
+
+  it('prints repository problems', () => {
+    logger.getProblems.mockReturnValueOnce([
+      {
+        repository: 'some/repo',
+        level: 30,
+        msg: 'Problem 1',
+        artifactErrors: false,
+      },
+      { repository: 'some/repo', level: 30, msg: 'Problem 2' },
+    ]);
+
+    printRepositoryProblems(config);
+
+    expect(logger.logger.debug).toHaveBeenCalled();
   });
 });
