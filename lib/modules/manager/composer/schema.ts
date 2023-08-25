@@ -272,8 +272,7 @@ export const ComposerExtract = z
             depName,
             currentValue,
             datasource: GithubTagsDatasource.id,
-            packageName: 'php/php-src',
-            extractVersion: '^php-(?<version>.*)$',
+            packageName: 'containerbase/php-prebuild',
           });
           continue;
         }

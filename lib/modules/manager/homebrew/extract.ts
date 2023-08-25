@@ -166,7 +166,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     skipReason = 'invalid-sha256';
   }
   const dep: PackageDependency = {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,

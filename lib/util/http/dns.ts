@@ -47,7 +47,7 @@ function lookup(
       ]
 ): void {
   let opts: LookupOneOptions | LookupAllOptions;
-  // TODO: strict null incompatible types (#7154)
+  // TODO: strict null incompatible types (#22198)
   let cb: any;
 
   if (typeof options === 'function') {

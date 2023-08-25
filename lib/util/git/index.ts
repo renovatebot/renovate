@@ -2,7 +2,7 @@ import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-// TODO: check if bug is fixed (#7154)
+// TODO: check if bug is fixed (#22198)
 // eslint-disable-next-line import/no-named-as-default
 import simpleGit, {
   Options,
@@ -204,7 +204,7 @@ async function fetchBranchCommits(): Promise<void> {
   const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       opts.unshift(e[0], `${e[1]!}`)
     );
   }
@@ -426,7 +426,7 @@ export async function syncGit(): Promise<void> {
       }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
-          // TODO: types (#7154)
+          // TODO: types (#22198)
           opts.push(e[0], `${e[1]!}`)
         );
       }
@@ -779,10 +779,38 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeBranch(
-  branchName: string,
-  localOnly = false
-): Promise<void> {
+export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
+  let status: StatusResult | undefined;
+  try {
+    await syncGit();
+    await writeGitAuthor();
+    await git.reset(ResetMode.HARD);
+    await gitRetry(() =>
+      git.checkout([
+        '-B',
+        config.currentBranch,
+        'origin/' + config.currentBranch,
+      ])
+    );
+    status = await git.status();
+    await fetchRevSpec(refSpecToMerge);
+    await gitRetry(() => git.merge(['FETCH_HEAD']));
+  } catch (err) {
+    logger.debug(
+      {
+        baseBranch: config.currentBranch,
+        baseSha: config.currentBranchSha,
+        refSpecToMerge,
+        status,
+        err,
+      },
+      'mergeLocally error'
+    );
+    throw err;
+  }
+}
+
+export async function mergeBranch(branchName: string): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -799,13 +827,8 @@ export async function mergeBranch(
       ])
     );
     status = await git.status();
-    if (localOnly) {
-      // merge commit, don't push to origin
-      await gitRetry(() => git.merge([branchName]));
-    } else {
-      await gitRetry(() => git.merge(['--ff-only', branchName]));
-      await gitRetry(() => git.push('origin', config.currentBranch));
-    }
+    await gitRetry(() => git.merge(['--ff-only', branchName]));
+    await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');
   } catch (err) {
     logger.debug(
@@ -1140,7 +1163,7 @@ export function getUrl({
   repository: string;
 }): string {
   if (protocol === 'ssh') {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     return `git@${hostname!}:${repository}.git`;
   }
   return URL.format({

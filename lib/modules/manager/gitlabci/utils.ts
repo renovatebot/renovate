@@ -31,7 +31,7 @@ export function getGitlabDep(
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {
     const dep = { ...getDep(match.groups.depName), replaceString: imageName };
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
     return dep;
   }

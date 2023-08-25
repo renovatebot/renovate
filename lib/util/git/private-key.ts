@@ -57,7 +57,7 @@ export async function configSigningKey(cwd: string): Promise<void> {
     return;
   }
   logger.debug('gitPrivateKey: configuring commit signing');
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   await exec(`git config user.signingkey ${keyId!}`, { cwd });
   await exec(`git config commit.gpgsign true`, { cwd });
 }
