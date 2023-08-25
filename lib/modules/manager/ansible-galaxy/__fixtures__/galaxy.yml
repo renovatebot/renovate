@@ -13,7 +13,9 @@ tags:
   - suite
   - backup
 dependencies:
+  ansible.posix: "1.5.4"
   ansible.windows: '1.4.0'
+  community.general: 7.3.0
   community.windows: '>=1.0.0,<2.0.0'
 repository: "https://github.com/foo/bar"
 issues: "https://github.com/foo/bar/issues"
