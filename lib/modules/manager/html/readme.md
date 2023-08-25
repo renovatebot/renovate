@@ -1,4 +1,4 @@
-The `html` manager updates `<script>` tags and _CSS includes_ that point to the [cdnjs content delivery network](https://cdnjs.com/).
+The `html` manager updates `<script>` tags and  css `<link>` tags that point to the [cdnjs content delivery network](https://cdnjs.com/).
 It also updates Subresource Integrity (SRI) hashes in `integrity` attributes.
 
 Key differences between the `cdnurl` manager and the `html` manager:
