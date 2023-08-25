@@ -1,4 +1,4 @@
-import { DescribeImagesCommand, EC2Client, Image } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client, EC2ClientConfig, Image } from '@aws-sdk/client-ec2';
 import { cache } from '../../../util/cache/package/decorator';
 import { Lazy } from '../../../util/lazy';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
@@ -29,13 +29,10 @@ export class AwsMachineImageDataSource extends Datasource {
     },
   };
 
-  private readonly ec2: Lazy<EC2Client>;
-
   private readonly now: number;
 
   constructor() {
     super(AwsMachineImageDataSource.id);
-    this.ec2 = new Lazy(() => new EC2Client({}));
     this.now = Date.now();
   }
 
@@ -45,12 +42,16 @@ export class AwsMachineImageDataSource extends Datasource {
       `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
   async getSortedAwsMachineImages(
-    serializedAmiFilter: string
+    serializedAmiFilter: string,
+    serializedAwsConfig: string,
   ): Promise<Image[]> {
     const cmd = new DescribeImagesCommand({
       Filters: JSON.parse(serializedAmiFilter),
     });
-    const matchingImages = await this.ec2.getValue().send(cmd);
+    const clientConfig: any = JSON.parse(serializedAwsConfig)
+    const client = new EC2Client({region: clientConfig.region || null})
+
+    const matchingImages = await client.send(cmd);
     matchingImages.Images = matchingImages.Images ?? [];
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate
@@ -70,10 +71,10 @@ export class AwsMachineImageDataSource extends Datasource {
       `getDigest:${packageName}:${newValue ?? ''}`,
   })
   override async getDigest(
-    { packageName: serializedAmiFilter }: GetReleasesConfig,
+    { packageName: serializedAmiFilter, registryUrl: serializedAwsConfig }: GetReleasesConfig,
     newValue?: string
   ): Promise<string | null> {
-    const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
+    const images = await this.getSortedAwsMachineImages(serializedAmiFilter, serializedAwsConfig || '{}');
     if (images.length < 1) {
       return null;
     }
@@ -100,8 +101,9 @@ export class AwsMachineImageDataSource extends Datasource {
   })
   async getReleases({
     packageName: serializedAmiFilter,
+    registryUrl: serializedAwsConfig,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
+    const images = await this.getSortedAwsMachineImages(serializedAmiFilter, serializedAwsConfig || '{}');
     const latestImage = images[images.length - 1];
     if (!latestImage?.ImageId) {
       return null;
