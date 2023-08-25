@@ -210,12 +210,76 @@ describe('modules/manager/woodpecker/extract', () => {
       });
     });
 
-    it('return null when no pipeline provided', () => {
+    it('should parse multiple sources of dependencies together', () => {
+      const res = extractPackageFile(
+        `
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+        clone:
+          git:
+            image: woodpeckerci/plugin-git:latest
+        `,
+        '',
+        {}
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'woodpeckerci/plugin-git',
+            currentValue: 'latest',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:latest',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('return dependency when an plugin-git is cloned', () => {
       const res = extractPackageFile(
         `
         clone:
           git:
-            image: woodpeckerci/plugin-git
+            image: woodpeckerci/plugin-git:latest
+        `,
+        '',
+        {}
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'woodpeckerci/plugin-git',
+            currentValue: 'latest',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:latest',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('return null when no dependencies are provided', () => {
+      const res = extractPackageFile(
+        `
+        clone:
+          git:
+            repo: github.com/org/some-repo
         `,
         '',
         {}

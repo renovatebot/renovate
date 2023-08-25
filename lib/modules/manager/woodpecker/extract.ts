@@ -7,14 +7,20 @@ import type { WoodpeckerConfig } from './types';
 
 function woodpeckerVersionDecider(
   woodpeckerConfig: WoodpeckerConfig
-): keyof WoodpeckerConfig | null {
-  if ('steps' in woodpeckerConfig) {
-    return 'steps';
-  } else if ('pipeline' in woodpeckerConfig) {
-    return 'pipeline';
+): Array<keyof WoodpeckerConfig> {
+  const keys: Array<keyof WoodpeckerConfig> = [];
+
+  if ('clone' in woodpeckerConfig) {
+    keys.push('clone');
   }
 
-  return null;
+  if ('steps' in woodpeckerConfig) {
+    keys.push('steps');
+  } else if ('pipeline' in woodpeckerConfig) {
+    keys.push('pipeline');
+  }
+
+  return keys;
 }
 
 export function extractPackageFile(
@@ -49,18 +55,20 @@ export function extractPackageFile(
     return null;
   }
 
-  const pipelineKey = woodpeckerVersionDecider(config);
+  const pipelineKeys = woodpeckerVersionDecider(config);
 
-  if (pipelineKey === null) {
-    logger.debug({ packageFile }, "Couldn't identify a pipeline");
+  if (pipelineKeys.length === 0) {
+    logger.debug({ packageFile }, "Couldn't identify dependencies");
     return null;
   }
 
   // Image name/tags for services are only eligible for update if they don't
   // use variables and if the image is not built locally
-  const deps = Object.values(config[pipelineKey] ?? {})
-    .filter((step) => is.string(step?.image))
-    .map((step) => getDep(step.image, true, extractConfig.registryAliases));
+  const deps = pipelineKeys.flatMap((pipelineKey) =>
+    Object.values(config[pipelineKey] ?? {})
+      .filter((step) => is.string(step?.image))
+      .map((step) => getDep(step.image, true, extractConfig.registryAliases))
+  );
 
   logger.trace({ deps }, 'Woodpecker Configuration image');
   return deps.length ? { deps } : null;
