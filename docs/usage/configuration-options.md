@@ -25,7 +25,8 @@ You can store your Renovate configuration file in one of these locations:
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
 
-When renovating a repository, Renovate tries to detect the configuration files in the order listed above, and stops after the first one is found.
+When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
+Renovate stops the search after it finds the first match.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
 Renovate does not read/override the config from within each base branch if present.
@@ -3022,7 +3023,7 @@ We recommend you use only one of these methods, or you'll get confused.
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
+For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/index.md).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 <!-- prettier-ignore -->

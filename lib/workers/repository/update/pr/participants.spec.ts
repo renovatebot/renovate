@@ -54,7 +54,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('supports dry run assignee adding', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await addParticipants(config, pr);
       expect(platform.addAssignees).not.toHaveBeenCalled();
     });
@@ -91,7 +91,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('supports dry run assignee adding', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await addParticipants(config, pr);
       expect(platform.addReviewers).not.toHaveBeenCalled();
     });

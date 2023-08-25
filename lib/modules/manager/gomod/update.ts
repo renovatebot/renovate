@@ -28,6 +28,11 @@ export function updateDependency({
     }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split(newlineRegex);
+    // istanbul ignore if: hard to test
+    if (lines.length <= upgrade.managerData.lineNumber) {
+      logger.warn('go.mod current line no longer exists after update');
+      return null;
+    }
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
