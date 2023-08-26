@@ -277,9 +277,9 @@ describe('modules/manager/woodpecker/extract', () => {
     it('return null when no dependencies are provided', () => {
       const res = extractPackageFile(
         `
-        clone:
-          git:
-            repo: github.com/org/some-repo
+        info:
+          version:
+            3.5
         `,
         '',
         {}
