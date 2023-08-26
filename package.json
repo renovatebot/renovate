@@ -336,7 +336,7 @@
     "nyc": "15.1.0",
     "pretty-format": "29.6.2",
     "rimraf": "5.0.1",
-    "semantic-release": "21.0.7",
+    "semantic-release": "21.0.8",
     "tar": "6.1.15",
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.1",
