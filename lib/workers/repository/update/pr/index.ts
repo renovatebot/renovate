@@ -124,7 +124,7 @@ export async function ensurePr(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if PR already exists
-  const existingPr = await platform.getBranchPr(branchName);
+  const existingPr = await platform.getBranchPr(branchName, config.baseBranch);
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');

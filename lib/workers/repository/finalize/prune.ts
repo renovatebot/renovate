@@ -22,6 +22,7 @@ async function cleanUpBranches(
       const pr = await platform.findPr({
         branchName,
         state: 'open',
+        targetBranch: config.baseBranch,
       });
       const branchIsModified = await scm.isBranchModified(branchName);
       if (pr) {
