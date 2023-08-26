@@ -66,6 +66,42 @@ export async function extractAllDependencies(
       return { manager: managerConfig.manager, packageFiles };
     })
   );
+
+  /* Deduplicate package.json files
+    - We don't want to keep an npm package.json extraction with no lockfile if it also exists as a pnpm or yarn package.json extraction
+    - We want to avoid matching two managers with one file (not sure it's a valid use case any longer) but for now we'll keep it in
+  */
+  const pnpmPackageFileNames =
+    extractResults
+      .find((res) => res.manager === 'pnpm')
+      ?.packageFiles?.map((p) => p.packageFile) ?? [];
+  const yarnPackageFileNames =
+    extractResults
+      .find((res) => res.manager === 'yarn')
+      ?.packageFiles?.map((p) => p.packageFile) ?? [];
+  const npmResults = extractResults.find((res) => res.manager === 'npm');
+  if (
+    npmResults?.packageFiles?.length &&
+    (pnpmPackageFileNames.length || yarnPackageFileNames.length)
+  ) {
+    logger.debug('Deduplicating npm package files');
+    const npmCount = npmResults.packageFiles.length;
+    npmResults.packageFiles = npmResults.packageFiles?.filter(
+      (p) =>
+        (is.string(p.packageFile) && !p.lockFiles?.length) || // retain it if it has a package-lock.json
+        (!pnpmPackageFileNames.includes(p.packageFile) && // otherwise skip it if it's in pnpm or yarn too
+          !yarnPackageFileNames.includes(p.packageFile))
+    );
+    const newCount = npmResults.packageFiles.length;
+    // Convenience log to be verbose to users
+    if (npmCount !== newCount) {
+      logger.debug(
+        `Removed ${
+          npmCount - newCount
+        } npm package files as they match pnpm or yarn manager instead`
+      );
+    }
+  }
   logger.debug(
     { managers: extractDurations },
     'manager extract durations (ms)'
