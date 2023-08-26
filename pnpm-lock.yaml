@@ -66,8 +66,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/osv-offline':
-        specifier: 1.3.2
-        version: 1.3.2
+        specifier: 1.3.3
+        version: 1.3.3
       '@renovatebot/pep440':
         specifier: 3.0.3
         version: 3.0.3
@@ -2837,8 +2837,8 @@ packages:
       '@seald-io/nedb': 4.0.2
     dev: false
 
-  /@renovatebot/osv-offline@1.3.2:
-    resolution: {integrity: sha512-Tv8p3hEPInvIV2nL2iniDn5hRSNoGHweKIfPN9kZiqe8WskA44+kylqUi2pqIlU90V7BYRtqTUNSiISiblgmqQ==}
+  /@renovatebot/osv-offline@1.3.3:
+    resolution: {integrity: sha512-TBnChwdG022L3uc8z5pmklaFoZF/GPjhnNfe6uNNXcgOq1Yd+PCoF4fn+y8vq2Zkr7K4EAbL3WLUhZsoS+rfhQ==}
     dependencies:
       '@octokit/rest': 19.0.13
       '@renovatebot/osv-offline-db': 1.4.0
