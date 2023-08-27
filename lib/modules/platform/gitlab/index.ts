@@ -783,7 +783,8 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 export function massageMarkdown(input: string): string {
   let desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
-    .replace(regEx(/PR/g), 'MR')
+    .replace(regEx(/\bPR\b/g), 'MR')
+    .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
     // Strip unicode null characters as GitLab markdown does not permit them
     .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex

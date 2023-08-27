@@ -11,7 +11,6 @@
       },
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
     {
@@ -25,14 +24,14 @@
       "preLaunchTask": "npm: clean-cache",
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Jest Current File",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "runtimeExecutable": "pnpm",
+      "program": "jest",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -45,18 +44,15 @@
         "LOG_LEVEL": "debug"
       },
       "console": "integratedTerminal",
-      "windows": {
-        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
-      },
       "runtimeArgs": ["--preserve-symlinks"],
-      "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Jest All",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "runtimeExecutable": "pnpm",
+      "program": "jest",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -67,18 +63,15 @@
         "LOG_LEVEL": "debug"
       },
       "console": "integratedTerminal",
-      "windows": {
-        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
-      },
       "runtimeArgs": ["--preserve-symlinks"],
-      "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Jest Current Folder",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "runtimeExecutable": "pnpm",
+      "program": "jest",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -86,11 +79,7 @@
         "--roots=${workspaceFolder}/${relativeFileDirname}"
       ],
       "console": "integratedTerminal",
-      "windows": {
-        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
-      },
       "runtimeArgs": ["--preserve-symlinks"],
-      "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
     {
@@ -99,15 +88,10 @@
       "request": "launch",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "disableOptimisticBPs": true,
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "pnpm",
-      "args": [
-        "jest",
-        "--runInBand",
-        "--watchAll=false",
-        "--testTimeout=100000000"
-      ]
+      "program": "jest",
+      "args": ["--runInBand", "--watchAll=false", "--testTimeout=100000000"]
     }
   ]
 }
