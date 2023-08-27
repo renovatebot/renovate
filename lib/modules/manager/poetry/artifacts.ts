@@ -51,8 +51,8 @@ export function getPoetryRequirement(
   }
 
   const { val: lockfilePoetryConstraint } = Result.parse(
-    Lockfile.transform(({ poetryConstraint }) => poetryConstraint),
-    existingLockFileContent
+    existingLockFileContent,
+    Lockfile.transform(({ poetryConstraint }) => poetryConstraint)
   ).unwrap();
   if (lockfilePoetryConstraint) {
     logger.debug('Using poetry version from poetry.lock metadata');

@@ -224,7 +224,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config as any
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
