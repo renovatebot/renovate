@@ -26,8 +26,8 @@ export function getPythonConstraint(
   existingLockFileContent: string
 ): string | null {
   return Result.parse(
-    Lockfile.transform(({ pythonVersions }) => pythonVersions),
-    existingLockFileContent
+    existingLockFileContent,
+    Lockfile.transform(({ pythonVersions }) => pythonVersions)
   ).unwrapOrNull();
 }
 
