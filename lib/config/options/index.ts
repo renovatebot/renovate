@@ -1014,7 +1014,7 @@ const options: RenovateOptions[] = [
   {
     name: 'updateInternalDeps',
     description:
-      'Whether to update internal dep versions in a monorepo. Works on Lerna or Yarn Workspaces.',
+      'Whether to update internal dep versions in a monorepo. Works on Yarn Workspaces.',
     type: 'boolean',
     default: false,
     stage: 'package',
