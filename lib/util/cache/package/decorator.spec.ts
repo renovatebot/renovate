@@ -161,7 +161,7 @@ describe('util/cache/package/decorator', () => {
         namespace: 'namespace',
         key: 'key',
         ttlMinutes: 1,
-        fallbackTtlMinutes: 3,
+        fallbackTtlMinutes: 2,
       })
 
       // Hard TTL is enabled only for `getReleases` and `getDigest` methods
@@ -176,6 +176,7 @@ describe('util/cache/package/decorator', () => {
 
     afterEach(() => {
       jest.useRealTimers();
+      GlobalConfig.reset();
     });
 
     it('updates cached result', async () => {
@@ -191,7 +192,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        3
+        2
       );
 
       jest.advanceTimersByTime(1);
@@ -201,13 +202,14 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '222' },
-        3
+        2
       );
     });
 
     it('overrides soft ttl and updates result', async () => {
       GlobalConfig.set({
         cacheTtlOverride: { namespace: 2 },
+        cacheHardTtlMinutes: 3,
       });
       const obj = new Class();
 
@@ -220,7 +222,7 @@ describe('util/cache/package/decorator', () => {
         3
       );
 
-      jest.advanceTimersByTime(2 * 60 * 1000 - 1); // namespace default ttl is 1min
+      jest.advanceTimersByTime(120 * 1000 - 1); // namespace default ttl is 1min
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenCalledTimes(1);
@@ -245,10 +247,10 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        3
+        2
       );
 
-      jest.advanceTimersByTime(2 * 60 * 1000);
+      jest.advanceTimersByTime(60 * 1000);
       getValue.mockRejectedValueOnce(new Error('test'));
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(2);
@@ -264,10 +266,10 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        3
+        2
       );
 
-      jest.advanceTimersByTime(3 * 60 * 1000 - 1);
+      jest.advanceTimersByTime(2 * 60 * 1000 - 1);
       getValue.mockRejectedValueOnce(new Error('test'));
       expect(await obj.getReleases()).toBe('111');
 
