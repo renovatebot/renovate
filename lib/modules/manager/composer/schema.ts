@@ -315,7 +315,6 @@ export const ComposerExtract = z
           if (bitbucketMatchGroups) {
             dep.datasource = BitbucketTagsDatasource.id;
             dep.packageName = bitbucketMatchGroups.packageName;
-            dep.sourceUrl = `https://bitbucket.org/${dep.packageName}`;
             deps.push(dep);
             continue;
           }
