@@ -521,8 +521,8 @@ export class Result<T extends Val, E extends Val = Error> {
     Schema extends ZodType<T, ZodTypeDef, Input>,
     Input = unknown
   >(
-    schema: Schema,
-    input: unknown
+    input: unknown,
+    schema: Schema
   ): Result<NonNullable<z.infer<Schema>>, ZodError<Input>> {
     const parseResult = schema
       .transform((result, ctx): NonNullable<T> => {
@@ -557,7 +557,7 @@ export class Result<T extends Val, E extends Val = Error> {
     schema: Schema
   ): Result<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
     if (this.res.ok) {
-      return Result.parse(schema, this.res.val);
+      return Result.parse(this.res.val, schema);
     }
 
     const err = this.res.err;
