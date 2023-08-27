@@ -698,6 +698,7 @@ export class DockerDatasource extends Datasource {
       const digest = currentDigest ? `@${currentDigest}` : '';
       return `${registryHost}:${dockerRepository}:${newTag}${digest}`;
     },
+    fallbackTtlMinutes: 24 * 60,
   })
   override async getDigest(
     { registryUrl, packageName, currentDigest }: DigestConfig,
@@ -861,6 +862,21 @@ export class DockerDatasource extends Datasource {
    *
    * This function will filter only tags that contain a semver version
    */
+  @cache({
+    namespace: 'datasource-docker-releases',
+    key: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!
+      );
+      return `${registryHost}:${dockerRepository}`;
+    },
+    cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost } = getRegistryRepository(packageName, registryUrl!);
+      return registryHost === 'https://index.docker.io';
+    },
+    fallbackTtlMinutes: 24 * 60,
+  })
   async getReleases({
     packageName,
     registryUrl,
