@@ -698,7 +698,6 @@ export class DockerDatasource extends Datasource {
       const digest = currentDigest ? `@${currentDigest}` : '';
       return `${registryHost}:${dockerRepository}:${newTag}${digest}`;
     },
-    fallbackTtlMinutes: 24 * 60,
   })
   override async getDigest(
     { registryUrl, packageName, currentDigest }: DigestConfig,
@@ -875,7 +874,6 @@ export class DockerDatasource extends Datasource {
       const { registryHost } = getRegistryRepository(packageName, registryUrl!);
       return registryHost === 'https://index.docker.io';
     },
-    fallbackTtlMinutes: 24 * 60,
   })
   async getReleases({
     packageName,
