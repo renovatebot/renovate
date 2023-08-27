@@ -161,7 +161,6 @@ describe('util/cache/package/decorator', () => {
         namespace: 'namespace',
         key: 'key',
         ttlMinutes: 1,
-        fallbackTtlMinutes: 2,
       })
 
       // Hard TTL is enabled only for `getReleases` and `getDigest` methods
@@ -172,6 +171,7 @@ describe('util/cache/package/decorator', () => {
 
     beforeEach(() => {
       jest.useFakeTimers({ advanceTimers: false });
+      GlobalConfig.set({ cacheHardTtlMinutes: 2 });
     });
 
     afterEach(() => {
