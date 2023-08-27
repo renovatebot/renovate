@@ -79,9 +79,10 @@ export async function extractAllDependencies(
   // If not, log a warning to indicate possible misconfiguration.
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
-      if (!(enabledManager in extractResult.packageFiles)) {
+      const massagedMgr = enabledManager.replace('custom.', '');
+      if (!(massagedMgr in extractResult.packageFiles)) {
         logger.debug(
-          { manager: enabledManager },
+          { manager: massagedMgr },
           `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
         );
       }
