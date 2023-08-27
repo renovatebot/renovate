@@ -257,13 +257,13 @@ describe('util/result', () => {
           .transform((x) => x.toUpperCase())
           .nullish();
 
-        expect(Result.parse(schema, 'foo')).toEqual(Result.ok('FOO'));
+        expect(Result.parse('foo', schema)).toEqual(Result.ok('FOO'));
 
-        expect(Result.parse(schema, 42).unwrap()).toMatchObject({
+        expect(Result.parse(42, schema).unwrap()).toMatchObject({
           err: { issues: [{ message: 'Expected string, received number' }] },
         });
 
-        expect(Result.parse(schema, undefined).unwrap()).toMatchObject({
+        expect(Result.parse(undefined, schema).unwrap()).toMatchObject({
           err: {
             issues: [
               {
@@ -273,7 +273,7 @@ describe('util/result', () => {
           },
         });
 
-        expect(Result.parse(schema, null).unwrap()).toMatchObject({
+        expect(Result.parse(null, schema).unwrap()).toMatchObject({
           err: {
             issues: [
               {
