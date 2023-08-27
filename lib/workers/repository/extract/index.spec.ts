@@ -14,7 +14,13 @@ const managerFiles = mocked(_managerFiles);
 describe('workers/repository/extract/index', () => {
   describe('extractAllDependencies()', () => {
     let config: RenovateConfig;
-    const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
+    const fileList = [
+      'README',
+      'composer.json',
+      'package.json',
+      'tasks/ansible.yaml',
+      'yarn.lock',
+    ];
 
     beforeEach(() => {
       jest.resetAllMocks();
@@ -32,13 +38,13 @@ describe('workers/repository/extract/index', () => {
     });
 
     it('skips non-enabled managers', async () => {
-      config.enabledManagers = ['npm'];
+      config.enabledManagers = ['npm', 'composer'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       const res = await extractAllDependencies(config);
       expect(res).toMatchObject({
-        packageFiles: { npm: [{}] },
+        packageFiles: { composer: [{}], yarn: [{}] },
       });
     });
 

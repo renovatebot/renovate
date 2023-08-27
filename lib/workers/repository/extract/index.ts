@@ -16,8 +16,12 @@ export async function extractAllDependencies(
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
-    managerList = managerList.filter((manager) =>
-      enabledManagers.includes(manager)
+    const alternativeNpmManagers = ['pnpm', 'yarn'];
+    managerList = managerList.filter(
+      (manager) =>
+        enabledManagers.includes(manager) ||
+        (enabledManagers.includes('npm') &&
+          alternativeNpmManagers.includes(manager))
     );
   }
   const extractList: WorkerExtractConfig[] = [];
