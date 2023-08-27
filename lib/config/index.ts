@@ -24,6 +24,14 @@ export function getManagerConfig(
     managerConfig.categories = categories;
   }
   // TODO: fix types #22198
+  // Special handling for npm, pnpm, yarn
+  const alternativeNpmManagers = ['pnpm', 'yarn'];
+  if (alternativeNpmManagers.includes(manager)) {
+    // merge npm config first
+    managerConfig = mergeChildConfig(managerConfig, config.npm as any);
+    // We don't want to merge fileMatch
+    delete managerConfig.fileMatch;
+  }
   managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
   for (const i of allManagersList) {
     delete managerConfig[i];

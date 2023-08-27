@@ -97,6 +97,13 @@ describe('config/index', () => {
       ]);
     });
 
+    it('falls back from yarn to pnpm', () => {
+      const parentConfig = { ...defaultConfig };
+      expect(getManagerConfig(parentConfig, 'yarn').fileMatch).toEqual([
+        '(^|/)yarn\\.lock$',
+      ]);
+    });
+
     it('filterConfig()', () => {
       const parentConfig = { ...defaultConfig };
       const config = filterConfig(parentConfig, 'pr');
