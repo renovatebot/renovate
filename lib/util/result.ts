@@ -568,6 +568,36 @@ export class Result<T extends Val, E extends Val = Error> {
 
     return Result.err(err);
   }
+
+  /**
+   * Call `fn` on the `val` if the result is ok.
+   */
+  onValue(fn: (value: T) => void): Result<T, E> {
+    if (this.res.ok) {
+      try {
+        fn(this.res.val);
+      } catch (err) {
+        return Result._uncaught(err);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * Call `fn` on the `err` if the result is err.
+   */
+  onError(fn: (err: E) => void): Result<T, E> {
+    if (!this.res.ok) {
+      try {
+        fn(this.res.err);
+      } catch (err) {
+        return Result._uncaught(err);
+      }
+    }
+
+    return this;
+  }
 }
 
 /**
@@ -822,6 +852,28 @@ export class AsyncResult<T extends Val, E extends Val>
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => oldResult.parse(schema))
+        .catch(
+          /* istanbul ignore next: should never happen */
+          (err) => Result._uncaught(err)
+        )
+    );
+  }
+
+  onValue(fn: (value: T) => void): AsyncResult<T, E> {
+    return new AsyncResult(
+      this.asyncResult
+        .then((result) => result.onValue(fn))
+        .catch(
+          /* istanbul ignore next: should never happen */
+          (err) => Result._uncaught(err)
+        )
+    );
+  }
+
+  onError(fn: (err: E) => void): AsyncResult<T, E> {
+    return new AsyncResult(
+      this.asyncResult
+        .then((result) => result.onError(fn))
         .catch(
           /* istanbul ignore next: should never happen */
           (err) => Result._uncaught(err)
