@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
 import { isCustomManager } from '../../../modules/manager/custom';
+import { AbstractMigration } from '../base/abstract-migration';
 
 export class MatchManagersMigration extends AbstractMigration {
   override readonly propertyName = 'matchManagers';
