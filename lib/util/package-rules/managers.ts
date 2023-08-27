@@ -13,6 +13,18 @@ export class ManagersMatcher extends Matcher {
     if (is.undefined(manager) || !manager) {
       return false;
     }
-    return matchManagers.includes(manager);
+    if (matchManagers.includes(manager)) {
+      return true;
+    }
+    // Special handling for npm, pnpm, yarn
+    // allow matchManagers=npm to match even if manager is pnpm or yarn
+    const alternativeNpmManagers = ['pnpm', 'yarn'];
+    if (
+      alternativeNpmManagers.includes(manager) &&
+      matchManagers.includes('npm')
+    ) {
+      return true;
+    }
+    return false;
   }
 }
