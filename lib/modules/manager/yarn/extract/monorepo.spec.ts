@@ -5,18 +5,18 @@ jest.mock('./pnpm');
 
 describe('modules/manager/yarn/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
-    it('handles no monorepo', async () => {
+    it('handles no monorepo', () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           deps: [],
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(packageFiles).toHaveLength(1);
     });
 
-    it('updates internal packages', async () => {
+    it('updates internal packages', () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
@@ -55,7 +55,7 @@ describe('modules/manager/yarn/extract/monorepo', () => {
           managerData: { packageJsonName: '@org/b' },
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.isInternal)
@@ -63,7 +63,7 @@ describe('modules/manager/yarn/extract/monorepo', () => {
       ).toBeTrue();
     });
 
-    it('uses yarn workspaces package settings', async () => {
+    it('uses yarn workspaces package settings', () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
@@ -79,7 +79,7 @@ describe('modules/manager/yarn/extract/monorepo', () => {
           managerData: { packageJsonName: '@org/b' },
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(packageFiles).toMatchObject([
         {},
         { npmrc: '@org:registry=//registry.some.org\n' },
@@ -87,7 +87,7 @@ describe('modules/manager/yarn/extract/monorepo', () => {
       ]);
     });
 
-    it('uses yarn workspaces package settings with extractedConstraints', async () => {
+    it('uses yarn workspaces package settings with extractedConstraints', () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
@@ -108,7 +108,7 @@ describe('modules/manager/yarn/extract/monorepo', () => {
           extractedConstraints: { yarn: '^3.2.0' },
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(packageFiles).toMatchObject([
         {
           extractedConstraints: {
@@ -131,7 +131,7 @@ describe('modules/manager/yarn/extract/monorepo', () => {
       ]);
     });
 
-    it('uses yarnZeroInstall and skipInstalls from yarn workspaces package settings', async () => {
+    it('uses yarnZeroInstall and skipInstalls from yarn workspaces package settings', () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
@@ -152,7 +152,7 @@ describe('modules/manager/yarn/extract/monorepo', () => {
           skipInstalls: true,
         },
       ];
-      await detectMonorepos(packageFiles);
+      detectMonorepos(packageFiles);
       expect(packageFiles).toMatchObject([
         {},
         { managerData: { yarnZeroInstall: true }, skipInstalls: false },

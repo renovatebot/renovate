@@ -468,7 +468,7 @@ export async function extractPackageFile(
 export async function postExtract(
   packageFiles: PackageFile<NpmManagerData>[]
 ): Promise<void> {
-  await detectMonorepos(packageFiles);
+  detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
 
