@@ -373,7 +373,7 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('returns pr if found matches targetBranch', async () => {
-      azureApi.gitApi.mockImplementationOnce(() =>
+      azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
           getPullRequests: jest
             .fn()
@@ -421,7 +421,7 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('returns first pr if found does not match targetBranch', async () => {
-      azureApi.gitApi.mockImplementationOnce(() =>
+      azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
           getPullRequests: jest
             .fn()

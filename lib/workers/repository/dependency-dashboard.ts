@@ -157,7 +157,7 @@ function getListItem(branch: BranchConfig, type: string): string {
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
-  const repoProblems = extractRepoProblems(config);
+  const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
     newIssueBody += '## Repository problems\n\n';
     const repoProblemsHeader =

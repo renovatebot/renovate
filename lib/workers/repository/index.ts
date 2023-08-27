@@ -95,7 +95,7 @@ export async function renovateRepository(
       // TODO #22198
       repoResult = processResult(config, res!);
     }
-    printRepositoryProblems(config);
+    printRepositoryProblems(config.repository);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
@@ -141,8 +141,8 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
   };
 }
 
-export function printRepositoryProblems(config: RenovateConfig): void {
-  const repoProblems = extractRepoProblems(config);
+export function printRepositoryProblems(repository: string | undefined): void {
+  const repoProblems = extractRepoProblems(repository);
   if (repoProblems.size) {
     logger.debug(
       { repoProblems: Array.from(repoProblems) },
