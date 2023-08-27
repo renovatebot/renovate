@@ -1,7 +1,6 @@
 import { fs, git, mocked } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update';
-import * as lerna from '../../../../../modules/manager/npm/post-update/lerna';
 import * as npm from '../../../../../modules/manager/npm/post-update/npm';
 import * as pnpm from '../../../../../modules/manager/npm/post-update/pnpm';
 import * as yarn from '../../../../../modules/manager/npm/post-update/yarn';
@@ -90,7 +89,6 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       jest.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(lerna, 'generateLockFiles');
       jest.spyOn(lockFiles, 'determineLockFileDirs');
     });
 
