@@ -166,31 +166,7 @@ export async function extractPackageFile(
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
-  let lernaJsonFile: string | undefined;
-  let lernaPackages: string[] | undefined;
-  let lernaClient: 'yarn' | 'npm' | undefined;
   let hasFancyRefs = false;
-  let lernaJson:
-    | {
-        packages: string[];
-        npmClient: string;
-        useWorkspaces?: boolean;
-      }
-    | undefined;
-  try {
-    lernaJsonFile = getSiblingFileName(packageFile, 'lerna.json');
-    // TODO #22198
-    lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, lernaJsonFile }, 'Could not parse lerna.json');
-  }
-  if (lernaJson && !lernaJson.useWorkspaces) {
-    lernaPackages = lernaJson.packages;
-    lernaClient =
-      lernaJson.npmClient === 'yarn' || lockFiles.yarnLock ? 'yarn' : 'npm';
-  } else {
-    lernaJsonFile = undefined;
-  }
 
   const depTypes = {
     dependencies: 'dependency',
@@ -478,7 +454,6 @@ export async function extractPackageFile(
         !!packageJsonName ||
         !!packageFileVersion ||
         !!npmrc ||
-        !!lernaJsonFile ||
         workspacesPackages
       )
     ) {
@@ -507,9 +482,6 @@ export async function extractPackageFile(
     npmrc,
     managerData: {
       ...lockFiles,
-      lernaClient,
-      lernaJsonFile,
-      lernaPackages,
       packageJsonName,
       yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
