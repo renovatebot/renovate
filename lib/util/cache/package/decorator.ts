@@ -35,6 +35,12 @@ interface CacheParameters {
    * The TTL (or expiry) of the key in minutes
    */
   ttlMinutes?: number;
+
+  /**
+   * Store cached results for this many minutes after the TTL has expired,
+   * in case if the errors were thrown during obtaining the new results.
+   */
+  fallbackTtlMinutes?: number;
 }
 
 /**
@@ -45,6 +51,7 @@ export function cache<T>({
   key,
   cacheable = () => true,
   ttlMinutes = 30,
+  fallbackTtlMinutes = 0,
 }: CacheParameters): Decorator<T> {
   return decorate(async ({ args, instance, callback, methodName }) => {
     if (!cacheable.apply(instance, args)) {
@@ -79,10 +86,10 @@ export function cache<T>({
     const ttlOverride = getTtlOverride(finalNamespace);
     const softTtl = ttlOverride ?? ttlMinutes;
 
-    const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
+    const globalFallbackTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
     let hardTtl = softTtl;
     if (methodName === 'getReleases' || methodName === 'getDigest') {
-      hardTtl = Math.max(softTtl, cacheHardTtlMinutes);
+      hardTtl = Math.max(softTtl, fallbackTtlMinutes, globalFallbackTtlMinutes);
     }
 
     let oldData: unknown;
