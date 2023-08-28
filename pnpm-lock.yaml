@@ -801,7 +801,7 @@ packages:
       '@smithy/util-defaults-mode-node': 1.1.0
       '@smithy/util-retry': 1.1.0
       '@smithy/util-utf8': 1.1.0
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
     dev: false
@@ -1144,7 +1144,7 @@ packages:
       '@aws-sdk/types': 3.357.0
       '@smithy/property-provider': 1.2.0
       '@smithy/types': 1.2.0
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
     dev: false
@@ -1250,7 +1250,7 @@ packages:
       '@smithy/credential-provider-imds': 1.1.0
       '@smithy/property-provider': 1.2.0
       '@smithy/types': 1.2.0
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
     dev: false
