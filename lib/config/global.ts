@@ -10,6 +10,7 @@ export class GlobalConfig {
     'binarySource',
     'cacheDir',
     'cacheHardTtlMinutes',
+    'cacheTtlOverride',
     'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',

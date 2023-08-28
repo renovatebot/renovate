@@ -1,4 +1,5 @@
 import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags';
+import { GiteaTagsDatasource } from '../modules/datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import { GitlabPackagesDatasource } from '../modules/datasource/gitlab-packages';
@@ -10,11 +11,19 @@ import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/chang
 import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from './platforms';
 
 describe('constants/platform', () => {
+  it('should be part of the GITEA_API_USING_HOST_TYPES', () => {
+    expect(
+      GITEA_API_USING_HOST_TYPES.includes(GiteaTagsDatasource.id)
+    ).toBeTrue();
+    expect(GITEA_API_USING_HOST_TYPES.includes('gitea')).toBeTrue();
+  });
+
   it('should be part of the GITLAB_API_USING_HOST_TYPES', () => {
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GitlabTagsDatasource.id)

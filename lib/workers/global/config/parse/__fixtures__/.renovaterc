@@ -1,0 +1,5 @@
+{
+  // Renovate parses all configuration files as JSON5.
+  // https://github.com/renovatebot/renovate/pull/22991#issuecomment-1609106254
+  token: "abcdefg",
+}
