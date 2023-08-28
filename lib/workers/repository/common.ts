@@ -1,13 +1,14 @@
 import { nameFromLevel } from 'bunyan';
-import type { RenovateConfig } from '../../config/types';
 import { getProblems } from '../../logger';
 
-export function extractRepoProblems(config: RenovateConfig): Set<string> {
+export function extractRepoProblems(
+  repository: string | undefined
+): Set<string> {
   return new Set(
     getProblems()
       .filter(
         (problem) =>
-          problem.repository === config.repository && !problem.artifactErrors
+          problem.repository === repository && !problem.artifactErrors
       )
       .map(
         (problem) =>

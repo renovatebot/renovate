@@ -79,7 +79,10 @@ export function cache<T>({
     const ttlOverride = getTtlOverride(finalNamespace);
     const softTtl = ttlOverride ?? ttlMinutes;
 
-    const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
+    const cacheHardTtlMinutes = GlobalConfig.get(
+      'cacheHardTtlMinutes',
+      7 * 24 * 60
+    );
     let hardTtl = softTtl;
     if (methodName === 'getReleases' || methodName === 'getDigest') {
       hardTtl = Math.max(softTtl, cacheHardTtlMinutes);

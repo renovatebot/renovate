@@ -13,7 +13,7 @@ export function updateLockedDependency(
   );
 
   const LockedVersionSchema = Lockfile.transform(({ lock }) => lock[depName]);
-  return Result.parse(LockedVersionSchema, lockFileContent)
+  return Result.parse(lockFileContent, LockedVersionSchema)
     .transform(
       (lockedVersion): UpdateLockedResult =>
         lockedVersion === newVersion
