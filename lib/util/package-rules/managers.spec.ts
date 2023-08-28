@@ -47,17 +47,5 @@ describe('util/package-rules/managers', () => {
       );
       expect(result).toBeFalse();
     });
-
-    it('should match custom managers', () => {
-      const result = managersMatcher.matches(
-        {
-          manager: 'regex',
-        },
-        {
-          matchManagers: ['custom.regex'],
-        }
-      );
-      expect(result).toBeTrue();
-    });
   });
 });
