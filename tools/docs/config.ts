@@ -1,12 +1,12 @@
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
-import { getManagerList } from '../../lib/modules/manager';
+import { allManagersList } from '../../lib/modules/manager';
 import { getCliName } from '../../lib/workers/global/config/parse/cli';
 import { getEnvName } from '../../lib/workers/global/config/parse/env';
 import { readFile, updateFile } from '../utils';
 
 const options = getOptions();
-const managers = new Set(getManagerList());
+const managers = new Set(allManagersList);
 
 /**
  * Merge string arrays one by one
@@ -215,7 +215,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       (option) => !!option.globalOnly === bot && !managers.has(option.name)
     )
     .forEach((option) => {
-      // TODO: fix types (#7154,#9610)
+      // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
 
       if (!indexed[option.name]) {

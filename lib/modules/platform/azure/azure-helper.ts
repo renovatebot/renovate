@@ -50,7 +50,7 @@ export async function getAzureBranchObj(
     };
   }
   return {
-    // TODO: fix undefined (#7154)
+    // TODO: fix undefined (#22198)
     name: getNewBranchName(branchName)!,
     oldObjectId: refs[0].objectId!,
   };
@@ -83,9 +83,7 @@ export async function getFile(
   if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
-      const result = await WrappedExceptionSchema.safeParseAsync(
-        JSON.parse(fileContent)
-      );
+      const result = WrappedExceptionSchema.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
           logger.warn(`Unable to find file ${filePath}`);
@@ -129,7 +127,7 @@ export async function getMergeMethod(
   const isRelevantScope = (scope: Scope): boolean => {
     if (
       scope.matchKind === 'DefaultBranch' &&
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
     ) {
       return true;
@@ -140,7 +138,7 @@ export async function getMergeMethod(
     if (!branchRef) {
       return true;
     }
-    // TODO #7154
+    // TODO #22198
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
       : branchRef.startsWith(scope.refName!);
@@ -155,7 +153,7 @@ export async function getMergeMethod(
     .map((p) => p.settings)[0];
 
   logger.trace(
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     `getMergeMethod(${repoId}, ${project}, ${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
       policyConfigurations,
       null,

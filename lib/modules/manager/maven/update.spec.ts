@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { XmlDocument } from 'xmldoc';
 import { Fixtures } from '../../../../test/fixtures';
 import * as pomUpdater from '.';

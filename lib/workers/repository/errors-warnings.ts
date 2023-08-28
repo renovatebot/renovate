@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
@@ -39,7 +39,7 @@ function getDepWarnings(
   const warningFiles: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
     for (const file of files ?? []) {
-      // TODO: remove condition when type is fixed (#7154)
+      // TODO: remove condition when type is fixed (#22198)
       if (file.packageFile) {
         for (const dep of file.deps ?? []) {
           for (const w of dep.warnings ?? []) {

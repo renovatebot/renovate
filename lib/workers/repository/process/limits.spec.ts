@@ -131,7 +131,7 @@ describe('workers/repository/process/limits', () => {
 
     it('returns prConcurrentLimit if errored', async () => {
       config.branchConcurrentLimit = 2;
-      // TODO: #7154
+      // TODO: #22198
       const res = await limits.getConcurrentBranchesRemaining(
         config,
         null as never

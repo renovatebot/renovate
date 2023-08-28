@@ -293,7 +293,10 @@ const repoGroups = {
   javascriptengineswitcher:
     'https://github.com/Taritsyn/JavaScriptEngineSwitcher',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
-  jest: 'https://github.com/facebook/jest',
+  jest: [
+    'https://github.com/facebook/jest', // old repo
+    'https://github.com/jestjs/jest',
+  ],
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
@@ -426,6 +429,7 @@ const repoGroups = {
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
+  unocss: 'https://github.com/unocss/unocss',
   uppy: 'https://github.com/transloadit/uppy',
   vaadinWebComponents: 'https://github.com/vaadin/web-components',
   vitest: 'https://github.com/vitest-dev/vitest',

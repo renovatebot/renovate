@@ -164,18 +164,12 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   });
 
   if (env.GITHUB_COM_TOKEN) {
-    if (env.GITHUB_COM_TOKEN.startsWith('github_pat_')) {
-      logger.warn(
-        'GITHUB_COM_TOKEN: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API. Use a classic PAT instead.'
-      );
-    } else {
-      logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
-      config.hostRules.push({
-        hostType: 'github',
-        matchHost: 'github.com',
-        token: env.GITHUB_COM_TOKEN,
-      });
-    }
+    logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
+    config.hostRules.push({
+      hostType: 'github',
+      matchHost: 'github.com',
+      token: env.GITHUB_COM_TOKEN,
+    });
   }
 
   // These env vars are deprecated and deleted to make sure they're not used

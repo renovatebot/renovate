@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -20,7 +20,7 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      // TODO: toolConstraint.constraint can be null or undefined? (#7154)
+      // TODO: toolConstraint.constraint can be null or undefined? (#22198)
       const major = api.getMajor(toolConstraint.constraint!);
       const minor = api.getMinor(toolConstraint.constraint!);
       args += api.matches(`${major}.${minor}`, '^2.2')
@@ -110,71 +110,6 @@ export function extractConstraints(
     res.composer = `^${major}.${minor}`;
   }
   return res;
-}
-
-export function findGithubToken(
-  searchResult: HostRuleSearchResult
-): string | undefined {
-  return searchResult?.token?.replace('x-access-token:', '');
-}
-
-export function isGithubPersonalAccessToken(token: string): boolean {
-  return token.startsWith('ghp_');
-}
-
-export function isGithubServerToServerToken(token: string): boolean {
-  return token.startsWith('ghs_');
-}
-
-export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
-  return token.startsWith('github_pat_');
-}
-
-export function takePersonalAccessTokenIfPossible(
-  githubToken: string | undefined,
-  gitTagsGithubToken: string | undefined
-): string | undefined {
-  if (gitTagsGithubToken && isGithubPersonalAccessToken(gitTagsGithubToken)) {
-    logger.debug('Using GitHub Personal Access Token (git-tags)');
-    return gitTagsGithubToken;
-  }
-
-  if (githubToken && isGithubPersonalAccessToken(githubToken)) {
-    logger.debug('Using GitHub Personal Access Token');
-    return githubToken;
-  }
-
-  if (
-    gitTagsGithubToken &&
-    isGithubFineGrainedPersonalAccessToken(gitTagsGithubToken)
-  ) {
-    logger.debug('Using GitHub Fine-grained Personal Access Token (git-tags)');
-    return gitTagsGithubToken;
-  }
-
-  if (githubToken && isGithubFineGrainedPersonalAccessToken(githubToken)) {
-    logger.debug('Using GitHub Fine-grained Personal Access Token');
-    return githubToken;
-  }
-
-  if (gitTagsGithubToken) {
-    if (isGithubServerToServerToken(gitTagsGithubToken)) {
-      logger.debug('Using GitHub Server-to-Server token (git-tags)');
-    } else {
-      logger.debug('Using unknown GitHub token type (git-tags)');
-    }
-    return gitTagsGithubToken;
-  }
-
-  if (githubToken) {
-    if (isGithubServerToServerToken(githubToken)) {
-      logger.debug('Using GitHub Server-to-Server token');
-    } else {
-      logger.debug('Using unknown GitHub token type');
-    }
-  }
-
-  return githubToken;
 }
 
 export function isArtifactAuthEnabled(rule: HostRuleSearchResult): boolean {

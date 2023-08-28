@@ -92,14 +92,17 @@ describe('modules/manager/composer/artifacts', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1.0.0' },
+          { depName: 'bar', newVersion: '2.0.0' },
+        ],
         newPackageFileContent: '{}',
         config,
       })
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
+        cmd: 'composer update foo:1.0.0 bar:2.0.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -1146,14 +1149,17 @@ describe('modules/manager/composer/artifacts', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1.0.0' },
+          { depName: 'bar', newVersion: '2.0.0' },
+        ],
         newPackageFileContent: '{}',
         config,
       })
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader',
+        cmd: 'composer update foo:1.0.0 bar:2.0.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1179,6 +1185,28 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('includes new dependency version in update command', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo', newVersion: '1.1.0' }],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update foo:1.1.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);

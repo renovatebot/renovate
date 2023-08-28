@@ -9,6 +9,8 @@ export type PlatformId =
   | 'gitlab'
   | 'local';
 
+export const GITEA_API_USING_HOST_TYPES = ['gitea', 'gitea-tags'];
+
 export const GITHUB_API_USING_HOST_TYPES = [
   'github',
   'github-releases',

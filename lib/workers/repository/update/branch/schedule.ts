@@ -143,7 +143,7 @@ export function isScheduledNow(
 ): boolean {
   let configSchedule = config[scheduleKey];
   logger.debug(
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     `Checking schedule(${String(configSchedule)}, ${config.timezone!})`
   );
   if (

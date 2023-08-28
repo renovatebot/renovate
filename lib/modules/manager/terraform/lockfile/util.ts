@@ -139,7 +139,7 @@ export function writeLockUpdates(
   const sections: string[][] = [];
 
   // sort updates in order of appearance in the lockfile
-  // TODO #7154
+  // TODO #22198
   updates.sort(
     (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start
   );
@@ -148,18 +148,18 @@ export function writeLockUpdates(
     let startWhitespace: number | undefined;
     if (index > 0) {
       // get end of the
-      // TODO #7154
+      // TODO #22198
       startWhitespace = array[index - 1].lineNumbers.block!.end;
     }
     const leadingNonRelevantLines = lines.slice(
       startWhitespace,
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.block!.start
     );
     sections.push(leadingNonRelevantLines);
 
     const providerBlockLines = lines.slice(
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.block!.start,
       update.lineNumbers.block!.end
     );
@@ -199,7 +199,7 @@ export function writeLockUpdates(
       (value) => `${hashLinePrefix}${value}${hashLineSuffix}`
     );
     newProviderBlockLines.splice(
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.hashes.start!,
       0,
       ...hashesWithWhitespace

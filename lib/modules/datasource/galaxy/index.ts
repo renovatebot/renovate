@@ -32,7 +32,7 @@ export class GalaxyDatasource extends Datasource {
     const userName = lookUp[0];
     const projectName = lookUp[1];
 
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
     const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 

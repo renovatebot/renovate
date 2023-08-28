@@ -59,7 +59,7 @@ export class ModuleExtractor extends DependencyExtractor {
   }
 
   private analyseTerraformModule(dep: PackageDependency): PackageDependency {
-    // TODO #7154
+    // TODO #22198
     const source = dep.managerData!.source as string;
     const githubRefMatch = githubRefMatchRegex.exec(source);
     const bitbucketRefMatch = bitbucketRefMatchRegex.exec(source);
