@@ -42,11 +42,11 @@ export class AwsMachineImageDataSource extends Datasource {
     this.now = Date.now();
   }
 
-  isAmiFilter(config: Filter | AwsClientConfig): config is Filter {
+  private isAmiFilter(config: Filter | AwsClientConfig): config is Filter {
     return 'Name' in config && 'Values' in config;
   }
 
-  getEC2Client(config: AwsClientConfig): EC2Client {
+  private getEC2Client(config: AwsClientConfig): EC2Client {
     const { profile, region } = config;
     return new EC2Client({
       region,
@@ -54,13 +54,13 @@ export class AwsMachineImageDataSource extends Datasource {
     });
   }
 
-  getAmiFilterCommand(filter: Filter[]): DescribeImagesCommand {
+  private getAmiFilterCommand(filter: Filter[]): DescribeImagesCommand {
     return new DescribeImagesCommand({
       Filters: filter,
     });
   }
 
-  loadConfig(serializedAmiFilter: string): [Filter[], AwsClientConfig] {
+  private loadConfig(serializedAmiFilter: string): [Filter[], AwsClientConfig] {
     const parsedConfig: ParsedConfig = JSON.parse(serializedAmiFilter);
     const filters = [];
     let config = {};
