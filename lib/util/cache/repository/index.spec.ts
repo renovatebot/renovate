@@ -68,7 +68,7 @@ describe('util/cache/repository/index', () => {
       { repository: 'some/repo', level: 30, msg: 'Problem 2' },
     ]);
 
-    printRepositoryProblems(config);
+    printRepositoryProblems(config.repository);
 
     expect(logger.logger.debug).toHaveBeenCalled();
   });

@@ -371,7 +371,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.19.0',
+    default: 'ghcr.io/containerbase/sidecar:9.19.3',
     globalOnly: true,
   },
   {
@@ -2354,7 +2354,7 @@ const options: RenovateOptions[] = [
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 24 * 60,
+    default: 7 * 24 * 60,
     globalOnly: true,
   },
   {
