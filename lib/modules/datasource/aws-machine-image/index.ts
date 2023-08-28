@@ -1,18 +1,15 @@
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { DescribeImagesCommand, Filter, EC2Client, Image } from '@aws-sdk/client-ec2';
+import {
+  DescribeImagesCommand,
+  Filter,
+  EC2Client,
+  Image,
+} from '@aws-sdk/client-ec2';
 import { cache } from '../../../util/cache/package/decorator';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-
-type AwsClientConfig = {
-  region?: string
-  profile?: string
-}
-
-type ParsedConfig = [Filter | AwsClientConfig]
-
-
+import type { AwsClientConfig, ParsedConfig } from './types';
 
 export class AwsMachineImageDataSource extends Datasource {
   static readonly id = 'aws-machine-image';
@@ -45,17 +42,16 @@ export class AwsMachineImageDataSource extends Datasource {
     this.now = Date.now();
   }
 
-
   isAmiFilter(config: Filter | AwsClientConfig): config is Filter {
-    return 'Name' in config && 'Values' in config
+    return 'Name' in config && 'Values' in config;
   }
 
   getEC2Client(config: AwsClientConfig): EC2Client {
-    const { profile, region } = config
+    const { profile, region } = config;
     return new EC2Client({
       region,
       credentials: profile ? fromNodeProviderChain({ profile }) : undefined,
-    })
+    });
   }
 
   getAmiFilterCommand(filter: Filter[]): DescribeImagesCommand {
@@ -65,16 +61,19 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   loadConfig(serializedAmiFilter: string): [Filter[], AwsClientConfig] {
-    const parsedConfig: ParsedConfig = JSON.parse(serializedAmiFilter)
-    return parsedConfig.reduce<[Filter[], AwsClientConfig]>((acc, elem) => {
+    const parsedConfig: ParsedConfig = JSON.parse(serializedAmiFilter);
+    const filters = [];
+    let config = {};
+    for (const elem of parsedConfig) {
       if (this.isAmiFilter(elem)) {
-        acc[0].push(elem)
+        // Separate actual AMI filters from aws client config
+        filters.push(elem);
+      } else {
+        // merge  config objects if there are multiple
+        config = Object.assign(config, elem);
       }
-      else {
-        acc[1] = elem
-      }
-      return acc
-    }, [[], {}])
+    }
+    return [filters, config];
   }
 
   @cache({
@@ -83,11 +82,11 @@ export class AwsMachineImageDataSource extends Datasource {
       `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
   async getSortedAwsMachineImages(
-    serializedAmiFilter: string,
+    serializedAmiFilter: string
   ): Promise<Image[]> {
-    const [amiFilter, clientConfig] = this.loadConfig(serializedAmiFilter)
-    const amiFilterCmd = this.getAmiFilterCommand(amiFilter)
-    const ec2Client = this.getEC2Client(clientConfig)
+    const [amiFilter, clientConfig] = this.loadConfig(serializedAmiFilter);
+    const amiFilterCmd = this.getAmiFilterCommand(amiFilter);
+    const ec2Client = this.getEC2Client(clientConfig);
     const matchingImages = await ec2Client.send(amiFilterCmd);
     matchingImages.Images = matchingImages.Images ?? [];
     return matchingImages.Images.sort((image1, image2) => {

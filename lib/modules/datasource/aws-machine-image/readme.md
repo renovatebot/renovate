@@ -61,8 +61,7 @@ Here's an example of using the regex manager:
 module.exports = {
   regexManagers: [
     {
-
-      customType: "regex",
+      customType: 'regex',
       fileMatch: ['.*'],
       matchStrings: [
         '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
@@ -81,7 +80,7 @@ Or as JSON:
   'regexManagers':
     [
       {
-        'customType': "regex",
+        'customType': 'regex',
         'fileMatch': ['.*'],
         'matchStrings':
           [
