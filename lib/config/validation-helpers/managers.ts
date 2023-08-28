@@ -13,8 +13,7 @@ export function check({
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(
-        (confManager) =>
-          !allManagersList.includes(confManager.replace('custom.', ''))
+        (confManager) => !allManagersList.includes(confManager)
       )
     ) {
       managersErrMessage = `${currentPath}:
