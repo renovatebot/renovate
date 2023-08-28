@@ -59,7 +59,7 @@ class GerritClient {
     const changes = await this.gerritHttp.getJson<GerritChange[]>(
       `a/changes/?q=` +
         filters.join('+') +
-        this.requestDetails.map((det) => '&o=' + det).join(''),
+        this.requestDetails.map((det) => `&o=${det}`).join(''),
       { memCache: !refreshCache }
     );
     logger.trace(
@@ -71,7 +71,7 @@ class GerritClient {
   async getChange(changeNumber: number): Promise<GerritChange> {
     const changes = await this.gerritHttp.getJson<GerritChange>(
       `a/changes/${changeNumber}?` +
-        this.requestDetails.map((det) => 'o=' + det).join('&')
+        this.requestDetails.map((det) => `o=${det}`).join('&')
     );
     return changes.body;
   }

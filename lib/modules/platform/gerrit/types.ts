@@ -1,7 +1,6 @@
 import type { FindPRConfig } from '../types';
 
 export interface GerritFindPRConfig extends FindPRConfig {
-  targetBranch?: string;
   label?: string;
 }
 

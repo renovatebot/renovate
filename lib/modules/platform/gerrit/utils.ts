@@ -68,7 +68,9 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
     targetBranch: change.branch,
     title: change.subject,
     reviewers:
-      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
+      change.reviewers?.REVIEWER?.filter(
+        (reviewer) => typeof reviewer.username === 'string'
+      ).map((reviewer) => reviewer.username!) ?? [],
     bodyStruct: {
       hash: hashBody(findPullRequestBody(change)),
     },
@@ -132,7 +134,7 @@ export function mapBranchStateContextToLabel(
   switch (context) {
     //TODO #21442
     case 'renovate/stability-days':
-      //not usefully for Gerrit, Renovate only creates the change after the minimumReleaseAge has been exceeded. That way the label would always be green...
+      //not usefully for Gerrit
       break;
     case 'renovate/merge-confidence':
       labelName = labelMapping?.mergeConfidenceLabel;
