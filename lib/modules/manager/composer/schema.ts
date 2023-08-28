@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { Json, LooseArray, LooseRecord } from '../../../util/schema-utils';
-import { BitbucketTagsDatasource } from "../../datasource/bitbucket-tags";
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
@@ -309,8 +309,9 @@ export const ComposerExtract = z
 
         const gitRepo = gitRepos[depName];
         if (gitRepo) {
-
-          const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitRepo.url)?.groups;
+          const bitbucketMatchGroups = bitbucketUrlRegex.exec(
+            gitRepo.url
+          )?.groups;
 
           if (bitbucketMatchGroups) {
             dep.datasource = BitbucketTagsDatasource.id;
