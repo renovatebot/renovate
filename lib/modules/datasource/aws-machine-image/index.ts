@@ -50,7 +50,7 @@ export class AwsMachineImageDataSource extends Datasource {
     const { profile, region } = config;
     return new EC2Client({
       region,
-      credentials: profile ? fromNodeProviderChain({ profile }) : undefined,
+      credentials: fromNodeProviderChain({ profile }),
     });
   }
 
@@ -60,7 +60,7 @@ export class AwsMachineImageDataSource extends Datasource {
     });
   }
 
-  private loadConfig(serializedAmiFilter: string): [Filter[], AwsClientConfig] {
+  loadConfig(serializedAmiFilter: string): [Filter[], AwsClientConfig] {
     const parsedConfig: ParsedConfig = JSON.parse(serializedAmiFilter);
     const filters = [];
     let config = {};
