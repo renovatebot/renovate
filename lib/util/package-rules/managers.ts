@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { isCustomManager } from '../../modules/manager/custom';
 import { Matcher } from './base';
 
 export class ManagersMatcher extends Matcher {
@@ -13,8 +14,8 @@ export class ManagersMatcher extends Matcher {
     if (is.undefined(manager) || !manager) {
       return false;
     }
-    if (matchManagers.includes(manager)) {
-      return true;
+    if (isCustomManager(manager)) {
+      return matchManagers.includes(`custom.${manager}`);
     }
     // Special handling for npm, pnpm, yarn
     // allow matchManagers=npm to match even if manager is pnpm or yarn
