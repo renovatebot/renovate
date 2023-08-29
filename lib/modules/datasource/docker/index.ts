@@ -15,7 +15,12 @@ import {
 } from '../../../util/url';
 import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 import { isArtifactoryServer } from '../util';
 import {
   DOCKER_HUB,
@@ -31,6 +36,9 @@ import {
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
 import type { Manifest, OciImageConfig } from './schema';
 import type { DockerHubTags } from './types';
+import { DockerHubCache } from './docker-hub-cache';
+import { AsyncResult, Result } from '../../../util/result';
+import { get } from 'lodash';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -883,20 +891,41 @@ export class DockerDatasource extends Datasource {
       packageName,
       registryUrl!
     );
-    let tags: string[] | null = null;
-    if (registryHost === 'https://index.docker.io') {
-      tags = await this.getDockerHubTags(dockerRepository);
-    }
-    tags ??= await this.getTags(registryHost, dockerRepository);
-    if (!tags) {
+
+    type TagsResultType = AsyncResult<
+      Release[],
+      NonNullable<Error | 'tags-fetch-error'>
+    >;
+
+    const getTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getTags(registryHost, dockerRepository),
+        'tags-fetch-error' as const
+      ).transform((tags) => tags.map((version) => ({ version })));
+
+    const getDockerHubTags = (): TagsResultType => {
+      const dockerHubCache = new DockerHubCache(this.http, dockerRepository);
+      return Result.wrap(dockerHubCache.getTags()).catch(getTags);
+    };
+
+    const tagsResult =
+      registryHost === 'https://index.docker.io' &&
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+        ? getDockerHubTags()
+        : getTags();
+    const { val: releases, err } = await tagsResult.unwrap();
+    if (err === 'tags-fetch-error') {
       return null;
+    } else if (err) {
+      throw err;
     }
-    const releases = tags.map((version) => ({ version }));
+
     const ret: ReleaseResult = {
       registryUrl: registryHost,
       releases,
     };
 
+    const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
       : findLatestStable(tags) ?? tags[tags.length - 1];

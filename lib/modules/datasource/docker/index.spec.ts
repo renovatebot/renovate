@@ -1561,11 +1561,26 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags?page_size=100')
         .reply(200, {
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=100`,
-          results: [{ name: '1.0.0' }],
+          results: [
+            {
+              id: 2,
+              name: '1.0.0',
+              digest: 'bbb',
+              tag_last_pushed: '2022-01-01T00:00:00.000Z',
+            },
+          ],
         })
         .get('/library/node/tags?page=2&page_size=100')
         .reply(200, {
-          results: [{ name: '0.9.0' }],
+          next: null,
+          results: [
+            {
+              id: 1,
+              name: '0.9.0',
+              digest: 'aaa',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+            },
+          ],
         });
       httpMock
         .scope(baseUrl)
