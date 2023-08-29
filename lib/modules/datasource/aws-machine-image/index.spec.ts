@@ -397,8 +397,10 @@ describe('modules/datasource/aws-machine-image/index', () => {
       });
     });
   });
+
   describe('loadConfig()', () => {
     const ec2DataSource = new AwsMachineImageDataSource();
+
     it('loads filters without aws config', async () => {
       const res = ec2DataSource.loadConfig(
         '[{"Name":"testname","Values":["testvalue"]}]'
@@ -413,6 +415,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
         {},
       ]);
     });
+
     it('loads filters with multiple aws configs', async () => {
       const res = ec2DataSource.loadConfig(
         '[{"Name":"testname","Values":["testvalue"]},{"region":"us-west-2"},{"profile":"test-profile"},{"region":"eu-central-1"}]'
