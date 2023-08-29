@@ -30,20 +30,20 @@ describe('util/git/auth', () => {
 
     it('returns url with username and password', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables('https://example.com/', {
           username: 'username',
           password: 'password',
           hostType: 'github',
-          matchHost: 'github.com',
+          matchHost: 'example.com',
         })
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://username:password@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://username:password@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://username:password@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_KEY_0: 'url.https://username:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://username:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://username:password@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+        GIT_CONFIG_VALUE_1: 'git@example.com:',
+        GIT_CONFIG_VALUE_2: 'https://example.com/',
       });
     });
 

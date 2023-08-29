@@ -32,7 +32,7 @@ Before running the `go` commands to update the `go.sum`, Renovate exports `git` 
 
 The following logic is executed prior to "artifacts" updating:
 
-The token or username/password from the `hostRules` entry matching `hostType=github` and `matchHost=api.github.com` is added as the default authentication for `github.com`.
+The token from the `hostRules` entry matching `hostType=github` and `matchHost=api.github.com` is added as the default authentication for `github.com`.
 For those running against `github.com`, this token will be the default platform token.
 
 Next, all `hostRules` with both a token or username/password and `matchHost` will be fetched, except for any github.com one from above.
