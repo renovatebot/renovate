@@ -293,11 +293,15 @@ export function findLatestStable(tags: string[]): string | null {
   let unstable: string | null = null;
 
   for (const tag of tags) {
+    if (!dockerVersioning.isValid(tag)) {
+      continue;
+    }
+
     if (!unstable || dockerVersioning.isGreaterThan(tag, unstable)) {
       unstable = tag;
     }
 
-    if (!dockerVersioning.isValid(tag) || !dockerVersioning.isStable(tag)) {
+    if (!dockerVersioning.isStable(tag)) {
       continue;
     }
 
