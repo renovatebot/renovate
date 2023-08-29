@@ -437,6 +437,7 @@ const staticGroups = {
       'group:springWebflow',
       'group:springWs',
       'group:symfony',
+      'group:twig',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -726,6 +727,16 @@ const staticGroups = {
         extends: 'packages:test',
         groupName: 'test packages',
         matchUpdateTypes: ['minor', 'patch'],
+      },
+    ],
+  },
+  twig: {
+    description: 'Group PHP Twig packages together.',
+    packageRules: [
+      {
+        groupName: 'twig packages',
+        groupSlug: 'twig',
+        matchPackagePrefixes: ['twig/'],
       },
     ],
   },
