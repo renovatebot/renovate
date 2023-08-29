@@ -222,8 +222,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6
       luxon:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.4.1
+        version: 3.4.1
       markdown-it:
         specifier: 13.0.1
         version: 13.0.1
@@ -2928,7 +2928,7 @@ packages:
       adm-zip: 0.5.10
       fs-extra: 11.1.1
       got: 11.8.6
-      luxon: 3.4.0
+      luxon: 3.4.1
       node-fetch: 2.6.13
     transitivePeerDependencies:
       - encoding
@@ -5214,7 +5214,7 @@ packages:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      luxon: 3.4.0
+      luxon: 3.4.1
     dev: false
 
   /cross-spawn@6.0.5:
@@ -7952,8 +7952,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  /luxon@3.4.0:
-    resolution: {integrity: sha512-7eDo4Pt7aGhoCheGFIuq4Xa2fJm4ZpmldpGhjTYBNUYNCN6TIEP6v7chwwwt3KRp7YR+rghbfvjyo3V5y9hgBw==}
+  /luxon@3.4.1:
+    resolution: {integrity: sha512-2USspxOCXWGIKHwuQ9XElxPPYrDOJHDQ5DQ870CoD+CxJbBnRDIBCfhioUJJjct7BKOy80Ia8cVstIcIMb/0+Q==}
     engines: {node: '>=12'}
     dev: false
 
