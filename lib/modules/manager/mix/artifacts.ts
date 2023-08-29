@@ -16,8 +16,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
-  `https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`,
-  'g'
+  `^https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`
 );
 
 export async function updateArtifacts({

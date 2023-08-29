@@ -861,6 +861,20 @@ export class DockerDatasource extends Datasource {
    *
    * This function will filter only tags that contain a semver version
    */
+  @cache({
+    namespace: 'datasource-docker-releases',
+    key: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!
+      );
+      return `${registryHost}:${dockerRepository}`;
+    },
+    cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost } = getRegistryRepository(packageName, registryUrl!);
+      return registryHost === 'https://index.docker.io';
+    },
+  })
   async getReleases({
     packageName,
     registryUrl,
@@ -885,7 +899,7 @@ export class DockerDatasource extends Datasource {
 
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags);
+      : findLatestStable(tags) ?? tags[tags.length - 1];
 
     // istanbul ignore if: needs test
     if (!latestTag) {
