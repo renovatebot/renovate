@@ -38,9 +38,12 @@ describe('util/git/auth', () => {
         })
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://username:password@example.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://username:password@example.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://username:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://username:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://username:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://username:password@example.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
         GIT_CONFIG_VALUE_1: 'git@example.com:',
         GIT_CONFIG_VALUE_2: 'https://example.com/',
