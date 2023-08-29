@@ -109,6 +109,26 @@ async function getCatalogEntry(
   return items.map(({ catalogEntry }) => catalogEntry);
 }
 
+/**
+ * Compare two versions. Return:
+ * - `1` if `a > b` or `b` is invalid
+ * - `-1` if `a < b` or `a` is invalid
+ * - `0` if `a == b` or both `a` and `b` are invalid
+ */
+export function sortNugetVersions(a: string, b: string): number {
+  if (versioning.isValid(a)) {
+    if (versioning.isValid(b)) {
+      return versioning.sortVersions(a, b);
+    } else {
+      return 1;
+    }
+  } else if (versioning.isValid(b)) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
 export async function getReleases(
   http: Http,
   registryUrl: string,
@@ -124,8 +144,7 @@ export async function getReleases(
   );
   const catalogEntries = (await p.all(catalogPagesQueue))
     .flat()
-    .filter((entry) => versioning.isValid(entry.version))
-    .sort((a, b) => versioning.sortVersions(a.version, b.version));
+    .sort((a, b) => sortNugetVersions(a.version, b.version));
 
   let homepage: string | null = null;
   let latestStable: string | null = null;

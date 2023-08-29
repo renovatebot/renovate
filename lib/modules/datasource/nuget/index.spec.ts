@@ -406,7 +406,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3AzureDevOps,
       });
-      expect(res).not.toBeNull();
       expect(res).toMatchObject({
         homepage: 'https://nunit.org/',
         registryUrl:
