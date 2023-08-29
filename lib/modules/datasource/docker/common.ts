@@ -290,18 +290,9 @@ export function extractDigestFromResponseBody(
 
 export function findLatestStable(tags: string[]): string | null {
   let stable: string | null = null;
-  let unstable: string | null = null;
 
   for (const tag of tags) {
-    if (!dockerVersioning.isValid(tag)) {
-      continue;
-    }
-
-    if (!unstable || dockerVersioning.isGreaterThan(tag, unstable)) {
-      unstable = tag;
-    }
-
-    if (!dockerVersioning.isStable(tag)) {
+    if (!dockerVersioning.isValid(tag) || !dockerVersioning.isStable(tag)) {
       continue;
     }
 
@@ -310,5 +301,5 @@ export function findLatestStable(tags: string[]): string | null {
     }
   }
 
-  return stable ?? unstable;
+  return stable;
 }
