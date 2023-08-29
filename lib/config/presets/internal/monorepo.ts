@@ -367,6 +367,7 @@ const repoGroups = {
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
+  promster: 'https://github.com/tdeekens/promster',
   quartznet: 'https://github.com/quartznet/quartznet',
   'reach-ui': 'https://github.com/reach/reach-ui',
   react: 'https://github.com/facebook/react',
