@@ -1,4 +1,3 @@
-import { time } from 'console';
 import { getChangeLogJSON } from '..';
 import * as httpMock from '../../../../../../../test/http-mock';
 import { partial } from '../../../../../../../test/util';

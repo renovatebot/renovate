@@ -1,19 +1,19 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
-import type {
-  ChangeLogFile,
-  ChangeLogNotes,
-  ChangeLogProject,
-  ChangeLogRelease,
-} from '../types';
-import { GiteaHttp } from '../../../../../../util/http/gitea';
 import { ReleasesSchema } from '../../../../../../modules/datasource/gitea-releases/schema';
 import {
   ContentsListResponseSchema,
   ContentsResponse,
   ContentsResponseSchema,
 } from '../../../../../../modules/platform/gitea/schema';
+import { GiteaHttp } from '../../../../../../util/http/gitea';
 import { fromBase64 } from '../../../../../../util/string';
+import type {
+  ChangeLogFile,
+  ChangeLogNotes,
+  ChangeLogProject,
+  ChangeLogRelease,
+} from '../types';
 
 export const id = 'gitea-changelog';
 const http = new GiteaHttp(id);
