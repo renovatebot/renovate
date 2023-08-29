@@ -2354,7 +2354,7 @@ const options: RenovateOptions[] = [
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 24 * 60,
+    default: 7 * 24 * 60,
     globalOnly: true,
   },
   {
