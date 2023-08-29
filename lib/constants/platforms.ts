@@ -10,6 +10,7 @@ export type PlatformId =
 
 export const GITEA_API_USING_HOST_TYPES = [
   'gitea',
+  'gitea-changelog',
   'gitea-releases',
   'gitea-tags',
 ];
