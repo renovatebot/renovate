@@ -160,7 +160,7 @@ export async function extractAllPackageFiles(
     filesAlreadyExamined.add(packageFile);
 
     const content = await readLocalFile(packageFile, 'utf8');
-    // TODO #7154
+    // TODO #22198
     const result = extractPackageFile(content!, packageFile);
 
     if (result !== null) {

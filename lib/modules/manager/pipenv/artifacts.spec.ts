@@ -46,7 +46,7 @@ const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('modules/manager/pipenv/artifacts', () => {
-  // TODO: #7154
+  // TODO: #22198
   let pipFileLock: any;
 
   beforeEach(() => {

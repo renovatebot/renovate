@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import type { RegexManagerTemplates } from '../../../config/types';
+import type { RegexManagerTemplates } from '../../../../config/types';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
   Result,
-} from '../types';
+} from '../../types';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
 import type { RegexManagerConfig } from './types';
 import { validMatchFields } from './utils';
@@ -14,6 +14,7 @@ export const defaultConfig = {
   pinDigests: false,
 };
 export const supportedDatasources = ['*'];
+export const displayName = 'Regex';
 
 export function extractPackageFile(
   content: string,

@@ -22,6 +22,7 @@ async function cleanUpBranches(
       const pr = await platform.findPr({
         branchName,
         state: 'open',
+        targetBranch: config.baseBranch,
       });
       const branchIsModified = await scm.isBranchModified(branchName);
       if (pr) {
@@ -101,13 +102,13 @@ export async function pruneStaleBranches(
 ): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
     return;
   }
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   let renovateBranches = getBranchList().filter((branchName) =>
     branchName.startsWith(config.branchPrefix!)
   );
@@ -122,7 +123,7 @@ export async function pruneStaleBranches(
     },
     'Branch lists'
   );
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const lockFileBranch = `${config.branchPrefix!}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch

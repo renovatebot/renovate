@@ -21,6 +21,7 @@ const ecrMock = mockClient(ECRClient);
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
 const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
+const dockerHubUrl = 'https://hub.docker.com/v2/repositories';
 
 function mockEcrAuthResolve(
   res: Partial<GetAuthorizationTokenCommandOutput> = {}
@@ -40,6 +41,8 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
+    delete process.env.RENOVATE_X_DOCKER_MAX_PAGES;
+    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS;
   });
 
   describe('getDigest', () => {
@@ -1039,6 +1042,41 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
+    it('uses custom max pages', async () => {
+      process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
+      httpMock
+        .scope(baseUrl)
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/library/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          {
+            link: `<${baseUrl}/library/node/tags/list?n=1&page=1>; rel="next", `,
+          }
+        )
+        .get('/library/node/tags/list?n=1&page=1')
+        .reply(
+          200,
+          { tags: ['1.0.1'] },
+          {
+            link: `<${baseUrl}/library/node/tags/list?n=1&page=2>; rel="next", `,
+          }
+        )
+        .get('/')
+        .reply(200)
+        .get('/library/node/manifests/1.0.1')
+        .reply(200);
+
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(2);
+    });
+
     it('uses custom registry in packageName', async () => {
       const tags = ['1.0.0'];
       httpMock
@@ -1484,7 +1522,12 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       const tags = ['1.0.0'];
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=100')
+        .reply(404);
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1512,31 +1555,29 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
-      const tags = ['1.0.0'];
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=100')
+        .reply(200, {
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=100`,
+          results: [{ name: '1.0.0' }],
+        })
+        .get('/library/node/tags?page=2&page_size=100')
+        .reply(200, {
+          results: [{ name: '0.9.0' }],
+        });
       httpMock
         .scope(baseUrl)
-        .get('/library/node/tags/list?n=10000')
-        .reply(401, '', {
-          'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
-        })
-        .get('/library/node/tags/list?n=10000')
-        .reply(200, { tags }, {})
         .get('/')
         .reply(200)
         .get('/library/node/manifests/1.0.0')
         .reply(200);
-      httpMock
-        .scope(authUrl)
-        .get(
-          '/token?service=registry.docker.io&scope=repository:library/node:pull'
-        )
-        .reply(200, { token: 'test' });
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'docker.io/node',
       });
-      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(2);
     });
 
     it('adds no library/ prefix for other registries', async () => {

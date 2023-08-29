@@ -6,8 +6,9 @@ import { logger } from '../../../../logger';
 import {
   Release,
   ReleaseResult,
+  applyDatasourceFilters,
   getDigest,
-  getPkgReleases,
+  getRawPkgReleases,
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../modules/datasource';
@@ -19,10 +20,8 @@ import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
-import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
-import { Result } from '../../../../util/result';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -77,21 +76,24 @@ export async function lookupUpdates(
     if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
-        // TODO #7154
+        // TODO #22198
         versioning.isSingleVersion(currentValue!)
       ) {
         res.skipReason = 'is-pinned';
         return res;
       }
 
-      const { val: lookupValue, err: lookupError } = await Result.wrapNullable(
-        getPkgReleases(config),
-        'no-releases' as const
+      const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
+        config
       )
-        .transform((x) => Result.ok(clone(x)))
+        .transform((res) => applyDatasourceFilters(res, config))
         .unwrap();
 
-      if (lookupError === 'no-releases') {
+      if (lookupError instanceof Error) {
+        throw lookupError;
+      }
+
+      if (lookupError) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: packageName,
@@ -101,18 +103,17 @@ export async function lookupUpdates(
         // TODO: return warnings in own field
         res.warnings.push(warning);
         return res;
-      } else if (lookupError) {
-        throw lookupError;
       }
 
-      dependency = lookupValue;
+      dependency = releaseResult;
+
       if (dependency.deprecationMessage) {
         logger.debug(
           `Found deprecationMessage for ${datasource} package ${packageName}`
         );
       }
 
-      assignKeys(res, lookupValue, [
+      assignKeys(res, dependency, [
         'deprecationMessage',
         'sourceUrl',
         'registryUrl',
@@ -157,7 +158,7 @@ export async function lookupUpdates(
       // Check that existing constraint can be satisfied
       const allSatisfyingVersions = allVersions.filter(
         (v) =>
-          // TODO #7154
+          // TODO #22198
           unconstrainedValue || versioning.matches(v.version, currentValue!)
       );
       if (rollbackPrs && !allSatisfyingVersions.length) {
@@ -166,7 +167,7 @@ export async function lookupUpdates(
         if (!rollback) {
           res.warnings.push({
             topic: packageName,
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             message: `Can't find version matching ${currentValue!} for ${datasource} package ${packageName}`,
           });
           return res;
@@ -190,7 +191,7 @@ export async function lookupUpdates(
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = lockedVersion!;
       }
-      // TODO #7154
+      // TODO #22198
       currentVersion ??=
         getCurrentVersion(
           currentValue!,
@@ -222,7 +223,7 @@ export async function lookupUpdates(
         res.updates.push({
           updateType: 'pin',
           isPin: true,
-          // TODO: newValue can be null! (#7154)
+          // TODO: newValue can be null! (#22198)
           newValue: versioning.getNewValue({
             currentValue,
             rangeStrategy,
@@ -243,7 +244,7 @@ export async function lookupUpdates(
         return res;
       }
       // Filter latest, unstable, etc
-      // TODO #7154
+      // TODO #22198
       let filteredReleases = filterVersions(
         config,
         currentVersion!,
@@ -264,7 +265,7 @@ export async function lookupUpdates(
       for (const release of filteredReleases) {
         const bucket = getBucket(
           config,
-          // TODO #7154
+          // TODO #22198
           currentVersion!,
           release.version,
           versioning
@@ -297,7 +298,7 @@ export async function lookupUpdates(
         const update = await generateUpdate(
           config,
           versioning,
-          // TODO #7154
+          // TODO #22198
 
           rangeStrategy!,
           lockedVersion ?? currentVersion!,
@@ -308,7 +309,7 @@ export async function lookupUpdates(
           update.pendingChecks = pendingChecks;
         }
 
-        // TODO #7154
+        // TODO #22198
         if (pendingReleases!.length) {
           update.pendingVersions = pendingReleases!.map((r) => r.version);
         }
@@ -364,7 +365,7 @@ export async function lookupUpdates(
           // digest update
           res.updates.push({
             updateType: 'digest',
-            // TODO #7154
+            // TODO #22198
             newValue: currentValue!,
           });
         }
@@ -375,23 +376,23 @@ export async function lookupUpdates(
           res.updates.push({
             isPinDigest: true,
             updateType: 'pinDigest',
-            // TODO #7154
+            // TODO #22198
             newValue: currentValue!,
           });
         }
       }
       if (versioning.valueToVersion) {
-        // TODO #7154
+        // TODO #22198
         res.currentVersion = versioning.valueToVersion(res.currentVersion!);
         for (const update of res.updates || /* istanbul ignore next*/ []) {
-          // TODO #7154
+          // TODO #22198
           update.newVersion = versioning.valueToVersion(update.newVersion!);
         }
       }
       // update digest for all
       for (const update of res.updates) {
-        if (pinDigests || currentDigest) {
-          // TODO #7154
+        if (pinDigests === true || currentDigest) {
+          // TODO #22198
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
 
@@ -438,11 +439,11 @@ export async function lookupUpdates(
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
-          (update.newName && update.newName !== packageName) ||
-          update.isReplacement ||
+          (is.string(update.newName) && update.newName !== packageName) ||
+          update.isReplacement === true ||
           update.newValue !== currentValue ||
-          update.isLockfileUpdate ||
-          // TODO #7154
+          update.isLockfileUpdate === true ||
+          // TODO #22198
           (update.newDigest && !update.newDigest.startsWith(currentDigest!))
       );
     // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue

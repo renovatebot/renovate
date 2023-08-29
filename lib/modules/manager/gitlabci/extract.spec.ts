@@ -86,7 +86,7 @@ describe('modules/manager/gitlabci/extract', () => {
       });
       expect(deps).toHaveLength(8);
 
-      // TODO #7154
+      // TODO #22198
       expect(deps.some((dep) => dep.currentValue!.includes("'"))).toBeFalse();
     });
 
