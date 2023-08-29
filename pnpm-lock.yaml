@@ -557,8 +557,8 @@ importers:
         specifier: 29.6.4
         version: 29.6.4
       markdownlint-cli2:
-        specifier: 0.8.1
-        version: 0.8.1
+        specifier: 0.9.0
+        version: 0.9.0
       memfs:
         specifier: 4.2.1
         version: 4.2.1(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
@@ -6408,17 +6408,6 @@ packages:
       merge2: 1.4.1
       slash: 3.0.0
 
-  /globby@13.1.4:
-    resolution: {integrity: sha512-iui/IiiW+QrJ1X1hKH5qwlMQyv34wJAYwH1vrf8b9kBA4sNiif3gKsMHa+BrdnOpEudWjpotfa7LrTzB1ERS/g==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dependencies:
-      dir-glob: 3.0.1
-      fast-glob: 3.3.1
-      ignore: 5.2.4
-      merge2: 1.4.1
-      slash: 4.0.0
-    dev: true
-
   /globby@13.2.2:
     resolution: {integrity: sha512-Y1zNGV+pzQdh7H39l9zgB4PJqjRNqydvdYCDG4HFXM4XuvSaQQlEc91IU1yALL8gUTDomgBAfz3XJdmUS+oo0w==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -7958,38 +7947,38 @@ packages:
       repeat-string: 1.6.1
     dev: false
 
-  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.8.1):
+  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.9.0):
     resolution: {integrity: sha512-xm2rM0E+sWgjpPn1EesPXx5hIyrN2ddUnUwnbCsD/ONxYtw3PX6LydvdH6dciWAoFDpwzbHM1TO7uHfcMd6IYg==}
     peerDependencies:
       markdownlint-cli2: '>=0.0.4'
     dependencies:
-      markdownlint-cli2: 0.8.1
+      markdownlint-cli2: 0.9.0
     dev: true
 
-  /markdownlint-cli2@0.8.1:
-    resolution: {integrity: sha512-y0Siwt+RApKxSSb0CT9p7z1DcAO+ncjrB9IpC/jflJRIet4namCFmxLTbfBBQdPF6EntPk5yyXKe7vcoPGlnXw==}
+  /markdownlint-cli2@0.9.0:
+    resolution: {integrity: sha512-BS4iLajH0ZdM3CmKAesA2rKLASctj5VC8EFxvgC2T2tUnivmOsHvBZB8xOqn1ByADL2cJHF0WQUF6VL4CYtEIw==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      globby: 13.1.4
-      markdownlint: 0.29.0
-      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.8.1)
+      globby: 13.2.2
+      markdownlint: 0.30.0
+      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.9.0)
       micromatch: 4.0.5
-      strip-json-comments: 5.0.0
+      strip-json-comments: 5.0.1
       yaml: 2.3.1
     dev: true
 
-  /markdownlint-micromark@0.1.5:
-    resolution: {integrity: sha512-HvofNU4QCvfUCWnocQP1IAWaqop5wpWrB0mKB6SSh0fcpV0PdmQNS6tdUuFew1utpYlUvYYzz84oDkrD76GB9A==}
+  /markdownlint-micromark@0.1.7:
+    resolution: {integrity: sha512-BbRPTC72fl5vlSKv37v/xIENSRDYL/7X/XoFzZ740FGEbs9vZerLrIkFRY0rv7slQKxDczToYuMmqQFN61fi4Q==}
     engines: {node: '>=16'}
     dev: true
 
-  /markdownlint@0.29.0:
-    resolution: {integrity: sha512-ASAzqpODstu/Qsk0xW5BPgWnK/qjpBQ4e7IpsSvvFXcfYIjanLTdwFRJK1SIEEh0fGSMKXcJf/qhaZYHyME0wA==}
+  /markdownlint@0.30.0:
+    resolution: {integrity: sha512-nInuFvI/rEzanAOArW5490Ez4EYpB5ODqVM0mcDYCPx9DKJWCQqCgejjiCvbSeE7sjbDscVtZmwr665qpF5xGA==}
     engines: {node: '>=16'}
     dependencies:
       markdown-it: 13.0.1
-      markdownlint-micromark: 0.1.5
+      markdownlint-micromark: 0.1.7
     dev: true
 
   /marked-terminal@5.2.0(marked@5.1.2):
@@ -10032,8 +10021,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /strip-json-comments@5.0.0:
-    resolution: {integrity: sha512-V1LGY4UUo0jgwC+ELQ2BNWfPa17TIuwBLg+j1AA/9RPzKINl1lhxVEu2r+ZTTO8aetIsUzE5Qj6LMSBkoGYKKw==}
+  /strip-json-comments@5.0.1:
+    resolution: {integrity: sha512-0fk9zBqO67Nq5M/m45qHCJxylV/DhBlIOVExqgOMiCCrzrhU6tCibRXNqE3jwJLftzE9SNuZtYbpzcO+i9FiKw==}
     engines: {node: '>=14.16'}
     dev: true
 
