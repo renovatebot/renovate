@@ -142,6 +142,7 @@
     "node": "^18.12.0 || >=20.0.0"
   },
   "dependencies": {
+    "@aws-sdk/credential-providers": "3.363.0",
     "@aws-sdk/client-codecommit": "3.363.0",
     "@aws-sdk/client-ec2": "3.363.0",
     "@aws-sdk/client-ecr": "3.363.0",
