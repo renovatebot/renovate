@@ -126,6 +126,7 @@ export interface RepoGlobalConfig {
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
+  cacheTtlOverride?: Record<string, number>;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
@@ -335,7 +336,7 @@ export interface PackageRule
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
   matchBaseBranches?: string[];
-  matchManagers?: string | string[];
+  matchManagers?: string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
   matchDepNames?: string[];

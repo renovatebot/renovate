@@ -100,8 +100,8 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
   const { val: pyprojectfile, err } = Result.parse(
-    PoetrySchemaToml,
-    content
+    content,
+    PoetrySchemaToml
   ).unwrap();
   if (err) {
     logger.debug({ packageFile, err }, `Poetry: error parsing pyproject.toml`);
@@ -114,8 +114,8 @@ export async function extractPackageFile(
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
   const lockfileMapping = Result.parse(
-    Lockfile.transform(({ lock }) => lock),
-    lockContents
+    lockContents,
+    Lockfile.transform(({ lock }) => lock)
   ).unwrapOrElse({});
 
   const deps = [
