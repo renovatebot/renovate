@@ -5,6 +5,15 @@ import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import type { WoodpeckerConfig } from './types';
 
+function woodpeckerVersionDecider(
+  woodpeckerConfig: WoodpeckerConfig
+): (keyof WoodpeckerConfig)[] {
+  const keys = ['clone', 'steps', 'pipeline'];
+  return Object.keys(woodpeckerConfig).filter((key) =>
+    keys.includes(key)
+  ) as (keyof WoodpeckerConfig)[];
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -37,11 +46,20 @@ export function extractPackageFile(
     return null;
   }
 
+  const pipelineKeys = woodpeckerVersionDecider(config);
+
+  if (pipelineKeys.length === 0) {
+    logger.debug({ packageFile }, "Couldn't identify dependencies");
+    return null;
+  }
+
   // Image name/tags for services are only eligible for update if they don't
   // use variables and if the image is not built locally
-  const deps = Object.values(config.pipeline ?? {})
-    .filter((step) => is.string(step?.image))
-    .map((step) => getDep(step.image, true, extractConfig.registryAliases));
+  const deps = pipelineKeys.flatMap((pipelineKey) =>
+    Object.values(config[pipelineKey] ?? {})
+      .filter((step) => is.string(step?.image))
+      .map((step) => getDep(step.image, true, extractConfig.registryAliases))
+  );
 
   logger.trace({ deps }, 'Woodpecker Configuration image');
   return deps.length ? { deps } : null;
