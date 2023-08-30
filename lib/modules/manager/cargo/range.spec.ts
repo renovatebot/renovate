@@ -20,6 +20,6 @@ describe('modules/manager/cargo/range', () => {
       rangeStrategy: 'auto',
       currentValue: '1.0.0',
     };
-    expect(getRangeStrategy(config)).toBe('update-lockfile');
+    expect(getRangeStrategy(config)).toBe('bump');
   });
 });
