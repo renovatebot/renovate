@@ -1022,7 +1022,7 @@ describe('modules/datasource/docker/index', () => {
           200,
           { tags },
           {
-            link: '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
+            link: '<https://api.github.com/user/9287/repos?page=3&per_page=1000>; rel="next", ',
           }
         )
         .get('/')
@@ -1031,7 +1031,7 @@ describe('modules/datasource/docker/index', () => {
         .reply(200);
       httpMock
         .scope('https://api.github.com')
-        .get('/user/9287/repos?page=3&per_page=100')
+        .get('/user/9287/repos?page=3&per_page=1000')
         .reply(200, { tags: ['latest'] }, {});
       const config = {
         datasource: DockerDatasource.id,
@@ -1526,7 +1526,7 @@ describe('modules/datasource/docker/index', () => {
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=100')
+        .get('/library/node/tags?page_size=1000')
         .reply(404);
       httpMock
         .scope(baseUrl)
@@ -1558,12 +1558,12 @@ describe('modules/datasource/docker/index', () => {
       process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=100')
+        .get('/library/node/tags?page_size=1000')
         .reply(200, {
-          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=100`,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000`,
           results: [{ name: '1.0.0' }],
         })
-        .get('/library/node/tags?page=2&page_size=100')
+        .get('/library/node/tags?page=2&page_size=1000')
         .reply(200, {
           results: [{ name: '0.9.0' }],
         });
