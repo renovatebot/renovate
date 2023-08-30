@@ -175,7 +175,7 @@ Let's automerge it if all the linting updates pass:
 }
 ```
 
-Have you come up with a rule that you think others would benefit from?
+Have you come up with a rule that would help others?
 How about a PR to [our presets](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal)?
 For example the above rule could be named `":automergeEslintWeekly"` in `schedule.ts`.
 
