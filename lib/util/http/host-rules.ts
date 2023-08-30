@@ -30,6 +30,7 @@ export type HostRulesGotOptions = Pick<
   | 'lookup'
   | 'agent'
   | 'http2'
+  | 'https'
 >;
 
 export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
@@ -161,6 +162,18 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
 
   if (!hasProxy() && foundRules.enableHttp2 === true) {
     options.http2 = true;
+  }
+
+  if (
+    foundRules.certificateAuthority !== null ||
+    foundRules.privateKey !== null ||
+    foundRules.certificate !== null
+  ) {
+    options.https = {
+      certificateAuthority: foundRules.certificateAuthority,
+      key: foundRules.privateKey,
+      certificate: foundRules.certificate,
+    };
   }
   return options;
 }

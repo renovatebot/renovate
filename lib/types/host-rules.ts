@@ -15,6 +15,9 @@ export interface HostRuleSearchResult {
   dnsCache?: boolean;
   keepalive?: boolean;
   artifactAuth?: string[] | null;
+  certificateAuthority?: string;
+  privateKey?: string;
+  certificate?: string;
 }
 
 export interface HostRule extends HostRuleSearchResult {

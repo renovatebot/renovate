@@ -46,6 +46,14 @@ describe('util/http/host-rules', () => {
       hostType: 'bitbucket',
       token: 'cdef',
     });
+
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource',
+      certificateAuthority: 'ca-cert',
+      certificate: 'cert',
+      privateKey: 'key',
+    });
   });
 
   afterEach(() => {
@@ -144,6 +152,24 @@ describe('util/http/host-rules', () => {
       {
         "hostType": "github",
         "noAuth": true,
+      }
+    `);
+  });
+
+  it('https', () => {
+    expect(
+      applyHostRules('https://custom.datasource/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "certificate": "cert",
+          "certificateAuthority": "ca-cert",
+          "key": "key",
+        },
       }
     `);
   });

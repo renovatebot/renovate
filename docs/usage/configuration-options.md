@@ -1556,6 +1556,18 @@ To adjust it down to 10s for all queries, do this:
 }
 ```
 
+### certificateAuthority
+
+certificateAuthority overrides trusted CA certificate.
+
+### privateKey
+
+Specifies the privateKey for mTLS authentication.
+
+### certificate
+
+Specifies the certificate chain in PEM format for mTLS authentication.
+
 ## ignoreDeprecated
 
 By default, Renovate won't update a dependency version to a deprecated release unless the current version was _itself_ deprecated.
