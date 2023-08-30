@@ -6,17 +6,19 @@ export async function extractLockFileVersions(
   lockFilePath: string
 ): Promise<Map<string, string[]>> {
   const versionsByPackage = new Map<string, string[]>();
-  try {
-    const content = await readLocalFile(lockFilePath);
-    const lock = parseLockFile(content!.toString())!;
-    const packages = lock.package ?? [];
-    for (const pkg of packages) {
-      const versions = versionsByPackage.get(pkg.name) ?? [];
-      versions.push(pkg.version);
-      versionsByPackage.set(pkg.name, versions);
-    }
-  } catch (err) {
-    logger.warn({ err }, `Failed to parse Cargo lockfile`);
+  const content = await readLocalFile(lockFilePath, 'utf8');
+  if (!content) {
+    return versionsByPackage;
+  }
+  const lock = parseLockFile(content);
+  if (!lock) {
+    return versionsByPackage;
+  }
+  const packages = lock.package ?? [];
+  for (const pkg of packages) {
+    const versions = versionsByPackage.get(pkg.name) ?? [];
+    versions.push(pkg.version);
+    versionsByPackage.set(pkg.name, versions);
   }
   return versionsByPackage;
 }

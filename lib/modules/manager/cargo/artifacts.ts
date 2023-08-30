@@ -42,7 +42,7 @@ async function cargoUpdatePrecise(
       (dep) =>
         `cargo update --manifest-path ${quote(manifestPath)}` +
         ` --package ${dep.packageName!}@${dep.lockedVersion}` +
-        (dep.newVersion ? ` --precise ${dep.newVersion}` : '')
+        ` --precise ${dep.newVersion}`
     );
 
   const execOptions: ExecOptions = {
@@ -63,8 +63,6 @@ async function cargoUpdatePrecise(
         );
       } else if (pkg) {
         logger.warn({ err }, `Could not update cargo package \`${pkg}\`.`);
-      } else {
-        logger.warn({ err }, `Command failed: \`${err.cmd}\`.`);
       }
     }
     throw err;

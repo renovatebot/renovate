@@ -253,7 +253,11 @@ export async function extractPackageFile(
           dep.lockedVersion = lockedVersion;
         }
       } catch (err) {
-        logger.warn({ packageName, err }, 'Error finding satisfying version');
+        // istanbul ignore next: this should not happen
+        logger.warn(
+          { packageName, err },
+          `Error finding satisfying version for package ${dep.depName}.`
+        );
       }
     }
   }

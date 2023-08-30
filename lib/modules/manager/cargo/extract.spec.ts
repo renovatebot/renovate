@@ -17,6 +17,8 @@ const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
 const cargo6toml = Fixtures.get('Cargo.6.toml');
 const cargo7toml = Fixtures.get('Cargo.7.toml');
 const cargo7lock = Fixtures.get('Cargo.7.lock');
+const cargo8toml = Fixtures.get('Cargo.8.toml');
+const cargo8lock = Fixtures.get('Cargo.8.lock');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
@@ -267,6 +269,24 @@ tokio = { version = "1.21.1" }`;
       const res = await extractPackageFile(cargo7toml, 'Cargo.toml', config);
       expect(res?.deps[0].lockedVersion).toBe('1.0.1');
       expect(res?.deps[1].lockedVersion).toBe('2.0.1');
+      expect(res?.deps).toHaveLength(2);
+    });
+
+    it('handles missing locked versions', async () => {
+      await writeLocalFile('Cargo.lock', cargo8lock);
+
+      const res = await extractPackageFile(cargo8toml, 'Cargo.toml', config);
+      expect(res?.deps[0].lockedVersion).toBe('2.0.1');
+      expect(res?.deps[1].lockedVersion).toBeUndefined();
+      expect(res?.deps).toHaveLength(2);
+    });
+
+    it('handles invalid lock file', async () => {
+      await writeLocalFile('Cargo.lock', 'foo');
+
+      const res = await extractPackageFile(cargo8toml, 'Cargo.toml', config);
+      expect(res?.deps[0].lockedVersion).toBeUndefined();
+      expect(res?.deps[1].lockedVersion).toBeUndefined();
       expect(res?.deps).toHaveLength(2);
     });
   });

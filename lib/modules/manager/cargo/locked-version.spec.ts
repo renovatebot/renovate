@@ -1,7 +1,54 @@
+import { DirectoryResult, dir } from 'tmp-promise';
+import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
-import { parseLockFile } from './locked-version';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
+import { writeLocalFile } from '../../../util/fs';
+import { extractLockFileVersions, parseLockFile } from './locked-version';
 
 describe('modules/manager/cargo/locked-version', () => {
+  describe('extractLockFileVersions()', () => {
+    let adminConfig: RepoGlobalConfig;
+    let tmpDir: DirectoryResult;
+
+    beforeEach(async () => {
+      tmpDir = await dir({ unsafeCleanup: true });
+      adminConfig = {
+        localDir: join(tmpDir.path, 'local'),
+      };
+
+      GlobalConfig.set(adminConfig);
+    });
+
+    afterEach(async () => {
+      await tmpDir.cleanup();
+      GlobalConfig.reset();
+    });
+
+    it('returns empty map for missing lock file', async () => {
+      expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
+    });
+
+    it('returns empty map for invalid lock file', async () => {
+      await writeLocalFile('Cargo.lock', 'foo');
+      expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
+    });
+
+    it('returns a map of package versions', async () => {
+      await writeLocalFile('Cargo.lock', Fixtures.get('Cargo.7.lock'));
+      expect(await extractLockFileVersions('Cargo.lock')).toEqual(
+        new Map([
+          ['proc-macro2', ['1.0.66']],
+          ['quote', ['1.0.33']],
+          ['syn', ['1.0.1', '2.0.1']],
+          ['test', ['0.1.0']],
+          ['unicode-ident', ['1.0.11']],
+          ['unicode-xid', ['0.2.4']]
+        ])
+      );
+    });
+  });
+
   describe('parseLockFile', () => {
     it('parses v1 lockfile string into an object', () => {
       const lockFile = Fixtures.get('lockfile-parsing/Cargo.v1.lock');

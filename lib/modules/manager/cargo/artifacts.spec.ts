@@ -3,7 +3,9 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
+import { ExecError } from '../../../util/exec/exec-error';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from '.';
 
@@ -135,12 +137,95 @@ describe('modules/manager/cargo/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
+    ).toMatchObject([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'cargo update --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1',
       },
     ]);
+  });
+
+  it('logs the package that cargo failed to update', async () => {
+    const cmd =
+      'cargo update --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1';
+    const execError = new ExecError('Exec error', {
+      cmd,
+      stdout: '',
+      stderr: '',
+      options: { encoding: 'utf8' },
+    });
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll(execError);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toMatchObject([
+      { artifactError: { lockFile: 'Cargo.lock', stderr: 'Exec error' } },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd }]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err: execError },
+      'Could not update cargo package `dep1`.'
+    );
+  });
+
+  it('logs the package and error message when cargo failed to update', async () => {
+    const cmd =
+      'cargo update --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1';
+    const stderr = 'error: failed to select a version for `dep2`.';
+    const execError = new ExecError('Exec error', {
+      cmd,
+      stdout: '',
+      stderr,
+      options: { encoding: 'utf8' },
+    });
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll(execError);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toMatchObject([
+      { artifactError: { lockFile: 'Cargo.lock', stderr: 'Exec error' } },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd }]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err: execError },
+      'Could not update cargo package `dep1`: failed to select a version for `dep2`.'
+    );
   });
 
   it('updates Cargo.lock based on the packageName, when given', async () => {
