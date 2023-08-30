@@ -69,8 +69,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/osv-offline':
-        specifier: 1.3.3
-        version: 1.3.3
+        specifier: 1.3.4
+        version: 1.3.4
       '@renovatebot/pep440':
         specifier: 3.0.5
         version: 3.0.5
@@ -222,8 +222,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6
       luxon:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.4.2
+        version: 3.4.2
       markdown-it:
         specifier: 13.0.1
         version: 13.0.1
@@ -246,8 +246,8 @@ importers:
         specifier: 6.1.6
         version: 6.1.6
       openpgp:
-        specifier: 5.9.0
-        version: 5.9.0
+        specifier: 5.10.1
+        version: 5.10.1
       p-all:
         specifier: 3.0.0
         version: 3.0.0
@@ -2920,15 +2920,15 @@ packages:
       '@seald-io/nedb': 4.0.2
     dev: false
 
-  /@renovatebot/osv-offline@1.3.3:
-    resolution: {integrity: sha512-TBnChwdG022L3uc8z5pmklaFoZF/GPjhnNfe6uNNXcgOq1Yd+PCoF4fn+y8vq2Zkr7K4EAbL3WLUhZsoS+rfhQ==}
+  /@renovatebot/osv-offline@1.3.4:
+    resolution: {integrity: sha512-rJba46OHM9Eyq88+xxxBy5s4xi8AQXKe8UmRaJxqO+A0YcTXuPYpRMQmUc2czPhmqKWM9ua1a+bRDPaEZf7BkA==}
     dependencies:
       '@octokit/rest': 19.0.13
       '@renovatebot/osv-offline-db': 1.4.0
       adm-zip: 0.5.10
       fs-extra: 11.1.1
       got: 11.8.6
-      luxon: 3.4.0
+      luxon: 3.4.2
       node-fetch: 2.6.13
     transitivePeerDependencies:
       - encoding
@@ -5214,7 +5214,7 @@ packages:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      luxon: 3.4.0
+      luxon: 3.4.2
     dev: false
 
   /cross-spawn@6.0.5:
@@ -7952,8 +7952,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  /luxon@3.4.0:
-    resolution: {integrity: sha512-7eDo4Pt7aGhoCheGFIuq4Xa2fJm4ZpmldpGhjTYBNUYNCN6TIEP6v7chwwwt3KRp7YR+rghbfvjyo3V5y9hgBw==}
+  /luxon@3.4.2:
+    resolution: {integrity: sha512-uBoAVCVcajsrqy3pv7eo5jEUz1oeLmCcnMv8n4AJpT5hbpN9lUssAXibNElpbLce3Mhm9dyBzwYLs9zctM/0tA==}
     engines: {node: '>=12'}
     dev: false
 
@@ -8807,8 +8807,8 @@ packages:
       mimic-fn: 4.0.0
     dev: true
 
-  /openpgp@5.9.0:
-    resolution: {integrity: sha512-wEI6TAinCAq8ZLZA4oZ3ZtJ2BhhHj+CiPCd8TzE7zCicr0V8tvG5UF76OtddLLOJcK63w3Aj3KiRd+VLMScirQ==}
+  /openpgp@5.10.1:
+    resolution: {integrity: sha512-SR5Ft+ej51d0+p53ld5Ney0Yiz0y8Mh1YYLJrvpRMbTaNhvS1QcDX0Oq1rW9sjBnQXtgrpWw2Zve3rm7K5C/pw==}
     engines: {node: '>= 8.0.0'}
     dependencies:
       asn1.js: 5.4.1
