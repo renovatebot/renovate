@@ -4,12 +4,22 @@ This page explains the differences between Renovate and Dependabot.
 
 ## Table
 
-Create Markdown table with differences here.
+| Name of feature | Dependabot | Renovate |
+| ----------------| ---------- | -------- |
+| Dependency Dashboard | no | yes |
+| Grouped updates | Yes, but manual setup | Yes, with built-in groups |
+| Monorepo support | research | Yes |
+| Supported platforms | link here | link here |
+| Supported languages | link here | link here |
+| Customizability | low | high |
+| Show changelogs | yes | yes |
+| Compatibility score badges | 1 | 4 |
+| Built-in to GitHub | yes | no, requires app or self-hosting |
 
 ## Dependency Dashboard
 
 Big difference so we should highlight it.
-Link to the Dependency Dashboard key concepts page.
+Read the [Key concepts, Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) page to learn more.
 
 ## Grouped updates
 
@@ -23,17 +33,19 @@ Link to Dependabot docs if available.
 
 ## Supported platforms
 
-For a list of supported platforms see:
+Platform means the Git-hosting site or program, for example GitHub, GitLab or Azure.
 
-- Link to Renovate's list of supported platforms.
-- Link to Dependabot platform support list on GitHub Docs.
+Dependabot only works on GitHub.
+
+Renovate works on other platforms as well.
+Read the [list of Renovate platforms](https://docs.renovatebot.com/modules/platform/) to learn more.
 
 ## Supported languages
 
-For a list of supported programming languages see:
+Follow these links to learn what languages and ecosystems each bot supports:
 
-- Link to Renovate's list of supported languages
-- Link to Dependabot's list of supported languages
+- [Renovate's supported managers](https://docs.renovatebot.com/modules/manager/)
+- [GitHub Docs, Dependabot's supported repositories and ecosystems](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems)
 
 ## Customizability
 
@@ -41,15 +53,22 @@ Low for Dependabot, high for Renovate.
 
 ## Show changelogs
 
-Both show changelogs.
+Renovate and Dependabot show changelogs in their PRs.
 
-## Compatiblity score badges
+## Compatiblity score badge(s)
 
-Dependabot has badges that are similar to our Merge Confidence badges.
-Research the differences.
+Dependabot shows one compatibility score badge.
+This score tells you how many other repositories have passing CI tests for the proposed update.
+Read the [GitHub Docs, Dependabot's compatibility scores](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates#about-compatibility-scores) to learn more about Dependabot's badge.
 
-Link to docs for Merge Confidence.
-Link to GitHub docs for badges (if they have any).
+Renovate has four _Merge Confidence_ badges:
+
+- **Age**: The age of the package
+- **Adoption**: The percentage of this package's users (within Renovate) which are using this release
+- **Passing**: The percentage of updates which have passing tests for this package
+- **Confidence**: The confidence level for this update
+
+Read the [Merge Confidence badges](https://docs.renovatebot.com/merge-confidence/) page to learn more.
 
 ## Built-in to GitHub vs app
 
