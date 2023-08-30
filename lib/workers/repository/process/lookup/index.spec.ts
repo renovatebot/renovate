@@ -19,7 +19,6 @@ import { id as pep440VersioningId } from '../../../../modules/versioning/pep440'
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
 import type { HostRule } from '../../../../types';
 import * as memCache from '../../../../util/cache/memory';
-import * as githubGraphql from '../../../../util/github/graphql';
 import { initConfig, resetConfig } from '../../../../util/merge-confidence';
 import * as McApi from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
@@ -1235,15 +1234,16 @@ describe('workers/repository/process/lookup/index', () => {
 
       // Only mock calls once so that the second invocation results in
       // no digest being computable.
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
-        {
-          version: 'v2.0.0',
-          gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
-          hash: 'abc',
-        },
-      ]);
+      getGithubReleases.mockResolvedValueOnce({ releases: [] });
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01',
+          },
+        ],
+      });
 
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
@@ -1265,15 +1265,16 @@ describe('workers/repository/process/lookup/index', () => {
 
         // Only mock calls once so that the second invocation results in
         // no digest being computable.
-        jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
-        jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
-          {
-            version: 'v2.0.0',
-            gitRef: 'v2.0.0',
-            releaseTimestamp: '2022-01-01',
-            hash: 'abc',
-          },
-        ]);
+        getGithubReleases.mockResolvedValueOnce({ releases: [] });
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v2.0.0',
+              gitRef: 'v2.0.0',
+              releaseTimestamp: '2022-01-01',
+            },
+          ],
+        });
 
         const res = await lookup.lookupUpdates(config);
         expect(res.updates).toHaveLength(0);
@@ -2167,6 +2168,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
 
       it('gets a merge confidence level for a given update when corresponding packageRule is in use', async () => {
+        getMergeConfidenceSpy.mockRestore();
         const datasource = NpmDatasource.id;
         const packageName = 'webpack';
         const newVersion = '3.8.1';
