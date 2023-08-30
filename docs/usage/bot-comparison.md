@@ -6,14 +6,14 @@ This page explains the differences between Renovate and Dependabot.
 
 | Name of feature | Dependabot | Renovate |
 | ----------------| ---------- | -------- |
-| Dependency Dashboard | no | yes |
-| Grouped updates | Yes, but manual setup | Yes, with built-in groups |
+| Dependency Dashboard | No | Yes |
+| Grouped updates | Yes, you create groups | Yes, use built-in groups, or create your own |
 | Monorepo support | research | Yes |
-| Supported platforms | link here | link here |
-| Supported languages | link here | link here |
+| Supported platforms | GitHub only| multiple |
+| Supported languages | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/) |
 | Customizability | low | high |
 | Show changelogs | yes | yes |
-| Compatibility score badges | 1 | 4 |
+| Compatibility score badge(s) | 1 | 4 |
 | Built-in to GitHub | yes | no, requires app or self-hosting |
 
 ## Dependency Dashboard
