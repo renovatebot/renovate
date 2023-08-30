@@ -829,7 +829,7 @@ export class DockerDatasource extends Datasource {
       let tags: string[] = [];
       let url:
         | string
-        | undefined = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=100`;
+        | undefined = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
       do {
         const res: DockerHubTags = (await this.http.getJson<DockerHubTags>(url))
           .body;
@@ -899,7 +899,7 @@ export class DockerDatasource extends Datasource {
 
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags);
+      : findLatestStable(tags) ?? tags[tags.length - 1];
 
     // istanbul ignore if: needs test
     if (!latestTag) {
