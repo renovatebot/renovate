@@ -908,13 +908,7 @@ export class DockerDatasource extends Datasource {
         ? getDockerHubTags()
         : getTags();
 
-    const { val: releases, err } = await tagsResult
-      .transform((releases) =>
-        releases.length > 0
-          ? Result.ok(releases)
-          : Result.err('empty-result' as const)
-      )
-      .unwrap();
+    const { val: releases, err } = await tagsResult.unwrap();
     if (err instanceof Error) {
       throw err;
     } else if (err) {
