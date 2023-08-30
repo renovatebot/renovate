@@ -137,6 +137,7 @@ export interface FindPRConfig {
   prTitle?: string | null;
   state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
+  targetBranch?: string | null;
 }
 export interface MergePRConfig {
   branchName?: string;
@@ -203,7 +204,7 @@ export interface Platform {
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #7154
+    // TODO: can be undefined or null ? #22198
     context: string | null | undefined
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
@@ -219,7 +220,7 @@ export interface Platform {
     branchName: string,
     internalChecksAsSuccess: boolean
   ): Promise<BranchStatus>;
-  getBranchPr(branchName: string): Promise<Pr | null>;
+  getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;

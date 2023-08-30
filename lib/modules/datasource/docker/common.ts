@@ -291,11 +291,19 @@ export function extractDigestFromResponseBody(
 }
 
 export function findLatestStable(tags: string[]): string | null {
-  const versions = tags
-    .filter((v) => dockerVersioning.isValid(v) && dockerVersioning.isStable(v))
-    .sort((a, b) => dockerVersioning.sortVersions(a, b));
+  let stable: string | null = null;
 
-  return versions.pop() ?? tags.slice(-1).pop() ?? null;
+  for (const tag of tags) {
+    if (!dockerVersioning.isValid(tag) || !dockerVersioning.isStable(tag)) {
+      continue;
+    }
+
+    if (!stable || dockerVersioning.isGreaterThan(tag, stable)) {
+      stable = tag;
+    }
+  }
+
+  return stable;
 }
 
 const chartRepo = regEx(/charts?|helm|helm-charts/i);

@@ -9,7 +9,7 @@ import type { LazyPackageJson } from './utils';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
-    // TODO #7154
+    // TODO #22198
     const constraint = (await readLocalFile(filename, 'utf8'))!
       .split(newlineRegex)[0]
       .replace(regEx(/^v/), '');

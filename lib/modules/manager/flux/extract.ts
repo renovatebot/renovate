@@ -302,7 +302,7 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    // TODO #7154
+    // TODO #22198
     const manifest = readManifest(content!, file);
     if (manifest) {
       manifests.push(manifest);

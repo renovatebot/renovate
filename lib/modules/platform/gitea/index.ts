@@ -89,7 +89,7 @@ function toRenovateIssue(data: Issue): Issue {
   };
 }
 
-// TODO #7154
+// TODO #22198
 function toRenovatePR(data: PR): Pr | null {
   if (!data) {
     return null;
@@ -255,7 +255,7 @@ const platform: Platform = {
     repoName?: string,
     branchOrTag?: string
   ): Promise<any> {
-    // TODO #7154
+    // TODO #22198
     const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
     return JSON5.parse(raw);
   },
@@ -271,7 +271,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
 
-    // Attempt to fetch information about repository
+    // Try to fetch information about repository
     try {
       repo = await helper.getRepo(repository);
     } catch (err) {
@@ -474,7 +474,7 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (config.prList !== null) {
-        // TODO #7154
+        // TODO #22198
         (await config.prList).push(pr!);
       }
     }
@@ -692,9 +692,9 @@ const platform: Platform = {
     if (!issue) {
       return null;
     }
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.debug(`Found Issue #${issue.number!}`);
-    // TODO #7154
+    // TODO #22198
     return getIssue!(issue.number!);
   },
 
@@ -743,9 +743,9 @@ const platform: Platform = {
         // Close any duplicate issues
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             logger.warn({ issueNo: issue.number! }, 'Closing duplicate issue');
-            // TODO #7154
+            // TODO #22198
             await helper.closeIssue(config.repository, issue.number!);
           }
         }
@@ -757,18 +757,18 @@ const platform: Platform = {
           activeIssue.state === 'open'
         ) {
           logger.debug(
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             `Issue #${activeIssue.number!} is open and up to date - nothing to do`
           );
           return null;
         }
 
         // Update issue body and re-open if enabled
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         logger.debug(`Updating Issue #${activeIssue.number!}`);
         const existingIssue = await helper.updateIssue(
           config.repository,
-          // TODO #7154
+          // TODO #22198
           activeIssue.number!,
           {
             body,
@@ -789,7 +789,7 @@ const platform: Platform = {
         ) {
           await helper.updateIssueLabels(
             config.repository,
-            // TODO #7154
+            // TODO #22198
             activeIssue.number!,
             {
               labels,
@@ -823,7 +823,7 @@ const platform: Platform = {
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
         logger.debug(`Closing issue...issueNo: ${issue.number!}`);
-        // TODO #7154
+        // TODO #22198
         await helper.closeIssue(config.repository, issue.number!);
       }
     }
@@ -909,7 +909,7 @@ const platform: Platform = {
       return;
     }
 
-    // Attempt to delete comment
+    // Try to delete comment
     try {
       await helper.deleteComment(config.repository, comment.id);
     } catch (err) {

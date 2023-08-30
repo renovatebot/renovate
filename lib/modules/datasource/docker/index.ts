@@ -38,6 +38,7 @@ import {
   OciImageConfig,
   OciImageManifest,
 } from './schema';
+import type { DockerHubTags } from './types';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -782,7 +783,7 @@ export class DockerDatasource extends Datasource {
       registryUrl!
     );
     logger.debug(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
@@ -880,7 +881,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (manifestResponse) {
-        // TODO: fix types (#7154)
+        // TODO: fix types (#22198)
         logger.debug(`Got docker digest ${digest!}`);
       }
     } catch (err) /* istanbul ignore next */ {
@@ -899,6 +900,36 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
+  async getDockerHubTags(dockerRepository: string): Promise<string[] | null> {
+    if (!process.env.RENOVATE_X_DOCKER_HUB_TAGS) {
+      return null;
+    }
+    try {
+      let index = 0;
+      let tags: string[] = [];
+      let url:
+        | string
+        | undefined = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=100`;
+      do {
+        const res: DockerHubTags = (await this.http.getJson<DockerHubTags>(url))
+          .body;
+        tags = tags.concat(res.results.map((tag) => tag.name));
+        url = res.next;
+        index += 1;
+      } while (url && index < 100);
+      logger.debug(
+        `getDockerHubTags(${dockerRepository}): found ${tags.length} tags`
+      );
+      return tags;
+    } catch (err) {
+      logger.debug(
+        { dockerRepository, errMessage: err.message },
+        `No Docker Hub tags result - falling back to docker.io api`
+      );
+    }
+    return null;
+  }
+
   /**
    * docker.getReleases
    *
@@ -910,6 +941,20 @@ export class DockerDatasource extends Datasource {
    *
    * This function will filter only tags that contain a semver version
    */
+  @cache({
+    namespace: 'datasource-docker-releases',
+    key: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!
+      );
+      return `${registryHost}:${dockerRepository}`;
+    },
+    cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost } = getRegistryRepository(packageName, registryUrl!);
+      return registryHost === 'https://index.docker.io';
+    },
+  })
   async getReleases({
     packageName,
     registryUrl,
@@ -918,7 +963,11 @@ export class DockerDatasource extends Datasource {
       packageName,
       registryUrl!
     );
-    const tags = await this.getTags(registryHost, dockerRepository);
+    let tags: string[] | null = null;
+    if (registryHost === 'https://index.docker.io') {
+      tags = await this.getDockerHubTags(dockerRepository);
+    }
+    tags ??= await this.getTags(registryHost, dockerRepository);
     if (!tags) {
       return null;
     }
@@ -930,7 +979,7 @@ export class DockerDatasource extends Datasource {
 
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags);
+      : findLatestStable(tags) ?? tags[tags.length - 1];
 
     // istanbul ignore if: needs test
     if (!latestTag) {

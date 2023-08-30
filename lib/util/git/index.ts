@@ -2,7 +2,7 @@ import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-// TODO: check if bug is fixed (#7154)
+// TODO: check if bug is fixed (#22198)
 // eslint-disable-next-line import/no-named-as-default
 import simpleGit, {
   Options,
@@ -204,7 +204,7 @@ async function fetchBranchCommits(): Promise<void> {
   const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       opts.unshift(e[0], `${e[1]!}`)
     );
   }
@@ -426,7 +426,7 @@ export async function syncGit(): Promise<void> {
       }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
-          // TODO: types (#7154)
+          // TODO: types (#22198)
           opts.push(e[0], `${e[1]!}`)
         );
       }
@@ -1163,7 +1163,7 @@ export function getUrl({
   repository: string;
 }): string {
   if (protocol === 'ssh') {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     return `git@${hostname!}:${repository}.git`;
   }
   return URL.format({

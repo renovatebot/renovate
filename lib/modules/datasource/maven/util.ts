@@ -361,12 +361,12 @@ export async function createUrlForDependencyPom(
 
     // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
     if (fullVersion !== null) {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       return `${version}/${dependency.name}-${fullVersion}.pom`;
     }
   }
 
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   return `${version}/${dependency.name}-${version}.pom`;
 }
 

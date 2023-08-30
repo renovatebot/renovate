@@ -33,7 +33,7 @@ export async function getReleases(
       const version = getPkgProp(pkgInfo, 'Version');
       const releaseTimestamp = getPkgProp(pkgInfo, 'Published');
       dep.releases.push({
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         version: removeBuildMeta(`${version}`),
         releaseTimestamp,
       });

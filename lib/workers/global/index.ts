@@ -35,7 +35,7 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const platform = GlobalConfig.get('platform')!;
   repoConfig.localDir =
     platform === 'local'

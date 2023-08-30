@@ -7,7 +7,7 @@ export function updateLockedDependency(
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
-  // TODO: fix types (#7154)
+  // TODO: fix types (#22198)
   logger.debug(
     `terraform.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
