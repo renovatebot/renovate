@@ -401,6 +401,7 @@ export async function validateConfig(
             }
             if (key === 'regexManagers') {
               const allowedKeys = [
+                'customType',
                 'description',
                 'fileMatch',
                 'matchStrings',
@@ -431,53 +432,60 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  if (is.nonEmptyArray(regexManager.matchStrings)) {
-                    let validRegex = false;
-                    for (const matchString of regexManager.matchStrings) {
-                      try {
-                        regEx(matchString);
-                        validRegex = true;
-                      } catch (e) {
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message: `Invalid regExp for ${currentPath}: \`${String(
-                            matchString
-                          )}\``,
-                        });
-                      }
-                    }
-                    if (validRegex) {
-                      const mandatoryFields = [
-                        'depName',
-                        'currentValue',
-                        'datasource',
-                      ];
-                      for (const field of mandatoryFields) {
-                        if (
-                          !regexManager[`${field}Template`] &&
-                          !regexManager.matchStrings.some(
-                            (matchString: string) =>
-                              matchString.includes(`(?<${field}>`)
-                          )
-                        ) {
+                } else if (is.nonEmptyString(regexManager.customType)) {
+                  if (is.nonEmptyArray(regexManager.fileMatch)) {
+                    if (is.nonEmptyArray(regexManager.matchStrings)) {
+                      let validRegex = false;
+                      for (const matchString of regexManager.matchStrings) {
+                        try {
+                          regEx(matchString);
+                          validRegex = true;
+                        } catch (e) {
                           errors.push({
                             topic: 'Configuration Error',
-                            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                            message: `Invalid regExp for ${currentPath}: \`${String(
+                              matchString
+                            )}\``,
                           });
                         }
                       }
+                      if (validRegex) {
+                        const mandatoryFields = [
+                          'depName',
+                          'currentValue',
+                          'datasource',
+                        ];
+                        for (const field of mandatoryFields) {
+                          if (
+                            !regexManager[`${field}Template`] &&
+                            !regexManager.matchStrings.some(
+                              (matchString: string) =>
+                                matchString.includes(`(?<${field}>`)
+                            )
+                          ) {
+                            errors.push({
+                              topic: 'Configuration Error',
+                              message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+                            });
+                          }
+                        }
+                      }
+                    } else {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                      });
                     }
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+                      message: `Each Regex Manager must contain a non-empty fileMatch array`,
                     });
                   }
                 } else {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a non-empty fileMatch array`,
+                    message: `Each Regex Manager must contain a non-empty customType string`,
                   });
                 }
               }

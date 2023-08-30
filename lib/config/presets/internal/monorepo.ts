@@ -293,7 +293,10 @@ const repoGroups = {
   javascriptengineswitcher:
     'https://github.com/Taritsyn/JavaScriptEngineSwitcher',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
-  jest: 'https://github.com/facebook/jest',
+  jest: [
+    'https://github.com/facebook/jest', // old repo
+    'https://github.com/jestjs/jest',
+  ],
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',

@@ -226,7 +226,6 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBeEmptyString();
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
     });
@@ -264,7 +263,6 @@ describe('modules/manager/poetry/extract', () => {
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBe('');
       expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
     });

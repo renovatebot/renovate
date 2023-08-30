@@ -9,6 +9,9 @@ import { logger } from '../../../../logger';
 import { readSystemFile } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
+  if (upath.basename(file) === '.renovaterc') {
+    return JSON5.parse(await readSystemFile(file, 'utf8'));
+  }
   switch (upath.extname(file)) {
     case '.yaml':
     case '.yml':
@@ -72,7 +75,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     }
   }
 
-  await deleteNonDefaultConfig(env); // Attempt deletion only if RENOVATE_CONFIG_FILE is specified
+  await deleteNonDefaultConfig(env); // Try deletion only if RENOVATE_CONFIG_FILE is specified
 
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {

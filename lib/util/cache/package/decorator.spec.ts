@@ -206,6 +206,38 @@ describe('util/cache/package/decorator', () => {
       );
     });
 
+    it('overrides soft ttl and updates result', async () => {
+      GlobalConfig.set({
+        cacheTtlOverride: { namespace: 2 },
+        cacheHardTtlMinutes: 3,
+      });
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        3
+      );
+
+      jest.advanceTimersByTime(120 * 1000 - 1); // namespace default ttl is 1min
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(1);
+      expect(await obj.getReleases()).toBe('222');
+      expect(getValue).toHaveBeenCalledTimes(2);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '222' },
+        3
+      );
+    });
+
     it('returns obsolete result on error', async () => {
       const obj = new Class();
 
