@@ -165,9 +165,9 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   }
 
   if (
-    foundRules.certificateAuthority !== null ||
-    foundRules.privateKey !== null ||
-    foundRules.certificate !== null
+    is.nonEmptyString(foundRules.certificateAuthority) ||
+    is.nonEmptyString(foundRules.privateKey) ||
+    is.nonEmptyString(foundRules.certificate)
   ) {
     options.https = {
       certificateAuthority: foundRules.certificateAuthority,
