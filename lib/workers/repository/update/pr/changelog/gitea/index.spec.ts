@@ -3,8 +3,10 @@ import * as httpMock from '../../../../../../../test/http-mock';
 import { partial } from '../../../../../../../test/util';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../../util/host-rules';
+import { toBase64 } from '../../../../../../util/string';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { GiteaChangeLogSource } from '../gitea/source';
+import { getReleaseNotesMd } from '.';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -109,26 +111,86 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         .get('/api/v1/repos/meno/dropzone/tags')
         .times(8)
         .reply(200, [
-          { name: 'v5.2.0' },
-          { name: 'v5.4.0' },
-          { name: 'v5.5.0' },
-          { name: 'v5.6.0' },
-          { name: 'v5.6.1' },
-          { name: 'v5.7.0' },
+          {
+            name: 'v5.2.0',
+            commit: { sha: 'abc', created: '2023-07-27T06:19:02Z' },
+          },
+          {
+            name: 'v5.4.0',
+            commit: { sha: 'abc', created: '2023-07-27T06:19:02Z' },
+          },
+          {
+            name: 'v5.5.0',
+            commit: { sha: 'abc', created: '2023-07-27T06:19:02Z' },
+          },
+          {
+            name: 'v5.6.0',
+            commit: { sha: 'abc', created: '2023-07-27T06:19:02Z' },
+          },
+          {
+            name: 'v5.6.1',
+            commit: { sha: 'abc', created: '2023-07-27T06:19:02Z' },
+          },
+          {
+            name: 'v5.7.0',
+            commit: { sha: 'abc', created: '2023-07-27T06:19:02Z' },
+          },
         ])
         .get('/api/v1/repos/meno/dropzone/contents')
         .times(4)
         .reply(200, [])
         .get('/api/v1/repos/meno/dropzone/releases?draft=false')
         .times(4)
-        .reply(200, []);
+        .reply(200, [
+          {
+            name: 'v5.2.0',
+            tag_name: 'v5.2.0',
+            body: '',
+            prerelease: false,
+            published_at: '2023-07-27T06:19:02Z',
+          },
+          {
+            name: 'v5.4.0',
+            tag_name: 'v5.4.0',
+            body: '',
+            prerelease: false,
+            published_at: '2023-07-27T06:19:02Z',
+          },
+          {
+            name: 'v5.5.0',
+            tag_name: 'v5.5.0',
+            body: '',
+            prerelease: false,
+            published_at: '2023-07-27T06:19:02Z',
+          },
+          {
+            name: 'v5.6.0',
+            tag_name: 'v5.6.0',
+            body: '',
+            prerelease: false,
+            published_at: '2023-07-27T06:19:02Z',
+          },
+          {
+            name: '5.6.1 - Some feature',
+            tag_name: 'v5.6.1',
+            body: 'some changes',
+            prerelease: false,
+            published_at: '2023-07-27T06:19:02Z',
+          },
+          {
+            name: 'v5.7.0',
+            tag_name: 'v5.7.0',
+            body: '',
+            prerelease: false,
+            published_at: '2023-07-27T06:19:02Z',
+          },
+        ]);
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchObject({
-        // TODO: fix me
-        // hasReleaseNotes: true,
+        hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://gitea.com/api/v1/',
           baseUrl: 'https://gitea.com/',
@@ -139,7 +201,17 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           type: 'gitea',
         },
         versions: [
-          { version: '5.6.1' },
+          {
+            version: '5.6.1',
+            releaseNotes: {
+              body: 'some changes\n',
+              name: '5.6.1 - Some feature',
+              notesSourceUrl:
+                'https://gitea.com/api/v1/repos/meno/dropzone/releases',
+              tag: 'v5.6.1',
+              url: 'https://gitea.com/api/v1/repos/meno/dropzone/releases/tag/v5.6.1',
+            },
+          },
           { version: '5.6.0' },
           { version: '5.5.0' },
           { version: '5.4.0' },
@@ -387,6 +459,39 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       expect(
         await changelogSource.getAllTags('https://git.test.com/', 'some/repo')
       ).toEqual([]);
+    });
+  });
+
+  describe('getReleaseNotesMd', () => {
+    it('works', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get('/api/v1/repos/some/repo/contents/charts/some')
+        .reply(200, [
+          {
+            name: 'CHANGELOG.md',
+            path: 'charts/some/CHANGELOG.md',
+            type: 'file',
+            content: null,
+          },
+        ])
+        .get('/api/v1/repos/some/repo/contents/charts/some/CHANGELOG.md')
+        .reply(200, {
+          name: 'CHANGELOG.md',
+          path: 'charts/some/CHANGELOG.md',
+          type: 'file',
+          content: toBase64('some content'),
+        });
+      expect(
+        await getReleaseNotesMd(
+          'some/repo',
+          'https://git.test.com/api/v1/',
+          'charts/some'
+        )
+      ).toEqual({
+        changelogFile: 'charts/some/CHANGELOG.md',
+        changelogMd: 'some content\n#\n##',
+      });
     });
   });
 });
