@@ -9,7 +9,7 @@ import type { Release } from '../types';
 interface DockerHubRelease {
   version: string;
   newDigest: string;
-  releaseTimestamp: string;
+  releaseTimestamp?: string;
 }
 
 const DockerHubTag = z
@@ -17,7 +17,7 @@ const DockerHubTag = z
     id: z.number().transform((id) => id.toString()),
     name: z.string(),
     digest: z.string(),
-    tag_last_pushed: z.string(),
+    tag_last_pushed: z.string().optional(),
   })
   .transform(
     ({
@@ -25,14 +25,18 @@ const DockerHubTag = z
       name,
       digest,
       tag_last_pushed,
-    }): { id: string; release: DockerHubRelease } => ({
-      id,
-      release: {
+    }): { id: string; release: DockerHubRelease } => {
+      const release: DockerHubRelease = {
         version: name,
         newDigest: digest,
-        releaseTimestamp: tag_last_pushed,
-      },
-    })
+      };
+
+      if (tag_last_pushed) {
+        release.releaseTimestamp = tag_last_pushed;
+      }
+
+      return { id, release };
+    }
   );
 type DockerHubTag = z.infer<typeof DockerHubTag>;
 
@@ -41,7 +45,7 @@ const DockerHubTagsPage = z
     next: z.string().nullable(),
     results: LooseArray(DockerHubTag, {
       onError: /* istanbul ignore next */ ({ error, input: tags }) => {
-        logger.warn(
+        logger.debug(
           { error, input: tags },
           'Docker: Failed to parse some tags from Docker Hub'
         );
