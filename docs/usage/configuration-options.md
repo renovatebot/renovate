@@ -1558,7 +1558,7 @@ To adjust it down to 10s for all queries, do this:
 
 ### httpsCertificateAuthority
 
-`httpsCertificateAuthority` overrides any trusted CA certificate.
+`httpsCertificateAuthority` overrides the trusted CA certificate that defaults to the curated list of well-known CAs by Mozilla.
 
 ### httpsPrivateKey
 
