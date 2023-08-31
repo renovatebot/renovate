@@ -3,6 +3,7 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { HelmDatasource } from '../../datasource/helm';
+import { DockerDatasource } from '../../datasource/docker';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -11,6 +12,7 @@ import type {
 import type { HelmsmanDocument } from './types';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
+const ociChartRegex = regEx('^(?<registryRef>oci:\/\/[^\/]*)\/(?<packageName>([^\/]\/?)*$');
 
 function createDep(
   key: string,
@@ -30,6 +32,28 @@ function createDep(
     return dep;
   }
   dep.currentValue = anApp.version;
+
+  // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
+  const ociRegexResult = anApp.chart ? ociChartRegex.exec(anApp.chart) : null;
+  if (ociRegexResult && ociRegexResult.groups) {
+
+    if (!is.nonEmptyString(ociRegexResult.groups.packageName)) {
+      dep.skipReason = 'invalid-name';
+      return dep;
+    }
+
+    if (!is.nonEmptyString(ociRegexResult.groups.registryRef)) {
+      dep.skipReason = 'no-repository';
+      return dep;
+    }
+
+    dep.datasource = DockerDatasource.id
+    const ociRegistryUrl = ociRegexResult.groups.registryRef.replace('oci://', '');
+    dep.registryUrls = [ociRegistryUrl];
+    dep.packageName = ociRegistryUrl + ociRegexResult.groups.packageName;
+
+    return dep;
+  }
 
   const regexResult = anApp.chart ? chartRegex.exec(anApp.chart) : null;
   if (!regexResult?.groups) {
@@ -63,8 +87,8 @@ export function extractPackageFile(
     const doc = load(content, {
       json: true,
     }) as HelmsmanDocument;
-    if (!(doc?.helmRepos && doc.apps)) {
-      logger.debug({ packageFile }, `Missing helmRepos and/or apps keys`);
+    if (!(doc.apps)) {
+      logger.debug({ packageFile }, `Missing apps keys`);
       return null;
     }
 
