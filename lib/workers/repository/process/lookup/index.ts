@@ -389,6 +389,10 @@ export async function lookupUpdates(
           update.newVersion = versioning.valueToVersion(update.newVersion!);
         }
       }
+      if (res.registryUrl) {
+        config.registryUrls = [res.registryUrl];
+      }
+
       // update digest for all
       for (const update of res.updates) {
         if (pinDigests === true || currentDigest) {
