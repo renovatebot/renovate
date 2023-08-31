@@ -1588,11 +1588,21 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags?page_size=1000')
         .reply(200, {
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000`,
-          results: [{ name: '1.0.0' }],
+          results: [
+            {
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+            },
+          ],
         })
         .get('/library/node/tags?page=2&page_size=1000')
         .reply(200, {
-          results: [{ name: '0.9.0' }],
+          results: [
+            {
+              name: '0.9.0',
+              tag_last_pushed: '2020-01-01T00:00:00.000Z',
+            },
+          ],
         });
       httpMock
         .scope(baseUrl)
@@ -1604,7 +1614,16 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'docker.io/node',
       });
-      expect(res?.releases).toHaveLength(2);
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.9.0',
+          releaseTimestamp: '2020-01-01T00:00:00.000Z',
+        },
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
+        },
+      ]);
     });
 
     it('adds no library/ prefix for other registries', async () => {

@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { Json } from '../../../util/schema-utils';
+import { logger } from '../../../logger';
+import { Json, LooseArray } from '../../../util/schema-utils';
+import type { Release } from '../types';
 
 // OCI manifests
 
@@ -152,3 +154,35 @@ export const Manifest = ManifestObject.passthrough()
 
 export type Manifest = z.infer<typeof Manifest>;
 export const ManifestJson = Json.pipe(Manifest);
+
+export const DockerHubTag = z
+  .object({
+    name: z.string(),
+    tag_last_pushed: z.string().datetime().nullable().catch(null),
+  })
+  .transform(({ name, tag_last_pushed }) => {
+    const release: Release = { version: name };
+
+    if (tag_last_pushed) {
+      release.releaseTimestamp = tag_last_pushed;
+    }
+
+    return release;
+  });
+
+export const DockerHubTagsPage = z
+  .object({
+    next: z.string().nullable().catch(null),
+    results: LooseArray(DockerHubTag, {
+      onError: /* istanbul ignore next */ ({ error }) => {
+        logger.debug(
+          { error },
+          'Docker: Failed to parse some tags from Docker Hub'
+        );
+      },
+    }),
+  })
+  .transform(({ next, results }) => ({
+    nextPage: next,
+    items: results,
+  }));
