@@ -304,23 +304,22 @@ export class DockerDatasource extends Datasource {
         return manifest;
       case 'application/vnd.docker.distribution.manifest.list.v2+json':
       case 'application/vnd.oci.image.index.v1+json':
-        if (manifest.manifests.length) {
-          logger.trace(
-            { registry, dockerRepository, tag },
-            'Found manifest list, using first image'
-          );
-          return this.getManifest(
-            registry,
-            dockerRepository,
-            manifest.manifests[0].digest
-          );
-        } else {
-          logger.debug(
+        if (!manifest.manifests.length) {
+            logger.debug(
             { manifest },
             'Invalid manifest list with no manifests - returning'
           );
           return null;
         }
+        logger.trace(
+          { registry, dockerRepository, tag },
+          'Found manifest list, using first image'
+        );
+        return this.getManifest(
+          registry,
+          dockerRepository,
+          manifest.manifests[0].digest
+        );
       // istanbul ignore next: can't happen
       default:
         return null;
