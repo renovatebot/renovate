@@ -305,7 +305,7 @@ export class DockerDatasource extends Datasource {
       case 'application/vnd.docker.distribution.manifest.list.v2+json':
       case 'application/vnd.oci.image.index.v1+json':
         if (!manifest.manifests.length) {
-            logger.debug(
+          logger.debug(
             { manifest },
             'Invalid manifest list with no manifests - returning'
           );
