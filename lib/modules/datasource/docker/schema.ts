@@ -159,12 +159,17 @@ export const DockerHubTag = z
   .object({
     name: z.string(),
     tag_last_pushed: z.string().datetime().nullable().catch(null),
+    digest: z.string().nullable().catch(null),
   })
-  .transform(({ name, tag_last_pushed }) => {
+  .transform(({ name, tag_last_pushed, digest }) => {
     const release: Release = { version: name };
 
     if (tag_last_pushed) {
       release.releaseTimestamp = tag_last_pushed;
+    }
+
+    if (digest) {
+      release.newDigest = digest;
     }
 
     return release;
