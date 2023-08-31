@@ -21,7 +21,10 @@ export async function checkConfigMigrationBranch(
   }
   const configMigrationBranch = getMigrationBranchName(config);
 
-  const branchPr = await migrationPrExists(configMigrationBranch); // handles open/autoClosed PRs
+  const branchPr = await migrationPrExists(
+    configMigrationBranch,
+    config.baseBranch
+  ); // handles open/autoClosed PRs
 
   if (!branchPr) {
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
@@ -33,6 +36,7 @@ export async function checkConfigMigrationBranch(
       branchName: configMigrationBranch,
       prTitle,
       state: 'closed',
+      targetBranch: config.baseBranch,
     };
 
     // handles closed PR
@@ -54,7 +58,8 @@ export async function checkConfigMigrationBranch(
     await rebaseMigrationBranch(config, migratedConfigData);
     if (platform.refreshPr) {
       const configMigrationPr = await platform.getBranchPr(
-        configMigrationBranch
+        configMigrationBranch,
+        config.baseBranch
       );
       if (configMigrationPr) {
         await platform.refreshPr(configMigrationPr.number);
@@ -71,8 +76,11 @@ export async function checkConfigMigrationBranch(
   return configMigrationBranch;
 }
 
-export async function migrationPrExists(branchName: string): Promise<boolean> {
-  return !!(await platform.getBranchPr(branchName));
+export async function migrationPrExists(
+  branchName: string,
+  targetBranch?: string
+): Promise<boolean> {
+  return !!(await platform.getBranchPr(branchName, targetBranch));
 }
 
 async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {

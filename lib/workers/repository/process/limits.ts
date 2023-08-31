@@ -49,7 +49,7 @@ export async function getConcurrentPrsRemaining(
       const openPrs: Pr[] = [];
       for (const { branchName } of branches) {
         try {
-          const pr = await platform.getBranchPr(branchName);
+          const pr = await platform.getBranchPr(branchName, config.baseBranch);
           if (
             pr &&
             pr.sourceBranch !== config.onboardingBranch &&

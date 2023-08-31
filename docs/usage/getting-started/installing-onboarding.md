@@ -4,7 +4,7 @@
 
 Renovate administrators can configure Renovate to either "autodiscover" installed repositories, or configure a fixed list of repository names to operate on.
 
-If the administrator has configured a fixed list of repositories then the only way to "install" Renovate on an additional repository is for it to be manually added for the next run or restart.
+If the administrator has configured a fixed list of repositories then the only way to "install" Renovate on a extra repository is for it to be manually added for the next run or restart.
 
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
