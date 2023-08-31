@@ -2349,7 +2349,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'certificateAuthority',
+    name: 'httpsCertificateAuthority',
     description: 'The overriding trusted CA certificate',
     type: 'string',
     stage: 'repository',
@@ -2359,7 +2359,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'privateKey',
+    name: 'httpsPrivateKey',
     description: 'The private key in PEM format',
     type: 'string',
     stage: 'repository',
@@ -2369,7 +2369,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'certificate',
+    name: 'httpsCertificate',
     description: 'The certificate chains in PEM format',
     type: 'string',
     stage: 'repository',

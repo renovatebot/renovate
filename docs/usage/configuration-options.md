@@ -1556,15 +1556,15 @@ To adjust it down to 10s for all queries, do this:
 }
 ```
 
-### certificateAuthority
+### httpsCertificateAuthority
 
-`certificateAuthority` overrides any trusted CA certificate.
+`httpsCertificateAuthority` overrides any trusted CA certificate.
 
-### privateKey
+### httpsPrivateKey
 
 Specifies the private key for mTLS authentication.
 
-### certificate
+### httpsCertificate
 
 Specifies the certificate chain in PEM format for mTLS authentication.
 

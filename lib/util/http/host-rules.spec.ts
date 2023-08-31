@@ -152,7 +152,7 @@ describe('util/http/host-rules', () => {
     hostRules.add({
       hostType: 'maven',
       matchHost: 'https://custom.datasource.ca',
-      certificateAuthority: 'ca-cert',
+      httpsCertificateAuthority: 'ca-cert',
     });
 
     expect(
@@ -174,7 +174,7 @@ describe('util/http/host-rules', () => {
     hostRules.add({
       hostType: 'maven',
       matchHost: 'https://custom.datasource.key',
-      privateKey: 'key',
+      httpsPrivateKey: 'key',
     });
     expect(
       applyHostRules('https://custom.datasource.key/data/path', {
@@ -195,7 +195,7 @@ describe('util/http/host-rules', () => {
     hostRules.add({
       hostType: 'maven',
       matchHost: 'https://custom.datasource.cert',
-      certificate: 'cert',
+      httpsCertificate: 'cert',
     });
 
     expect(
