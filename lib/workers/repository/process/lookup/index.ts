@@ -394,9 +394,8 @@ export async function lookupUpdates(
         if (pinDigests === true || currentDigest) {
           // TODO #22198
           update.newDigest ??=
-            dependency?.releases?.find(
-              (release) => release.version === update.newVersion
-            )?.newDigest ?? (await getDigest(config, update.newValue))!;
+            dependency?.releases.find((r) => r.version === update.newValue)
+              ?.newDigest ?? (await getDigest(config, update.newValue))!;
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.
