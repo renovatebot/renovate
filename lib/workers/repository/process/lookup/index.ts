@@ -367,9 +367,6 @@ export async function lookupUpdates(
             updateType: 'digest',
             // TODO #22198
             newValue: currentValue!,
-            newDigest: dependency?.releases.find(
-              (r) => r.version === currentValue
-            )?.newDigest,
           });
         }
       } else if (pinDigests) {
@@ -396,8 +393,9 @@ export async function lookupUpdates(
       for (const update of res.updates) {
         if (pinDigests === true || currentDigest) {
           // TODO #22198
-          update.newDigest =
-            update.newDigest ?? (await getDigest(config, update.newValue))!;
+          update.newDigest ??=
+            dependency?.releases.find((r) => r.version === update.newValue)
+              ?.newDigest ?? (await getDigest(config, update.newValue))!;
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.
