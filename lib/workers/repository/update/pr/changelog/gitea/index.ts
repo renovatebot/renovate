@@ -26,9 +26,10 @@ export async function getReleaseNotesMd(
   logger.trace('gitea.getReleaseNotesMd()');
   const apiPrefix = `${apiBaseUrl}repos/${repository}/contents`;
 
+  const sourceDir = sourceDirectory ? `/${sourceDirectory}` : ''
   const tree = (
     await http.getJson(
-      `${apiPrefix}${sourceDirectory ? `/${sourceDirectory}` : ''}`,
+      `${apiPrefix}${sourceDir}`,
       {
         paginate: false, // no pagination yet
       },
@@ -44,6 +45,7 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
+
   const { path: changelogFile } = files.shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
@@ -61,6 +63,7 @@ export async function getReleaseNotesMd(
     return null;
   }
   const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
+
   return { changelogFile, changelogMd };
 }
 
