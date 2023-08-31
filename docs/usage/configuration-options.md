@@ -1562,7 +1562,7 @@ To adjust it down to 10s for all queries, do this:
 
 ### httpsPrivateKey
 
-Specifies the private key for mTLS authentication.
+Specifies the private key in PEM format for mTLS authentication. **Note: a Private Key MUST NOT be specified directly here to avoid losing confidentiality completely. Use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.**
 
 ### httpsCertificate
 
