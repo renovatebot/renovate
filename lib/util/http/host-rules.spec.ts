@@ -334,4 +334,30 @@ describe('util/http/host-rules', () => {
       token: 'cdef',
     });
   });
+
+  it('no fallback to gitea', () => {
+    hostRules.add({
+      hostType: 'gitea-tags',
+      token: 'abc',
+    });
+    expect(applyHostRules(url, { ...options, hostType: 'gitea-tags' })).toEqual(
+      {
+        context: {
+          authType: undefined,
+        },
+        hostType: 'gitea-tags',
+        token: 'abc',
+      }
+    );
+  });
+
+  it('fallback to gitea', () => {
+    expect(applyHostRules(url, { ...options, hostType: 'gitea-tags' })).toEqual(
+      {
+        hostType: 'gitea-tags',
+        password: 'password',
+        username: undefined,
+      }
+    );
+  });
 });

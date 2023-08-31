@@ -159,6 +159,27 @@ describe('util/result', () => {
         const res = Result.err('oops');
         expect(() => res.unwrapOrThrow()).toThrow('oops');
       });
+
+      it('unwrapOrNull returns value for ok-result', () => {
+        const res = Result.ok(42);
+        expect(res.unwrapOrNull()).toBe(42);
+      });
+
+      it('unwrapOrNull returns null for error result', () => {
+        const res = Result.err('oops');
+        expect(res.unwrapOrNull()).toBeNull();
+      });
+
+      it('unwrapOrNull throws uncaught transform error', () => {
+        const res = Result.ok(42);
+        expect(() =>
+          res
+            .transform(() => {
+              throw 'oops';
+            })
+            .unwrapOrNull()
+        ).toThrow('oops');
+      });
     });
 
     describe('Transforming', () => {
@@ -236,13 +257,13 @@ describe('util/result', () => {
           .transform((x) => x.toUpperCase())
           .nullish();
 
-        expect(Result.parse(schema, 'foo')).toEqual(Result.ok('FOO'));
+        expect(Result.parse('foo', schema)).toEqual(Result.ok('FOO'));
 
-        expect(Result.parse(schema, 42).unwrap()).toMatchObject({
+        expect(Result.parse(42, schema).unwrap()).toMatchObject({
           err: { issues: [{ message: 'Expected string, received number' }] },
         });
 
-        expect(Result.parse(schema, undefined).unwrap()).toMatchObject({
+        expect(Result.parse(undefined, schema).unwrap()).toMatchObject({
           err: {
             issues: [
               {
@@ -252,7 +273,7 @@ describe('util/result', () => {
           },
         });
 
-        expect(Result.parse(schema, null).unwrap()).toMatchObject({
+        expect(Result.parse(null, schema).unwrap()).toMatchObject({
           err: {
             issues: [
               {
@@ -276,6 +297,34 @@ describe('util/result', () => {
         });
 
         expect(Result.err('oops').parse(schema)).toEqual(Result.err('oops'));
+      });
+    });
+
+    describe('Handlers', () => {
+      it('supports value handlers', () => {
+        const cb = jest.fn();
+        Result.ok(42).onValue(cb);
+        expect(cb).toHaveBeenCalledWith(42);
+      });
+
+      it('supports error handlers', () => {
+        const cb = jest.fn();
+        Result.err('oops').onError(cb);
+        expect(cb).toHaveBeenCalledWith('oops');
+      });
+
+      it('handles error thrown in value handler', () => {
+        const res = Result.ok(42).onValue(() => {
+          throw 'oops';
+        });
+        expect(res).toEqual(Result._uncaught('oops'));
+      });
+
+      it('handles error thrown in error handler', () => {
+        const res = Result.err('oops').onError(() => {
+          throw 'oops';
+        });
+        expect(res).toEqual(Result._uncaught('oops'));
       });
     });
   });
@@ -372,6 +421,16 @@ describe('util/result', () => {
       it('rejects for error for unwrapOrThrow', async () => {
         const res = Result.wrap(Promise.reject('oops'));
         await expect(res.unwrapOrThrow()).rejects.toBe('oops');
+      });
+
+      it('unwrapOrNull returns value for ok-result', async () => {
+        const res = AsyncResult.ok(42);
+        await expect(res.unwrapOrNull()).resolves.toBe(42);
+      });
+
+      it('unwrapOrNull returns null for error result', async () => {
+        const res = AsyncResult.err('oops');
+        await expect(res.unwrapOrNull()).resolves.toBeNull();
       });
     });
 
@@ -587,6 +646,34 @@ describe('util/result', () => {
           throw 'oops';
         })
         .parse(z.number().transform((x) => x + 1));
+      expect(res).toEqual(Result._uncaught('oops'));
+    });
+  });
+
+  describe('Handlers', () => {
+    it('supports value handlers', async () => {
+      const cb = jest.fn();
+      await AsyncResult.ok(42).onValue(cb);
+      expect(cb).toHaveBeenCalledWith(42);
+    });
+
+    it('supports error handlers', async () => {
+      const cb = jest.fn();
+      await AsyncResult.err('oops').onError(cb);
+      expect(cb).toHaveBeenCalledWith('oops');
+    });
+
+    it('handles error thrown in value handler', async () => {
+      const res = await AsyncResult.ok(42).onValue(() => {
+        throw 'oops';
+      });
+      expect(res).toEqual(Result._uncaught('oops'));
+    });
+
+    it('handles error thrown in error handler', async () => {
+      const res = await AsyncResult.err('oops').onError(() => {
+        throw 'oops';
+      });
       expect(res).toEqual(Result._uncaught('oops'));
     });
   });

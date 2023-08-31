@@ -451,7 +451,7 @@ exports[`workers/repository/dependency-dashboard ensureDependencyDashboard() con
 
 ## Repository problems
 
-These problems occurred while renovating this repository.
+Renovate tried to run on this repository, but found these problems.
 
  - ERROR: everything is broken
  - WARN: just a bit
