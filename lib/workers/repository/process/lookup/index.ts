@@ -367,6 +367,9 @@ export async function lookupUpdates(
             updateType: 'digest',
             // TODO #22198
             newValue: currentValue!,
+            newDigest: dependency?.releases.find(
+              (r) => r.version === currentValue
+            )?.newDigest,
           });
         }
       } else if (pinDigests) {
