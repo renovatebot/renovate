@@ -1793,6 +1793,7 @@ describe('workers/repository/process/lookup/index', () => {
         releases: [
           {
             version: '8.0.0',
+            newDigest: 'sha256:0123456789abcdef',
           },
           {
             version: '8.1.0',
@@ -1800,7 +1801,6 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
