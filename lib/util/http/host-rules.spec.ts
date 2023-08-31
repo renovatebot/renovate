@@ -46,14 +46,6 @@ describe('util/http/host-rules', () => {
       hostType: 'bitbucket',
       token: 'cdef',
     });
-
-    hostRules.add({
-      hostType: 'maven',
-      matchHost: 'https://custom.datasource',
-      certificateAuthority: 'ca-cert',
-      certificate: 'cert',
-      privateKey: 'key',
-    });
   });
 
   afterEach(() => {
@@ -156,9 +148,58 @@ describe('util/http/host-rules', () => {
     `);
   });
 
-  it('https', () => {
+  it('certificateAuthority', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.ca',
+      certificateAuthority: 'ca-cert',
+    });
+
     expect(
-      applyHostRules('https://custom.datasource/data/path', {
+      applyHostRules('https://custom.datasource.ca/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "certificateAuthority": "cert-ca",
+        },
+      }
+    `);
+  });
+
+  it('privateKey', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.key',
+      privateKey: 'key',
+    });
+    expect(
+      applyHostRules('https://custom.datasource.key/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "key": "key",
+        },
+      }
+    `);
+  });
+
+  it('certificate', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.cert',
+      certificate: 'cert',
+    });
+
+    expect(
+      applyHostRules('https://custom.datasource.cert/data/path', {
         ...options,
         hostType: 'maven',
       })
@@ -167,8 +208,6 @@ describe('util/http/host-rules', () => {
         "hostType": "maven",
         "https": {
           "certificate": "cert",
-          "certificateAuthority": "ca-cert",
-          "key": "key",
         },
       }
     `);
