@@ -164,7 +164,7 @@ describe('util/http/host-rules', () => {
       {
         "hostType": "maven",
         "https": {
-          "certificateAuthority": "cert-ca",
+          "certificateAuthority": "ca-cert",
         },
       }
     `);
