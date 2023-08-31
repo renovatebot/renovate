@@ -43,7 +43,7 @@ describe('modules/manager/cargo/locked-version', () => {
           ['syn', ['1.0.1', '2.0.1']],
           ['test', ['0.1.0']],
           ['unicode-ident', ['1.0.11']],
-          ['unicode-xid', ['0.2.4']]
+          ['unicode-xid', ['0.2.4']],
         ])
       );
     });
