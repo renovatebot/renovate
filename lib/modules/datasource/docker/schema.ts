@@ -134,7 +134,7 @@ export type Manifest = z.infer<typeof Manifest>;
 export const DockerHubTag = z
   .object({
     name: z.string(),
-    tag_last_pushed: z.string().nullable().catch(null),
+    tag_last_pushed: z.string().datetime().nullable().catch(null),
   })
   .transform(({ name, tag_last_pushed }) => {
     const release: Release = { version: name };
