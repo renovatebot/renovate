@@ -164,17 +164,27 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
     options.http2 = true;
   }
 
-  if (
-    is.nonEmptyString(foundRules.certificateAuthority) ||
-    is.nonEmptyString(foundRules.privateKey) ||
-    is.nonEmptyString(foundRules.certificate)
-  ) {
+  if (is.nonEmptyString(foundRules.certificateAuthority)) {
     options.https = {
+      ...(options.https ?? {}),
       certificateAuthority: foundRules.certificateAuthority,
-      key: foundRules.privateKey,
-      certificate: foundRules.certificate,
-    };
+    }
   }
+
+  if (is.nonEmptyString(foundRules.privateKey)) {
+    options.https = {
+      ...(options.https ?? {}),
+      key: foundRules.privateKey,
+    }
+  }
+
+  if (is.nonEmptyString(foundRules.certificate)) {
+    options.https = {
+      ...(options.https ?? {}),
+      certificate: foundRules.certificate,
+    }
+  }
+
   return options;
 }
 
