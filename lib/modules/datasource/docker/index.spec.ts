@@ -1086,11 +1086,7 @@ describe('modules/datasource/docker/index', () => {
           {
             link: `<${baseUrl}/library/node/tags/list?n=1&page=2>; rel="next", `,
           }
-        )
-        .get('/')
-        .reply(200)
-        .get('/library/node/manifests/1.0.1')
-        .reply(200);
+        );
 
       const config = {
         datasource: DockerDatasource.id,
@@ -1563,11 +1559,7 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
         })
         .get('/library/node/tags/list?n=10000')
-        .reply(200, { tags }, {})
-        .get('/')
-        .reply(200)
-        .get('/library/node/manifests/1.0.0')
-        .reply(200);
+        .reply(200, { tags }, {});
       httpMock
         .scope(authUrl)
         .get(
@@ -1604,12 +1596,6 @@ describe('modules/datasource/docker/index', () => {
             },
           ],
         });
-      httpMock
-        .scope(baseUrl)
-        .get('/')
-        .reply(200)
-        .get('/library/node/manifests/1.0.0')
-        .reply(200);
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'docker.io/node',
