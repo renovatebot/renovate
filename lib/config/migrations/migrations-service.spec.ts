@@ -106,7 +106,7 @@ describe('config/migrations/migrations-service', () => {
       .map((file) => file.name)
       .filter((name) => !name.includes('spec.ts'));
 
-    expect(MigrationsService.customMigrations.length).toBe(
+    expect(MigrationsService.customMigrations).toHaveLength(
       allDefinedMigrationClasses.length
     );
   });
