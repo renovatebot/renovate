@@ -69,8 +69,7 @@ export class GithubTagsDatasource extends Datasource {
     const sourceUrl = getSourceUrl(repo, registryUrl);
     const tagsResult = await queryTags(config, this.http);
     const releases: Release[] = tagsResult.map(
-      ({ version, releaseTimestamp, gitRef, hash }) => ({
-        newDigest: hash,
+      ({ version, releaseTimestamp, gitRef }) => ({
         version,
         releaseTimestamp,
         gitRef,

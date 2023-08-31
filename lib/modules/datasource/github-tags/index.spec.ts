@@ -163,14 +163,12 @@ describe('modules/datasource/github-tags/index', () => {
             version: 'v1.0.0',
             releaseTimestamp: '2021-01-01T00:00:00.000Z',
             isStable: true,
-            newDigest: '123',
           },
           {
             gitRef: 'v2.0.0',
             version: 'v2.0.0',
             releaseTimestamp: '2022-01-01T00:00:00.000Z',
             isStable: false,
-            newDigest: 'abc',
           },
         ],
 
