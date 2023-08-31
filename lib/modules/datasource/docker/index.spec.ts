@@ -1584,6 +1584,7 @@ describe('modules/datasource/docker/index', () => {
             {
               name: '1.0.0',
               tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
             },
           ],
         })
@@ -1593,6 +1594,7 @@ describe('modules/datasource/docker/index', () => {
             {
               name: '0.9.0',
               tag_last_pushed: '2020-01-01T00:00:00.000Z',
+              digest: 'bbb',
             },
           ],
         });
