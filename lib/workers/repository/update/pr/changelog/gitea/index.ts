@@ -26,7 +26,7 @@ export async function getReleaseNotesMd(
   logger.trace('gitea.getReleaseNotesMd()');
   const apiPrefix = `${apiBaseUrl}repos/${repository}/contents`;
 
-  const sourceDir = sourceDirectory ? `/${sourceDirectory}` : ''
+  const sourceDir = sourceDirectory ? `/${sourceDirectory}` : '';
   const tree = (
     await http.getJson(
       `${apiPrefix}${sourceDir}`,
@@ -60,6 +60,7 @@ export async function getReleaseNotesMd(
   );
   // istanbul ignore if: should never happen
   if (!fileRes.body.content) {
+    logger.debug(`Missing content for changelog file, using ${changelogFile}`);
     return null;
   }
   const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
