@@ -863,7 +863,7 @@ export class DockerDatasource extends Datasource {
    * This function will filter only tags that contain a semver version
    */
   @cache({
-    namespace: 'datasource-docker-releases',
+    namespace: 'datasource-docker-releases-v2',
     key: ({ registryUrl, packageName }: GetReleasesConfig) => {
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
