@@ -7,6 +7,7 @@ import { HttpError } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
+import { type AsyncResult, Result } from '../../../util/result';
 import { isDockerDigest } from '../../../util/string';
 import {
   ensurePathPrefix,
@@ -15,7 +16,12 @@ import {
 } from '../../../util/url';
 import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 import { isArtifactoryServer } from '../util';
 import {
   DOCKER_HUB,
@@ -29,8 +35,11 @@ import {
   sourceLabels,
 } from './common';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
-import type { Manifest, OciImageConfig } from './schema';
-import type { DockerHubTags } from './types';
+import {
+  DockerHubTagsPage,
+  type Manifest,
+  type OciImageConfig,
+} from './schema';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -820,34 +829,26 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
-  async getDockerHubTags(dockerRepository: string): Promise<string[] | null> {
-    if (!process.env.RENOVATE_X_DOCKER_HUB_TAGS) {
-      return null;
+  async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
+    const result: Release[] = [];
+    let url:
+      | null
+      | string = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
+    while (url) {
+      const { val, err } = await this.http
+        .getJsonSafe(url, DockerHubTagsPage)
+        .unwrap();
+
+      if (err) {
+        logger.debug({ err }, `Docker: error fetching data from DockerHub`);
+        return null;
+      }
+
+      result.push(...val.items);
+      url = val.nextPage;
     }
-    try {
-      let index = 0;
-      let tags: string[] = [];
-      let url:
-        | string
-        | undefined = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=100`;
-      do {
-        const res: DockerHubTags = (await this.http.getJson<DockerHubTags>(url))
-          .body;
-        tags = tags.concat(res.results.map((tag) => tag.name));
-        url = res.next;
-        index += 1;
-      } while (url && index < 100);
-      logger.debug(
-        `getDockerHubTags(${dockerRepository}): found ${tags.length} tags`
-      );
-      return tags;
-    } catch (err) {
-      logger.debug(
-        { dockerRepository, errMessage: err.message },
-        `No Docker Hub tags result - falling back to docker.io api`
-      );
-    }
-    return null;
+
+    return result;
   }
 
   /**
@@ -883,20 +884,43 @@ export class DockerDatasource extends Datasource {
       packageName,
       registryUrl!
     );
-    let tags: string[] | null = null;
-    if (registryHost === 'https://index.docker.io') {
-      tags = await this.getDockerHubTags(dockerRepository);
-    }
-    tags ??= await this.getTags(registryHost, dockerRepository);
-    if (!tags) {
+
+    type TagsResultType = AsyncResult<
+      Release[],
+      NonNullable<Error | 'tags-error' | 'dockerhub-error'>
+    >;
+
+    const getTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getTags(registryHost, dockerRepository),
+        'tags-error' as const
+      ).transform((tags) => tags.map((version) => ({ version })));
+
+    const getDockerHubTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getDockerHubTags(dockerRepository),
+        'dockerhub-error' as const
+      ).catch(getTags);
+
+    const tagsResult =
+      registryHost === 'https://index.docker.io' &&
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+        ? getDockerHubTags()
+        : getTags();
+
+    const { val: releases, err } = await tagsResult.unwrap();
+    if (err instanceof Error) {
+      throw err;
+    } else if (err) {
       return null;
     }
-    const releases = tags.map((version) => ({ version }));
+
     const ret: ReleaseResult = {
       registryUrl: registryHost,
       releases,
     };
 
+    const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
       : findLatestStable(tags) ?? tags[tags.length - 1];
