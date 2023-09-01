@@ -1,13 +1,16 @@
 import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import { mocked, partial } from '../../../../test/util';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import {
   dockerDatasourceId,
+  findHelmSourceUrl,
+  findLatestStable,
   getAuthHeaders,
   getRegistryRepository,
 } from './common';
+import type { OciHelmConfig } from './schema';
 
 const hostRules = mocked(_hostRules);
 
@@ -185,5 +188,39 @@ describe('modules/datasource/docker/common', () => {
         }
       `);
     });
+  });
+
+  it('findLatestStable works', () => {
+    expect(findLatestStable([])).toBeNull();
+  });
+
+  it('findHelmSourceUrl works', () => {
+    expect(
+      findHelmSourceUrl(
+        partial<OciHelmConfig>({
+          home: 'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+        })
+      )
+    ).toBe('https://github.com/bitnami/charts/tree/main/bitnami/harbor');
+
+    expect(findHelmSourceUrl(partial<OciHelmConfig>({}))).toBeNull();
+
+    expect(
+      findHelmSourceUrl(
+        partial<OciHelmConfig>({
+          sources: [
+            'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+          ],
+        })
+      )
+    ).toBe('https://github.com/bitnami/charts/tree/main/bitnami/harbor');
+
+    expect(
+      findHelmSourceUrl(
+        partial<OciHelmConfig>({
+          sources: ['https://some.test'],
+        })
+      )
+    ).toBe('https://some.test');
   });
 });
