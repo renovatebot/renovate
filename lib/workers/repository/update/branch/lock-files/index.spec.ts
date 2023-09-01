@@ -2,8 +2,6 @@ import { fs, git, mocked } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update';
 import * as npm from '../../../../../modules/manager/npm/post-update/npm';
-import * as pnpm from '../../../../../modules/manager/npm/post-update/pnpm';
-import * as yarn from '../../../../../modules/manager/npm/post-update/yarn';
 import type { PostUpdateConfig } from '../../../../../modules/manager/types';
 import * as _hostRules from '../../../../../util/host-rules';
 
@@ -81,12 +79,6 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');
       jest.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
-        lockFile: 'some lock file contents',
-      });
-      jest.spyOn(yarn, 'generateLockFile').mockResolvedValueOnce({
-        lockFile: 'some lock file contents',
-      });
-      jest.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
       jest.spyOn(lockFiles, 'determineLockFileDirs');

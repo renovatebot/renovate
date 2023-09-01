@@ -4,7 +4,6 @@ import { Fixtures } from '../../../../../../test/fixtures';
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
 const input01Content = readFixture('inputs/01.json');
-const input01GlobContent = readFixture('inputs/01-glob.json');
 const input01PMContent = readFixture('inputs/01-package-manager.json');
 
 describe('modules/manager/pnpm/update/dependency/index', () => {
@@ -114,50 +113,6 @@ describe('modules/manager/pnpm/update/dependency/index', () => {
       expect(res).toContain('v1.1.0');
     });
 
-    it('updates resolutions too', () => {
-      const upgrade = {
-        depType: 'dependencies',
-        depName: 'config',
-        newValue: '1.22.0',
-      };
-      const testContent = npmUpdater.updateDependency({
-        fileContent: input01Content,
-        upgrade,
-      });
-      expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
-      expect(JSON.parse(testContent!).resolutions.config).toBe('1.22.0');
-    });
-
-    it('updates glob resolutions', () => {
-      const upgrade = {
-        depType: 'dependencies',
-        depName: 'config',
-        newValue: '1.22.0',
-      };
-      const testContent = npmUpdater.updateDependency({
-        fileContent: input01GlobContent,
-        upgrade,
-      });
-      expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
-      expect(JSON.parse(testContent!).resolutions['**/config']).toBe('1.22.0');
-    });
-
-    it('updates glob resolutions without dep', () => {
-      const upgrade = {
-        depType: 'resolutions',
-        depName: '@angular/cli',
-        managerData: { key: '**/@angular/cli' },
-        newValue: '8.1.0',
-      };
-      const testContent = npmUpdater.updateDependency({
-        fileContent: input01Content,
-        upgrade,
-      });
-      expect(JSON.parse(testContent!).resolutions['**/@angular/cli']).toBe(
-        '8.1.0'
-      );
-    });
-
     it('replaces only the first instance of a value', () => {
       const upgrade = {
         depType: 'devDependencies',
@@ -252,49 +207,6 @@ describe('modules/manager/pnpm/update/dependency/index', () => {
       });
       expect(JSON.parse(testContent!).dependencies.config).toBeUndefined();
       expect(JSON.parse(testContent!).dependencies.abc).toBe('2.0.0');
-    });
-
-    it('replaces glob package resolutions', () => {
-      const upgrade = {
-        depType: 'dependencies',
-        depName: 'config',
-        newName: 'abc',
-        newValue: '2.0.0',
-      };
-      const testContent = npmUpdater.updateDependency({
-        fileContent: input01GlobContent,
-        upgrade,
-      });
-      expect(JSON.parse(testContent!).resolutions.config).toBeUndefined();
-      expect(JSON.parse(testContent!).resolutions['**/abc']).toBe('2.0.0');
-    });
-
-    it('pins also the version in patch with npm protocol in resolutions', () => {
-      const upgrade = {
-        depType: 'dependencies',
-        depName: 'lodash',
-        newValue: '4.17.21',
-      };
-      const outputContent = readFixture('outputs/patch1o.json');
-      const testContent = npmUpdater.updateDependency({
-        fileContent: readFixture('inputs/patch1.json'),
-        upgrade,
-      });
-      expect(testContent).toEqual(outputContent);
-    });
-
-    it('replaces also the version in patch with range in resolutions', () => {
-      const upgrade = {
-        depType: 'dependencies',
-        depName: 'metro',
-        newValue: '^0.60.0',
-      };
-      const outputContent = readFixture('outputs/patch2o.json');
-      const testContent = npmUpdater.updateDependency({
-        fileContent: readFixture('inputs/patch2.json'),
-        upgrade,
-      });
-      expect(testContent).toEqual(outputContent);
     });
 
     it('handles override dependency', () => {

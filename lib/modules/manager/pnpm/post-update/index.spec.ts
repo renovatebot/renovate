@@ -1,7 +1,6 @@
 // TODO: add tests
 import upath from 'upath';
-import { Fixtures } from '../../../../../test/fixtures';
-import { fs, git, partial, scm } from '../../../../../test/util';
+import { fs, partial, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { PostUpdateConfig } from '../../types';
 import * as pnpm from './pnpm';
@@ -15,8 +14,6 @@ import {
 
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
-jest.mock('./npm');
-jest.mock('./yarn');
 jest.mock('./pnpm');
 
 describe('modules/manager/pnpm/post-update/index', () => {
@@ -25,25 +22,6 @@ describe('modules/manager/pnpm/post-update/index', () => {
   const additionalFiles: AdditionalPackageFiles = {
     npm: [
       { packageFile: 'dummy.txt' },
-      {
-        packageFile: 'packages/core/package.json',
-        managerData: {
-          npmLock: 'package-lock.json',
-        },
-        npmrc: '#dummy',
-      },
-      {
-        packageFile: 'packages/cli/package.json',
-        managerData: {
-          yarnLock: 'yarn.lock',
-        },
-      },
-      {
-        packageFile: 'packages/test/package.json',
-        managerData: {
-          yarnLock: 'yarn.lock',
-        },
-      },
       {
         packageFile: 'packages/pnpm/package.json',
         managerData: {
@@ -81,18 +59,6 @@ describe('modules/manager/pnpm/post-update/index', () => {
           },
           lockFiles: ['randomFolder/package-lock.json'],
           rangeStrategy: 'pin',
-        },
-        {
-          isLockfileUpdate: true,
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
-        },
-        {
-          managerData: {
-            yarnLock: 'yarn.lock',
-          },
-          isLockfileUpdate: true,
         },
       ],
       updatedPackageFiles: [
@@ -156,50 +122,12 @@ describe('modules/manager/pnpm/post-update/index', () => {
           additionalFiles
         )
       ).toStrictEqual({
-        npmLockDirs: ['package-lock.json', 'randomFolder/package-lock.json'],
         pnpmShrinkwrapDirs: ['packages/pnpm/pnpm-lock.yaml'],
-        yarnLockDirs: ['yarn.lock'],
-      });
-    });
-
-    it('lockfile maintenance', () => {
-      expect(
-        determineLockFileDirs(
-          {
-            ...baseConfig,
-            upgrades: [
-              {
-                isLockfileUpdate: true,
-                managerData: {
-                  yarnLock: 'yarn.lock',
-                },
-              },
-            ],
-          },
-          {}
-        )
-      ).toStrictEqual({
-        npmLockDirs: [],
-        pnpmShrinkwrapDirs: [],
-        yarnLockDirs: ['yarn.lock'],
       });
     });
   });
 
   describe('writeExistingFiles()', () => {
-    it('works', async () => {
-      git.getFile.mockResolvedValueOnce(
-        Fixtures.get('update-lockfile-massage-1/package-lock.json')
-      );
-      await expect(
-        writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
-      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
-    });
-
     it('works no reuse lockfiles', async () => {
       await expect(
         writeExistingFiles(
@@ -208,11 +136,7 @@ describe('modules/manager/pnpm/post-update/index', () => {
         )
       ).resolves.toBeUndefined();
 
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.deleteLocalFile.mock.calls).toEqual([
-        ['package-lock.json'],
-        ['yarn.lock'],
-        ['yarn.lock'],
         ['packages/pnpm/pnpm-lock.yaml'],
       ]);
     });
@@ -262,19 +186,6 @@ describe('modules/manager/pnpm/post-update/index', () => {
       );
     });
 
-    it('works only on relevant folders', async () => {
-      git.getFile.mockResolvedValueOnce(
-        Fixtures.get('update-lockfile-massage-1/package-lock.json')
-      );
-      await expect(
-        writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
-      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
-    });
-
     it('has no npm files', async () => {
       await expect(writeExistingFiles(baseConfig, {})).toResolve();
     });
@@ -286,7 +197,7 @@ describe('modules/manager/pnpm/post-update/index', () => {
         ...updateConfig,
         upgrades: [{ gitRef: true }],
       });
-      expect(fs.writeLocalFile).toHaveBeenCalledTimes(6);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(5);
     });
 
     it('missing updated packages files', async () => {

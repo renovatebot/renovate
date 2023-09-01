@@ -1,6 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs, scm } from '../../../../../test/util';
-import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
 
@@ -175,12 +174,8 @@ describe('modules/manager/yarn/extract/index', () => {
         'package.json',
         defaultExtractConfig
       );
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
-      );
       expect(res).toMatchObject({
         managerData: {
-          npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
         },
       });
@@ -822,9 +817,7 @@ describe('modules/manager/yarn/extract/index', () => {
           extractedConstraints: {},
           managerData: {
             hasPackageManager: false,
-            npmLock: undefined,
             packageJsonName: 'renovate',
-            pnpmShrinkwrap: undefined,
             workspacesPackages: undefined,
             yarnLock: undefined,
             yarnZeroInstall: false,
@@ -832,7 +825,6 @@ describe('modules/manager/yarn/extract/index', () => {
           npmrc: undefined,
           packageFile: 'package.json',
           packageFileVersion: '1.0.0',
-          skipInstalls: true,
         },
       ]);
     });

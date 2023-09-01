@@ -6,12 +6,10 @@ import * as _yarn from './yarn';
 
 const yarn = mocked(_yarn);
 
-jest.mock('./npm');
 jest.mock('./yarn', () => ({
   ...jest.requireActual<any>('./yarn'),
   getYarnLock: jest.fn(),
 }));
-jest.mock('./pnpm');
 
 describe('modules/manager/yarn/extract/locked-versions', () => {
   describe('.getLockedVersions()', () => {

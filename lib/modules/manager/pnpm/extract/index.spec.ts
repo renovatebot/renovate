@@ -1,6 +1,5 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs, scm } from '../../../../../test/util';
-import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
 
@@ -141,51 +140,6 @@ describe('modules/manager/pnpm/extract/index', () => {
       });
     });
 
-    it('finds a lock file', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'yarn.lock') {
-          return Promise.resolve('# yarn.lock');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          yarnLock: 'yarn.lock',
-        },
-      });
-    });
-
-    it('warns when multiple lock files found', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'yarn.lock') {
-          return Promise.resolve('# yarn.lock');
-        }
-        if (fileName === 'package-lock.json') {
-          return Promise.resolve('# package-lock.json');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
-      );
-      expect(res).toMatchObject({
-        managerData: {
-          npmLock: 'package-lock.json',
-          yarnLock: 'yarn.lock',
-        },
-      });
-    });
-
     it('finds and filters .npmrc', async () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.npmrc') {
@@ -256,42 +210,6 @@ describe('modules/manager/pnpm/extract/index', () => {
         {}
       );
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
-    });
-
-    it('reads registryUrls from .yarnrc.yml', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === '.yarnrc.yml') {
-          return Promise.resolve(
-            'npmRegistryServer: https://registry.example.com'
-          );
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input02Content,
-        'package.json',
-        {}
-      );
-      expect(
-        res?.deps.flatMap((dep) => dep.registryUrls)
-      ).toBeArrayIncludingOnly(['https://registry.example.com']);
-    });
-
-    it('reads registryUrls from .yarnrc', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === '.yarnrc') {
-          return Promise.resolve('registry "https://registry.example.com"');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input02Content,
-        'package.json',
-        {}
-      );
-      expect(
-        res?.deps.flatMap((dep) => dep.registryUrls)
-      ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
     it('extracts engines', async () => {
@@ -826,13 +744,10 @@ describe('modules/manager/pnpm/extract/index', () => {
             packageJsonName: 'renovate',
             pnpmShrinkwrap: undefined,
             workspacesPackages: undefined,
-            yarnLock: undefined,
-            yarnZeroInstall: false,
           },
           npmrc: undefined,
           packageFile: 'package.json',
           packageFileVersion: '1.0.0',
-          skipInstalls: true,
         },
       ]);
     });

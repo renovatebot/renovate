@@ -1,18 +1,14 @@
 // TODO: add tests
 import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
-import { fs, git, logger, partial, scm } from '../../../../../test/util';
+import { fs, git, partial, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import type { FileChange } from '../../../../util/git/types';
 import type { PostUpdateConfig } from '../../types';
 import * as npm from './npm';
-import * as pnpm from './pnpm';
 import type { AdditionalPackageFiles } from './types';
-import * as yarn from './yarn';
 import {
   determineLockFileDirs,
   getAdditionalFiles,
-  updateYarnBinary,
   writeExistingFiles,
   writeUpdatedPackageFiles,
 } from './';
@@ -20,8 +16,6 @@ import {
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./npm');
-jest.mock('./yarn');
-jest.mock('./pnpm');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -301,104 +295,11 @@ describe('modules/manager/npm/post-update/index', () => {
     });
   });
 
-  describe('updateYarnBinary()', () => {
-    const lockFileDir = `path/to/lockfile`;
-    const oldYarnrcYml = `yarnPath: .yarn/releases/yarn-3.0.1.cjs\na: b\n`;
-    const newYarnrcYml = `yarnPath: .yarn/releases/yarn-3.0.2.cjs\nc: d\n`;
-    const newYarn = `new yarn\n`;
-
-    it('should update the Yarn binary', async () => {
-      git.getFile.mockResolvedValueOnce(oldYarnrcYml);
-      fs.readLocalFile.mockResolvedValueOnce(newYarnrcYml);
-      fs.readLocalFile.mockResolvedValueOnce(newYarn);
-      const updatedArtifacts: FileChange[] = [];
-      const yarnrcYmlContent = await updateYarnBinary(
-        lockFileDir,
-        updatedArtifacts,
-        undefined
-      );
-      expect(yarnrcYmlContent).toBeUndefined();
-      expect(updatedArtifacts).toMatchSnapshot();
-    });
-
-    it('should return .yarnrc.yml content if it has been overwritten', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(newYarnrcYml);
-      fs.readLocalFile.mockResolvedValueOnce(newYarn);
-      const updatedArtifacts: FileChange[] = [];
-      const existingYarnrcYmlContent = await updateYarnBinary(
-        lockFileDir,
-        updatedArtifacts,
-        oldYarnrcYml
-      );
-      expect(git.getFile).not.toHaveBeenCalled();
-      expect(existingYarnrcYmlContent).toMatchSnapshot();
-      expect(updatedArtifacts).toMatchSnapshot();
-    });
-
-    it("should not update the Yarn binary if the old .yarnrc.yml doesn't exist", async () => {
-      git.getFile.mockResolvedValueOnce(null);
-      fs.readLocalFile.mockResolvedValueOnce(newYarnrcYml);
-      const updatedArtifacts: FileChange[] = [];
-      const yarnrcYmlContent = await updateYarnBinary(
-        lockFileDir,
-        updatedArtifacts,
-        undefined
-      );
-      expect(yarnrcYmlContent).toBeUndefined();
-      expect(updatedArtifacts).toBeEmpty();
-    });
-
-    it("should not update the Yarn binary if the new .yarnrc.yml doesn't exist", async () => {
-      git.getFile.mockResolvedValueOnce(oldYarnrcYml);
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
-      const updatedArtifacts: FileChange[] = [];
-      const yarnrcYmlContent = await updateYarnBinary(
-        lockFileDir,
-        updatedArtifacts,
-        undefined
-      );
-      expect(yarnrcYmlContent).toBeUndefined();
-      expect(updatedArtifacts).toBeEmpty();
-    });
-
-    it("should return existing .yarnrc.yml if the new one doesn't exist", async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
-      const updatedArtifacts: FileChange[] = [];
-      const existingYarnrcYmlContent = await updateYarnBinary(
-        lockFileDir,
-        updatedArtifacts,
-        oldYarnrcYml
-      );
-      expect(existingYarnrcYmlContent).toMatch(oldYarnrcYml);
-      expect(updatedArtifacts).toBeEmpty();
-    });
-
-    it('should support Yarn with corepack', async () => {
-      git.getFile.mockResolvedValueOnce('');
-      fs.readLocalFile.mockResolvedValueOnce('');
-      fs.readLocalFile.mockResolvedValueOnce('');
-      const updatedArtifacts: FileChange[] = [];
-      const yarnrcYmlContent = await updateYarnBinary(
-        lockFileDir,
-        updatedArtifacts,
-        ''
-      );
-      expect(yarnrcYmlContent).toBe('');
-      expect(updatedArtifacts).toEqual([]);
-      expect(logger.logger.debug).not.toHaveBeenCalled();
-      expect(logger.logger.error).not.toHaveBeenCalled();
-    });
-  });
-
   describe('getAdditionalFiles()', () => {
     const spyNpm = jest.spyOn(npm, 'generateLockFile');
-    const spyYarn = jest.spyOn(yarn, 'generateLockFile');
-    const spyPnpm = jest.spyOn(pnpm, 'generateLockFile');
 
     beforeEach(() => {
       spyNpm.mockResolvedValue({});
-      spyPnpm.mockResolvedValue({});
-      spyYarn.mockResolvedValue({});
     });
 
     it('works', async () => {
@@ -442,61 +343,7 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['randomFolder/.npmrc'],
-        ['packages/pnpm/.npmrc'],
       ]);
-    });
-
-    it('works for yarn', async () => {
-      spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-      expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [
-          {
-            type: 'addition',
-            path: 'yarn.lock',
-            contents: '{}',
-          },
-        ],
-      });
-      expect(fs.deleteLocalFile).toHaveBeenCalled();
-    });
-
-    it('works for pnpm', async () => {
-      spyPnpm.mockResolvedValueOnce({
-        error: false,
-        lockFile: 'some-contents:',
-      });
-      expect(
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-            upgrades: [
-              {
-                isRemediation: true,
-                packageFile: 'packages/pnpm/package.json',
-              },
-            ],
-          },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [
-          {
-            type: 'addition',
-            path: 'packages/pnpm/pnpm-lock.yaml',
-            contents: 'some-contents:',
-          },
-        ],
-      });
-      expect(fs.deleteLocalFile).toHaveBeenCalled();
     });
 
     it('no npm files', async () => {
@@ -579,43 +426,6 @@ describe('modules/manager/npm/post-update/index', () => {
       ).toStrictEqual({
         artifactErrors: [
           { lockFile: 'package-lock.json', stderr: 'some-error' },
-        ],
-        updatedArtifacts: [],
-      });
-    });
-
-    it('fails for yarn', async () => {
-      spyYarn.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
-      expect(
-        await getAdditionalFiles(
-          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
-        updatedArtifacts: [],
-      });
-    });
-
-    it('fails for pnpm', async () => {
-      spyPnpm.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
-      expect(
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            upgrades: [
-              {
-                isRemediation: true,
-                packageFile: 'packages/pnpm/package.json',
-              },
-            ],
-          },
-          additionalFiles
-        )
-      ).toStrictEqual({
-        artifactErrors: [
-          { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
       });

@@ -19,13 +19,6 @@ import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
-import { isZeroInstall } from './yarn';
-import {
-  YarnConfig,
-  loadConfigFromLegacyYarnrc,
-  loadConfigFromYarnrcYml,
-  resolveRegistryUrl,
-} from './yarnrc';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -151,21 +144,6 @@ export async function extractPackageFile(
     npmrc = config.npmrc;
   }
 
-  const yarnrcYmlFileName = getSiblingFileName(packageFile, '.yarnrc.yml');
-  const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
-
-  let yarnConfig: YarnConfig | null = null;
-  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
-  if (is.string(repoYarnrcYml)) {
-    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
-  }
-
-  const legacyYarnrcFileName = getSiblingFileName(packageFile, '.yarnrc');
-  const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
-  if (is.string(repoLegacyYarnrc)) {
-    yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
-  }
-
   let hasFancyRefs = false;
 
   const depTypes = {
@@ -282,12 +260,6 @@ export async function extractPackageFile(
       dep.skipReason = 'file';
       hasFancyRefs = true;
       return dep;
-    }
-    if (yarnConfig) {
-      const registryUrlFromYarnConfig = resolveRegistryUrl(depName, yarnConfig);
-      if (registryUrlFromYarnConfig) {
-        dep.registryUrls = [registryUrlFromYarnConfig];
-      }
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
@@ -463,7 +435,7 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    if ((hasFancyRefs && lockFiles.npmLock) || yarnZeroInstall) {
+    if (hasFancyRefs && lockFiles.npmLock) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
@@ -483,7 +455,6 @@ export async function extractPackageFile(
     managerData: {
       ...lockFiles,
       packageJsonName,
-      yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager
       ),
@@ -497,7 +468,7 @@ export async function extractPackageFile(
 export async function postExtract(
   packageFiles: PackageFile<NpmManagerData>[]
 ): Promise<void> {
-  await detectMonorepos(packageFiles);
+  detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
 

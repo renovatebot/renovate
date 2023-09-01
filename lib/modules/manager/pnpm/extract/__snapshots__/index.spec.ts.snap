@@ -17,12 +17,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() catches invali
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": true,
 }
 `;
 
@@ -136,12 +133,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts engin
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": true,
 }
 `;
 
@@ -313,12 +307,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts non-n
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": true,
 }
 `;
 
@@ -355,16 +346,13 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts npm p
   "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": "package-lock.json",
+    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": false,
 }
 `;
 
@@ -390,12 +378,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts packa
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": true,
 }
 `;
 
@@ -462,12 +447,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts volta
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": true,
 }
 `;
 
@@ -513,145 +495,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts volta
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": true,
-}
-`;
-
-exports[`modules/manager/pnpm/extract/index .extractPackageFile() finds a lock file 1`] = `
-{
-  "deps": [
-    {
-      "currentValue": "6.5.0",
-      "datasource": "npm",
-      "depName": "autoprefixer",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "~1.6.0",
-      "datasource": "npm",
-      "depName": "bower",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "13.1.0",
-      "datasource": "npm",
-      "depName": "browserify",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "0.9.2",
-      "datasource": "npm",
-      "depName": "browserify-css",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "=0.22.0",
-      "datasource": "npm",
-      "depName": "cheerio",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "depName": "enabled",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-      "skipReason": "invalid-value",
-    },
-    {
-      "currentValue": "^1.5.8",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-touch",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-sanitize",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "4.0.0-beta.1",
-      "datasource": "npm",
-      "depName": "@angular/core",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "resolutions",
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "8.0.0",
-      "datasource": "npm",
-      "depName": "@angular/cli",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/@angular/cli",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.33.0",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/angular",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.0.0",
-      "datasource": "npm",
-      "depName": "glob",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "config/glob",
-      },
-      "prettyDepType": "resolutions",
-    },
-  ],
-  "extractedConstraints": {},
-  "managerData": {
-    "hasPackageManager": false,
-    "npmLock": undefined,
-    "packageJsonName": "renovate",
-    "pnpmShrinkwrap": undefined,
-    "workspacesPackages": undefined,
-    "yarnLock": "yarn.lock",
-    "yarnZeroInstall": false,
-  },
-  "npmrc": undefined,
-  "packageFileVersion": "1.0.0",
-  "skipInstalls": true,
 }
 `;
 
@@ -779,12 +625,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() returns an arr
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "skipInstalls": true,
 }
 `;
 
@@ -894,12 +737,9 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() returns an arr
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": [],
-    "yarnLock": undefined,
-    "yarnZeroInstall": false,
   },
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "skipInstalls": true,
 }
 `;
 
@@ -1027,11 +867,8 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() sets skipInsta
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
-    "yarnLock": "yarn.lock",
-    "yarnZeroInstall": true,
   },
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "skipInstalls": false,
 }
 `;

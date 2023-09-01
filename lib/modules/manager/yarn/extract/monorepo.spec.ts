@@ -1,8 +1,6 @@
 import type { PackageFile } from '../../types';
 import { detectMonorepos } from './monorepo';
 
-jest.mock('./pnpm');
-
 describe('modules/manager/yarn/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('handles no monorepo', () => {

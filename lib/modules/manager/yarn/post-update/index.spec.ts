@@ -17,9 +17,7 @@ import {
 
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
-jest.mock('./npm');
 jest.mock('./yarn');
-jest.mock('./pnpm');
 
 describe('modules/manager/yarn/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
