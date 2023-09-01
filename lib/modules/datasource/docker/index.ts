@@ -431,7 +431,7 @@ export class DockerDatasource extends Datasource {
     namespace: 'datasource-docker-labels',
     key: (registryHost: string, dockerRepository: string, tag: string) =>
       `${registryHost}:${dockerRepository}:${tag}`,
-    ttlMinutes: 60,
+    ttlMinutes: 24 * 60,
   })
   public async getLabels(
     registryHost: string,
@@ -439,6 +439,14 @@ export class DockerDatasource extends Datasource {
     tag: string
   ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
+    // Docker Hub library images don't have labels we need
+    if (
+      registryHost === 'https://index.docker.io' &&
+      dockerRepository.startsWith('library/')
+    ) {
+      logger.debug('Docker Hub library image - skipping label lookup');
+      return {};
+    }
     try {
       let labels: Record<string, string> | undefined = {};
       const manifest = await this.getManifest(
@@ -939,7 +947,7 @@ export class DockerDatasource extends Datasource {
    * This function will filter only tags that contain a semver version
    */
   @cache({
-    namespace: 'datasource-docker-releases',
+    namespace: 'datasource-docker-releases-v2',
     key: ({ registryUrl, packageName }: GetReleasesConfig) => {
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
