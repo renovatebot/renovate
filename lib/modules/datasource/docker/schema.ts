@@ -10,7 +10,7 @@ import type { Release } from '../types';
  */
 export const ManifestObject = z.object({
   schemaVersion: z.literal(2),
-  mediaType: z.string().optional(),
+  mediaType: z.string().nullish(),
 });
 
 /**
@@ -20,7 +20,7 @@ export const ManifestObject = z.object({
 export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
-  size: z.number().int().gt(0).optional(),
+  size: z.number().int().gt(0).nullish(),
 });
 /**
  * OCI platform properties
@@ -28,9 +28,9 @@ export const Descriptor = z.object({
  */
 const OciPlatform = z
   .object({
-    architecture: z.string().optional(),
+    architecture: z.string().nullish(),
   })
-  .optional();
+  .nullish();
 
 /**
  * OCI Image Configuration.
@@ -40,8 +40,8 @@ const OciPlatform = z
  */
 export const OciImageConfig = z.object({
   // This is required by the spec, but probably not present in the wild.
-  architecture: z.string().optional(),
-  config: z.object({ Labels: z.record(z.string()).optional() }).optional(),
+  architecture: z.string().nullish(),
+  config: z.object({ Labels: z.record(z.string()).nullish() }).nullish(),
 });
 export type OciImageConfig = z.infer<typeof OciImageConfig>;
 
@@ -52,8 +52,8 @@ export type OciImageConfig = z.infer<typeof OciImageConfig>;
 export const OciHelmConfig = z.object({
   name: z.string(),
   version: z.string(),
-  home: z.string().optional(),
-  sources: z.array(z.string()).optional(),
+  home: z.string().nullish(),
+  sources: z.array(z.string()).nullish(),
 });
 export type OciHelmConfig = z.infer<typeof OciHelmConfig>;
 
@@ -70,7 +70,7 @@ export const OciImageManifest = ManifestObject.extend({
       'application/vnd.cncf.helm.config.v1+json',
     ]),
   }),
-  annotations: z.record(z.string()).optional(),
+  annotations: z.record(z.string()).nullish(),
 });
 export type OciImageManifest = z.infer<typeof OciImageManifest>;
 
@@ -90,7 +90,7 @@ export const OciImageIndexManifest = ManifestObject.extend({
       platform: OciPlatform,
     })
   ),
-  annotations: z.record(z.string()).optional(),
+  annotations: z.record(z.string()).nullish(),
 });
 
 // Old Docker manifests
