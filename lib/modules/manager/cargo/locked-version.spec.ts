@@ -34,6 +34,11 @@ describe('modules/manager/cargo/locked-version', () => {
       expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
     });
 
+    it('returns empty map for lock file without packages', async () => {
+      await writeLocalFile('Cargo.lock', '[metadata]');
+      expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
+    });
+
     it('returns a map of package versions', async () => {
       await writeLocalFile('Cargo.lock', Fixtures.get('Cargo.7.lock'));
       expect(await extractLockFileVersions('Cargo.lock')).toEqual(

@@ -19,6 +19,8 @@ const cargo7toml = Fixtures.get('Cargo.7.toml');
 const cargo7lock = Fixtures.get('Cargo.7.lock');
 const cargo8toml = Fixtures.get('Cargo.8.toml');
 const cargo8lock = Fixtures.get('Cargo.8.lock');
+const cargo9toml = Fixtures.get('Cargo.9.toml');
+const cargo9lock = Fixtures.get('Cargo.9.lock');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
@@ -519,6 +521,14 @@ replace-with = "mcorbin"
     });
 
     it('extracts locked versions', async () => {
+      await writeLocalFile('Cargo.lock', cargo9lock);
+
+      const res = await extractPackageFile(cargo9toml, 'Cargo.toml', config);
+      expect(res?.deps[0].lockedVersion).toBe('2.0.1');
+      expect(res?.deps).toHaveLength(1);
+    });
+
+    it('extracts locked versions for renamed packages', async () => {
       await writeLocalFile('Cargo.lock', cargo7lock);
 
       const res = await extractPackageFile(cargo7toml, 'Cargo.toml', config);
