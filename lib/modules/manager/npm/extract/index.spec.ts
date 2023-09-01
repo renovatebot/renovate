@@ -265,7 +265,6 @@ describe('modules/manager/npm/extract/index', () => {
           npm: '^8.0.0',
           pnpm: '^1.2.0',
           vscode: '>=1.49.3',
-          yarn: 'disabled',
         },
         deps: [
           { depName: 'angular', currentValue: '1.6.0' },
