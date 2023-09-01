@@ -19,20 +19,15 @@ import { Result } from '../../../util/result';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
-import type { PoetryFile, PoetryLock, PoetrySource } from './types';
+import type { PoetryFile, PoetrySource } from './types';
 
 export function getPythonConstraint(
   existingLockFileContent: string
-): string | undefined | null {
-  try {
-    const data = parse(existingLockFileContent) as PoetryLock;
-    if (is.string(data?.metadata?.['python-versions'])) {
-      return data?.metadata?.['python-versions'];
-    }
-  } catch (err) {
-    // Do nothing
-  }
-  return undefined;
+): string | null {
+  return Result.parse(
+    existingLockFileContent,
+    Lockfile.transform(({ pythonVersions }) => pythonVersions)
+  ).unwrapOrNull();
 }
 
 export function getPoetryRequirement(
@@ -91,11 +86,9 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   return sourceArray;
 }
 
-function getMatchingHostRule(source: PoetrySource): HostRule {
-  const scopedMatch = find({ hostType: PypiDatasource.id, url: source.url });
-  return is.nonEmptyObject(scopedMatch)
-    ? scopedMatch
-    : find({ url: source.url });
+function getMatchingHostRule(url: string | undefined): HostRule {
+  const scopedMatch = find({ hostType: PypiDatasource.id, url });
+  return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
 }
 
 function getSourceCredentialVars(
@@ -106,7 +99,7 @@ function getSourceCredentialVars(
   const envVars: Record<string, string> = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = getMatchingHostRule(source);
+    const matchingHostRule = getMatchingHostRule(source.url);
     const formattedSourceName = source.name
       .replace(regEx(/(\.|-)+/g), '_')
       .toUpperCase();
@@ -121,6 +114,7 @@ function getSourceCredentialVars(
   }
   return envVars;
 }
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
