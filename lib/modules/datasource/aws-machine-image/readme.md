@@ -61,6 +61,7 @@ Here's an example of using the regex manager:
 module.exports = {
   regexManagers: [
     {
+      customType: 'regex',
       fileMatch: ['.*'],
       matchStrings: [
         '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
@@ -79,6 +80,7 @@ Or as JSON:
   'regexManagers':
     [
       {
+        'customType': 'regex',
         'fileMatch': ['.*'],
         'matchStrings':
           [
@@ -102,6 +104,11 @@ my_ami1: ami-02ce3d9008cab69cb
 # amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]}]
 # currentImageName=unknown
 my_ami2: ami-0083e9407e275acf2
+
+# Using custom aws profile and region
+# amiFilter=[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["amazon-eks-node-1.20-*"]},{"profile":"test","region":"eu-central-1"}]
+# currentImageName=unknown
+ami = "ami-0083e9407e275acf2"
 ```
 
 ```typescript

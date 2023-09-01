@@ -216,16 +216,6 @@ describe('modules/datasource/gitea-tags/index', () => {
             'https://codeberg.org/forgejo-contrib/forgejo-helm/commit/7eb7edcfd00ffab9dddbae9e9b2deace305c9a84',
           commit: {
             url: 'https://codeberg.org/api/v1/repos/forgejo-contrib/forgejo-helm/git/commits/7eb7edcfd00ffab9dddbae9e9b2deace305c9a84',
-            author: {
-              name: 'Michael Kriese',
-              email: 'viceice@noreply.codeberg.org',
-              date: '2023-08-25T08:26:28Z',
-            },
-            committer: {
-              name: 'Michael Kriese',
-              email: 'viceice@noreply.codeberg.org',
-              date: '2023-08-25T08:26:28Z',
-            },
             message:
               'fix(deps): update helm release postgresql to v12.9.0 (#174)\n\nReviewed-on: https://codeberg.org/forgejo-contrib/forgejo-helm/pulls/174\nCo-authored-by: Michael Kriese <viceice@noreply.codeberg.org>\nCo-committed-by: Michael Kriese <viceice@noreply.codeberg.org>\n',
             tree: {
@@ -235,7 +225,6 @@ describe('modules/datasource/gitea-tags/index', () => {
             },
             verification: null,
           },
-
           parents: [
             {
               url: 'https://codeberg.org/api/v1/repos/forgejo-contrib/forgejo-helm/git/commits/f19d22c6643b4643c4b2e96482b07527c84d2106',
