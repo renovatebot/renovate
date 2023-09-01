@@ -10,6 +10,7 @@ import { newlineRegex, regEx } from '../../../../../util/regex';
 import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -33,6 +34,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseList(project, release);
       case 'gitlab':
         return await gitlab.getReleaseList(project, release);
       case 'github':
@@ -242,6 +245,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       case 'gitlab':
         return await gitlab.getReleaseNotesMd(
           repository,

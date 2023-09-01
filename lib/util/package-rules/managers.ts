@@ -14,9 +14,6 @@ export class ManagersMatcher extends Matcher {
     if (is.undefined(manager) || !manager) {
       return false;
     }
-    if (isCustomManager(manager)) {
-      return matchManagers.includes(`custom.${manager}`);
-    }
     // Special handling for npm, pnpm, yarn
     // allow matchManagers=npm to match even if manager is pnpm or yarn
     const alternativeNpmManagers = ['pnpm', 'yarn'];
