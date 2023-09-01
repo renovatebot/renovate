@@ -142,8 +142,8 @@ describe('modules/manager/npm/extract/index', () => {
 
     it('finds a lock file', async () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'yarn.lock') {
-          return Promise.resolve('# yarn.lock');
+        if (fileName === 'package-lock.json') {
+          return Promise.resolve('{}');
         }
         return Promise.resolve(null);
       });
@@ -154,7 +154,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         managerData: {
-          yarnLock: 'yarn.lock',
+          npmLock: 'package-lock.json',
         },
       });
     });
