@@ -37,11 +37,3 @@ export interface PoetryLockSection {
   name?: string;
   version?: string;
 }
-
-export interface PoetryLock {
-  metadata?: {
-    'lock-version'?: string;
-    'python-versions'?: string;
-  };
-  package?: PoetryLockSection[];
-}
