@@ -97,7 +97,7 @@ describe('config/index', () => {
       ]);
     });
 
-    it('falls back from yarn to pnpm', () => {
+    it('falls back from yarn to npm', () => {
       const parentConfig = { ...defaultConfig };
       expect(getManagerConfig(parentConfig, 'yarn').fileMatch).toEqual([
         '(^|/)yarn\\.lock$',
