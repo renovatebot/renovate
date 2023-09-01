@@ -57,8 +57,8 @@ export function getPoetryRequirement(
   }
 
   const { val: pyprojectPoetryConstraint } = Result.parse(
-    PoetrySchemaToml.transform(({ poetryRequirement }) => poetryRequirement),
-    pyProjectContent
+    pyProjectContent,
+    PoetrySchemaToml.transform(({ poetryRequirement }) => poetryRequirement)
   ).unwrap();
   if (pyprojectPoetryConstraint) {
     logger.debug('Using poetry version from pyproject.toml');
