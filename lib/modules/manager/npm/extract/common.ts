@@ -1,13 +1,21 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
+import { GlobalConfig } from '../../../../config/global';
+import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
+import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
 import * as nodeVersioning from '../../../versioning/node';
 import { api, isValid, isVersion } from '../../../versioning/npm';
-import type { PackageDependency } from '../../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../../types';
 import type { NpmManagerData } from '../types';
+import type { NpmPackage, NpmPackageDependency } from './types';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
@@ -228,4 +236,174 @@ export function extractOverrideDepsRec(
   }
   parents.pop();
   return deps;
+}
+
+export async function extractPackageJson(
+  packageFile: string,
+  packageJson: NpmPackage,
+  config: ExtractConfig
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  const deps: PackageDependency[] = [];
+
+  if (packageJson._id && packageJson._args && packageJson._from) {
+    logger.debug({ packageFile }, 'Ignoring vendorised package.json');
+    return null;
+  }
+  if (packageFile !== 'package.json' && packageJson.renovate) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = packageFile;
+    error.validationError =
+      'Nested package.json must not contain Renovate configuration. Please use `packageRules` with `matchFileNames` in your main config instead.';
+    throw error;
+  }
+  const packageJsonName = packageJson.name;
+  logger.debug(
+    `npm file ${packageFile} has name ${JSON.stringify(packageJsonName)}`
+  );
+  const packageFileVersion = packageJson.version;
+  let workspacesPackages: string[] | undefined;
+  if (is.array(packageJson.workspaces)) {
+    workspacesPackages = packageJson.workspaces;
+  } else {
+    workspacesPackages = packageJson.workspaces?.packages;
+  }
+
+  let npmrc: string | undefined;
+  const npmrcFileName = getSiblingFileName(packageFile, '.npmrc');
+  let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
+  if (is.string(repoNpmrc)) {
+    if (is.string(config.npmrc) && !config.npmrcMerge) {
+      logger.debug(
+        { npmrcFileName },
+        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
+      );
+      npmrc = config.npmrc;
+    } else {
+      npmrc = config.npmrc ?? '';
+      if (npmrc.length) {
+        if (!npmrc.endsWith('\n')) {
+          npmrc += '\n';
+        }
+      }
+      if (repoNpmrc?.includes('package-lock')) {
+        logger.debug('Stripping package-lock setting from .npmrc');
+        repoNpmrc = repoNpmrc.replace(
+          regEx(/(^|\n)package-lock.*?(\n|$)/g),
+          '\n'
+        );
+      }
+      if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
+        logger.debug(
+          { npmrcFileName },
+          'Stripping .npmrc file of lines with variables'
+        );
+        repoNpmrc = repoNpmrc
+          .split(newlineRegex)
+          .filter((line) => !line.includes('=${'))
+          .join('\n');
+      }
+      npmrc += repoNpmrc;
+    }
+  } else if (is.string(config.npmrc)) {
+    npmrc = config.npmrc;
+  }
+
+  const depTypes = {
+    dependencies: 'dependency',
+    devDependencies: 'devDependency',
+    optionalDependencies: 'optionalDependency',
+    peerDependencies: 'peerDependency',
+    engines: 'engine',
+    volta: 'volta',
+    resolutions: 'resolutions',
+    packageManager: 'packageManager',
+    overrides: 'overrides',
+  };
+
+  for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
+    let dependencies = packageJson[depType];
+    if (dependencies) {
+      try {
+        if (depType === 'packageManager') {
+          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
+            dependencies as string
+          );
+          // istanbul ignore next
+          if (!match?.groups) {
+            break;
+          }
+          dependencies = { [match.groups.name]: match.groups.range };
+        }
+        for (const [key, val] of Object.entries(
+          dependencies as NpmPackageDependency
+        )) {
+          const depName = parseDepName(depType, key);
+          let dep: PackageDependency = {
+            depType,
+            depName,
+          };
+          if (depName !== key) {
+            dep.managerData = { key };
+          }
+          if (depType === 'overrides' && !is.string(val)) {
+            // TODO: fix type #22198
+            deps.push(
+              ...extractOverrideDepsRec(
+                [depName],
+                val as unknown as NpmManagerData
+              )
+            );
+          } else {
+            // TODO: fix type #22198
+            dep = { ...dep, ...extractDependency(depType, depName, val!) };
+            setNodeCommitTopic(dep);
+            dep.prettyDepType = depTypes[depType];
+            deps.push(dep);
+          }
+        }
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { fileName: packageFile, depType, err },
+          'Error parsing package.json'
+        );
+        return null;
+      }
+    }
+  }
+  if (deps.length === 0) {
+    logger.debug('Package file has no deps');
+    if (
+      !(
+        !!packageJsonName ||
+        !!packageFileVersion ||
+        !!npmrc ||
+        workspacesPackages
+      )
+    ) {
+      logger.debug('Skipping file');
+      return null;
+    }
+  }
+  const extractedConstraints: Record<string, any> = {};
+  const engines = ['node', 'npm', 'yarn', 'pnpm', 'vscode'];
+  for (const engine of engines) {
+    const constraint = deps.find((dep) => dep.depName === engine);
+    if (constraint?.currentValue && !constraint?.skipReason) {
+      extractedConstraints[engine] = constraint.currentValue;
+    }
+  }
+
+  return {
+    deps,
+    packageFileVersion,
+    npmrc,
+    managerData: {
+      packageJsonName,
+      hasPackageManager: is.nonEmptyStringAndNotWhitespace(
+        packageJson.packageManager
+      ),
+      workspacesPackages,
+    },
+    extractedConstraints,
+  };
 }
