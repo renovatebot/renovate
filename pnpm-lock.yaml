@@ -599,8 +599,8 @@ importers:
         specifier: 10.9.1
         version: 10.9.1(@swc/core@1.3.82)(@types/node@18.17.5)(typescript@5.1.6)
       type-fest:
-        specifier: 4.2.0
-        version: 4.2.0
+        specifier: 4.3.0
+        version: 4.3.0
       typescript:
         specifier: 5.1.6
         version: 5.1.6
@@ -10459,8 +10459,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /type-fest@4.2.0:
-    resolution: {integrity: sha512-5zknd7Dss75pMSED270A1RQS3KloqRJA9XbXLe0eCxyw7xXFb3rd+9B0UQ/0E+LQT6lnrLviEolYORlRWamn4w==}
+  /type-fest@4.3.0:
+    resolution: {integrity: sha512-XbMcLhoaaX/vw1S8jTKysTlznqSPxDXj1Jf56neDMksT1xoKr02pFAhHhDbW9bFejktlwKto18/UsdXlnUCBMg==}
     engines: {node: '>=16'}
     dev: true
 
