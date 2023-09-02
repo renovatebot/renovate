@@ -560,8 +560,8 @@ importers:
         specifier: 29.6.4
         version: 29.6.4
       markdownlint-cli2:
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.2
+        version: 0.9.2
       memfs:
         specifier: 4.2.1
         version: 4.2.1(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
@@ -8040,22 +8040,22 @@ packages:
       repeat-string: 1.6.1
     dev: false
 
-  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.9.0):
+  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.9.2):
     resolution: {integrity: sha512-xm2rM0E+sWgjpPn1EesPXx5hIyrN2ddUnUwnbCsD/ONxYtw3PX6LydvdH6dciWAoFDpwzbHM1TO7uHfcMd6IYg==}
     peerDependencies:
       markdownlint-cli2: '>=0.0.4'
     dependencies:
-      markdownlint-cli2: 0.9.0
+      markdownlint-cli2: 0.9.2
     dev: true
 
-  /markdownlint-cli2@0.9.0:
-    resolution: {integrity: sha512-BS4iLajH0ZdM3CmKAesA2rKLASctj5VC8EFxvgC2T2tUnivmOsHvBZB8xOqn1ByADL2cJHF0WQUF6VL4CYtEIw==}
+  /markdownlint-cli2@0.9.2:
+    resolution: {integrity: sha512-ndijEHIOikcs29W8068exHXlfkFviGFT/mPhREia7zSfQzHvTDkL2s+tWizvELjLHiKRO4KGTkkJyR3oeR8A5g==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
       globby: 13.2.2
       markdownlint: 0.30.0
-      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.9.0)
+      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.9.2)
       micromatch: 4.0.5
       strip-json-comments: 5.0.1
       yaml: 2.3.1
