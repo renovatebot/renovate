@@ -28,7 +28,6 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
-  const deps: PackageDependency[] = [];
   let packageJson: NpmPackage;
   try {
     packageJson = JSON.parse(content);
@@ -36,6 +35,19 @@ export async function extractPackageFile(
     logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }
+  const res = await extractPackageJson(packageFile, packageJson, config);
+  if (!res) {
+    return res;
+  }
+  return res;
+}
+
+export async function extractPackageJson(
+  packageFile: string,
+  packageJson: NpmPackage,
+  config: ExtractConfig
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  const deps: PackageDependency[] = [];
 
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug({ packageFile }, 'Ignoring vendorised package.json');
