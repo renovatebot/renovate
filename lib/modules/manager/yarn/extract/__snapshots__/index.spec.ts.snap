@@ -125,7 +125,6 @@ exports[`modules/manager/yarn/extract/index .extractPackageFile() extracts engin
     "npm": "^8.0.0",
     "pnpm": "^1.2.0",
     "vscode": ">=1.49.3",
-    "yarn": "disabled",
   },
   "managerData": {
     "hasPackageManager": false,
@@ -440,6 +439,9 @@ exports[`modules/manager/yarn/extract/index .extractPackageFile() extracts volta
   ],
   "extractedConstraints": {
     "node": "8.9.2",
+    "npm": "5.9.0",
+    "pnpm": "6.11.2",
+    "yarn": "1.12.3",
   },
   "managerData": {
     "hasPackageManager": false,
