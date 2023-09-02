@@ -10,14 +10,8 @@ export function detectMonorepos(
 ): void {
   logger.debug('Detecting workspaces');
   for (const p of packageFiles) {
-    const { packageFile, npmrc, managerData = {}, skipInstalls } = p;
-    const {
-      npmLock,
-      yarnZeroInstall,
-      hasPackageManager,
-      workspacesPackages,
-      yarnLock,
-    } = managerData;
+    const { packageFile, managerData = {} } = p;
+    const { workspacesPackages } = managerData;
 
     const packages = workspacesPackages as string[] | undefined;
     if (packages?.length) {
@@ -42,30 +36,6 @@ export function detectMonorepos(
           dep.isInternal = true;
         }
       });
-
-      for (const subPackage of internalPackageFiles) {
-        subPackage.managerData = subPackage.managerData ?? {};
-        subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
-        subPackage.managerData.hasPackageManager = hasPackageManager;
-        subPackage.managerData.yarnLock ??= yarnLock;
-        subPackage.managerData.npmLock ??= npmLock;
-        subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
-        subPackage.managerData.workspacesPackages = workspacesPackages;
-        subPackage.npmrc ??= npmrc;
-
-        if (p.extractedConstraints) {
-          subPackage.extractedConstraints = {
-            ...p.extractedConstraints,
-            ...subPackage.extractedConstraints,
-          };
-        }
-
-        subPackage.deps?.forEach((dep) => {
-          if (internalPackageNames.includes(dep.depName)) {
-            dep.isInternal = true;
-          }
-        });
-      }
     }
   }
 }
