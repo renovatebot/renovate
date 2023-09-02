@@ -195,13 +195,16 @@ export interface RegexManagerTemplates {
   registryUrlTemplate?: string;
 }
 
-export type CustomManagerName = 'regex';
-export interface CustomManager extends RegexManagerTemplates {
-  customType: CustomManagerName;
-  fileMatch: string[];
+export interface RegexManager extends RegexManagerTemplates {
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   autoReplaceStringTemplate?: string;
+}
+
+export type CustomManagerName = 'regex';
+export interface CustomManager extends RegexManager {
+  customType: CustomManagerName;
+  fileMatch: string[];
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';

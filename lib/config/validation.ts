@@ -399,6 +399,7 @@ export async function validateConfig(
                 }
               }
             }
+            // TODO: change to customManagers
             if (key === 'regexManagers') {
               const allowedKeys = [
                 'customType',
@@ -434,47 +435,16 @@ export async function validateConfig(
                   });
                 } else if (is.nonEmptyString(regexManager.customType)) {
                   if (is.nonEmptyArray(regexManager.fileMatch)) {
-                    if (is.nonEmptyArray(regexManager.matchStrings)) {
-                      let validRegex = false;
-                      for (const matchString of regexManager.matchStrings) {
-                        try {
-                          regEx(matchString);
-                          validRegex = true;
-                        } catch (e) {
-                          errors.push({
-                            topic: 'Configuration Error',
-                            message: `Invalid regExp for ${currentPath}: \`${String(
-                              matchString
-                            )}\``,
-                          });
-                        }
-                      }
-                      if (validRegex) {
-                        const mandatoryFields = [
-                          'depName',
-                          'currentValue',
-                          'datasource',
-                        ];
-                        for (const field of mandatoryFields) {
-                          if (
-                            !regexManager[`${field}Template`] &&
-                            !regexManager.matchStrings.some(
-                              (matchString: string) =>
-                                matchString.includes(`(?<${field}>`)
-                            )
-                          ) {
-                            errors.push({
-                              topic: 'Configuration Error',
-                              message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
-                            });
-                          }
-                        }
-                      }
-                    } else {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Each Regex Manager must contain a non-empty matchStrings array`,
-                      });
+                    // TODO: Add validation as per customType, preferrably a separate file or function for readability
+                    switch (regexManager.customType) {
+                      case 'regex':
+                        errors.push(
+                          ...(validateRegexManagerFields(
+                            regexManager,
+                            currentPath
+                          ) as any)
+                        );
+                        break;
                     }
                   } else {
                     errors.push({
@@ -671,4 +641,50 @@ export async function validateConfig(
   errors.sort(sortAll);
   warnings.sort(sortAll);
   return { errors, warnings };
+}
+
+function validateRegexManagerFields(
+  regexManager: any,
+  currentPath: any
+): any[] {
+  const errors = [];
+  if (is.nonEmptyArray(regexManager.matchStrings)) {
+    let validRegex = false;
+    for (const matchString of regexManager.matchStrings) {
+      try {
+        regEx(matchString);
+        validRegex = true;
+      } catch (e) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${String(
+            matchString
+          )}\``,
+        });
+      }
+    }
+    if (validRegex) {
+      const mandatoryFields = ['depName', 'currentValue', 'datasource'];
+      for (const field of mandatoryFields) {
+        if (
+          !regexManager[`${field}Template`] &&
+          !regexManager.matchStrings.some((matchString: string) =>
+            matchString.includes(`(?<${field}>`)
+          )
+        ) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+          });
+        }
+      }
+    }
+  } else {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+    });
+  }
+
+  return errors;
 }
