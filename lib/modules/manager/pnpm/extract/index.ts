@@ -86,8 +86,6 @@ export async function extractPackageFile(
       lockFiles[key] = undefined;
     }
   }
-  lockFiles.npmLock = lockFiles.packageLock ?? lockFiles.shrinkwrapJson;
-  delete lockFiles.shrinkwrapJson;
 
   let npmrc: string | undefined;
   const npmrcFileName = getSiblingFileName(packageFile, '.npmrc');

@@ -13,7 +13,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() catches invali
   "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -129,7 +128,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts engin
   },
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -303,7 +301,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts non-n
   "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -346,7 +343,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts npm p
   "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -374,7 +370,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts packa
   },
   "managerData": {
     "hasPackageManager": true,
-    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -443,7 +438,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts volta
   },
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -491,7 +485,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() extracts volta
   },
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -621,7 +614,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() returns an arr
   "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
@@ -733,7 +725,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() returns an arr
   "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": [],
@@ -863,7 +854,6 @@ exports[`modules/manager/pnpm/extract/index .extractPackageFile() sets skipInsta
   "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "npmLock": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
