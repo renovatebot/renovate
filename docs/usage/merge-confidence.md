@@ -25,13 +25,15 @@ Merge Confidence badges for pull requests are available on any supported platfor
 
 ## Supported languages
 
-Data is available for packages from:
+Data is available for the following languages (from the noted data source):
 
-- npm (NodeJS)
-- Maven (Java)
-- PyPI (Python)
-- NuGet (.NET)
-- Packagist (PHP)
+- JavaScript (npm)
+- Java (maven)
+- Python (pypi)
+- .Net (nuget)
+- PHP (packagist)
+- Ruby (rubygems)
+- Scala (sbt-package)
 
 We plan to support more languages soon.
 
