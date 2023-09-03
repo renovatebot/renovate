@@ -27,9 +27,11 @@ Merge Confidence badges for pull requests are available on any supported platfor
 
 Data is available for packages from:
 
-- npm
-- Maven
-- PyPI
+- npm (NodeJS)
+- Maven (Java)
+- PyPI (Python)
+- NuGet (.NET)
+- Packagist (PHP)
 
 We plan to support more languages soon.
 
