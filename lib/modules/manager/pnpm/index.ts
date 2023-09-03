@@ -3,8 +3,9 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
 
+export { updateDependency } from '../npm/update';
 export { extractAllPackageFiles } from './extract';
-export { bumpPackageVersion, updateDependency } from './update';
+export { bumpPackageVersion } from './update';
 export { getRangeStrategy } from './range';
 
 export const supportsLockFileMaintenance = true;

@@ -26,13 +26,6 @@ describe('modules/manager/yarn/post-update/index', () => {
     npm: [
       { packageFile: 'dummy.txt' },
       {
-        packageFile: 'packages/core/package.json',
-        managerData: {
-          npmLock: 'package-lock.json',
-        },
-        npmrc: '#dummy',
-      },
-      {
         packageFile: 'packages/cli/package.json',
         managerData: {
           yarnLock: 'yarn.lock',
@@ -42,12 +35,6 @@ describe('modules/manager/yarn/post-update/index', () => {
         packageFile: 'packages/test/package.json',
         managerData: {
           yarnLock: 'yarn.lock',
-        },
-      },
-      {
-        packageFile: 'packages/pnpm/package.json',
-        managerData: {
-          pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
         },
       },
     ],
@@ -117,11 +104,6 @@ describe('modules/manager/yarn/post-update/index', () => {
         },
         {
           type: 'addition',
-          path: 'packages/pnpm/pnpm-lock.yaml',
-          contents: '',
-        },
-        {
-          type: 'addition',
           path: 'packages/core/package.json',
           contents: '{}',
         },
@@ -148,20 +130,6 @@ describe('modules/manager/yarn/post-update/index', () => {
   });
 
   describe('determineLockFileDirs()', () => {
-    it('works', () => {
-      expect(
-        determineLockFileDirs(
-          updateConfig,
-
-          additionalFiles
-        )
-      ).toStrictEqual({
-        npmLockDirs: ['package-lock.json', 'randomFolder/package-lock.json'],
-        pnpmShrinkwrapDirs: ['packages/pnpm/pnpm-lock.yaml'],
-        yarnLockDirs: ['yarn.lock'],
-      });
-    });
-
     it('lockfile maintenance', () => {
       expect(
         determineLockFileDirs(
@@ -179,44 +147,12 @@ describe('modules/manager/yarn/post-update/index', () => {
           {}
         )
       ).toStrictEqual({
-        npmLockDirs: [],
-        pnpmShrinkwrapDirs: [],
         yarnLockDirs: ['yarn.lock'],
       });
     });
   });
 
   describe('writeExistingFiles()', () => {
-    it('works', async () => {
-      git.getFile.mockResolvedValueOnce(
-        Fixtures.get('update-lockfile-massage-1/package-lock.json')
-      );
-      await expect(
-        writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
-      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
-    });
-
-    it('works no reuse lockfiles', async () => {
-      await expect(
-        writeExistingFiles(
-          { ...updateConfig, reuseLockFiles: false },
-          additionalFiles
-        )
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.deleteLocalFile.mock.calls).toEqual([
-        ['package-lock.json'],
-        ['yarn.lock'],
-        ['yarn.lock'],
-        ['packages/pnpm/pnpm-lock.yaml'],
-      ]);
-    });
-
     it('writes .npmrc files', async () => {
       await writeExistingFiles(updateConfig, {
         npm: [
@@ -270,9 +206,9 @@ describe('modules/manager/yarn/post-update/index', () => {
         writeExistingFiles(updateConfig, additionalFiles)
       ).resolves.toBeUndefined();
 
-      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(0);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(git.getFile).toHaveBeenCalledOnce();
+      expect(git.getFile).not.toHaveBeenCalledOnce();
     });
 
     it('has no npm files', async () => {

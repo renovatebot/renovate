@@ -11,10 +11,13 @@ import type {
   ToolConstraint,
 } from '../../../../util/exec/types';
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
+import {
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from '../../npm/post-update/utils';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
   for (const upgrade of upgrades) {

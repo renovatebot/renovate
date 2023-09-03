@@ -21,11 +21,14 @@ import {
 } from '../../../../util/fs';
 import { minimatch } from '../../../../util/minimatch';
 import { trimSlashes } from '../../../../util/url';
+import {
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from '../../npm/post-update/utils';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function generateLockFile(
   lockFileDir: string,

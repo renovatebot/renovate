@@ -23,12 +23,15 @@ import {
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
+import {
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from '../../npm/post-update/utils';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function checkYarnrc(
   lockFileDir: string

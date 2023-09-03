@@ -22,7 +22,6 @@ import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
-import { composeLockFile, parseLockFile } from '../utils';
 import { processHostRules } from './rules';
 import type {
   AdditionalPackageFiles,
@@ -41,21 +40,16 @@ export function determineLockFileDirs(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
 ): DetermineLockFileDirsResult {
-  const npmLockDirs: (string | undefined)[] = [];
   const yarnLockDirs: (string | undefined)[] = [];
-  const pnpmShrinkwrapDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
     if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
       // Return every directory that contains a lockfile
       yarnLockDirs.push(upgrade.managerData?.yarnLock);
-      npmLockDirs.push(upgrade.managerData?.npmLock);
-      pnpmShrinkwrapDirs.push(upgrade.managerData?.pnpmShrinkwrap);
       continue;
     }
     if (upgrade.isLockfileUpdate) {
       yarnLockDirs.push(upgrade.managerData?.yarnLock);
-      npmLockDirs.push(upgrade.managerData?.npmLock);
     }
   }
 
@@ -67,8 +61,6 @@ export function determineLockFileDirs(
   ) {
     return {
       yarnLockDirs: getDirs(yarnLockDirs),
-      npmLockDirs: getDirs(npmLockDirs),
-      pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
     };
   }
 
@@ -97,14 +89,10 @@ export function determineLockFileDirs(
     }
     // push full lock file names and convert them later
     yarnLockDirs.push(packageFile.managerData.yarnLock);
-    npmLockDirs.push(packageFile.managerData.npmLock);
-    pnpmShrinkwrapDirs.push(packageFile.managerData.pnpmShrinkwrap);
   }
 
   return {
     yarnLockDirs: getDirs(yarnLockDirs),
-    npmLockDirs: getDirs(npmLockDirs),
-    pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
   };
 }
 
@@ -136,100 +124,9 @@ export async function writeExistingFiles(
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
-    const npmLock = packageFile.managerData.npmLock;
-    if (npmLock) {
-      const npmLockPath = npmLock;
-      if (
-        process.env.RENOVATE_REUSE_PACKAGE_LOCK === 'false' ||
-        config.reuseLockFiles === false
-      ) {
-        logger.debug(`Ensuring ${npmLock} is removed`);
-        await deleteLocalFile(npmLockPath);
-      } else {
-        logger.debug(`Writing ${npmLock}`);
-        let existingNpmLock: string;
-        try {
-          existingNpmLock = (await getFile(npmLock)) ?? '';
-        } catch (err) /* istanbul ignore next */ {
-          logger.warn({ err }, 'Error reading npm lock file');
-          existingNpmLock = '';
-        }
-        const { detectedIndent, lockFileParsed: npmLockParsed } =
-          parseLockFile(existingNpmLock);
-        if (npmLockParsed) {
-          const packageNames =
-            'packages' in npmLockParsed
-              ? Object.keys(npmLockParsed.packages)
-              : [];
-          const widens: string[] = [];
-          let lockFileChanged = false;
-          for (const upgrade of config.upgrades) {
-            if (upgrade.lockFiles && !upgrade.lockFiles.includes(npmLock)) {
-              continue;
-            }
-            if (!upgrade.managerData) {
-              continue;
-            }
-            if (
-              upgrade.rangeStrategy === 'widen' &&
-              upgrade.managerData.npmLock === npmLock
-            ) {
-              // TODO #22198
-              widens.push(upgrade.depName!);
-            }
-            const { depName } = upgrade;
-            for (const packageName of packageNames) {
-              if (
-                'packages' in npmLockParsed &&
-                (packageName === `node_modules/${depName}` ||
-                  packageName.startsWith(`node_modules/${depName}/`))
-              ) {
-                logger.trace({ packageName }, 'Massaging out package name');
-                lockFileChanged = true;
-                delete npmLockParsed.packages[packageName];
-              }
-            }
-          }
-          if (widens.length) {
-            logger.debug(
-              `Removing ${String(widens)} from ${npmLock} to force an update`
-            );
-            lockFileChanged = true;
-            try {
-              if (
-                'dependencies' in npmLockParsed &&
-                npmLockParsed.dependencies
-              ) {
-                widens.forEach((depName) => {
-                  // TODO #22198
-                  delete npmLockParsed.dependencies![depName];
-                });
-              }
-            } catch (err) /* istanbul ignore next */ {
-              logger.warn(
-                { npmLock },
-                'Error massaging package-lock.json for widen'
-              );
-            }
-          }
-          if (lockFileChanged) {
-            logger.debug('Massaging npm lock file before writing to disk');
-            existingNpmLock = composeLockFile(npmLockParsed, detectedIndent);
-          }
-          await writeLocalFile(npmLockPath, existingNpmLock);
-        }
-      }
-    }
     const { yarnLock } = packageFile.managerData;
     if (yarnLock && config.reuseLockFiles === false) {
       await deleteLocalFile(yarnLock);
-    }
-    // istanbul ignore next
-    if (
-      packageFile.managerData.pnpmShrinkwrap &&
-      config.reuseLockFiles === false
-    ) {
-      await deleteLocalFile(packageFile.managerData.pnpmShrinkwrap);
     }
   }
 }

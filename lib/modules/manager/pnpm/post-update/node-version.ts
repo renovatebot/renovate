@@ -4,8 +4,8 @@ import { logger } from '../../../../logger';
 import type { ToolConstraint } from '../../../../util/exec/types';
 import { readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import type { LazyPackageJson } from '../../npm/post-update/utils';
 import type { PostUpdateConfig, Upgrade } from '../../types';
-import type { LazyPackageJson } from './utils';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {

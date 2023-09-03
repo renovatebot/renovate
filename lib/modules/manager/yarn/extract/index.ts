@@ -106,7 +106,7 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   fileMatches: string[]
 ): Promise<PackageFile<NpmManagerData>[]> {
-  // We want to avoid any mistaken matches
+  // Ensure the matched files are yarn.lock files
   const yarnLocks = fileMatches.filter(
     (fileName) => fileName === 'yarn.lock' || fileName.endsWith('/yarn.lock')
   );
@@ -118,6 +118,7 @@ export async function extractAllPackageFiles(
     if (!content) {
       continue;
     }
+    // Only use the file if it parses
     let packageJson: any;
     try {
       packageJson = JSON.parse(content);

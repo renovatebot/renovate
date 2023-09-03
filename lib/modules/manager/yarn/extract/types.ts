@@ -31,10 +31,6 @@ export interface LockFile {
   isYarn1?: boolean;
 }
 
-export interface PnpmWorkspaceFile {
-  packages: string[];
-}
-
 export type OverrideDependency = Record<string, RecursiveOverride>;
 
 export type RecursiveOverride = string | { [_: string]: RecursiveOverride };

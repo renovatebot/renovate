@@ -1,3 +1,4 @@
+import yaml from 'js-yaml';
 import { logger } from '../../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { extractPackageJson } from '../../npm/extract/common';
@@ -65,7 +66,7 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   fileMatches: string[]
 ): Promise<PackageFile<NpmManagerData>[]> {
-  // We want to avoid any mistaken matches
+  // Ensure the matched files are pnpm lock files
   const pnpmLocks = fileMatches.filter(
     (fileName) =>
       fileName === 'pnpm-lock.yaml' || fileName.endsWith('/pnpm-lock.yaml')
@@ -78,10 +79,22 @@ export async function extractAllPackageFiles(
     if (!content) {
       continue;
     }
+    // Only use the file if it parses
     try {
+      JSON.parse(content);
       packageFiles.push(packageFile);
     } catch (err) {
       logger.debug({ packageFile }, `Invalid JSON`);
+      continue;
+    }
+    // Find the pnpm-workspace.yaml
+    const workspaceFile = getSiblingFileName(
+      packageFile,
+      'pnpm-workspace.yaml'
+    );
+    const workspaceContent = await readLocalFile(workspaceFile, 'utf8');
+    if (!workspaceContent) {
+      logger.debug({ workspaceFile }, `No workspace file found`);
       continue;
     }
   }
