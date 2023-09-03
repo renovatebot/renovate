@@ -30,7 +30,7 @@ Data is available for the following languages (from the noted data source):
 - JavaScript (npm)
 - Java (maven)
 - Python (pypi)
-- .Net (nuget)
+- .NET (nuget)
 - PHP (packagist)
 - Ruby (rubygems)
 - Scala (sbt-package)
