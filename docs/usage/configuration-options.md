@@ -1563,8 +1563,10 @@ To adjust it down to 10s for all queries, do this:
 ### httpsPrivateKey
 
 Specifies the private key in PEM format for mTLS authentication.
-**Note: a Private Key SHOULD NOT be specified directly here to avoid losing confidentiality completely.
-Use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.**
+<!-- prettier-ignore -->
+!!! warning
+    Do _not_ specify your private key directly here, to avoid losing confidentiality completely.
+    Use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.
 
 ### httpsCertificate
 
