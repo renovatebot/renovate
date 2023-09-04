@@ -1140,6 +1140,31 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
+    it('uses quay api 2', async () => {
+      const tags = [{ name: '5.0.12' }];
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
+        .reply(200, { tags, has_additional: true })
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=2&onlyActiveTags=true'
+        )
+        .reply(200, { tags: [], has_additional: false })
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/bitnami/redis/manifests/5.0.12')
+        .reply(200, '', {});
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'redis',
+        registryUrls: ['https://quay.io/bitnami'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(1);
+    });
+
     it('uses quay api and test error', async () => {
       httpMock
         .scope('https://quay.io')
