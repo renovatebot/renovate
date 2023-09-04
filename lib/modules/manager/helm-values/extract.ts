@@ -1,4 +1,4 @@
-import {loadAll} from 'js-yaml';
+import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
