@@ -2350,7 +2350,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'httpsCertificateAuthority',
-    description: 'The overriding trusted CA certificate',
+    description: 'The overriding trusted CA certificate.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -2360,7 +2360,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'httpsPrivateKey',
-    description: 'The private key in PEM format',
+    description: 'The private key in PEM format.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',
@@ -2370,7 +2370,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'httpsCertificate',
-    description: 'The certificate chains in PEM format',
+    description: 'The certificate chains in PEM format.',
     type: 'string',
     stage: 'repository',
     parent: 'hostRules',

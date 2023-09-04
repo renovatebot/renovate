@@ -1558,7 +1558,8 @@ To adjust it down to 10s for all queries, do this:
 
 ### httpsCertificateAuthority
 
-`httpsCertificateAuthority` overrides the trusted CA certificate that defaults to the curated list of well-known CAs by Mozilla.
+By default, Renovate uses the curated list of well-known CAs by Mozilla.
+You may use another Certificate Authority instead, by setting it in the `httpsCertificateAuthority` config option.
 
 ### httpsPrivateKey
 
@@ -1566,8 +1567,8 @@ Specifies the private key in PEM format for mTLS authentication.
 
 <!-- prettier-ignore -->
 !!! warning
-    Do _not_ specify your private key directly here, to avoid losing confidentiality completely.
-    Use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.
+    Do _not_ put your private key into this field, to avoid losing confidentiality completely.
+    You must use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.
 
 ### httpsCertificate
 
