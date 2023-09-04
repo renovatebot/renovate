@@ -112,9 +112,9 @@ export async function getAuthHeaders(
       );
       const accessToken = await getGoogleAccessToken();
       if (accessToken) {
-        const auth = Buffer.from(`${"oauth2accesstoken"}:${accessToken}`).toString(
-          'base64'
-        );
+        const auth = Buffer.from(
+          `${'oauth2accesstoken'}:${accessToken}`
+        ).toString('base64');
         opts.headers = { authorization: `Basic ${auth}` };
       }
     } else if (opts.username && opts.password) {
