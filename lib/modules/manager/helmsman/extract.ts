@@ -54,7 +54,7 @@ function createDep(
       ''
     );
     dep.registryUrls = [ociRegistryUrl];
-    dep.packageName = ociRegistryUrl + '/' + ociRegexResult.groups.packageName;
+    dep.packageName = ociRegexResult.input.replace('oci://', '');
 
     return dep;
   }
