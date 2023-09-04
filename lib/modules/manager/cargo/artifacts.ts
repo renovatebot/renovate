@@ -57,12 +57,9 @@ async function cargoUpdatePrecise(
       const pkg = err.cmd.match(regEx(/--package ([^@]+)@/))?.at(1);
       const msg = err.stderr.match(regEx(/error: (.+)/))?.at(1);
       if (pkg && msg) {
-        logger.warn(
-          { err },
-          `Could not update cargo package \`${pkg}\`: ${msg}`
-        );
+        logger.warn(`Could not update cargo package \`${pkg}\`: ${msg}`);
       } else if (pkg) {
-        logger.warn({ err }, `Could not update cargo package \`${pkg}\`.`);
+        logger.warn(`Could not update cargo package \`${pkg}\`.`);
       }
     }
     throw err;

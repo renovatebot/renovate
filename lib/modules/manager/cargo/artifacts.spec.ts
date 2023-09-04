@@ -182,7 +182,6 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([{ cmd }]);
     expect(logger.warn).toHaveBeenCalledWith(
-      { err: execError },
       'Could not update cargo package `dep1`.'
     );
   });
@@ -223,7 +222,6 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([{ cmd }]);
     expect(logger.warn).toHaveBeenCalledWith(
-      { err: execError },
       'Could not update cargo package `dep1`: failed to select a version for `dep2`.'
     );
   });
