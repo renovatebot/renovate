@@ -480,7 +480,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "versioning": "docker",
+    "versioning": "poetry",
   },
   {
     "currentValue": "^3.0",
@@ -574,7 +574,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVers
       "managerData": {
         "nestedVersion": false,
       },
-      "versioning": "docker",
+      "versioning": "poetry",
     },
     {
       "currentValue": "*",
