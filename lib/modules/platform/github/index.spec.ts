@@ -176,9 +176,7 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
-      expect(
-        await github.initPlatform({ token: 'ghs_123test' })
-      ).toEqual({
+      expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         renovateUsername: 'my-app[bot]',
