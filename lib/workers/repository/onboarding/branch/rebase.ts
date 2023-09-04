@@ -44,7 +44,7 @@ export async function rebaseOnboardingBranch(
   );
   const commitMessage = commitMessageFactory.create();
 
-  // TODO #7154
+  // TODO #22198
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
