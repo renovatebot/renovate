@@ -43,7 +43,7 @@ describe('modules/manager/helm-values/extract', () => {
       expect(result?.deps).toHaveLength(5);
     });
 
-    it('extract data from file with multiple documents', ()=> {
+    it('extract data from file with multiple documents', () => {
       const multiDocumentFile = Fixtures.get(
         'single_file_with_multiple_documents.yaml'
       );
