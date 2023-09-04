@@ -374,8 +374,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   public async requestGraphql<T = unknown>(
     query: string,
-    options: GraphqlOptions = {},
-    token: string | null = null
+    options: GraphqlOptions = {}
   ): Promise<GithubGraphqlResponse<T> | null> {
     const path = 'graphql';
 
@@ -395,8 +394,8 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       body,
       headers: { accept: options?.acceptHeader },
     };
-    if (token) {
-      opts.token = token;
+    if (options.token) {
+      opts.token = options.token;
     }
     logger.trace(`Performing Github GraphQL request`);
 
