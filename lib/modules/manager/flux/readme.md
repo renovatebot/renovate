@@ -10,7 +10,8 @@ This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 Extracts `helm` dependencies from `HelmRelease` resources.
 
 The `flux` manager extracts `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
-Renovate support OCI `HelmRepository` sources, those with `type: oci`. Renovate will then extract the `docker` dependencies for the referenced `HelmRelease` resources.
+Renovate supports OCI `HelmRepository` sources, those with `type: oci`.
+Renovate will then extract the `docker` dependencies for the referenced `HelmRelease` resources.
 
 In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
