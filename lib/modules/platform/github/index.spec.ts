@@ -163,7 +163,11 @@ describe('modules/platform/github/index', () => {
 
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
       httpMock
-        .scope(githubApiHost)
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
         .post('/graphql')
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
@@ -193,7 +197,11 @@ describe('modules/platform/github/index', () => {
 
     it('should autodetect email/user on custom endpoint with GitHub App', async () => {
       httpMock
-        .scope('https://ghe.renovatebot.com')
+        .scope('https://ghe.renovatebot.com', {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
         .head('/')
         .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
         .post('/graphql')
