@@ -2,6 +2,7 @@ namespaces:
   redis-operator:
   strimzi:
   monitoring:
+  test-apps:
 
 helmRepos:
   ot-helm: "https://ot-container-kit.github.io/helm-charts/"
@@ -44,6 +45,11 @@ apps:
     namespace: strimzi
     chart: strimzi/strimzi-kafka-operator
     version: 0.25.0
+  podinfo:
+    enabled: true
+    namespace: test-apps
+    chart: oci://ghcr.io/stefanprodan/charts/podinfo
+    version: 6.4.0
 
 # missing version
   strimzi-operator-missing-version:
