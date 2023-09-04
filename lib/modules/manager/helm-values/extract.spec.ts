@@ -9,10 +9,6 @@ const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml'
 );
 
-const multiDocumentFile = Fixtures.get(
-  'single_file_with_multiple_documents.yaml'
-);
-
 describe('modules/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
@@ -48,8 +44,11 @@ describe('modules/manager/helm-values/extract', () => {
     });
 
     it('extract data from file with multiple documents', ()=> {
+      const multiDocumentFile = Fixtures.get(
+        'single_file_with_multiple_documents.yaml'
+      );
       const result = extractPackageFile(multiDocumentFile);
-      expect(result).toMatchSnapshot({
+      expect(result).toMatchObject({
         deps: [
           {
             currentValue: 'v0.13.10',
@@ -65,7 +64,6 @@ describe('modules/manager/helm-values/extract', () => {
           },
         ],
       });
-      expect(result?.deps).toHaveLength(2);
     });
   });
 });

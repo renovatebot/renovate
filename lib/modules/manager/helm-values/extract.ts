@@ -65,6 +65,7 @@ export function extractPackageFile(
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
+    // TODO: fix me (#9610)
     parsedContent = loadAll(content, null, { json: true }) as any;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse helm-values YAML');
@@ -72,9 +73,11 @@ export function extractPackageFile(
   }
   try {
     const deps: PackageDependency<Record<string, any>>[] = [];
-    parsedContent.forEach((content) => {
-      deps.push(...findDependencies(content, []));
-    });
+
+    for (const con of parsedContent) {
+      deps.push(...findDependencies(con, []));
+    }
+
     if (deps.length) {
       return { deps };
     }
