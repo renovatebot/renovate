@@ -472,6 +472,17 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "versioning": "poetry",
   },
   {
+    "commitMessageTopic": "Python",
+    "currentValue": "~2.7 || ^3.4",
+    "datasource": "docker",
+    "depName": "python",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "versioning": "docker",
+  },
+  {
     "currentValue": "^3.0",
     "datasource": "pypi",
     "depName": "dev_dep1",
@@ -554,6 +565,17 @@ exports[`modules/manager/poetry/extract extractPackageFile() handles multiple co
 exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVersions from the lockfile 1`] = `
 {
   "deps": [
+    {
+      "commitMessageTopic": "Python",
+      "currentValue": "^3.9",
+      "datasource": "docker",
+      "depName": "python",
+      "depType": "dependencies",
+      "managerData": {
+        "nestedVersion": false,
+      },
+      "versioning": "docker",
+    },
     {
       "currentValue": "*",
       "datasource": "pypi",
