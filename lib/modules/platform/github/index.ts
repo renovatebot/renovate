@@ -164,9 +164,7 @@ export async function initPlatform({
   if (username) {
     renovateUsername = username;
   } else if (platformConfig.isGHApp) {
-    platformConfig.userDetails ??= await getAppDetails(
-      token
-    );
+    platformConfig.userDetails ??= await getAppDetails(token);
     renovateUsername = platformConfig.userDetails.username;
   } else {
     platformConfig.userDetails ??= await getUserDetails(
@@ -178,9 +176,7 @@ export async function initPlatform({
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
-      platformConfig.userDetails ??= await getAppDetails(
-        token
-      );
+      platformConfig.userDetails ??= await getAppDetails(token);
       const ghHostname = platformConfig.isGhe
         ? URL.parse(platformConfig.endpoint).hostname
         : 'github.com';
