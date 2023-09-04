@@ -6,7 +6,7 @@ import { toSha256 } from '../../../../util/hash';
 import * as _config from './config';
 import { rebaseOnboardingBranch } from './rebase';
 
-const configModule: any = mocked(_config);
+const configModule = mocked(_config);
 
 jest.mock('./config');
 
