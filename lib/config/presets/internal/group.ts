@@ -336,6 +336,46 @@ const staticGroups = {
       },
     ],
   },
+  pulumi: {
+    description: 'Group Pulumi packages together.',
+    packageRules: [
+      {
+        description: 'Group Pulumi Node.JS packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-node',
+        matchDatasources: ['npm'],
+        matchPackagePrefixes: ['@pulumi/'],
+      },
+      {
+        description: 'Group Pulumi Python packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-python',
+        matchDatasources: ['pypi'],
+        matchPackagePrefixes: ['pulumi-'],
+      },
+      {
+        description: 'Group Pulumi Go packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-go',
+        matchDatasources: ['go'],
+        matchPackagePrefixes: ['github.com/pulumi/'],
+      },
+      {
+        description: 'Group Pulumi Java packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-java',
+        matchDatasources: ['maven'],
+        matchPackagePrefixes: ['com.pulumi'],
+      },
+      {
+        description: 'Group Pulumi .NET packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-dotnet',
+        matchDatasources: ['nuget'],
+        matchPackagePrefixes: ['Pulumi'],
+      },
+    ],
+  },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
     packageRules: [

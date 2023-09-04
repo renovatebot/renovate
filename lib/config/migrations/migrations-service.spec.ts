@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import { join } from 'upath';
 import type { RenovateConfig } from '../types';
 import { AbstractMigration } from './base/abstract-migration';
 import { MigrationsService } from './migrations-service';
@@ -96,5 +98,16 @@ describe('config/migrations/migrations-service', () => {
       set.add(propertyName);
     }
     expect(duplicateProperties).toBeEmptyArray();
+  });
+
+  it('includes all defined migration classes in MigrationsService.customMigrations', () => {
+    const allDefinedMigrationClasses: string[] = fs
+      .readdirSync(join(__dirname, 'custom'), { withFileTypes: true })
+      .map((file) => file.name)
+      .filter((name) => !name.includes('spec.ts'));
+
+    expect(MigrationsService.customMigrations).toHaveLength(
+      allDefinedMigrationClasses.length
+    );
   });
 });

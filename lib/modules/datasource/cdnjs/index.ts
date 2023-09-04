@@ -40,7 +40,7 @@ export class CdnJsDatasource extends Datasource {
   override readonly caching = true;
 
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const result = Result.parse(ReleasesConfig, config)
+    const result = Result.parse(config, ReleasesConfig)
       .transform(({ packageName, registryUrl }) => {
         const [library] = packageName.split('/');
         const assetName = packageName.replace(`${library}/`, '');
