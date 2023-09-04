@@ -4,17 +4,14 @@ import type { UserDetails } from './types';
 
 const githubApi = new githubHttp.GithubHttp();
 
-export async function getAppDetails(
-  endpoint: string,
-  token: string
-): Promise<UserDetails> {
+export async function getAppDetails(token: string): Promise<UserDetails> {
   try {
     const appData = await githubApi.requestGraphql<{
       viewer: {
         login: string;
         databaseId: number;
       };
-    }>('query { viewer { login databaseId }}', undefined, token);
+    }>('query { viewer { login databaseId }}', { token });
     if (!appData?.data) {
       throw new Error("Init: Can't get App details");
     }
@@ -35,7 +32,7 @@ export async function getUserDetails(
 ): Promise<UserDetails> {
   try {
     const userData = (
-      await githubApi.getJson<{ login: string; name: string }>(
+      await githubApi.getJson<{ login: string; name: string; id: number }>(
         endpoint + 'user',
         {
           token,
@@ -45,6 +42,7 @@ export async function getUserDetails(
     return {
       username: userData.login,
       name: userData.name,
+      id: userData.id,
     };
   } catch (err) {
     logger.debug({ err }, 'Error authenticating with GitHub');

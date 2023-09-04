@@ -165,7 +165,6 @@ export async function initPlatform({
     renovateUsername = username;
   } else if (platformConfig.isGHApp) {
     platformConfig.userDetails ??= await getAppDetails(
-      platformConfig.endpoint,
       token
     );
     renovateUsername = platformConfig.userDetails.username;
@@ -180,7 +179,6 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(
-        platformConfig.endpoint,
         token
       );
       const ghHostname = platformConfig.isGhe
