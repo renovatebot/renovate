@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { HelmDatasource } from '../../datasource/helm';
 import { DockerDatasource } from '../../datasource/docker';
+import { HelmDatasource } from '../../datasource/helm';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -12,7 +12,9 @@ import type {
 import type { HelmsmanDocument } from './types';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
-const ociChartRegex = regEx('^(?<registryRef>oci:\/\/[^\/]*)\/(?<packageName>([^\/]\/?)*$');
+const ociChartRegex = regEx(
+  '^(?<registryRef>oci://[^/]*)/(?<packageName>([^/]/?)*)$'
+);
 
 function createDep(
   key: string,
@@ -35,8 +37,7 @@ function createDep(
 
   // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
   const ociRegexResult = anApp.chart ? ociChartRegex.exec(anApp.chart) : null;
-  if (ociRegexResult && ociRegexResult.groups) {
-
+  if (ociRegexResult?.groups) {
     if (!is.nonEmptyString(ociRegexResult.groups.packageName)) {
       dep.skipReason = 'invalid-name';
       return dep;
@@ -47,10 +48,13 @@ function createDep(
       return dep;
     }
 
-    dep.datasource = DockerDatasource.id
-    const ociRegistryUrl = ociRegexResult.groups.registryRef.replace('oci://', '');
+    dep.datasource = DockerDatasource.id;
+    const ociRegistryUrl = ociRegexResult.groups.registryRef.replace(
+      'oci://',
+      ''
+    );
     dep.registryUrls = [ociRegistryUrl];
-    dep.packageName = ociRegistryUrl + ociRegexResult.groups.packageName;
+    dep.packageName = ociRegistryUrl + '/' + ociRegexResult.groups.packageName;
 
     return dep;
   }
@@ -87,7 +91,7 @@ export function extractPackageFile(
     const doc = load(content, {
       json: true,
     }) as HelmsmanDocument;
-    if (!(doc.apps)) {
+    if (!doc.apps) {
       logger.debug({ packageFile }, `Missing apps keys`);
       return null;
     }

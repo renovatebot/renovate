@@ -9,4 +9,4 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['cd', 'helm', 'kubernetes'];
 
-export const supportedDatasources = [HelmDatasource.id, DockerDatasource];
+export const supportedDatasources = [HelmDatasource.id, DockerDatasource.id];
