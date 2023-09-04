@@ -1,6 +1,13 @@
+import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
+import { join } from 'upath';
 import { logger } from '../../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import {
+  getParentDir,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../../util/fs';
+import { scm } from '../../../platform/scm';
 import { extractPackageJson } from '../../npm/extract/common';
 import type {
   ExtractConfig,
@@ -10,6 +17,7 @@ import type {
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import type { NpmPackage } from './types';
+import { matchesAnyPattern } from './utils';
 
 export async function extractPackageFile(
   content: string,
@@ -71,7 +79,7 @@ export async function extractAllPackageFiles(
     (fileName) =>
       fileName === 'pnpm-lock.yaml' || fileName.endsWith('/pnpm-lock.yaml')
   );
-  let packageFiles: string[] = [];
+  const packageFiles: Record<string, string> = {};
   for (const pnpmLock of pnpmLocks) {
     // find sibling package.json file and parse it
     const packageFile = getSiblingFileName(pnpmLock, 'package.json');
@@ -82,7 +90,7 @@ export async function extractAllPackageFiles(
     // Only use the file if it parses
     try {
       JSON.parse(content);
-      packageFiles.push(packageFile);
+      packageFiles[packageFile] = pnpmLock;
     } catch (err) {
       logger.debug({ packageFile }, `Invalid JSON`);
       continue;
@@ -97,13 +105,50 @@ export async function extractAllPackageFiles(
       logger.debug({ workspaceFile }, `No workspace file found`);
       continue;
     }
+    // Validate the YAML content
+    let workspaceYaml: any;
+    try {
+      workspaceYaml = workspaceContent ? yaml.load(workspaceContent) : {};
+    } catch (err) {
+      logger.debug({ workspaceFile }, `Invalid YAML`);
+      continue;
+    }
+    logger.debug({ workspaceYaml }, `Found workspace file`);
+    if (!is.array(workspaceYaml.packages)) {
+      continue;
+    }
+    const includePatterns = workspaceYaml.packages.filter(
+      (pattern: unknown) => is.string(pattern) && !pattern.startsWith('!')
+    );
+    const excludePatterns = workspaceYaml.packages
+      .filter(
+        (pattern: unknown) => is.string(pattern) && pattern.startsWith('!')
+      )
+      .map((pattern: string) => pattern.slice(1));
+    const fileList = await scm.getFileList();
+    const uniqueDirs = [
+      ...new Set(fileList.map((fileName) => getParentDir(fileName))),
+    ];
+    const matchingDirs = uniqueDirs.filter((dir) => {
+      return (
+        matchesAnyPattern(dir, includePatterns) &&
+        !matchesAnyPattern(dir, excludePatterns)
+      );
+    });
+    const internalPackageFiles = matchingDirs
+      .map((dir) => join(dir, 'package.json'))
+      .filter((fileName) => fileList.includes(fileName));
+    logger.debug(
+      { workspaceFile, internalPackageFiles },
+      `Found internal package files`
+    );
+    for (const internalPackageFile of internalPackageFiles) {
+      packageFiles[internalPackageFile] = pnpmLock;
+    }
   }
 
-  // Deduplicate packageFiles
-  packageFiles = [...new Set(packageFiles)];
-
   const npmFiles: PackageFile<NpmManagerData>[] = [];
-  for (const packageFile of packageFiles) {
+  for (const [packageFile, pnpmLock] of Object.entries(packageFiles)) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const deps = await extractPackageFile(content, packageFile, config);
@@ -111,6 +156,7 @@ export async function extractAllPackageFiles(
         npmFiles.push({
           ...deps,
           packageFile,
+          lockFiles: [pnpmLock],
         });
       }
     } else {
