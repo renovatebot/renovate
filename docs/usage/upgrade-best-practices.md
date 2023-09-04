@@ -251,7 +251,7 @@ As a starting point:
 - We automerge some dependencies, but request `major` updates from the Dependency Dashboard
 - When a developer merges a breaking change, we revert to a known-good version, and try again later
 - We automated the release with the [`semantic-release`](https://github.com/semantic-release/semantic-release) bot
-- We spend time to make our build as fast as possible, and aslo spend time to speed up the automated tests
+- We spend time to make our build and automated tests as fast as possible
 
 ## How others use Renovate
 
