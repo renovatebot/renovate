@@ -374,7 +374,8 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   public async requestGraphql<T = unknown>(
     query: string,
-    options: GraphqlOptions = {}
+    options: GraphqlOptions = {},
+    token: string | null = null
   ): Promise<GithubGraphqlResponse<T> | null> {
     const path = 'graphql';
 
@@ -394,14 +395,13 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       body,
       headers: { accept: options?.acceptHeader },
     };
-
+    if (token) {
+      opts.token = token;
+    }
     logger.trace(`Performing Github GraphQL request`);
 
     try {
-      const res = await this.postJson<GithubGraphqlResponse<T>>(
-        'graphql',
-        opts
-      );
+      const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
       return res?.body;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');

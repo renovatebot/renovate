@@ -83,7 +83,7 @@ import type {
   LocalRepoConfig,
   PlatformConfig,
 } from './types';
-import { getUserDetails, getUserEmail } from './user';
+import { getAppDetails, getUserDetails, getUserEmail } from './user';
 
 export const id = 'github';
 
@@ -163,6 +163,12 @@ export async function initPlatform({
   let renovateUsername: string;
   if (username) {
     renovateUsername = username;
+  } else if (platformConfig.isGHApp) {
+    platformConfig.userDetails ??= await getAppDetails(
+      platformConfig.endpoint,
+      token
+    );
+    renovateUsername = platformConfig.userDetails.username;
   } else {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
@@ -172,16 +178,27 @@ export async function initPlatform({
   }
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
-    platformConfig.userDetails ??= await getUserDetails(
-      platformConfig.endpoint,
-      token
-    );
-    platformConfig.userEmail ??= await getUserEmail(
-      platformConfig.endpoint,
-      token
-    );
-    if (platformConfig.userEmail) {
-      discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
+    if (platformConfig.isGHApp) {
+      platformConfig.userDetails ??= await getAppDetails(
+        platformConfig.endpoint,
+        token
+      );
+      const ghHostname = platformConfig.isGhe
+        ? URL.parse(platformConfig.endpoint).hostname
+        : 'github.com';
+      discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
+    } else {
+      platformConfig.userDetails ??= await getUserDetails(
+        platformConfig.endpoint,
+        token
+      );
+      platformConfig.userEmail ??= await getUserEmail(
+        platformConfig.endpoint,
+        token
+      );
+      if (platformConfig.userEmail) {
+        discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
+      }
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');

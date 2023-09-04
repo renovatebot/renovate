@@ -72,6 +72,7 @@ export interface GhPr extends Pr {
 export interface UserDetails {
   username: string;
   name: string;
+  id?: number;
 }
 
 export interface PlatformConfig {
