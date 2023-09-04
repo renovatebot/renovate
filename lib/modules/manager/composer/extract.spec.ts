@@ -223,9 +223,23 @@ describe('modules/manager/composer/extract', () => {
           {
             currentValue: 'dev-trunk',
             datasource: 'bitbucket-tags',
-            depName: 'awesome/bitbucket-repo',
+            depName: 'awesome/bitbucket-repo1',
             depType: 'require',
-            packageName: 'awesome/bitbucket-repo',
+            packageName: 'awesome/bitbucket-repo1',
+          },
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'bitbucket-tags',
+            depName: 'awesome/bitbucket-repo2',
+            depType: 'require',
+            packageName: 'awesome/bitbucket-repo2',
+          },
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'bitbucket-tags',
+            depName: 'awesome/bitbucket-repo3',
+            depType: 'require',
+            packageName: 'awesome/bitbucket-repo3',
           },
         ],
       });
