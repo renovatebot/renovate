@@ -1,0 +1,19 @@
+{
+  "name": "acme/git-sources",
+  "description": "Fetch Packages via bitbucket-tags",
+  "repositories": [
+    {
+      "name": "awesome/bitbucket-repo",
+      "type": "vcs",
+      "url": "https://bitbucket.org/awesome/bitbucket-repo.git"
+    }
+  ],
+  "require": {
+    "awesome/bitbucket-repo": "dev-trunk"
+  },
+  "autoload": {
+    "psr-0": {
+      "Acme": "src/"
+    }
+  }
+}
