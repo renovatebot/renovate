@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/helm-values/extract extractPackageFile() extract data from file with multiple documents 1`] = `
+{
+  "deps": [
+    {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v0.13.10",
+      "datasource": "docker",
+      "depName": "quay.io/metallb/controller",
+      "replaceString": "v0.13.10",
+      "versioning": "docker",
+    },
+    {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v0.13.10",
+      "datasource": "docker",
+      "depName": "quay.io/metallb/speaker",
+      "replaceString": "v0.13.10",
+      "versioning": "docker",
+    },
+  ],
+}
+`;
+
 exports[`modules/manager/helm-values/extract extractPackageFile() extracts from complex values file correctly" 1`] = `
 {
   "deps": [
@@ -61,6 +86,31 @@ exports[`modules/manager/helm-values/extract extractPackageFile() extracts from 
       "datasource": "docker",
       "depName": "nginx",
       "replaceString": "1.16.1",
+      "versioning": "docker",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helm-values/extract extractPackageFile() extracts multiple documents from a single file correctly 1`] = `
+{
+  "deps": [
+    {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v0.13.10",
+      "datasource": "docker",
+      "depName": "quay.io/metallb/controller",
+      "replaceString": "v0.13.10",
+      "versioning": "docker",
+    },
+    {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v0.13.10",
+      "datasource": "docker",
+      "depName": "quay.io/metallb/speaker",
+      "replaceString": "v0.13.10",
       "versioning": "docker",
     },
   ],

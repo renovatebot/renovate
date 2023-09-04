@@ -9,6 +9,10 @@ const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml'
 );
 
+const multiDocumentFile = Fixtures.get(
+  'single_file_with_multiple_documents.yaml'
+);
+
 describe('modules/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
@@ -41,6 +45,27 @@ describe('modules/manager/helm-values/extract', () => {
       const result = extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
       expect(result?.deps).toHaveLength(5);
+    });
+
+    it('extract data from file with multiple documents', ()=> {
+      const result = extractPackageFile(multiDocumentFile);
+      expect(result).toMatchSnapshot({
+        deps: [
+          {
+            currentValue: 'v0.13.10',
+            depName: 'quay.io/metallb/controller',
+            datasource: 'docker',
+            versioning: 'docker',
+          },
+          {
+            currentValue: 'v0.13.10',
+            depName: 'quay.io/metallb/speaker',
+            datasource: 'docker',
+            versioning: 'docker',
+          },
+        ],
+      });
+      expect(result?.deps).toHaveLength(2);
     });
   });
 });
