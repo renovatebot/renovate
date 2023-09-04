@@ -6336,7 +6336,7 @@ packages:
       extend: 3.0.2
       https-proxy-agent: 7.0.1
       is-stream: 2.0.1
-      node-fetch: 2.6.13
+      node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
       - supports-color
