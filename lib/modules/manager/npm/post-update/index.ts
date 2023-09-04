@@ -298,12 +298,12 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   let originalNpmrcContent: string | null = null;
   try {
     originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
-    logger.debug('npmrc file found in repository');
   } catch /* istanbul ignore next */ {
-    logger.debug('No npmrc file found in repository');
     originalNpmrcContent = null;
   }
-
+  if (originalNpmrcContent) {
+    logger.debug(`npmrc file ${npmrcFilePath} found in repository`);
+  }
   return originalNpmrcContent;
 }
 
