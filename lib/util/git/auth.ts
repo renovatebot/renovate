@@ -138,6 +138,14 @@ export function getAuthenticationRules(
     }/${insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
   });
 
+  // When on gitlab, we add oauth2 since it's hardcoded.
+  if (token.startsWith('gitlab-ci-token')) {
+    authenticationRules.push({
+      url: url.toString(protocol),
+      insteadOf: `https://oauth2@${insteadUrl.resource}`,
+    });
+  }
+
   // alternative ssh protocol with user if empty
   url.token = hasUser ? token : `git:${token}`;
   authenticationRules.push({
