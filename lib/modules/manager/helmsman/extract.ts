@@ -36,7 +36,7 @@ function createDep(
   const isOci = anApp?.chart?.startsWith('oci://');
   if (isOci) {
     dep.datasource = DockerDatasource.id;
-    dep.packageName = anApp.chart?.replace('oci://', '');
+    dep.packageName = anApp.chart.replace('oci://', '');
     return dep;
   }
 
