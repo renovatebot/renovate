@@ -267,25 +267,31 @@ export function getRegistryRepository(
       };
     }
   }
-  let registryHost: string | undefined;
+  let registryHost = registryUrl;
   const split = packageName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
     [registryHost] = split;
     split.shift();
   }
   let dockerRepository = split.join('/');
-  if (!registryHost) {
-    registryHost = registryUrl.replace(
-      'https://docker.io',
-      'https://index.docker.io'
-    );
-  }
-  if (registryHost === 'docker.io') {
-    registryHost = 'index.docker.io';
-  }
-  if (!regEx(/^https?:\/\//).exec(registryHost)) {
+
+  if (!regEx(/^https?:\/\//).test(registryHost)) {
     registryHost = `https://${registryHost}`;
   }
+
+  const { path, base } =
+    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)
+      ?.groups ?? {};
+  if (base && path) {
+    registryHost = base;
+    dockerRepository = `${trimTrailingSlash(path)}/${dockerRepository}`;
+  }
+
+  registryHost = registryHost.replace(
+    'https://docker.io',
+    'https://index.docker.io'
+  );
+
   const opts = hostRules.find({
     hostType: dockerDatasourceId,
     url: registryHost,

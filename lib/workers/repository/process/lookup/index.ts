@@ -445,6 +445,8 @@ export async function lookupUpdates(
               });
             }
           }
+        } else {
+          delete update.newDigest;
         }
         if (update.newVersion) {
           const registryUrl = dependency?.releases?.find(
