@@ -29,6 +29,7 @@ export const presets: Record<string, Preset> = {
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-babel-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rome-to-biome',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
@@ -686,6 +687,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'rome-to-biome': {
+    description: 'The rome project has been discontinued and biome was announced.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rome'],
+        replacementName: '@biomejs/biome',
+        replacementVersion: '1.0.0',
       },
     ],
   },
