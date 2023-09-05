@@ -12,9 +12,6 @@ import type {
 import type { HelmsmanDocument } from './types';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
-const ociChartRegex = regEx(
-  '^(?<registryRef>oci://[^/]*)/(?<packageName>([^/]/?)*)$'
-);
 
 function createDep(
   key: string,
@@ -36,26 +33,10 @@ function createDep(
   dep.currentValue = anApp.version;
 
   // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-  const ociRegexResult = anApp.chart ? ociChartRegex.exec(anApp.chart) : null;
-  if (ociRegexResult?.groups) {
-    if (!is.nonEmptyString(ociRegexResult.groups.packageName)) {
-      dep.skipReason = 'invalid-name';
-      return dep;
-    }
-
-    if (!is.nonEmptyString(ociRegexResult.groups.registryRef)) {
-      dep.skipReason = 'no-repository';
-      return dep;
-    }
-
+  const isOci = anApp?.chart?.startsWith('oci://');
+  if (isOci) {
     dep.datasource = DockerDatasource.id;
-    const ociRegistryUrl = ociRegexResult.groups.registryRef.replace(
-      'oci://',
-      ''
-    );
-    dep.registryUrls = [ociRegistryUrl];
-    dep.packageName = ociRegexResult.input.replace('oci://', '');
-
+    dep.packageName = anApp.chart?.replace('oci://', '');
     return dep;
   }
 
