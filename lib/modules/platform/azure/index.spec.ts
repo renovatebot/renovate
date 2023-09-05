@@ -1251,6 +1251,28 @@ describe('modules/platform/azure/index', () => {
       expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
       expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
     });
+
+    it('passes comment through massageMarkdown', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn(() => [{ id: 123 }]),
+        getThreads: jest.fn().mockReturnValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 2,
+          },
+        ]),
+        updateComment: jest.fn(() => ({ id: 123 })),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content:
+          'You can manually request rebase by checking the rebase/retry box above.',
+      });
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+    });
   });
 
   describe('ensureCommentRemoval', () => {
@@ -1380,6 +1402,15 @@ describe('modules/platform/azure/index', () => {
         'plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(azure.massageMarkdown(prBody)).toBe(
         'plus also [a link](https://github.com/foo/bar/issues/5)'
+      );
+    });
+
+    it('returns updated comment content', () => {
+      const commentContent =
+        'You can manually request rebase by checking the rebase/retry box above.\n\n' +
+        'plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(azure.massageMarkdown(commentContent)).toBe(
+        'You can manually request rebase by renaming the PR to start with "rebase!".\n\nplus also [a link](https://github.com/foo/bar/issues/5)'
       );
     });
   });

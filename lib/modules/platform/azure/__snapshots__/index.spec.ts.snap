@@ -115,6 +115,27 @@ exports[`modules/platform/azure/index ensureComment does nothing if comment exis
 
 exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `[]`;
 
+exports[`modules/platform/azure/index ensureComment passes comment through massageMarkdown 1`] = `
+[
+  [
+    {
+      "comments": [
+        {
+          "commentType": 1,
+          "content": "### some-subject
+
+You can manually request rebase by renaming the PR to start with "rebase!".",
+          "parentCommentId": 0,
+        },
+      ],
+      "status": 1,
+    },
+    "1",
+    42,
+  ],
+]
+`;
+
 exports[`modules/platform/azure/index ensureComment updates comment if missing 1`] = `[]`;
 
 exports[`modules/platform/azure/index ensureComment updates comment if missing 2`] = `
