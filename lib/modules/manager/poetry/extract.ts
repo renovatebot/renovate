@@ -7,7 +7,6 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import { Result } from '../../../util/result';
-import { DockerDatasource } from '../../datasource/docker';
 import type { PackageFileContent } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
 
@@ -38,11 +37,7 @@ export async function extractPackageFile(
       if (dep.currentValue) {
         pythonVersion = dep.currentValue;
       }
-      return {
-        ...dep,
-        datasource: DockerDatasource.id,
-        commitMessageTopic: 'Python',
-      };
+      return null;
     }
 
     const packageName = dep.packageName ?? dep.depName;
