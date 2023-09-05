@@ -33,7 +33,6 @@ Data is available for the following languages (from the noted data source):
 - .NET (nuget)
 - PHP (packagist)
 - Ruby (rubygems)
-- Scala (sbt-package)
 
 We plan to support more languages soon.
 
