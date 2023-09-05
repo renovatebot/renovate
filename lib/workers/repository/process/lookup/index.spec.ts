@@ -1668,7 +1668,7 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '8.1.5' },
           { version: '8.1' },
           { version: '8.2.0' },
-          { version: '8.2.5' },
+          { version: '8.2.5', newDigest: 'abc123' },
           { version: '8.2' },
           { version: '8' },
           { version: '9.0' },
