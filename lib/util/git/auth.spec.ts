@@ -223,16 +223,19 @@ describe('util/git/auth', () => {
           matchHost: 'github.com',
         })
       ).toStrictEqual({
-        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_0:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_KEY_1:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_KEY_2:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
-        GIT_CONFIG_VALUE_1: 'git@gitlab.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.com/',
+        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.com/',
+        GIT_CONFIG_VALUE_2: 'git@gitlab.com:',
+        GIT_CONFIG_VALUE_3: 'https://gitlab.com/',
       });
     });
 
@@ -243,16 +246,19 @@ describe('util/git/auth', () => {
           matchHost: 'gitlab.com',
         })
       ).toStrictEqual({
-        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_0:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_KEY_1:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_KEY_2:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
-        GIT_CONFIG_VALUE_1: 'git@gitlab.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.com/',
+        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.com/',
+        GIT_CONFIG_VALUE_2: 'git@gitlab.com:',
+        GIT_CONFIG_VALUE_3: 'https://gitlab.com/',
       });
     });
 
@@ -395,7 +401,7 @@ describe('util/git/auth', () => {
         token: 'token345',
       });
       expect(getGitEnvironmentVariables()).toStrictEqual({
-        GIT_CONFIG_COUNT: '9',
+        GIT_CONFIG_COUNT: '10',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
         GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
@@ -406,19 +412,22 @@ describe('util/git/auth', () => {
         GIT_CONFIG_KEY_5:
           'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
         GIT_CONFIG_KEY_6:
-          'url.https://ssh:token345@github.example.com/.insteadOf',
+          'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
         GIT_CONFIG_KEY_7:
+          'url.https://ssh:token345@github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_8:
           'url.https://git:token345@github.example.com/.insteadOf',
-        GIT_CONFIG_KEY_8: 'url.https://token345@github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_9: 'url.https://token345@github.example.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
         GIT_CONFIG_VALUE_3: 'ssh://git@gitlab.example.com/',
-        GIT_CONFIG_VALUE_4: 'git@gitlab.example.com:',
-        GIT_CONFIG_VALUE_5: 'https://gitlab.example.com/',
-        GIT_CONFIG_VALUE_6: 'ssh://git@github.example.com/',
-        GIT_CONFIG_VALUE_7: 'git@github.example.com:',
-        GIT_CONFIG_VALUE_8: 'https://github.example.com/',
+        GIT_CONFIG_VALUE_4: 'https://oauth2@gitlab.example.com',
+        GIT_CONFIG_VALUE_5: 'git@gitlab.example.com:',
+        GIT_CONFIG_VALUE_6: 'https://gitlab.example.com/',
+        GIT_CONFIG_VALUE_7: 'ssh://git@github.example.com/',
+        GIT_CONFIG_VALUE_8: 'git@github.example.com:',
+        GIT_CONFIG_VALUE_9: 'https://github.example.com/',
       });
     });
 
@@ -429,16 +438,19 @@ describe('util/git/auth', () => {
         token: 'token123',
       });
       expect(getGitEnvironmentVariables()).toStrictEqual({
-        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_0:
           'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
         GIT_CONFIG_KEY_1:
           'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
         GIT_CONFIG_KEY_2:
           'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
-        GIT_CONFIG_VALUE_1: 'git@gitlab.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.example.com/',
+        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.example.com',
+        GIT_CONFIG_VALUE_2: 'git@gitlab.example.com:',
+        GIT_CONFIG_VALUE_3: 'https://gitlab.example.com/',
       });
     });
 
