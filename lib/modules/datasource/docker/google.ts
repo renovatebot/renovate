@@ -11,20 +11,14 @@ export async function getGoogleAccessToken(): Promise<string | null> {
   const googleAuth: GoogleAuth = new GoogleAuth({
     scopes: 'https://www.googleapis.com/auth/cloud-platform',
   });
-  const client = await googleAuth.getClient();
-  try {
-    const data = await client.getAccessToken();
-    const accessToken = data.token;
-    if (accessToken) {
-      // sanitize token
-      addSecretForSanitizing(accessToken);
-      return accessToken;
-    }
-    logger.warn(
-      'Could not extract access token from google getAccessToken response'
-    );
-  } catch (err) {
-    logger.debug({ err }, 'google getAccessToken error');
+  const accessToken = await googleAuth.getAccessToken();
+  if (accessToken) {
+    // sanitize token
+    addSecretForSanitizing(accessToken);
+    return accessToken;
   }
+  logger.warn(
+    'Could not retrieve access token using google-auth-library getAccessToken'
+  );
   return null;
 }
