@@ -42,7 +42,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -62,7 +62,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -91,7 +91,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -117,7 +117,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir/npm-shrinkwrap.json',
       'utf8'
     );
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
@@ -140,7 +140,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir/npm-shrinkwrap.json',
       'utf8'
     );
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
@@ -158,7 +158,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls, binarySource, constraints: { npm: '^6.0.0' } }
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
@@ -176,7 +176,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       [{ isRemediation: true }]
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toHaveLength(2);
   });
@@ -421,7 +421,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         updates
       );
       expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
-      expect(res.error).toBeUndefined();
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
@@ -456,7 +456,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         modifiedUpdates
       );
       expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
-      expect(res.error).toBeUndefined();
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
