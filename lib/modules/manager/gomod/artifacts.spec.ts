@@ -642,7 +642,7 @@ describe('modules/manager/gomod/artifacts', () => {
         expect.objectContaining({
           options: expect.objectContaining({
             env: expect.objectContaining({
-              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_COUNT: '4',
               GIT_CONFIG_KEY_0:
                 'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_1:
@@ -718,10 +718,14 @@ describe('modules/manager/gomod/artifacts', () => {
               GIT_CONFIG_KEY_2:
                 'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_4:
                 'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_KEY_5:
+                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
+              GIT_CONFIG_KEY_6:
+                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
+              GIT_CONFIG_KEY_7:
                 'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.enterprise.com/repo1',
               GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.enterprise.com/repo1',
@@ -880,7 +884,7 @@ describe('modules/manager/gomod/artifacts', () => {
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_8:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
-              GIT_CONFIG_QKEY_9:
+              GIT_CONFIG_KEY_9:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
