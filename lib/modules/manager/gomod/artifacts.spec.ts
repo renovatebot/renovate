@@ -718,7 +718,7 @@ describe('modules/manager/gomod/artifacts', () => {
               GIT_CONFIG_KEY_2:
                 'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo1.insteadOf',
+                'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_4:
                 'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_KEY_5:
