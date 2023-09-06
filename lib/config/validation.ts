@@ -399,7 +399,6 @@ export async function validateConfig(
                 }
               }
             }
-            // TODO: change to customManagers
             if (key === 'regexManagers') {
               const allowedKeys = [
                 'customType',
@@ -435,7 +434,6 @@ export async function validateConfig(
                   });
                 } else if (is.nonEmptyString(regexManager.customType)) {
                   if (is.nonEmptyArray(regexManager.fileMatch)) {
-                    // TODO: Add validation as per customType, preferrably a separate file or function for readability
                     switch (regexManager.customType) {
                       case 'regex':
                         errors.push(
