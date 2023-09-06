@@ -48,7 +48,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies', async () => {
       const res = await extractPackageFile(pyproject1toml, filename);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(10);
+      expect(res?.deps).toHaveLength(9);
       expect(res?.extractedConstraints).toEqual({
         python: '~2.7 || ^3.4',
       });
@@ -74,7 +74,7 @@ describe('modules/manager/poetry/extract', () => {
     it('can parse TOML v1 heterogeneous arrays', async () => {
       const res = await extractPackageFile(pyproject12toml, filename);
       expect(res).not.toBeNull();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts registries', async () => {
@@ -184,10 +184,7 @@ describe('modules/manager/poetry/extract', () => {
       const res = await extractPackageFile(pyproject11toml, filename);
       expect(res).toMatchSnapshot({
         extractedConstraints: { python: '^3.9' },
-        deps: [
-          { depName: 'python', currentValue: '^3.9' },
-          { depName: 'boto3', lockedVersion: '1.17.5' },
-        ],
+        deps: [{ lockedVersion: '1.17.5' }],
       });
     });
 

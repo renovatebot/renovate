@@ -1,4 +1,3 @@
-import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -9,7 +8,7 @@ import * as docker from '../../../util/exec/docker';
 import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import { getPoetryRequirement, getPythonConstraint } from './artifacts';
+import { getPoetryRequirement } from './artifacts';
 import { updateArtifacts } from '.';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
@@ -34,29 +33,6 @@ const adminConfig: RepoGlobalConfig = {
 const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/poetry/artifacts', () => {
-  describe('getPythonConstraint', () => {
-    const pythonVersion = '3.11.3';
-    const poetryLock = codeBlock`
-      [metadata]
-      python-versions = "${pythonVersion}"
-    `;
-
-    it('detects from pyproject.toml', () => {
-      const pythonVersion = '3.11.5';
-      const pyprojectContent = codeBlock`
-        [tool.poetry.dependencies]
-        python = "${pythonVersion}"
-      `;
-      expect(getPythonConstraint(pyprojectContent, poetryLock)).toBe(
-        pythonVersion
-      );
-    });
-
-    it('detects from poetry.ock', () => {
-      expect(getPythonConstraint('', poetryLock)).toBe(pythonVersion);
-    });
-  });
-
   describe('getPoetryRequirement', () => {
     const poetry12lock = Fixtures.get('poetry12.lock');
     const poetry142lock = Fixtures.get('poetry142.lock');
