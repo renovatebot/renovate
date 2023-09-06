@@ -32,7 +32,7 @@ describe('modules/datasource/flutter-version/index', () => {
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(baseUrl).get(urlPath).reply(200, []);
+      httpMock.scope(baseUrl).get(urlPath).reply(200, { releases: [] });
       expect(
         await getPkgReleases({
           datasource,

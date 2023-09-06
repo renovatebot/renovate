@@ -404,7 +404,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 98 \
+            --branches 98.99 \
             --functions 100 \
             --lines 100 \
             --statements 100
