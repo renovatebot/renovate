@@ -30,8 +30,7 @@ export function getLernaConstraint(
     lazyPkgJson.dependencies?.lerna ?? lazyPkgJson.devDependencies?.lerna;
   if (!constraint || !semver.validRange(constraint)) {
     logger.warn(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
     );
     return null;
@@ -120,7 +119,8 @@ export async function generateLockFiles(
       getLernaConstraint(lernaPackageFile, await lazyPgkJson.getValue());
     if (
       !is.string(lernaConstraint) ||
-      (semver.valid(lernaConstraint) && semver.gte(lernaConstraint, '7.0.0')) ||
+      (semver.valid(lernaConstraint) &&
+        semver.gte(lernaConstraint, '7.0.0')) === true ||
       (semver.validRange(lernaConstraint) &&
         (semver.satisfies('7.0.0', lernaConstraint) ||
           semver.satisfies('7.999.999', lernaConstraint)))

@@ -12,6 +12,7 @@ export type RenovateConfigStage =
   | 'pr';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type RepositoryCacheType = 'local' | string;
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
@@ -125,6 +126,7 @@ export interface RepoGlobalConfig {
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
+  cacheTtlOverride?: Record<string, number>;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
@@ -192,7 +194,10 @@ export interface RegexManagerTemplates {
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
 }
-export interface RegExManager extends RegexManagerTemplates {
+
+export type CustomManagerName = 'regex';
+export interface CustomManager extends RegexManagerTemplates {
+  customType: CustomManagerName;
   fileMatch: string[];
   matchStrings: string[];
   matchStringsStrategy?: MatchStringsStrategy;
@@ -260,7 +265,7 @@ export interface RenovateConfig
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
-  regexManagers?: RegExManager[];
+  regexManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
@@ -272,11 +277,12 @@ export interface RenovateConfig
   constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
+  customizeDashboard?: Record<string, string>;
 }
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json';
+  format?: 'json' | 'plain';
   transformTemplates?: string[];
 }
 
@@ -330,7 +336,7 @@ export interface PackageRule
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
   matchBaseBranches?: string[];
-  matchManagers?: string | string[];
+  matchManagers?: string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
   matchDepNames?: string[];
@@ -457,7 +463,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
-  default?: any | null;
+  default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';

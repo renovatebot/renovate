@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
@@ -48,7 +48,10 @@ async function raiseWarningIssue(
     )}\`\n`;
   }
 
-  const pr = await platform.getBranchPr(config.onboardingBranch!);
+  const pr = await platform.getBranchPr(
+    config.onboardingBranch!,
+    config.baseBranch
+  );
   if (pr?.state === 'open') {
     await handleOnboardingPr(pr, body);
     return;

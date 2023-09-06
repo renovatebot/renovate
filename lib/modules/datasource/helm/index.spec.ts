@@ -17,7 +17,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          packageName: undefined as never, // #7154
+          packageName: undefined as never, // #22198
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();

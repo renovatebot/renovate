@@ -207,6 +207,19 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## cacheTtlOverride
+
+Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
+For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+```json
+{
+  "cacheTtlOverride": {
+    "datasource-docker-tags": 120
+  }
+}
+```
+
 ## checkedBranches
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
@@ -572,14 +585,26 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 When this option is `true`, Renovate will do the following during repository initialization:
 
-- Attempt to fetch the default config file (`renovate.json`)
+- Try to fetch the default config file (e.g. `renovate.json`)
 - Check if the file contains `"enabled": false`
+- If so, skip cloning and skip the repository immediately
+
+If `onboardingConfigFileName` is set, that file name will be used instead of the default.
 
 If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
 Otherwise, it will continue as normal.
 
-This option is only useful where the ratio of disabled repos is quite high.
-It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
+It can speed up initialization significantly in cases where most repositories are disabled, at the cost of an extra API call for enabled repositories.
+
+A second, advanced, use also exists when the bot global config contains `extends: [":disableRenovate"]`.
+In that case, Renovate will check for a repo config file containing one of the following:
+
+- `extends: [":enableRenovate"]`
+- `ignorePresets: [":disableRenovate"]`
+- `enabled: true`
+
+If any of those three are found, then the repo initialization will continue.
+If not, then Renoate will skip the repository without cloning it.
 
 ## password
 
@@ -706,7 +731,7 @@ Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define additional settings:
+Elements in the `repositories` array can be an object if you wish to define more settings:
 
 ```js
 {
@@ -732,7 +757,7 @@ Set this to an S3 URI to enable S3 backed repository cache.
 
 <!-- prettier-ignore -->
 !!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running Renovate within an EC2 instance in an ECS cluster. In this case, no extra environment variables are required.
     Otherwise, the following environment variables should be set for the S3 client to work.
 
 ```

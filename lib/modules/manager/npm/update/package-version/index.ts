@@ -3,20 +3,29 @@ import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import type { BumpPackageVersionResult } from '../../../types';
 
+type MirrorBumpVersion = `mirror:${string}`;
+
+function isMirrorBumpVersion(
+  bumpVersion: string
+): bumpVersion is MirrorBumpVersion {
+  return bumpVersion.startsWith('mirror:');
+}
+
 export function bumpPackageVersion(
   content: string,
   currentValue: string,
-  bumpVersion: ReleaseType | string
+  bumpVersion: ReleaseType | `mirror:${string}`
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   let newPjVersion: string | null;
   let bumpedContent = content;
+
   try {
-    if (bumpVersion.startsWith('mirror:')) {
+    if (isMirrorBumpVersion(bumpVersion)) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
       newPjVersion =
@@ -29,9 +38,9 @@ export function bumpPackageVersion(
         return { bumpedContent };
       }
     } else {
-      newPjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+      newPjVersion = semver.inc(currentValue, bumpVersion);
     }
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     logger.debug(`newPjVersion: ${newPjVersion!}`);
     bumpedContent = content.replace(
       regEx(`(?<version>"version":\\s*")[^"]*`),

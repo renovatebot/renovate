@@ -36,7 +36,7 @@ It is responsible for handling several aspects of the fetch process, including:
 - Handling and aggregating errors that may occur during the fetch process
 - Dynamically adjusting the page size and retrying in the event of server errors
 - Enforcing a maximum limit on the number of queries that can be made
-- Detecting whether a package is private or public, and selecting the appropriate cache strategy (in-memory or long-term) accordingly
+- Detecting whether a package is private or public, and selecting the right cache strategy (in-memory or long-term) accordingly
 - Ensuring proper concurrency when querying the same package simultaneously.
 
 The `cache-strategies/` directory is responsible for caching implementation.

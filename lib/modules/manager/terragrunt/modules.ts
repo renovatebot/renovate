@@ -22,7 +22,7 @@ export function extractTerragruntModule(
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // TODO #7154
+    // TODO #22198
     dep.managerData!.terragruntDependencyType = 'terraform';
   });
   return result;
@@ -31,7 +31,7 @@ export function extractTerragruntModule(
 export function analyseTerragruntModule(
   dep: PackageDependency<TerraformManagerData>
 ): void {
-  // TODO #7154
+  // TODO #22198
   const source = dep.managerData!.source;
   const githubRefMatch = githubRefMatchRegex.exec(source ?? '');
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source ?? '');

@@ -10,6 +10,7 @@ import { newlineRegex, regEx } from '../../../../../util/regex';
 import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -33,6 +34,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseList(project, release);
       case 'gitlab':
         return await gitlab.getReleaseList(project, release);
       case 'github':
@@ -60,7 +63,7 @@ export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
     project.repository
   }`;
@@ -130,7 +133,7 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   const { packageName, repository } = project;
   const { version, gitRef } = release;
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
@@ -242,6 +245,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       case 'gitlab':
         return await gitlab.getReleaseNotesMd(
           repository,
@@ -283,7 +292,7 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
     project.sourceDirectory ? `-${project.sourceDirectory}` : ''
   }-${project.apiBaseUrl!}`;

@@ -45,6 +45,7 @@ export interface GraphqlOptions {
   limit?: number;
   cursor?: string | null;
   acceptHeader?: string;
+  token?: string;
 }
 
 export interface HttpOptions {
