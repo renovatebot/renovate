@@ -475,10 +475,20 @@ describe('config/validation', () => {
     it('errors if empty regexManager matchStrings', async () => {
       const config = {
         regexManagers: [
-          { customType: 'regex', fileMatch: ['foo'], matchStrings: [] },
           {
             customType: 'regex',
             fileMatch: ['foo'],
+            matchStrings: [],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
+          },
+          {
+            customType: 'regex',
+            fileMatch: ['foo'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
