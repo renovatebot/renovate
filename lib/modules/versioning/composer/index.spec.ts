@@ -3,7 +3,24 @@ import { api as semver } from '.';
 describe('modules/versioning/composer/index', () => {
   it.each`
     version    | expected
+    ${'1.2.0'} | ${1}
+    ${''}      | ${null}
+  `('getMajor("$version") === $expected', ({ version, expected }) => {
+    expect(semver.getMajor(version)).toBe(expected);
+  });
+
+  it.each`
+    version    | expected
+    ${'1.2.0'} | ${2}
+    ${''}      | ${null}
+  `('getMinor("$version") === $expected', ({ version, expected }) => {
+    expect(semver.getMinor(version)).toBe(expected);
+  });
+
+  it.each`
+    version    | expected
     ${'1.2.0'} | ${0}
+    ${''}      | ${null}
   `('getPatch("$version") === $expected', ({ version, expected }) => {
     expect(semver.getPatch(version)).toBe(expected);
   });
@@ -202,6 +219,7 @@ describe('modules/versioning/composer/index', () => {
     ${'^5'}                   | ${'update-lockfile'} | ${'5.1.0'}        | ${'6.0.0'}       | ${'^6'}
     ${'^0.4.0'}               | ${'replace'}         | ${'0.4'}          | ${'0.5'}         | ${'^0.5.0'}
     ${'^0.4.0'}               | ${'replace'}         | ${'0.4'}          | ${'1.0'}         | ${'^1.0.0'}
+    ${'^0.4.0'}               | ${'replace'}         | ${null}           | ${'1.0'}         | ${'1.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

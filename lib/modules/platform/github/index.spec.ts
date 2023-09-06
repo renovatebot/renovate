@@ -161,6 +161,67 @@ describe('modules/platform/github/index', () => {
       expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
     });
 
+    it('should autodetect email/user on default endpoint with GitHub App', async () => {
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({ token: 'x-access-token:ghs_123test' })
+      ).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+      expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
+    it('should throw error when cant request App information on default endpoint with GitHub App', async () => {
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' })
+      ).rejects.toThrowWithMessage(Error, 'Init: Authentication failure');
+    });
+
+    it('should autodetect email/user on custom endpoint with GitHub App', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com', {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'x-access-token:ghs_123test',
+        })
+      ).toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor:
+          'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
     it('should support custom endpoint', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')

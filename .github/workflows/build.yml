@@ -398,10 +398,13 @@ jobs:
       - name: Merge coverage reports
         run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
+      - name: Report coverage
+        run: pnpm nyc report -t ./coverage/nyc --skip-full -r text -r text-summary
+
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 98 \
+            --branches 99.4 \
             --functions 100 \
             --lines 100 \
             --statements 100

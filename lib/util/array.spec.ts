@@ -1,4 +1,4 @@
-import { isNotNullOrUndefined } from './array';
+import { isNotNullOrUndefined, toArray } from './array';
 
 describe('util/array', () => {
   it.each`
@@ -8,5 +8,14 @@ describe('util/array', () => {
     ${{ name: 'foo' }} | ${true}
   `('.isNotNullOrUndefined', ({ a, exp }) => {
     expect(isNotNullOrUndefined(a)).toEqual(exp);
+  });
+
+  it.each`
+    a            | exp
+    ${null}      | ${[null]}
+    ${undefined} | ${[undefined]}
+    ${[]}        | ${[]}
+  `('.toArray', ({ a, exp }) => {
+    expect(toArray(a)).toEqual(exp);
   });
 });

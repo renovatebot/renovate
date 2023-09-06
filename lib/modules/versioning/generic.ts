@@ -129,9 +129,8 @@ export abstract class GenericVersioningApi<
     return result ?? null;
   }
 
-  getNewValue(newValueConfig: NewValueConfig): string {
-    const { newVersion } = newValueConfig || {};
-    return newVersion;
+  getNewValue({ newVersion }: NewValueConfig): string | null {
+    return newVersion ?? null;
   }
 
   sortVersions(version: string, other: string): number {
