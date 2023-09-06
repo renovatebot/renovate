@@ -399,7 +399,7 @@ jobs:
         run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
       - name: Report coverage
-        run: pnpm nyc report --report-dir=./coverage/nyc --skip-full  -r text -r text-summary
+        run: pnpm nyc report --report-dir=./coverage/nyc --skip-full -r text -r text-summary
 
       - name: Check coverage threshold
         run: |
