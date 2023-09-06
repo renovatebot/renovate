@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { allManagersList, getManagerList } from '../modules/manager';
+import { isCustomManager } from '../modules/manager/custom';
 import type { RegexManagerConfig } from '../modules/manager/custom/regex/types';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
@@ -19,7 +20,6 @@ import type {
   ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
-import { isCustomManager } from '../modules/manager/custom';
 
 const options = getOptions();
 
