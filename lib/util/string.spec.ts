@@ -38,5 +38,6 @@ describe('util/string', () => {
     expect(coerceString('')).toBe('');
     expect(coerceString(undefined)).toBe('');
     expect(coerceString(null)).toBe('');
+    expect(coerceString(null, 'foo')).toBe('foo');
   });
 });

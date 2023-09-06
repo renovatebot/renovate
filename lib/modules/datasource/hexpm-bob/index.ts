@@ -27,7 +27,7 @@ export class HexpmBobDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl ?? defaultRegistryUrl}:${packageName}`,
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,

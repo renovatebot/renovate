@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
 import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
@@ -70,8 +71,8 @@ class DockerVersioningApi extends GenericVersioningApi {
     }
 
     // equals
-    const suffix1 = parsed1.suffix ?? '';
-    const suffix2 = parsed2.suffix ?? '';
+    const suffix1 = coerceString(parsed1.suffix);
+    const suffix2 = coerceString(parsed2.suffix);
     return suffix2.localeCompare(suffix1);
   }
 

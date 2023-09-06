@@ -83,6 +83,14 @@ export function copystr(x: string): string {
   return buf.toString('utf8');
 }
 
-export function coerceString(val: string | null | undefined): string {
-  return val ?? '';
+/**
+ * Coerce a value to a string with optional default value.
+ * @param val value to coerce
+ * @returns the coerced value.
+ */
+export function coerceString(
+  val: string | null | undefined,
+  def?: string
+): string {
+  return val ?? def ?? '';
 }
