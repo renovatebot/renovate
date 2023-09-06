@@ -2,6 +2,7 @@
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
+import { coerceArray } from '../../util/array';
 import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
@@ -41,8 +42,8 @@ function getDepWarnings(
     for (const file of files ?? []) {
       // TODO: remove condition when type is fixed (#22198)
       if (file.packageFile) {
-        for (const dep of file.deps ?? []) {
-          for (const w of dep.warnings ?? []) {
+        for (const dep of coerceArray(file.deps)) {
+          for (const w of coerceArray(dep.warnings)) {
             const message = w.message;
             if (!warnings.includes(message)) {
               warnings.push(message);
