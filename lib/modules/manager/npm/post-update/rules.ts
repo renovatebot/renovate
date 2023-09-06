@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../../../logger';
 import * as hostRules from '../../../../util/host-rules';
 import { regEx } from '../../../../util/regex';
 import { toBase64 } from '../../../../util/string';
@@ -18,7 +17,6 @@ export function processHostRules(): HostRulesResult {
   const npmHostRules = hostRules.findAll({
     hostType: 'npm',
   });
-  logger.debug(`Found ${npmHostRules.length} npm hostRules`);
   for (const hostRule of npmHostRules) {
     if (hostRule.resolvedHost) {
       let uri = hostRule.matchHost;
