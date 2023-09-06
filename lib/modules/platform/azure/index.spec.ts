@@ -1271,7 +1271,14 @@ describe('modules/platform/azure/index', () => {
         content:
           'You can manually request rebase by checking the rebase/retry box above.',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
+
+      const commentContent = gitApiMock.createThread.mock.calls[0];
+      expect(JSON.stringify(commentContent)).not.toContain(
+        'checking the rebase/retry box above'
+      );
+      expect(JSON.stringify(commentContent)).toContain(
+        'renaming the PR to start with \\"rebase!\\"'
+      );
     });
   });
 
