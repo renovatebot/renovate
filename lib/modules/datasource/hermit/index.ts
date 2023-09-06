@@ -5,6 +5,7 @@ import { getApiBaseUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { streamToString } from '../../../util/streams';
+import { coerceString } from '../../../util/string';
 import { parseUrl } from '../../../util/url';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
@@ -106,8 +107,8 @@ export class HermitDatasource extends Datasource {
   })
   async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
     const registryUrl = u.toString();
-    const host = u.host ?? '';
-    const groups = this.pathRegex.exec(u.pathname ?? '')?.groups;
+    const host = coerceString(u.host);
+    const groups = this.pathRegex.exec(coerceString(u.pathname))?.groups;
     if (!groups) {
       logger.warn(
         { registryUrl },

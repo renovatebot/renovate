@@ -82,3 +82,7 @@ export function copystr(x: string): string {
   buf.write(x, 'utf8');
   return buf.toString('utf8');
 }
+
+export function coerceString(val: string | null | undefined): string {
+  return val ?? '';
+}
