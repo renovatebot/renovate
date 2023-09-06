@@ -14,7 +14,7 @@ describe('util/array', () => {
     a            | exp
     ${null}      | ${[null]}
     ${undefined} | ${[undefined]}
-    ${[]}        | ${[true]}
+    ${[]}        | ${[]}
   `('.toArray', ({ a, exp }) => {
     expect(toArray(a)).toEqual(exp);
   });
