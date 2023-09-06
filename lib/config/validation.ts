@@ -668,9 +668,7 @@ function validateRegexManagerFields(
       } catch (e) {
         errors.push({
           topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${String(
-            matchString
-          )}\``,
+          message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
         });
       }
     }
@@ -686,7 +684,7 @@ function validateRegexManagerFields(
     const templateField = `${field}Template` as keyof RegexManagerTemplates;
     if (
       !regexManager[templateField] &&
-      !regexManager.matchStrings.some((matchString: string) =>
+      !regexManager.matchStrings.some((matchString) =>
         matchString.includes(`(?<${field}>`)
       )
     ) {
