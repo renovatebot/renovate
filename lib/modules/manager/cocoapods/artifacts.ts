@@ -2,6 +2,7 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -134,7 +135,7 @@ export async function updateArtifacts({
         });
       }
     }
-    for (const f of status.deleted || []) {
+    for (const f of coerceArray(status.deleted)) {
       res.push({
         file: {
           type: 'deletion',

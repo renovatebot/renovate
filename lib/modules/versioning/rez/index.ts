@@ -1,5 +1,6 @@
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
 import { api as npm } from '../npm';
 import { api as pep440 } from '../pep440';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -160,10 +161,12 @@ function getNewValue({
     const lowerAscVersionCurrent = matchAscRange.groups.range_lower_asc_version;
     const upperAscVersionCurrent = matchAscRange.groups.range_upper_asc_version;
     const [lowerBoundAscPep440, upperBoundAscPep440] = pep440Value.split(', ');
-    const lowerAscVersionNew =
-      regEx(versionGroup).exec(lowerBoundAscPep440)?.[0] ?? '';
-    const upperAscVersionNew =
-      regEx(versionGroup).exec(upperBoundAscPep440)?.[0] ?? '';
+    const lowerAscVersionNew = coerceString(
+      regEx(versionGroup).exec(lowerBoundAscPep440)?.[0]
+    );
+    const upperAscVersionNew = coerceString(
+      regEx(versionGroup).exec(upperBoundAscPep440)?.[0]
+    );
     const lowerBoundAscNew = lowerBoundAscCurrent.replace(
       lowerAscVersionCurrent,
       lowerAscVersionNew
@@ -189,10 +192,12 @@ function getNewValue({
     const [lowerBoundDescPep440, upperBoundDescPep440] =
       pep440Value.split(', ');
 
-    const upperDescVersionNew =
-      regEx(versionGroup).exec(upperBoundDescPep440)?.[0] ?? '';
-    const lowerDescVersionNew =
-      regEx(versionGroup).exec(lowerBoundDescPep440)?.[0] ?? '';
+    const upperDescVersionNew = coerceString(
+      regEx(versionGroup).exec(upperBoundDescPep440)?.[0]
+    );
+    const lowerDescVersionNew = coerceString(
+      regEx(versionGroup).exec(lowerBoundDescPep440)?.[0]
+    );
     const upperBoundDescNew = upperBoundDescCurrent.replace(
       upperDescVersionCurrent,
       upperDescVersionNew

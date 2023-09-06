@@ -148,6 +148,71 @@ describe('util/http/host-rules', () => {
     `);
   });
 
+  it('certificateAuthority', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.ca',
+      httpsCertificateAuthority: 'ca-cert',
+    });
+
+    expect(
+      applyHostRules('https://custom.datasource.ca/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "certificateAuthority": "ca-cert",
+        },
+      }
+    `);
+  });
+
+  it('privateKey', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.key',
+      httpsPrivateKey: 'key',
+    });
+    expect(
+      applyHostRules('https://custom.datasource.key/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "key": "key",
+        },
+      }
+    `);
+  });
+
+  it('certificate', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.cert',
+      httpsCertificate: 'cert',
+    });
+
+    expect(
+      applyHostRules('https://custom.datasource.cert/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "certificate": "cert",
+        },
+      }
+    `);
+  });
+
   it('no fallback to github', () => {
     hostRules.add({
       hostType: 'github-tags',

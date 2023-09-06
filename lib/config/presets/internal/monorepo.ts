@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { toArray } from '../../../util/array';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -482,20 +482,20 @@ export const presets: Record<string, Preset> = {};
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrls: is.array(value) ? value : [value],
+    matchSourceUrls: toArray(value),
   };
 }
 
 for (const [name, value] of Object.entries(orgGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrlPrefixes: is.array(value) ? value : [value],
+    matchSourceUrlPrefixes: toArray(value),
   };
 }
 
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchPackagePatterns: is.array(value) ? value : [value],
+    matchPackagePatterns: toArray(value),
   };
 }
