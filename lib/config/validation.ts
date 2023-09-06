@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { allManagersList, getManagerList } from '../modules/manager';
+import type { RegexManagerConfig } from '../modules/manager/custom/regex/types';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -18,7 +19,6 @@ import type {
   ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
-import type { RegexManagerConfig } from '../modules/manager/custom/regex/types';
 
 const options = getOptions();
 
@@ -436,6 +436,7 @@ export async function validateConfig(
                   });
                 } else if (is.nonEmptyString(regexManager.customType)) {
                   if (is.nonEmptyArray(regexManager.fileMatch)) {
+                    ``;
                     switch (regexManager.customType) {
                       case 'regex':
                         errors.push(
