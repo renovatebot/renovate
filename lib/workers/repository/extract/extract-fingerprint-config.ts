@@ -1,12 +1,10 @@
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  RegexManagerTemplates,
-  RenovateConfig,
-} from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { allManagersList } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
+import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
-import type { CustomExtractConfig } from '../../../modules/manager/types';
+import type { CustomExtractConfig } from '../../../modules/manager/custom/types';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {

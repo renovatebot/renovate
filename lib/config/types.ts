@@ -3,6 +3,7 @@ import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
+import type { CustomManager } from '../modules/manager/custom/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -183,26 +184,6 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
-export interface RegexManagerTemplates {
-  depNameTemplate?: string;
-  packageNameTemplate?: string;
-  datasourceTemplate?: string;
-  versioningTemplate?: string;
-  depTypeTemplate?: string;
-  currentValueTemplate?: string;
-  currentDigestTemplate?: string;
-  extractVersionTemplate?: string;
-  registryUrlTemplate?: string;
-}
-
-export type CustomManagerName = 'regex';
-export interface CustomManager extends RegexManagerTemplates {
-  customType: CustomManagerName;
-  fileMatch: string[];
-  matchStrings: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
-  autoReplaceStringTemplate?: string;
-}
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import type { CustomManager } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
+import type { CustomManager } from '../../../modules/manager/custom/types';
 
 export class RegexManagersMigration extends AbstractMigration {
   override readonly propertyName = 'regexManagers';
