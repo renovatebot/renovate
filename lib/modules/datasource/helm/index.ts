@@ -71,7 +71,7 @@ export class HelmDatasource extends Datasource {
           releases: releases.map((release) => ({
             version: release.version,
             releaseTimestamp: release.created ?? null,
-            // The Helm repository at Gitlab.com does not include a digest
+            // The Helm repository at Gitlab does not include a digest (#24280)
             newDigest: release.digest ?? undefined,
           })),
         };
