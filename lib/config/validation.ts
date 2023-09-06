@@ -439,10 +439,10 @@ export async function validateConfig(
                     switch (regexManager.customType) {
                       case 'regex':
                         errors.push(
-                          ...(validateRegexManagerFields(
+                          ...validateRegexManagerFields(
                             regexManager,
                             currentPath
-                          ) as any)
+                          )
                         );
                         break;
                     }
