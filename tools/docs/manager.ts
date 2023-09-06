@@ -139,7 +139,7 @@ sidebar_label: ${displayName}
     }
     const managerReadmeContent = await readFile(
       `lib/modules/manager/${
-        isCustomManager(manager) ? 'custom/' : '' + manager
+        isCustomManager(manager) ? 'custom/' + manager : manager
       }/readme.md`
     );
     if (!isCustomManager(manager)) {

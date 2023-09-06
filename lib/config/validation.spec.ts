@@ -224,7 +224,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config as any
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
@@ -372,9 +372,10 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each fileMatch', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
+            customType: 'regex',
             fileMatch: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -391,10 +392,11 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('errors if no regexManager matchStrings', async () => {
+    it('errors if regexManager has empty fileMatch', async () => {
       const config = {
         regexManagers: [
           {
+            customType: 'regex',
             fileMatch: [],
           },
         ],
@@ -415,14 +417,39 @@ describe('config/validation', () => {
       `);
     });
 
-    it('errors if empty regexManager matchStrings', async () => {
+    it('errors if no regexManager customType', async () => {
       const config = {
         regexManagers: [
           {
-            fileMatch: ['foo'],
-            matchStrings: [],
+            fileMatch: ['some-file'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
           },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        [
           {
+            "message": "Each Regex Manager must contain a non-empty customType string",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
+    it('errors if empty regexManager matchStrings', async () => {
+      const config = {
+        regexManagers: [
+          { customType: 'regex', fileMatch: ['foo'], matchStrings: [] },
+          {
+            customType: 'regex',
             fileMatch: ['foo'],
           },
         ],
@@ -466,9 +493,10 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each matchStrings', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
           },
@@ -483,9 +511,10 @@ describe('config/validation', () => {
     });
 
     it('passes if regexManager fields are present', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
@@ -508,6 +537,7 @@ describe('config/validation', () => {
       const config = {
         regexManagers: [
           {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
@@ -518,7 +548,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as any,
         true
       );
       expect(warnings).toHaveLength(0);
@@ -526,9 +556,10 @@ describe('config/validation', () => {
     });
 
     it('errors if regexManager fields are missing', async () => {
-      const config = {
+      const config: RenovateConfig = {
         regexManagers: [
           {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (.*?)\\s'],
             depNameTemplate: 'foo',
@@ -649,7 +680,7 @@ describe('config/validation', () => {
     });
 
     it('errors if fileMatch has wrong parent', async () => {
-      const config = {
+      const config: RenovateConfig = {
         fileMatch: ['foo'],
         npm: {
           fileMatch: ['package\\.json'],
@@ -659,6 +690,7 @@ describe('config/validation', () => {
         },
         regexManagers: [
           {
+            customType: 'regex',
             fileMatch: ['build.gradle'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',

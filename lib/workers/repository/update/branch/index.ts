@@ -132,7 +132,10 @@ export async function processBranch(
     }
   }
 
-  let branchPr = await platform.getBranchPr(config.branchName);
+  let branchPr = await platform.getBranchPr(
+    config.branchName,
+    config.baseBranch
+  );
   logger.debug(`branchExists=${branchExists}`);
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
@@ -262,6 +265,7 @@ export async function processBranch(
         const oldPr = await platform.findPr({
           branchName: config.branchName,
           state: '!open',
+          targetBranch: config.baseBranch,
         });
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
