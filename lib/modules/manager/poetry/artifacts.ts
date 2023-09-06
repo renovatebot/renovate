@@ -22,33 +22,12 @@ import { Lockfile, PoetrySchemaToml } from './schema';
 import type { PoetryFile, PoetrySource } from './types';
 
 export function getPythonConstraint(
-  pyProjectContent: string,
   existingLockFileContent: string
 ): string | null {
-  // Read Python version from `pyproject.toml` first as it could have been updated
-  const pyprojectPythonConstraint = Result.parse(
-    pyProjectContent,
-    PoetrySchemaToml.transform(
-      ({ packageFileContent }) =>
-        packageFileContent.deps.find((dep) => dep.depName === 'python')
-          ?.currentValue
-    )
-  ).unwrapOrNull();
-  if (pyprojectPythonConstraint) {
-    logger.debug('Using python version from pyproject.toml');
-    return pyprojectPythonConstraint;
-  }
-
-  const lockfilePythonConstraint = Result.parse(
+  return Result.parse(
     existingLockFileContent,
     Lockfile.transform(({ pythonVersions }) => pythonVersions)
   ).unwrapOrNull();
-  if (lockfilePythonConstraint) {
-    logger.debug('Using python version from poetry.lock');
-    return lockfilePythonConstraint;
-  }
-
-  return null;
 }
 
 export function getPoetryRequirement(
@@ -179,7 +158,7 @@ export async function updateArtifacts({
     }
     const pythonConstraint =
       config?.constraints?.python ??
-      getPythonConstraint(newPackageFileContent, existingLockFileContent);
+      getPythonConstraint(existingLockFileContent);
     const poetryConstraint =
       config.constraints?.poetry ??
       getPoetryRequirement(newPackageFileContent, existingLockFileContent);
