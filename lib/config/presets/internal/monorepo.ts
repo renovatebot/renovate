@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { toArray } from '../../../util/array';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -498,8 +498,4 @@ for (const [name, value] of Object.entries(patternGroups)) {
     description: `${name} monorepo`,
     matchPackagePatterns: toArray(value),
   };
-}
-
-function toArray(value: string | string[]): string[] {
-  return is.array(value) ? value : [value];
 }

@@ -11,17 +11,14 @@ export function smartTruncate(input: string, len: number): string {
   }
 
   const reMatch = re.exec(input);
-  if (!reMatch) {
+  if (!reMatch?.groups) {
     return input.substring(0, len);
   }
 
   const divider = `\n\n</details>\n\n---\n\n### Configuration`;
-  const preNotes =
-    reMatch.groups?.preNotes ?? /* istanbul ignore next: can't happen */ '';
-  const releaseNotes =
-    reMatch.groups?.releaseNotes ?? /* istanbul ignore next: can't happen */ '';
-  const postNotes =
-    reMatch.groups?.postNotes ?? /* istanbul ignore next: can't happen */ '';
+  const preNotes = reMatch.groups.preNotes;
+  const releaseNotes = reMatch.groups.releaseNotes;
+  const postNotes = reMatch.groups.postNotes;
 
   const availableLength =
     len - (preNotes.length + postNotes.length + divider.length);
