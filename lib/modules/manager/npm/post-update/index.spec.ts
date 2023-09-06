@@ -482,6 +482,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ).updatedArtifacts.find((a) => a.path === 'package-lock.json')
       ).toBeUndefined();
     });
+
     it('works for yarn', async () => {
       spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
       expect(
