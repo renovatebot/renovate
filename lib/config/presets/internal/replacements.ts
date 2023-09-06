@@ -692,7 +692,7 @@ export const presets: Record<string, Preset> = {
   },
   'rome-to-biome': {
     description:
-      'The rome project has been discontinued and biome was announced. For migration instruction, read [the announcement](https://biomejs.dev/blog/annoucing-biome/).',
+      'The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.',
     packageRules: [
       {
         matchDatasources: ['npm'],
