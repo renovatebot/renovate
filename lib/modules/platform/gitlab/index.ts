@@ -17,6 +17,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { coerceArray } from '../../../util/array';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -176,9 +177,10 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     throw err;
   }
 }
-
-function urlEscape(str: string): string {
-  return str ? str.replace(regEx(/\//g), '%2F') : str;
+function urlEscape(str: string): string;
+function urlEscape(str: string | undefined): string | undefined;
+function urlEscape(str: string | undefined): string | undefined {
+  return str?.replace(regEx(/\//g), '%2F');
 }
 
 export async function getRawFile(
@@ -187,7 +189,7 @@ export async function getRawFile(
   branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
-  const repo = urlEscape(repoName ?? config.repository);
+  const repo = urlEscape(repoName) ?? config.repository;
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
     (branchOrTag ?? `HEAD`);
@@ -243,11 +245,13 @@ function getRepoUrl(
     const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
-      protocol: protocol.slice(0, -1) || 'https',
+      protocol:
+        protocol.slice(0, -1) ||
+        /* istanbul ignore next: should never happen */ 'https',
       // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,
-      pathname: newPathname + '/' + repository + '.git',
+      pathname: `${newPathname}/${repository}.git`,
     });
     logger.debug(`Using URL based on configured endpoint, url:${url}`);
     return url;
@@ -1097,7 +1101,7 @@ export async function addReviewers(
     return;
   }
 
-  mr.reviewers = mr.reviewers ?? [];
+  mr.reviewers = coerceArray(mr.reviewers);
   const existingReviewers = mr.reviewers.map((r) => r.username);
   const existingReviewerIDs = mr.reviewers.map((r) => r.id);
 
@@ -1144,7 +1148,7 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
-    const labels = (pr.labels ?? [])
+    const labels = coerceArray(pr.labels)
       .filter((l: string) => l !== label)
       .join(',');
     await gitlabApi.putJson(

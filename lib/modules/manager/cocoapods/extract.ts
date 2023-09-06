@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
@@ -54,7 +55,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
   const platformMatch = regEx(
     /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/
-  ).exec(git ?? '');
+  ).exec(coerceString(git));
 
   if (platformMatch?.groups) {
     const { account, repo, platform } = platformMatch.groups;
