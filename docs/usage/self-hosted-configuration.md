@@ -585,14 +585,26 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 When this option is `true`, Renovate will do the following during repository initialization:
 
-- Try to fetch the default config file (`renovate.json`)
+- Try to fetch the default config file (e.g. `renovate.json`)
 - Check if the file contains `"enabled": false`
+- If so, skip cloning and skip the repository immediately
+
+If `onboardingConfigFileName` is set, that file name will be used instead of the default.
 
 If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
 Otherwise, it will continue as normal.
 
-This option is only useful where the ratio of disabled repos is quite high.
-You spend one extra API call per repo, but skip cloning disabled repositories.
+It can speed up initialization significantly in cases where most repositories are disabled, at the cost of an extra API call for enabled repositories.
+
+A second, advanced, use also exists when the bot global config contains `extends: [":disableRenovate"]`.
+In that case, Renovate will check for a repo config file containing one of the following:
+
+- `extends: [":enableRenovate"]`
+- `ignorePresets: [":disableRenovate"]`
+- `enabled: true`
+
+If any of those three are found, then the repo initialization will continue.
+If not, then Renoate will skip the repository without cloning it.
 
 ## password
 
