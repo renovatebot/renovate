@@ -142,8 +142,9 @@ export function getAuthenticationRules(
   if (token.startsWith('gitlab-ci-token')) {
     authenticationRules.push({
       url: url.toString(protocol),
-      insteadOf: `https://oauth2@${insteadUrl.resource}/${
-        insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
+      insteadOf: `https://oauth2@${insteadUrl.resource}${
+        insteadUrl.port ? `:${insteadUrl.port}` : ''
+      }/${insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
     });
   }
 
