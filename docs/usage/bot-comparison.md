@@ -1,35 +1,37 @@
 # Bot comparison
 
-This page explains the differences between Renovate and Dependabot.
+This page explains the key differences between Renovate and Dependabot.
 
 ## Table
 
-| Name of feature | Dependabot | Renovate |
-| ----------------| ---------- | -------- |
-| Dependency Dashboard | No | Yes |
-| Grouped updates | Yes, you create groups | Yes, use built-in groups, or create your own |
-| Monorepo support | research | Yes |
-| Supported platforms | GitHub only| multiple |
-| Supported languages | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/) |
-| Customizability | low | high |
-| Show changelogs | yes | yes |
-| Compatibility score badge(s) | 1 | 4 |
-| Built-in to GitHub | yes | no, requires app or self-hosting |
+| Name of feature              | Dependabot                                                                                                                                                                   | Renovate                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Dependency Dashboard         | No                                                                                                                                                                           | Yes                                                                |
+| Grouped updates              | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     | Yes, use community-provided groups, or create your own             |
+| Monorepo support             | unknown                                                                                                                                                                      | Yes                                                                |
+| Supported platforms          | GitHub only                                                                                                                                                                  | multiple                                                           |
+| Supported languages          | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/) |
+| Customizability              | low                                                                                                                                                                          | high                                                               |
+| Show changelogs              | yes                                                                                                                                                                          | yes                                                                |
+| Compatibility score badges   | 1                                                                                                                                                                            | 4                                                                  |
+| Built-in to GitHub           | yes                                                                                                                                                                          | no, requires app or self-hosting                                   |
+| Schedule interval            | yes: `daily`, `weekly`, `monthly`                                                                                                                                            | yes: custom                                                        |
 
 ## Dependency Dashboard
 
-Big difference so we should highlight it.
+One big feature of Renovate is the Dependency Dashboard, which is enabled by default.
 Read the [Key concepts, Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) page to learn more.
 
 ## Grouped updates
 
-Dependabot recently added grouped update support.
-Research recent blog posts to see how it works.
+Renovate comes with community-provided groupings of dependencies, so it will group common dependencies out-of-the-box.
+With Dependabot you'll have to set your own [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups).
 
 ## Monorepo support
 
-Research how Dependabot handles monorepos.
-Link to Dependabot docs if available.
+Renovate has a [`group:monorepos`](https://docs.renovatebot.com/presets-group/#groupmonorepos) preset, that groups dependencies from monorepos.
+
+I don't know if Dependabot supports monorepos.
 
 ## Supported platforms
 
@@ -37,25 +39,26 @@ Platform means the Git-hosting site or program, for example GitHub, GitLab or Az
 
 Dependabot only works on GitHub.
 
-Renovate works on other platforms as well.
+Renovate works on multiple platforms, including GitHub.
 Read the [list of Renovate platforms](https://docs.renovatebot.com/modules/platform/) to learn more.
 
 ## Supported languages
 
-Follow these links to learn what languages and ecosystems each bot supports:
-
 - [Renovate's supported managers](https://docs.renovatebot.com/modules/manager/)
-- [GitHub Docs, Dependabot's supported repositories and ecosystems](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems)
+- [Dependabot's supported repositories and ecosystems](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems)
 
 ## Customizability
 
-Low for Dependabot, high for Renovate.
+Both Renovate and Dependabot come with good default settings.
+
+Renovate gives you more control over _when_ and _how_ you'll get the updates.
+Renovate gives you tools to reduce the "update noise", read our [Noise reduction](https://docs.renovatebot.com/noise-reduction/) page to learn more.
 
 ## Show changelogs
 
 Renovate and Dependabot show changelogs in their PRs.
 
-## Compatiblity score badge(s)
+## Compatiblity score badges
 
 Dependabot shows one compatibility score badge.
 This score tells you how many other repositories have passing CI tests for the proposed update.
