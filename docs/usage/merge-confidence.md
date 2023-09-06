@@ -25,14 +25,16 @@ Merge Confidence badges for pull requests are available on any supported platfor
 
 ## Supported languages
 
-Data is available for the following languages (from the noted data source):
+Renovate will show Merge Confidence badges for these languages:
 
-- JavaScript (npm)
-- Java (maven)
-- Python (pypi)
-- .NET (nuget)
-- PHP (packagist)
-- Ruby (rubygems)
+| Language   | Datasource  |
+| ---------- | ----------- |
+| JavaScript | `npm`       |
+| Java       | `maven`     |
+| Python     | `pypi`      |
+| .NET       | `nuget`     |
+| PHP        | `packagist` |
+| Ruby       | `rubygems`  |
 
 We plan to support more languages soon.
 
