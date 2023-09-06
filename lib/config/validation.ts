@@ -672,7 +672,6 @@ function validateRegexManagerFields(
             matchString
           )}\``,
         });
-        return;
       }
     }
   } else {

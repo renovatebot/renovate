@@ -537,6 +537,9 @@ describe('config/validation', () => {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
@@ -546,6 +549,26 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+    });
+
+    // testing if we get all errors at once or not (possible), this does not include customType or fileMatch
+    // since they are common to all custom managers
+    it('validates all possible regex manager options', async () => {
+      const config: RenovateConfig = {
+        regexManagers: [
+          {
+            customType: 'regex',
+            fileMatch: ['Dockerfile'],
+            matchStrings: ['***$}{]]['], // invalid matchStrings regex, no depName, datasource and currentValue
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(4);
     });
 
     it('passes if regexManager fields are present', async () => {
