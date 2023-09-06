@@ -227,7 +227,9 @@ function extractDependency({
     : null;
   if (isArtifactDescriptor(descriptor)) {
     const { group, name } = descriptor;
-    const groupName = is.nullOrUndefined(versionRef) ? group : versionRef; // usage of common variable should have higher priority than other values
+    const groupName = is.nullOrUndefined(versionRef)
+      ? group
+      : /* istanbul ignore next: hard to test */ versionRef; // usage of common variable should have higher priority than other values
     return {
       depName: `${group}:${name}`,
       groupName,
