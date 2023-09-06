@@ -2,6 +2,11 @@
 
 This page explains the key differences between Renovate and Dependabot.
 
+This is not meant to be a “versus” or anti-Dependabot page, and it's not marketing.
+It should be as objective as possible, to help users decide which tool is best for them.
+
+If you see anything wrong on this page, please let us know by creating a [Discussion](https://github.com/renovatebot/renovate/discussions), or edit this page with a PR.
+
 ## Table
 
 | Name of feature            | Dependabot                                                                                                                                                                   | Renovate                                                           |
