@@ -1558,12 +1558,12 @@ To adjust it down to 10s for all queries, do this:
 
 ### httpsCertificateAuthority
 
-By default, Renovate uses the curated list of well-known CAs by Mozilla.
+By default, Renovate uses the curated list of well-known [CA](https://en.wikipedia.org/wiki/Certificate_authority)s by Mozilla.
 You may use another Certificate Authority instead, by setting it in the `httpsCertificateAuthority` config option.
 
 ### httpsPrivateKey
 
-Specifies the private key in PEM format for mTLS authentication.
+Specifies the private key in [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) for mTLS authentication.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -1572,7 +1572,7 @@ Specifies the private key in PEM format for mTLS authentication.
 
 ### httpsCertificate
 
-Specifies the certificate chain in PEM format for mTLS authentication.
+Specifies the [Certificate chains](https://en.wikipedia.org/wiki/X.509#Certificate_chains_and_cross-certification) in [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) for mTLS authentication.
 
 ## ignoreDeprecated
 
