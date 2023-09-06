@@ -436,7 +436,6 @@ export async function validateConfig(
                   });
                 } else if (is.nonEmptyString(regexManager.customType)) {
                   if (is.nonEmptyArray(regexManager.fileMatch)) {
-                    ``;
                     switch (regexManager.customType) {
                       case 'regex':
                         errors.push(
