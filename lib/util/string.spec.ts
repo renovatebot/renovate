@@ -1,4 +1,4 @@
-import { looseEquals, replaceAt } from './string';
+import { coerceString, looseEquals, replaceAt } from './string';
 
 describe('util/string', () => {
   describe('replaceAt', () => {
@@ -31,5 +31,12 @@ describe('util/string', () => {
       expect(looseEquals(null, null)).toBeTrue();
       expect(looseEquals(null, '')).toBeFalse();
     });
+  });
+
+  it('coerceString', () => {
+    expect(coerceString('foo')).toBe('foo');
+    expect(coerceString('')).toBe('');
+    expect(coerceString(undefined)).toBe('');
+    expect(coerceString(null)).toBe('');
   });
 });

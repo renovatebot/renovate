@@ -1,8 +1,9 @@
+import { ZodError } from 'zod';
 import {
   DistributionListManifest,
   DistributionManifest,
-  HelmConfigBlob,
   Manifest,
+  OciHelmConfig,
   OciImageIndexManifest,
   OciImageManifest,
 } from './schema';
@@ -42,7 +43,7 @@ describe('modules/datasource/docker/schema', () => {
 
     delete (manifest as any).mediaType;
 
-    expect(OciImageManifest.parse(manifest)).toMatchObject({
+    expect(Manifest.parse(manifest)).toMatchObject({
       schemaVersion: 2,
       mediaType: 'application/vnd.oci.image.manifest.v1+json',
       config: {
@@ -90,7 +91,7 @@ describe('modules/datasource/docker/schema', () => {
 
     delete (manifest as any).mediaType;
 
-    expect(OciImageManifest.parse(manifest)).toMatchObject({
+    expect(Manifest.parse(manifest)).toMatchObject({
       schemaVersion: 2,
       mediaType: 'application/vnd.oci.image.manifest.v1+json',
       config: {
@@ -145,7 +146,7 @@ describe('modules/datasource/docker/schema', () => {
     });
 
     delete (manifest as any).mediaType;
-    expect(OciImageIndexManifest.parse(manifest)).toMatchObject({
+    expect(Manifest.parse(manifest)).toMatchObject({
       schemaVersion: 2,
       mediaType: 'application/vnd.oci.image.index.v1+json',
     });
@@ -276,8 +277,12 @@ describe('modules/datasource/docker/schema', () => {
       version: '16.7.2',
     };
 
-    expect(HelmConfigBlob.parse(manifest)).toMatchObject({
+    expect(OciHelmConfig.parse(manifest)).toMatchObject({
       sources: ['https://github.com/bitnami/charts/tree/main/bitnami/harbor'],
     });
+  });
+
+  it('throws for invalid manifest', () => {
+    expect(() => Manifest.parse({ schemaVersion: 2 })).toThrow(ZodError);
   });
 });

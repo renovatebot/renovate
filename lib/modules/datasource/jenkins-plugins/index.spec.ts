@@ -22,7 +22,6 @@ const jenkinsPluginsVersions: JenkinsPluginsVersionsResponse = {
       '1.0.0': {
         version: '1.0.0',
         url: 'https://download.example.com',
-        buildDate: 'Jan 01, 2020',
       },
       '2.0.0': {
         version: '2.0.0',
@@ -83,7 +82,6 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         releases: [
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-01-01T00:00:00.000Z',
             version: '1.0.0',
           },
           {
