@@ -42,6 +42,9 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   beforeEach(() => {
+    delete process.env.AWS_REGION;
+    delete process.env.AWS_ACCESS_KEY_ID;
+    delete process.env.AWS_SECRET_ACCESS_KEY;
     codeCommitClient.reset();
     config.prList = undefined;
     config.repository = undefined;
@@ -70,7 +73,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init with env vars', async () => {
-      const temp = process.env.AWS_REGION;
       process.env.AWS_REGION = 'REGION';
       await expect(
         codeCommit.initPlatform({
@@ -80,7 +82,6 @@ describe('modules/platform/codecommit/index', () => {
       ).resolves.toEqual({
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
-      process.env.AWS_REGION = temp;
     });
 
     it('should ', async () => {
@@ -587,6 +588,14 @@ describe('modules/platform/codecommit/index', () => {
         .resolvesOnce({ fileContent: uint8arrData });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('returns null', async () => {
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: undefined });
+      const res = await codeCommit.getJsonFile('file.json');
+      expect(res).toBeNull();
     });
   });
 

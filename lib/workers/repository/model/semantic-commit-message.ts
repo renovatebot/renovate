@@ -27,11 +27,11 @@ export class SemanticCommitMessage extends CommitMessage {
   static fromString(value: string): SemanticCommitMessage | undefined {
     const match = value.match(SemanticCommitMessage.REGEXP);
 
-    if (!match) {
+    if (!match?.groups) {
       return undefined;
     }
 
-    const { groups = {} } = match;
+    const { groups } = match;
     const message = new SemanticCommitMessage();
     message.type = groups.type;
     message.scope = groups.scope;

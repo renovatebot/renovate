@@ -3,6 +3,7 @@ import { dequal } from 'dequal';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
@@ -149,10 +150,10 @@ async function mergeRegistries(
         continue;
       }
       if (combinedRes) {
-        for (const existingRelease of combinedRes.releases || []) {
+        for (const existingRelease of coerceArray(combinedRes.releases)) {
           existingRelease.registryUrl ??= combinedRes.registryUrl;
         }
-        for (const additionalRelease of res.releases || []) {
+        for (const additionalRelease of coerceArray(res.releases)) {
           additionalRelease.registryUrl = res.registryUrl;
         }
         combinedRes = { ...res, ...combinedRes };

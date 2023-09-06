@@ -154,5 +154,39 @@ describe('workers/repository/init/apis', () => {
       expect(workerPlatformConfig.onboardingConfigFileName).toBe('foo.bar');
       expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
     });
+
+    it('checks for re-enablement and continues', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce({
+        enabled: true,
+      });
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        extends: [':disableRenovate'],
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+      expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
+    });
+
+    it('checks for re-enablement and skips', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce(null);
+      await expect(
+        initApis({
+          ...config,
+          optimizeForDisabled: true,
+          extends: [':disableRenovate'],
+        })
+      ).rejects.toThrow(REPOSITORY_DISABLED);
+    });
   });
 });
