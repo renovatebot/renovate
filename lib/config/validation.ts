@@ -19,6 +19,7 @@ import type {
   ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import { isCustomManager } from '../modules/manager/custom';
 
 const options = getOptions();
 
@@ -434,7 +435,10 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (is.nonEmptyString(regexManager.customType)) {
+                } else if (
+                  is.nonEmptyString(regexManager.customType) &&
+                  isCustomManager(regexManager.customType)
+                ) {
                   if (is.nonEmptyArray(regexManager.fileMatch)) {
                     switch (regexManager.customType) {
                       case 'regex':
@@ -453,10 +457,20 @@ export async function validateConfig(
                     });
                   }
                 } else {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a non-empty customType string`,
-                  });
+                  if (
+                    is.emptyString(regexManager.customType) ||
+                    is.undefined(regexManager.customType)
+                  ) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Regex Manager must contain a non-empty customType string`,
+                    });
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Invalid customType: ${regexManager.customType}. Key is not a custom manager`,
+                    });
+                  }
                 }
               }
             }
