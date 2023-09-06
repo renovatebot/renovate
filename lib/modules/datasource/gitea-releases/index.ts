@@ -1,56 +1,29 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { GiteaHttp } from '../../../util/http/gitea';
-import { regEx } from '../../../util/regex';
-import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
+import { GiteaTagsDatasource } from '../gitea-tags';
+import { CommitsSchema, TagSchema } from '../gitea-tags/schema';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
-import { CommitsSchema, TagSchema, TagsSchema } from './schema';
+import { ReleasesSchema } from './schema';
 
-export class GiteaTagsDatasource extends Datasource {
-  override http = new GiteaHttp(GiteaTagsDatasource.id);
+export class GiteaReleasesDatasource extends Datasource {
+  override http = new GiteaHttp(GiteaReleasesDatasource.id);
 
-  static readonly id = 'gitea-tags';
+  static readonly id = 'gitea-releases';
 
   static readonly defaultRegistryUrls = ['https://gitea.com'];
 
-  private static readonly cacheNamespace = `datasource-${GiteaTagsDatasource.id}`;
+  private static readonly cacheNamespace = `datasource-${GiteaReleasesDatasource.id}`;
 
   constructor() {
-    super(GiteaTagsDatasource.id);
-  }
-
-  static getRegistryURL(registryUrl?: string): string {
-    // fallback to default API endpoint if custom not provided
-    return registryUrl ?? this.defaultRegistryUrls[0];
-  }
-
-  static getApiUrl(registryUrl?: string): string {
-    const res = GiteaTagsDatasource.getRegistryURL(registryUrl).replace(
-      regEx(/\/api\/v1$/),
-      ''
-    );
-    return `${ensureTrailingSlash(res)}api/v1/`;
-  }
-
-  static getCacheKey(
-    registryUrl: string | undefined,
-    repo: string,
-    type: string
-  ): string {
-    return `${GiteaTagsDatasource.getRegistryURL(registryUrl)}:${repo}:${type}`;
-  }
-
-  static getSourceUrl(packageName: string, registryUrl?: string): string {
-    const url = GiteaTagsDatasource.getRegistryURL(registryUrl);
-    const normalizedUrl = ensureTrailingSlash(url);
-    return `${normalizedUrl}${packageName}`;
+    super(GiteaReleasesDatasource.id);
   }
 
   // getReleases fetches list of tags for the repository
   @cache({
-    namespace: GiteaTagsDatasource.cacheNamespace,
+    namespace: GiteaReleasesDatasource.cacheNamespace,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      GiteaTagsDatasource.getCacheKey(registryUrl, packageName, 'tags'),
+      GiteaTagsDatasource.getCacheKey(registryUrl, packageName, 'releases'),
   })
   async getReleases({
     registryUrl,
@@ -58,25 +31,25 @@ export class GiteaTagsDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `${GiteaTagsDatasource.getApiUrl(
       registryUrl
-    )}repos/${repo}/tags`;
+    )}repos/${repo}/releases?draft=false`;
     const tags = (
       await this.http.getJson(
         url,
         {
           paginate: true,
         },
-        TagsSchema
+        ReleasesSchema
       )
     ).body;
 
     const dependency: ReleaseResult = {
       sourceUrl: GiteaTagsDatasource.getSourceUrl(repo, registryUrl),
       registryUrl: GiteaTagsDatasource.getRegistryURL(registryUrl),
-      releases: tags.map(({ name, commit }) => ({
-        version: name,
-        gitRef: name,
-        newDigest: commit.sha,
-        releaseTimestamp: commit.created,
+      releases: tags.map(({ tag_name, published_at, prerelease }) => ({
+        version: tag_name,
+        gitRef: tag_name,
+        releaseTimestamp: published_at,
+        isStable: !prerelease,
       })),
     };
 
@@ -85,7 +58,7 @@ export class GiteaTagsDatasource extends Datasource {
 
   // getTagCommit fetched the commit has for specified tag
   @cache({
-    namespace: GiteaTagsDatasource.cacheNamespace,
+    namespace: GiteaReleasesDatasource.cacheNamespace,
     key: (registryUrl: string | undefined, repo: string, tag: string): string =>
       GiteaTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
   })
@@ -106,7 +79,7 @@ export class GiteaTagsDatasource extends Datasource {
   // getDigest fetched the latest commit for repository main branch
   // however, if newValue is provided, then getTagCommit is called
   @cache({
-    namespace: GiteaTagsDatasource.cacheNamespace,
+    namespace: GiteaReleasesDatasource.cacheNamespace,
     key: ({ registryUrl, packageName }: DigestConfig) =>
       GiteaTagsDatasource.getCacheKey(registryUrl, packageName, 'digest'),
   })

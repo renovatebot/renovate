@@ -395,6 +395,7 @@ const repoGroups = {
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  serde: 'https://github.com/serde-rs/serde',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',

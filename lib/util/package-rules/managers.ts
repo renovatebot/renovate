@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { isCustomManager } from '../../modules/manager/custom';
 import { Matcher } from './base';
 
 export class ManagersMatcher extends Matcher {
@@ -13,9 +12,6 @@ export class ManagersMatcher extends Matcher {
     }
     if (is.undefined(manager) || !manager) {
       return false;
-    }
-    if (isCustomManager(manager)) {
-      return matchManagers.includes(`custom.${manager}`);
     }
     return matchManagers.includes(manager);
   }
