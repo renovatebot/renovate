@@ -846,6 +846,24 @@ describe('modules/platform/gitlab/index', () => {
       );
       expect(res).toBe('green');
     });
+
+    it('returns yellow if unknown status found', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [
+          { name: 'context-1', status: 'pending' },
+          { name: 'some-context', status: 'something' },
+          { name: 'context-3', status: 'failed' },
+        ]);
+      const res = await gitlab.getBranchStatusCheck(
+        'somebranch',
+        'some-context'
+      );
+      expect(res).toBe('yellow');
+    });
   });
 
   describe('setBranchStatus', () => {
