@@ -233,7 +233,7 @@ describe('util/git/auth', () => {
         GIT_CONFIG_KEY_3:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
-        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.com',
+        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.com/',
         GIT_CONFIG_VALUE_2: 'git@gitlab.com:',
         GIT_CONFIG_VALUE_3: 'https://gitlab.com/',
       });
@@ -256,7 +256,7 @@ describe('util/git/auth', () => {
         GIT_CONFIG_KEY_3:
           'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
-        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.com',
+        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.com/',
         GIT_CONFIG_VALUE_2: 'git@gitlab.com:',
         GIT_CONFIG_VALUE_3: 'https://gitlab.com/',
       });
@@ -422,7 +422,7 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
         GIT_CONFIG_VALUE_3: 'ssh://git@gitlab.example.com/',
-        GIT_CONFIG_VALUE_4: 'https://oauth2@gitlab.example.com',
+        GIT_CONFIG_VALUE_4: 'https://oauth2@gitlab.example.com/',
         GIT_CONFIG_VALUE_5: 'git@gitlab.example.com:',
         GIT_CONFIG_VALUE_6: 'https://gitlab.example.com/',
         GIT_CONFIG_VALUE_7: 'ssh://git@github.example.com/',
@@ -448,7 +448,7 @@ describe('util/git/auth', () => {
         GIT_CONFIG_KEY_3:
           'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
-        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.example.com',
+        GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.example.com/',
         GIT_CONFIG_VALUE_2: 'git@gitlab.example.com:',
         GIT_CONFIG_VALUE_3: 'https://gitlab.example.com/',
       });

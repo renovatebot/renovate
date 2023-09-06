@@ -649,9 +649,12 @@ describe('modules/manager/gomod/artifacts', () => {
                 'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_2:
                 'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_3:
+                'url.https://gitlab-ci-token:some-enterprise-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.enterprise.com/',
-              GIT_CONFIG_VALUE_1: 'git@gitlab.enterprise.com:',
-              GIT_CONFIG_VALUE_2: 'https://gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_2: 'git@gitlab.enterprise.com:',
+              GIT_CONFIG_VALUE_3: 'https://gitlab.enterprise.com/',
             }),
           }),
         }),
@@ -707,7 +710,7 @@ describe('modules/manager/gomod/artifacts', () => {
         expect.objectContaining({
           options: expect.objectContaining({
             env: expect.objectContaining({
-              GIT_CONFIG_COUNT: '6',
+              GIT_CONFIG_COUNT: '8',
               GIT_CONFIG_KEY_0:
                 'url.https://gitlab-ci-token:some-enterprise-token-repo1@gitlab.enterprise.com/repo1.insteadOf',
               GIT_CONFIG_KEY_1:
@@ -721,11 +724,13 @@ describe('modules/manager/gomod/artifacts', () => {
               GIT_CONFIG_KEY_5:
                 'url.https://gitlab-ci-token:some-enterprise-token-repo2@gitlab.enterprise.com/repo2.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.enterprise.com/repo1',
-              GIT_CONFIG_VALUE_1: 'git@gitlab.enterprise.com:repo1',
-              GIT_CONFIG_VALUE_2: 'https://gitlab.enterprise.com/repo1',
-              GIT_CONFIG_VALUE_3: 'ssh://git@gitlab.enterprise.com/repo2',
-              GIT_CONFIG_VALUE_4: 'git@gitlab.enterprise.com:repo2',
-              GIT_CONFIG_VALUE_5: 'https://gitlab.enterprise.com/repo2',
+              GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.enterprise.com/repo1',
+              GIT_CONFIG_VALUE_2: 'git@gitlab.enterprise.com:repo1',
+              GIT_CONFIG_VALUE_3: 'https://gitlab.enterprise.com/repo1',
+              GIT_CONFIG_VALUE_4: 'ssh://git@gitlab.enterprise.com/repo2',
+              GIT_CONFIG_VALUE_5: 'https://oauth2@gitlab.enterprise.com/repo2',
+              GIT_CONFIG_VALUE_6: 'git@gitlab.enterprise.com:repo2',
+              GIT_CONFIG_VALUE_7: 'https://gitlab.enterprise.com/repo2',
             }),
           }),
         }),
@@ -781,16 +786,19 @@ describe('modules/manager/gomod/artifacts', () => {
         expect.objectContaining({
           options: expect.objectContaining({
             env: expect.objectContaining({
-              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_COUNT: '4',
               GIT_CONFIG_KEY_0:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_1:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_2:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_3:
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.enterprise.com/',
-              GIT_CONFIG_VALUE_1: 'git@gitlab.enterprise.com:',
-              GIT_CONFIG_VALUE_2: 'https://gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_1: 'https://oauth2@gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_2: 'git@gitlab.enterprise.com:',
+              GIT_CONFIG_VALUE_3: 'https://gitlab.enterprise.com/',
             }),
           }),
         }),
@@ -854,7 +862,7 @@ describe('modules/manager/gomod/artifacts', () => {
         expect.objectContaining({
           options: expect.objectContaining({
             env: expect.objectContaining({
-              GIT_CONFIG_COUNT: '9',
+              GIT_CONFIG_COUNT: '10',
               GIT_CONFIG_KEY_0:
                 'url.https://ssh:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
@@ -872,6 +880,8 @@ describe('modules/manager/gomod/artifacts', () => {
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_8:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_QKEY_9:
+                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -879,8 +889,9 @@ describe('modules/manager/gomod/artifacts', () => {
               GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
               GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
               GIT_CONFIG_VALUE_6: 'ssh://git@gitlab.enterprise.com/',
-              GIT_CONFIG_VALUE_7: 'git@gitlab.enterprise.com:',
-              GIT_CONFIG_VALUE_8: 'https://gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_7: 'https://oauth2@gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_8: 'git@gitlab.enterprise.com:',
+              GIT_CONFIG_VALUE_9: 'https://gitlab.enterprise.com/',
             }),
           }),
         }),
