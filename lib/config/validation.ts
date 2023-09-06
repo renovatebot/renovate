@@ -442,7 +442,7 @@ export async function validateConfig(
                   if (is.nonEmptyArray(regexManager.fileMatch)) {
                     switch (regexManager.customType) {
                       case 'regex':
-                        errors = validateRegexManagerFields(
+                        validateRegexManagerFields(
                           regexManager,
                           currentPath,
                           errors
@@ -660,7 +660,7 @@ function validateRegexManagerFields(
   regexManager: RegexManagerConfig,
   currentPath: string,
   errors: ValidationMessage[]
-): ValidationMessage[] {
+): void {
   if (is.nonEmptyArray(regexManager.matchStrings)) {
     for (const matchString of regexManager.matchStrings) {
       try {
@@ -672,7 +672,7 @@ function validateRegexManagerFields(
             matchString
           )}\``,
         });
-        return errors;
+        return;
       }
     }
   } else {
@@ -697,6 +697,4 @@ function validateRegexManagerFields(
       });
     }
   }
-
-  return errors;
 }
