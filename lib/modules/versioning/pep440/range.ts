@@ -2,6 +2,7 @@ import { gte, lt, lte, satisfies } from '@renovatebot/pep440';
 import { parse as parseRange } from '@renovatebot/pep440/lib/specifier.js';
 import { parse as parseVersion } from '@renovatebot/pep440/lib/version.js';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig } from '../types';
 
@@ -28,8 +29,9 @@ type UserPolicy =
  * @returns A {@link UserPolicy}
  */
 function getRangePrecision(ranges: Range[]): UserPolicy {
-  const bound: number[] =
-    parseVersion((ranges[1] || ranges[0]).version)?.release ?? [];
+  const bound = coerceArray(
+    parseVersion((ranges[1] || ranges[0]).version)?.release
+  );
   let rangePrecision = -1;
   // range is defined by a single bound.
   // ie. <1.2.2.3,
@@ -39,7 +41,7 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
   }
   // Range is defined by both upper and lower bounds.
   if (ranges.length === 2) {
-    const lowerBound: number[] = parseVersion(ranges[0].version)?.release ?? [];
+    const lowerBound = coerceArray(parseVersion(ranges[0].version)?.release);
     rangePrecision = bound.findIndex((el, index) => el > lowerBound[index]);
   }
   // Tune down Major precision if followed by a zero
@@ -74,11 +76,12 @@ function getFutureVersion(
   newVersion: string,
   baseVersion?: string
 ): number[] {
-  const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
-  const baseRelease: number[] =
-    parseVersion(baseVersion ?? newVersion)?.release ?? [];
+  const toRelease = coerceArray(parseVersion(newVersion)?.release);
+  const baseRelease = coerceArray(
+    parseVersion(baseVersion ?? newVersion)?.release
+  );
   return baseRelease.map((_, index) => {
-    const toPart: number = toRelease[index] ?? 0;
+    const toPart = toRelease[index] ?? 0;
     if (index < policy) {
       return toPart;
     }
@@ -303,8 +306,8 @@ function updateRangeValue(
     return range.operator + futureVersion + '.*';
   }
   if (range.operator === '~=') {
-    const baseVersion = parseVersion(range.version)?.release ?? [];
-    const futureVersion = parseVersion(newVersion)?.release ?? [];
+    const baseVersion = coerceArray(parseVersion(range.version)?.release);
+    const futureVersion = coerceArray(parseVersion(newVersion)?.release);
     const baseLen = baseVersion.length;
     const newVerLen = futureVersion.length;
     // trim redundant trailing version specifiers
@@ -410,7 +413,7 @@ function handleWidenStrategy(
   return newRanges.map((range) => {
     // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
-      const upperBound = parseVersion(range.version)?.release ?? [];
+      const upperBound = coerceArray(parseVersion(range.version)?.release);
       const len = upperBound.length;
       // Match the precision of the smallest specifier if other than 0
       if (upperBound[len - 1] !== 0) {
@@ -474,7 +477,7 @@ function handleReplaceStrategy(
         return '>=' + newVersion;
       }
       // update the lower bound to reflect the accepted new version
-      const lowerBound = parseVersion(range.version)?.release ?? [];
+      const lowerBound = coerceArray(parseVersion(range.version)?.release);
       const rangePrecision = lowerBound.length - 1;
       let newBase = getFutureVersion(rangePrecision, newVersion);
       if (trimZeros) {
