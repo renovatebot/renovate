@@ -157,7 +157,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any> {
-  // TODO #7154
+  // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -228,7 +228,7 @@ export async function initRepo({
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
-  // TODO #7154
+  // TODO #22198
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
   const auth = opts.token
@@ -464,7 +464,7 @@ export async function getBranchStatusCheck(
 ): Promise<BranchStatus | null> {
   const statuses = await getStatus(branchName);
   const bbState = statuses.find((status) => status.key === context)?.state;
-  // TODO #7154
+  // TODO #22198
   return bbToRenovateStatusMapping[bbState!] || null;
 }
 
@@ -691,7 +691,7 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
-  // TODO #7154
+  // TODO #22198
   const { title } = (await getPr(prId))!;
 
   const body = {

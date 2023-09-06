@@ -14,7 +14,7 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {
     return getBasicHandler(config.username, config.password, true);
   }
-  // TODO: token can be undefined here (#7154)
+  // TODO: token can be undefined here (#22198)
   return getHandlerFromToken(config.token!, true);
 }
 

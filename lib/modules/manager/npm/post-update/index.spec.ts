@@ -425,7 +425,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('works for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       fs.readLocalFile.mockImplementation((f): Promise<any> => {
         if (f === '.npmrc') {
           return Promise.resolve('# dummy');

@@ -12,6 +12,7 @@ import type { RenovateConfig } from '../config/types';
 import dataFiles from '../data-files.generated';
 import { logger } from '../logger';
 import { regEx } from './regex';
+import { Json } from './schema-utils';
 
 let unicodeEmoji = true;
 
@@ -19,17 +20,14 @@ let mappingsInitialized = false;
 const shortCodesByHex = new Map<string, string>();
 const hexCodesByShort = new Map<string, string>();
 
-const EmojiShortcodesSchema = z.record(
-  z.string(),
-  z.union([z.string(), z.array(z.string())])
+const EmojiShortcodesSchema = Json.pipe(
+  z.record(z.string(), z.union([z.string(), z.array(z.string())]))
 );
 
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
     const result = EmojiShortcodesSchema.safeParse(
-      JSON.parse(
-        dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
-      )
+      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
     );
     // istanbul ignore if: not easily testable
     if (!result.success) {

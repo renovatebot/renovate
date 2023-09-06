@@ -10,7 +10,7 @@ export async function readFileAsXmlDocument(
   file: string
 ): Promise<XmlDocument | undefined> {
   try {
-    // TODO #7154
+    // TODO #22198
     const doc = new XmlDocument((await readLocalFile(file, 'utf8'))!);
     // don't return empty documents
     return doc?.firstChild ? doc : undefined;

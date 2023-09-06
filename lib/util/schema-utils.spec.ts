@@ -1,9 +1,11 @@
+import { codeBlock } from 'common-tags';
 import { z } from 'zod';
 import {
   Json,
   Json5,
   LooseArray,
   LooseRecord,
+  Toml,
   Url,
   UtcDate,
   Yaml,
@@ -331,6 +333,57 @@ describe('util/schema-utils', () => {
           issues: [
             {
               message: 'Invalid YAML',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
+  describe('Toml', () => {
+    const Schema = Toml.pipe(
+      z.object({ foo: z.object({ bar: z.literal('baz') }) })
+    );
+
+    it('parses valid toml', () => {
+      const content = codeBlock`
+        [foo]
+        bar = "baz"
+      `;
+      expect(Schema.parse(content)).toEqual({
+        foo: { bar: 'baz' },
+      });
+    });
+
+    it('throws error for invalid schema', () => {
+      const content = codeBlock`
+        [foo]
+        bar = "brb"
+      `;
+      expect(Schema.safeParse(content)).toMatchObject({
+        error: {
+          issues: [
+            {
+              received: 'brb',
+              code: 'invalid_literal',
+              expected: 'baz',
+              path: ['foo', 'bar'],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+
+    it('throws error for invalid toml', () => {
+      expect(Schema.safeParse('clearly_invalid')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid TOML',
               code: 'custom',
               path: [],
             },

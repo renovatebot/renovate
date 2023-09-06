@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import hasha from 'hasha';
 import semver from 'semver';
 import { logger } from '../../../logger';

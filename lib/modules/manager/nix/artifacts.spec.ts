@@ -155,6 +155,36 @@ describe('modules/manager/nix/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
   });
 
+  it('trims "x-access-token:" prefix from GitHub token', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['flake.lock'],
+      })
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    hostRules.find.mockReturnValueOnce({ token: 'x-access-token:token' });
+
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: { ...config, constraints: { python: '3.7' } },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'new flake.lock',
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
+  });
+
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
