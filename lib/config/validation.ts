@@ -10,12 +10,15 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import type {
+  CustomManager,
+  RegexManagerTemplates,
   RenovateConfig,
   RenovateOptions,
   ValidationMessage,
   ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import type { RegexManagerConfig } from '../modules/manager/custom/regex/types';
 
 const options = getOptions();
 
@@ -416,8 +419,7 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              // TODO: fix types #22198
-              for (const regexManager of val as any[]) {
+              for (const regexManager of val as CustomManager[]) {
                 if (
                   Object.keys(regexManager).some(
                     (k) => !allowedKeys.includes(k)
@@ -642,10 +644,11 @@ export async function validateConfig(
 }
 
 function validateRegexManagerFields(
-  regexManager: any,
-  currentPath: any
-): any[] {
-  const errors = [];
+  regexManager: RegexManagerConfig,
+  currentPath: string
+): ValidationMessage[] {
+  const errors: ValidationMessage[] = [];
+
   if (is.nonEmptyArray(regexManager.matchStrings)) {
     let validRegex = false;
     for (const matchString of regexManager.matchStrings) {
@@ -664,8 +667,9 @@ function validateRegexManagerFields(
     if (validRegex) {
       const mandatoryFields = ['depName', 'currentValue', 'datasource'];
       for (const field of mandatoryFields) {
+        const templateField = `${field}Template` as keyof RegexManagerTemplates;
         if (
-          !regexManager[`${field}Template`] &&
+          !regexManager[templateField] &&
           !regexManager.matchStrings.some((matchString: string) =>
             matchString.includes(`(?<${field}>`)
           )

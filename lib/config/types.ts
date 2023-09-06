@@ -199,6 +199,9 @@ export type CustomManagerName = 'regex';
 export interface CustomManager extends RegexManagerTemplates {
   customType: CustomManagerName;
   fileMatch: string[];
+  matchStrings: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
+  autoReplaceStringTemplate?: string;
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
