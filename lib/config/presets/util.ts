@@ -46,6 +46,13 @@ export async function fetchPreset({
         tag
       );
       logger.warn(
+        {
+          repo,
+          filePreset,
+          presetPath,
+          endpoint,
+          tag,
+        },
         'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
       );
     }
