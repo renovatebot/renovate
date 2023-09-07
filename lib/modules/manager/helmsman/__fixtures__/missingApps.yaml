@@ -1,0 +1,12 @@
+namespaces:
+  redis-operator:
+  strimzi:
+  monitoring:
+  test-apps:
+
+helmRepos:
+  ot-helm: "https://ot-container-kit.github.io/helm-charts/"
+  strimzi: "https://strimzi.io/charts/"
+  open-telemetry: "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  grafana: "https://grafana.github.io/helm-charts"
+  prometheus-community: https://prometheus-community.github.io/helm-charts

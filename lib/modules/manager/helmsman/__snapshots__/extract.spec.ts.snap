@@ -86,9 +86,27 @@ exports[`modules/manager/helmsman/extract extractPackageFile() extract deps 1`] 
     },
     {
       "currentValue": "6.4.0",
-      "datasource": "helm",
+      "datasource": "docker",
       "depName": "podinfo-incorrect-url",
+      "packageName": "",
+    },
+    {
+      "currentValue": "6.4.0",
+      "datasource": "helm",
+      "depName": "podinfo-missing-chart",
       "skipReason": "invalid-url",
+    },
+    {
+      "currentValue": "6.4.0",
+      "datasource": "helm",
+      "depName": "podinfo-chart-null",
+      "skipReason": "invalid-url",
+    },
+    {
+      "currentValue": "6.4.0",
+      "datasource": "docker",
+      "depName": "podinfo-incorrect-oci",
+      "packageName": "oci://",
     },
   ],
 }

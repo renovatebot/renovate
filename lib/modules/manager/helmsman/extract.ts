@@ -33,7 +33,7 @@ function createDep(
   dep.currentValue = anApp.version;
 
   // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-  const isOci = anApp?.chart?.startsWith('oci://');
+  const isOci = anApp.chart?.startsWith('oci://');
   if (isOci) {
     dep.datasource = DockerDatasource.id;
     dep.packageName = anApp.chart!.replace('oci://', '');
