@@ -11,10 +11,6 @@ describe('modules/versioning/debian/index', () => {
     Settings.now = () => dt.valueOf();
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   it.each`
     version           | expected
     ${undefined}      | ${false}

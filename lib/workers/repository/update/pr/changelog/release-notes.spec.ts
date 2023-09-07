@@ -144,6 +144,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         project: partial<ChangeLogProject>({
           type: 'gitlab',
           repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
+          sourceDirectory: 'lib',
         }),
         versions: [
           partial<ChangeLogRelease>({
@@ -159,6 +160,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         project: {
           repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
           type: 'gitlab',
+          sourceDirectory: 'lib',
         },
         versions: [
           {

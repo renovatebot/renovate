@@ -158,4 +158,9 @@ describe('modules/versioning/distro', () => {
   it('retrieves non-existent release schedule', () => {
     expect(di.getSchedule('20.06')).toBeNull();
   });
+
+  it('works with debian', () => {
+    const di = new DistroInfo('data/debian-distro-info.json');
+    expect(di.isEolLts('trixie')).toBe(true);
+  });
 });

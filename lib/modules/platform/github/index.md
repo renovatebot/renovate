@@ -48,16 +48,6 @@ Other values like Homepage URL, User authorization callback URL and webhooks can
 
 Inside your `config.js` you need to set the following values, assuming the name of your app is `self-hosted-renovate`:
 
-**`username:"self-hosted-renovate[bot]"`**
-
-The slug name of your app with `[bot]` appended
-
-**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`**
-
-The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
-It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
-A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
-
 **`token:"ghs_123exampletoken"`**
 
 You must use a [GitHub App Installation token](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation).
@@ -84,6 +74,16 @@ Any tokens that do not start with `ghs_` (for example tokens from GitHub Enterpr
 List of repositories to run on.
 Alternatively as comma-separated environment variable `RENOVATE_REPOSITORIES`.
 The GitHub App installation token is scoped at most to a single organization and running on multiple organizations requires multiple invocations of `renovate` with different `token` and `repositories` parameters.
+
+**`username:"self-hosted-renovate[bot]"`** (optional, autodetected if not supplied)
+
+The slug name of your app with `[bot]` appended
+
+**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`** (optional, autodetected if not supplied)
+
+The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
+It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
+A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
 ## Features awaiting implementation
 

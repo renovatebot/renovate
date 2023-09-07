@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import * as hostRules from '../../../util/host-rules';
 import * as rubyVersioning from '../../versioning/ruby';
 import { PodDatasource } from '.';
 
@@ -20,6 +21,7 @@ describe('modules/datasource/pod/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      hostRules.clear();
     });
 
     it('returns null for invalid inputs', async () => {
@@ -33,6 +35,16 @@ describe('modules/datasource/pod/index', () => {
           datasource: PodDatasource.id,
           packageName: 'foobar',
           registryUrls: [],
+        })
+      ).toBeNull();
+    });
+
+    it('returns null disabled host', async () => {
+      hostRules.add({ matchHost: cocoapodsHost, enabled: false });
+      expect(
+        await getPkgReleases({
+          datasource: PodDatasource.id,
+          packageName: 'foobar',
         })
       ).toBeNull();
     });
@@ -116,6 +128,14 @@ describe('modules/datasource/pod/index', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .reply(429);
+      await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for 500', async () => {
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_a_c_b.txt')
+        .reply(500);
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

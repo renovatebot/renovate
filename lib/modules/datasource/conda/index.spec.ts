@@ -31,7 +31,10 @@ describe('modules/datasource/conda/index', () => {
     });
 
     it('returns null for empty result', async () => {
-      httpMock.scope(defaultRegistryUrl).get(depUrl).reply(200, {});
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(depUrl)
+        .reply(200, { versions: [] });
       expect(
         await getPkgReleases({
           datasource,
