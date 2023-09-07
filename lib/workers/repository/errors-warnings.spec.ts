@@ -331,5 +331,10 @@ describe('workers/repository/errors-warnings', () => {
       const res = getDepWarningsOnboardingPR(packageFiles, config);
       expect(res).toBe('');
     });
+
+    it('handles undefined', () => {
+      const res = getDepWarningsOnboardingPR(undefined as never, {});
+      expect(res).toBe('');
+    });
   });
 });

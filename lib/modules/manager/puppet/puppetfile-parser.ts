@@ -1,3 +1,4 @@
+import { coerceArray } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PuppetfileModule } from './types';
 
@@ -34,7 +35,7 @@ export class Puppetfile {
   ): PuppetfileModule[] {
     const modules = this.forgeModules.get(forgeUrl ?? null);
 
-    return modules ?? [];
+    return coerceArray(modules);
   }
 }
 
