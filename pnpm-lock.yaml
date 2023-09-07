@@ -479,8 +479,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       '@types/xmldoc':
-        specifier: 1.1.6
-        version: 1.1.6
+        specifier: 1.1.7
+        version: 1.1.7
       '@typescript-eslint/eslint-plugin':
         specifier: 6.5.0
         version: 6.5.0(@typescript-eslint/parser@6.5.0)(eslint@8.48.0)(typescript@5.1.6)
@@ -4029,8 +4029,8 @@ packages:
     resolution: {integrity: sha512-RpO62vB2lkjEkyLbwTheA2+uwYmtVMWTr/kWRI++UAgVdZqNqdAuIQl/SxBCGeMKfdjWaXPbyhZbiCc4PAj+KA==}
     dev: true
 
-  /@types/xmldoc@1.1.6:
-    resolution: {integrity: sha512-3qhte5iT9zpj3YtvxRhE74C+1qnRTjR+JZ26TdXuEXkagdFCBSlDm49+e7gMhvJwEqL53ReCiW/yg5JKaCzDlQ==}
+  /@types/xmldoc@1.1.7:
+    resolution: {integrity: sha512-jOZDR9H9tY9bdQ9mdcBv4MCO80tRq1+XxTgfwphJP7Da74DXBPTYqx0q6vT6zBswDBIQJ0Q6VYCJJMRPJVLxNw==}
     dev: true
 
   /@types/yargs-parser@21.0.0:
