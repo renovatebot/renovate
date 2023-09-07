@@ -216,11 +216,13 @@ describe('modules/datasource/helm/index', () => {
       });
       expect(releases).toMatchObject({
         registryUrl: 'https://example-repository.com',
-        releases: [{
-          "newDigest": undefined,
-          "releaseTimestamp": "2023-09-05T13:24:19.046Z",
-          "version": "3.2.1",
-        }],
+        releases: [
+          {
+            newDigest: undefined,
+            releaseTimestamp: '2023-09-05T13:24:19.046Z',
+            version: '3.2.1',
+          },
+        ],
       });
     });
   });
