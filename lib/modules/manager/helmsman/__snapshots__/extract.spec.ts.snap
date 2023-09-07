@@ -84,6 +84,12 @@ exports[`modules/manager/helmsman/extract extractPackageFile() extract deps 1`] 
       "depName": "otlp-collector-no-chart",
       "skipReason": "invalid-url",
     },
+    {
+      "currentValue": "6.4.0",
+      "datasource": "helm",
+      "depName": "podinfo-incorrect-url",
+      "skipReason": "invalid-url",
+    },
   ],
 }
 `;
