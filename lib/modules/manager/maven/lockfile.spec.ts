@@ -6,6 +6,8 @@ import { GlobalConfig } from '../../../config/global';
 import type { StatusResult } from '../../../util/git/types';
 import { updateArtifacts } from './lockfile';
 
+jest.mock('../../../util/git');
+
 describe('modules/manager/maven/lockfile', () => {
   describe('updateArtifacts()', () => {
     it('returns null if no Maven dependencies are updated', async () => {
@@ -118,7 +120,6 @@ async function deleteDummyLockfile(tempFilePath: string) {
   await fs.promises.unlink(tempFilePath);
 }
 
-jest.mock('../../../util/git');
 
 function mockLockfileChangedInGit(pathToFile?: string) {
   if (pathToFile) {
