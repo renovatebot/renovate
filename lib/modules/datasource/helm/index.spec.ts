@@ -171,7 +171,7 @@ describe('modules/datasource/helm/index', () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, Fixtures.get('index_empty-package.yaml'));
+        .reply(200, Fixtures.get('index_emptypackage.yaml'));
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
         packageName: 'ambassador',
