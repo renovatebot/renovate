@@ -77,6 +77,14 @@ describe('util/git/url', () => {
         'https://x-access-token:token@github.com/some/repo'
       );
     });
+
+    it('removes username/password from URL', () => {
+      expect(getHttpUrl('https://user:password@foo.bar/')).toBe('https://foo.bar/');
+    });
+    
+    it('replaces username/password with given token', () => {
+      expect(getHttpUrl('https://user:password@foo.bar/', 'another-user:a-secret-pwd')).toBe('https://another-user:a-secret-pwd@foo.bar/');
+    });
   });
 
   describe('getRemoteUrlWithToken()', () => {
