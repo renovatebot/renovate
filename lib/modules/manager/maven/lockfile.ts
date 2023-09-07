@@ -88,28 +88,26 @@ function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
   return glob('**/lockfile.json', { cwd: directoryPath });
 }
 /**
- * Returns the version of the maven-lockfile plugin used in the project.
- *
- * For this we let maven evaluate the plugin version. This is done by running the `mvn help:describe` command.
- * The output of this command is then parsed to extract the version.
- * If the version could not be found, an error is thrown.
+ * Returns the version of the maven-lockfile plugin used in the project. 
+ * For this the `lockfile.json` file is read and the version is extracted from the `metaData.config.mavenLockfileVersion` field.
  *
  * @param {string} folder - The folder to check. This should be the parent folder of the `pom.xml` file.
  * @returns {Promise<string>} The version of the maven-lockfile plugin used in the project.
  */
 async function getLockfileVersion(folder: string): Promise<string> {
-  const command =
-    'mvn help:describe -DgroupId=io.github.chains-project -DartifactId=maven-lockfile -Dminimal=true -B';
-  const result: ExecResult = await exec(command, { cwd: folder });
-  if (result.stderr) {
-    throw new Error(result.stderr);
+  var lockFiles : string[] = await getLockfileJsonFiles(folder);
+    if (lockFiles.length > 0) {
+      const fileContent = await readLocalFile(lockFiles[0]);
+      if (!fileContent) {
+        throw new Error('Could not read lockfile.json');
+      }
+      const json = JSON.parse(fileContent.toString());
+      const version = json.metaData.config.mavenLockfileVersion;
+      return version;
+    } else {
+      throw new Error('No lockfile.json files found. Cant get the correct version of maven-lockfile plugin');
+    }
   }
-  const version = /Version: (.*)/.exec(result.stdout);
-  if (version) {
-    return version[1];
-  }
-  throw new Error('Could not find version');
-}
 /**
  * Filters the file paths to only include `lockfile.json` files
  * @param filePaths The file paths to filter
