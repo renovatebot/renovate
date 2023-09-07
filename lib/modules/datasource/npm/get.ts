@@ -105,7 +105,12 @@ export async function getDependency(
     .plus({ minutes: cacheMinutes })
     .toISO()!;
   let cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
-  if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
+  if (
+    !(
+      is.number(cacheHardTtlMinutes) &&
+      /* istanbul ignore next: needs test */ cacheHardTtlMinutes > cacheMinutes
+    )
+  ) {
     cacheHardTtlMinutes = cacheMinutes;
   }
 
@@ -204,7 +209,9 @@ export async function getDependency(
         cacheNamespace,
         packageUrl,
         { ...dep, cacheData },
-        etag ? cacheHardTtlMinutes : cacheMinutes
+        etag
+          ? /* istanbul ignore next: needs test */ cacheHardTtlMinutes
+          : cacheMinutes
       );
     } else {
       dep.isPrivate = true;

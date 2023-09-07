@@ -54,10 +54,9 @@ export class FlutterVersionDatasource extends Datasource {
           releaseTimestamp: release_date,
           isStable: channel === 'stable',
         }));
+      return result.releases.length ? result : null;
     } catch (err) {
       this.handleGenericErrors(err);
     }
-
-    return result.releases.length ? result : null;
   }
 }

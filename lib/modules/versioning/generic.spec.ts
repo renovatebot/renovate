@@ -1,4 +1,6 @@
+import { partial } from '../../../test/util';
 import { GenericVersion, GenericVersioningApi } from './generic';
+import type { NewValueConfig } from './types';
 
 describe('modules/versioning/generic', () => {
   const optionalFunctions = [
@@ -104,6 +106,8 @@ describe('modules/versioning/generic', () => {
           newVersion: '3.2.1',
         })
       ).toBe('3.2.1');
+
+      expect(api.getNewValue(partial<NewValueConfig>({}))).toBeNull();
     });
 
     it('isCompatible', () => {

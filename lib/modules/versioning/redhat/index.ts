@@ -20,7 +20,7 @@ class RedhatVersioningApi extends GenericVersioningApi {
 
     const { major, minor, patch, releaseMajor, releaseMinor } = matches;
     const release = [
-      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
+      Number.parseInt(major, 10),
       typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
       typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
       typeof releaseMajor === 'undefined'
