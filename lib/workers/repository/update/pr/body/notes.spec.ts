@@ -2,14 +2,10 @@ import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
 import { getPrExtraNotes, getPrNotes } from './notes';
 
-jest.mock('../../../../../util/template');
+vi.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/notes', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('renders notes', () => {
     template.compile.mockImplementation((x) => x);
     const res = getPrNotes({

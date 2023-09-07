@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/kustomize/extract extractPackageFile() extracts from digest 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > extracts from digest 1`] = `
 {
   "deps": [
     {
@@ -42,7 +42,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from di
 }
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() extracts from newTag 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > extracts from newTag 1`] = `
 {
   "deps": [
     {
@@ -71,7 +71,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from ne
 }
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() extracts http dependency 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > extracts http dependency 1`] = `
 [
   {
     "currentValue": "v0.0.1",
@@ -88,7 +88,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts http de
 ]
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() extracts multiple image lines 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > extracts multiple image lines 1`] = `
 [
   {
     "currentValue": "v0.0.1",
@@ -107,7 +107,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts multipl
 ]
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() extracts newName 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > extracts newName 1`] = `
 {
   "deps": [
     {
@@ -138,7 +138,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts newName
 }
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() extracts ssh dependency 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > extracts ssh dependency 1`] = `
 [
   {
     "currentValue": "v0.0.1",
@@ -149,7 +149,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts ssh dep
 ]
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() extracts ssh dependency with a subdir 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > extracts ssh dependency with a subdir 1`] = `
 [
   {
     "currentValue": "v2.0.0",
@@ -160,7 +160,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts ssh dep
 ]
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() parses helmChart field 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > parses helmChart field 1`] = `
 {
   "deps": [
     {
@@ -176,7 +176,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() parses helmChart
 }
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() should extract bases resources and components from their respective blocks 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > should extract bases resources and components from their respective blocks 1`] = `
 [
   {
     "currentValue": "v0.0.1",
@@ -199,7 +199,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract b
 ]
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() should extract dependencies when kind is Component 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > should extract dependencies when kind is Component 1`] = `
 [
   {
     "currentValue": "1.19.0",
@@ -224,7 +224,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract d
 ]
 `;
 
-exports[`modules/manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
+exports[`modules/manager/kustomize/extract > extractPackageFile() > should extract out image versions 1`] = `
 [
   {
     "currentDigest": undefined,

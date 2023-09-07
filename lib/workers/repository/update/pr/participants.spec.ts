@@ -6,10 +6,10 @@ import * as _util from '../../../../util/sample';
 import * as _codeOwners from './code-owners';
 import { addParticipants } from './participants';
 
-jest.mock('../../../../util/sample');
+vi.mock('../../../../util/sample');
 const util = mocked(_util);
 
-jest.mock('./code-owners');
+vi.mock('./code-owners');
 const codeOwners = mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {
@@ -25,7 +25,6 @@ describe('workers/repository/update/pr/participants', () => {
 
   beforeEach(() => {
     GlobalConfig.reset();
-    jest.resetAllMocks();
   });
 
   describe('assignees', () => {

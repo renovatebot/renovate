@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/setup-cfg/extract extractPackageFile() extracts dependencies 1`] = `
+exports[`modules/manager/setup-cfg/extract > extractPackageFile() > extracts dependencies 1`] = `
 {
   "deps": [
     {

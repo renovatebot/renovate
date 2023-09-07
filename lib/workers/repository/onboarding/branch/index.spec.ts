@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import {
   RenovateConfig,
   fs,
@@ -27,11 +27,11 @@ import { checkOnboardingBranch } from '.';
 
 const configModule: any = _config;
 
-jest.mock('../../../../util/cache/repository');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('./config');
-jest.mock('./onboarding-branch-cache');
+vi.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
+vi.mock('./config');
+vi.mock('./onboarding-branch-cache');
 
 const cache = mocked(_cache);
 const onboardingCache = mocked(_onboardingCache);
@@ -42,7 +42,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';
       OnboardingState.prUpdateRequested = false;

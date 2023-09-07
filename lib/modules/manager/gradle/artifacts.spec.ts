@@ -23,10 +23,10 @@ import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource');
 
 process.env.CONTAINERBASE = 'true';
 

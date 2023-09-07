@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`config/decrypt decryptConfig() appends npm token in npmrc 1`] = `
+exports[`config/decrypt > decryptConfig() > appends npm token in npmrc 1`] = `
 "foo=bar
 _authToken=abcdef-ghijklm-nopqf-stuvwxyz
 "

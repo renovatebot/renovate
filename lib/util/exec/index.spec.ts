@@ -10,12 +10,11 @@ import { exec } from '.';
 
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
-jest.mock('./hermit', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  ...(jest.requireActual('./hermit') as any),
+vi.mock('./hermit', async () => ({
+  ...(await vi.importActual<any>('./hermit')),
   getHermitEnvs: jest.fn(),
 }));
-jest.mock('../../modules/datasource');
+vi.mock('../../modules/datasource');
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -46,9 +45,7 @@ describe('util/exec/index', () => {
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.resetModules();
+
     processEnvOrig = process.env;
     GlobalConfig.reset();
   });

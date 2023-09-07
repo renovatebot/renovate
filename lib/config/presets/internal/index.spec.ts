@@ -5,8 +5,8 @@ import { validateConfig } from '../../validation';
 import * as npm from '../npm';
 import * as internal from '.';
 
-jest.mock('../npm');
-jest.mock('../../../modules/datasource/npm');
+vi.mock('../npm');
+vi.mock('../../../modules/datasource/npm');
 
 jest.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
 

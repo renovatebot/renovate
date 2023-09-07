@@ -106,7 +106,7 @@ describe('modules/versioning/index', () => {
     }
 
     for (const supportedScheme of supportedSchemes ?? []) {
-      it(supportedScheme, () => {
+      it(supportedScheme, async () => {
         const schemeKeys = getAllPropertyNames(
           allVersioning.get(supportedScheme)
         )
@@ -117,7 +117,7 @@ describe('modules/versioning/index', () => {
 
         expect(schemeKeys).toEqual(npmApi);
 
-        const apiOrCtor = require('./' + supportedScheme).api;
+        const apiOrCtor = (await import('./' + supportedScheme)).api;
         if (isVersioningApiConstructor(apiOrCtor)) {
           return;
         }

@@ -27,3 +27,9 @@ test/datasource/nuget/_fixtures/obj
 
 # testing
 /docker-compose.yml
+html/bg.png
+html/favicon.svg
+html/html.meta.json.gz
+html/index.html
+html/assets/index-2c21df7e.js
+html/assets/index-46946a8e.css

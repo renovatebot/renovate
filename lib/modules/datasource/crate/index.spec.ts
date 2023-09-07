@@ -13,7 +13,7 @@ import * as memCache from '../../../util/cache/memory';
 import type { RegistryInfo } from './types';
 import { CrateDatasource } from '.';
 
-jest.mock('simple-git');
+vi.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
 const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;

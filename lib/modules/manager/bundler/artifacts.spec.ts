@@ -22,12 +22,12 @@ import { updateArtifacts } from '.';
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
-jest.mock('./host-rules');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
+vi.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -52,9 +52,6 @@ const updatedGemfileLock = {
 describe('modules/manager/bundler/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
-
       delete process.env.GEM_HOME;
 
       env.getChildProcessEnv.mockReturnValue(envMock.basic);

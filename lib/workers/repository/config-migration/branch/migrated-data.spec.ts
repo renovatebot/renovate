@@ -8,11 +8,11 @@ import { readLocalFile } from '../../../../util/fs';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
-jest.mock('../../../../config/migration');
-jest.mock('../../../../util/git');
-jest.mock('../../../../util/fs');
-jest.mock('../../init/merge');
-jest.mock('detect-indent');
+vi.mock('../../../../config/migration');
+vi.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
+vi.mock('../../init/merge');
+vi.mock('detect-indent');
 
 const rawNonMigrated = Fixtures.get('./renovate.json');
 const rawNonMigratedJson5 = Fixtures.get('./renovate.json5');
@@ -26,7 +26,6 @@ const formattedMigratedData = Fixtures.getJson(
 describe('workers/repository/config-migration/branch/migrated-data', () => {
   describe('MigratedDataFactory.getAsync', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       mockedFunction(detectIndent).mockReturnValue({
         type: 'space',
         amount: 2,

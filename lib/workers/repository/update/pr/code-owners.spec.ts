@@ -1,18 +1,17 @@
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { fs, git } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
 import { codeOwnersForPr } from './code-owners';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
 
 describe('workers/repository/update/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {
     let pr: Pr;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       pr = mock<Pr>();
     });
 

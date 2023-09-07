@@ -10,7 +10,7 @@ import {
   getRubyConstraint,
 } from './common';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const gemfile = Fixtures.get('Gemfile.sourceGroup');
 const lockedContent = Fixtures.get('Gemfile.gitlab-foss.lock');

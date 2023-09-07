@@ -9,12 +9,11 @@ import { GlobalConfig } from '../../../config/global';
 import type { Pr } from '../../../modules/platform/types';
 import * as cleanup from './prune';
 
-jest.mock('../../../util/git');
+vi.mock('../../../util/git');
 
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({
     repoIsOnboarded: true,
     branchPrefix: `renovate/`,

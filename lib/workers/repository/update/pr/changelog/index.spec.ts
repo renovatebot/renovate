@@ -8,7 +8,7 @@ import type { BranchConfig } from '../../../../types';
 import * as releases from './releases';
 import { getChangeLogJSON } from '.';
 
-jest.mock('../../../../../modules/datasource/npm');
+vi.mock('../../../../../modules/datasource/npm');
 
 const githubApiHost = 'https://api.github.com';
 

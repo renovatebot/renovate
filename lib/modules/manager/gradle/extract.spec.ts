@@ -5,7 +5,7 @@ import type { ExtractConfig } from '../types';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   // TODO: fix types, jest is using wrong overload (#22198)
@@ -28,10 +28,6 @@ function mockFs(files: Record<string, string>): void {
 }
 
 describe('modules/manager/gradle/extract', () => {
-  afterAll(() => {
-    jest.resetAllMocks();
-  });
-
   it('returns null', async () => {
     const fsMock = {
       'gradle.properties': '',

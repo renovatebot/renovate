@@ -6,7 +6,7 @@ import type {
 } from '../../../../util/cache/repository/types';
 import { getPrCache, setPrCache } from './pr-cache';
 
-jest.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/cache/repository');
 const cache = mocked(_cache);
 
 describe('workers/repository/update/pr/pr-cache', () => {

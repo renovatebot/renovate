@@ -4,7 +4,7 @@ import * as githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
 import { GithubReleasesDatasource } from '.';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/github-releases/index', () => {

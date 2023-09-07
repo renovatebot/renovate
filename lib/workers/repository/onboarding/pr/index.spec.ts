@@ -15,7 +15,7 @@ import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
 
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/git');
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
@@ -29,7 +29,6 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = {
         ...getConfig(),
         errors: [],
@@ -275,7 +274,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       const err = partial<RequestError>({ response });
 
       beforeEach(() => {
-        jest.resetAllMocks();
         GlobalConfig.reset();
         scm.deleteBranch.mockResolvedValue();
       });

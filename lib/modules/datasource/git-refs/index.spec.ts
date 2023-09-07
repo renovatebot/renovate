@@ -4,7 +4,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { add, clear } from '../../../util/host-rules';
 import { GitRefsDatasource } from '.';
 
-jest.mock('simple-git');
+vi.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
 
 const packageName = 'https://github.com/example/example.git';
@@ -25,7 +25,8 @@ describe('modules/datasource/git-refs/index', () => {
 
     // reset git mock
     gitMock = {
-      env: jest.fn(),
+      // typescript overload issue
+      env: jest.fn<any, any>(),
       listRemote: jest.fn(),
     };
 

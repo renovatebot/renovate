@@ -17,6 +17,16 @@ import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 
+vi.mock('./azure-got-wrapper');
+vi.mock('./azure-helper');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../util/sanitize', () => ({
+  sanitize: vi.fn((input) => input),
+}));
+vi.mock('../../../logger');
+vi.mock('timers/promises');
+
 describe('modules/platform/azure/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
@@ -28,19 +38,12 @@ describe('modules/platform/azure/index', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('./azure-got-wrapper');
-    jest.mock('./azure-helper');
-    jest.mock('../../../util/git');
-    jest.mock('../../../util/host-rules');
-    jest.mock('../../../logger');
-    jest.mock('timers/promises');
-    hostRules = require('../../../util/host-rules');
-    require('../../../util/sanitize').sanitize = jest.fn((input) => input);
+    hostRules = await vi.importMock('../../../util/host-rules');
     azure = await import('.');
-    azureApi = require('./azure-got-wrapper');
-    azureHelper = require('./azure-helper');
-    logger = (await import('../../../logger')).logger as never;
-    git = require('../../../util/git');
+    azureApi = await vi.importMock('./azure-got-wrapper');
+    azureHelper = await vi.importMock('./azure-helper');
+    logger = (await await vi.importMock<any>('../../../logger')).logger;
+    git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.find.mockReturnValue({

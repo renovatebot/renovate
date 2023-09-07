@@ -1,7 +1,7 @@
 import { hostRules } from '../../../test/util';
 import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url';
 
-jest.mock('../host-rules');
+vi.mock('../host-rules');
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {

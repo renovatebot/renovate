@@ -3,8 +3,8 @@ import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { scm, setPlatformScmApi } from './scm';
 
-jest.mock('../../util/git');
-jest.unmock('./scm'); //mocked from test/setup
+vi.mock('../../util/git');
+vi.unmock('./scm'); //mocked from test/setup
 
 describe('modules/platform/scm', () => {
   it('no platform chosen', () => {

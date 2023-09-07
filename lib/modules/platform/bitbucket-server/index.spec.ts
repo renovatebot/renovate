@@ -8,6 +8,10 @@ import {
 import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
 
+vi.mock('timers/promises');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
+
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
 }
@@ -201,12 +205,9 @@ describe('modules/platform/bitbucket-server/index', () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        jest.mock('timers/promises');
-        jest.mock('../../../util/git');
-        jest.mock('../../../util/host-rules');
-        hostRules = require('../../../util/host-rules');
+        hostRules = await vi.importMock('../../../util/host-rules');
         bitbucket = await import('.');
-        git = require('../../../util/git');
+        git = await vi.importMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
         git.isBranchBehindBase.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(

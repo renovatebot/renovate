@@ -13,10 +13,6 @@ describe('workers/repository/update/branch/schedule', () => {
   });
 
   describe('hasValidSchedule(schedule)', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns true for null', () => {
       expect(schedule.hasValidSchedule(null)[0]).toBeTrue();
     });
@@ -146,7 +142,6 @@ describe('workers/repository/update/branch/schedule', () => {
 
     beforeEach(() => {
       jest.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
-      jest.resetAllMocks();
       config = {};
     });
 

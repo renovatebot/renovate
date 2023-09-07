@@ -13,10 +13,6 @@ const invalidGitRepoYaml = Fixtures.get('invalid_gitrepo.yaml');
 const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
 
 describe('modules/manager/fleet/extract', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   describe('extractPackageFile()', () => {
     it('should return null if empty content', () => {
       const result = extractPackageFile('', 'fleet.yaml');

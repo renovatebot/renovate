@@ -5,7 +5,7 @@ import { fs, logger } from '../../../../test/util';
 import { parseGradle, parseKotlinSource, parseProps } from './parser';
 import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   fs.getSiblingFileName.mockImplementation(

@@ -2,7 +2,11 @@ import { execSync as _execSync } from 'node:child_process';
 import { mockedFunction } from '../../../../test/util';
 import { LocalFs } from './scm';
 
-jest.mock('node:child_process');
+vi.mock('node:child_process');
+vi.mock('glob', () => ({
+  glob: jest.fn().mockResolvedValue(['file1', 'file2']),
+}));
+
 const execSync = mockedFunction(_execSync);
 
 describe('modules/platform/local/scm', () => {
@@ -56,11 +60,6 @@ describe('modules/platform/local/scm', () => {
       execSync.mockImplementationOnce(() => {
         throw new Error();
       });
-      jest.mock('glob', () => ({
-        glob: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve(['file1', 'file2'])),
-      }));
 
       expect(await localFs.getFileList()).toHaveLength(2);
     });

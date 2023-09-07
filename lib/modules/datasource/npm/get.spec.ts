@@ -7,7 +7,7 @@ import { Http } from '../../../util/http';
 import { getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 
 const packageCache = mocked(_packageCache);
 

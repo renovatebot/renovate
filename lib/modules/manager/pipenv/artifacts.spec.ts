@@ -19,12 +19,12 @@ import * as pipenv from '.';
 
 const datasource = mocked(_datasource);
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules');
-jest.mock('../../../util/http');
-jest.mock('../../datasource');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../util/http');
+vi.mock('../../datasource');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -50,7 +50,6 @@ describe('modules/manager/pipenv/artifacts', () => {
   let pipFileLock: any;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',

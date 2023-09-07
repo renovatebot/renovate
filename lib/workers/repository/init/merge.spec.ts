@@ -22,9 +22,9 @@ import {
   mergeRenovateConfig,
 } from './merge';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../onboarding/branch/onboarding-branch-cache');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../onboarding/branch/onboarding-branch-cache');
 
 const migrate = mocked(_migrate);
 const migrateAndValidate = mocked(_migrateAndValidate);
@@ -34,20 +34,18 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   memCache.init();
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
 });
 
-jest.mock('../../../config/migration');
-jest.mock('../../../config/migrate-validate');
+vi.mock('../../../config/migration');
+vi.mock('../../../config/migrate-validate');
 
 describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
-      jest.restoreAllMocks();
     });
 
     it('returns config if not found', async () => {

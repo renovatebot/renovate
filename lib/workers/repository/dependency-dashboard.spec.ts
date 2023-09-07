@@ -1,6 +1,6 @@
 import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import {
   RenovateConfig,
@@ -25,8 +25,8 @@ import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
-const createVulnerabilitiesMock = jest.fn();
-jest.mock('./process/vulnerabilities', () => {
+const createVulnerabilitiesMock = vi.hoisted(() => vi.fn());
+vi.mock('./process/vulnerabilities', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -1019,10 +1019,6 @@ describe('workers/repository/dependency-dashboard', () => {
 
         beforeEach(() => {
           PackageFiles.clear();
-        });
-
-        afterAll(() => {
-          jest.resetAllMocks();
         });
 
         it('does not truncates as there is enough space to fit', () => {

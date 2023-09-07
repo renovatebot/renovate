@@ -15,12 +15,12 @@ import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
-jest.mock('fs-extra', () =>
-  require('../../../../../test/fixtures').Fixtures.fsExtra()
+vi.mock('fs-extra', async () =>
+  (await import('../../../../../test/fixtures')).Fixtures.fsExtra()
 );
-jest.mock('../../../../util/exec/env');
-jest.mock('./node-version');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/exec/env');
+vi.mock('./node-version');
+vi.mock('../../../datasource');
 
 delete process.env.NPM_CONFIG_CACHE;
 

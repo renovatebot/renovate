@@ -16,7 +16,7 @@ import {
   setMeta,
 } from '.';
 
-jest.unmock('.');
+vi.unmock('.');
 
 describe('logger/index', () => {
   it('inits', () => {

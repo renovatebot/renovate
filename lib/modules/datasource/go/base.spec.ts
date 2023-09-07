@@ -7,7 +7,7 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
@@ -30,13 +30,8 @@ describe('modules/datasource/go/base', () => {
 
   describe('go-get requests', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     describe('meta name=go-source', () => {

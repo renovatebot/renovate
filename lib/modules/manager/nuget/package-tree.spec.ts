@@ -1,4 +1,3 @@
-import { fs as memfs } from 'memfs';
 import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { scm } from '../../../../test/util';
@@ -6,9 +5,11 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { getDependentPackageFiles } from './package-tree';
 
-jest.mock('fs', () => memfs);
-jest.mock('fs-extra', () => Fixtures.fsExtra());
-jest.mock('../../../util/git');
+vi.mock('fs', () => import('memfs'));
+vi.mock('fs-extra', async () =>
+  (await import('../../../../test/fixtures')).Fixtures.fsExtra()
+);
+vi.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('/tmp/repo'),

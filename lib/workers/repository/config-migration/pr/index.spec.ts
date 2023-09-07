@@ -1,6 +1,6 @@
 import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
@@ -37,7 +37,6 @@ describe('workers/repository/config-migration/pr/index', () => {
     GlobalConfig.set({
       dryRun: null,
     });
-    jest.resetAllMocks();
     config = {
       ...getConfig(),
       configMigration: true,
@@ -251,7 +250,6 @@ describe('workers/repository/config-migration/pr/index', () => {
     const err = partial<RequestError>({ response });
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       scm.deleteBranch.mockResolvedValue();
     });

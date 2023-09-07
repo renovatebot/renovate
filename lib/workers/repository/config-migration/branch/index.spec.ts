@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
@@ -17,11 +17,11 @@ import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
 
-jest.mock('./migrated-data');
-jest.mock('./rebase');
-jest.mock('./create');
-jest.mock('../../../../util/git');
-jest.mock('../../update/branch/handle-existing');
+vi.mock('./migrated-data');
+vi.mock('./rebase');
+vi.mock('./create');
+vi.mock('../../../../util/git');
+vi.mock('../../update/branch/handle-existing');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
 
@@ -33,7 +33,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       GlobalConfig.set({
         dryRun: null,
       });
-      jest.resetAllMocks();
       config = getConfig();
       config.branchPrefix = 'some/';
     });

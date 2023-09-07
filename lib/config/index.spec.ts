@@ -1,12 +1,8 @@
 import { getConfig } from './defaults';
 import { filterConfig, getManagerConfig, mergeChildConfig } from './index';
 
-jest.mock('../modules/datasource/npm');
-try {
-  jest.mock('../../config.js');
-} catch (err) {
-  // file does not exist
-}
+vi.mock('../modules/datasource/npm');
+vi.mock('../../config.js', () => ({}));
 
 const defaultConfig = getConfig();
 

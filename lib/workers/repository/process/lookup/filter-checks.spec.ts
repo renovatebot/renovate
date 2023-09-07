@@ -8,8 +8,8 @@ import { toMs } from '../../../../util/pretty-time';
 import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
-jest.mock('../../../../util/date');
-jest.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/date');
+vi.mock('../../../../util/merge-confidence');
 
 const dateUtil = mocked(_dateUtil);
 const mergeConfidence = mocked(_mergeConfidence);
@@ -43,7 +43,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
   beforeEach(() => {
     config = { currentVersion: '1.0.0' };
     sortedReleases = clone(releases);
-    jest.resetAllMocks();
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('3 days') ?? 0);
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('7 days') ?? 0);

@@ -22,18 +22,17 @@ import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
 
-jest.mock('timers/promises');
+vi.mock('timers/promises');
 
-jest.mock('../../../util/host-rules');
-jest.mock('../../../util/http/queue');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../util/http/queue');
 const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
 
-jest.mock('../../../util/git');
+vi.mock('../../../util/git');
 const git: jest.Mocked<typeof _git> = mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);

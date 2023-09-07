@@ -8,9 +8,9 @@ import { updateArtifacts } from '../index';
 import { TerraformProviderHash } from './hash';
 
 // auto-mock fs
-jest.mock('../../../../util/fs');
-jest.mock('./hash');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/fs');
+vi.mock('./hash');
+vi.mock('../../../datasource');
 
 const config = {
   constraints: {},
@@ -33,8 +33,6 @@ const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
 
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 

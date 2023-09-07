@@ -8,14 +8,13 @@ import * as lookup from './lookup';
 
 const lookupUpdates = mocked(lookup).lookupUpdates;
 
-jest.mock('./lookup');
+vi.mock('./lookup');
 
 describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = getConfig();
     });
 

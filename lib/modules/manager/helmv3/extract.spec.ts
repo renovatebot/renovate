@@ -3,7 +3,7 @@ import { DockerDatasource } from '../../datasource/docker';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 const config = partial<ExtractConfig>({
   registryAliases: {
     stable: 'https://charts.helm.sh/stable',
@@ -12,11 +12,6 @@ const config = partial<ExtractConfig>({
 
 describe('modules/manager/helmv3/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      fs.readLocalFile = jest.fn();
-    });
-
     it('skips invalid registry urls', async () => {
       const content = `
       apiVersion: v2

@@ -2,7 +2,11 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import v8 from 'node:v8';
 import { minimatch } from 'minimatch';
-import type { JestConfigWithTsJest } from 'ts-jest';
+
+type JestConfigWithTsJest = {
+  coverageDirectory?: string;
+  testMatch?: string[];
+} & Record<string, unknown>;
 
 const ci = !!process.env.CI;
 

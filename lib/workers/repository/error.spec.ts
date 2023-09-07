@@ -31,12 +31,11 @@ import {
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import handleError from './error';
 
-jest.mock('./error-config');
+vi.mock('./error-config');
 
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({ branchList: [] });
 });
 

@@ -12,10 +12,10 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -44,8 +44,6 @@ const repoStatus = partial<StatusResult>({
 
 describe('modules/manager/composer/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();
     hostRules.clear();

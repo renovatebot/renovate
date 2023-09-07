@@ -18,12 +18,12 @@ import {
   writeUpdatedPackageFiles,
 } from './';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('./lerna');
-jest.mock('./npm');
-jest.mock('./yarn');
-jest.mock('./pnpm');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
+vi.mock('./lerna');
+vi.mock('./npm');
+vi.mock('./yarn');
+vi.mock('./pnpm');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -62,7 +62,6 @@ describe('modules/manager/npm/post-update/index', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
     GlobalConfig.set({ localDir: '' });
     baseConfig = partial<PostUpdateConfig>({
       upgrades: [],

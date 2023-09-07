@@ -7,10 +7,10 @@ import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -26,9 +26,6 @@ const adminConfig: RepoGlobalConfig = {
 
 describe('modules/manager/cargo/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

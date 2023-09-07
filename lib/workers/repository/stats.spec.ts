@@ -5,7 +5,7 @@ import type { LookupStats } from '../../util/cache/memory/types';
 import type { RequestStats } from '../../util/http/types';
 import { printLookupStats, printRequestStats } from './stats';
 
-jest.mock('../../util/cache/memory');
+vi.mock('../../util/cache/memory');
 
 const memCache = mocked(_memCache);
 const log = logger.logger as jest.Mocked<Logger>;

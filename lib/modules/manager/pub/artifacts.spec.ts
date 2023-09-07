@@ -9,11 +9,11 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
 import * as pub from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/http');
-jest.mock('../../datasource');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/http');
+vi.mock('../../datasource');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -45,8 +45,6 @@ const updateArtifact: UpdateArtifact = {
 
 describe('modules/manager/pub/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

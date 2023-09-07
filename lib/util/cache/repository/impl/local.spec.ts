@@ -9,7 +9,7 @@ import type { RepoCacheData } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';
 
-jest.mock('../../../fs');
+vi.mock('../../../fs');
 
 async function createCacheRecord(
   data: RepoCacheData,
@@ -34,7 +34,6 @@ async function createCacheRecord(
 
 describe('util/cache/repository/impl/local', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
     fs.cachePathExists.mockResolvedValue(true);
   });

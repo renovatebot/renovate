@@ -2,14 +2,10 @@ import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
 import { getChangelogs } from './changelogs';
 
-jest.mock('../../../../../util/template');
+vi.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/changelogs', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('returns empty string when there is no release notes', () => {
     const res = getChangelogs({
       manager: 'some-manager',

@@ -7,10 +7,11 @@ const loggerLevels: string[] = [
   'fatal',
   'child',
 ];
-const logger: any = {};
+const logger: any = { once: {}};
 
 loggerLevels.forEach(k => {
   logger[k] = jest.fn();
+  logger.once[k] = jest.fn();
 });
 
 export const setContext = jest.fn();

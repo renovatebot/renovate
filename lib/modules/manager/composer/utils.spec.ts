@@ -7,7 +7,7 @@ import {
   requireComposerDependencyInstallation,
 } from './utils';
 
-jest.mock('../../datasource');
+vi.mock('../../datasource');
 
 describe('modules/manager/composer/utils', () => {
   beforeEach(() => {

@@ -5,7 +5,7 @@ import * as _hostRules from '../../../util/host-rules';
 import { GitHubReleaseAttachmentMocker } from './test';
 import { GithubReleaseAttachmentsDatasource } from '.';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
 
 const githubApiHost = 'https://api.github.com';

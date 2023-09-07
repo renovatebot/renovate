@@ -6,7 +6,7 @@ import {
   setCachedModifiedResult,
 } from './modified-cache';
 
-jest.mock('../cache/repository');
+vi.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {

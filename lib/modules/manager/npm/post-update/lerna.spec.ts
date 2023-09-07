@@ -6,10 +6,10 @@ import type { PackageFileContent, PostUpdateConfig } from '../../types';
 import * as lernaHelper from './lerna';
 import { getNodeToolConstraint } from './node-version';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
+vi.mock('../../../datasource');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -29,8 +29,6 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
   describe('generateLockFiles()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       GlobalConfig.set(globalConfig);
       mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({

@@ -4,7 +4,7 @@ import * as presets from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { getOnboardingConfig, getOnboardingConfigContents } from './config';
 
-jest.mock('../../../../config/presets/local');
+vi.mock('../../../../config/presets/local');
 
 const mockedPresets = presets as jest.Mocked<typeof presets>;
 

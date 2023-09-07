@@ -4,6 +4,10 @@ import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
 
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../logger');
+
 const baseUrl = 'https://api.bitbucket.org';
 
 const pr = {
@@ -25,13 +29,10 @@ describe('modules/platform/bitbucket/index', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('../../../util/git');
-    jest.mock('../../../util/host-rules');
-    jest.mock('../../../logger');
-    hostRules = require('../../../util/host-rules');
+    hostRules = await vi.importMock('../../../util/host-rules');
     bitbucket = await import('.');
     logger = (await import('../../../logger')).logger as any;
-    git = require('../../../util/git');
+    git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     // clean up hostRules

@@ -4,9 +4,9 @@ import * as _html from '../../../modules/manager/html';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
-jest.mock('./file-match');
-jest.mock('../../../modules/manager/html');
-jest.mock('../../../util/fs');
+vi.mock('./file-match');
+vi.mock('../../../modules/manager/html');
+vi.mock('../../../util/fs');
 
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
@@ -16,7 +16,6 @@ describe('workers/repository/extract/manager-files', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>();
     });
 

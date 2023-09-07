@@ -320,7 +320,6 @@ describe('util/http/index', () => {
       .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
 
     beforeEach(() => {
-      jest.resetAllMocks();
       memCache.init();
     });
 
@@ -441,7 +440,7 @@ describe('util/http/index', () => {
     });
 
     it('works without throttling', async () => {
-      jest.useFakeTimers({ advanceTimers: 1 });
+      vi.useFakeTimers({ shouldAdvanceTime: true, advanceTimeDelta: 1 });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
 
       const t1 = Date.now();
@@ -453,7 +452,7 @@ describe('util/http/index', () => {
     });
 
     it('limits request rate by host', async () => {
-      jest.useFakeTimers({ advanceTimers: true });
+      vi.useFakeTimers({ shouldAdvanceTime: true });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
       hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
 

@@ -15,8 +15,8 @@ const config: PostUpdateConfig = {
 
 const hostRules = mocked(_hostRules);
 
-jest.mock('../../../../../util/git');
-jest.mock('../../../../../util/fs');
+vi.mock('../../../../../util/git');
+vi.mock('../../../../../util/fs');
 
 hostRules.find = jest.fn((_) => ({
   token: 'abc',
@@ -27,7 +27,6 @@ const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 describe('workers/repository/update/branch/lock-files/index', () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
@@ -92,10 +91,6 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       });
       jest.spyOn(lerna, 'generateLockFiles');
       jest.spyOn(lockFiles, 'determineLockFileDirs');
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {

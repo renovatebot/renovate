@@ -7,7 +7,7 @@ import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
 import { PackagistDatasource } from '.';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const hostRules = _hostRules;
 
@@ -24,7 +24,6 @@ describe('modules/datasource/packagist/index', () => {
     let config: any;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find = jest.fn((input: HostRule) => input);
       hostRules.hosts = jest.fn(() => []);
       config = {

@@ -6,16 +6,14 @@ import { GlobalConfig } from '../../../../config/global';
 import { getNodeToolConstraint } from './node-version';
 import * as npmHelper from './npm';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
 
 process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
     mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({

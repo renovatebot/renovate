@@ -35,9 +35,9 @@ import {
   writeLocalFile,
 } from '.';
 
-jest.mock('../exec/env');
-jest.mock('find-up');
-jest.mock('../git');
+vi.mock('../exec/env');
+vi.mock('find-up');
+vi.mock('../git');
 
 const findUp = mockedFunction(_findUp);
 

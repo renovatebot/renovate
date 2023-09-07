@@ -23,7 +23,7 @@ import type {
   ChangeLogResult,
 } from './types';
 
-jest.mock('../../../../../util/host-rules');
+vi.mock('../../../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
@@ -1048,7 +1048,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
-      jest.setTimeout(0);
       httpMock
         .scope('https://api.gitlab.com/')
         .get(
@@ -1078,7 +1077,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('parses self hosted gitlab', async () => {
       hostRules.find.mockReturnValue({ token: 'some-token' });
-      jest.setTimeout(0);
       httpMock
         .scope('https://my.custom.domain/')
         .get(

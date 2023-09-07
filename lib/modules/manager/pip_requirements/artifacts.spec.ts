@@ -9,9 +9,9 @@ import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
 
-jest.mock('../../../util/exec/common');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource');
+vi.mock('../../../util/exec/common');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -41,8 +41,6 @@ botocore==1.27.46 \
 
 describe('modules/manager/pip_requirements/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 

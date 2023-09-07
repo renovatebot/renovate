@@ -7,7 +7,7 @@ import { GlobalConfig } from '../../config/global';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
 import type { RawExecOptions } from './types';
 
-jest.mock('find-up');
+vi.mock('find-up');
 const findUp = mockedFunction(_findUp);
 const localDir = '/tmp/renovate/repository/project-a';
 

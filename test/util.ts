@@ -1,7 +1,5 @@
-import crypto from 'node:crypto';
-import { expect, jest } from '@jest/globals';
-import type { Plugin } from 'pretty-format';
 import upath from 'upath';
+import type { Mocked, MockedFunction } from 'vitest';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
 import { Platform, platform as _platform } from '../lib/modules/platform';
@@ -14,20 +12,20 @@ import { regEx } from '../lib/util/regex';
 
 /**
  * Simple wrapper for getting mocked version of a module
- * @param module module which is mocked by `jest.mock`
+ * @param module module which is mocked by `vi.mock`
  */
-export function mocked<T extends object>(module: T): jest.MockedObject<T> {
-  return module as jest.MockedObject<T>;
+export function mocked<T extends object>(module: T): Mocked<T> {
+  return module as Mocked<T>;
 }
 
 /**
  * Simple wrapper for getting mocked version of a function
- * @param func function which is mocked by `jest.mock`
+ * @param func function which is mocked by `vi.mock`
  */
 export function mockedFunction<T extends (...args: any[]) => any>(
   func: T
-): jest.MockedFunction<T> {
-  return func as jest.MockedFunction<T>;
+): MockedFunction<T> {
+  return func as MockedFunction<T>;
 }
 
 /**
@@ -41,15 +39,15 @@ export function partial(obj: unknown = {}): unknown {
   return obj;
 }
 
-export const fs = mocked(_fs);
-export const git = mocked(_git);
+export const fs = vi.mocked(_fs);
+export const git = vi.mocked(_git);
 
 // TODO: fix types, jest / typescript is using wrong overload (#22198)
-export const platform = mocked(partial<Required<Platform>>(_platform));
-export const scm = mocked(_scm);
-export const env = mocked(_env);
-export const hostRules = mocked(_hostRules);
-export const logger = mocked(_logger);
+export const platform = vi.mocked(partial<Required<Platform>>(_platform));
+export const scm = vi.mocked(_scm);
+export const env = vi.mocked(_env);
+export const hostRules = vi.mocked(_hostRules);
+export const logger = vi.mocked(_logger);
 
 export type { RenovateConfig };
 
@@ -90,44 +88,6 @@ function getCallerFileName(): string | null {
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   const callerDir = upath.dirname(getCallerFileName()!);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
-}
-
-/**
- * Can be used to search and replace strings in jest snapshots.
- * @example
- * expect.addSnapshotSerializer(
- *     replacingSerializer(upath.toUnix(gradleDir.path), 'localDir')
- * );
- */
-export const replacingSerializer = (
-  search: string,
-  replacement: string
-): Plugin => ({
-  test: (value) => typeof value === 'string' && value.includes(search),
-  serialize: (val, config, indent, depth, refs, printer) => {
-    const replaced = (val as string).replace(search, replacement);
-    return printer(replaced, config, indent, depth, refs);
-  },
-});
-
-export function addReplacingSerializer(from: string, to: string): void {
-  expect.addSnapshotSerializer(replacingSerializer(from, to));
-}
-
-function toHash(buf: Buffer): string {
-  return crypto.createHash('sha256').update(buf).digest('hex');
-}
-
-const bufferSerializer: Plugin = {
-  test: (value) => Buffer.isBuffer(value),
-  serialize: (val, config, indent, depth, refs, printer) => {
-    const replaced = toHash(val);
-    return printer(replaced, config, indent, depth, refs);
-  },
-};
-
-export function addBufferSerializer(): void {
-  expect.addSnapshotSerializer(bufferSerializer);
 }
 
 export function regexMatches(target: string, patterns: string[]): boolean {

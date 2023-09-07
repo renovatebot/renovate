@@ -14,12 +14,12 @@ import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
-jest.mock('../../../util/http');
-jest.mock('../../datasource');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../util/http');
+vi.mock('../../datasource');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -40,7 +40,6 @@ const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('modules/manager/pip-compile/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',

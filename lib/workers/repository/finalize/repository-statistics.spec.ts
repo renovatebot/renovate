@@ -14,8 +14,8 @@ import {
   runRenovateRepoStats,
 } from './repository-statistics';
 
-jest.mock('../../../modules/platform/github/pr');
-jest.mock('../../../util/http/github');
+vi.mock('../../../modules/platform/github/pr');
+vi.mock('../../../util/http/github');
 
 const prJson = Fixtures.getJson('./pr-list.json');
 const result = Object.keys(prJson).map((key) => {

@@ -7,9 +7,9 @@ import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
 import { configMigration } from './index';
 
-jest.mock('./pr');
-jest.mock('./branch');
-jest.mock('./branch/migrated-data');
+vi.mock('./pr');
+vi.mock('./branch');
+vi.mock('./branch/migrated-data');
 
 const content = Fixtures.getJson('./migrated-data.json', './branch');
 const filename = 'renovate.json';
@@ -21,7 +21,6 @@ const config = {
 
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
       filename,
       content,

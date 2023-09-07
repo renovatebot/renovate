@@ -14,7 +14,7 @@ import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const ecrMock = mockClient(ECRClient);
 

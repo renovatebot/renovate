@@ -3,10 +3,6 @@ import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { isUUID, regEx } from './regex';
 
 describe('util/regex', () => {
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   it('uses RE2', () => {
     expect(regEx('foo')).toBeInstanceOf(RE2);
   });
@@ -29,12 +25,12 @@ describe('util/regex', () => {
     expect(regEx(/bar/g)).not.toBe(/bar/g);
   });
 
-  it('Falls back to RegExp', () => {
-    jest.doMock('re2', () => {
+  it('Falls back to RegExp', async () => {
+    vi.doMock('re2', () => {
       throw new Error();
     });
 
-    const regex = require('./regex');
+    const regex = await import('./regex');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 

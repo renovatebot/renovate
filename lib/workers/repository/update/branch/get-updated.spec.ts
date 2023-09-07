@@ -18,14 +18,14 @@ const npm = mocked(_npm);
 const batectWrapper = mocked(_batectWrapper);
 const autoReplace = mocked(_autoReplace);
 
-jest.mock('../../../../modules/manager/bundler');
-jest.mock('../../../../modules/manager/composer');
-jest.mock('../../../../modules/manager/helmv3');
-jest.mock('../../../../modules/manager/npm');
-jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/batect-wrapper');
-jest.mock('../../../../util/git');
-jest.mock('./auto-replace');
+vi.mock('../../../../modules/manager/bundler');
+vi.mock('../../../../modules/manager/composer');
+vi.mock('../../../../modules/manager/helmv3');
+vi.mock('../../../../modules/manager/npm');
+vi.mock('../../../../modules/manager/git-submodules');
+vi.mock('../../../../modules/manager/batect-wrapper');
+vi.mock('../../../../util/git');
+vi.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {

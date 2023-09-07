@@ -1,19 +1,18 @@
 import is from '@sindresorhus/is';
-import { mock } from 'jest-mock-extended';
 import { Response, SimpleGit, SimpleGitFactory, simpleGit } from 'simple-git';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
+import { mock } from 'vitest-mock-extended';
 
-jest.mock('simple-git');
+vi.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const Git = jest.requireActual('simple-git') as SimpleGitFactory;
 
 const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/extract', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    const Git = await vi.importActual<SimpleGitFactory>('simple-git');
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
     // clear host rules
     hostRules.clear();

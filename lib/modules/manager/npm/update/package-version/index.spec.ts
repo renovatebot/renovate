@@ -57,7 +57,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
     });
 
     it('returns content if bumping errors', async () => {
-      jest.mock('semver', () => ({
+      vi.doMock('semver', () => ({
         inc: () => {
           throw new Error('semver inc');
         },

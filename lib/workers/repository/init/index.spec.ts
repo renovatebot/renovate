@@ -7,13 +7,13 @@ import * as _config from './config';
 import * as _merge from './merge';
 import { initRepo } from '.';
 
-jest.mock('../../../util/git');
-jest.mock('../onboarding/branch');
-jest.mock('../configured');
-jest.mock('../init/apis');
-jest.mock('../init/config');
-jest.mock('../init/merge');
-jest.mock('../../../config/secrets');
+vi.mock('../../../util/git');
+vi.mock('../onboarding/branch');
+vi.mock('../configured');
+vi.mock('../init/apis');
+vi.mock('../init/config');
+vi.mock('../init/merge');
+vi.mock('../../../config/secrets');
 
 const apis = mocked(_apis);
 const config = mocked(_config);

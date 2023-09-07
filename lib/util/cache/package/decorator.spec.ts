@@ -4,7 +4,7 @@ import * as memCache from '../memory';
 import { cache } from './decorator';
 import * as packageCache from '.';
 
-jest.mock('./file');
+vi.mock('./file');
 
 describe('util/cache/package/decorator', () => {
   const setCache = jest.spyOn(packageCache, 'set');
@@ -170,7 +170,7 @@ describe('util/cache/package/decorator', () => {
     }
 
     beforeEach(() => {
-      jest.useFakeTimers({ advanceTimers: false });
+      jest.useFakeTimers();
       GlobalConfig.set({ cacheHardTtlMinutes: 2 });
     });
 

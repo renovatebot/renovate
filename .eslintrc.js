@@ -37,7 +37,7 @@ module.exports = {
     'import/no-named-as-default-member': 0,
     'import/no-extraneous-dependencies': [
       'error',
-      { devDependencies: ['test/**/*', '**/*.spec.ts'] },
+      { devDependencies: ['test/**/*', '**/*.spec.ts', 'vite.config.ts'] },
     ],
     'import/prefer-default-export': 0, // no benefit
 
@@ -84,7 +84,7 @@ module.exports = {
     // disallow `path` in favor of `upath`
     'no-restricted-imports': [
       2,
-      { paths: ['nock', 'parse-link-header', 'path'] },
+      { paths: ['jest', 'nock', 'node:test', 'parse-link-header', 'path'] },
     ],
 
     '@typescript-eslint/consistent-type-assertions': [

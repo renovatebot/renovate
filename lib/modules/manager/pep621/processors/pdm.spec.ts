@@ -8,8 +8,8 @@ import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 

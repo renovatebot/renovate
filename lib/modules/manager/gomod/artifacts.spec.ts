@@ -11,22 +11,20 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs', () => {
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs', async () => {
   // restore
   return {
     __esModules: true,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    ...(jest.createMockFromModule('../../../util/fs') as any),
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    isValidLocalPath: (jest.requireActual('../../../util/fs') as any)
+    ...(await vi.importMock<typeof fs>('../../../util/fs')),
+    isValidLocalPath: (await vi.importActual<typeof fs>('../../../util/fs'))
       .isValidLocalPath,
   };
 });
-jest.mock('../../datasource');
+vi.mock('../../datasource');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -78,9 +76,6 @@ const goEnv = {
 
 describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);

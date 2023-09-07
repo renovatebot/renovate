@@ -2,11 +2,11 @@ import * as manager from '../../modules/manager';
 import * as platform from '../../modules/platform';
 import { getOptions } from '.';
 
-jest.unmock('../../modules/platform');
+vi.unmock('../../modules/platform');
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
-    jest.mock('../../modules/manager', () => ({
+    vi.mock('../../modules/manager', () => ({
       getManagers: jest.fn(() => new Map().set('testManager', {})),
     }));
 
@@ -15,7 +15,7 @@ describe('config/options/index', () => {
   });
 
   it('supportedManagers should have valid names', () => {
-    jest.unmock('../../modules/manager');
+    vi.unmock('../../modules/manager');
     const opts = getOptions();
     const managerList = Array.from(manager.getManagers().keys());
 
@@ -30,7 +30,7 @@ describe('config/options/index', () => {
   });
 
   it('supportedPlatforms should have valid names', () => {
-    jest.unmock('../../modules/platform');
+    vi.unmock('../../modules/platform');
     const opts = getOptions();
     const platformList = Array.from(platform.getPlatforms().keys());
 

@@ -14,10 +14,10 @@ import { updateArtifacts } from '.';
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource');
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource');
+vi.mock('../../../util/host-rules');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -54,7 +54,6 @@ describe('modules/manager/poetry/artifacts', () => {
 
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       GlobalConfig.set(adminConfig);
       docker.resetPrefetchedImages();

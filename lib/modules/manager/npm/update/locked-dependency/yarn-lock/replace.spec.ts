@@ -32,12 +32,12 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version "0.2.5"
+        "  version \\"0.2.5\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "  version "0.2.4"
-          resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.2.4.tgz#3582499206c9723714190edd74b4604feb4a614c"
+        "  version \\"0.2.4\\"
+          resolved \\"https://registry.yarnpkg.com/fresh/-/fresh-0.2.4.tgz#3582499206c9723714190edd74b4604feb4a614c\\"
           integrity sha1-NYJJkgbJcjcUGQ7ddLRgT+tKYUw=
         "
       `);
@@ -57,12 +57,12 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version "4.4.0"
+        "  version \\"4.4.0\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "  version "4.0.0"
-          resolved "https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094"
+        "  version \\"4.0.0\\"
+          resolved \\"https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094\\"
           integrity sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=
         "
       `);
@@ -84,13 +84,13 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
         "express@4.4.0:
-          version "4.4.0"
+          version \\"4.4.0\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
         "express@4.0.0:
-          version "4.0.0"
-          resolved "https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094"
+          version \\"4.0.0\\"
+          resolved \\"https://registry.yarnpkg.com/express/-/express-4.0.0.tgz#274dc82933c9f574cc38a0ce5ea8172be9c6b094\\"
           integrity sha1-J03IKTPJ9XTMOKDOXqgXK+nGsJQ=
         "
       `);
@@ -110,12 +110,12 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version "2.2.0"
+        "  version \\"2.2.0\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "  version "2.0.0"
-          resolved "https://registry.yarnpkg.com/string-width/-/string-width-2.1.1.tgz#ab93f27a8dc13d28cac815c462143a6d9012ae9e"
+        "  version \\"2.0.0\\"
+          resolved \\"https://registry.yarnpkg.com/string-width/-/string-width-2.1.1.tgz#ab93f27a8dc13d28cac815c462143a6d9012ae9e\\"
           integrity sha512-nOqH59deCq9SRHlxq1Aw85Jnt4w6KvLKqWVik6oA9ZklXLNIOlqg4F2yrT1MVaTjAqvVwdfeZ7w7aCvJD7ugkw==
         "
       `);
@@ -135,12 +135,12 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       expect(addedSections).toHaveLength(1);
       expect(removedSections).toHaveLength(1);
       expect(addedSections[0].value).toMatchInlineSnapshot(`
-        "  version "0.48.1"
+        "  version \\"0.48.1\\"
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "  version "0.48.0"
-          resolved "https://registry.yarnpkg.com/@embroider/addon-shim/-/addon-shim-0.48.0.tgz#2a950ecb82c45ae53e801bcddfd26dc420cac9e8"
+        "  version \\"0.48.0\\"
+          resolved \\"https://registry.yarnpkg.com/@embroider/addon-shim/-/addon-shim-0.48.0.tgz#2a950ecb82c45ae53e801bcddfd26dc420cac9e8\\"
           integrity sha512-hu2Yzv5xXHl1vCzkcybjyjCK2/fHwKPDJ5xpwRlvASU/8WMBVLekQQ9Tt8WhPMZJHdMkzIWchAPGkLZaKaeXmA==
         "
       `);

@@ -11,11 +11,11 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
 
-jest.mock('../../datasource');
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+vi.mock('../../datasource');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
 
 const datasource = mocked(_datasource);
 
@@ -36,9 +36,6 @@ const chartFileAlias = Fixtures.get('ChartAlias.yaml');
 
 describe('modules/manager/helmv3/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

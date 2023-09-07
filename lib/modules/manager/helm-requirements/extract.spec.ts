@@ -1,15 +1,10 @@
 import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      fs.readLocalFile = jest.fn();
-    });
-
     it('ensure that currentValue is string', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1

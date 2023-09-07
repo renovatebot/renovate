@@ -4,7 +4,7 @@ import { fs } from '../../../../test/util';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject2toml = Fixtures.get('pyproject.2.toml');

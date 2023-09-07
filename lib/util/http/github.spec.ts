@@ -16,7 +16,7 @@ import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 import type { GraphqlPageCache } from './github';
 
-jest.mock('../cache/repository');
+vi.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
@@ -55,7 +55,7 @@ describe('util/http/github', () => {
     delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
-    jest.resetAllMocks();
+
     repoCache = {};
     repositoryCache.getCache.mockReturnValue(repoCache);
   });

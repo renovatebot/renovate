@@ -22,11 +22,11 @@ import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
 import { updateBuildFile, updateLockFiles } from './artifacts';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
-jest.mock('../gradle');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource');
+vi.mock('../gradle');
 
 process.env.CONTAINERBASE = 'true';
 

@@ -8,10 +8,10 @@ import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules');
-jest.mock('../../datasource');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/host-rules');
+vi.mock('../../datasource');
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
@@ -29,8 +29,6 @@ const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     hostRules.getAll.mockReturnValue([]);
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

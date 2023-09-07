@@ -1,16 +1,17 @@
 import { Readable } from 'node:stream';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 
+vi.mock('./azure-got-wrapper');
+
 describe('modules/platform/azure/azure-helper', () => {
   let azureHelper: typeof import('./azure-helper');
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('./azure-got-wrapper');
-    azureHelper = require('./azure-helper');
-    azureApi = require('./azure-got-wrapper');
+    azureHelper = await import('./azure-helper');
+    azureApi = await vi.importMock('./azure-got-wrapper');
   });
 
   describe('getRef', () => {

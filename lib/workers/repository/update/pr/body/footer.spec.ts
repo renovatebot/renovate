@@ -2,14 +2,10 @@ import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
 import { getPrFooter } from './footer';
 
-jest.mock('../../../../../util/template');
+vi.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/footer', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('renders empty footer', () => {
     expect(
       getPrFooter({

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/gitlabci-include/extract extractPackageFile() extracts multiple include blocks 1`] = `
+exports[`modules/manager/gitlabci-include/extract > extractPackageFile() > extracts multiple include blocks 1`] = `
 [
   {
     "currentValue": "1.0.0",
@@ -23,7 +23,7 @@ exports[`modules/manager/gitlabci-include/extract extractPackageFile() extracts 
 ]
 `;
 
-exports[`modules/manager/gitlabci-include/extract extractPackageFile() extracts single include block 1`] = `
+exports[`modules/manager/gitlabci-include/extract > extractPackageFile() > extracts single include block 1`] = `
 [
   {
     "currentValue": "1.0.0",

@@ -4,16 +4,16 @@ import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { GoDatasource } from '.';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
 
-const getReleasesDirectMock = jest.fn();
+const getReleasesDirectMock = vi.hoisted(() => vi.fn());
 
-const getDigestGithubMock = jest.fn();
-const getDigestGitlabMock = jest.fn();
-const getDigestGitMock = jest.fn();
-const getDigestBitbucketMock = jest.fn();
-jest.mock('./releases-direct', () => {
+const getDigestGithubMock = vi.hoisted(() => vi.fn());
+const getDigestGitlabMock = vi.hoisted(() => vi.fn());
+const getDigestGitMock = vi.hoisted(() => vi.fn());
+const getDigestBitbucketMock = vi.hoisted(() => vi.fn());
+vi.mock('./releases-direct', () => {
   return {
     GoDirectDatasource: jest.fn().mockImplementation(() => {
       return {
@@ -29,8 +29,8 @@ jest.mock('./releases-direct', () => {
   };
 });
 
-const getReleasesProxyMock = jest.fn();
-jest.mock('./releases-goproxy', () => {
+const getReleasesProxyMock = vi.hoisted(() => vi.fn());
+vi.mock('./releases-goproxy', () => {
   return {
     GoProxyDatasource: jest.fn().mockImplementation(() => {
       return {
@@ -70,13 +70,8 @@ describe('modules/datasource/go/index', () => {
 
   describe('getDigest', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('returns null for no go-source tag', async () => {

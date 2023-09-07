@@ -6,10 +6,6 @@ import prepareError, {
 } from './utils';
 
 describe('logger/utils', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   it('checks for valid log levels', () => {
     expect(validateLogLevel(undefined)).toBeUndefined();
     expect(validateLogLevel('warn')).toBeUndefined();

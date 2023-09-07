@@ -6,14 +6,14 @@ import { initRepoCache } from './init';
 import type { RepoCacheConfig } from './types';
 import { getCache, isCacheModified, resetCache, saveCache } from '.';
 
-jest.mock('../../fs');
+vi.mock('../../fs');
 
 const fs = mocked(_fs);
 
 describe('util/cache/repository/index', () => {
   beforeEach(() => {
     resetCache();
-    jest.resetAllMocks();
+
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 

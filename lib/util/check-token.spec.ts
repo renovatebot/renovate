@@ -13,12 +13,11 @@ import {
   takePersonalAccessTokenIfPossible,
 } from './check-token';
 
-jest.mock('./host-rules');
+vi.mock('./host-rules');
 
 describe('util/check-token', () => {
   describe('checkGithubToken', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       memCache.reset();
       GlobalConfig.set({ githubTokenWarn: true });
     });

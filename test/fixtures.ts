@@ -1,13 +1,12 @@
 import fs from 'node:fs';
 import type { PathLike, Stats } from 'node:fs';
-import { jest } from '@jest/globals';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
 import upath from 'upath';
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const realFs = jest.requireActual('fs') as typeof fs;
+const realFs = fs;
 
 /**
  * Class to work with in-memory file-system

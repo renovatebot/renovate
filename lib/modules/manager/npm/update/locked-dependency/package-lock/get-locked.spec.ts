@@ -1,7 +1,7 @@
 import { Fixtures } from '../../../../../../../test/fixtures';
 import { getLockedDependencies } from './get-locked';
 
-jest.mock('../../../../../../util/fs');
+vi.mock('../../../../../../util/fs');
 
 const packageLockJson = Fixtures.getJson('package-lock.json');
 const bundledPackageLockJson = Fixtures.getJson('bundled.package-lock.json');

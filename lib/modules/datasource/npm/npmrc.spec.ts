@@ -8,7 +8,7 @@ import {
   setNpmrc,
 } from './npmrc';
 
-jest.mock('../../../util/sanitize');
+vi.mock('../../../util/sanitize');
 
 const sanitize = mocked(_sanitize);
 
@@ -16,7 +16,6 @@ describe('modules/datasource/npm/npmrc', () => {
   beforeEach(() => {
     setNpmrc('');
     GlobalConfig.reset();
-    jest.resetAllMocks();
   });
 
   describe('getMatchHostFromNpmrcHost()', () => {

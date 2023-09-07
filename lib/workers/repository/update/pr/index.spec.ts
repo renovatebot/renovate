@@ -30,25 +30,25 @@ import * as _prCache from './pr-cache';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
 import { ensurePr } from '.';
 
-jest.mock('../../../../util/git');
-jest.mock('../../changelog');
+vi.mock('../../../../util/git');
+vi.mock('../../changelog');
 
-jest.mock('../../../global/limits');
+vi.mock('../../../global/limits');
 const limits = mocked(_limits);
 
-jest.mock('../branch/status-checks');
+vi.mock('../branch/status-checks');
 const checks = mocked(_statusChecks);
 
-jest.mock('./body');
+vi.mock('./body');
 const prBody = mocked(_prBody);
 
-jest.mock('./participants');
+vi.mock('./participants');
 const participants = mocked(_participants);
 
-jest.mock('../../../../modules/platform/comment');
+vi.mock('../../../../modules/platform/comment');
 const comment = mocked(_comment);
 
-jest.mock('./pr-cache');
+vi.mock('./pr-cache');
 const prCache = mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
@@ -77,7 +77,6 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
     });

@@ -3,12 +3,11 @@ import type { RenovateConfig } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { flattenUpdates } from './flatten';
 
-jest.mock('../../../util/git/semantic');
+vi.mock('../../../util/git/semantic');
 
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];

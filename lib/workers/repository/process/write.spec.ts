@@ -27,8 +27,8 @@ import {
   writeUpdates,
 } from './write';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/cache/repository');
+vi.mock('../../../util/git');
+vi.mock('../../../util/cache/repository');
 
 const branchWorker = mocked(_branchWorker);
 const limits = mocked(_limits);
@@ -42,7 +42,6 @@ limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
 });

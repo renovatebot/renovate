@@ -16,7 +16,7 @@ const hostRules = mocked(_hostRules);
 
 const http = new Http(dockerDatasourceId);
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 describe('modules/datasource/docker/common', () => {
   describe('getRegistryRepository', () => {

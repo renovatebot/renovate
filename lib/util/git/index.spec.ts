@@ -15,11 +15,11 @@ import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
-jest.mock('./conflicts-cache');
-jest.mock('./behind-base-branch-cache');
-jest.mock('./modified-cache');
-jest.mock('timers/promises');
-jest.mock('../cache/repository');
+vi.mock('./conflicts-cache');
+vi.mock('./behind-base-branch-cache');
+vi.mock('./modified-cache');
+vi.mock('timers/promises');
+vi.mock('../cache/repository');
 const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
 const modifiedCache = mocked(_modifiedCache);
@@ -27,8 +27,6 @@ const modifiedCache = mocked(_modifiedCache);
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
 describe('util/git/index', () => {
-  jest.setTimeout(60000);
-
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -95,7 +93,6 @@ describe('util/git/index', () => {
   const OLD_ENV = process.env;
 
   beforeEach(async () => {
-    jest.resetModules();
     process.env = { ...OLD_ENV };
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);
@@ -119,7 +116,6 @@ describe('util/git/index', () => {
   afterEach(async () => {
     await tmpDir?.cleanup();
     await origin?.cleanup();
-    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -892,10 +888,6 @@ describe('util/git/index', () => {
     });
 
     describe('cachedConflictResult', () => {
-      beforeEach(() => {
-        jest.resetAllMocks();
-      });
-
       it('returns cached values', async () => {
         conflictsCache.getCachedConflictResult.mockReturnValue(true);
 
@@ -1083,4 +1075,4 @@ describe('util/git/index', () => {
       expect(sha).toBe(git.getBranchCommit(defaultBranch));
     });
   });
-});
+}, 60000);
