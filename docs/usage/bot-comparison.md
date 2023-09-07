@@ -9,34 +9,38 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 
 ## Table
 
-| Name of feature            | Dependabot                                                                                                                                                                   | Renovate                                                                                                 |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Dependency Dashboard       | No                                                                                                                                                                           | Yes                                                                                                      |
-| Grouped updates            | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     | Yes, use community-provided groups, or create your own                                                   |
-| Monorepo support           | Unknown                                                                                                                                                                      | Yes                                                                                                      |
-| Supported platforms        | GitHub only                                                                                                                                                                  | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](https://docs.renovatebot.com/modules/platform/) |
-| Supported languages        | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/)                                       |
-| Customizability            | Low                                                                                                                                                                          | High                                                                                                     |
-| Show changelogs            | Yes                                                                                                                                                                          | Yes                                                                                                      |
-| Compatibility score badges | 1                                                                                                                                                                            | 4                                                                                                        |
-| Built-in to GitHub         | Yes                                                                                                                                                                          | No, requires app or self-hosting                                                                         |
-| Schedule interval          | Yes: `daily`, `weekly`, `monthly`                                                                                                                                            | Yes: custom                                                                                              |
+| Name of feature                           | Dependabot                                                                                                                                                                   | Renovate                                                                                                 |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Dependency Dashboard                      | No                                                                                                                                                                           | Yes                                                                                                      |
+| Grouped updates                           | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     | Yes, use community-provided groups, or create your own                                                   |
+| Upgrades common monorepo packages at once | No                                                                                                                                                                           | Yes                                                                                                      |
+| Supported platforms                       | GitHub only                                                                                                                                                                  | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](https://docs.renovatebot.com/modules/platform/) |
+| Supported languages                       | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/)                                       |
+| Customizability                           | Low                                                                                                                                                                          | High                                                                                                     |
+| Show changelogs                           | Yes                                                                                                                                                                          | Yes                                                                                                      |
+| Compatibility score badges                | 1                                                                                                                                                                            | 4                                                                                                        |
+| Built-in to GitHub                        | Yes                                                                                                                                                                          | No, requires app or self-hosting                                                                         |
+| Scheduling                                | Yes: `daily`, `weekly`, `monthly`                                                                                                                                            | Yes: custom                                                                                              |
+| License                                   | [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE)                                                                       | [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license)           |
 
 ## Dependency Dashboard
 
 One big feature of Renovate is the Dependency Dashboard, which is enabled by default.
 Read the [Key concepts, Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) page to learn more.
 
+Dependabot does not have a similar feature.
+
 ## Grouped updates
 
 Renovate comes with community-provided groupings of dependencies, so it will group common dependencies out-of-the-box.
+
 With Dependabot you'll have to set your own [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups).
 
-## Monorepo support
+## Upgrades common monorepo packages at once
 
-Renovate has a [`group:monorepos`](https://docs.renovatebot.com/presets-group/#groupmonorepos) preset, that groups dependencies from monorepos.
+Renovate has a [`group:monorepos`](https://docs.renovatebot.com/presets-group/#groupmonorepos) preset, that upgrades common monorepo packages at once.
 
-I don't know if Dependabot supports monorepos.
+Dependabot does not update common monorepo packages at once.
 
 ## Supported platforms
 
@@ -81,3 +85,20 @@ Read the [Merge Confidence badges](https://docs.renovatebot.com/merge-confidence
 ## Built-in to GitHub vs app
 
 Dependabot is built-in to GitHub, Renovate needs app installation or self-hosting.
+
+## Scheduling
+
+Read [Renovate scheduling](https://docs.renovatebot.com/key-concepts/scheduling/).
+With Renovate you can set a schedule per package, manager, or globally.
+
+Dependabot has four options that apply at a language level:
+
+- [`schedule.interval`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduleinterval)
+- [`schedule.day`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduleday)
+- [`schedule.time`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduletime)
+- [`schedule.timezone`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduletimezone)
+
+## License
+
+Dependabot uses [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE).
+Renovate uses the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license).
