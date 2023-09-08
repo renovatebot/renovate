@@ -5,7 +5,14 @@ export const presets: Record<string, Preset> = {
     description: 'Show all Merge Confidence badges for pull requests.',
     packageRules: [
       {
-        matchDatasources: ['maven', 'npm', 'pypi'],
+        matchDatasources: [
+          'maven',
+          'npm',
+          'nuget',
+          'packagist',
+          'pypi',
+          'rubygems',
+        ],
         matchUpdateTypes: ['patch', 'minor', 'major'],
         prBodyColumns: [
           'Package',
@@ -23,7 +30,14 @@ export const presets: Record<string, Preset> = {
       'Show only the Age and Confidence Merge Confidence badges for pull requests.',
     packageRules: [
       {
-        matchDatasources: ['maven', 'npm', 'pypi'],
+        matchDatasources: [
+          'maven',
+          'npm',
+          'nuget',
+          'packagist',
+          'pypi',
+          'rubygems',
+        ],
         matchUpdateTypes: ['patch', 'minor', 'major'],
         prBodyColumns: ['Package', 'Change', 'Age', 'Confidence'],
       },

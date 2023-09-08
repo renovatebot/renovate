@@ -455,6 +455,34 @@ describe('modules/manager/npm/post-update/index', () => {
       ]);
     });
 
+    it('detects if lock file contents are unchanged', async () => {
+      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+      fs.readLocalFile.mockImplementation((f): Promise<any> => {
+        if (f === 'package-lock.json') {
+          return Promise.resolve('{}');
+        }
+        return Promise.resolve(null);
+      });
+      git.getFile.mockImplementation((f) => {
+        if (f === 'package-lock.json') {
+          return Promise.resolve('{}');
+        }
+        return Promise.resolve(null);
+      });
+      expect(
+        (
+          await getAdditionalFiles(
+            {
+              ...updateConfig,
+              updateLockFiles: true,
+              reuseExistingBranch: true,
+            },
+            additionalFiles
+          )
+        ).updatedArtifacts.find((a) => a.path === 'package-lock.json')
+      ).toBeUndefined();
+    });
+
     it('works for yarn', async () => {
       spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
       expect(

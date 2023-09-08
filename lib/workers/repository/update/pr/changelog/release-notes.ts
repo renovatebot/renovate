@@ -7,9 +7,11 @@ import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import { coerceString } from '../../../../../util/string';
 import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -33,6 +35,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseList(project, release);
       case 'gitlab':
         return await gitlab.getReleaseList(project, release);
       case 'github':
@@ -78,7 +82,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string
 ): string {
-  let body = input ?? '';
+  let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
   // semantic-release cleanup
@@ -242,6 +246,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       case 'gitlab':
         return await gitlab.getReleaseNotesMd(
           repository,

@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { HostRuleSearchResult } from '../../../types';
 import type { ToolConstraint } from '../../../util/exec/types';
+import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { Lockfile, PackageFile } from './schema';
@@ -78,8 +79,8 @@ export function extractConstraints(
   const phpVersion = config?.platform.php;
   if (phpVersion) {
     const major = api.getMajor(phpVersion);
-    const minor = api.getMinor(phpVersion) ?? 0;
-    const patch = api.getPatch(phpVersion) ?? 0;
+    const minor = coerceNumber(api.getMinor(phpVersion));
+    const patch = coerceNumber(api.getPatch(phpVersion));
     res.php = `<=${major}.${minor}.${patch}`;
   } else if (require.php) {
     res.php = require.php;

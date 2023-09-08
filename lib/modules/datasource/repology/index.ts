@@ -219,7 +219,6 @@ export class RepologyDatasource extends Datasource {
       return { releases };
     } catch (err) {
       if (err.message === HOST_DISABLED) {
-        // istanbul ignore next
         logger.trace({ packageName, err }, 'Host disabled');
       } else {
         logger.warn(

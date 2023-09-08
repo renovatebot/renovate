@@ -38,7 +38,7 @@ describe('workers/global/config/parse/file', () => {
       ['.renovaterc', '.renovaterc'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
-    ])('parses %s', async (fileType, filePath) => {
+    ])('parses %s', async (_fileType, filePath) => {
       const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
       expect(
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile })

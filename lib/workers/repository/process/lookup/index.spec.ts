@@ -1282,6 +1282,45 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('should use registry of update to determine digest', async () => {
+      config.currentValue = 'v1.0.0';
+      config.registryUrls = [
+        'https://github.enterprise.com',
+        'https://github.com',
+      ];
+      config.digestOneAndOnly = true;
+      config.packageName = 'angular/angular';
+      config.pinDigests = true;
+      config.datasource = GithubTagsDatasource.id;
+
+      getGithubTags.mockRejectedValueOnce(
+        new Error('Not contained in registry')
+      );
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2022-01-01',
+          },
+        ],
+      });
+      const getGithubTagsDigest = jest
+        .spyOn(GithubTagsDatasource.prototype, 'getDigest')
+        .mockResolvedValueOnce('digest1234');
+
+      const res = await lookup.lookupUpdates(config);
+      expect(getGithubTagsDigest).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          registryUrl: 'https://github.com',
+        }),
+        'v1.0.0'
+      );
+
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newDigest).toBe('digest1234');
+    });
+
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
@@ -1629,7 +1668,7 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '8.1.5' },
           { version: '8.1' },
           { version: '8.2.0' },
-          { version: '8.2.5' },
+          { version: '8.2.5', newDigest: 'abc123' },
           { version: '8.2' },
           { version: '8' },
           { version: '9.0' },
@@ -1793,6 +1832,7 @@ describe('workers/repository/process/lookup/index', () => {
         releases: [
           {
             version: '8.0.0',
+            newDigest: 'sha256:0123456789abcdef',
           },
           {
             version: '8.1.0',
@@ -1800,7 +1840,6 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
