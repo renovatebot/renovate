@@ -1,6 +1,6 @@
-import url from 'node:url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
+import url from 'node:url';
 import { GlobalConfig } from '../../../config/global';
 import type { PackageRule } from '../../../config/types';
 import { logger } from '../../../logger';
