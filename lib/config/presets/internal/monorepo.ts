@@ -439,6 +439,7 @@ const repoGroups = {
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
+  wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',
   xstate: 'https://github.com/statelyai/xstate',
   xterm: 'https://github.com/xtermjs/xterm.js',
