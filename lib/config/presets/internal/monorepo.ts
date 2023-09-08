@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { toArray } from '../../../util/array';
 import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -310,6 +310,7 @@ const repoGroups = {
   mailing: 'https://github.com/sofn-xyz/mailing',
   mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
+  marten: 'https://github.com/JasperFx/marten',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
     'https://github.com/material-components/material-components-web',
@@ -346,6 +347,7 @@ const repoGroups = {
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
   nswag: 'https://github.com/RicoSuter/NSwag',
+  nuget: 'https://github.com/NuGet/NuGet.Client',
   nuxtjs: [
     'https://github.com/nuxt/nuxt.js', // old repo
     'https://github.com/nuxt/nuxt',
@@ -395,6 +397,7 @@ const repoGroups = {
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  serde: 'https://github.com/serde-rs/serde',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
@@ -438,6 +441,7 @@ const repoGroups = {
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
+  wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',
   xstate: 'https://github.com/statelyai/xstate',
   xterm: 'https://github.com/xtermjs/xterm.js',
@@ -481,20 +485,20 @@ export const presets: Record<string, Preset> = {};
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrls: is.array(value) ? value : [value],
+    matchSourceUrls: toArray(value),
   };
 }
 
 for (const [name, value] of Object.entries(orgGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrlPrefixes: is.array(value) ? value : [value],
+    matchSourceUrlPrefixes: toArray(value),
   };
 }
 
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchPackagePatterns: is.array(value) ? value : [value],
+    matchPackagePatterns: toArray(value),
   };
 }

@@ -1,4 +1,5 @@
 import type { RenovateSharedConfig } from '../../../config/types';
+import { coerceString } from '../../../util/string';
 import type { CommitMessage } from './commit-message';
 import { CustomCommitMessage } from './custom-commit-message';
 import { SemanticCommitMessage } from './semantic-commit-message';
@@ -29,8 +30,8 @@ export class CommitMessageFactory {
   private createSemanticCommitMessage(): SemanticCommitMessage {
     const message = new SemanticCommitMessage();
 
-    message.type = this._config.semanticCommitType ?? '';
-    message.scope = this._config.semanticCommitScope ?? '';
+    message.type = coerceString(this._config.semanticCommitType);
+    message.scope = coerceString(this._config.semanticCommitScope);
 
     return message;
   }

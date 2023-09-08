@@ -116,8 +116,8 @@
     'source.toolkit.fluxcd.io/v1',
   ],
   Kustomization: [
-    'source.toolkit.fluxcd.io/v1beta2',
-    'source.toolkit.fluxcd.io/v1',
+    'kustomize.toolkit.fluxcd.io/v1beta2',
+    'kustomize.toolkit.fluxcd.io/v1',
   ],
   Receiver: [
     'notification.toolkit.fluxcd.io/v1beta2',

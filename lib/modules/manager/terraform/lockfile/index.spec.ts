@@ -439,20 +439,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
           },
         ],
       })
-      .mockResolvedValueOnce({
+      .mockResolvedValueOnce(
         // random
-        releases: [
-          {
-            version: '2.2.1',
-          },
-          {
-            version: '2.2.2',
-          },
-          {
-            version: '3.0.0',
-          },
-        ],
-      });
+        null
+      );
     mockHash.mockResolvedValue([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
@@ -480,7 +470,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       })
     );
 
-    expect(mockHash.mock.calls).toBeArrayOfSize(2);
+    expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
   });
 

@@ -5,7 +5,7 @@ export interface HelmRelease {
   sources?: string[];
   version: string;
   created: string;
-  digest: string;
+  digest: string | null;
   urls: string[];
 }
 
