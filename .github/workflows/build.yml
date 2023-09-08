@@ -17,8 +17,8 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        description: "Dry-Run"
-        default: "true"
+        description: 'Dry-Run'
+        default: 'true'
         required: false
 
 permissions:
@@ -495,7 +495,7 @@ jobs:
 
   test-e2e:
     needs: [build]
-    runs-on: "ubuntu-latest"
+    runs-on: 'ubuntu-latest'
     timeout-minutes: 7
 
     if: github.event.pull_request.draft != true
