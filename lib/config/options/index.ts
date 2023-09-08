@@ -798,6 +798,17 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'autodiscoverNamespaces',
+    description:
+      'Filter the list of autodiscovered repositories by namespaces.',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'autodiscoverTopics',
     description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',

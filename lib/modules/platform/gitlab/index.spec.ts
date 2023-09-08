@@ -207,7 +207,53 @@ describe('modules/platform/gitlab/index', () => {
       const repos = await gitlab.getRepos({ topics: ['one', 'two'] });
       expect(repos).toEqual(['a/b', 'c/d']);
     });
+
+    it('should query the groups endpoint for each namespace', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          }
+        ])
+        .get(
+          '/api/v4/groups/c%2Fd/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'c/d/e',
+          },
+          {
+            path_with_namespace: 'c/d/f',
+          },
+        ]);
+      const repos = await gitlab.getRepos({ namespaces: [ "a", "c/d" ] });
+      expect(repos).toEqual(['a/b', 'c/d/e','c/d/f']);
+    });
+
+    it('should consider topics when querying the groups endpoint', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false&topic=one%2Ctwo'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'a/c',
+          }
+        ]);
+      const repos = await gitlab.getRepos({ namespaces: [ "a" ], topics: ['one', 'two'] });
+      expect(repos).toEqual(['a/b', 'a/c']);
+    });
+
   });
+});
 
   async function initRepo(
     repoParams: RepoParams = {

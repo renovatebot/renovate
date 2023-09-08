@@ -162,14 +162,35 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     queryParams['topic'] = config.topics.join(',');
   }
 
-  const url = 'projects?' + getQueryString(queryParams);
+  const urls = [];
+  if (config?.namespaces?.length) {
+    queryParams['with_shared'] = false;
+    queryParams['include_subgroups'] = true;
+    urls.push(
+      ...config.namespaces.map(
+        (namespace) =>
+          `groups/${urlEscape(namespace)}/projects?${getQueryString(
+            queryParams
+          )}`
+      )
+    );
+  } else {
+    urls.push('projects?' + getQueryString(queryParams));
+  }
 
   try {
-    const res = await gitlabApi.getJson<RepoResponse[]>(url, {
-      paginate: true,
-    });
-    logger.debug(`Discovered ${res.body.length} project(s)`);
-    return res.body
+    const repos = (
+      await Promise.all(
+        urls.map((url) =>
+          gitlabApi.getJson<RepoResponse[]>(url, {
+            paginate: true,
+          })
+        )
+      )
+    ).flatMap((response) => response.body);
+
+    logger.debug(`Discovered ${repos.length} project(s)`);
+    return repos
       .filter((repo) => !repo.mirror || config?.includeMirrors)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
@@ -177,6 +198,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     throw err;
   }
 }
+
 function urlEscape(str: string): string;
 function urlEscape(str: string | undefined): string | undefined;
 function urlEscape(str: string | undefined): string | undefined {
