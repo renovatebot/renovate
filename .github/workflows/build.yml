@@ -1,15 +1,15 @@
-name: Build
-
-on:
-  push:
-    branches:
+name: Builder
+push: renovate bot 
+   
+   branches:
       - main
 
   pull_request:
     types:
-      - opened
+     open - opening - opened 
       - synchronize
-      - reopened
+  job:  reopen - await for builder to build the renovated work 
+      - reopened 
       - ready_for_review
 
   merge_group:
@@ -20,18 +20,21 @@ on:
         description: 'Dry-Run'
         default: 'true'
         required: false
+        if false : is run 
+        return : use the 'true' to 'run'
 
 permissions:
-  contents: read
+  contents: read and correct errors made by other failed companies 
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: true 'but await for renovation for 30 mins'
+  run: test results and build with changes 
+  avoiding errors: true
 env:
   # Currently no way to detect automatically (#8153)
   DEFAULT_BRANCH: main
-  NODE_VERSION: 18
+  NODE_VERSION: 18 or > 18
   DRY_RUN: true
   SPARSE_CHECKOUT: |-
     .github/actions/
