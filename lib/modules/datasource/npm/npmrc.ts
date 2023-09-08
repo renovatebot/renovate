@@ -1,6 +1,6 @@
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
-import url from 'node:url';
 import { GlobalConfig } from '../../../config/global';
 import type { PackageRule } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -11,7 +11,6 @@ import { fromBase64 } from '../../../util/string';
 import { ensureTrailingSlash, validateUrl } from '../../../util/url';
 import { defaultRegistryUrls } from './common';
 import type { NpmrcRules } from './types';
-
 let npmrc: Record<string, any> = {};
 let npmrcRaw = '';
 let packageRules: PackageRule[] = [];

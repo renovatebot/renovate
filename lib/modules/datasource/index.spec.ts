@@ -12,7 +12,6 @@ import {
   HOST_DISABLED,
 } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { HttpError } from '../../util/http';
 import { loadModules } from '../../util/modules';
 import datasources from './api';
 import { getDefaultVersioning } from './common';
@@ -79,6 +78,28 @@ class DummyDatasource3 extends Datasource {
   override defaultRegistryUrls = function () {
     return ['https://reg1.com'];
   };
+
+  constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
+    super(datasource);
+  }
+
+  override getReleases({
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const fn = this.registriesMock[registryUrl!];
+    if (typeof fn === 'function') {
+      return Promise.resolve(fn());
+    }
+    return Promise.resolve(fn ?? null);
+  }
+}
+
+class DummyDatasource4 extends DummyDatasource3 {
+  override defaultRegistryUrls = undefined as never;
+}
+
+class DummyDatasource5 extends Datasource {
+  override registryStrategy = undefined as never;
 
   constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
     super(datasource);
@@ -316,10 +337,7 @@ describe('modules/datasource/index', () => {
 
     // for coverage
     it('undefined defaultRegistryUrls with customRegistrySupport works', async () => {
-      class UndefinedRegistryUrlDatasource extends DummyDatasource3 {
-        override defaultRegistryUrls = undefined as never;
-      }
-      datasources.set(datasource, new UndefinedRegistryUrlDatasource());
+      datasources.set(datasource, new DummyDatasource4());
       const res = await getPkgReleases({
         datasource,
         packageName,
@@ -585,7 +603,6 @@ describe('modules/datasource/index', () => {
           override readonly registryStrategy = 'hunt';
         }
 
-        // default strategy is hunt
         it('returns first successful result', async () => {
           const registries: RegistriesMock = {
             'https://reg1.com': null,
@@ -597,7 +614,7 @@ describe('modules/datasource/index', () => {
             'https://reg5.com': { releases: [{ version: '3.0.0' }] },
           };
           const registryUrls = Object.keys(registries);
-          datasources.set(datasource, new DummyDatasource(registries)); // for coverage
+          datasources.set(datasource, new HuntRegistriyDatasource(registries));
 
           const res = await getPkgReleases({
             datasource,
@@ -673,6 +690,31 @@ describe('modules/datasource/index', () => {
           });
 
           expect(res).toBeNull();
+        });
+
+        it('defaults to hunt strategy', async () => {
+          const registries: RegistriesMock = {
+            'https://reg1.com': null,
+            'https://reg2.com': () => {
+              throw new Error('unknown');
+            },
+            'https://reg3.com': { releases: [{ version: '1.0.0' }] },
+            'https://reg4.com': { releases: [{ version: '2.0.0' }] },
+            'https://reg5.com': { releases: [{ version: '3.0.0' }] },
+          };
+          const registryUrls = Object.keys(registries);
+          datasources.set(datasource, new DummyDatasource5(registries));
+
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryUrls,
+          });
+
+          expect(res).toMatchObject({
+            registryUrl: 'https://reg3.com',
+            releases: [{ version: '1.0.0' }],
+          });
         });
       });
 
