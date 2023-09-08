@@ -346,6 +346,7 @@ const repoGroups = {
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
   nswag: 'https://github.com/RicoSuter/NSwag',
+  nuget: 'https://github.com/NuGet/NuGet.Client',
   nuxtjs: [
     'https://github.com/nuxt/nuxt.js', // old repo
     'https://github.com/nuxt/nuxt',
