@@ -168,6 +168,12 @@ If your project is this badly behind on updates, you have two problems:
 Let's fix the easier problem first: getting back up to date.
 First update any dependencies that have critical updates for CVEs or other security related improvements.
 
+If you're on the GitHub platform: follow the steps listed in the [`vulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts) docs to make sure Renovate is reading GitHub's Vulnerability Alerts.
+
+You may want to enable the experimental `osvVulnerabilityAlerts` config option, to get OSV-based vulnerability alerts for _direct_ dependencies.
+Read the [`osvVulnerabilityAlerts` config option docs](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to learn more.
+
+
 ### Fix blocking updates
 
 Next, update any dependency that's blocking another update.
