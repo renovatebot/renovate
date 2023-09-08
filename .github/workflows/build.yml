@@ -43,7 +43,7 @@ env:
     package.json
     pnpm-lock.yaml
     codecov.yml
-
+renovate bot : create new environment for renovation'true'
 jobs:
   setup:
     runs-on: ubuntu-latest
