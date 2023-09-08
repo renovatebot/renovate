@@ -310,6 +310,7 @@ const repoGroups = {
   mailing: 'https://github.com/sofn-xyz/mailing',
   mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
+  marten: 'https://github.com/JasperFx/marten',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
     'https://github.com/material-components/material-components-web',
