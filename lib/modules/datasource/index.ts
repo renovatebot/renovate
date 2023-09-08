@@ -29,8 +29,8 @@ import type {
   ReleaseResult,
 } from './types';
 
-export { isGetPkgReleasesConfig } from './common';
 export * from './types';
+export { isGetPkgReleasesConfig } from './common';
 
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
