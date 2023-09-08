@@ -15,7 +15,7 @@ export function getHttpUrl(url: string, token?: string): string {
     ? parsedUrl.protocol
     : 'https';
 
-  parsedUrl.user = parsedUrl.password = null;
+  parsedUrl.user = '';
   parsedUrl.token = token ?? '';
 
   if (token) {
