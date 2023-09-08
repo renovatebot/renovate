@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -9,7 +10,7 @@ import { getNodeToolConstraint } from './node-version';
 vi.mock('../../../../util/exec/env');
 vi.mock('../../../../util/fs');
 vi.mock('./node-version');
-vi.mock('../../../datasource');
+vi.mock('../../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

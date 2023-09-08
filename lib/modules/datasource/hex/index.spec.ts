@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -8,7 +9,7 @@ import { HexDatasource } from '.';
 const certifiResponse = Fixtures.get('certifi.json');
 const privatePackageResponse = Fixtures.get('private_package.json');
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const baseUrl = 'https://hex.pm/api';
 const datasource = HexDatasource.id;

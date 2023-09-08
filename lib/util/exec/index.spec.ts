@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { exec as cpExec, envMock } from '../../../test/exec-util';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -11,10 +12,10 @@ import { exec } from '.';
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
 vi.mock('./hermit', async () => ({
-  ...(await vi.importActual<any>('./hermit')),
+  ...(await vi.importActual<typeof import('./hermit')>('./hermit')),
   getHermitEnvs: jest.fn(),
 }));
-vi.mock('../../modules/datasource');
+vi.mock('../../modules/datasource', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -45,7 +46,8 @@ describe('util/exec/index', () => {
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
-
+    jest.restoreAllMocks();
+    jest.resetModules();
     processEnvOrig = process.env;
     GlobalConfig.reset();
   });

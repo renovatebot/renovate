@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -12,8 +13,7 @@ import { updateArtifacts } from '.';
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
-vi.mock('../../platform');
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 
 const datasource = mocked(_datasource);
 

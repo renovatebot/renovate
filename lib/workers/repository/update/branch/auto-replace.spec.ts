@@ -12,9 +12,7 @@ const sampleHtml = Fixtures.get(
   `../../../../modules/manager/html`
 );
 
-vi.mock('fs-extra', async () =>
-  (await import('../../../../../test/fixtures')).Fixtures.fsExtra()
-);
+vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {

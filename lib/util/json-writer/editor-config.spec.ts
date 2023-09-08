@@ -28,6 +28,7 @@ describe('util/json-writer/editor-config', () => {
   });
 
   beforeEach(() => {
+    jest.restoreAllMocks();
     Fixtures.reset();
   });
 

@@ -1,24 +1,22 @@
 // Check for missing or pending http mocks
 import './http-mock';
 import 'expect-more-jest';
-import { expect } from 'vitest';
 import * as matchers from 'jest-extended';
+import { expect } from 'vitest';
+import { mockDeep } from 'vitest-mock-extended';
+import type { Platform, PlatformScm } from '../lib/modules/platform';
 
 globalThis.jest = vi;
 
 expect.extend(matchers);
 
-vi.mock('../lib/modules/platform', async () => ({
-  platform: await vi.importMock('../lib/modules/platform/github'),
+vi.mock('../lib/modules/platform', () => ({
+  platform: mockDeep<Platform>(),
   initPlatform: jest.fn(),
   getPlatformList: jest.fn(),
 }));
-vi.mock('../lib/modules/platform/scm', async () => ({
-  scm: new (
-    await vi.importMock<typeof import('../lib/modules/platform/default-scm')>(
-      '../lib/modules/platform/default-scm'
-    )
-  ).DefaultGitScm(),
+vi.mock('../lib/modules/platform/scm', () => ({
+  scm: mockDeep<PlatformScm>(),
 }));
 
-vi.mock('../lib/logger');
+vi.mock('../lib/logger', () => mockDeep());

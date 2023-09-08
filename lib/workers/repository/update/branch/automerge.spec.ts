@@ -15,6 +15,7 @@ describe('workers/repository/update/branch/automerge', () => {
     beforeEach(() => {
       config = partial<RenovateConfig>();
       GlobalConfig.reset();
+      isScheduledSpy.mockReturnValue(true);
     });
 
     it('returns false if not configured for automerge', async () => {

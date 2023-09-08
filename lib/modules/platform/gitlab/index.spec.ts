@@ -1,7 +1,9 @@
 // TODO fix mocks
 import type * as _timers from 'timers/promises';
+import { mockDeep } from 'vitest-mock-extended';
 import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -16,9 +18,9 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
 
-vi.mock('../../../util/host-rules');
-vi.mock('timers/promises');
+vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/git');
+vi.mock('timers/promises');
 
 const gitlabApiHost = 'https://gitlab.com';
 
@@ -26,14 +28,14 @@ describe('modules/platform/gitlab/index', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
-  let logger: jest.Mocked<typeof _logger>;
+  let logger: jest.MockedObject<typeof _logger>;
   let timers: jest.Mocked<typeof _timers>;
 
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     gitlab = await import('.');
-    logger = (await import('../../../logger')).logger as never;
+    logger = (await vi.importMock<any>('../../../logger')).logger;
     timers = await vi.importMock('timers/promises');
     hostRules = await vi.importMock('../../../util/host-rules');
     git = await vi.importMock('../../../util/git');

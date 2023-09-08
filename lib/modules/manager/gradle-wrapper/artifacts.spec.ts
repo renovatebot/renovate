@@ -1,5 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -25,7 +26,7 @@ import { updateArtifacts } from '.';
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');
 vi.mock('../../../util/exec/env');
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 vi.mock('../gradle');
 
 process.env.CONTAINERBASE = 'true';

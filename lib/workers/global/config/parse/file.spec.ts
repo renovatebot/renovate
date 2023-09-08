@@ -134,7 +134,9 @@ describe('workers/global/config/parse/file', () => {
       fsRemoveSpy.mockImplementationOnce(() => {
         // no-op
       });
-      fsPathExistsSpy.mockResolvedValueOnce(true as never);
+      fsPathExistsSpy
+        .mockResolvedValueOnce(true as never)
+        .mockResolvedValueOnce(true as never);
       const configFile = upath.resolve(tmp.path, './config.json');
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
 

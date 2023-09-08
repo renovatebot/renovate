@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, mocked } from '../../../../test/util';
@@ -11,7 +12,7 @@ const datasource = mocked(_datasource);
 
 vi.mock('../../../util/exec/common');
 vi.mock('../../../util/fs');
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

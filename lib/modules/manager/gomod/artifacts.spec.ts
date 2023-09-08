@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -15,16 +16,13 @@ vi.mock('../../../util/exec/env');
 vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules');
 vi.mock('../../../util/http');
-vi.mock('../../../util/fs', async () => {
-  // restore
-  return {
-    __esModules: true,
-    ...(await vi.importMock<typeof fs>('../../../util/fs')),
+vi.mock('../../../util/fs', async () =>
+  mockDeep({
     isValidLocalPath: (await vi.importActual<typeof fs>('../../../util/fs'))
       .isValidLocalPath,
-  };
-});
-vi.mock('../../datasource');
+  })
+);
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

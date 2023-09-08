@@ -28,6 +28,10 @@ function mockFs(files: Record<string, string>): void {
 }
 
 describe('modules/manager/gradle/extract', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('returns null', async () => {
     const fsMock = {
       'gradle.properties': '',

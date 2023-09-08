@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, hostRules, mockedFunction } from '../../../../test/util';
@@ -10,8 +11,8 @@ import { updateArtifacts } from '.';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules');
-vi.mock('../../datasource');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../datasource', () => mockDeep());
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 

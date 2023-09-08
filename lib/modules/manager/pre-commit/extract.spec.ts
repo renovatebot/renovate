@@ -1,9 +1,10 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 const filename = '.pre-commit.yaml';
 

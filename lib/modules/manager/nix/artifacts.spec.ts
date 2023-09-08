@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
 import {
@@ -16,7 +17,7 @@ import { updateArtifacts } from '.';
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

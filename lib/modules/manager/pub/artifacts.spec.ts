@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, mocked } from '../../../../test/util';
@@ -13,7 +14,7 @@ vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');
 vi.mock('../../../util/http');
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

@@ -117,7 +117,7 @@ describe('modules/versioning/index', () => {
 
         expect(schemeKeys).toEqual(npmApi);
 
-        const apiOrCtor = (await import('./' + supportedScheme)).api;
+        const apiOrCtor = (await import(`./${supportedScheme}`)).api;
         if (isVersioningApiConstructor(apiOrCtor)) {
           return;
         }

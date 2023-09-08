@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import {
   envMock,
@@ -23,10 +24,10 @@ const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
@@ -52,6 +53,8 @@ const updatedGemfileLock = {
 describe('modules/manager/bundler/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
+      jest.resetModules();
+
       delete process.env.GEM_HOME;
 
       env.getChildProcessEnv.mockReturnValue(envMock.basic);

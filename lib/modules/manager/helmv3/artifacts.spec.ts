@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -11,7 +12,7 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
 
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/http');
 vi.mock('../../../util/fs');

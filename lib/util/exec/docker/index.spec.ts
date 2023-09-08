@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
 import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -15,7 +16,7 @@ import {
   sideCarImage,
 } from '.';
 
-vi.mock('../../../modules/datasource');
+vi.mock('../../../modules/datasource', () => mockDeep());
 
 describe('util/exec/docker/index', () => {
   describe('prefetchDockerImage', () => {

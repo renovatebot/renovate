@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
@@ -24,7 +25,7 @@ const githubApiHost = 'https://api.github.com';
 
 vi.mock('timers/promises');
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/http/queue');
 const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
 

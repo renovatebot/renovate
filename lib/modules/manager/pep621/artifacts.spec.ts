@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, mockedFunction } from '../../../../test/util';
@@ -9,7 +10,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
 vi.mock('../../../util/fs');
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 

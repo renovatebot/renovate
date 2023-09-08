@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -7,7 +8,7 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 

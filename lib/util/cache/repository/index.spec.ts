@@ -13,7 +13,6 @@ const fs = mocked(_fs);
 describe('util/cache/repository/index', () => {
   beforeEach(() => {
     resetCache();
-
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 

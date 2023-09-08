@@ -4,7 +4,7 @@ import { configSigningKey, writePrivateKey } from './private-key';
 import { setPrivateKey } from '.';
 
 vi.mock('fs-extra', async () =>
-  (await import('../../../test/fixtures')).Fixtures.fsExtra()
+  (await import('../../../test/fixtures')).fsExtra()
 );
 vi.mock('../exec');
 

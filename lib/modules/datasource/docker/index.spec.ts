@@ -4,6 +4,7 @@ import {
   GetAuthorizationTokenCommandOutput,
 } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
@@ -14,7 +15,7 @@ import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const ecrMock = mockClient(ECRClient);
 

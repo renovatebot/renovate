@@ -10,17 +10,17 @@ const packageCache = mocked(_packageCache);
 describe('modules/datasource/rubygems/metadata-cache', () => {
   const cache: Map<string, unknown> = new Map();
 
-  packageCache.get.mockImplementation(
-    (ns, key) => Promise.resolve(cache.get(`${ns}::${key}`)) as never
-  );
-
-  packageCache.set.mockImplementation((ns, key, value) => {
-    cache.set(`${ns}::${key}`, value);
-    return Promise.resolve() as never;
-  });
-
   beforeEach(() => {
     cache.clear();
+
+    packageCache.get.mockImplementation(
+      (ns, key) => Promise.resolve(cache.get(`${ns}::${key}`)) as never
+    );
+
+    packageCache.set.mockImplementation((ns, key, value) => {
+      cache.set(`${ns}::${key}`, value);
+      return Promise.resolve() as never;
+    });
   });
 
   it('fetches data', async () => {

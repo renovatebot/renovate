@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import {
   REPOSITORY_CHANGED,
@@ -10,7 +11,7 @@ import type { Platform } from '../types';
 
 vi.mock('timers/promises');
 vi.mock('../../../util/git');
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -171,6 +172,8 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
+type HostRules = typeof import('../../../util/host-rules');
+
 describe('modules/platform/bitbucket-server/index', () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
@@ -178,7 +181,8 @@ describe('modules/platform/bitbucket-server/index', () => {
 
     describe(scenarioName, () => {
       let bitbucket: Platform;
-      let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
+
+      let hostRules: jest.Mocked<HostRules>;
       let git: jest.Mocked<typeof _git>;
       const username = 'abc';
       const password = '123';

@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { Lockfile, PackageFile } from './schema';
@@ -7,7 +8,7 @@ import {
   requireComposerDependencyInstallation,
 } from './utils';
 
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 
 describe('modules/manager/composer/utils', () => {
   beforeEach(() => {

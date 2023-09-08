@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs, mocked } from '../../../../../test/util';
@@ -10,7 +11,7 @@ import { TerraformProviderHash } from './hash';
 // auto-mock fs
 vi.mock('../../../../util/fs');
 vi.mock('./hash');
-vi.mock('../../../datasource');
+vi.mock('../../../datasource', () => mockDeep());
 
 const config = {
   constraints: {},

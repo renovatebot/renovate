@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -13,7 +14,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../datasource');
+vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');
 

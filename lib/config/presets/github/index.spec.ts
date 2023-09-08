@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
@@ -5,7 +6,7 @@ import { toBase64 } from '../../../util/string';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
 
-vi.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 

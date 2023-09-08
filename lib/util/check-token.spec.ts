@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { hostRules, logger } from '../../test/util';
 import { GlobalConfig } from '../config/global';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
@@ -13,7 +14,7 @@ import {
   takePersonalAccessTokenIfPossible,
 } from './check-token';
 
-vi.mock('./host-rules');
+vi.mock('./host-rules', () => mockDeep());
 
 describe('util/check-token', () => {
   describe('checkGithubToken', () => {

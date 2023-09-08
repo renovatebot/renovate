@@ -1,3 +1,4 @@
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -16,8 +17,8 @@ const pyproject10toml = Fixtures.get('pyproject.10.toml');
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../datasource');
-vi.mock('../../../util/host-rules');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

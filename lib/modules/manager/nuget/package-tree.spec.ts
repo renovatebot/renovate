@@ -7,7 +7,7 @@ import { getDependentPackageFiles } from './package-tree';
 
 vi.mock('fs', () => import('memfs'));
 vi.mock('fs-extra', async () =>
-  (await import('../../../../test/fixtures')).Fixtures.fsExtra()
+  (await import('../../../../test/fixtures')).fsExtra()
 );
 vi.mock('../../../util/git');
 

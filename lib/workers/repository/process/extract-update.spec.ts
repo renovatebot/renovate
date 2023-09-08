@@ -30,19 +30,21 @@ vi.mock('../../../util/git');
 const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
 
-branchify.branchifyUpgrades.mockResolvedValue({
-  branches: [
-    {
-      manager: 'some-manager',
-      branchName: 'some-branch',
-      baseBranch: 'base',
-      upgrades: [],
-    },
-  ],
-  branchList: ['branchName'],
-});
-
 describe('workers/repository/process/extract-update', () => {
+  beforeEach(() => {
+    branchify.branchifyUpgrades.mockResolvedValue({
+      branches: [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          baseBranch: 'base',
+          upgrades: [],
+        },
+      ],
+      branchList: ['branchName'],
+    });
+  });
+
   describe('extract()', () => {
     it('runs with no baseBranches', async () => {
       const config = {

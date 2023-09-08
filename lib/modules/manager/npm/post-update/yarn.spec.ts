@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   ExecSnapshots,
   envMock,
@@ -16,7 +17,7 @@ import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
 vi.mock('fs-extra', async () =>
-  (await import('../../../../../test/fixtures')).Fixtures.fsExtra()
+  (await import('../../../../../test/fixtures')).fsExtra()
 );
 vi.mock('../../../../util/exec/env');
 vi.mock('./node-version');
@@ -34,14 +35,16 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
 env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
 describe('modules/manager/npm/post-update/yarn', () => {
+  const removeDockerContainer = jest.spyOn(docker, 'removeDockerContainer');
+
   beforeEach(() => {
     delete process.env.BUILDPACK;
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
+    removeDockerContainer.mockResolvedValue();
     docker.resetPrefetchedImages();
     mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',

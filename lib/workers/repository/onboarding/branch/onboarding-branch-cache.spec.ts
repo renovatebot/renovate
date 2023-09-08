@@ -251,6 +251,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
     });
 
     it('returns undefined', () => {
+      cache.getCache.mockReturnValueOnce({});
       expect(getOnboardingFileNameFromCache()).toBeUndefined();
     });
   });
@@ -267,6 +268,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
     });
 
     it('returns undefined', () => {
+      cache.getCache.mockReturnValueOnce({});
       expect(getOnboardingConfigFromCache()).toBeUndefined();
     });
   });

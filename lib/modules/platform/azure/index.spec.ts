@@ -6,7 +6,8 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { partial } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
+import { mocked, partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -20,10 +21,10 @@ import { AzurePrVote } from './types';
 vi.mock('./azure-got-wrapper');
 vi.mock('./azure-helper');
 vi.mock('../../../util/git');
-vi.mock('../../../util/host-rules');
-vi.mock('../../../util/sanitize', () => ({
-  sanitize: vi.fn((input) => input),
-}));
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/sanitize', () =>
+  mockDeep({ sanitize: (s: string) => s })
+);
 vi.mock('../../../logger');
 vi.mock('timers/promises');
 
@@ -42,7 +43,7 @@ describe('modules/platform/azure/index', () => {
     azure = await import('.');
     azureApi = await vi.importMock('./azure-got-wrapper');
     azureHelper = await vi.importMock('./azure-helper');
-    logger = (await await vi.importMock<any>('../../../logger')).logger;
+    logger = mocked((await import('../../../logger')).logger);
     git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
