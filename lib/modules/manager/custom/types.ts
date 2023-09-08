@@ -13,5 +13,5 @@ export interface CustomManager extends Partial<RegexManagerConfig> {
 // the two interfaces might seem similar but they have different usage...
 // CustomManager interface consists of all fields that a custom manager can have
 // whereas
-// CustomExtractConfig consists of the fields that custom managers need when performing extraction
+// CustomExtractConfig consists of the fields that custom managers need to extract deps from a package file
 // ie. options necessary for the function extractPackageFile
