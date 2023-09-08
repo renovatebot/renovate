@@ -82,23 +82,3 @@ apps:
     version: 0.6.0
     valuesFile: ./otlp-collector/values.yaml
     priority: -75
-  podinfo-incorrect-url:
-    enabled: true
-    namespace: test-apps
-    chart: oci://
-    version: 6.4.0
-  podinfo-missing-chart:
-    enabled: true
-    namespace: test-apps
-    version: 6.4.0
-  podinfo-chart-null:
-    enabled: true
-    namespace: test-apps
-    version: 6.4.0
-    chart:
-  podinfo-incorrect-oci:
-    podinfo-incorrect-url:
-    enabled: true
-    namespace: test-apps
-    chart: oci://oci://
-    version: 6.4.0

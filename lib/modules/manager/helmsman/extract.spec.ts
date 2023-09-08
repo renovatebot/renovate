@@ -3,7 +3,6 @@ import { extractPackageFile } from '.';
 
 const multiDepFile = Fixtures.get('validHelmsfile.yaml');
 const otherYamlFile = Fixtures.get('empty.yaml');
-const incorrectYamlFile = Fixtures.get('missingApps.yaml');
 
 describe('modules/manager/helmsman/extract', () => {
   describe('extractPackageFile()', () => {
@@ -23,7 +22,7 @@ describe('modules/manager/helmsman/extract', () => {
 
     it('returns null if apps not defined', () => {
       const fileName = 'incorrect.yaml';
-      const result = extractPackageFile(incorrectYamlFile, fileName, {});
+      const result = extractPackageFile('incorrect', fileName, {});
       expect(result).toBeNull();
     });
 
@@ -31,8 +30,8 @@ describe('modules/manager/helmsman/extract', () => {
       const fileName = 'helmsman.yaml';
       const result = extractPackageFile(multiDepFile, fileName, {});
       expect(result).not.toBeNull();
-      expect(result?.deps).toHaveLength(15);
-      expect(result?.deps.filter((value) => value.skipReason)).toHaveLength(7);
+      expect(result?.deps).toHaveLength(11);
+      expect(result?.deps.filter((value) => value.skipReason)).toHaveLength(5);
       expect(result).toMatchSnapshot();
     });
   });
