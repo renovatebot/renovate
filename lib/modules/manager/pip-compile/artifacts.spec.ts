@@ -2,7 +2,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { env, fs, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -12,6 +12,7 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { constructPipCompileCmd, extractResolver } from './artifacts';
 import { updateArtifacts } from '.';
+import { git } from '../../../../test/git';
 
 const datasource = mocked(_datasource);
 

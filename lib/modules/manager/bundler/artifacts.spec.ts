@@ -5,7 +5,7 @@ import {
   mockExecAll,
   mockExecSequence,
 } from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { env, fs, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import {
@@ -19,6 +19,7 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
+import { git } from '../../../../test/git';
 
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
@@ -26,7 +27,6 @@ const bundlerHostRules = mocked(_bundlerHostRules);
 vi.mock('../../../util/exec/env');
 vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('./host-rules');
 

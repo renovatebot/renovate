@@ -21,7 +21,7 @@ vi.mock('fs-extra', async () =>
 );
 vi.mock('../../../../util/exec/env');
 vi.mock('./node-version');
-vi.mock('../../../datasource');
+vi.mock('../../../datasource', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 

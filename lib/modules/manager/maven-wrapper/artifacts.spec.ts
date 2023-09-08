@@ -4,11 +4,12 @@ import { mockDeep } from 'vitest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
+import { env, fs, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
+import { git } from '../../../../test/git';
 
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');

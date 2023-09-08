@@ -4,7 +4,6 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import {
   env,
   fs,
-  git,
   mocked,
   mockedFunction,
   partial,
@@ -17,6 +16,7 @@ import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipenv from '.';
+import { git } from '../../../../test/git';
 
 const datasource = mocked(_datasource);
 

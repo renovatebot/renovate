@@ -1,4 +1,5 @@
-import { fs, git, mocked } from '../../../../../../test/util';
+import { git } from '../../../../../../test/git';
+import { fs, mocked } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update';
 import * as lerna from '../../../../../modules/manager/npm/post-update/lerna';

@@ -1,4 +1,5 @@
-import { git, partial } from '../../../test/util';
+import { git } from '../../../test/git';
+import { partial } from '../../../test/util';
 import type { CommitFilesConfig } from '../../util/git/types';
 import { DefaultGitScm } from './default-scm';
 

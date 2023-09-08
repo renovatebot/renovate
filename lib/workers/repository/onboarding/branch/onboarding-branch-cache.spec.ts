@@ -1,4 +1,5 @@
-import { git, mocked, partial, scm } from '../../../../../test/util';
+import { git } from '../../../../../test/git';
+import { mocked, partial, scm } from '../../../../../test/util';
 import * as _cache from '../../../../util/cache/repository';
 import type {
   OnboardingBranchCache,

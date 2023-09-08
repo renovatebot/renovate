@@ -1,4 +1,5 @@
-import { git, mockedFunction } from '../../../test/util';
+import { git } from '../../../test/git';
+import { mockedFunction } from '../../../test/util';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { initPlatform as _initPlatform } from '../../modules/platform';
 import { globalInitialize } from './initialize';

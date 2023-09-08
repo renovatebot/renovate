@@ -2,7 +2,6 @@ import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  git,
   mockedFunction,
   partial,
   platform,
@@ -16,6 +15,7 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
+import { git } from '../../../../../test/git';
 
 vi.mock('./migrated-data');
 vi.mock('./rebase');

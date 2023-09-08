@@ -28,14 +28,14 @@ describe('modules/platform/gitlab/index', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
   let git: jest.Mocked<typeof _git>;
-  let logger: jest.MockedObject<typeof _logger>;
+  let logger: jest.Mocked<typeof _logger>;
   let timers: jest.Mocked<typeof _timers>;
 
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     gitlab = await import('.');
-    logger = (await vi.importMock<any>('../../../logger')).logger;
+    logger = mocked((await import('../../../logger')).logger);
     timers = await vi.importMock('timers/promises');
     hostRules = await vi.importMock('../../../util/host-rules');
     git = await vi.importMock('../../../util/git');

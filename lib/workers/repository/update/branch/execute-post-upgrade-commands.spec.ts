@@ -1,4 +1,5 @@
-import { fs, git, partial } from '../../../../../test/util';
+import { git } from '../../../../../test/git';
+import { fs, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';

@@ -2,7 +2,6 @@ import { mock } from 'vitest-mock-extended';
 import {
   RenovateConfig,
   fs,
-  git,
   mocked,
   platform,
   scm,
@@ -24,6 +23,7 @@ import { OnboardingState } from '../common';
 import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import { checkOnboardingBranch } from '.';
+import { git } from '../../../../../test/git';
 
 const configModule: any = _config;
 

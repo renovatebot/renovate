@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon';
 import {
-  git,
   logger,
   mocked,
   partial,
@@ -29,6 +28,7 @@ import * as _participants from './participants';
 import * as _prCache from './pr-cache';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
 import { ensurePr } from '.';
+import { git } from '../../../../../test/git';
 
 vi.mock('../../../../util/git');
 vi.mock('../../changelog');

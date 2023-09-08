@@ -1,7 +1,7 @@
 // TODO: add tests
 import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
-import { fs, git, logger, partial, scm } from '../../../../../test/util';
+import { fs, logger, partial, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { FileChange } from '../../../../util/git/types';
 import type { PostUpdateConfig } from '../../types';
@@ -17,6 +17,7 @@ import {
   writeExistingFiles,
   writeUpdatedPackageFiles,
 } from './';
+import { git } from '../../../../../test/git';
 
 vi.mock('../../../../util/fs');
 vi.mock('../../../../util/git');

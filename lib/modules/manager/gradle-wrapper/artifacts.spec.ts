@@ -8,7 +8,6 @@ import * as httpMock from '../../../../test/http-mock';
 import {
   env,
   fs,
-  git,
   logger,
   mockedFunction,
   partial,
@@ -22,6 +21,7 @@ import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
 import { updateBuildFile, updateLockFiles } from './artifacts';
 import { updateArtifacts } from '.';
+import { git } from '../../../../test/git';
 
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');

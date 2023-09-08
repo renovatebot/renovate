@@ -1,4 +1,5 @@
-import { RenovateConfig, git, partial } from '../../../test/util';
+import { git } from '../../../test/git';
+import { RenovateConfig, partial } from '../../../test/util';
 import { initRepoCache } from '../cache/repository/init';
 import { detectSemanticCommits } from './semantic';
 

@@ -1,7 +1,8 @@
-import { git, mocked } from '../../../../test/util';
+import { mocked } from '../../../../test/util';
 import type { CommitFilesConfig } from '../../../util/git/types';
 import { GithubScm } from './scm';
 import * as _github from '.';
+import { git } from '../../../../test/git';
 
 vi.mock('.');
 const github = mocked(_github);

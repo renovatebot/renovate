@@ -1,6 +1,6 @@
+import { git } from '../../../../../test/git';
 import {
   RenovateConfig,
-  git,
   mocked,
   partial,
   platform,

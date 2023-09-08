@@ -9,7 +9,6 @@ import {
 import {
   env,
   fs,
-  git,
   logger,
   mockedFunction,
   partial,
@@ -23,6 +22,7 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
+import { git } from '../../../../test/git';
 
 vi.mock('../../../util/fs');
 vi.mock('../../../util/git');

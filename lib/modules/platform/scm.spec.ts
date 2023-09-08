@@ -1,4 +1,4 @@
-import { git } from '../../../test/util';
+import { git } from '../../../test/git';
 import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { scm, setPlatformScmApi } from './scm';
