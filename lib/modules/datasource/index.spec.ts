@@ -1,11 +1,4 @@
 import fs from 'fs-extra';
-import {
-  getDatasourceList,
-  getDatasources,
-  getDigest,
-  getPkgReleases,
-  supportsDigests,
-} from '.';
 import { logger } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
@@ -22,6 +15,13 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types';
+import {
+  getDatasourceList,
+  getDatasources,
+  getDigest,
+  getPkgReleases,
+  supportsDigests,
+} from '.';
 
 const datasource = 'dummy';
 const packageName = 'package';
