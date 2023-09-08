@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/extract/pnpm .detectPnpmWorkspaces() uses pnpm workspaces 1`] = `
+exports[`modules/manager/npm/extract/pnpm > .detectPnpmWorkspaces() > uses pnpm workspaces 1`] = `
 [
   {
     "managerData": {

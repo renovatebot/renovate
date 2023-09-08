@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid names 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > catches invalid names 1`] = `
 {
   "deps": [
     {
@@ -29,7 +29,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engines 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts engines 1`] = `
 {
   "deps": [
     {
@@ -151,7 +151,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-npmjs 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts non-npmjs 1`] = `
 {
   "deps": [
     {
@@ -331,7 +331,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm package alias 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts npm package alias 1`] = `
 {
   "deps": [
     {
@@ -380,7 +380,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packageManager 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts packageManager 1`] = `
 {
   "deps": [
     {
@@ -414,7 +414,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packag
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts volta 1`] = `
 {
   "deps": [
     {
@@ -489,7 +489,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unspecified-version 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts volta yarn unspecified-version 1`] = `
 {
   "deps": [
     {
@@ -543,7 +543,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds "npmClient":"npm" in lerna.json 1`] = `
 {
   "deps": [
     {
@@ -679,7 +679,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClien
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds "npmClient":"yarn" in lerna.json 1`] = `
 {
   "deps": [
     {
@@ -815,7 +815,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClien
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock file 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds a lock file 1`] = `
 {
   "deps": [
     {
@@ -951,7 +951,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock fi
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex yarn workspaces 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds complex yarn workspaces 1`] = `
 {
   "deps": [],
   "extractedConstraints": {},
@@ -975,7 +975,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex y
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds lerna 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds lerna 1`] = `
 {
   "deps": [
     {
@@ -1111,7 +1111,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds lerna 1`]
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds simple yarn workspaces 1`] = `
 {
   "deps": [],
   "extractedConstraints": {},
@@ -1135,7 +1135,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
 {
   "deps": [],
   "extractedConstraints": {},
@@ -1159,7 +1159,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies 1`] = `
 {
   "deps": [
     {
@@ -1295,7 +1295,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies with resolution comments 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies with resolution comments 1`] = `
 {
   "deps": [
     {
@@ -1413,7 +1413,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstalls false if Yarn zero-install is used 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > sets skipInstalls false if Yarn zero-install is used 1`] = `
 {
   "deps": [
     {

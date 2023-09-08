@@ -26,3 +26,12 @@ declare module 'vitest' {
   interface Assertion<T = any> extends CustomMatchers<T> {}
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 }
+
+declare global {
+  namespace jest {
+    interface CustomMatcherResult {
+      pass: boolean;
+      message: string | (() => string);
+    }
+  }
+}

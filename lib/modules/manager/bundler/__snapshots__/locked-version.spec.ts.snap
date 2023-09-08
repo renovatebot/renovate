@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/bundler/locked-version Parse Gitlab Foss Gem Lock File 1`] = `
+exports[`modules/manager/bundler/locked-version > Parse Gitlab Foss Gem Lock File 1`] = `
 Map {
   "RedCloth" => "4.3.2",
   "abstract_type" => "0.0.7",
@@ -483,7 +483,7 @@ Map {
 }
 `;
 
-exports[`modules/manager/bundler/locked-version Parse Mastodon Gem Lock File 1`] = `
+exports[`modules/manager/bundler/locked-version > Parse Mastodon Gem Lock File 1`] = `
 Map {
   "actioncable" => "5.2.4.1",
   "actionmailer" => "5.2.4.1",
@@ -754,7 +754,7 @@ Map {
 }
 `;
 
-exports[`modules/manager/bundler/locked-version Parse Rails Gem Lock File 1`] = `
+exports[`modules/manager/bundler/locked-version > Parse Rails Gem Lock File 1`] = `
 Map {
   "activerecord-jdbc-adapter" => "52.1-java",
   "activerecord-jdbcmysql-adapter" => "52.1-java",
@@ -944,7 +944,7 @@ Map {
 }
 `;
 
-exports[`modules/manager/bundler/locked-version Parse Ruby CI Gem Lock File 1`] = `
+exports[`modules/manager/bundler/locked-version > Parse Ruby CI Gem Lock File 1`] = `
 Map {
   "actioncable" => "5.2.3",
   "actionmailer" => "5.2.3",
@@ -1013,7 +1013,7 @@ Map {
 }
 `;
 
-exports[`modules/manager/bundler/locked-version Parse WebPacker Gem Lock File 1`] = `
+exports[`modules/manager/bundler/locked-version > Parse WebPacker Gem Lock File 1`] = `
 Map {
   "actioncable" => "6.0.1",
   "actionmailbox" => "6.0.1",

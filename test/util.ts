@@ -6,7 +6,6 @@ import { Platform, platform as _platform } from '../lib/modules/platform';
 import { scm as _scm } from '../lib/modules/platform/scm';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
-import * as _git from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
 import { regEx } from '../lib/util/regex';
 
@@ -40,14 +39,13 @@ export function partial(obj: unknown = {}): unknown {
 }
 
 export const fs = vi.mocked(_fs);
-export const git = vi.mocked(_git);
 
 // TODO: fix types, jest / typescript is using wrong overload (#22198)
 export const platform = vi.mocked(partial<Required<Platform>>(_platform));
 export const scm = vi.mocked(_scm);
 export const env = vi.mocked(_env);
 export const hostRules = vi.mocked(_hostRules);
-export const logger = vi.mocked(_logger);
+export const logger = vi.mocked(_logger, true);
 
 export type { RenovateConfig };
 

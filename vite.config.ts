@@ -21,7 +21,7 @@ export default defineConfig({
     },
     reporters: ci ? ['default', new GithubActionsReporter()] : ['default'],
     restoreMocks: true,
-    setupFiles: ['./test/setup.ts', './test/to-migrate.ts'],
+    setupFiles: ['expect-more-jest', './test/setup.ts', './test/to-migrate.ts'],
     logHeapUsage: true,
   },
 });

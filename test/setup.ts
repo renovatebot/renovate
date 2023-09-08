@@ -1,6 +1,5 @@
 // Check for missing or pending http mocks
 import './http-mock';
-import 'expect-more-jest';
 import * as matchers from 'jest-extended';
 import { expect } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
