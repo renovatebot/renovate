@@ -17,8 +17,8 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        description: 'Dry-Run'
-        default: 'true'
+        description: "Dry-Run"
+        default: "true"
         required: false
 
 permissions:
@@ -404,7 +404,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 99.6 \
+            --branches 99.61 \
             --functions 100 \
             --lines 100 \
             --statements 100
@@ -495,7 +495,7 @@ jobs:
 
   test-e2e:
     needs: [build]
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     timeout-minutes: 7
 
     if: github.event.pull_request.draft != true
