@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import {
   envMock,
@@ -23,10 +24,10 @@ const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
@@ -52,7 +53,6 @@ const updatedGemfileLock = {
 describe('modules/manager/bundler/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       jest.resetModules();
 
       delete process.env.GEM_HOME;

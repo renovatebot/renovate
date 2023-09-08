@@ -1,7 +1,9 @@
 // TODO fix mocks
 import type * as _timers from 'timers/promises';
+import { mockDeep } from 'jest-mock-extended';
 import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -16,6 +18,10 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
 
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('../../../util/git');
+jest.mock('timers/promises');
+
 const gitlabApiHost = 'https://gitlab.com';
 
 describe('modules/platform/gitlab/index', () => {
@@ -28,16 +34,12 @@ describe('modules/platform/gitlab/index', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.resetAllMocks();
+
     gitlab = await import('.');
-    jest.mock('../../../logger');
-    logger = (await import('../../../logger')).logger as never;
-    jest.mock('../../../util/host-rules');
-    jest.mock('timers/promises');
-    timers = require('timers/promises');
-    hostRules = require('../../../util/host-rules');
-    jest.mock('../../../util/git');
-    git = require('../../../util/git');
+    logger = mocked(await import('../../../logger')).logger;
+    timers = jest.requireMock('timers/promises');
+    hostRules = jest.requireMock('../../../util/host-rules');
+    git = jest.requireMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
@@ -2295,8 +2297,6 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('updatePr(prNo, title, body)', () => {
-    jest.resetAllMocks();
-
     it('updates the PR', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -2452,8 +2452,6 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('mergePr(pr)', () => {
-    jest.resetAllMocks();
-
     it('merges the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -2499,8 +2497,8 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('returns updated pr body', async () => {
-      jest.mock('../utils/pr-body');
-      const { smartTruncate } = require('../utils/pr-body');
+      jest.doMock('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
@@ -2508,8 +2506,8 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description if too low API version', async () => {
-      jest.mock('../utils/pr-body');
-      const { smartTruncate } = require('../utils/pr-body');
+      jest.doMock('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.3.0');
       gitlab.massageMarkdown(prBody);
@@ -2518,8 +2516,8 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description for API version gt 13.4', async () => {
-      jest.mock('../utils/pr-body');
-      const { smartTruncate } = require('../utils/pr-body');
+      jest.doMock('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.4.1');
       gitlab.massageMarkdown(prBody);

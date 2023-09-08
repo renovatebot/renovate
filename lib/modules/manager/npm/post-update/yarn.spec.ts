@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { mockDeep } from 'jest-mock-extended';
 import {
   ExecSnapshots,
   envMock,
@@ -16,11 +17,15 @@ import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
-  require('../../../../../test/fixtures').Fixtures.fsExtra()
+  jest
+    .requireActual<typeof import('../../../../../test/fixtures')>(
+      '../../../../../test/fixtures'
+    )
+    .fsExtra()
 );
 jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
-jest.mock('../../../datasource');
+jest.mock('../../../datasource', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -34,14 +39,16 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
 env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
 describe('modules/manager/npm/post-update/yarn', () => {
+  const removeDockerContainer = jest.spyOn(docker, 'removeDockerContainer');
+
   beforeEach(() => {
     delete process.env.BUILDPACK;
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
+    removeDockerContainer.mockResolvedValue();
     docker.resetPrefetchedImages();
     mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',

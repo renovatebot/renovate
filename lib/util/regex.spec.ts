@@ -29,12 +29,12 @@ describe('util/regex', () => {
     expect(regEx(/bar/g)).not.toBe(/bar/g);
   });
 
-  it('Falls back to RegExp', () => {
+  it('Falls back to RegExp', async () => {
     jest.doMock('re2', () => {
       throw new Error();
     });
 
-    const regex = require('./regex');
+    const regex = await import('./regex');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 

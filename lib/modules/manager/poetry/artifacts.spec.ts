@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -16,8 +17,8 @@ const pyproject10toml = Fixtures.get('pyproject.10.toml');
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
-jest.mock('../../datasource');
-jest.mock('../../../util/host-rules');
+jest.mock('../../datasource', () => mockDeep());
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -54,7 +55,6 @@ describe('modules/manager/poetry/artifacts', () => {
 
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       GlobalConfig.set(adminConfig);
       docker.resetPrefetchedImages();
