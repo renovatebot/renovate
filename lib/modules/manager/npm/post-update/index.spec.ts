@@ -13,6 +13,7 @@ import * as yarn from './yarn';
 import {
   determineLockFileDirs,
   getAdditionalFiles,
+  resetExistingFiles,
   updateYarnBinary,
   writeExistingFiles,
   writeUpdatedPackageFiles,
@@ -199,12 +200,13 @@ describe('modules/manager/npm/post-update/index', () => {
 
   describe('writeExistingFiles()', () => {
     it('works', async () => {
+      fs.readLocalFile.mockResolvedValue(null);
       git.getFile.mockResolvedValueOnce(
         Fixtures.get('update-lockfile-massage-1/package-lock.json')
       );
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toBeUndefined();
+      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
@@ -212,12 +214,13 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('works no reuse lockfiles', async () => {
+      fs.readLocalFile.mockResolvedValue(null);
       await expect(
         writeExistingFiles(
           { ...updateConfig, reuseLockFiles: false },
           additionalFiles
         )
-      ).resolves.toBeUndefined();
+      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.deleteLocalFile.mock.calls).toEqual([
@@ -229,30 +232,9 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('writes .npmrc files', async () => {
-      await writeExistingFiles(updateConfig, {
-        npm: [
-          // This package's npmrc should be written verbatim.
-          {
-            packageFile: 'packages/core/package.json',
-            npmrc: '#dummy',
-            managerData: {},
-          },
-          // No npmrc content should be written for this package.
-          { packageFile: 'packages/core/package.json', managerData: {} },
-        ],
-      });
-
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.writeLocalFile).toHaveBeenCalledWith(
-        'packages/core/.npmrc',
-        '#dummy\n'
-      );
-    });
-
-    it('only sources npmrc content from package config', async () => {
-      await writeExistingFiles(
-        { ...updateConfig, npmrc: '#foobar' },
-        {
+      fs.readLocalFile.mockResolvedValue(null);
+      await expect(
+        writeExistingFiles(updateConfig, {
           npm: [
             // This package's npmrc should be written verbatim.
             {
@@ -263,8 +245,66 @@ describe('modules/manager/npm/post-update/index', () => {
             // No npmrc content should be written for this package.
             { packageFile: 'packages/core/package.json', managerData: {} },
           ],
-        }
+        })
+      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/core/.npmrc',
+        '#dummy\n'
       );
+    });
+
+    it('reads existing .npmrc files', async () => {
+      fs.readLocalFile.mockImplementation((f): Promise<any> => {
+        if (f === 'packages/core/.npmrc') {
+          return Promise.resolve('# original npmrc');
+        }
+        return Promise.resolve(null);
+      });
+      await expect(
+        writeExistingFiles(updateConfig, {
+          npm: [
+            // This package's npmrc should be written verbatim.
+            {
+              packageFile: 'packages/core/package.json',
+              npmrc: '#dummy',
+              managerData: {},
+            },
+            // No npmrc content should be written for this package.
+            { packageFile: 'packages/core/package.json', managerData: {} },
+          ],
+        })
+      ).resolves.toStrictEqual({
+        'packages/core': { npmrc: '# original npmrc' },
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/core/.npmrc',
+        '#dummy\n'
+      );
+    });
+
+    it('only sources npmrc content from package config', async () => {
+      fs.readLocalFile.mockResolvedValue(null);
+      await expect(
+        writeExistingFiles(
+          { ...updateConfig, npmrc: '#foobar' },
+          {
+            npm: [
+              // This package's npmrc should be written verbatim.
+              {
+                packageFile: 'packages/core/package.json',
+                npmrc: '#dummy',
+                managerData: {},
+              },
+              // No npmrc content should be written for this package.
+              { packageFile: 'packages/core/package.json', managerData: {} },
+            ],
+          }
+        )
+      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.writeLocalFile).toHaveBeenCalledWith(
@@ -274,12 +314,13 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('works only on relevant folders', async () => {
+      fs.readLocalFile.mockResolvedValue(null);
       git.getFile.mockResolvedValueOnce(
         Fixtures.get('update-lockfile-massage-1/package-lock.json')
       );
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toBeUndefined();
+      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
@@ -305,6 +346,26 @@ describe('modules/manager/npm/post-update/index', () => {
         writeUpdatedPackageFiles(baseConfig)
       ).resolves.toBeUndefined();
       expect(fs.writeLocalFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resetExistingFiles()', () => {
+    it('works', async () => {
+      await expect(
+        resetExistingFiles({
+          'packages/none': {},
+          'packages/restore': { npmrc: '# original npmrc' },
+          'packages/delete': { npmrc: null },
+        })
+      ).resolves.toBeUndefined();
+
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/restore/.npmrc',
+        '# original npmrc'
+      );
+      expect(fs.deleteLocalFile).toHaveBeenCalledOnce();
+      expect(fs.deleteLocalFile).toHaveBeenCalledWith('packages/delete/.npmrc');
     });
   });
 
@@ -451,7 +512,47 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['packages/pnpm/.npmrc'],
+        ['packages/core/.npmrc'],
       ]);
+    });
+
+    it('restores original npmrc', async () => {
+      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+      // TODO: fix types, jest is using wrong overload (#22198)
+      fs.readLocalFile.mockImplementation((f): Promise<any> => {
+        if (f === '.npmrc') {
+          return Promise.resolve('# dummy');
+        }
+        if (f === 'packages/core/.npmrc') {
+          return Promise.resolve('# original core npmrc');
+        }
+        return Promise.resolve('');
+      });
+      expect(
+        await getAdditionalFiles(
+          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
+          additionalFiles
+        )
+      ).toStrictEqual({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'package-lock.json',
+            contents: '{}',
+          },
+        ],
+      });
+
+      expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
+      expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
+      expect(fs.deleteLocalFile.mock.calls).toMatchObject([
+        ['packages/pnpm/.npmrc'],
+      ]);
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/core/.npmrc',
+        '# original core npmrc'
+      );
     });
 
     it('detects if lock file contents are unchanged', async () => {

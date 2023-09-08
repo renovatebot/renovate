@@ -17,7 +17,7 @@ import { logger } from '../../../../logger';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type {
   ArtifactError,
-  WriteExistingFilesResult,
+  GetAdditionalFilesResult,
 } from '../../../../modules/manager/npm/post-update/types';
 import type {
   EnsureCommentConfig,
@@ -908,7 +908,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<PackageFilesResult>()
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce(
-        partial<WriteExistingFilesResult>({
+        partial<GetAdditionalFilesResult>({
           artifactErrors: [],
           updatedArtifacts: [],
         })

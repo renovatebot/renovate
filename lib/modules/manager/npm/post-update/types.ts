@@ -18,10 +18,17 @@ export interface ArtifactError {
   stderr?: string;
 }
 
-export interface WriteExistingFilesResult {
+export interface GetAdditionalFilesResult {
   artifactErrors: ArtifactError[];
   updatedArtifacts: FileChange[];
 }
+
+export type WriteExistingFilesResult = Record<
+  string,
+  {
+    npmrc?: string | null;
+  }
+>;
 
 export interface GenerateLockFileResult {
   error?: boolean;

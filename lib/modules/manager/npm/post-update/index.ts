@@ -34,6 +34,7 @@ import type {
   AdditionalPackageFiles,
   ArtifactError,
   DetermineLockFileDirsResult,
+  GetAdditionalFilesResult,
   WriteExistingFilesResult,
   YarnRcYmlFile,
 } from './types';
@@ -139,9 +140,10 @@ export function determineLockFileDirs(
 export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
-): Promise<void> {
+): Promise<WriteExistingFilesResult> {
+  const result: WriteExistingFilesResult = {};
   if (!packageFiles.npm) {
-    return;
+    return result;
   }
   const npmFiles = packageFiles.npm;
   logger.debug(
@@ -158,6 +160,10 @@ export async function writeExistingFiles(
     const npmrc = packageFile.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
+      result[basedir] ??= {};
+      if (result[basedir].npmrc === undefined) {
+        result[basedir].npmrc = await getNpmrcContent(basedir);
+      }
       try {
         await writeLocalFile(npmrcFilename, `${npmrc}\n`);
       } catch (err) /* istanbul ignore next */ {
@@ -260,6 +266,7 @@ export async function writeExistingFiles(
       await deleteLocalFile(packageFile.managerData.pnpmShrinkwrap);
     }
   }
+  return result;
 }
 
 export async function writeUpdatedPackageFiles(
@@ -290,6 +297,17 @@ export async function writeUpdatedPackageFiles(
     }
     logger.debug(`Writing ${packageFile.path}`);
     await writeLocalFile(packageFile.path, packageFile.contents!);
+  }
+}
+
+export async function resetExistingFiles(
+  filesToReset: WriteExistingFilesResult
+): Promise<void> {
+  logger.debug({ filesToReset }, 'Resetting package.json files');
+  for (const [dir, files] of Object.entries(filesToReset)) {
+    if (files.npmrc !== undefined) {
+      await resetNpmrcContent(dir, files.npmrc);
+    }
   }
 }
 
@@ -455,7 +473,7 @@ export async function updateYarnBinary(
 export async function getAdditionalFiles(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles
-): Promise<WriteExistingFilesResult> {
+): Promise<GetAdditionalFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
   const updatedArtifacts: FileChange[] = [];
@@ -495,7 +513,7 @@ export async function getAdditionalFiles(
   }
   const dirs = determineLockFileDirs(config, packageFiles);
   logger.trace({ dirs }, 'lock file dirs');
-  await writeExistingFiles(config, packageFiles);
+  const writtenExistingFiles = await writeExistingFiles(config, packageFiles);
   await writeUpdatedPackageFiles(config);
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
@@ -875,6 +893,8 @@ export async function getAdditionalFiles(
     }
     await resetNpmrcContent(learnaFileDir, npmrcContent);
   }
+
+  await resetExistingFiles(writtenExistingFiles);
 
   return { artifactErrors, updatedArtifacts };
 }
