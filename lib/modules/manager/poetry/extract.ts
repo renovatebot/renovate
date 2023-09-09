@@ -42,6 +42,7 @@ export async function extractPackageFile(
         ...dep,
         datasource: DockerDatasource.id,
         commitMessageTopic: 'Python',
+        registryUrls: null,
       };
     }
 
