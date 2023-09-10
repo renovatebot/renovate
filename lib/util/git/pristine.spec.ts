@@ -3,7 +3,7 @@ import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { getCachedPristineResult } from './pristine';
 
-jest.mock('../cache/repository');
+vi.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/pristine', () => {

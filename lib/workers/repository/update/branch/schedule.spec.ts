@@ -142,7 +142,6 @@ describe('workers/repository/update/branch/schedule', () => {
 
     beforeEach(() => {
       jest.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
-
       config = {};
     });
 

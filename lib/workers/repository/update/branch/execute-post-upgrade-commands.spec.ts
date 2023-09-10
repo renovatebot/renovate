@@ -1,11 +1,12 @@
-import { fs, git, partial } from '../../../../../test/util';
+import { git } from '../../../../../test/git';
+import { fs, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/buildkite/extract extractPackageFile() adds skipReason 1`] = `
+exports[`modules/manager/buildkite/extract > extractPackageFile() > adds skipReason 1`] = `
 [
   {
     "currentValue": "v1.3.2.5",
@@ -15,7 +15,7 @@ exports[`modules/manager/buildkite/extract extractPackageFile() adds skipReason 
 ]
 `;
 
-exports[`modules/manager/buildkite/extract extractPackageFile() extracts arrays of plugins 1`] = `
+exports[`modules/manager/buildkite/extract > extractPackageFile() > extracts arrays of plugins 1`] = `
 [
   {
     "currentValue": "v2.0.1",
@@ -48,7 +48,7 @@ exports[`modules/manager/buildkite/extract extractPackageFile() extracts arrays 
 ]
 `;
 
-exports[`modules/manager/buildkite/extract extractPackageFile() extracts git-based plugins 1`] = `
+exports[`modules/manager/buildkite/extract > extractPackageFile() > extracts git-based plugins 1`] = `
 [
   {
     "currentValue": "v3.2.7",
@@ -69,7 +69,7 @@ exports[`modules/manager/buildkite/extract extractPackageFile() extracts git-bas
 ]
 `;
 
-exports[`modules/manager/buildkite/extract extractPackageFile() extracts multiple plugins in same file 1`] = `
+exports[`modules/manager/buildkite/extract > extractPackageFile() > extracts multiple plugins in same file 1`] = `
 [
   {
     "currentValue": "v1.3.2",
@@ -88,7 +88,7 @@ exports[`modules/manager/buildkite/extract extractPackageFile() extracts multipl
 ]
 `;
 
-exports[`modules/manager/buildkite/extract extractPackageFile() extracts simple single plugin 1`] = `
+exports[`modules/manager/buildkite/extract > extractPackageFile() > extracts simple single plugin 1`] = `
 [
   {
     "currentValue": "v2.0.0",

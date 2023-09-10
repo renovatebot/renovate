@@ -1,6 +1,6 @@
 // TODO fix mocks
 import type * as _timers from 'timers/promises';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -18,9 +18,9 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/git');
-jest.mock('timers/promises');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/git');
+vi.mock('timers/promises');
 
 const gitlabApiHost = 'https://gitlab.com';
 
@@ -34,12 +34,11 @@ describe('modules/platform/gitlab/index', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-
     gitlab = await import('.');
-    logger = mocked(await import('../../../logger')).logger;
-    timers = jest.requireMock('timers/promises');
-    hostRules = jest.requireMock('../../../util/host-rules');
-    git = jest.requireMock('../../../util/git');
+    logger = mocked((await import('../../../logger')).logger);
+    timers = await vi.importMock('timers/promises');
+    hostRules = await vi.importMock('../../../util/host-rules');
+    git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
@@ -2497,7 +2496,7 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('returns updated pr body', async () => {
-      jest.doMock('../utils/pr-body');
+      vi.doMock('../utils/pr-body');
       const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.4.0');
@@ -2506,7 +2505,7 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description if too low API version', async () => {
-      jest.doMock('../utils/pr-body');
+      vi.doMock('../utils/pr-body');
       const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.3.0');
@@ -2516,7 +2515,7 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description for API version gt 13.4', async () => {
-      jest.doMock('../utils/pr-body');
+      vi.doMock('../utils/pr-body');
       const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.4.1');

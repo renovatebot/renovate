@@ -5,14 +5,10 @@ import { loadModules } from '../../util/modules';
 import type { Platform } from './types';
 import * as platform from '.';
 
-jest.unmock('.');
-jest.unmock('./scm');
+vi.unmock('.');
+vi.unmock('./scm');
 
 describe('modules/platform/index', () => {
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   it('validates', () => {
     function validate(module: Platform | undefined, name: string): boolean {
       // TODO: test required api (#9650)

@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { RenovateConfig, mocked } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
@@ -8,10 +8,10 @@ import { renovateRepository } from '.';
 
 const process = mocked(_process);
 
-jest.mock('./init');
-jest.mock('./process');
-jest.mock('./result');
-jest.mock('./error');
+vi.mock('./init');
+vi.mock('./process');
+vi.mock('./result');
+vi.mock('./error');
 
 describe('workers/repository/index', () => {
   describe('renovateRepository()', () => {

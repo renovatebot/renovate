@@ -1,7 +1,7 @@
 import type { RenovateConfig } from '../../../../test/util';
 import * as fileMatch from './file-match';
 
-jest.mock('../../../util/git');
+vi.mock('../../../util/git');
 
 describe('workers/repository/extract/file-match', () => {
   const fileList = ['package.json', 'frontend/package.json'];

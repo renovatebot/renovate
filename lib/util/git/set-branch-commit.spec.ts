@@ -1,10 +1,11 @@
-import { git, logger, mocked, partial } from '../../../test/util';
+import { git } from '../../../test/git';
+import { logger, mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { setBranchNewCommit } from './set-branch-commit';
 
-jest.mock('../cache/repository');
-jest.mock('.');
+vi.mock('../cache/repository');
+vi.mock('.');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/set-branch-commit', () => {

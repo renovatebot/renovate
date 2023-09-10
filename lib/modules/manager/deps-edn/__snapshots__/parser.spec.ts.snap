@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/deps-edn/parser parseEdnFile extracts file 1`] = `
+exports[`modules/manager/deps-edn/parser > parseEdnFile > extracts file 1`] = `
 {
   "aliases": {
     "1.10": {

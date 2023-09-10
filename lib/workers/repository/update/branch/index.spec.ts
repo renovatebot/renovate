@@ -1,11 +1,4 @@
-import {
-  fs,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { fs, mocked, partial, platform, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
@@ -44,24 +37,25 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
+import { git } from '../../../../../test/git';
 
-jest.mock('./get-updated');
-jest.mock('./schedule');
-jest.mock('./check-existing');
-jest.mock('./reuse');
-jest.mock('../../../../modules/manager/npm/post-update');
-jest.mock('./automerge');
-jest.mock('./commit');
-jest.mock('../pr');
-jest.mock('../pr/automerge');
-jest.mock('../../changelog');
-jest.mock('../../../../util/exec');
-jest.mock('../../../../util/merge-confidence');
-jest.mock('../../../../util/sanitize');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('../../../global/limits');
-jest.mock('../../../../util/cache/repository');
+vi.mock('./get-updated');
+vi.mock('./schedule');
+vi.mock('./check-existing');
+vi.mock('./reuse');
+vi.mock('../../../../modules/manager/npm/post-update');
+vi.mock('./automerge');
+vi.mock('./commit');
+vi.mock('../pr');
+vi.mock('../pr/automerge');
+vi.mock('../../changelog');
+vi.mock('../../../../util/exec');
+vi.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/sanitize');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
+vi.mock('../../../global/limits');
+vi.mock('../../../../util/cache/repository');
 
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);

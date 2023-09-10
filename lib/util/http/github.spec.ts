@@ -16,7 +16,7 @@ import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 import type { GraphqlPageCache } from './github';
 
-jest.mock('../cache/repository');
+vi.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';

@@ -5,7 +5,7 @@ import * as customManager from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
-jest.mock('../../util/fs');
+vi.mock('../../util/fs');
 
 const datasources = getDatasourceList();
 

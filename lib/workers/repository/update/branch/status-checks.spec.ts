@@ -17,8 +17,6 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
     });
 
-    afterEach(() => {});
-
     it('returns if not configured', async () => {
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);

@@ -6,7 +6,7 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { mocked, partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
@@ -18,14 +18,15 @@ import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 
-jest.mock('./azure-got-wrapper');
-jest.mock('./azure-helper');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/sanitize', () =>
+vi.mock('./azure-got-wrapper');
+vi.mock('./azure-helper');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/sanitize', () =>
   mockDeep({ sanitize: (s: string) => s })
 );
-jest.mock('timers/promises');
+vi.mock('../../../logger');
+vi.mock('timers/promises');
 
 describe('modules/platform/azure/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -33,17 +34,17 @@ describe('modules/platform/azure/index', () => {
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
   let git: jest.Mocked<typeof _git>;
-  let logger: jest.MockedObject<typeof _logger>;
+  let logger: jest.Mocked<typeof _logger>;
 
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    hostRules = jest.requireMock('../../../util/host-rules');
+    hostRules = await vi.importMock('../../../util/host-rules');
     azure = await import('.');
-    azureApi = jest.requireMock('./azure-got-wrapper');
-    azureHelper = jest.requireMock('./azure-helper');
-    logger = mocked(await import('../../../logger')).logger;
-    git = jest.requireMock('../../../util/git');
+    azureApi = await vi.importMock('./azure-got-wrapper');
+    azureHelper = await vi.importMock('./azure-helper');
+    logger = mocked((await import('../../../logger')).logger);
+    git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.find.mockReturnValue({

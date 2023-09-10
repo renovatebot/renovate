@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import { getNpmLock } from './npm';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('modules/manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {

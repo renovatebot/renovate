@@ -1,4 +1,5 @@
-import { fs, git, mocked } from '../../../../../../test/util';
+import { git } from '../../../../../../test/git';
+import { fs, mocked } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update';
 import * as lerna from '../../../../../modules/manager/npm/post-update/lerna';
@@ -15,8 +16,8 @@ const config: PostUpdateConfig = {
 
 const hostRules = mocked(_hostRules);
 
-jest.mock('../../../../../util/git');
-jest.mock('../../../../../util/fs');
+vi.mock('../../../../../util/git');
+vi.mock('../../../../../util/fs');
 
 hostRules.find = jest.fn((_) => ({
   token: 'abc',

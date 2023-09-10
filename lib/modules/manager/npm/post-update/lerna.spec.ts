@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -7,10 +7,10 @@ import type { PackageFileContent, PostUpdateConfig } from '../../types';
 import * as lernaHelper from './lerna';
 import { getNodeToolConstraint } from './node-version';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
-jest.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
+vi.mock('../../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

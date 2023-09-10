@@ -5,7 +5,7 @@ import * as terraformLockfile from '../terraform/lockfile';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
-jest.mock('../terraform/lockfile');
+vi.mock('../terraform/lockfile');
 
 const config = {
   constraints: {},

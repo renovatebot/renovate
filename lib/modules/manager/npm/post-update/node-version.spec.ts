@@ -6,7 +6,7 @@ import {
   getNodeUpdate,
 } from './node-version';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('modules/manager/npm/post-update/node-version', () => {
   const config = {

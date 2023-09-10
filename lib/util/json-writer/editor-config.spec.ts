@@ -1,12 +1,12 @@
-import { fs as memfs } from 'memfs';
 import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 
 // use real fs to read wasm files for `@one-ini/wasm`
-jest.mock('fs', () => {
-  const realFs = jest.requireActual<typeof import('fs')>('fs');
+vi.mock('fs', async () => {
+  const realFs = await vi.importActual<typeof import('fs')>('fs');
+  const memfs = (await vi.importActual<typeof import('memfs')>('memfs')).fs;
   return {
     ...memfs,
     readFileSync: (file: string, ...args: any[]) => {

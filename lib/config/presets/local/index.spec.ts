@@ -5,9 +5,9 @@ import * as _github from '../github';
 import * as _gitlab from '../gitlab';
 import * as local from '.';
 
-jest.mock('../gitea');
-jest.mock('../github');
-jest.mock('../gitlab');
+vi.mock('../gitea');
+vi.mock('../github');
+vi.mock('../gitlab');
 
 const gitea = mocked(_gitea);
 const github = mocked(_github);

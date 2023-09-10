@@ -4,9 +4,9 @@ import * as _ghApi from '../../modules/platform/github';
 import * as _hostRules from '../../util/host-rules';
 import { autodiscoverRepositories } from './autodiscover';
 
-jest.mock('../../modules/platform/github');
-jest.unmock('../../modules/platform');
-jest.unmock('../../modules/platform/scm');
+vi.mock('../../modules/platform/github');
+vi.unmock('../../modules/platform');
+vi.unmock('../../modules/platform/scm');
 
 // imports are readonly
 const hostRules = _hostRules;

@@ -1,7 +1,7 @@
 import { cleanup, get, init, set } from '.';
 
-jest.mock('./file');
-jest.mock('./redis');
+vi.mock('./file');
+vi.mock('./redis');
 
 describe('util/cache/package/index', () => {
   it('returns undefined if not initialized', async () => {

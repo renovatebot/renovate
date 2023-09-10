@@ -1,8 +1,7 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import {
   RenovateConfig,
   fs,
-  git,
   mocked,
   platform,
   scm,
@@ -24,14 +23,15 @@ import { OnboardingState } from '../common';
 import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import { checkOnboardingBranch } from '.';
+import { git } from '../../../../../test/git';
 
 const configModule: any = _config;
 
-jest.mock('../../../../util/cache/repository');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('./config');
-jest.mock('./onboarding-branch-cache');
+vi.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
+vi.mock('./config');
+vi.mock('./onboarding-branch-cache');
 
 const cache = mocked(_cache);
 const onboardingCache = mocked(_onboardingCache);

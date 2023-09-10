@@ -11,7 +11,7 @@ const adminConfig: RepoGlobalConfig = {
 };
 
 // auto-mock fs
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/tflint-plugin/extract', () => {
   beforeEach(() => {

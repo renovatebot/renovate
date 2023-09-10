@@ -1,7 +1,7 @@
 // TODO: add tests
 import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
-import { fs, git, logger, partial, scm } from '../../../../../test/util';
+import { fs, logger, partial, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { FileChange } from '../../../../util/git/types';
 import type { PostUpdateConfig } from '../../types';
@@ -17,13 +17,14 @@ import {
   writeExistingFiles,
   writeUpdatedPackageFiles,
 } from './';
+import { git } from '../../../../../test/git';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('./lerna');
-jest.mock('./npm');
-jest.mock('./yarn');
-jest.mock('./pnpm');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
+vi.mock('./lerna');
+vi.mock('./npm');
+vi.mock('./yarn');
+vi.mock('./pnpm');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;

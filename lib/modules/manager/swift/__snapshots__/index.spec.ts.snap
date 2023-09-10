@@ -1,10 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/swift/index extractPackageFile() parses multiple packages 1`] = `
+exports[`modules/manager/swift/index > extractPackageFile() > parses multiple packages 1`] = `
 {
   "deps": [
     {
-      "currentValue": ""master"
+      "currentValue": "\\"master\\"
         ",
       "datasource": "git-tags",
       "depName": "0x7fs/CountedSet",
@@ -29,7 +29,7 @@ exports[`modules/manager/swift/index extractPackageFile() parses multiple packag
       "packageName": "https://github.com/apple/swift-argument-parser",
     },
     {
-      "currentValue": ""UpdateSocket"
+      "currentValue": "\\"UpdateSocket\\"
         ",
       "datasource": "git-tags",
       "depName": "beefon/Shout",
@@ -48,13 +48,13 @@ exports[`modules/manager/swift/index extractPackageFile() parses multiple packag
       "packageName": "https://github.com/httpswift/swifter.git",
     },
     {
-      "currentValue": "from : "0.9.6"",
+      "currentValue": "from : \\"0.9.6\\"",
       "datasource": "git-tags",
       "depName": "weichsel/ZIPFoundation",
       "packageName": "https://github.com/weichsel/ZIPFoundation/",
     },
     {
-      "currentValue": ""swift-5.0-branch"
+      "currentValue": "\\"swift-5.0-branch\\"
     ",
       "datasource": "git-tags",
       "depName": "apple/swift-package-manager",

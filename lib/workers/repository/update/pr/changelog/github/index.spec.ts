@@ -8,7 +8,7 @@ import type { GithubTagItem } from '../../../../../../util/github/graphql/types'
 import * as hostRules from '../../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../../types';
 
-jest.mock('../../../../../../modules/datasource/npm');
+vi.mock('../../../../../../modules/datasource/npm');
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',

@@ -8,8 +8,8 @@ import { toMs } from '../../../../util/pretty-time';
 import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
-jest.mock('../../../../util/date');
-jest.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/date');
+vi.mock('../../../../util/merge-confidence');
 
 const dateUtil = mocked(_dateUtil);
 const mergeConfidence = mocked(_mergeConfidence);

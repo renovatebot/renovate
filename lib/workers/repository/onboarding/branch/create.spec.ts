@@ -2,7 +2,7 @@ import { RenovateConfig, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { createOnboardingBranch } from './create';
 
-jest.mock('./config', () => ({
+vi.mock('./config', () => ({
   getOnboardingConfigContents: () =>
     JSON.stringify({
       foo: 'bar',

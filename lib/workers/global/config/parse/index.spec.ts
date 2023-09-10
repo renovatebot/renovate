@@ -4,10 +4,10 @@ import { readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
 
-jest.mock('../../../../modules/datasource/npm');
-jest.mock('../../../../util/fs');
-jest.mock('./host-rules-from-env');
-jest.mock('../../config.js', () => ({}), { virtual: true });
+vi.mock('../../../../modules/datasource/npm');
+vi.mock('../../../../util/fs');
+vi.mock('./host-rules-from-env');
+vi.mock('../../config.js', () => ({}));
 
 const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
 

@@ -27,8 +27,8 @@ import {
   writeUpdates,
 } from './write';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/cache/repository');
+vi.mock('../../../util/git');
+vi.mock('../../../util/cache/repository');
 
 const branchWorker = mocked(_branchWorker);
 const limits = mocked(_limits);

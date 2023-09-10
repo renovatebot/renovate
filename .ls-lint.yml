@@ -14,6 +14,7 @@ ignore:
   - .github/pull_request_template.md
   - dist
   - jest.config.ts
+  - vite.config.ts
   - node_modules
   - SECURITY.md
   - test/e2e/node_modules

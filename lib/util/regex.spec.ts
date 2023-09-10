@@ -3,10 +3,6 @@ import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { isUUID, regEx } from './regex';
 
 describe('util/regex', () => {
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   it('uses RE2', () => {
     expect(regEx('foo')).toBeInstanceOf(RE2);
   });
@@ -30,7 +26,7 @@ describe('util/regex', () => {
   });
 
   it('Falls back to RegExp', async () => {
-    jest.doMock('re2', () => {
+    vi.doMock('re2', () => {
       throw new Error();
     });
 

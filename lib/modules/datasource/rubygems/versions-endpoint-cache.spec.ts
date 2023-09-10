@@ -81,7 +81,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
 
   describe('Delta sync', () => {
     beforeAll(() => {
-      jest.useFakeTimers({ advanceTimers: true });
+      vi.useFakeTimers({ shouldAdvanceTime: true });
     });
 
     beforeEach(() => {

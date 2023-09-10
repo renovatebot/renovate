@@ -4,7 +4,7 @@ import { cache } from './decorator';
 import * as file from './file';
 import * as packageCache from '.';
 
-jest.mock('./file');
+vi.mock('./file');
 
 describe('util/cache/package/decorator', () => {
   const setCache = file.set;

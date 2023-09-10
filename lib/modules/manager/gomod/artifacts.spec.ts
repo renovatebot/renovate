@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { env, fs, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -11,23 +11,19 @@ import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from '.';
+import { git } from '../../../../test/git';
 
-type FS = typeof import('../../../util/fs');
-
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs', () => {
-  // restore
-  return {
-    __esModules: true,
-    ...jest.createMockFromModule<FS>('../../../util/fs'),
-    isValidLocalPath:
-      jest.requireActual<FS>('../../../util/fs').isValidLocalPath,
-  };
-});
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs', async () =>
+  mockDeep({
+    isValidLocalPath: (await vi.importActual<typeof fs>('../../../util/fs'))
+      .isValidLocalPath,
+  })
+);
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

@@ -1,11 +1,13 @@
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
+import { mocked } from '../../../../test/util';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -28,10 +30,10 @@ describe('modules/platform/bitbucket/index', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    hostRules = jest.requireMock('../../../util/host-rules');
+    hostRules = await vi.importMock('../../../util/host-rules');
     bitbucket = await import('.');
-    logger = (await import('../../../logger')).logger as any;
-    git = jest.requireMock('../../../util/git');
+    logger = mocked((await import('../../../logger')).logger);
+    git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     // clean up hostRules

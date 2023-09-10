@@ -1,9 +1,9 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/post-update/lerna generateLockFiles() allows scripts for trust level high 1`] = `
+exports[`modules/manager/npm/post-update/lerna > generateLockFiles() > allows scripts for trust level high 1`] = `
 [
   {
-    "cmd": "lerna info || echo "Ignoring lerna info failure"",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -59,7 +59,7 @@ exports[`modules/manager/npm/post-update/lerna generateLockFiles() allows script
 ]
 `;
 
-exports[`modules/manager/npm/post-update/lerna generateLockFiles() defaults to latest and skips bootstrap if lerna version unspecified 1`] = `
+exports[`modules/manager/npm/post-update/lerna > generateLockFiles() > defaults to latest and skips bootstrap if lerna version unspecified 1`] = `
 [
   {
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
@@ -82,10 +82,10 @@ exports[`modules/manager/npm/post-update/lerna generateLockFiles() defaults to l
 ]
 `;
 
-exports[`modules/manager/npm/post-update/lerna generateLockFiles() generates package-lock.json files 1`] = `
+exports[`modules/manager/npm/post-update/lerna > generateLockFiles() > generates package-lock.json files 1`] = `
 [
   {
-    "cmd": "lerna info || echo "Ignoring lerna info failure"",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -141,10 +141,10 @@ exports[`modules/manager/npm/post-update/lerna generateLockFiles() generates pac
 ]
 `;
 
-exports[`modules/manager/npm/post-update/lerna generateLockFiles() generates yarn.lock files 1`] = `
+exports[`modules/manager/npm/post-update/lerna > generateLockFiles() > generates yarn.lock files 1`] = `
 [
   {
-    "cmd": "lerna info || echo "Ignoring lerna info failure"",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -200,10 +200,10 @@ exports[`modules/manager/npm/post-update/lerna generateLockFiles() generates yar
 ]
 `;
 
-exports[`modules/manager/npm/post-update/lerna generateLockFiles() performs full npm install 1`] = `
+exports[`modules/manager/npm/post-update/lerna > generateLockFiles() > performs full npm install 1`] = `
 [
   {
-    "cmd": "lerna info || echo "Ignoring lerna info failure"",
+    "cmd": "lerna info || echo \\"Ignoring lerna info failure\\"",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",

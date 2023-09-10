@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, mocked } from '../../../../test/util';
@@ -10,9 +10,9 @@ import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
 
-jest.mock('../../../util/exec/common');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/common');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

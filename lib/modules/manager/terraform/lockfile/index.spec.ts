@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs, mocked } from '../../../../../test/util';
@@ -9,9 +9,9 @@ import { updateArtifacts } from '../index';
 import { TerraformProviderHash } from './hash';
 
 // auto-mock fs
-jest.mock('../../../../util/fs');
-jest.mock('./hash');
-jest.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/fs');
+vi.mock('./hash');
+vi.mock('../../../datasource', () => mockDeep());
 
 const config = {
   constraints: {},

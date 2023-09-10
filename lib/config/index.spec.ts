@@ -1,8 +1,8 @@
 import { getConfig } from './defaults';
 import { filterConfig, getManagerConfig, mergeChildConfig } from './index';
 
-jest.mock('../modules/datasource/npm');
-jest.mock('../../config.js', () => ({}), { virtual: true });
+vi.mock('../modules/datasource/npm');
+vi.mock('../../config.js', () => ({}));
 
 const defaultConfig = getConfig();
 

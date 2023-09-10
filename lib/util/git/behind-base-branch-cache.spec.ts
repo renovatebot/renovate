@@ -6,7 +6,7 @@ import {
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache';
 
-jest.mock('../cache/repository');
+vi.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/behind-base-branch-cache', () => {

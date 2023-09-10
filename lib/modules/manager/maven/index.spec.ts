@@ -5,7 +5,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pomContent = Fixtures.get('simple.pom.xml');
 const pomParent = Fixtures.get('parent.pom.xml');

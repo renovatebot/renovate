@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs as fsutil } from '../../../../test/util';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pipfile1 = Fixtures.get('Pipfile1');
 const pipfile2 = Fixtures.get('Pipfile2');

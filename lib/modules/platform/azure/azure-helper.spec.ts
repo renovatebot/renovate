@@ -1,7 +1,12 @@
 import { Readable } from 'node:stream';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import {
+  GitPullRequestMergeStrategy,
+  GitRef,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { IGitApi } from 'azure-devops-node-api/GitApi';
+import { partial } from '../../../../test/util';
 
-jest.mock('./azure-got-wrapper');
+vi.mock('./azure-got-wrapper');
 
 describe('modules/platform/azure/azure-helper', () => {
   let azureHelper: typeof import('./azure-helper');
@@ -11,16 +16,19 @@ describe('modules/platform/azure/azure-helper', () => {
     // reset module
     jest.resetModules();
     azureHelper = await import('./azure-helper');
-    azureApi = jest.requireMock('./azure-got-wrapper');
+    azureApi = (await import('./azure-got-wrapper')) as any;
   });
 
   describe('getRef', () => {
     it('should get the ref with short ref name', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: jest.fn(() => [{ objectId: 132 }]),
-          } as any)
+      azureApi.gitApi.mockImplementationOnce(() =>
+        Promise.resolve(
+          partial<IGitApi>({
+            getRefs: jest
+              .fn()
+              .mockResolvedValue(partial<GitRef[]>([{ objectId: '132' }])),
+          })
+        )
       );
       const res = await azureHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();

@@ -1,8 +1,7 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  git,
   mockedFunction,
   partial,
   platform,
@@ -16,12 +15,13 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
+import { git } from '../../../../../test/git';
 
-jest.mock('./migrated-data');
-jest.mock('./rebase');
-jest.mock('./create');
-jest.mock('../../../../util/git');
-jest.mock('../../update/branch/handle-existing');
+vi.mock('./migrated-data');
+vi.mock('./rebase');
+vi.mock('./create');
+vi.mock('../../../../util/git');
+vi.mock('../../update/branch/handle-existing');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
 

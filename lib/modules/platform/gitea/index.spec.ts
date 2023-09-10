@@ -35,8 +35,8 @@ import type {
   User,
 } from './types';
 
-jest.mock('./gitea-helper');
-jest.mock('../../../util/git');
+vi.mock('./gitea-helper');
+vi.mock('../../../util/git');
 
 /**
  * latest tested gitea version.
@@ -202,11 +202,10 @@ describe('modules/platform/gitea/index', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-
     gitea = await import('.');
-    helper = jest.requireMock('./gitea-helper');
-    logger = mocked(await import('../../../logger')).logger;
-    gitvcs = jest.requireMock('../../../util/git');
+    helper = mocked(await import('./gitea-helper'));
+    logger = mocked((await import('../../../logger')).logger);
+    gitvcs = await vi.importMock('../../../util/git');
     gitvcs.isBranchBehindBase.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = await import('../../../util/host-rules');

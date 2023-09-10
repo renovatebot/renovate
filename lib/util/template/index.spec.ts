@@ -3,7 +3,7 @@ import { getOptions } from '../../config/options';
 import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
-jest.mock('../exec/utils');
+vi.mock('../exec/utils');
 
 const execUtils = mocked(_execUtils);
 

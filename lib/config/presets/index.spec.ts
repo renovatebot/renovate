@@ -13,9 +13,9 @@ import {
 } from './util';
 import * as presets from '.';
 
-jest.mock('./npm');
-jest.mock('./github');
-jest.mock('./local');
+vi.mock('./npm');
+vi.mock('./github');
+vi.mock('./local');
 
 const npm = mocked(_npm);
 const local = mocked(_local);

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import {
   REPOSITORY_CHANGED,
@@ -9,9 +9,9 @@ import {
 import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
 
-jest.mock('timers/promises');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('timers/promises');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -209,9 +209,9 @@ describe('modules/platform/bitbucket-server/index', () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
+        hostRules = await vi.importMock('../../../util/host-rules');
         bitbucket = await import('.');
-        hostRules = jest.requireMock('../../../util/host-rules');
-        git = jest.requireMock('../../../util/git');
+        git = await vi.importMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
         git.isBranchBehindBase.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(

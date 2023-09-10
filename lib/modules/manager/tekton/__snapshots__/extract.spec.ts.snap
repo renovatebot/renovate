@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/tekton/extract extractPackageFile() extracts deps from a file 1`] = `
+exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps from a file 1`] = `
 {
   "deps": [
     {

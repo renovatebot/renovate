@@ -8,7 +8,7 @@ import {
 } from './containerbase';
 import type { ToolConstraint } from './types';
 
-jest.mock('../../modules/datasource');
+vi.mock('../../modules/datasource');
 
 const datasource = mocked(_datasource);
 

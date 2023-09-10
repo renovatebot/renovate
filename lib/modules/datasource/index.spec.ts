@@ -116,7 +116,7 @@ class DummyDatasource5 extends Datasource {
   }
 }
 
-jest.mock('./metadata-manual', () => ({
+vi.mock('./metadata-manual', () => ({
   manualChangelogUrls: {
     dummy: {
       package: 'https://foo.bar/package/CHANGELOG.md',

@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { exec as cpExec, envMock } from '../../../test/exec-util';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -11,11 +11,11 @@ import { exec } from '.';
 
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
-jest.mock('./hermit', () => ({
-  ...jest.requireActual<typeof import('./hermit')>('./hermit'),
+vi.mock('./hermit', async () => ({
+  ...(await vi.importActual<typeof import('./hermit')>('./hermit')),
   getHermitEnvs: jest.fn(),
 }));
-jest.mock('../../modules/datasource', () => mockDeep());
+vi.mock('../../modules/datasource', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;

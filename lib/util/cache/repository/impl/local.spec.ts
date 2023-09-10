@@ -9,7 +9,7 @@ import type { RepoCacheData } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';
 
-jest.mock('../../../fs');
+vi.mock('../../../fs');
 
 async function createCacheRecord(
   data: RepoCacheData,

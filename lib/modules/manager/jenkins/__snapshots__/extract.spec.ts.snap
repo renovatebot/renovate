@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/jenkins/extract extractPackageFile() extracts multiple image lines in text format 1`] = `
+exports[`modules/manager/jenkins/extract > extractPackageFile() > extracts multiple image lines in text format 1`] = `
 [
   {
     "currentValue": "1.2.3",
@@ -43,7 +43,7 @@ exports[`modules/manager/jenkins/extract extractPackageFile() extracts multiple 
 ]
 `;
 
-exports[`modules/manager/jenkins/extract extractPackageFile() extracts multiple image lines in yaml format 1`] = `
+exports[`modules/manager/jenkins/extract > extractPackageFile() > extracts multiple image lines in yaml format 1`] = `
 [
   {
     "currentValue": "latest",
