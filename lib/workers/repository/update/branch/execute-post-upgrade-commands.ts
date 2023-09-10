@@ -45,7 +45,7 @@ export async function postUpgradeCommandsExecutor(
       },
       `Checking for post-upgrade tasks`
     );
-    const commands = upgrade.postUpgradeTasks?.commands ?? [];
+    const commands = upgrade.postUpgradeTasks?.commands;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them

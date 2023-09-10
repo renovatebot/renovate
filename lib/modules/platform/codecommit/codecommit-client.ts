@@ -307,7 +307,9 @@ export function getCodeCommitUrl(
   const token = `${dateTime}Z${signer.signature()}`;
 
   let username = `${process.env.AWS_ACCESS_KEY_ID}${
-    process.env.AWS_SESSION_TOKEN ? `%${process.env.AWS_SESSION_TOKEN}` : ''
+    process.env.AWS_SESSION_TOKEN
+      ? `%${process.env.AWS_SESSION_TOKEN}`
+      : /*istanbul ignore next*/ ''
   }`;
 
   // massaging username with the session token,

@@ -1393,7 +1393,7 @@ describe('workers/repository/update/branch/index', () => {
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>()],
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(

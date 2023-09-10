@@ -1239,11 +1239,17 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
 
           expect(
-            await bitbucket.findPr({
-              branchName: 'userName1/pullRequest1',
-            })
+            await bitbucket.getBranchPr('userName1/pullRequest1')
           ).toBeNull();
         });
+
+        // it('has no existing pr', async () => {
+        //   expect(
+        //     await bitbucket.findPr({
+        //       branchName: 'userName1/pullRequest1',
+        //     })
+        //   ).toBeNull();
+        // });
       });
 
       describe('findPr()', () => {

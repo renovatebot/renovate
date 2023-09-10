@@ -84,11 +84,17 @@ describe('modules/platform/codecommit/index', () => {
       });
     });
 
-    it('should ', async () => {
+    it('should', async () => {
       await expect(
         codeCommit.initPlatform({ endpoint: 'non://parsable.url' })
       ).resolves.toEqual({
         endpoint: 'non://parsable.url',
+      });
+    });
+
+    it('should as well', async () => {
+      await expect(codeCommit.initPlatform({})).resolves.toEqual({
+        endpoint: 'https://git-codecommit.us-east-1.amazonaws.com/',
       });
     });
   });

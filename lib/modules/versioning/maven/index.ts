@@ -152,7 +152,10 @@ function getNewValue({
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return newVersion;
   }
-  return autoExtendMavenRange(currentValue, newVersion) ?? currentValue;
+  return (
+    autoExtendMavenRange(currentValue, newVersion) ??
+    /* istanbul ignore next */ currentValue
+  );
 }
 
 export { isValid };

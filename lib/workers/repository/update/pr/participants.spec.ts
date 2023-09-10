@@ -29,6 +29,11 @@ describe('workers/repository/update/pr/participants', () => {
   });
 
   describe('assignees', () => {
+    it('does not assignees when none', async () => {
+      await addParticipants({ ...config, assignees: undefined }, pr);
+      expect(platform.addAssignees).not.toHaveBeenCalled();
+    });
+
     it('adds assignees', async () => {
       await addParticipants(config, pr);
       expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b', 'c']);
@@ -74,6 +79,11 @@ describe('workers/repository/update/pr/participants', () => {
   });
 
   describe('reviewers', () => {
+    it('does not assignees when none', async () => {
+      await addParticipants({ ...config, reviewers: undefined }, pr);
+      expect(platform.addReviewers).not.toHaveBeenCalled();
+    });
+
     it('adds reviewers', async () => {
       await addParticipants(config, pr);
       expect(platform.addReviewers).toHaveBeenCalledWith(123, ['x', 'y', 'z']);

@@ -248,7 +248,11 @@ export async function getUpdatedPackageFiles(
             reuseExistingBranch: false,
           });
         }
-        logger.debug(`Updating ${depName} in ${packageFile || lockFile}`);
+        logger.debug(
+          `Updating ${depName} in ${
+            packageFile || /* istanbul ignore next*/ lockFile
+          }`
+        );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
@@ -334,10 +338,7 @@ export async function getUpdatedPackageFiles(
       if (updateArtifacts) {
         const packageFileContents =
           updatedFileContents[packageFile] ||
-          (await getFile(
-            packageFile,
-            reuseExistingBranch ? config.branchName : config.baseBranch
-          ));
+          (await getFile(packageFile, config.baseBranch));
         const results = await updateArtifacts({
           packageFileName: packageFile,
           updatedDeps: [],

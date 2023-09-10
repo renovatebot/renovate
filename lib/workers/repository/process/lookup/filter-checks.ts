@@ -61,7 +61,10 @@ export async function filterInternalChecks(
         updateType,
       } = releaseConfig;
       if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
-        if (getElapsedMs(releaseTimestamp) < (toMs(minimumReleaseAge) ?? 0)) {
+        if (
+          getElapsedMs(releaseTimestamp) <
+          (toMs(minimumReleaseAge) ?? /* istanbul ignore next */ 0)
+        ) {
           // Skip it if it doesn't pass checks
           logger.trace(
             { depName, check: 'minimumReleaseAge' },

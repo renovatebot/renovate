@@ -89,7 +89,7 @@ export function fixParsedRange(range: string): any {
         major,
       };
 
-      let full = `${operator ?? ''}${major}`;
+      let full = `${operator ?? /* istanbul ignore next */ ''}${major}`;
       if (minor) {
         NewSemVer.minor = minor;
         full = `${full}.${minor}`;

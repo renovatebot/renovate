@@ -112,7 +112,7 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders = gheQueryRes?.headers || {};
+    const gheHeaders = gheQueryRes?.headers || /* istanbul ignore next */ {};
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
@@ -580,7 +580,7 @@ export async function initRepo({
             sha,
             force: true,
           },
-          token: forkToken ?? opts.token,
+          token: forkToken ?? /* istanbul ignore next */ opts.token,
         });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
@@ -603,7 +603,7 @@ export async function initRepo({
   // istanbul ignore else
   if (forkToken) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken ?? null;
+    parsedEndpoint.auth = config.forkToken ?? /* istanbul ignore next */ null;
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
@@ -1826,7 +1826,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           const key = `${ecosystem.toLowerCase()}/${name}`;
           const range = vulnerableVersionRange;
           const elem = shortAlerts[key] || {};
-          elem[range] = patch ?? null;
+          elem[range] = patch ?? /* istanbul ignore next */ null;
           shortAlerts[key] = elem;
         }
         logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');

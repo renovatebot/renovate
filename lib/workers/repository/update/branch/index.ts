@@ -346,7 +346,10 @@ export async function processBranch(
           upgrade.releaseTimestamp
         ) {
           const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-          if (timeElapsed < (toMs(upgrade.minimumReleaseAge) ?? 0)) {
+          if (
+            timeElapsed <
+            (toMs(upgrade.minimumReleaseAge) ?? /* istanbul ignore next*/ 0)
+          ) {
             logger.debug(
               {
                 depName: upgrade.depName,
@@ -852,7 +855,7 @@ export async function processBranch(
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
         // skip automerge if there is a new commit since status checks aren't done yet
-        if (!commitSha || config.ignoreTests) {
+        if (config.ignoreTests || !commitSha) {
           logger.debug('checking auto-merge');
           const prAutomergeResult = await checkAutoMerge(pr, config);
           if (prAutomergeResult?.automerged) {

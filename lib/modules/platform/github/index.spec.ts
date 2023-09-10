@@ -887,6 +887,26 @@ describe('modules/platform/github/index', () => {
       expect(res).toMatchObject([{ number: 3 }, { number: 2 }, { number: 1 }]);
     });
 
+    // pre-cautionary test, should not happen irl
+    it('fetches multiple pages(unsorted) and sort in descending', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(pagePath(1))
+        .reply(200, [pr1], {
+          link: `${pageLink(2)}, ${pageLink(3).replace('next', 'last')}`,
+        })
+        .get(pagePath(2))
+        .reply(200, [pr2], { link: pageLink(3) })
+        .get(pagePath(3))
+        .reply(200, [pr3]);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.getPrList();
+
+      expect(res).toMatchObject([{ number: 3 }, { number: 2 }, { number: 1 }]);
+    });
+
     it('synchronizes cache', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -1405,6 +1425,23 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatusCheck('somebranch', 'context-4');
       expect(res).toBeNull();
+    });
+
+    it('returns yellow if state not present in context object', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [
+          {
+            context: 'context-1',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatusCheck('somebranch', 'context-1');
+      expect(res).toBe('yellow');
     });
   });
 

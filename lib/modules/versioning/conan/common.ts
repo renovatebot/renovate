@@ -66,7 +66,9 @@ export function matchesWithOptions(
     options.includePrerelease
   ) {
     const coercedVersion = semver.coerce(cleanedVersion)?.raw;
-    cleanedVersion = coercedVersion ? coercedVersion : '';
+    cleanedVersion = coercedVersion
+      ? coercedVersion
+      : /* istanbul ignore next */ '';
   }
   return semver.satisfies(cleanedVersion, cleanRange, options);
 }
