@@ -9,6 +9,7 @@ import {
   makeVersion,
   matchesWithOptions,
 } from './common';
+import { coerceString } from '../../../util/string';
 
 // always include prereleases
 export function getMajor(version: string): null | number {
@@ -89,7 +90,7 @@ export function fixParsedRange(range: string): any {
         major,
       };
 
-      let full = `${operator ?? /* istanbul ignore next */ ''}${major}`;
+      let full = `${coerceString(operator)}${major}`;
       if (minor) {
         NewSemVer.minor = minor;
         full = `${full}.${minor}`;

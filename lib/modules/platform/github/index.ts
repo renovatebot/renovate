@@ -37,7 +37,7 @@ import type { GithubHttpOptions } from '../../../util/http/github';
 import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { fromBase64, looseEquals } from '../../../util/string';
+import { coerceString, fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
@@ -580,7 +580,7 @@ export async function initRepo({
             sha,
             force: true,
           },
-          token: forkToken ?? /* istanbul ignore next */ opts.token,
+          token: coerceString(forkToken, opts.token),
         });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(

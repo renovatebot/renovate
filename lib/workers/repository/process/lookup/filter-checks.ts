@@ -13,6 +13,7 @@ import { applyPackageRules } from '../../../../util/package-rules';
 import { toMs } from '../../../../util/pretty-time';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
+import { coerceNumber } from '../../../../util/number';
 
 export interface InternalChecksResult {
   release: Release;
@@ -63,7 +64,7 @@ export async function filterInternalChecks(
       if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
         if (
           getElapsedMs(releaseTimestamp) <
-          (toMs(minimumReleaseAge) ?? /* istanbul ignore next */ 0)
+          coerceNumber(toMs(minimumReleaseAge), 0)
         ) {
           // Skip it if it doesn't pass checks
           logger.trace(

@@ -1249,10 +1249,18 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('has no existing pr', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
           expect(
-            await bitbucket.findPr({
-              branchName: 'userName1/pullRequest1',
-            })
+            await bitbucket.getBranchPr('userName1/pullRequest1')
           ).toBeNull();
         });
       });
