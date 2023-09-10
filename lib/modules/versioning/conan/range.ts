@@ -1,6 +1,7 @@
 import * as semver from 'semver';
 import { SemVer, parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
+import { coerceString } from '../../../util/string';
 import type { NewValueConfig } from '../types';
 import {
   cleanVersion,
@@ -9,7 +10,6 @@ import {
   makeVersion,
   matchesWithOptions,
 } from './common';
-import { coerceString } from '../../../util/string';
 
 // always include prereleases
 export function getMajor(version: string): null | number {

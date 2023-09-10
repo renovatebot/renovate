@@ -279,8 +279,7 @@ function overrideDepPosition(
       overrideDep = overrideDep[parent]! as Record<string, RecursiveOverride>;
     }
   }
-  const overrideDepName =
-    depName === lastParent ? /* istanbul ignore next */ '.' : depName;
+  const overrideDepName = depName === lastParent ? '.' : depName;
   const depObjectReference = overrideDep as Record<string, string>;
   return { depObjectReference, overrideDepName };
 }
