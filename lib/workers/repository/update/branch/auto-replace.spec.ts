@@ -12,7 +12,7 @@ const sampleHtml = Fixtures.get(
   `../../../../modules/manager/html`
 );
 
-jest.mock('fs-extra', () => Fixtures.fsExtra());
+jest.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {

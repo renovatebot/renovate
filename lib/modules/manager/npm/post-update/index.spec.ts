@@ -62,7 +62,6 @@ describe('modules/manager/npm/post-update/index', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
     GlobalConfig.set({ localDir: '' });
     baseConfig = partial<PostUpdateConfig>({
       upgrades: [],

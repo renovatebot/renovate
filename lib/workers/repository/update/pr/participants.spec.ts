@@ -25,7 +25,6 @@ describe('workers/repository/update/pr/participants', () => {
 
   beforeEach(() => {
     GlobalConfig.reset();
-    jest.resetAllMocks();
   });
 
   describe('assignees', () => {

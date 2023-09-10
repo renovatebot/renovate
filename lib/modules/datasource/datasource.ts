@@ -46,11 +46,7 @@ export abstract class Datasource implements DatasourceApi {
 
       const statusCode = err.response?.statusCode;
       if (statusCode) {
-        if (statusCode === 429) {
-          throw new ExternalHostError(err);
-        }
-
-        if (statusCode >= 500 && statusCode < 600) {
+        if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
           throw new ExternalHostError(err);
         }
       }

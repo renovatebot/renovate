@@ -42,7 +42,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';
       OnboardingState.prUpdateRequested = false;

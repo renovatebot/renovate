@@ -12,7 +12,7 @@ const yarn = mocked(_yarn);
 
 jest.mock('./npm');
 jest.mock('./yarn', () => ({
-  ...jest.requireActual<any>('./yarn'),
+  ...jest.requireActual<typeof import('./yarn')>('./yarn'),
   getYarnLock: jest.fn(),
 }));
 jest.mock('./pnpm');

@@ -22,7 +22,6 @@ describe('workers/repository/update/branch/reuse', () => {
         rebaseWhen: 'behind-base-branch',
         upgrades: [],
       };
-      jest.resetAllMocks();
     });
 
     it('returns false if branch does not exist', async () => {
