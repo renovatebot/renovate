@@ -1,4 +1,3 @@
-import type { leftContext } from 're2';
 import { RenovateConfig, partial } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
 import {

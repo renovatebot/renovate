@@ -59,7 +59,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
 
-    it('handles an artifact which is a directory', async () => {
+    it('executes commands on update package files', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',

@@ -1248,13 +1248,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toBeNull();
         });
 
-        // it('has no existing pr', async () => {
-        //   expect(
-        //     await bitbucket.findPr({
-        //       branchName: 'userName1/pullRequest1',
-        //     })
-        //   ).toBeNull();
-        // });
+        it('has no existing pr', async () => {
+          expect(
+            await bitbucket.findPr({
+              branchName: 'userName1/pullRequest1',
+            })
+          ).toBeNull();
+        });
       });
 
       describe('findPr()', () => {

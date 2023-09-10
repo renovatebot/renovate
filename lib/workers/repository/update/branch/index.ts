@@ -855,7 +855,7 @@ export async function processBranch(
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
         // skip automerge if there is a new commit since status checks aren't done yet
-        if (config.ignoreTests || !commitSha) {
+        if (!commitSha || config.ignoreTests) {
           logger.debug('checking auto-merge');
           const prAutomergeResult = await checkAutoMerge(pr, config);
           if (prAutomergeResult?.automerged) {
