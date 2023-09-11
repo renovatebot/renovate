@@ -24,26 +24,33 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 | License                                   | [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE)                                                                       | [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license)           |
 | Programming language of project           | Ruby                                                                                                                                                                         | TypeScript                                                                                               |
 
-## Dependency Dashboard
+## Hosted app
+
+This section explains the key differences when you're using the Mend Renovate app or the GitHub-native Dependabot.
+
+If you're going to self-host a bot, read the hosted app section first anyway.
+Then read the self-hosted section.
+
+### Dependency Dashboard
 
 One big feature of Renovate is the Dependency Dashboard, which is enabled by default.
 Read the [Key concepts, Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) page to learn more.
 
 Dependabot does not have a similar feature.
 
-## Grouped updates
+### Grouped updates
 
 Renovate comes with community-provided groupings of dependencies, so it will group common dependencies out-of-the-box.
 
 With Dependabot you'll have to set your own [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups).
 
-## Upgrades common monorepo packages at once
+### Upgrades common monorepo packages at once
 
 Renovate has a [`group:monorepos`](https://docs.renovatebot.com/presets-group/#groupmonorepos) preset, that upgrades common monorepo packages at once.
 
 Dependabot does not update common monorepo packages at once.
 
-## Supported platforms
+### Supported platforms
 
 Platform means the Git-hosting site or program, for example GitHub, GitLab or Azure.
 
@@ -52,23 +59,23 @@ Dependabot only works on GitHub.
 Renovate works on multiple platforms, including GitHub.
 Read the [list of Renovate platforms](https://docs.renovatebot.com/modules/platform/) to learn more.
 
-## Supported languages
+### Supported languages
 
 - [Renovate's supported managers](https://docs.renovatebot.com/modules/manager/)
 - [Dependabot's supported repositories and ecosystems](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems)
 
-## Customizability
+### Customizability
 
 Both Renovate and Dependabot come with good default settings.
 
 Renovate gives you more control over _when_ and _how_ you'll get the updates.
 Renovate gives you tools to reduce the "update noise", read our [Noise reduction](https://docs.renovatebot.com/noise-reduction/) page to learn more.
 
-## Show changelogs
+### Show changelogs
 
 Renovate and Dependabot show changelogs in their PRs.
 
-## Compatiblity score badges
+### Compatibility score badges
 
 Dependabot shows one compatibility score badge.
 This score tells you how many other repositories have passing CI tests for the proposed update.
@@ -83,11 +90,11 @@ Renovate has four _Merge Confidence_ badges:
 
 Read the [Merge Confidence badges](https://docs.renovatebot.com/merge-confidence/) page to learn more.
 
-## Built-in to GitHub vs app
+### Built-in to GitHub vs app
 
 Dependabot is built-in to GitHub, Renovate needs app installation or self-hosting.
 
-## Scheduling
+### Scheduling
 
 Read [Renovate scheduling](https://docs.renovatebot.com/key-concepts/scheduling/).
 With Renovate you can set a schedule per package, manager, or globally.
@@ -99,12 +106,25 @@ Dependabot has four options that apply at a language level:
 - [`schedule.time`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduletime)
 - [`schedule.timezone`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduletimezone)
 
-## License
+### License
 
 Dependabot uses [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE).
 Renovate uses the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license).
 
-## Programming language of project
+### Programming language of project
 
 `dependabot-core` uses Ruby.
 Renovate uses TypeScript.
+
+## Self-hosting a bot
+
+Explain differences between self-hosting Renovate and self-hosting Dependabot in this section.
+
+### Self-hosting Renovate
+
+Link to self-hosting Renovate docs here.
+
+### Self-hosting Dependabot
+
+The Dependabot team has a community-maintained collection of scripts to start self-hosting Dependabot: [`dependabot-script`](https://github.com/dependabot/dependabot-script).
+There's also a community-maintained Dependabot for GitLab: [`dependabot-gitlab/dependabot`](https://gitlab.com/dependabot-gitlab/dependabot).
