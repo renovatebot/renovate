@@ -736,7 +736,11 @@ export async function getPrList(): Promise<GhPr[]> {
     // TODO: check null `repo` (#22198)
     const prCache = await getPrCache(githubApi, repo!, username);
     config.prList = Object.values(prCache).sort(
-      ({ number: a }, { number: b }) => (a > b ? -1 : 1)
+      ({ number: a }, { number: b }) =>
+        a > b
+          ? -1
+          : // cannot be tested because we store in ascending order in prCache
+            /*istanbul ignore next*/ 1
     );
   }
 

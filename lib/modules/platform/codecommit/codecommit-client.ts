@@ -308,7 +308,6 @@ export function getCodeCommitUrl(
   const token = `${dateTime}Z${signer.signature()}`;
 
   let username = `${process.env.AWS_ACCESS_KEY_ID}${coerceString(
-    process.env.AWS_SESSION_TOKEN,
     process.env.AWS_SESSION_TOKEN
   )}`;
 

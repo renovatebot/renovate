@@ -887,26 +887,6 @@ describe('modules/platform/github/index', () => {
       expect(res).toMatchObject([{ number: 3 }, { number: 2 }, { number: 1 }]);
     });
 
-    // pre-cautionary test, should not happen irl
-    it('fetches multiple pages(unsorted) and sort in descending', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope
-        .get(pagePath(1))
-        .reply(200, [pr1], {
-          link: `${pageLink(2)}, ${pageLink(3).replace('next', 'last')}`,
-        })
-        .get(pagePath(2))
-        .reply(200, [pr2], { link: pageLink(3) })
-        .get(pagePath(3))
-        .reply(200, [pr3]);
-      await github.initRepo({ repository: 'some/repo' });
-
-      const res = await github.getPrList();
-
-      expect(res).toMatchObject([{ number: 3 }, { number: 2 }, { number: 1 }]);
-    });
-
     it('synchronizes cache', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
