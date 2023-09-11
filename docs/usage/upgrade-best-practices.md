@@ -2,29 +2,29 @@
 
 This page explains what we (the Renovate maintainers) recommend you do to update your dependencies.
 
-We'll cover different situations like starting a new project, or updating a project with five year old dependencies.
-We also explain why you should update often, and how to nudge your team to update their dependencies.
+We'll cover starting a new project, updating a year-old project, and updating a project with five year old dependencies.
+We explain why you should update often, and how to nudge your team to update their dependencies.
 
 ## General recommendations
 
-In general, we recommend that you:
+In general, you should:
 
 - Run Renovate on _every_ repository
-- Extend from the `config:best-practices` preset instead of `config:recommended`
+- Use the `config:best-practices` preset instead of `config:recommended`
 - Use the Dependency Dashboard issue (it's on by default)
 - Update your dependencies often
 - Read the changelogs for the updates
 - Update to new `major` versions in good time
 - Talk with your team about the update stategy
 
-If you think Renovate is too noisy, please read our [noise reduction docs](./noise-reduction.md).
+If Renovate is too noisy for you, read the [noise reduction docs](./noise-reduction.md).
 
-## About the `config:best-practices` preset
+## Use the `config:best-practices` preset
 
 The `config:recommended` preset is the recommended configuration for most Renovate users.
-We also have a `config:best-practices` preset that includes our upgrade best practices.
+Renovate also has a `config:best-practices` preset that includes our upgrade best practices.
 
-To follow our upgrade best practices, you should extend from the `config:best-practices` preset:
+You should extend from the `config:best-practices` preset:
 
 ```json
 {
@@ -32,7 +32,7 @@ To follow our upgrade best practices, you should extend from the `config:best-pr
 }
 ```
 
-If you're using `config:recommended` then replace it with `config:best-practices`:
+If you're using `config:recommended` now, replace it with `config:best-practices`:
 
 ```diff
 - "extends": ["config:recommended"]
@@ -41,7 +41,7 @@ If you're using `config:recommended` then replace it with `config:best-practices
 
 ### What's in the `config:best-practices preset?
 
-The [`config:best-practices` preset](https://docs.renovatebot.com/presets-config/#configbest-practices) comes with this configuration:
+The [`config:best-practices` preset](https://docs.renovatebot.com/presets-config/#configbest-practices) has this configuration:
 
 ```json
 {
@@ -60,7 +60,7 @@ The next sections explain each part of the preset.
 #### Config migration
 
 Renovate creates a config migration PR to replace old config option names with their new replacements.
-This way your configuration and the Renovate docs always use the same terms.
+This way your configuration file and the Renovate docs always use the same terms.
 
 #### Extends `config:recommended`
 
@@ -73,10 +73,10 @@ The [Renovate docs, Docker Digest pinning](https://docs.renovatebot.com/docker/#
 
 #### Extends `helpers:pinGitHubActionDigests`
 
-The [GitHub Docs, using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions) recommend that you pin GitHub Actions to a full-length commit SHA.
-We agree with GitHub, and go further, because we recommend pinning _all_ Actions.
+The [GitHub Docs, using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions) recommend that you pin third-party GitHub Actions to a full-length commit SHA.
 
-The `helpers:pinGitHubActionDigests` preset pins all GitHub Actions.
+We recommend pinning _all_ Actions.
+That's why the `helpers:pinGitHubActionDigests` preset pins all GitHub Actions.
 
 #### Extends `:pinDevDependencies`
 
@@ -128,7 +128,7 @@ Renovate does not support GitLab's Merge Trains, see [issue #5573](https://githu
 
 ## Starting from a new project
 
-Let's assume you start a new project.
+Let's assume you're starting a new project.
 You created a new Git repository, installed the latest frameworks, libraries and development tools.
 After pushing the initial commit, you should enable and onboard Renovate.
 
@@ -138,9 +138,8 @@ Now you'll have to stay on the "update often" train.
 
 If you have a project that's a year behind on dependencies, you'll need to do some work.
 Let's assume that most dependencies need a `patch` or `minor` update, and at _least_ one dependency needs a `major` update.
-We recommend you start small, and do the easier updates first.
 
-Start with the `patch` and `minor` updates.
+Start small, and get the `patch` and `minor` updates first.
 Read the changelogs for your updates.
 You may have to make small changes to get things working again.
 
@@ -153,7 +152,7 @@ Let multiple team members review your work before merging, it's easy to miss som
 
 Finally, update your development tools.
 
-Now that you're up to date, it's important to start thinking about how to make updating a regular thing.
+Now you're up to date, you should think how to make updating a regular habit.
 
 ## Project with five year old dependencies
 
@@ -165,8 +164,8 @@ If your project is this badly behind on updates, you have two problems:
 
 ### Focus on critical updates first
 
-Let's fix the easier problem first: getting back up to date.
-First update any dependencies that have critical updates for CVEs or other security related improvements.
+Fix the easier problem first: getting back up to date.
+Update any dependencies that have critical updates for CVEs or other security related improvements.
 
 If you're on the GitHub platform: follow the steps listed in the [`vulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts) docs to make sure Renovate is reading GitHub's Vulnerability Alerts.
 
@@ -181,12 +180,12 @@ In that case, update dependency `A` first.
 
 ### Update to latest `minor` or `patch` of current version
 
-Then update all dependencies to their latest `minor` or `patch` version to prepare for dealing with `major` updates.
+Then update all dependencies to their latest `minor` or `patch` version, to prepare for the `major` updates.
 
 ### Take `major` updates in sequence
 
-We recommend you get `major` updates in sequence.
-You'll read the changelogs for each `major` version, and often learn _why_ upstream made certain breaking changes.
+Take `major` updates in sequence.
+This way you'll read the changelogs for each `major` version, and learn _why_ upstream made certain breaking changes.
 
 Say you're on version `1` of a dependency, and the latest `major` version is at `4`.
 You should update to `2`, then `3` and finally `4`.
@@ -209,7 +208,7 @@ Avoid blaming developers for not updating often.
 
 Let's assume most developers _want_ a project that's up to date.
 So why are your developers avoiding updates?
-Here's a list of common reasons:
+Some common reasons:
 
 - Developers get blamed when things break in production
 - There are no tests, so merging updates is scary
@@ -217,34 +216,34 @@ Here's a list of common reasons:
 - Releasing a new version of the project must be done by hand
 - Updating must be done by hand
 - The company doesn't allow developer time for updates
-- The company has complex rules about when to update
+- The company has complex rules about updates
 
-In short, if updating is painful, developers will avoid it.
-The solution is to make it easy and fast to update dependencies.
-Again: focus on the process, not on the people.
+If updating is painful, or takes a lot of time, developers tend to avoid it.
+Make it easy and fast to update dependencies.
 
 ### Talk with your team about the update process
 
 Listen to your team, write down their problems.
-Make time to fix each problem as best as you can.
+Then fix each problem as best as you can.
 
 ### Make updating easy and fast
 
-In short, respect your developer's time and brains.
+Respect your developer's time and brains:
 
-- Use Renovate to propose updates for dependencies
+- Run Renovate on _all_ projects
+- Use Renovate to propose updates
 - Building the project _must_ be as fast as possible
 - Have automated tests for the critical path of your project
 - Run the automated tests on _every_ pull request
-- Enable [GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
-- Use the [`semantic-release`](https://github.com/semantic-release/semantic-release) bot to automate the release process
+- If you're on GitHub: use [GitHub's Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
 - Follow SemVer versioning
+- Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
+- Refactor existing code to make future changes easier
 
 #### Ground rules
 
 As a starting point:
 
-- Run Renovate on _all_ projects
 - Avoid long lived branches that diverge from `main` over time
 - Dig beyond "developer error" when things go wrong, again: focus on the process
 - Ensure company policy allows frequent updates
@@ -260,7 +259,7 @@ As a starting point:
 
 ## How others use Renovate
 
-Read the [Swissquote user story](https://docs.renovatebot.com/user-stories/swissquote/) to learn how they use Renovate to update their dependencies.
+Read the [Swissquote user story](https://docs.renovatebot.com/user-stories/swissquote/) to see how they use Renovate.
 
 ## Recommended reading
 
