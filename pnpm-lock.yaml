@@ -389,8 +389,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@types/common-tags':
-        specifier: 1.8.1
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       '@types/conventional-commits-detector':
         specifier: 1.0.0
         version: 1.0.0
@@ -3779,8 +3779,8 @@ packages:
     resolution: {integrity: sha512-dVoH5zxekPWDBllQ+tpBoSfCVnmOt9JYBbPqtl0YvR0twDrgQ4qGEd1ZqPvAe7SGSALcIXl54bhE+cH7Px3g+A==}
     dev: true
 
-  /@types/common-tags@1.8.1:
-    resolution: {integrity: sha512-20R/mDpKSPWdJs5TOpz3e7zqbeCNuMCPhV7Yndk9KU2Rbij2r5W4RzwDPkzC+2lzUqXYu9rFzTktCBnDjHuNQg==}
+  /@types/common-tags@1.8.2:
+    resolution: {integrity: sha512-Z5UcOnlqxFm0tCCTEhkcVOfSihWOMyKypIWHtQNSYh6fMdPUIVpNdLBYutDpDXVHsMUrYzI2IczUHXIzpUovmQ==}
     dev: true
 
   /@types/conventional-commits-detector@1.0.0:
