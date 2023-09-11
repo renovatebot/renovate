@@ -2,6 +2,7 @@ import type { ProgrammingLanguage } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import * as mavenVersioning from '../../versioning/maven';
 
+export { updateArtifacts } from './lockfile';
 export { extractAllPackageFiles } from './extract';
 export { bumpPackageVersion, updateDependency } from './update';
 
@@ -13,3 +14,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [MavenDatasource.id];
+
+export const supportsLockFileMaintenance = true;
