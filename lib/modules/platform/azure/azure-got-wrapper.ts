@@ -4,7 +4,6 @@ import type { ICoreApi } from 'azure-devops-node-api/CoreApi';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
-import type { IRequestOptions } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
 import type { HostRule } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 
@@ -19,21 +18,16 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   return getHandlerFromToken(config.token!, true);
 }
 
-function getRequestOptions() : IRequestOptions {
-  let options: IRequestOptions = <IRequestOptions>{};
-  options.allowRetries = true;
-  options.maxRetries = 2;
-  return options;
-}
-
 export function azureObj(): azure.WebApi {
   const config = hostRules.find({ hostType, url: endpoint });
   if (!config.token && !(config.username && config.password)) {
     throw new Error(`No config found for azure`);
   }
   const authHandler = getAuthenticationHandler(config);
-  const requestOptions = getRequestOptions();
-  return new azure.WebApi(endpoint, authHandler, requestOptions);
+  return new azure.WebApi(endpoint, authHandler, {
+    allowRetries: true,
+    maxRetries: 2,
+  });
 }
 
 export function gitApi(): Promise<IGitApi> {
