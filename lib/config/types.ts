@@ -95,6 +95,7 @@ export interface RenovateSharedConfig {
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
+  autodiscoverNamespaces?: string[];
   autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
