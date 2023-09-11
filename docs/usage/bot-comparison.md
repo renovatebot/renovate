@@ -22,6 +22,7 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 | Built-in to GitHub                        | Yes                                                                                                                                                                          | No, requires app or self-hosting                                                                         |
 | Scheduling                                | Yes: `daily`, `weekly`, `monthly`                                                                                                                                            | Yes: custom                                                                                              |
 | License                                   | [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE)                                                                       | [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license)           |
+| Programming language of project           | Ruby                                                                                                                                                                         | TypeScript                                                                                               |
 
 ## Dependency Dashboard
 
@@ -102,3 +103,8 @@ Dependabot has four options that apply at a language level:
 
 Dependabot uses [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE).
 Renovate uses the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license).
+
+## Programming language of project
+
+`dependabot-core` uses Ruby.
+Renovate uses TypeScript.
