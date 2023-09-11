@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -8,7 +9,7 @@ import { HexDatasource } from '.';
 const certifiResponse = Fixtures.get('certifi.json');
 const privatePackageResponse = Fixtures.get('private_package.json');
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const baseUrl = 'https://hex.pm/api';
 const datasource = HexDatasource.id;
@@ -17,10 +18,6 @@ describe('modules/datasource/hex/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({});
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
   });
 
   describe('getReleases', () => {

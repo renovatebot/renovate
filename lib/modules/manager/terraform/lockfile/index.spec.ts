@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs, mocked } from '../../../../../test/util';
@@ -10,7 +11,7 @@ import { TerraformProviderHash } from './hash';
 // auto-mock fs
 jest.mock('../../../../util/fs');
 jest.mock('./hash');
-jest.mock('../../../datasource');
+jest.mock('../../../datasource', () => mockDeep());
 
 const config = {
   constraints: {},
@@ -33,8 +34,6 @@ const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
 
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 

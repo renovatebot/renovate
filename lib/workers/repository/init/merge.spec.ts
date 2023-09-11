@@ -34,7 +34,6 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   memCache.init();
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];

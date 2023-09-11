@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { exec as cpExec, envMock } from '../../../test/exec-util';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -11,11 +12,10 @@ import { exec } from '.';
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
 jest.mock('./hermit', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  ...(jest.requireActual('./hermit') as any),
+  ...jest.requireActual<typeof import('./hermit')>('./hermit'),
   getHermitEnvs: jest.fn(),
 }));
-jest.mock('../../modules/datasource');
+jest.mock('../../modules/datasource', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -46,7 +46,6 @@ describe('util/exec/index', () => {
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
-    jest.resetAllMocks();
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;

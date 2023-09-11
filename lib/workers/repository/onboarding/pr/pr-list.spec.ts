@@ -7,7 +7,6 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>({
         prHourlyLimit: 2, // default
       });
