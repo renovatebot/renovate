@@ -2,14 +2,12 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import { ExecError } from '../../../util/exec/exec-error';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 
 async function cargoUpdate(
@@ -50,20 +48,7 @@ async function cargoUpdatePrecise(
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
 
-  try {
-    await exec(cmds, execOptions);
-  } catch (err) {
-    if (err instanceof ExecError) {
-      const pkg = err.cmd.match(regEx(/--package ([^@]+)@/))?.at(1);
-      const msg = err.stderr.match(regEx(/error: (.+)/))?.at(1);
-      if (pkg && msg) {
-        logger.warn(`Could not update cargo package \`${pkg}\`: ${msg}`);
-      } else if (pkg) {
-        logger.warn(`Could not update cargo package \`${pkg}\`.`);
-      }
-    }
-    throw err;
-  }
+  await exec(cmds, execOptions);
 }
 
 export async function updateArtifacts({
@@ -104,16 +89,23 @@ export async function updateArtifacts({
 
     if (isLockFileMaintenance) {
       await cargoUpdate(packageFileName, true, config.constraints?.rust);
-    } else if (updatedDeps.find((dep) => dep.lockedVersion)) {
-      // If we can identify packages by their locked version, then update them precisely
-      await cargoUpdatePrecise(
-        packageFileName,
-        updatedDeps,
-        config.constraints?.rust
-      );
     } else {
-      // If we can't identify packages by their locked version, then perform a full lockfile update
-      await cargoUpdate(packageFileName, false, config.constraints?.rust);
+      const missingDep = updatedDeps.find((dep) => !dep.lockedVersion);
+      if (missingDep) {
+        // If there is a dependency without a locked version then log a warning
+        // and perform a regular workspace lockfile update.
+        logger.warn(
+          `Missing locked version for dependency \`${missingDep.depName}\``
+        );
+        await cargoUpdate(packageFileName, false, config.constraints?.rust);
+      } else {
+        // If all dependencies have locked versions then update them precisely.
+        await cargoUpdatePrecise(
+          packageFileName,
+          updatedDeps,
+          config.constraints?.rust
+        );
+      }
     }
 
     logger.debug('Returning updated Cargo.lock');
