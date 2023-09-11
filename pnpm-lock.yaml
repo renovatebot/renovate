@@ -380,8 +380,8 @@ importers:
         specifier: 17.0.0
         version: 17.0.0
       '@types/callsite':
-        specifier: 1.0.31
-        version: 1.0.31
+        specifier: 1.0.32
+        version: 1.0.32
       '@types/changelog-filename-regex':
         specifier: 2.0.0
         version: 2.0.0
@@ -3767,8 +3767,8 @@ packages:
       '@types/responselike': 1.0.0
     dev: false
 
-  /@types/callsite@1.0.31:
-    resolution: {integrity: sha512-jrKmIHhuZVGUpOR1s4TgY9BTt/Eh9CFCjHVZ2FsrKmHSo3J/vpl6EpK08SfMLrX2IY1ZEFA+BPRTJQGg4xIHsA==}
+  /@types/callsite@1.0.32:
+    resolution: {integrity: sha512-cYpP9vbWPRlwAoejiH+KvH7RYW9klpVt2Da5rYhnb6K4p9jXt1J2uLSLOds0QmfD/dbnCByUtBCs8s7DSuMczQ==}
     dev: true
 
   /@types/changelog-filename-regex@2.0.0:
