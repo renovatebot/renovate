@@ -2,6 +2,7 @@ import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
+import pMap from 'p-map';
 import semver from 'semver';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -180,12 +181,15 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
 
   try {
     const repos = (
-      await Promise.all(
-        urls.map((url) =>
+      await pMap(
+        urls,
+        (url) =>
           gitlabApi.getJson<RepoResponse[]>(url, {
             paginate: true,
-          })
-        )
+          }),
+        {
+          concurrency: 2,
+        }
       )
     ).flatMap((response) => response.body);
 
