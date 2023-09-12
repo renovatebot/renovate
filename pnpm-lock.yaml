@@ -587,8 +587,8 @@ importers:
         specifier: 21.1.1
         version: 21.1.1(typescript@5.1.6)
       tar:
-        specifier: 6.1.15
-        version: 6.1.15
+        specifier: 6.2.0
+        version: 6.2.0
       tmp-promise:
         specifier: 3.0.3
         version: 3.0.3
@@ -4288,7 +4288,7 @@ packages:
       semver: 7.5.4
       stream-to-promise: 2.2.0
       strip-ansi: 6.0.1
-      tar: 6.1.15
+      tar: 6.2.0
       tinylogic: 1.0.3
       treeify: 1.1.0
       tslib: 1.14.1
@@ -4855,7 +4855,7 @@ packages:
       minipass-pipeline: 1.2.4
       p-map: 4.0.0
       ssri: 10.0.5
-      tar: 6.1.15
+      tar: 6.2.0
       unique-filename: 3.0.0
     dev: false
 
@@ -8505,7 +8505,7 @@ packages:
       npmlog: 6.0.2
       rimraf: 3.0.2
       semver: 7.5.4
-      tar: 6.1.15
+      tar: 6.2.0
       which: 2.0.2
     transitivePeerDependencies:
       - supports-color
@@ -10171,8 +10171,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /tar@6.1.15:
-    resolution: {integrity: sha512-/zKt9UyngnxIT/EAGYuxaMYgOIJiP81ab9ZfkILq4oNLPFX50qyYmu7jRj9qeXoxmJHjGlbH0+cm2uy1WCs10A==}
+  /tar@6.2.0:
+    resolution: {integrity: sha512-/Wo7DcT0u5HUV486xg675HtjNd3BXZ6xDbzsCUZPt5iw8bTQ63bP0Raut3mvro9u+CUyq7YQd8Cx55fsZXxqLQ==}
     engines: {node: '>=10'}
     dependencies:
       chownr: 2.0.0
