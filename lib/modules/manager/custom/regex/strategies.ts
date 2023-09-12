@@ -89,7 +89,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
     regexes,
     config,
   }: RecursionParameter = parameters;
-  // abort if we have no matched strings anymore
+  // abort if we have no matchString anymore
   if (regexes.length === index) {
     const result = createDependency(
       {
