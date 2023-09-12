@@ -97,11 +97,11 @@ function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
 export async function getLockfileVersion(folder: string): Promise<string> {
   var lockFiles: string[] = await getLockfileJsonFiles(folder);
   if (lockFiles.length > 0) {
-    const fileContent = await readLocalFile(lockFiles[0]);
+    const fileContent = await readLocalFile(lockFiles[0], 'utf8`);
     if (!fileContent) {
       throw new Error('Could not read lockfile.json');
     }
-    const json = JSON.parse(fileContent.toString());
+    const json = JSON.parse(fileContent);
     const version = json.metaData.config.mavenLockfileVersion;
     return version;
   } else {
