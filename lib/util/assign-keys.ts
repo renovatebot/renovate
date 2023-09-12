@@ -5,7 +5,7 @@ import is from '@sindresorhus/is';
  */
 export function assignKeys<
   Left extends { [key in K]?: unknown },
-  Right extends { [key in K]?: Left[key] },
+  Right extends { [key in K]?: Left[K] },
   K extends keyof Right
 >(left: Left, right: Right, keys: K[]): Left {
   for (const key of keys) {
