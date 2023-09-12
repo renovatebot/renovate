@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -9,7 +10,7 @@ import { getNodeToolConstraint } from './node-version';
 jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs');
 jest.mock('./node-version');
-jest.mock('../../../datasource');
+jest.mock('../../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -29,8 +30,6 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
   describe('generateLockFiles()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       GlobalConfig.set(globalConfig);
       mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({

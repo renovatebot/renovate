@@ -28,7 +28,7 @@ describe('modules/versioning/versioning-metadata', () => {
     );
 
     for (const versioning of allVersioning) {
-      const versioningObj = require(`./${versioning}`);
+      const versioningObj = await import(`./${versioning}`);
       expect(versioningObj.id).toEqual(versioning);
       expect(versioningObj.displayName).toBeDefined();
       expect(versioningObj.urls).toBeDefined();
