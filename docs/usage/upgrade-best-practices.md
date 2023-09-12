@@ -62,6 +62,8 @@ The next sections explain each part of the preset.
 Renovate creates a config migration PR to replace old config option names with their new replacements.
 This way your configuration file and the Renovate docs always use the same terms.
 
+You'll get config migration PRs no matter _how_ you run Renovate: self-hosting or the Mend Renovate app.
+
 #### Extends `config:recommended`
 
 The `config:recommended` preset is a good base to start from.
