@@ -49,7 +49,7 @@ export function generateRegistryLoginCmd(
   repositoryName: string,
   repositoryBaseURL: string,
   repositoryHost: string
-): string | null {
+): Promise<string | null> {
   const repositoryRule: RepositoryRule = {
     name: repositoryName,
     repository: repositoryHost,

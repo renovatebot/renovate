@@ -1,3 +1,9 @@
+import {
+  ECRClient,
+  GetAuthorizationTokenCommand,
+  GetAuthorizationTokenCommandOutput,
+} from '@aws-sdk/client-ecr';
+import { mockClient } from 'aws-sdk-client-mock';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
@@ -8,6 +14,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
+import { toBase64 } from '../../../util/string';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
@@ -17,7 +24,6 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-
 const datasource = mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {
@@ -35,12 +41,29 @@ const ociLockFile1Alias = Fixtures.get('oci_1_alias.lock');
 const ociLockFile2Alias = Fixtures.get('oci_2_alias.lock');
 const chartFileAlias = Fixtures.get('ChartAlias.yaml');
 
+const ociLockFile1ECR = Fixtures.get('oci_1_ecr.lock');
+const ociLockFile2ECR = Fixtures.get('oci_2_ecr.lock');
+const chartFileECR = Fixtures.get('ChartECR.yaml');
+
+const ecrMock = mockClient(ECRClient);
+
+function mockEcrAuthResolve(
+  res: Partial<GetAuthorizationTokenCommandOutput> = {}
+) {
+  ecrMock.on(GetAuthorizationTokenCommand).resolvesOnce(res);
+}
+
+function mockEcrAuthReject(msg: string) {
+  ecrMock.on(GetAuthorizationTokenCommand).rejectsOnce(new Error(msg));
+}
+
 describe('modules/manager/helmv3/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     hostRules.clear();
+    ecrMock.reset();
   });
 
   afterEach(() => {
@@ -720,6 +743,171 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(3);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('supports ECR authentication', async () => {
+    mockEcrAuthResolve({
+      authorizationData: [
+        { authorizationToken: toBase64('token-username:token-password') },
+      ],
+    });
+
+    hostRules.add({
+      username: 'some-username',
+      password: 'some-password',
+      token: 'some-session-token',
+      hostType: 'docker',
+      matchHost: '123456789.dkr.ecr.us-east-1.amazonaws.com',
+    });
+
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1ECR as never);
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [],
+        newPackageFileContent: chartFileECR,
+        config: {
+          ...config,
+          updateType: 'lockFileMaintenance',
+          registryAliases: {},
+        },
+      })
+    ).toMatchObject([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2ECR,
+        },
+      },
+    ]);
+
+    const ecr = ecrMock.call(0).thisValue as ECRClient;
+    expect(await ecr.config.region()).toBe('us-east-1');
+    expect(await ecr.config.credentials()).toEqual({
+      accessKeyId: 'some-username',
+      secretAccessKey: 'some-password',
+      sessionToken: 'some-session-token',
+    });
+
+    expect(execSnapshots).toBeArrayOfSize(2);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('continues without token if ECR token is invalid', async () => {
+    mockEcrAuthResolve({
+      authorizationData: [{ authorizationToken: ':' }],
+    });
+
+    hostRules.add({
+      username: 'some-username',
+      password: 'some-password',
+      token: 'some-session-token',
+      hostType: 'docker',
+      matchHost: '123456789.dkr.ecr.us-east-1.amazonaws.com',
+    });
+
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1ECR as never);
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [],
+        newPackageFileContent: chartFileECR,
+        config: {
+          ...config,
+          updateType: 'lockFileMaintenance',
+          registryAliases: {},
+        },
+      })
+    ).toMatchObject([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2ECR,
+        },
+      },
+    ]);
+
+    const ecr = ecrMock.call(0).thisValue as ECRClient;
+    expect(await ecr.config.region()).toBe('us-east-1');
+    expect(await ecr.config.credentials()).toEqual({
+      accessKeyId: 'some-username',
+      secretAccessKey: 'some-password',
+      sessionToken: 'some-session-token',
+    });
+
+    expect(execSnapshots).toBeArrayOfSize(1);
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('continues without token if ECR authentication fails', async () => {
+    mockEcrAuthReject('some error');
+
+    hostRules.add({
+      username: 'some-username',
+      password: 'some-password',
+      token: 'some-session-token',
+      hostType: 'docker',
+      matchHost: '123456789.dkr.ecr.us-east-1.amazonaws.com',
+    });
+
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1ECR as never);
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [],
+        newPackageFileContent: chartFileECR,
+        config: {
+          ...config,
+          updateType: 'lockFileMaintenance',
+          registryAliases: {},
+        },
+      })
+    ).toMatchObject([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2ECR,
+        },
+      },
+    ]);
+
+    const ecr = ecrMock.call(0).thisValue as ECRClient;
+    expect(await ecr.config.region()).toBe('us-east-1');
+    expect(await ecr.config.credentials()).toEqual({
+      accessKeyId: 'some-username',
+      secretAccessKey: 'some-password',
+      sessionToken: 'some-session-token',
+    });
+
+    expect(execSnapshots).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchSnapshot();
   });
 
