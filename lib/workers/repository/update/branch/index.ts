@@ -30,6 +30,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
@@ -346,10 +347,7 @@ export async function processBranch(
           upgrade.releaseTimestamp
         ) {
           const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-          if (
-            timeElapsed <
-            (toMs(upgrade.minimumReleaseAge) ?? /* istanbul ignore next*/ 0)
-          ) {
+          if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
             logger.debug(
               {
                 depName: upgrade.depName,

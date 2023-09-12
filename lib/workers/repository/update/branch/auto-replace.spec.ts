@@ -45,8 +45,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('rebases if the deps to update has changed', async () => {
-      (upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps),
-        (upgrade.baseDeps![0].currentValue = '1.0.0');
+      upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
+      upgrade.baseDeps![0].currentValue = '1.0.0';
       reuseExistingBranch = true;
       const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
       expect(res).toBeNull();

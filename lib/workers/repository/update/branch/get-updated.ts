@@ -9,6 +9,7 @@ import type {
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
+import { coerceString } from '../../../../util/string';
 import type { BranchConfig } from '../../../types';
 import { doAutoReplace } from './auto-replace';
 
@@ -249,9 +250,7 @@ export async function getUpdatedPackageFiles(
           });
         }
         logger.debug(
-          `Updating ${depName} in ${
-            packageFile || /* istanbul ignore next*/ lockFile
-          }`
+          `Updating ${depName} in ${coerceString(packageFile, lockFile)}`
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
