@@ -1,7 +1,8 @@
+import { mockDeep } from 'jest-mock-extended';
 import { hostRules } from '../../../test/util';
 import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url';
 
-jest.mock('../host-rules');
+jest.mock('../host-rules', () => mockDeep());
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {

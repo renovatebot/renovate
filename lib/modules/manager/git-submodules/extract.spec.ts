@@ -7,8 +7,7 @@ import { extractPackageFile } from '.';
 
 jest.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const Git = jest.requireActual('simple-git') as SimpleGitFactory;
+const Git = jest.requireActual<SimpleGitFactory>('simple-git');
 
 const gitMock = mock<SimpleGit>();
 

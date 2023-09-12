@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -11,7 +12,7 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
 
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
@@ -36,9 +37,6 @@ const chartFileAlias = Fixtures.get('ChartAlias.yaml');
 
 describe('modules/manager/helmv3/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

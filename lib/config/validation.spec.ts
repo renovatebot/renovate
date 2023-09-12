@@ -444,13 +444,51 @@ describe('config/validation', () => {
       `);
     });
 
+    it('errors if invalid regexManager customType', async () => {
+      const config = {
+        regexManagers: [
+          {
+            customType: 'unknown',
+            fileMatch: ['some-file'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        [
+          {
+            "message": "Invalid customType: unknown. Key is not a custom manager",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
     it('errors if empty regexManager matchStrings', async () => {
       const config = {
         regexManagers: [
-          { customType: 'regex', fileMatch: ['foo'], matchStrings: [] },
           {
             customType: 'regex',
             fileMatch: ['foo'],
+            matchStrings: [],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
+          },
+          {
+            customType: 'regex',
+            fileMatch: ['foo'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
@@ -499,6 +537,9 @@ describe('config/validation', () => {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
@@ -508,6 +549,26 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
+    });
+
+    // testing if we get all errors at once or not (possible), this does not include customType or fileMatch
+    // since they are common to all custom managers
+    it('validates all possible regex manager options', async () => {
+      const config: RenovateConfig = {
+        regexManagers: [
+          {
+            customType: 'regex',
+            fileMatch: ['Dockerfile'],
+            matchStrings: ['***$}{]]['], // invalid matchStrings regex, no depName, datasource and currentValue
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(4);
     });
 
     it('passes if regexManager fields are present', async () => {
