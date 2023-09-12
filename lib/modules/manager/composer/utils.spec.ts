@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { Lockfile, PackageFile } from './schema';
@@ -7,7 +8,7 @@ import {
   requireComposerDependencyInstallation,
 } from './utils';
 
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 describe('modules/manager/composer/utils', () => {
   beforeEach(() => {

@@ -1,9 +1,11 @@
+import { partial } from '../../../test/util';
 import { HelmDatasource } from './helm';
 import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
   massageUrl,
+  normalizeDate,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -502,4 +504,38 @@ describe('modules/datasource/metadata', () => {
       expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
     }
   );
+
+  // for coverage
+  it('should handle dep with no releases', () => {
+    const dep = partial<ReleaseResult>({});
+
+    const datasource = PypiDatasource.id;
+    const packageName = 'django';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toEqual({
+      changelogUrl:
+        'https://github.com/django/django/tree/master/docs/releases',
+      sourceUrl: 'https://github.com/django/django',
+    });
+  });
+
+  describe('normalizeDate()', () => {
+    it('works for number input', () => {
+      const now = Date.now();
+      expect(normalizeDate(now)).toBe(new Date(now).toISOString());
+    });
+
+    it('works for string input', () => {
+      expect(normalizeDate('2021-01-01')).toBe(
+        new Date('2021-01-01').toISOString()
+      );
+    });
+
+    it('works for Date instance', () => {
+      expect(normalizeDate(new Date('2021-01-01'))).toBe(
+        new Date('2021-01-01').toISOString()
+      );
+    });
+  });
 });

@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { GoogleAuth } from 'google-auth-library';
+import { mockDeep } from 'jest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
@@ -17,6 +18,7 @@ const hostRules = mocked(_hostRules);
 
 jest.mock('../../../util/host-rules');
 jest.mock('google-auth-library');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const ecrMock = mockClient(ECRClient);
 

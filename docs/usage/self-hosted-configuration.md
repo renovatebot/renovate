@@ -125,6 +125,20 @@ If using negations, all repositories except those who match the regex are added 
 }
 ```
 
+## autodiscoverNamespaces
+
+You can use this option to autodiscover projects in specific namespaces (a.k.a. groups/organizations/workspaces).
+In contrast to `autodiscoverFilter` the filtering is done by the platform and therefore more efficient.
+
+For example:
+
+```json
+{
+  "platform": "gitlab",
+  "autodiscoverNamespaces": ["a-group", "another-group/some-subgroup"]
+}
+```
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
@@ -577,7 +591,8 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 ## onboardingPrTitle
 
-Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+If you have an existing Renovate installation and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
+This is similar to what happens when you change the `onboardingBranch` config option.
 
 ## onboardingRebaseCheckbox
 
@@ -585,14 +600,26 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 When this option is `true`, Renovate will do the following during repository initialization:
 
-- Try to fetch the default config file (`renovate.json`)
-- Check if the file contains `"enabled": false`
+1. Try to fetch the default config file (e.g. `renovate.json`)
+1. Check if the file contains `"enabled": false`
+1. If so, skip cloning and skip the repository immediately
+
+If `onboardingConfigFileName` is set, that file name will be used instead of the default.
 
 If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
 Otherwise, it will continue as normal.
 
-This option is only useful where the ratio of disabled repos is quite high.
-You spend one extra API call per repo, but skip cloning disabled repositories.
+`optimizeForDisabled` can make initialization quicker in cases where most repositories are disabled, but it uses an extra API call for enabled repositories.
+
+A second, advanced, use also exists when the bot global config has `extends: [":disableRenovate"]`.
+In that case, Renovate searches the repository config file for any of these configurations:
+
+- `extends: [":enableRenovate"]`
+- `ignorePresets: [":disableRenovate"]`
+- `enabled: true`
+
+If Renovate finds any of the above configurations, it continues initializing the repository.
+If not, then Renovate skips the repository without cloning it.
 
 ## password
 
