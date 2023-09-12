@@ -7,6 +7,7 @@ import type { ExecResult } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { GlobalConfig } from '../../../config/global';
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -14,24 +15,28 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    // Check if any Maven dependencies were updated
     if (!updatedDeps.some((dep) => dep.datasource === 'maven')) {
       logger.debug(
         'No Maven dependency version updated - skipping Artifacts update'
       );
       return null;
     }
-    const parent = upath.dirname(packageFileName);
-    const parentDir = upath.resolve(parent);
-    const files = await getLockfileJsonFiles(parentDir);
+    // Check if any Maven dependencies were updated
+    logger.info({ updatedDeps }, 'maven-lockfile.updateArtifacts()');
+    const rootDir = GlobalConfig.get().localDir;
+    if (!rootDir) {
+      logger.error('No rootDir found');
+      return null;
+    }
+    const files = await getLockfileJsonFiles(rootDir);
 
     // Check if any files were found
     if (files.length > 0) {
       logger.info(`Found ${files.length} lockfile.json files`);
       const execOptions = {
-        cwd: parentDir,
+        cwd: rootDir,
       };
-      const maven_lockfile_version = await getLockfileVersion(parentDir);
+      const maven_lockfile_version = await getLockfileVersion(rootDir);
       // Generate the Maven lockfile using the `mvn` command
       const cmd = `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
       const result: ExecResult = await exec(cmd, execOptions);
@@ -88,7 +93,7 @@ function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
   return glob('**/lockfile.json', { cwd: directoryPath });
 }
 /**
- * Returns the version of the maven-lockfile plugin used in the project. 
+ * Returns the version of the maven-lockfile plugin used in the project.
  * For this the `lockfile.json` file is read and the version is extracted from the `metaData.config.mavenLockfileVersion` field.
  *
  * @param {string} folder - The folder to check. This should be the parent folder of the `pom.xml` file.
@@ -97,7 +102,7 @@ function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
 export async function getLockfileVersion(folder: string): Promise<string> {
   var lockFiles: string[] = await getLockfileJsonFiles(folder);
   if (lockFiles.length > 0) {
-    const fileContent = await readLocalFile(lockFiles[0], 'utf8`);
+    const fileContent = await readLocalFile(lockFiles[0], 'utf8');
     if (!fileContent) {
       throw new Error('Could not read lockfile.json');
     }
