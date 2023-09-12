@@ -34,7 +34,7 @@ const repoGroups = {
   'arcus.webapi': 'https://github.com/arcus-azure/arcus.webapi',
   'aspnet aspnetwebstack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet extensions': 'https://github.com/aspnet/Extensions',
-  'aspnet health checks':
+  'aspnet-health-checks':
     'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'automapper-dotnet': [
