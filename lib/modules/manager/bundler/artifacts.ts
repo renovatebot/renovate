@@ -77,8 +77,8 @@ export async function updateArtifacts(
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(existingError);
   }
-  const lockFileName = await getLockFilePath(packageFileName);
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const lockFilePath = await getLockFilePath(packageFileName);
+  const existingLockFileContent = await readLocalFile(lockFilePath, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
@@ -174,7 +174,7 @@ export async function updateArtifacts(
     }
 
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile: lockFilePath,
       extraEnv: {
         ...bundlerHostRulesVariables,
         GEM_HOME: await ensureCacheDir('bundler'),
@@ -195,16 +195,16 @@ export async function updateArtifacts(
     await exec(commands, execOptions);
 
     const status = await getRepoStatus();
-    if (!status.modified.includes(lockFileName)) {
+    if (!status.modified.includes(lockFilePath)) {
       return null;
     }
     logger.debug('Returning updated Gemfile.lock');
-    const lockFileContent = await readLocalFile(lockFileName);
+    const lockFileContent = await readLocalFile(lockFilePath);
     return [
       {
         file: {
           type: 'addition',
-          path: lockFileName,
+          path: lockFilePath,
           contents: lockFileContent,
         },
       },
@@ -221,7 +221,7 @@ export async function updateArtifacts(
       return [
         {
           artifactError: {
-            lockFile: lockFileName,
+            lockFile: lockFilePath,
             stderr: output,
           },
         },
@@ -275,7 +275,7 @@ export async function updateArtifacts(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          lockFile: lockFilePath,
           stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },
