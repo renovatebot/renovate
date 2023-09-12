@@ -34,6 +34,8 @@ const repoGroups = {
   'arcus.webapi': 'https://github.com/arcus-azure/arcus.webapi',
   'aspnet aspnetwebstack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet extensions': 'https://github.com/aspnet/Extensions',
+  'aspnet health checks':
+    'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
@@ -323,6 +325,7 @@ const repoGroups = {
   'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
+  'mongo-csharp-driver': 'https://github.com/mongodb/mongo-csharp-driver',
   mstest: 'https://github.com/microsoft/testfx',
   'mutation-testing-elements':
     'https://github.com/stryker-mutator/mutation-testing-elements',
