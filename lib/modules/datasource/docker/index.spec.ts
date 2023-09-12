@@ -4,21 +4,21 @@ import {
   GetAuthorizationTokenCommandOutput,
 } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
-import { GoogleAuth } from 'google-auth-library';
+import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'jest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked } from '../../../../test/util';
+import {logger, mocked} from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
+const googleAuth = mocked(_googleAuth);
 
-jest.mock('../../../util/host-rules');
-jest.mock('google-auth-library');
 jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('google-auth-library')
 
 const ecrMock = mockClient(ECRClient);
 
@@ -41,9 +41,7 @@ function mockEcrAuthReject(msg: string) {
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
-    if (GoogleAuth) {
-      (GoogleAuth as any).mockReset();
-    }
+    googleAuth.GoogleAuth.mockReset();
     ecrMock.reset();
     hostRules.find.mockReturnValue({
       username: 'some-username',
@@ -371,11 +369,9 @@ describe('modules/datasource/docker/index', () => {
         .matchHeader('authorization', 'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: jest.fn(() => {
-          return Promise.resolve('some-token');
-        }),
-      }));
+      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockResolvedValue("some-token")
+      })));
 
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
@@ -386,7 +382,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBe('some-digest');
-      expect(GoogleAuth).toHaveBeenCalledTimes(1);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
     });
 
     it('supports Google ADC authentication for gar', async () => {
@@ -400,11 +396,9 @@ describe('modules/datasource/docker/index', () => {
         .matchHeader('authorization', 'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: jest.fn(() => {
-          return Promise.resolve('some-token');
-        }),
-      }));
+      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockResolvedValue("some-token")
+      })));
 
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
@@ -416,7 +410,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBe('some-digest');
-      expect(GoogleAuth).toHaveBeenCalledTimes(1);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
     });
 
     it('supports basic authentication for gcr', async () => {
@@ -430,11 +424,9 @@ describe('modules/datasource/docker/index', () => {
         .matchHeader('authorization', 'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: jest.fn(() => {
-          return Promise.resolve('some-token');
-        }),
-      }));
+      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockResolvedValue("some-token")
+      })));
 
       const res = await getDigest(
         {
@@ -444,7 +436,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBe('some-digest');
-      expect(GoogleAuth).toHaveBeenCalledTimes(0);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
     });
 
     it('supports basic authentication for gar', async () => {
@@ -458,11 +450,9 @@ describe('modules/datasource/docker/index', () => {
         .matchHeader('authorization', 'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: jest.fn(() => {
-          return Promise.resolve('some-token');
-        }),
-      }));
+      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockResolvedValue("some-token")
+      })));
 
       const res = await getDigest(
         {
@@ -473,7 +463,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBe('some-digest');
-      expect(GoogleAuth).toHaveBeenCalledTimes(0);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
     });
 
     it('supports public gcr', async () => {
@@ -486,10 +476,6 @@ describe('modules/datasource/docker/index', () => {
         .head('/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: () => {},
-      }));
-
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
         {
@@ -500,7 +486,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBe('some-digest');
-      expect(GoogleAuth).toHaveBeenCalledTimes(0);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
     });
 
     it('supports public gar', async () => {
@@ -513,10 +499,6 @@ describe('modules/datasource/docker/index', () => {
         .head('/some-project/some-repo/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: () => {},
-      }));
-
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
         {
@@ -527,7 +509,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBe('some-digest');
-      expect(GoogleAuth).toHaveBeenCalledTimes(0);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
     });
 
     it('continues without token if Google ADC fails for gcr', async () => {
@@ -535,11 +517,9 @@ describe('modules/datasource/docker/index', () => {
       httpMock.scope(gcrUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: jest.fn(() => {
-          return Promise.resolve();
-        }),
-      }));
+      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockResolvedValue(undefined)
+      })));
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -549,7 +529,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBeNull();
-      expect(GoogleAuth).toHaveBeenCalledTimes(1);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
     });
 
     it('continues without token if Google ADC fails for gar', async () => {
@@ -557,11 +537,9 @@ describe('modules/datasource/docker/index', () => {
       httpMock.scope(garUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
-      (GoogleAuth as any).mockImplementationOnce(() => ({
-        getAccessToken: jest.fn(() => {
-          return Promise.reject('some-error');
-        }),
-      }));
+      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
+        getAccessToken: jest.fn().mockRejectedValue("some-error")
+      })));
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -571,7 +549,7 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBeNull();
-      expect(GoogleAuth).toHaveBeenCalledTimes(1);
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
     });
 
     it('continues without token, when no header is present', async () => {
