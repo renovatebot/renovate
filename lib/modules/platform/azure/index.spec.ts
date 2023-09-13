@@ -6,7 +6,8 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { partial } from '../../../../test/util';
+import { mockDeep } from 'jest-mock-extended';
+import { mocked, partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -17,30 +18,32 @@ import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 
+jest.mock('./azure-got-wrapper');
+jest.mock('./azure-helper');
+jest.mock('../../../util/git');
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('../../../util/sanitize', () =>
+  mockDeep({ sanitize: (s: string) => s })
+);
+jest.mock('timers/promises');
+
 describe('modules/platform/azure/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
   let git: jest.Mocked<typeof _git>;
-  let logger: jest.Mocked<typeof _logger>;
+  let logger: jest.MockedObject<typeof _logger>;
 
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('./azure-got-wrapper');
-    jest.mock('./azure-helper');
-    jest.mock('../../../util/git');
-    jest.mock('../../../util/host-rules');
-    jest.mock('../../../logger');
-    jest.mock('timers/promises');
-    hostRules = require('../../../util/host-rules');
-    require('../../../util/sanitize').sanitize = jest.fn((input) => input);
+    hostRules = jest.requireMock('../../../util/host-rules');
     azure = await import('.');
-    azureApi = require('./azure-got-wrapper');
-    azureHelper = require('./azure-helper');
-    logger = (await import('../../../logger')).logger as never;
-    git = require('../../../util/git');
+    azureApi = jest.requireMock('./azure-got-wrapper');
+    azureHelper = jest.requireMock('./azure-helper');
+    logger = mocked(await import('../../../logger')).logger;
+    git = jest.requireMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.find.mockReturnValue({

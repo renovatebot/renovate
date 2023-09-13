@@ -33,7 +33,6 @@ type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 
 describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     memCache.init();
   });
 

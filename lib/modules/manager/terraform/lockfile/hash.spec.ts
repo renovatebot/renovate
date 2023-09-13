@@ -4,14 +4,13 @@ import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { getFixturePath, logger } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import type { Logger } from '../../../../logger/types';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { TerraformProviderHash } from './hash';
 
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const releaseBackendAzurerm = Fixtures.get('releaseBackendAzurerm_2_56_0.json');
 
-const log = logger.logger as jest.Mocked<Logger>;
+const log = logger.logger;
 
 describe('modules/manager/terraform/lockfile/hash', () => {
   let cacheDir: DirectoryResult;

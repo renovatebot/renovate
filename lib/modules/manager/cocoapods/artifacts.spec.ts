@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -12,8 +13,7 @@ import { updateArtifacts } from '.';
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
-jest.mock('../../platform');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 const datasource = mocked(_datasource);
 
@@ -31,7 +31,6 @@ const adminConfig: RepoGlobalConfig = {
 
 describe('modules/manager/cocoapods/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
     // can't be mocked

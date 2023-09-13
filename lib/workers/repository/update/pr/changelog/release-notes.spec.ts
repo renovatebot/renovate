@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
 import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
@@ -23,7 +24,7 @@ import type {
   ChangeLogResult,
 } from './types';
 
-jest.mock('../../../../../util/host-rules');
+jest.mock('../../../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 

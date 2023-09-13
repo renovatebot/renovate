@@ -5,9 +5,6 @@ import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
 
 jest.mock('../../../../util/fs');
-const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
-  '../../../../util/fs'
-);
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -27,7 +24,7 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      const realFs = jest.requireActual<typeof fs>('../../../../util/fs');
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);

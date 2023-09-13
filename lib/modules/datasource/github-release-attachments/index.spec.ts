@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
@@ -5,7 +6,7 @@ import * as _hostRules from '../../../util/host-rules';
 import { GitHubReleaseAttachmentMocker } from './test';
 import { GithubReleaseAttachmentsDatasource } from '.';
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 
 const githubApiHost = 'https://api.github.com';

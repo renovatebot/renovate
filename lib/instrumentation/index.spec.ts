@@ -1,4 +1,3 @@
-import { afterAll } from '@jest/globals';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';

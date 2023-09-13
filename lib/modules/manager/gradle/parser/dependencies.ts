@@ -31,7 +31,7 @@ const qVersion = qValueMatcher.handler((ctx) =>
 // "foo:bar:1.2.3"
 // "foo:bar:$baz"
 // "foo" + "${bar}" + baz
-const qDependencyStrings = qTemplateString
+export const qDependencyStrings = qTemplateString
   .opt(q.op<Ctx>('+').join(qValueMatcher))
   .handler((ctx: Ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
   .handler(handleDepString)

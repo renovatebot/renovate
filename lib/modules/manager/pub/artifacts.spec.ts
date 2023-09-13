@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, mocked } from '../../../../test/util';
@@ -13,7 +14,7 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/http');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -45,8 +46,6 @@ const updateArtifact: UpdateArtifact = {
 
 describe('modules/manager/pub/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
