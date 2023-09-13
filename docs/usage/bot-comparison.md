@@ -126,6 +126,16 @@ You can self-host Renovate on all [officially supported platforms](https://docs.
 
 If you decide to self-host Renovate, start by reading the items from the [Self-hosting Renovate reading list](./reading-list.md#self-hosting-renovate).
 
+Available [Renovate distributions](./getting-started/running.md#available-distributions):
+
+- npm package (CLI)
+- Docker images
+- GitHub Action
+- GitLab Runner
+- Mend Renovate On-Premises
+- Mend Remediate (commercial offering)
+- Forking Renovate app
+
 ### Self-hosting Dependabot
 
 The Dependabot team has a community-maintained collection of scripts to start self-hosting Dependabot: [`dependabot-script`](https://github.com/dependabot/dependabot-script).
