@@ -28,7 +28,7 @@ describe('workers/repository/update/pr/participants', () => {
   });
 
   describe('assignees', () => {
-    it('does not assignees when none', async () => {
+    it('does not assignees when there are none', async () => {
       await addParticipants({ ...config, assignees: undefined }, pr);
       expect(platform.addAssignees).not.toHaveBeenCalled();
     });
