@@ -136,7 +136,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
       buf = [];
     }
   });
-  return result.length ? result : /* istanbul ignore next */ [zeroToken];
+  return result.length ? result : [zeroToken];
 }
 
 function nullFor(token: Token): Token {
