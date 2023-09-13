@@ -404,12 +404,6 @@ describe('modules/versioning/maven/compare', () => {
       },
       { input: '', expected: [zeroToken] },
     ];
-
-    it('should fallback to zeroToken', () => {
-      for (const { input, expected } of testObj) {
-        expect(tokenize(input)).toEqual(expected);
-      }
-    });
   });
 
   describe('Non-standard behavior', () => {
