@@ -78,7 +78,7 @@ describe('workers/repository/update/pr/participants', () => {
   });
 
   describe('reviewers', () => {
-    it('does not assignees when none', async () => {
+    it('does not assignees when there are none', async () => {
       await addParticipants({ ...config, reviewers: undefined }, pr);
       expect(platform.addReviewers).not.toHaveBeenCalled();
     });
