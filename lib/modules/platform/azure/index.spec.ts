@@ -1255,16 +1255,17 @@ describe('modules/platform/azure/index', () => {
     it('passes comment through massageMarkdown', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
-        createThread: jest.fn(() => [{ id: 123 }]),
-        getThreads: jest.fn().mockReturnValue([
+        createThread: jest.fn().mockResolvedValue([{ id: 123 }]),
+        getThreads: jest.fn().mockResolvedValue([
           {
             comments: [{ content: 'end-user comment', id: 1 }],
             id: 2,
           },
         ]),
-        updateComment: jest.fn(() => ({ id: 123 })),
+        updateComment: jest.fn().mockResolvedValue({ id: 123 }),
       };
-      azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+      azureApi.gitApi.mockResolvedValue(partial<IGitApi>(gitApiMock));
+
       await azure.ensureComment({
         number: 42,
         topic: 'some-subject',
