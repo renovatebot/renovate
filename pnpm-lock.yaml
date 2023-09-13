@@ -332,8 +332,8 @@ importers:
         version: 1.20.3
     devDependencies:
       '@hyrious/marshal':
-        specifier: 0.2.5
-        version: 0.2.5
+        specifier: 0.3.0
+        version: 0.3.0
       '@jest/environment':
         specifier: 29.6.4
         version: 29.6.4
@@ -1993,8 +1993,8 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
 
-  /@hyrious/marshal@0.2.5:
-    resolution: {integrity: sha512-z0zS0N9TTX6gh78lsC9rkYMDGCvQAFn0oGT5zftU7HEr6/5woMf022/oMSxE94A1TXRyzk+SE2g7EMFc3n+uCw==}
+  /@hyrious/marshal@0.3.0:
+    resolution: {integrity: sha512-VeQyqt0Mmi+oTu6t1dESnnciVCeWISzbYH4fI+gcG6YnpJuHfPiWIweP7lbGjGqw3SZoGHu+f+takwZW71xenw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     dev: true
 
