@@ -9,20 +9,20 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 
 ## Table of features
 
-| Feature                                   | Dependabot                                                                                                                                                                   | Renovate                                                                                                                                                |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dependency Dashboard                      | No                                                                                                                                                                           | Yes                                                                                                                                                     |
-| Grouped updates                           | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     | Yes, use community-provided groups, or create your own                                                                                                  |
-| Upgrades common monorepo packages at once | No                                                                                                                                                                           | Yes                                                                                                                                                     |
-| Officially supported platforms            | GitHub only                                                                                                                                                                  | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](https://docs.renovatebot.com/#supported-platforms)                                             |
-| Supported languages                       | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/)                                                                                      |
-| Customizability                           | Low                                                                                                                                                                          | High                                                                                                                                                    |
-| Show changelogs                           | Yes                                                                                                                                                                          | Yes                                                                                                                                                     |
-| Compatibility score badges                | One badge with overall compatibility score                                                                                                                                   | Four badges showing: Age, Adoption, Passing, Confidence                                                                                                 |
-| Built-in to GitHub                        | Yes                                                                                                                                                                          | No, requires app or self-hosting                                                                                                                        |
-| Scheduling                                | Yes: `daily`, `weekly`, `monthly`                                                                                                                                            | By default, Renovate runs as often as it is allowed to, read [Renovate scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) to learn more |                                                                                        |
-| License                                   | [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE)                                                                       | [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license)                                                          |
-| Programming language of project           | Ruby                                                                                                                                                                         | TypeScript                                                                                                                                              |
+| Feature                                   | Dependabot                                                                                                                                                                   | Renovate                                                                                                                       |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Dependency Dashboard                      | No                                                                                                                                                                           | Yes                                                                                                                            |
+| Grouped updates                           | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     | Yes, use community-provided groups, or create your own                                                                         |
+| Upgrades common monorepo packages at once | No                                                                                                                                                                           | Yes                                                                                                                            |
+| Officially supported platforms            | GitHub only                                                                                                                                                                  | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](https://docs.renovatebot.com/#supported-platforms)                    |
+| Supported languages                       | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/)                                                             |
+| Customizability                           | Low                                                                                                                                                                          | High                                                                                                                           |
+| Show changelogs                           | Yes                                                                                                                                                                          | Yes                                                                                                                            |
+| Compatibility score badges                | One badge with overall compatibility score                                                                                                                                   | Four badges showing: Age, Adoption, Passing, Confidence                                                                        |
+| Built-in to GitHub                        | Yes                                                                                                                                                                          | No, requires app or self-hosting                                                                                               |
+| Scheduling                                | Yes: `daily`, `weekly`, `monthly`                                                                                                                                            | By default, Renovate runs as often as it is allowed to, read [Renovate scheduling](./key-concepts/scheduling.md) to learn more |
+| License                                   | [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE)                                                                       | [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license)                                 |
+| Programming language of project           | Ruby                                                                                                                                                                         | TypeScript                                                                                                                     |
 
 ## Hosted app
 
@@ -34,7 +34,7 @@ Then read the self-hosted section.
 ### Dependency Dashboard
 
 One big feature of Renovate is the Dependency Dashboard, which is enabled by default.
-Read the [Key concepts, Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) page to learn more.
+Read the [Key concepts, Dependency Dashboard](./key-concepts/dashboard.md) page to learn more.
 
 Dependabot does not have a similar feature.
 
@@ -69,7 +69,7 @@ Read the [list of Renovate platforms](https://docs.renovatebot.com/modules/platf
 Both Renovate and Dependabot come with good default settings.
 
 Renovate gives you more control over _when_ and _how_ you'll get the updates.
-Renovate gives you tools to reduce the "update noise", read our [Noise reduction](https://docs.renovatebot.com/noise-reduction/) page to learn more.
+Renovate gives you tools to reduce the "update noise", read our [Noise reduction](./noise-reduction.md) page to learn more.
 
 ### Show changelogs
 
@@ -88,7 +88,7 @@ Renovate has four _Merge Confidence_ badges:
 - **Passing**: The percentage of updates which have passing tests for this package
 - **Confidence**: The confidence level for this update
 
-Read the [Merge Confidence badges](https://docs.renovatebot.com/merge-confidence/) page to learn more.
+Read the [Merge Confidence badges](./merge-confidence.md) page to learn more.
 
 ### Built-in to GitHub vs app
 
@@ -96,7 +96,7 @@ Dependabot is built-in to GitHub, Renovate needs app installation or self-hostin
 
 ### Scheduling
 
-Read [Renovate scheduling](https://docs.renovatebot.com/key-concepts/scheduling/).
+Read [Renovate scheduling](./key-concepts/scheduling.md).
 With Renovate you can set a schedule per package, manager, or globally.
 
 Dependabot has four options that apply at a language level:
@@ -124,7 +124,7 @@ This section explains how you can self-host each bot.
 
 You can self-host Renovate on all [officially supported platforms](https://docs.renovatebot.com/#supported-platforms).
 
-If you decide to self-host Renovate, start by reading the items from the [Self-hosting Renovate reading list](https://docs.renovatebot.com/reading-list/#self-hosting-renovate).
+If you decide to self-host Renovate, start by reading the items from the [Self-hosting Renovate reading list](./reading-list.md#self-hosting-renovate).
 
 ### Self-hosting Dependabot
 
