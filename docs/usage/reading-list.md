@@ -65,6 +65,7 @@ Then read:
 
 If you're going to self-host Renovate then read:
 
+- [Running Renovate](./getting-started/running.md)
 - [Self-hosting examples](./examples/self-hosting.md)
 - Skim the [self hosted configuration options](./self-hosted-configuration.md)
 
