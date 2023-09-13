@@ -23,7 +23,7 @@ describe('util/coerce', () => {
     it('should return original value', () => {
       expect(coerceToUndefined({})).toEqual({});
       expect(coerceToUndefined('str')).toBe('str');
-      expect(coerceToNull(false)).toBe(false);
+      expect(coerceToUndefined(false)).toBe(false);
     });
   });
 });

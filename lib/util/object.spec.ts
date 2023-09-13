@@ -1,4 +1,4 @@
-import { hasKey } from './object';
+import { coerceObject, hasKey } from './object';
 
 describe('util/object', () => {
   beforeEach(() => {
@@ -15,5 +15,20 @@ describe('util/object', () => {
 
   it('returns false for wrong instance type', () => {
     expect(hasKey('foo', 'i-am-not-an-object')).toBeFalse();
+  });
+
+  describe('coerceObject', () => {
+    it('should return empty object', () => {
+      expect(coerceObject(undefined)).toEqual({});
+      expect(coerceObject(null)).toEqual({});
+    });
+
+    it('should return input object', () => {
+      expect(coerceObject({})).toEqual({});
+      expect(coerceObject({ name: 'name' })).toEqual({ name: 'name' });
+      expect(coerceObject(undefined, { name: 'name' })).toEqual({
+        name: 'name',
+      });
+    });
   });
 });
