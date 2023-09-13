@@ -138,5 +138,19 @@ Available [Renovate distributions](./getting-started/running.md#available-distri
 
 ### Self-hosting Dependabot
 
+You can self-host Dependabot on other platforms than GitHub.
+
+#### `dependabot-core`
+
+If you want to customize Dependabot, or self-host on another platform, you can use [`dependabot-core`](https://github.com/dependabot/dependabot-core).
+Quote from the `dependabot-core` readme:
+
+> It [`dependabot-core`] currently supports opening Pull Requests against repositories hosted on GitHub, Github Enterprise, Azure DevOps, GitLab, BitBucket, and AWS CodeCommit.
+
+#### `dependabot-script`
+
 The Dependabot team has a community-maintained collection of scripts to start self-hosting Dependabot: [`dependabot-script`](https://github.com/dependabot/dependabot-script).
+
+#### `dependabot-gitlab/dependabot`
+
 There's also a community-maintained Dependabot for GitLab: [`dependabot-gitlab/dependabot`](https://gitlab.com/dependabot-gitlab/dependabot).
