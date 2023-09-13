@@ -1,7 +1,11 @@
 import is from '@sindresorhus/is';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
-import type { RegexManagerConfig } from '../modules/manager/custom/regex/types';
+import type {
+  RegexManagerConfig,
+  RegexManagerTemplates,
+} from '../modules/manager/custom/regex/types';
+import type { CustomManager } from '../modules/manager/custom/types';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -12,8 +16,6 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import type {
-  CustomManager,
-  RegexManagerTemplates,
   RenovateConfig,
   RenovateOptions,
   ValidationMessage,
@@ -657,7 +659,7 @@ export async function validateConfig(
 }
 
 function validateRegexManagerFields(
-  regexManager: RegexManagerConfig,
+  regexManager: Partial<RegexManagerConfig>,
   currentPath: string,
   errors: ValidationMessage[]
 ): void {
@@ -684,7 +686,7 @@ function validateRegexManagerFields(
     const templateField = `${field}Template` as keyof RegexManagerTemplates;
     if (
       !regexManager[templateField] &&
-      !regexManager.matchStrings.some((matchString) =>
+      !regexManager.matchStrings?.some((matchString) =>
         matchString.includes(`(?<${field}>`)
       )
     ) {
