@@ -25,11 +25,6 @@ $ renovate-config-validator
  INFO: Config validated successfully
 ```
 
-<!-- prettier-ignore -->
-!!! note
-    The `renovate-config-validator` program is meant to validate one file per run.
-    Avoid checking multiple files in one run.
-
 ### Strict mode
 
 By default, the validator program fails with a non-zero exit code if there are any validation warnings or errors.
