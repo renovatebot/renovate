@@ -4,6 +4,7 @@ import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
+import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
@@ -136,7 +137,7 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
-      for (const relativePath of status.deleted || []) {
+      for (const relativePath of coerceArray(status.deleted)) {
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(

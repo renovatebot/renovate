@@ -136,7 +136,10 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
       buf = [];
     }
   });
-  return result.length ? result : [zeroToken];
+  return result.length
+    ? result
+    : // un-reachable since results array will conatin token even for invalid versions and empty strings
+      /*istanbul ignore next*/ [zeroToken];
 }
 
 function nullFor(token: Token): Token {
