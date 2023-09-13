@@ -14,9 +14,6 @@ describe('util/http/host-rules', () => {
   };
 
   beforeEach(() => {
-    // reset module
-    jest.resetAllMocks();
-
     delete process.env.HTTP_PROXY;
 
     // clean up hostRules

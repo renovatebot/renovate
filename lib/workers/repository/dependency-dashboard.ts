@@ -6,6 +6,7 @@ import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
+import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
 import type { BranchConfig, SelectAllConfig } from '../types';
 import { extractRepoProblems } from './common';
@@ -76,8 +77,7 @@ function getAllSelectedBranches(
 
 function getCheckedBranches(issueBody: string): Record<string, string> {
   let dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody?.matchAll(markedBranchesRe) ??
-    []) {
+  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
     dependencyDashboardChecks[branchName] = type;
   }
   dependencyDashboardChecks = getAllSelectedBranches(
@@ -427,7 +427,7 @@ export async function ensureDependencyDashboard(
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        updatedIssue.body ?? ''
+        coerceString(updatedIssue.body)
       );
       for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];

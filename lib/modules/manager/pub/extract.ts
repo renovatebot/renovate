@@ -16,9 +16,16 @@ function extractFromSection(
     return [];
   }
 
+  const skippedPackages = [
+    'flutter_driver',
+    'flutter_localizations',
+    'flutter_test',
+    'flutter_web_plugins',
+    'meta',
+  ];
   const deps: PackageDependency[] = [];
   for (const depName of Object.keys(sectionContent)) {
-    if (depName === 'meta' || depName === 'flutter_test') {
+    if (skippedPackages.includes(depName)) {
       continue;
     }
 

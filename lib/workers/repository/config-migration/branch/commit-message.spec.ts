@@ -5,10 +5,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
   const config = getConfig();
   const fileName = 'renovate.json';
 
-  afterAll(() => {
-    jest.resetAllMocks();
-  });
-
   it('creates semantic commit message', () => {
     config.semanticCommits = 'enabled';
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
