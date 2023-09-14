@@ -36,11 +36,11 @@ export function extractPackageFile(
         // https://support.atlassian.com/bitbucket-cloud/docs/docker-image-options/
         lineIdx = addDepFromObject(
           deps,
-          config,
           lines,
           lineIdx,
           len,
-          dockerImageObjectGroups.spaces
+          dockerImageObjectGroups.spaces,
+          config.registryAliases
         );
         continue;
       }
@@ -51,7 +51,7 @@ export function extractPackageFile(
 
         if (pipe.startsWith('docker://')) {
           const currentPipe = pipe.replace('docker://', '');
-          addDepAsDockerImage(deps, config, currentPipe);
+          addDepAsDockerImage(deps, currentPipe, config.registryAliases);
         } else {
           addDepAsBitbucketTag(deps, pipe);
         }
@@ -61,7 +61,7 @@ export function extractPackageFile(
       const dockerImageMatch = dockerImageRegex.exec(line);
       if (dockerImageMatch) {
         const currentFrom = dockerImageMatch[1];
-        addDepAsDockerImage(deps, config, currentFrom);
+        addDepAsDockerImage(deps, currentFrom, config.registryAliases);
       }
     }
   } catch (err) /* istanbul ignore next */ {

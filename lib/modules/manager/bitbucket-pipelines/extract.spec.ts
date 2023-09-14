@@ -5,7 +5,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
-        extractPackageFile('nothing here', 'bitbucket-pipelines.yaml')
+        extractPackageFile('nothing here', 'bitbucket-pipelines.yaml', {})
       ).toBeNull();
     });
 
@@ -13,7 +13,8 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
       expect(
         extractPackageFile(
           'image:\n  username: ccc',
-          'bitbucket-pipelines.yaml'
+          'bitbucket-pipelines.yaml',
+          {}
         )
       ).toBeNull();
     });
