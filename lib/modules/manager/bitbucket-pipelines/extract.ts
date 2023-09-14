@@ -1,6 +1,10 @@
 import { logger } from '../../../logger';
 import { newlineRegex } from '../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import {
   addDepAsBitbucketTag,
   addDepAsDockerImage,
@@ -12,7 +16,8 @@ import {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
+  config: ExtractConfig
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
@@ -31,6 +36,7 @@ export function extractPackageFile(
         // https://support.atlassian.com/bitbucket-cloud/docs/docker-image-options/
         lineIdx = addDepFromObject(
           deps,
+          config,
           lines,
           lineIdx,
           len,
@@ -45,7 +51,7 @@ export function extractPackageFile(
 
         if (pipe.startsWith('docker://')) {
           const currentPipe = pipe.replace('docker://', '');
-          addDepAsDockerImage(deps, currentPipe);
+          addDepAsDockerImage(deps, config, currentPipe);
         } else {
           addDepAsBitbucketTag(deps, pipe);
         }
@@ -55,7 +61,7 @@ export function extractPackageFile(
       const dockerImageMatch = dockerImageRegex.exec(line);
       if (dockerImageMatch) {
         const currentFrom = dockerImageMatch[1];
-        addDepAsDockerImage(deps, currentFrom);
+        addDepAsDockerImage(deps, config, currentFrom);
       }
     }
   } catch (err) /* istanbul ignore next */ {
