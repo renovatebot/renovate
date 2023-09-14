@@ -53,7 +53,7 @@ export const presets: Record<string, Preset> = {
           '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
         fileMatch: ['^pom\\.xml$'],
         matchStrings: [
-          '<!--\\s?renovate:( datasource=(?<datasource>.*?))? depName=(?<depName>.*?)\\s?(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+-->\\s+<.*?\\.version>(?<currentValue>.*?)<\\/.*?\\.version>',
+          '<!--\\s?renovate:( datasource=(?<datasource>.*?))? depName=(?<depName>.*?)\\s?(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+-->\\s+<.*?\\.version>(?<currentValue>.*?)<\\/.*?\\.version>',
         ],
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
