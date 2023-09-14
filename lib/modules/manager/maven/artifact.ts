@@ -1,4 +1,3 @@
-import { glob } from 'glob';
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -8,11 +7,10 @@ import type { ExecResult } from '../../../util/exec/types';
 import { readLocalFile, writeLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { fs } from 'memfs';
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
-  updatedDeps,
-  config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     // Check if any Maven dependencies were updated
@@ -24,11 +22,8 @@ export async function updateArtifacts({
     }
     // copied from helmfile/artifact.ts. We need the pom in the state after the update
     await writeLocalFile(packageFileName, newPackageFileContent);
-    const files = await getLockfileJsonFiles(rootDir);
-
-    // Check if any files were found
-    if (files.length > 0) {
-      logger.info(`Found ${files.length} lockfile.json files`);
+    const file = getLockfilePath(rootDir);
+    if (fs.existsSync(file)) {
       const execOptions = {
         cwd: rootDir,
       };
@@ -41,7 +36,7 @@ export async function updateArtifacts({
       const res: UpdateArtifactsResult[] = await addUpdatedLockfiles(status);
       return res;
     } else {
-      logger.debug('No lockfile.json files found');
+      logger.debug('No lockfile.json file found');
       return null;
     }
   } catch (err) {
@@ -80,13 +75,14 @@ async function addUpdatedLockfiles(
   }
   return res;
 }
+
 /**
- * Returns a `Promise<string[]>` of `lockfile.json` files. If the array is empty, no files were found.
- * @param directoryPath the directory to start the search from
- * @returns a `Promise<string[]>` of `lockfile.json` files, empty if none were found.
+ * Returns the path to the `lockfile.json` file in the given directory.
+ * @param directoryPath  The directory to get the path for.
+ * @returns   The path to the `lockfile.json` file in the given directory.
  */
-function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
-  return glob('**/lockfile.json', { cwd: directoryPath });
+function getLockfilePath(directoryPath: string): string {
+  return upath.join(directoryPath, 'lockfile.json');
 }
 /**
  * Returns the version of the maven-lockfile plugin used in the project.
@@ -96,21 +92,17 @@ function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
  * @returns {Promise<string>} The version of the maven-lockfile plugin used in the project.
  */
 export async function getLockfileVersion(folder: string): Promise<string> {
-  const lockFiles: string[] = await getLockfileJsonFiles(folder);
-  if (lockFiles.length > 0) {
-    const fileContent = await readLocalFile(lockFiles[0], 'utf8');
-    if (!fileContent) {
-      throw new Error('Could not read lockfile.json');
-    }
-    const json = JSON.parse(fileContent);
-    const version = json.metaData.config.mavenLockfileVersion;
-    return version;
-  } else {
-    throw new Error(
-      'No lockfile.json files found. Cant get the correct version of maven-lockfile plugin'
-    );
+  const lockFile: string = getLockfilePath(folder);
+  const fileContent = await readLocalFile(lockFile, 'utf8');
+  //TODO:(MartinWitt): add check if file exists?
+  if (!fileContent) {
+    throw new Error('Could not read lockfile.json');
   }
+  const json = JSON.parse(fileContent);
+  const version = json.metaData.config.mavenLockfileVersion;
+  return version;
 }
+
 /**
  * Filters the file paths to only include `lockfile.json` files
  * @param filePaths The file paths to filter

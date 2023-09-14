@@ -2,7 +2,7 @@ import type { Category } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import * as mavenVersioning from '../../versioning/maven';
 
-export { updateArtifacts } from './lockfile';
+export { updateArtifacts } from './artifact';
 export { extractAllPackageFiles } from './extract';
 export { bumpPackageVersion, updateDependency } from './update';
 

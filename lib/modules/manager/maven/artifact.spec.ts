@@ -3,8 +3,8 @@ import { git, partial } from '../../../../test/util';
 
 import { GlobalConfig } from '../../../config/global';
 import type { StatusResult } from '../../../util/git/types';
-import { updateArtifacts } from './lockfile';
-import { getLockfileVersion } from './lockfile';
+import { updateArtifacts } from './artifact';
+import { getLockfileVersion } from './artifact';
 
 jest.mock('../../../util/git');
 
