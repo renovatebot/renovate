@@ -117,8 +117,7 @@ function filterLockfileJsonFiles(filePaths: string[]): string[] {
   if (!filePaths) {
     return [];
   }
-  return filePaths.filter((filePath) => {
-    const fileName = upath.basename(filePath);
-    return fileName === 'lockfile.json';
-  });
+  return filePaths.filter(
+    (filePath) => upath.basename(filePath) === 'lockfile.json'
+  );
 }
