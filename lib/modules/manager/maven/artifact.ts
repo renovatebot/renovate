@@ -13,7 +13,6 @@ export async function updateArtifacts({
   newPackageFileContent,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    // Check if any Maven dependencies were updated
     logger.info('maven-lockfile.updateArtifacts()');
     const rootDir = GlobalConfig.get().localDir;
     if (!rootDir) {
@@ -37,7 +36,13 @@ export async function updateArtifacts({
       return res;
     } else {
       logger.debug('No lockfile.json file found');
-      return null;
+      return [
+        {
+          artifactError: {
+            stderr: "No 'lockfile.json' file found",
+          },
+        },
+      ];
     }
   } catch (err) {
     logger.error({ err }, 'maven-lockfile.updateArtifacts() error');
