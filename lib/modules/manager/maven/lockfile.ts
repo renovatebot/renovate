@@ -1,13 +1,13 @@
 import { glob } from 'glob';
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecResult } from '../../../util/exec/types';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { GlobalConfig } from '../../../config/global';
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -15,19 +15,15 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
-    if (!updatedDeps.some((dep) => dep.datasource === 'maven')) {
-      logger.debug(
-        'No Maven dependency version updated - skipping Artifacts update'
-      );
-      return null;
-    }
     // Check if any Maven dependencies were updated
-    logger.info({ updatedDeps }, 'maven-lockfile.updateArtifacts()');
+    logger.info('maven-lockfile.updateArtifacts()');
     const rootDir = GlobalConfig.get().localDir;
     if (!rootDir) {
       logger.error('No rootDir found');
       return null;
     }
+    // copied from helmfile/artifact.ts. We need the pom in the state after the update
+    await writeLocalFile(packageFileName, newPackageFileContent);
     const files = await getLockfileJsonFiles(rootDir);
 
     // Check if any files were found
@@ -100,7 +96,7 @@ function getLockfileJsonFiles(directoryPath: string): Promise<string[]> {
  * @returns {Promise<string>} The version of the maven-lockfile plugin used in the project.
  */
 export async function getLockfileVersion(folder: string): Promise<string> {
-  var lockFiles: string[] = await getLockfileJsonFiles(folder);
+  const lockFiles: string[] = await getLockfileJsonFiles(folder);
   if (lockFiles.length > 0) {
     const fileContent = await readLocalFile(lockFiles[0], 'utf8');
     if (!fileContent) {
