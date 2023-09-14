@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, hostRules, mockedFunction } from '../../../../test/util';
@@ -10,8 +11,8 @@ import { updateArtifacts } from '.';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules');
-jest.mock('../../datasource');
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('../../datasource', () => mockDeep());
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
@@ -29,8 +30,6 @@ const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     hostRules.getAll.mockReturnValue([]);
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
@@ -238,12 +237,14 @@ describe('modules/manager/mix/artifacts', () => {
     hostRules.getAll.mockReturnValueOnce([
       { matchHost: 'https://hex.pm/api/repos/an_organization/' },
       { matchHost: 'https://hex.pm/api/repos/unauthorized_organization/' },
+      { matchHost: 'https://hex.pm/api/repos/other_organization/' },
       { matchHost: 'https://hex.pm/api/repos/does_not_match_org/packages/' },
       { matchHost: 'https://example.com/api/repos/also_does_not_match_org/' },
       { matchHost: 'hex.pm' },
     ]);
     hostRules.find.mockReturnValueOnce({ token: 'an_organization_token' });
     hostRules.find.mockReturnValueOnce({}); // unauthorized_organization token missing
+    hostRules.find.mockReturnValueOnce({ token: 'other_org_token' });
     hostRules.find.mockReturnValueOnce({ token: 'does_not_match_org_token' });
 
     // erlang
@@ -282,6 +283,9 @@ describe('modules/manager/mix/artifacts', () => {
       { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix hex.organization auth an_organization --key an_organization_token',
+      },
+      {
+        cmd: 'mix hex.organization auth other_organization --key other_org_token',
       },
       { cmd: 'mix deps.update some_package' },
     ]);

@@ -62,7 +62,6 @@ describe('modules/manager/npm/post-update/index', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
     GlobalConfig.set({ localDir: '' });
     baseConfig = partial<PostUpdateConfig>({
       upgrades: [],
@@ -453,6 +452,34 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
         ['packages/pnpm/.npmrc'],
       ]);
+    });
+
+    it('detects if lock file contents are unchanged', async () => {
+      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+      fs.readLocalFile.mockImplementation((f): Promise<any> => {
+        if (f === 'package-lock.json') {
+          return Promise.resolve('{}');
+        }
+        return Promise.resolve(null);
+      });
+      git.getFile.mockImplementation((f) => {
+        if (f === 'package-lock.json') {
+          return Promise.resolve('{}');
+        }
+        return Promise.resolve(null);
+      });
+      expect(
+        (
+          await getAdditionalFiles(
+            {
+              ...updateConfig,
+              updateLockFiles: true,
+              reuseExistingBranch: true,
+            },
+            additionalFiles
+          )
+        ).updatedArtifacts.find((a) => a.path === 'package-lock.json')
+      ).toBeUndefined();
     });
 
     it('works for yarn', async () => {

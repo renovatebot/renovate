@@ -128,7 +128,7 @@ And worse still, npm package versions that are less than 24 hours [can be unpubl
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
-- Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
+- Update daily, but between midnight and 5am? This way developers aren't bothered by notifications when they're working, _and_ you're keeping the build machines free for the developers
 
 To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 

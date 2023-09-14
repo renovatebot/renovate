@@ -1,12 +1,10 @@
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  RegexManagerTemplates,
-  RenovateConfig,
-} from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { allManagersList } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
+import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
-import type { CustomExtractConfig } from '../../../modules/manager/types';
+import type { CustomExtractConfig } from '../../../modules/manager/custom/types';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
@@ -67,10 +65,12 @@ export function generateFingerprintConfig(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
-      // TODO: filter regexManagers using customType
-      for (const regexManager of config.regexManagers ?? []) {
+      const filteredCustomManagers = (config.regexManagers ?? []).filter(
+        (mgr) => mgr.customType === manager
+      );
+      for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
-          ...mergeChildConfig(managerConfig, regexManager),
+          ...mergeChildConfig(managerConfig, customManager),
           fileList: [],
         });
       }

@@ -3,6 +3,7 @@ import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../modules/manager';
+import { coerceArray } from '../../../../util/array';
 import { ensureDir, getParentDir, readSystemFile } from '../../../../util/fs';
 import { addSecretForSanitizing } from '../../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../../util/url';
@@ -95,7 +96,7 @@ export async function parseConfigs(
 
   if (config.detectHostRulesFromEnv) {
     const hostRules = hostRulesFromEnv(env);
-    config.hostRules = [...(config.hostRules ?? []), ...hostRules];
+    config.hostRules = [...coerceArray(config.hostRules), ...hostRules];
   }
   // Get global config
   logger.trace({ config }, 'Full config');

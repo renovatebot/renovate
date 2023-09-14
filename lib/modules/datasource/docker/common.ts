@@ -7,6 +7,9 @@ import {
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { coerceArray } from '../../../util/array';
+import { detectPlatform } from '../../../util/common';
+import { parseGitUrl } from '../../../util/git/url';
 import { toSha256 } from '../../../util/hash';
 import * as hostRules from '../../../util/host-rules';
 import type { Http } from '../../../util/http';
@@ -24,14 +27,13 @@ import {
 } from '../../../util/url';
 import { api as dockerVersioning } from '../../versioning/docker';
 import { ecrRegex, getECRAuthToken } from './ecr';
+import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
 export const dockerDatasourceId = 'docker' as const;
 
-export const sourceLabels: string[] = [
-  'org.opencontainers.image.source',
-  'org.label-schema.vcs-url',
-];
+export const sourceLabel = 'org.opencontainers.image.source' as const;
+export const sourceLabels = [sourceLabel, 'org.label-schema.vcs-url'] as const;
 
 export const gitRefLabel = 'org.opencontainers.image.revision';
 
@@ -92,7 +94,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using ecr auth for Docker registry`
       );
-      const [, region] = ecrRegex.exec(registryHost) ?? [];
+      const [, region] = coerceArray(ecrRegex.exec(registryHost));
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
@@ -247,25 +249,31 @@ export function getRegistryRepository(
       };
     }
   }
-  let registryHost: string | undefined;
+  let registryHost = registryUrl;
   const split = packageName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
     [registryHost] = split;
     split.shift();
   }
   let dockerRepository = split.join('/');
-  if (!registryHost) {
-    registryHost = registryUrl.replace(
-      'https://docker.io',
-      'https://index.docker.io'
-    );
-  }
-  if (registryHost === 'docker.io') {
-    registryHost = 'index.docker.io';
-  }
-  if (!regEx(/^https?:\/\//).exec(registryHost)) {
+
+  if (!regEx(/^https?:\/\//).test(registryHost)) {
     registryHost = `https://${registryHost}`;
   }
+
+  const { path, base } =
+    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)
+      ?.groups ?? {};
+  if (base && path) {
+    registryHost = base;
+    dockerRepository = `${trimTrailingSlash(path)}/${dockerRepository}`;
+  }
+
+  registryHost = registryHost.replace(
+    'https://docker.io',
+    'https://index.docker.io'
+  );
+
   const opts = hostRules.find({
     hostType: dockerDatasourceId,
     url: registryHost,
@@ -289,9 +297,47 @@ export function extractDigestFromResponseBody(
 }
 
 export function findLatestStable(tags: string[]): string | null {
-  const versions = tags
-    .filter((v) => dockerVersioning.isValid(v) && dockerVersioning.isStable(v))
-    .sort((a, b) => dockerVersioning.sortVersions(a, b));
+  let stable: string | null = null;
 
-  return versions.pop() ?? tags.slice(-1).pop() ?? null;
+  for (const tag of tags) {
+    if (!dockerVersioning.isValid(tag) || !dockerVersioning.isStable(tag)) {
+      continue;
+    }
+
+    if (!stable || dockerVersioning.isGreaterThan(tag, stable)) {
+      stable = tag;
+    }
+  }
+
+  return stable;
+}
+
+const chartRepo = regEx(/charts?|helm|helm-charts/i);
+
+function isPossibleChartRepo(url: string): boolean {
+  if (detectPlatform(url) === null) {
+    return false;
+  }
+
+  const parsed = parseGitUrl(url);
+  return chartRepo.test(parsed.name);
+}
+
+export function findHelmSourceUrl(release: OciHelmConfig): string | null {
+  if (release.home && isPossibleChartRepo(release.home)) {
+    return release.home;
+  }
+
+  if (!release.sources?.length) {
+    return null;
+  }
+
+  for (const url of release.sources) {
+    if (isPossibleChartRepo(url)) {
+      return url;
+    }
+  }
+
+  // fallback
+  return release.sources[0];
 }

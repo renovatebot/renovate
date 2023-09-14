@@ -371,7 +371,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.12.2',
+    default: 'ghcr.io/containerbase/sidecar:9.20.1',
     globalOnly: true,
   },
   {
@@ -798,6 +798,17 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'autodiscoverNamespaces',
+    description:
+      'Filter the list of autodiscovered repositories by namespaces.',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'autodiscoverTopics',
     description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',
@@ -859,7 +870,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Additional Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
+      'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1025,8 +1036,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     mergeable: true,
-    cli: false,
-    env: false,
   },
   {
     name: 'matchCategories',
@@ -2351,13 +2360,53 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'httpsCertificateAuthority',
+    description: 'The overriding trusted CA certificate.',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'httpsPrivateKey',
+    description: 'The private key in PEM format.',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'httpsCertificate',
+    description: 'The certificate chains in PEM format.',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'cacheHardTtlMinutes',
     description:
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 24 * 60,
+    default: 7 * 24 * 60,
     globalOnly: true,
+  },
+  {
+    name: 'cacheTtlOverride',
+    description: 'An object that contains cache namespace TTL override values',
+    type: 'object',
+    stage: 'repository',
+    default: {},
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'prBodyDefinitions',
@@ -2394,7 +2443,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyNotes',
     description:
-      'List of additional notes/templates to include in the Pull Request body.',
+      'List of extra notes or templates to include in the Pull Request body.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -2452,6 +2501,16 @@ const options: RenovateOptions[] = [
     stage: 'package',
     cli: true,
     mergeable: true,
+  },
+  {
+    name: 'customType',
+    description:
+      'Custom manager to use. Valid only within a `regexManagers` object.',
+    type: 'string',
+    allowedValues: ['regex'],
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
   },
   {
     name: 'matchStrings',

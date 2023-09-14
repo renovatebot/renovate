@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
   ExtractConfig,
@@ -30,6 +31,14 @@ function createDep(
     return dep;
   }
   dep.currentValue = anApp.version;
+
+  // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
+  const isOci = anApp.chart?.startsWith('oci://');
+  if (isOci) {
+    dep.datasource = DockerDatasource.id;
+    dep.packageName = anApp.chart!.replace('oci://', '');
+    return dep;
+  }
 
   const regexResult = anApp.chart ? chartRegex.exec(anApp.chart) : null;
   if (!regexResult?.groups) {
@@ -63,8 +72,8 @@ export function extractPackageFile(
     const doc = load(content, {
       json: true,
     }) as HelmsmanDocument;
-    if (!(doc?.helmRepos && doc.apps)) {
-      logger.debug({ packageFile }, `Missing helmRepos and/or apps keys`);
+    if (!doc.apps) {
+      logger.debug({ packageFile }, `Missing apps keys`);
       return null;
     }
 

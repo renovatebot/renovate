@@ -1,6 +1,7 @@
 import { logger } from '../../../../logger';
 import * as fs from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { coerceString } from '../../../../util/string';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
 import { isDependencyString, versionLikeSubstring } from '../utils';
@@ -59,9 +60,9 @@ export function parseGcv(
   propsFileName: string,
   fileContents: Record<string, string | null>
 ): PackageDependency<GradleManagerData>[] {
-  const propsFileContent = fileContents[propsFileName] ?? '';
+  const propsFileContent = coerceString(fileContents[propsFileName]);
   const lockFileName = fs.getSiblingFileName(propsFileName, VERSIONS_LOCK);
-  const lockFileContent = fileContents[lockFileName] ?? '';
+  const lockFileContent = coerceString(fileContents[lockFileName]);
   const lockFileMap = parseLockFile(lockFileContent);
   const [propsFileExactMap, propsFileRegexMap] =
     parsePropsFile(propsFileContent);

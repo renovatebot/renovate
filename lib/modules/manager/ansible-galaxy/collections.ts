@@ -33,7 +33,9 @@ function interpretLine(
       if (value?.startsWith('git@')) {
         localDependency.packageName = value;
       } else {
-        localDependency.registryUrls = value ? [value] : [];
+        localDependency.registryUrls = value
+          ? [value]
+          : /* istanbul ignore next: should have test */ [];
       }
       break;
     }
@@ -83,7 +85,9 @@ function handleGitDep(
 function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
   dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
-  dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
+  dep.registryUrls = dep.managerData.source
+    ? /* istanbul ignore next: should have test */ [dep.managerData.source]
+    : [];
   dep.currentValue = dep.managerData.version;
 }
 

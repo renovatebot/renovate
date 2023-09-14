@@ -100,7 +100,7 @@ describe('modules/datasource/endoflife-date/index', () => {
     });
 
     it('returns null for empty result', async () => {
-      httpMock.scope(registryUrl).get(eksMockPath).reply(200, {});
+      httpMock.scope(registryUrl).get(eksMockPath).reply(200, []);
       expect(
         await getPkgReleases({
           datasource,

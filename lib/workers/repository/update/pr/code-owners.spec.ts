@@ -12,7 +12,6 @@ describe('workers/repository/update/pr/code-owners', () => {
     let pr: Pr;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       pr = mock<Pr>();
     });
 
@@ -219,9 +218,9 @@ describe('workers/repository/update/pr/code-owners', () => {
         [
           '# comment line',
           '    \t    ',
-          '   * @jimmy     ',
+          '   * @jimmy     # inline comment     ',
           '        # comment line with leading whitespace',
-          ' package.json @john @maria  ',
+          ' package.json @john @maria#inline comment without leading whitespace  ',
         ].join('\n')
       );
       git.getBranchFiles.mockResolvedValueOnce(['package.json']);

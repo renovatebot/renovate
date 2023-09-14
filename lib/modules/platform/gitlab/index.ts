@@ -2,6 +2,7 @@ import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
+import pMap from 'p-map';
 import semver from 'semver';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -17,6 +18,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { coerceArray } from '../../../util/array';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -161,14 +163,38 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     queryParams['topic'] = config.topics.join(',');
   }
 
-  const url = 'projects?' + getQueryString(queryParams);
+  const urls = [];
+  if (config?.namespaces?.length) {
+    queryParams['with_shared'] = false;
+    queryParams['include_subgroups'] = true;
+    urls.push(
+      ...config.namespaces.map(
+        (namespace) =>
+          `groups/${urlEscape(namespace)}/projects?${getQueryString(
+            queryParams
+          )}`
+      )
+    );
+  } else {
+    urls.push('projects?' + getQueryString(queryParams));
+  }
 
   try {
-    const res = await gitlabApi.getJson<RepoResponse[]>(url, {
-      paginate: true,
-    });
-    logger.debug(`Discovered ${res.body.length} project(s)`);
-    return res.body
+    const repos = (
+      await pMap(
+        urls,
+        (url) =>
+          gitlabApi.getJson<RepoResponse[]>(url, {
+            paginate: true,
+          }),
+        {
+          concurrency: 2,
+        }
+      )
+    ).flatMap((response) => response.body);
+
+    logger.debug(`Discovered ${repos.length} project(s)`);
+    return repos
       .filter((repo) => !repo.mirror || config?.includeMirrors)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
@@ -177,8 +203,10 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   }
 }
 
-function urlEscape(str: string): string {
-  return str ? str.replace(regEx(/\//g), '%2F') : str;
+function urlEscape(str: string): string;
+function urlEscape(str: string | undefined): string | undefined;
+function urlEscape(str: string | undefined): string | undefined {
+  return str?.replace(regEx(/\//g), '%2F');
 }
 
 export async function getRawFile(
@@ -187,7 +215,7 @@ export async function getRawFile(
   branchOrTag?: string
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
-  const repo = urlEscape(repoName ?? config.repository);
+  const repo = urlEscape(repoName) ?? config.repository;
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
     (branchOrTag ?? `HEAD`);
@@ -243,11 +271,13 @@ function getRepoUrl(
     const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
-      protocol: protocol.slice(0, -1) || 'https',
+      protocol:
+        protocol.slice(0, -1) ||
+        /* istanbul ignore next: should never happen */ 'https',
       // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,
-      pathname: newPathname + '/' + repository + '.git',
+      pathname: `${newPathname}/${repository}.git`,
     });
     logger.debug(`Using URL based on configured endpoint, url:${url}`);
     return url;
@@ -783,7 +813,8 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 export function massageMarkdown(input: string): string {
   let desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
-    .replace(regEx(/PR/g), 'MR')
+    .replace(regEx(/\bPR\b/g), 'MR')
+    .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
     // Strip unicode null characters as GitLab markdown does not permit them
     .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
@@ -1096,7 +1127,7 @@ export async function addReviewers(
     return;
   }
 
-  mr.reviewers = mr.reviewers ?? [];
+  mr.reviewers = coerceArray(mr.reviewers);
   const existingReviewers = mr.reviewers.map((r) => r.username);
   const existingReviewerIDs = mr.reviewers.map((r) => r.id);
 
@@ -1143,7 +1174,7 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
     const pr = await getPr(issueNo);
-    const labels = (pr.labels ?? [])
+    const labels = coerceArray(pr.labels)
       .filter((l: string) => l !== label)
       .join(',');
     await gitlabApi.putJson(

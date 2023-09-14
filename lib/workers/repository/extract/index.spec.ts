@@ -17,7 +17,6 @@ describe('workers/repository/extract/index', () => {
     const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
 
     beforeEach(() => {
-      jest.resetAllMocks();
       scm.getFileList.mockResolvedValue(fileList);
       config = getConfig();
     });
@@ -59,7 +58,9 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
-      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
+      config.regexManagers = [
+        { customType: 'regex', fileMatch: ['README'], matchStrings: [''] },
+      ];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('regex');
     });

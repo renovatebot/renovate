@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
+import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
@@ -95,6 +96,7 @@ export interface RenovateSharedConfig {
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
+  autodiscoverNamespaces?: string[];
   autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
@@ -126,6 +128,7 @@ export interface RepoGlobalConfig {
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
+  cacheTtlOverride?: Record<string, number>;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
@@ -182,23 +185,6 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
-export interface RegexManagerTemplates {
-  depNameTemplate?: string;
-  packageNameTemplate?: string;
-  datasourceTemplate?: string;
-  versioningTemplate?: string;
-  depTypeTemplate?: string;
-  currentValueTemplate?: string;
-  currentDigestTemplate?: string;
-  extractVersionTemplate?: string;
-  registryUrlTemplate?: string;
-}
-export interface RegExManager extends RegexManagerTemplates {
-  fileMatch: string[];
-  matchStrings: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
-  autoReplaceStringTemplate?: string;
-}
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -261,7 +247,7 @@ export interface RenovateConfig
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
-  regexManagers?: RegExManager[];
+  regexManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
@@ -332,7 +318,7 @@ export interface PackageRule
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
   matchBaseBranches?: string[];
-  matchManagers?: string | string[];
+  matchManagers?: string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
   matchDepNames?: string[];
