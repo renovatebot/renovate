@@ -15,6 +15,7 @@ import {
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
+import * as aws4 from 'aws4';
 import { logger } from '../../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -195,6 +196,32 @@ describe('modules/platform/codecommit/index', () => {
           'name'
         )
       ).toBe('https://git-codecommit.eu-central-1.amazonaws.com/v1/repos/name');
+    });
+
+    it('gets url with username and token', () => {
+      process.env.AWS_ACCESS_KEY_ID = 'access-key-id';
+      process.env.AWS_SECRET_ACCESS_KEY = 'secret-access-key';
+      process.env.AWS_REGION = 'eu-central-1';
+      process.env.AWS_SESSION_TOKEN = '';
+      const signer = new aws4.RequestSigner({
+        service: 'codecommit',
+        host: 'git-codecommit.eu-central-1.amazonaws.com',
+        method: 'GIT',
+        path: 'v1/repos/name',
+      });
+      const dateTime = signer.getDateTime();
+      const token = `${dateTime}Z${signer.signature()}`;
+      expect(
+        getCodeCommitUrl(
+          {
+            defaultBranch: 'main',
+            repositoryId: 'id',
+          },
+          'name'
+        )
+      ).toBe(
+        `https://access-key-id:${token}@git-codecommit.eu-central-1.amazonaws.com/v1/repos/name`
+      );
     });
   });
 

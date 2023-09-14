@@ -605,7 +605,7 @@ export async function initRepo({
   // istanbul ignore else
   if (forkToken) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken ?? /* istanbul ignore next */ null;
+    parsedEndpoint.auth = coerceToNull(config.forkToken);
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'

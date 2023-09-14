@@ -41,8 +41,8 @@ describe('workers/repository/process/lookup/filter', () => {
       const currentVersion = '1.0.0';
       const latestVersion = '2.0.0';
 
-      versioning.isVersion = jest.fn().mockReturnValue(true);
-      versioning.isGreaterThan = jest.fn().mockReturnValue(true);
+      jest.spyOn(versioning, 'isVersion').mockReturnValue(true);
+      jest.spyOn(versioning, 'isGreaterThan').mockReturnValue(true);
 
       const filteredVersions = filterVersions(
         config,

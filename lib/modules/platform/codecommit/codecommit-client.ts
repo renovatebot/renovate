@@ -49,7 +49,6 @@ import is from '@sindresorhus/is';
 import * as aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { coerceString } from '../../../util/string';
 
 let codeCommitClient: CodeCommitClient;
 
@@ -307,9 +306,9 @@ export function getCodeCommitUrl(
 
   const token = `${dateTime}Z${signer.signature()}`;
 
-  let username = `${process.env.AWS_ACCESS_KEY_ID}%${coerceString(
-    process.env.AWS_SESSION_TOKEN
-  )}`;
+  let username = `${process.env.AWS_ACCESS_KEY_ID}${
+    process.env.AWS_SESSION_TOKEN ? `%${process.env.AWS_SESSION_TOKEN}` : ''
+  }`;
 
   // massaging username with the session token,
   // istanbul ignore if
