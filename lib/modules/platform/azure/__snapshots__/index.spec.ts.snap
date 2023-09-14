@@ -30,6 +30,25 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
 }
 `;
 
+exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
+{
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "createdAt": undefined,
+  "createdBy": {
+    "id": 123,
+    "url": "user-url",
+  },
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
 exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
 {
   "autoCompleteSetBy": {
@@ -54,25 +73,6 @@ exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is se
   "state": "open",
   "targetBranch": undefined,
   "title": "The Title",
-}
-`;
-
-exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "createdBy": {
-    "id": 123,
-    "url": "user-url",
-  },
-  "number": 456,
-  "pullRequestId": 456,
-  "sourceBranch": undefined,
-  "sourceRefName": undefined,
-  "state": "open",
-  "targetBranch": undefined,
 }
 `;
 
@@ -133,78 +133,6 @@ content",
     2,
   ],
 ]
-`;
-
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "closed",
-  "status": 2,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
-`;
-
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "closed",
-  "status": 2,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
-`;
-
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "open",
-  "status": 1,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
-`;
-
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "merged",
-  "status": 3,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
 `;
 
 exports[`modules/platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
@@ -315,6 +243,7 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOption
   [
     {
       "description": "Hello world again",
+      "targetRefName": "refs/heads/new_base",
       "title": "The New Title",
     },
     "1",

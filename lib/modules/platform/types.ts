@@ -44,6 +44,7 @@ export interface RepoParams {
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
+  includeMirrors?: boolean;
 }
 
 export interface PrDebugData {
@@ -136,6 +137,7 @@ export interface FindPRConfig {
   prTitle?: string | null;
   state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
+  targetBranch?: string | null;
 }
 export interface MergePRConfig {
   branchName?: string;
@@ -166,6 +168,8 @@ export type EnsureIssueResult = 'updated' | 'created';
 
 export interface AutodiscoverConfig {
   topics?: string[];
+  includeMirrors?: boolean;
+  namespaces?: string[];
 }
 
 export interface Platform {
@@ -182,7 +186,7 @@ export interface Platform {
     fileName: string,
     repoName?: string,
     branchOrTag?: string
-  ): Promise<any | null>;
+  ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
@@ -201,7 +205,7 @@ export interface Platform {
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #7154
+    // TODO: can be undefined or null ? #22198
     context: string | null | undefined
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
@@ -217,7 +221,7 @@ export interface Platform {
     branchName: string,
     internalChecksAsSuccess: boolean
   ): Promise<BranchStatus>;
-  getBranchPr(branchName: string): Promise<Pr | null>;
+  getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
@@ -233,4 +237,6 @@ export interface PlatformScm {
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<CommitSha>;
+  mergeToLocal(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string): Promise<void>;
 }

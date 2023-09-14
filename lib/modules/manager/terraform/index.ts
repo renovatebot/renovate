@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -28,3 +29,5 @@ export const defaultConfig = {
   fileMatch: ['\\.tf$'],
   pinDigests: false,
 };
+
+export const categories: Category[] = ['iac', 'terraform'];

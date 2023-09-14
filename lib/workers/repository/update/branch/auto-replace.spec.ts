@@ -12,7 +12,7 @@ const sampleHtml = Fixtures.get(
   `../../../../modules/manager/html`
 );
 
-jest.mock('fs-extra', () => Fixtures.fsExtra());
+jest.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -26,7 +26,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     beforeEach(() => {
-      // TODO: fix types (#7154)
+      // TODO: fix types (#22198)
       upgrade = getConfig() as BranchUpgradeConfig;
       upgrade.packageFile = 'test';
       upgrade.manager = 'html';

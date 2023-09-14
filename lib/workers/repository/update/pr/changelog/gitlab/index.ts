@@ -1,7 +1,6 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger';
 import type { GitlabRelease } from '../../../../../../modules/datasource/gitlab-releases/types';
-import type { GitlabTag } from '../../../../../../modules/datasource/gitlab-tags/types';
 import type { GitlabTreeNode } from '../../../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../../../util/http/gitlab';
 import { ensureTrailingSlash } from '../../../../../../util/url';
@@ -14,41 +13,6 @@ import type {
 
 export const id = 'gitlab-changelog';
 const http = new GitlabHttp(id);
-
-export async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
-  logger.trace('gitlab.getTags()');
-  const urlEncodedRepo = encodeURIComponent(repository);
-  const url = `${ensureTrailingSlash(
-    endpoint
-  )}projects/${urlEncodedRepo}/repository/tags?per_page=100`;
-  try {
-    const res = await http.getJson<GitlabTag[]>(url, {
-      paginate: true,
-    });
-
-    const tags = res.body;
-
-    if (!tags.length) {
-      logger.debug(`No Gitlab tags found for ${repository}`);
-    }
-
-    return tags.map((tag) => tag.name).filter(Boolean);
-  } catch (err) {
-    logger.debug(
-      { sourceRepo: repository, err },
-      'Failed to fetch Gitlab tags'
-    );
-    // istanbul ignore if
-    if (err.message?.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
-  }
-}
 
 export async function getReleaseNotesMd(
   repository: string,
@@ -100,7 +64,7 @@ export async function getReleaseList(
   _release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitlab.getReleaseNotesMd()');
-  // TODO #7154
+  // TODO #22198
   const apiBaseUrl = project.apiBaseUrl!;
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const repository = project.repository!;

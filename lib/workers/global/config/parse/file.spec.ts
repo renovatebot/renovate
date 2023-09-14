@@ -35,9 +35,10 @@ describe('workers/global/config/parse/file', () => {
         'custom js config file exporting an async function',
         'config-async-function.js',
       ],
+      ['.renovaterc', '.renovaterc'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
-    ])('parses %s', async (fileType, filePath) => {
+    ])('parses %s', async (_fileType, filePath) => {
       const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
       expect(
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile })
@@ -65,7 +66,7 @@ describe('workers/global/config/parse/file', () => {
         "onboarding": false,
         "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {
-          "extends": ["config:base"],
+          "extends": ["config:recommended"],
         },
         "repositories": [ "test/test" ],
       };`,
@@ -133,7 +134,9 @@ describe('workers/global/config/parse/file', () => {
       fsRemoveSpy.mockImplementationOnce(() => {
         // no-op
       });
-      fsPathExistsSpy.mockResolvedValueOnce(true as never);
+      fsPathExistsSpy
+        .mockResolvedValueOnce(true as never)
+        .mockResolvedValueOnce(true as never);
       const configFile = upath.resolve(tmp.path, './config.json');
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
 

@@ -97,7 +97,7 @@ export async function generateUpdate(
   }
   if (
     rangeStrategy === 'bump' &&
-    // TODO #7154
+    // TODO #22198
     versioning.matches(newVersion, currentValue!)
   ) {
     update.isBump = true;

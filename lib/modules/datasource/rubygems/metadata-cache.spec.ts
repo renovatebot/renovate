@@ -10,17 +10,17 @@ const packageCache = mocked(_packageCache);
 describe('modules/datasource/rubygems/metadata-cache', () => {
   const cache: Map<string, unknown> = new Map();
 
-  packageCache.get.mockImplementation(
-    (ns, key) => Promise.resolve(cache.get(`${ns}::${key}`)) as never
-  );
-
-  packageCache.set.mockImplementation((ns, key, value) => {
-    cache.set(`${ns}::${key}`, value);
-    return Promise.resolve() as never;
-  });
-
   beforeEach(() => {
     cache.clear();
+
+    packageCache.get.mockImplementation(
+      (ns, key) => Promise.resolve(cache.get(`${ns}::${key}`)) as never
+    );
+
+    packageCache.set.mockImplementation((ns, key, value) => {
+      cache.set(`${ns}::${key}`, value);
+      return Promise.resolve() as never;
+    });
   });
 
   it('fetches data', async () => {
@@ -192,7 +192,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     });
   });
 
-  it('throws on unknown error', async () => {
+  it('returns fallback result on unknown error', async () => {
     const cache = new MetadataCache(new Http('test'));
 
     httpMock
@@ -201,9 +201,14 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
       .reply(500);
 
     const versions = ['1', '2', '3'];
+    const res = await cache.getRelease(
+      'https://rubygems.org',
+      'foobar',
+      versions
+    );
 
-    await expect(
-      cache.getRelease('https://rubygems.org', 'foobar', versions)
-    ).rejects.toThrow();
+    expect(res).toEqual({
+      releases: [{ version: '1' }, { version: '2' }, { version: '3' }],
+    });
   });
 });

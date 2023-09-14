@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { id as versioning } from '../../versioning/maven';
@@ -15,7 +16,7 @@ const WRAPPER_URL_REGEX = regEx(
 );
 
 function extractVersions(fileContent: string): MavenVersionExtract {
-  const lines = fileContent?.split(newlineRegex) ?? [];
+  const lines = coerceArray(fileContent?.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
   const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX) ?? undefined;
   return { maven, wrapper };

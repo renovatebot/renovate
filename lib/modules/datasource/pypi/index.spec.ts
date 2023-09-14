@@ -26,7 +26,6 @@ describe('modules/datasource/pypi/index', () => {
     beforeEach(() => {
       process.env = { ...OLD_ENV };
       delete process.env.PIP_INDEX_URL;
-      jest.resetAllMocks();
     });
 
     afterEach(() => {

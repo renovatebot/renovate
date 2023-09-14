@@ -21,9 +21,9 @@ If you're self-hosting or need to update private packages, complete the relevant
 
 If you're new to Renovate, you should:
 
-- Use the Mend-hosted GitHub App, or let somebody else host Renovate for you
-- Stick with the `config:base` preset
-- Use the Dependency Dashboard (`config:base` enables it automatically)
+- Use the Mend Renovate App, or let someone else host Renovate for you
+- Stick with the `config:recommended` preset
+- Use the Dependency Dashboard (`config:recommended` enables it automatically)
 - Read the pages in the "Beginners" list
 - Only create custom Renovate configuration when really needed
 

@@ -1,6 +1,7 @@
 import { join } from 'upath';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { coerceString } from '../../../util/string';
 import { parseUrl } from '../../../util/url';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { Dependency, JsonnetFile } from './types';
@@ -52,7 +53,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
   const depName = join(
     gitRemote.host,
     gitRemote.pathname.replace(/\.git$/, ''),
-    dependency.source.git.subdir ?? ''
+    coerceString(dependency.source.git.subdir)
   );
 
   return {

@@ -1,7 +1,41 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 
+const runnerTestWorkflow = `
+jobs:
+  test1:
+    runs-on: ubuntu-latest
+  test2:
+    runs-on:
+      ubuntu-22.04
+  test3:
+    runs-on: "macos-12-xl"
+  test4:
+    runs-on: 'macos-latest'
+  test5:
+    runs-on: |
+      windows-2019
+  test6:
+    runs-on: >
+      windows-2022
+  test7:
+    runs-on: [windows-2022, selfhosted]
+  test8:
+     runs-on: \${{ env.RUNNER }}
+  test9:
+     runs-on:
+       group: ubuntu-runners
+       labels: ubuntu-20.04-16core
+  test10:
+      runs-on: abc-123
+`;
+
 describe('modules/manager/github-actions/extract', () => {
+  beforeEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
@@ -37,11 +71,86 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(8);
     });
 
+    it('use github.com as registry when no settings provided', () => {
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://github.enterprise.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toEqual([
+        'https://github.enterprise.com',
+        'https://github.com',
+      ]);
+    });
+
+    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://github.enterprise.com/api/v3',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toEqual([
+        'https://github.enterprise.com',
+        'https://github.com',
+      ]);
+    });
+
+    it('use github.com only as registry when running against non-GitHub', () => {
+      GlobalConfig.set({
+        platform: 'bitbucket',
+        endpoint: 'https://bitbucket.enterprise.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('use github.com only as registry when running against github.com', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://github.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('use github.com only as registry when running against api.github.com', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://api.github.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml'
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
     it('extracts multiple action tag lines with double quotes and comments', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_3.yml'),
         'workflow_3.yml'
       );
+
       expect(res?.deps).toMatchObject([
         {
           currentValue: 'v0.13.1',
@@ -75,6 +184,20 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
           versioning: 'docker',
+        },
+        {
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+        },
+        {
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
         },
       ]);
     });
@@ -262,6 +385,74 @@ describe('modules/manager/github-actions/extract', () => {
             'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0',
         },
       ]);
+    });
+
+    it('extracts multiple action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflow, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          replaceString: 'ubuntu-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '22.04',
+          replaceString: 'ubuntu-22.04',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '12-xl',
+          replaceString: 'macos-12-xl',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: 'latest',
+          replaceString: 'macos-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2019',
+          replaceString: 'windows-2019',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2022',
+          replaceString: 'windows-2022',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2022',
+          replaceString: 'windows-2022',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners')
+      ).toHaveLength(7);
     });
   });
 });

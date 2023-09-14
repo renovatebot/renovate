@@ -7,11 +7,7 @@ import * as _hostRulesFromEnv from './host-rules-from-env';
 jest.mock('../../../../modules/datasource/npm');
 jest.mock('../../../../util/fs');
 jest.mock('./host-rules-from-env');
-try {
-  jest.mock('../../config.js');
-} catch (err) {
-  // file does not exist
-}
+jest.mock('../../config.js', () => ({}), { virtual: true });
 
 const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
 
@@ -30,7 +26,6 @@ describe('workers/global/config/parse/index', () => {
           './__fixtures__/default.js'
         ),
       };
-      jest.mock('delay', () => Promise.resolve());
     });
 
     it('supports token in env', async () => {

@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { logger } from '../../logger';
 import { stripEmojis } from '../../util/emoji';
+import { toSha256 } from '../../util/hash';
 import { regEx } from '../../util/regex';
 import { fromBase64 } from '../../util/string';
 import type { PrBodyStruct } from './types';
@@ -31,7 +31,7 @@ export function hashBody(body: string | undefined): string {
   }
   result = stripEmojis(result);
   result = noWhitespaceOrHeadings(result);
-  result = hasha(result, { algorithm: 'sha256' });
+  result = toSha256(result);
   return result;
 }
 

@@ -23,9 +23,11 @@ export interface ChangeLogRelease {
   gitRef: string;
 }
 
+export type ChangeLogPlatform = 'bitbucket' | 'gitea' | 'github' | 'gitlab';
+
 export interface ChangeLogProject {
   packageName?: string;
-  type: 'github' | 'gitlab';
+  type: ChangeLogPlatform;
   apiBaseUrl?: string;
   baseUrl: string;
   repository: string;
@@ -33,7 +35,10 @@ export interface ChangeLogProject {
   sourceDirectory?: string;
 }
 
-export type ChangeLogError = 'MissingGithubToken' | 'MissingGitlabToken';
+export type ChangeLogError =
+  | 'MissingBitbucketToken'
+  | 'MissingGithubToken'
+  | 'MissingGitlabToken';
 
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;

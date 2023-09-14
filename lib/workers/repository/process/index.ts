@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
 import { resolveConfigPresets } from '../../../config/presets';
@@ -37,7 +37,7 @@ async function getBaseBranchConfig(
 
     // Retrieve config file name autodetected for this repo
     const cache = getCache();
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const configFileName = cache.configFileName!;
 
     try {

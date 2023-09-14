@@ -60,6 +60,9 @@ export class HelmDatasource extends Datasource {
       }
       const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
+        if (releases.length === 0) {
+          continue;
+        }
         const latestRelease = releases[0];
         const sourceUrl = findSourceUrl(latestRelease);
         result[name] = {
@@ -68,6 +71,8 @@ export class HelmDatasource extends Datasource {
           releases: releases.map((release) => ({
             version: release.version,
             releaseTimestamp: release.created ?? null,
+            // The Helm repository at Gitlab does not include a digest (#24280)
+            newDigest: release.digest ?? undefined,
           })),
         };
       }

@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
 import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -15,13 +16,9 @@ import {
   sideCarImage,
 } from '.';
 
-jest.mock('../../../modules/datasource');
+jest.mock('../../../modules/datasource', () => mockDeep());
 
 describe('util/exec/docker/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('prefetchDockerImage', () => {
     beforeEach(() => {
       resetPrefetchedImages();
@@ -226,11 +223,14 @@ describe('util/exec/docker/index', () => {
       (opts ? `${opts} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `containerbase/${img} ` +
+      `ghcr.io/containerbase/sidecar ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
-      GlobalConfig.set({ dockerUser: 'some-user' });
+      GlobalConfig.set({
+        dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
     });
 
     it('returns executable command', async () => {
@@ -268,6 +268,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -288,6 +289,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/cache/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -304,6 +306,7 @@ describe('util/exec/docker/index', () => {
       GlobalConfig.set({
         dockerUser: 'some-user',
         dockerCliOptions: '--memory=4g --cpus=".5"',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,

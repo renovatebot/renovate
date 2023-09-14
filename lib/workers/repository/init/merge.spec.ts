@@ -34,7 +34,6 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   memCache.init();
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -47,6 +46,7 @@ describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
+      jest.restoreAllMocks();
     });
 
     it('returns config if not found', async () => {
@@ -338,7 +338,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['renovate.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       migrateAndValidate.migrateAndValidate.mockResolvedValue({
-        extends: ['config:base'],
+        extends: ['config:recommended'],
         warnings: [],
         errors: [],
       });
@@ -346,7 +346,7 @@ describe('workers/repository/init/merge', () => {
         isMigrated: true,
         migratedConfig: c,
       }));
-      config.extends = ['config:base'];
+      config.extends = ['config:recommended'];
       config.ignorePresets = [':ignoreModulesAndTests'];
       config.ignorePaths = ['**/examples/**'];
       const res = await mergeRenovateConfig(config);

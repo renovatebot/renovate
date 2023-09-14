@@ -37,6 +37,8 @@ export async function autodiscoverRepositories(
   // Autodiscover list of repositories
   let discovered = await platform.getRepos({
     topics: config.autodiscoverTopics,
+    includeMirrors: config.includeMirrors,
+    namespaces: config.autodiscoverNamespaces,
   });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
@@ -105,7 +107,7 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
       }
       res = repos.filter(autodiscoveryPred);
     } else {
-      res = repos.filter(minimatch.filter(filter));
+      res = repos.filter(minimatch.filter(filter, { nocase: true }));
     }
     for (const repository of res) {
       matched.add(repository);

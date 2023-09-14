@@ -210,7 +210,10 @@ export const presets: Record<string, Preset> = {
   },
   docker: {
     description: 'Keep Dockerfile `FROM` sources updated.',
-    docker: {
+    'docker-compose': {
+      enabled: true,
+    },
+    dockerfile: {
       enabled: true,
     },
   },
@@ -360,7 +363,10 @@ export const presets: Record<string, Preset> = {
   },
   onlyNpm: {
     description: 'Renovate only npm dependencies.',
-    docker: {
+    'docker-compose': {
+      enabled: false,
+    },
+    dockerfile: {
       enabled: false,
     },
     meteor: {
@@ -372,7 +378,7 @@ export const presets: Record<string, Preset> = {
       'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
     packageRules: [
       {
-        matchPaths: ['{{arg0}}'],
+        matchFileNames: ['{{arg0}}'],
         semanticCommitType: '{{arg1}}',
       },
     ],
@@ -528,7 +534,7 @@ export const presets: Record<string, Preset> = {
       'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchFileNames: ['**/*'],
         semanticCommitType: '{{arg0}}',
       },
     ],

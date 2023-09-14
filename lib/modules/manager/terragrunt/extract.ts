@@ -56,7 +56,7 @@ export function extractPackageFile(
     logger.debug({ err, packageFile }, 'Error extracting terragrunt plugins');
   }
   deps.forEach((dep) => {
-    // TODO #7154
+    // TODO #22198
     switch (dep.managerData!.terragruntDependencyType) {
       case 'terraform':
         analyseTerragruntModule(dep);
