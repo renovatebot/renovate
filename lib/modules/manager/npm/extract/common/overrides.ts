@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types';
 import type { NpmManagerData } from '../../types';
+import { extractDependency } from './dependency';
 import { setNodeCommitTopic } from './node';
-import { extractDependency } from '.';
 
 /**
  * Used when there is a json object as a value in overrides block.
