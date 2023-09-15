@@ -15,8 +15,8 @@ import type { NpmLockFiles, NpmManagerData } from '../types';
 import {
   extractDependency,
   getExtractedConstraints,
+  parseDepName,
 } from './common/dependency';
-import { parseDepName } from './common/dep-name';
 import { setNodeCommitTopic } from './common/node';
 import { extractOverrideDepsRec } from './common/overrides';
 import { postExtract } from './post';
