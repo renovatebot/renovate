@@ -1,23 +1,23 @@
-import { logger, mocked } from '../../../../../test/util';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import { logger, mocked } from '../../../../../../test/util';
+import type { PackageFile } from '../../../types';
+import type { NpmManagerData } from '../../types';
+import * as _npm from '../npm';
+import * as _pnpm from '../pnpm';
+import * as _yarn from '../yarn';
 import { getLockedVersions } from './locked-versions';
-import * as _npm from './npm';
-import * as _pnpm from './pnpm';
-import * as _yarn from './yarn';
 
 const npm = mocked(_npm);
 const pnpm = mocked(_pnpm);
 const yarn = mocked(_yarn);
 
-jest.mock('./npm');
-jest.mock('./yarn', () => ({
-  ...jest.requireActual<typeof import('./yarn')>('./yarn'),
+jest.mock('../npm');
+jest.mock('../yarn', () => ({
+  ...jest.requireActual<typeof import('../yarn')>('../yarn'),
   getYarnLock: jest.fn(),
 }));
-jest.mock('./pnpm');
+jest.mock('../pnpm');
 
-describe('modules/manager/npm/extract/locked-versions', () => {
+describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     function getPackageFiles(
       yarnVersion: string

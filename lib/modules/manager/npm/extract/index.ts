@@ -16,8 +16,7 @@ import { extractDependency, getExtractedConstraints } from './common';
 import { parseDepName } from './common/dep-name';
 import { setNodeCommitTopic } from './common/node';
 import { extractOverrideDepsRec } from './common/overrides';
-import { getLockedVersions } from './locked-versions';
-import { detectMonorepos } from './monorepo';
+import { postExtract } from './post';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
 import {
@@ -310,13 +309,6 @@ export async function extractPackageFile(
     skipInstalls,
     extractedConstraints,
   };
-}
-
-export async function postExtract(
-  packageFiles: PackageFile<NpmManagerData>[]
-): Promise<void> {
-  await detectMonorepos(packageFiles);
-  await getLockedVersions(packageFiles);
 }
 
 export async function extractAllPackageFiles(
