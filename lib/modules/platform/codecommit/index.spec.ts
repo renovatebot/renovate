@@ -199,6 +199,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets url with username and token', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
       process.env.AWS_ACCESS_KEY_ID = 'access-key-id';
       process.env.AWS_SECRET_ACCESS_KEY = 'secret-access-key';
       process.env.AWS_REGION = 'eu-central-1';
@@ -222,6 +223,7 @@ describe('modules/platform/codecommit/index', () => {
       ).toBe(
         `https://access-key-id:${token}@git-codecommit.eu-central-1.amazonaws.com/v1/repos/name`
       );
+      jest.useRealTimers();
     });
   });
 
