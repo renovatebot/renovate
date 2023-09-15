@@ -866,7 +866,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
   });
 
-  it('continues without token if ECR token is invalid', async () => {
+  it('falls back to username + password if the ECR token is invalid', async () => {
     mockEcrAuthResolve({
       authorizationData: [{ authorizationToken: ':' }],
     });
@@ -919,12 +919,15 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
+        cmd: 'helm registry login --username some-username --password some-password 123456789.dkr.ecr.us-east-1.amazonaws.com',
+      },
+      {
         cmd: "helm dependency update ''",
       },
     ]);
   });
 
-  it('continues without token if ECR authentication fails', async () => {
+  it('falls back to username + password if ECR authentication fails', async () => {
     mockEcrAuthReject('some error');
 
     hostRules.add({
@@ -974,6 +977,9 @@ describe('modules/manager/helmv3/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm registry login --username some-username --password some-password 123456789.dkr.ecr.us-east-1.amazonaws.com',
+      },
       {
         cmd: "helm dependency update ''",
       },

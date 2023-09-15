@@ -30,7 +30,8 @@ export async function generateLoginCmd(
         )} ${repository}`;
       }
     }
-  } else if (username && password) {
+  }
+  if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
       password
