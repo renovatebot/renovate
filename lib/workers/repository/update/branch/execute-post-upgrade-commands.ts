@@ -52,7 +52,7 @@ export async function postUpgradeCommandsExecutor(
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
         const canWriteFile = await localPathIsFile(file.path);
-        if (file.type === 'addition' && canWriteFile) {
+        if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);

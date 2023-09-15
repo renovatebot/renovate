@@ -253,7 +253,7 @@
     "re2": "1.20.3"
   },
   "devDependencies": {
-    "@hyrious/marshal": "0.2.5",
+    "@hyrious/marshal": "0.3.1",
     "@jest/environment": "29.6.4",
     "@jest/globals": "29.6.4",
     "@jest/reporters": "29.6.4",

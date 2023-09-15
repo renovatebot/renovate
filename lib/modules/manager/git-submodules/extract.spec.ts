@@ -247,7 +247,7 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: 'main',
             depName: 'some-azure',
             packageName:
-              'https://organization@dev.azure.com/organization/whitespace%20project/_git/repo',
+              'https://dev.azure.com/organization/whitespace%20project/_git/repo',
           },
         ],
       });

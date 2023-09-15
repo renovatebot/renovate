@@ -1,5 +1,5 @@
 import { partial } from '../../../../test/util';
-import type { CustomManager } from '../../types';
+import type { CustomManager } from '../../../modules/manager/custom/types';
 import { RegexManagersMigration } from './regex-managers-migration';
 
 describe('config/migrations/custom/regex-managers-migration', () => {
