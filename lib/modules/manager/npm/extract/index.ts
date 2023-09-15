@@ -13,6 +13,7 @@ import type {
 } from '../../types';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { extractDependency, getExtractedConstraints } from './common';
+import { parseDepName } from './common/dep-name';
 import { setNodeCommitTopic } from './common/node';
 import { extractOverrideDepsRec } from './common/overrides';
 import { getLockedVersions } from './locked-versions';
@@ -25,15 +26,6 @@ import {
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
 } from './yarnrc';
-
-function parseDepName(depType: string, key: string): string {
-  if (depType !== 'resolutions') {
-    return key;
-  }
-
-  const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
-  return depName;
-}
 
 function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
   return Object.values(lockFiles).filter(is.string).length > 1;
