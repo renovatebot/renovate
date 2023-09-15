@@ -809,6 +809,63 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
   });
 
+  it("does not use ECR authentication when the host rule's username is AWS", async () => {
+    mockEcrAuthResolve({
+      authorizationData: [
+        { authorizationToken: toBase64('token-username:token-password') },
+      ],
+    });
+
+    hostRules.add({
+      username: 'AWS',
+      password: 'some-password',
+      token: 'some-session-token',
+      hostType: 'docker',
+      matchHost: '123456789.dkr.ecr.us-east-1.amazonaws.com',
+    });
+
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1ECR as never);
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [],
+        newPackageFileContent: chartFileECR,
+        config: {
+          ...config,
+          updateType: 'lockFileMaintenance',
+          registryAliases: {},
+        },
+      })
+    ).toMatchObject([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2ECR,
+        },
+      },
+    ]);
+
+    expect(ecrMock.calls).toHaveLength(0);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm registry login --username AWS --password some-password 123456789.dkr.ecr.us-east-1.amazonaws.com',
+      },
+      {
+        cmd: "helm dependency update ''",
+      },
+    ]);
+  });
+
   it('continues without token if ECR token is invalid', async () => {
     mockEcrAuthResolve({
       authorizationData: [{ authorizationToken: ':' }],

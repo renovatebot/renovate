@@ -16,7 +16,7 @@ export async function generateLoginCmd(
 ): Promise<string | null> {
   const { hostRule, repository } = repositoryRule;
   const { username, password } = hostRule;
-  if (ecrRegex.test(repository)) {
+  if (username !== 'AWS' && ecrRegex.test(repository)) {
     logger.trace({ repository }, `Using ecr auth for Helm registry`);
     const [, region] = coerceArray(ecrRegex.exec(repository));
     const auth = await getECRAuthToken(region, hostRule);
