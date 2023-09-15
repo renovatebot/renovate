@@ -799,8 +799,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       sessionToken: 'some-session-token',
     });
 
-    expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm registry login --username token-username --password token-password 123456789.dkr.ecr.us-east-1.amazonaws.com',
+      },
+      {
+        cmd: "helm dependency update ''",
+      },
+    ]);
   });
 
   it('continues without token if ECR token is invalid', async () => {
@@ -854,8 +860,11 @@ describe('modules/manager/helmv3/artifacts', () => {
       sessionToken: 'some-session-token',
     });
 
-    expect(execSnapshots).toBeArrayOfSize(1);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "helm dependency update ''",
+      },
+    ]);
   });
 
   it('continues without token if ECR authentication fails', async () => {
@@ -907,8 +916,11 @@ describe('modules/manager/helmv3/artifacts', () => {
       sessionToken: 'some-session-token',
     });
 
-    expect(execSnapshots).toBeArrayOfSize(1);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "helm dependency update ''",
+      },
+    ]);
   });
 
   it('alias name is picked, when repository is as alias and dependency defined', async () => {
