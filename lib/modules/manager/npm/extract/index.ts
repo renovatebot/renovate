@@ -13,6 +13,8 @@ import type {
 } from '../../types';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { extractDependency, getExtractedConstraints } from './common';
+import { setNodeCommitTopic } from './common/node';
+import { extractOverrideDepsRec } from './common/overrides';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
@@ -196,47 +198,6 @@ export async function extractPackageFile(
     overrides: 'overrides',
   };
 
-  /**
-   * Used when there is a json object as a value in overrides block.
-   * @param parents
-   * @param child
-   * @returns PackageDependency array
-   */
-  function extractOverrideDepsRec(
-    parents: string[],
-    child: NpmManagerData
-  ): PackageDependency[] {
-    const deps: PackageDependency[] = [];
-    if (!child || is.emptyObject(child)) {
-      return deps;
-    }
-    for (const [overrideName, versionValue] of Object.entries(child)) {
-      if (is.string(versionValue)) {
-        // special handling for "." override depenency name
-        // "." means the constraint is applied to the parent dep
-        const currDepName =
-          overrideName === '.' ? parents[parents.length - 1] : overrideName;
-        const dep: PackageDependency<NpmManagerData> = {
-          depName: currDepName,
-          depType: 'overrides',
-          managerData: { parents: parents.slice() }, // set parents for dependency
-        };
-        setNodeCommitTopic(dep);
-        deps.push({
-          ...dep,
-          ...extractDependency('overrides', currDepName, versionValue),
-        });
-      } else {
-        // versionValue is an object, run recursively.
-        parents.push(overrideName);
-        const depsOfObject = extractOverrideDepsRec(parents, versionValue);
-        deps.push(...depsOfObject);
-      }
-    }
-    parents.pop();
-    return deps;
-  }
-
   for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
     let dependencies = packageJson[depType];
     if (dependencies) {
@@ -389,11 +350,4 @@ export async function extractAllPackageFiles(
 
   await postExtract(npmFiles);
   return npmFiles;
-}
-
-function setNodeCommitTopic(dep: PackageDependency<NpmManagerData>): void {
-  // This is a special case for Node.js to group it together with other managers
-  if (dep.depName === 'node') {
-    dep.commitMessageTopic = 'Node.js';
-  }
 }
