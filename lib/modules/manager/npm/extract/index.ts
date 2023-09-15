@@ -1,26 +1,19 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
-import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 
 import type {
   ExtractConfig,
-  PackageDependency,
   PackageFile,
   PackageFileContent,
 } from '../../types';
 import type { NpmLockFiles, NpmManagerData } from '../types';
-import {
-  extractDependency,
-  getExtractedConstraints,
-  parseDepName,
-} from './common/dependency';
-import { setNodeCommitTopic } from './common/node';
-import { extractOverrideDepsRec } from './common/overrides';
+import { getExtractedConstraints } from './common/dependency';
+import { extractPackageJson } from './common/package-file';
 import { postExtract } from './post';
-import type { NpmPackage, NpmPackageDependency } from './types';
+import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
 import {
   YarnConfig,
@@ -40,7 +33,6 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
-  const deps: PackageDependency[] = [];
   let packageJson: NpmPackage;
   try {
     packageJson = JSON.parse(content);
@@ -49,22 +41,11 @@ export async function extractPackageFile(
     return null;
   }
 
-  if (packageJson._id && packageJson._args && packageJson._from) {
-    logger.debug({ packageFile }, 'Ignoring vendorised package.json');
+  const res = extractPackageJson(packageJson, packageFile);
+  if (!res) {
     return null;
   }
-  if (packageFile !== 'package.json' && packageJson.renovate) {
-    const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = packageFile;
-    error.validationError =
-      'Nested package.json must not contain Renovate configuration. Please use `packageRules` with `matchFileNames` in your main config instead.';
-    throw error;
-  }
-  const packageJsonName = packageJson.name;
-  logger.debug(
-    `npm file ${packageFile} has name ${JSON.stringify(packageJsonName)}`
-  );
-  const packageFileVersion = packageJson.version;
+
   let workspacesPackages: string[] | undefined;
   if (is.array(packageJson.workspaces)) {
     workspacesPackages = packageJson.workspaces;
@@ -180,74 +161,12 @@ export async function extractPackageFile(
     lernaJsonFile = undefined;
   }
 
-  const depTypes = {
-    dependencies: 'dependency',
-    devDependencies: 'devDependency',
-    optionalDependencies: 'optionalDependency',
-    peerDependencies: 'peerDependency',
-    engines: 'engine',
-    volta: 'volta',
-    resolutions: 'resolutions',
-    packageManager: 'packageManager',
-    overrides: 'overrides',
-  };
-
-  for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
-    let dependencies = packageJson[depType];
-    if (dependencies) {
-      try {
-        if (depType === 'packageManager') {
-          const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
-            dependencies as string
-          );
-          // istanbul ignore next
-          if (!match?.groups) {
-            break;
-          }
-          dependencies = { [match.groups.name]: match.groups.range };
-        }
-        for (const [key, val] of Object.entries(
-          dependencies as NpmPackageDependency
-        )) {
-          const depName = parseDepName(depType, key);
-          let dep: PackageDependency = {
-            depType,
-            depName,
-          };
-          if (depName !== key) {
-            dep.managerData = { key };
-          }
-          if (depType === 'overrides' && !is.string(val)) {
-            // TODO: fix type #22198
-            deps.push(
-              ...extractOverrideDepsRec(
-                [depName],
-                val as unknown as NpmManagerData
-              )
-            );
-          } else {
-            // TODO: fix type #22198
-            dep = { ...dep, ...extractDependency(depType, depName, val!) };
-            setNodeCommitTopic(dep);
-            dep.prettyDepType = depTypes[depType];
-            deps.push(dep);
-          }
-        }
-      } catch (err) /* istanbul ignore next */ {
-        logger.debug(
-          { fileName: packageFile, depType, err },
-          'Error parsing package.json'
-        );
-        return null;
-      }
-    }
-  }
-  if (deps.length === 0) {
+  if (res.deps.length === 0) {
     logger.debug('Package file has no deps');
     if (
       !(
-        !!packageJsonName ||
-        !!packageFileVersion ||
+        !!res.managerData?.packageJsonName ||
+        !!res.packageFileVersion ||
         !!npmrc ||
         !!lernaJsonFile ||
         workspacesPackages
@@ -259,7 +178,7 @@ export async function extractPackageFile(
   }
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
-    const hasFancyRefs = !!deps.some(
+    const hasFancyRefs = !!res.deps.some(
       (dep) =>
         !!dep.currentValue?.startsWith('file:') ||
         !!dep.currentValue?.startsWith('npm:')
@@ -277,10 +196,10 @@ export async function extractPackageFile(
     }
   }
 
-  const extractedConstraints = getExtractedConstraints(deps);
+  const extractedConstraints = getExtractedConstraints(res.deps);
 
   if (yarnConfig) {
-    for (const dep of deps) {
+    for (const dep of res.deps) {
       if (dep.depName) {
         const registryUrlFromYarnConfig = resolveRegistryUrl(
           dep.depName,
@@ -294,15 +213,14 @@ export async function extractPackageFile(
   }
 
   return {
-    deps,
-    packageFileVersion,
+    ...res,
     npmrc,
     managerData: {
+      ...res.managerData,
       ...lockFiles,
       lernaClient,
       lernaJsonFile,
       lernaPackages,
-      packageJsonName,
       yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager
