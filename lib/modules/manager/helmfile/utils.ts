@@ -45,7 +45,7 @@ export function isOCIRegistry(repository: Repository): boolean {
   return repository.oci === true;
 }
 
-export function generateRegistryLoginCmd(
+export async function generateRegistryLoginCmd(
   repositoryName: string,
   repositoryBaseURL: string,
   repositoryHost: string
@@ -59,5 +59,5 @@ export function generateRegistryLoginCmd(
     }),
   };
 
-  return generateLoginCmd(repositoryRule, 'helm registry login');
+  return await generateLoginCmd(repositoryRule, 'helm registry login');
 }
