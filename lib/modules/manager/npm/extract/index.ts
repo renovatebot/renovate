@@ -12,7 +12,10 @@ import type {
   PackageFileContent,
 } from '../../types';
 import type { NpmLockFiles, NpmManagerData } from '../types';
-import { extractDependency, getExtractedConstraints } from './common';
+import {
+  extractDependency,
+  getExtractedConstraints,
+} from './common/dependency';
 import { parseDepName } from './common/dep-name';
 import { setNodeCommitTopic } from './common/node';
 import { extractOverrideDepsRec } from './common/overrides';
