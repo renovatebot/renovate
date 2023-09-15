@@ -243,8 +243,8 @@ importers:
         specifier: 3.3.6
         version: 3.3.6
       node-html-parser:
-        specifier: 6.1.7
-        version: 6.1.7
+        specifier: 6.1.8
+        version: 6.1.8
       openpgp:
         specifier: 5.10.1
         version: 5.10.1
@@ -8669,8 +8669,8 @@ packages:
     dev: false
     optional: true
 
-  /node-html-parser@6.1.7:
-    resolution: {integrity: sha512-OuraCzBo9x0JMTZScoNyWXydOX4kCjNJeSS2MQRbjAMJpfCn/1mQR8Jbsa+UGawX0aP+cbjFd9+EqP9wTroHLQ==}
+  /node-html-parser@6.1.8:
+    resolution: {integrity: sha512-bi3ChNi5Ne8XM2vDPvE2TOS6+AjgD9ASRJ81P1+45VTe9odNbsNb3SvVZzHho4qnu5gJ1yUYLGlQZ7tveSYNSg==}
     dependencies:
       css-select: 5.1.0
       he: 1.2.0
