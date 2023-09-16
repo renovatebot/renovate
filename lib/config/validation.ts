@@ -51,7 +51,7 @@ const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 
 function isManagerPath(parentPath: string): boolean {
   return (
-    regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
+    regEx(/^customManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
 }
@@ -405,7 +405,7 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'regexManagers') {
+            if (key === 'customManagers') {
               const allowedKeys = [
                 'customType',
                 'description',
@@ -422,30 +422,30 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              for (const regexManager of val as CustomManager[]) {
+              for (const customManager of val as CustomManager[]) {
                 if (
-                  Object.keys(regexManager).some(
+                  Object.keys(customManager).some(
                     (k) => !allowedKeys.includes(k)
                   )
                 ) {
-                  const disallowedKeys = Object.keys(regexManager).filter(
+                  const disallowedKeys = Object.keys(customManager).filter(
                     (k) => !allowedKeys.includes(k)
                   );
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
+                    message: `Custom Manager contains disallowed fields: ${disallowedKeys.join(
                       ', '
                     )}`,
                   });
                 } else if (
-                  is.nonEmptyString(regexManager.customType) &&
-                  isCustomManager(regexManager.customType)
+                  is.nonEmptyString(customManager.customType) &&
+                  isCustomManager(customManager.customType)
                 ) {
-                  if (is.nonEmptyArray(regexManager.fileMatch)) {
-                    switch (regexManager.customType) {
+                  if (is.nonEmptyArray(customManager.fileMatch)) {
+                    switch (customManager.customType) {
                       case 'regex':
-                        validateRegexManagerFields(
-                          regexManager,
+                        validatecustomManagerFields(
+                          customManager,
                           currentPath,
                           errors
                         );
@@ -459,8 +459,8 @@ export async function validateConfig(
                   }
                 } else {
                   if (
-                    is.emptyString(regexManager.customType) ||
-                    is.undefined(regexManager.customType)
+                    is.emptyString(customManager.customType) ||
+                    is.undefined(customManager.customType)
                   ) {
                     errors.push({
                       topic: 'Configuration Error',
@@ -469,7 +469,7 @@ export async function validateConfig(
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid customType: ${regexManager.customType}. Key is not a custom manager`,
+                      message: `Invalid customType: ${customManager.customType}. Key is not a custom manager`,
                     });
                   }
                 }
@@ -658,13 +658,13 @@ export async function validateConfig(
   return { errors, warnings };
 }
 
-function validateRegexManagerFields(
-  regexManager: Partial<RegexManagerConfig>,
+function validatecustomManagerFields(
+  customManager: Partial<RegexManagerConfig>,
   currentPath: string,
   errors: ValidationMessage[]
 ): void {
-  if (is.nonEmptyArray(regexManager.matchStrings)) {
-    for (const matchString of regexManager.matchStrings) {
+  if (is.nonEmptyArray(customManager.matchStrings)) {
+    for (const matchString of customManager.matchStrings) {
       try {
         regEx(matchString);
       } catch (e) {
@@ -685,8 +685,8 @@ function validateRegexManagerFields(
   for (const field of mandatoryFields) {
     const templateField = `${field}Template` as keyof RegexManagerTemplates;
     if (
-      !regexManager[templateField] &&
-      !regexManager.matchStrings?.some((matchString) =>
+      !customManager[templateField] &&
+      !customManager.matchStrings?.some((matchString) =>
         matchString.includes(`(?<${field}>`)
       )
     ) {

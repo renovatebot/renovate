@@ -1,11 +1,9 @@
 import type { Preset } from '../types';
 
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
-
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
     description: 'Update `_VERSION` variables in Dockerfiles.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: [
@@ -21,7 +19,7 @@ export const presets: Record<string, Preset> = {
   githubActionsVersions: {
     description:
       'Update `_VERSION` environment variables in GitHub Action files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: ['^.github/(?:workflows|actions)/.+\\.ya?ml$'],
@@ -33,7 +31,7 @@ export const presets: Record<string, Preset> = {
   },
   helmChartYamlAppVersions: {
     description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         datasourceTemplate: 'docker',
@@ -46,7 +44,7 @@ export const presets: Record<string, Preset> = {
   },
   tfvarsVersions: {
     description: 'Update `*_version` variables in `.tfvars` files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: ['.+\\.tfvars$'],
