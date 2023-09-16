@@ -1,14 +1,15 @@
 import is from '@sindresorhus/is';
-import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
-import { getProblems, logger } from '../../logger';
+import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
+import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
 import type { BranchConfig, SelectAllConfig } from '../types';
+import { extractRepoProblems } from './common';
 import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 import type { Vulnerability } from './process/types';
@@ -106,7 +107,7 @@ export async function readDashboardBody(
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
   if (
-    config.dependencyDashboard ||
+    config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
@@ -115,7 +116,7 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      const dashboardChecks = parseDashboardIssue(issue.body!);
+      const dashboardChecks = parseDashboardIssue(issue.body ?? '');
 
       if (config.checkedBranches) {
         const checkedBranchesRec: Record<string, string> = Object.fromEntries(
@@ -139,13 +140,13 @@ function getListItem(branch: BranchConfig, type: string): string {
   let item = ' - [ ] ';
   item += `<!-- ${type}-branch=${branch.branchName} -->`;
   if (branch.prNo) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
   } else {
     item += branch.prTitle;
   }
   const uniquePackages = [
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
@@ -156,25 +157,14 @@ function getListItem(branch: BranchConfig, type: string): string {
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
-  const repoProblems = new Set(
-    getProblems()
-      .filter(
-        (problem) =>
-          problem.repository === config.repository && !problem.artifactErrors
-      )
-      .map(
-        (problem) =>
-          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
-      )
-  );
+  const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
-    logger.debug(
-      { repoProblems: Array.from(repoProblems) },
-      'repository problems'
-    );
     newIssueBody += '## Repository problems\n\n';
-    newIssueBody +=
-      'These problems occurred while renovating this repository.\n\n';
+    const repoProblemsHeader =
+      config.customizeDashboard?.['repoProblemsHeader'] ??
+      'Renovate tried to run on this repository, but found these problems.';
+    newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
+
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
     }
@@ -188,6 +178,7 @@ export async function ensureDependencyDashboard(
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {}
 ): Promise<void> {
+  logger.debug('ensureDependencyDashboard()');
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
@@ -197,9 +188,10 @@ export async function ensureDependencyDashboard(
   );
   if (
     !(
-      config.dependencyDashboard ||
-      config.dependencyDashboardApproval ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ||
+      config.dependencyDashboard === true ||
+      config.dependencyDashboardApproval === true ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+        true ||
       branches.some(
         (branch) =>
           !!branch.dependencyDashboardApproval ||
@@ -435,7 +427,7 @@ export async function ensureDependencyDashboard(
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        updatedIssue.body!
+        coerceString(updatedIssue.body)
       );
       for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];

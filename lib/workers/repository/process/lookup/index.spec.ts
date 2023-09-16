@@ -1,7 +1,8 @@
 import * as hostRules from '../../../../../lib/util/host-rules';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
-import { getConfig, partial } from '../../../../../test/util';
+import { partial } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
@@ -12,12 +13,12 @@ import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
+import { id as nodeVersioningId } from '../../../../modules/versioning/node';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
 import type { HostRule } from '../../../../types';
 import * as memCache from '../../../../util/cache/memory';
-import * as githubGraphql from '../../../../util/github/graphql';
 import { initConfig, resetConfig } from '../../../../util/merge-confidence';
 import * as McApi from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
@@ -44,6 +45,11 @@ describe('workers/repository/process/lookup/index', () => {
     'getReleases'
   );
 
+  const getGithubTags = jest.spyOn(
+    GithubTagsDatasource.prototype,
+    'getReleases'
+  );
+
   const getDockerReleases = jest.spyOn(
     DockerDatasource.prototype,
     'getReleases'
@@ -52,9 +58,7 @@ describe('workers/repository/process/lookup/index', () => {
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
 
   beforeEach(() => {
-    // TODO: fix wrong tests
-    jest.resetAllMocks();
-    // TODO: fix types #7154
+    // TODO: fix types #22198
     config = partial<LookupUpdateConfig>(getConfig() as never);
     config.manager = 'npm';
     config.versioning = npmVersioningId;
@@ -80,6 +84,15 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
+    });
+
+    it('handles error result from getPkgReleasesWithResult', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'some-dep';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope('https://registry.npmjs.org').get('/some-dep').reply(500);
+      await expect(lookup.lookupUpdates(config)).rejects.toThrow();
     });
 
     it('returns rollback for pinned version', async () => {
@@ -998,6 +1011,23 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('should allow unstable versions in same major for node', async () => {
+      config.currentValue = '20.3.0';
+      config.packageName = 'node';
+      config.datasource = GithubTagsDatasource.id;
+      config.versioning = nodeVersioningId;
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: '20.3.0' },
+          { version: '20.3.1' },
+          { version: '21.0.0' },
+        ],
+      });
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        { newValue: '20.3.1', updateType: 'patch' },
+      ]);
+    });
+
     it('should return pendingChecks', async () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';
@@ -1202,15 +1232,16 @@ describe('workers/repository/process/lookup/index', () => {
 
       // Only mock calls once so that the second invocation results in
       // no digest being computable.
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
-        {
-          version: 'v2.0.0',
-          gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
-          hash: 'abc',
-        },
-      ]);
+      getGithubReleases.mockResolvedValueOnce({ releases: [] });
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01',
+          },
+        ],
+      });
 
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
@@ -1232,20 +1263,60 @@ describe('workers/repository/process/lookup/index', () => {
 
         // Only mock calls once so that the second invocation results in
         // no digest being computable.
-        jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
-        jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
-          {
-            version: 'v2.0.0',
-            gitRef: 'v2.0.0',
-            releaseTimestamp: '2022-01-01',
-            hash: 'abc',
-          },
-        ]);
+        getGithubReleases.mockResolvedValueOnce({ releases: [] });
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v2.0.0',
+              gitRef: 'v2.0.0',
+              releaseTimestamp: '2022-01-01',
+            },
+          ],
+        });
 
         const res = await lookup.lookupUpdates(config);
         expect(res.updates).toHaveLength(0);
         expect(res.warnings).toHaveLength(0);
       });
+    });
+
+    it('should use registry of update to determine digest', async () => {
+      config.currentValue = 'v1.0.0';
+      config.registryUrls = [
+        'https://github.enterprise.com',
+        'https://github.com',
+      ];
+      config.digestOneAndOnly = true;
+      config.packageName = 'angular/angular';
+      config.pinDigests = true;
+      config.datasource = GithubTagsDatasource.id;
+
+      getGithubTags.mockRejectedValueOnce(
+        new Error('Not contained in registry')
+      );
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2022-01-01',
+          },
+        ],
+      });
+      const getGithubTagsDigest = jest
+        .spyOn(GithubTagsDatasource.prototype, 'getDigest')
+        .mockResolvedValueOnce('digest1234');
+
+      const res = await lookup.lookupUpdates(config);
+      expect(getGithubTagsDigest).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          registryUrl: 'https://github.com',
+        }),
+        'v1.0.0'
+      );
+
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newDigest).toBe('digest1234');
     });
 
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
@@ -1595,7 +1666,7 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '8.1.5' },
           { version: '8.1' },
           { version: '8.2.0' },
-          { version: '8.2.5' },
+          { version: '8.2.5', newDigest: 'abc123' },
           { version: '8.2' },
           { version: '8' },
           { version: '9.0' },
@@ -1759,6 +1830,7 @@ describe('workers/repository/process/lookup/index', () => {
         releases: [
           {
             version: '8.0.0',
+            newDigest: 'sha256:0123456789abcdef',
           },
           {
             version: '8.1.0',
@@ -1766,7 +1838,6 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
@@ -2134,6 +2205,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
 
       it('gets a merge confidence level for a given update when corresponding packageRule is in use', async () => {
+        getMergeConfidenceSpy.mockRestore();
         const datasource = NpmDatasource.id;
         const packageName = 'webpack';
         const newVersion = '3.8.1';

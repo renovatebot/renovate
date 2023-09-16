@@ -1,6 +1,7 @@
-// TODO #7154
+// TODO #22198
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
+import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta, logger, removeMeta } from '../../../logger';
@@ -8,6 +9,7 @@ import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
 import { configRegexPredicate } from '../../../util/regex';
 import { addSplit } from '../../../util/split';
@@ -22,7 +24,7 @@ async function getBaseBranchConfig(
 ): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
-  let baseBranchConfig: RenovateConfig = structuredClone(config);
+  let baseBranchConfig: RenovateConfig = clone(config);
 
   if (
     config.useBaseBranchConfig === 'merge' &&
@@ -35,7 +37,7 @@ async function getBaseBranchConfig(
 
     // Retrieve config file name autodetected for this repo
     const cache = getCache();
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const configFileName = cache.configFileName!;
 
     try {
@@ -58,6 +60,7 @@ async function getBaseBranchConfig(
       throw error;
     }
 
+    baseBranchConfig = await resolveConfigPresets(baseBranchConfig, config);
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
 
     // istanbul ignore if
@@ -82,7 +85,10 @@ async function getBaseBranchConfig(
   return baseBranchConfig;
 }
 
-function unfoldBaseBranches(baseBranches: string[]): string[] {
+function unfoldBaseBranches(
+  defaultBranch: string,
+  baseBranches: string[]
+): string[] {
   const unfoldedList: string[] = [];
 
   const allBranches = getBranchList();
@@ -90,7 +96,13 @@ function unfoldBaseBranches(baseBranches: string[]): string[] {
     const isAllowedPred = configRegexPredicate(baseBranch);
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
+      logger.debug(
+        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`
+      );
       unfoldedList.push(...matchingBranches);
+    } else if (baseBranch === '$default') {
+      logger.debug(`baseBranches "$default" matches "${defaultBranch}"`);
+      unfoldedList.push(defaultBranch);
     } else {
       unfoldedList.push(baseBranch);
     }
@@ -109,7 +121,10 @@ export async function extractDependencies(
     packageFiles: null!,
   };
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
-    config.baseBranches = unfoldBaseBranches(config.baseBranches);
+    config.baseBranches = unfoldBaseBranches(
+      config.defaultBranch!,
+      config.baseBranches
+    );
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {

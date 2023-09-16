@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import type { HostRule, HostRuleSearchResult } from '../types';
+import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
 import { parseUrl, validateUrl } from './url';
@@ -17,7 +18,7 @@ export interface LegacyHostRule {
 }
 
 export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
-  const cloned: LegacyHostRule & HostRule = structuredClone(rule);
+  const cloned: LegacyHostRule & HostRule = clone(rule);
   delete cloned.hostName;
   delete cloned.domainName;
   delete cloned.baseUrl;
@@ -48,7 +49,7 @@ export function add(params: HostRule): void {
     confidentialFields.forEach((field) => {
       if (rule[field]) {
         logger.debug(
-          // TODO: types (#7154)
+          // TODO: types (#22198)
           `Adding ${field} authentication for ${rule.matchHost!} to hostRules`
         );
       }
@@ -121,7 +122,7 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
 }
 
 export function find(search: HostRuleSearch): HostRuleSearchResult {
-  if (!(search.hostType || search.url)) {
+  if (!(!!search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }
@@ -188,11 +189,11 @@ export function findAll({ hostType }: { hostType: string }): HostRule[] {
  * @returns a deep copy of all known host rules without any filtering
  */
 export function getAll(): HostRule[] {
-  return structuredClone(hostRules);
+  return clone(hostRules);
 }
 
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
-  sanitize.clearSanitizedSecretsList();
+  sanitize.clearRepoSanitizedSecretsList();
 }

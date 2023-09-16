@@ -1,14 +1,18 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
-import { fs } from '../../../../test/util';
+import { fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
+const datasource = mocked(_datasource);
+
 jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -40,8 +44,6 @@ botocore==1.27.46 \
 
 describe('modules/manager/pip_requirements/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 
@@ -186,9 +188,17 @@ describe('modules/manager/pip_requirements/artifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     fs.readLocalFile.mockResolvedValueOnce('new content');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/cache');
+    // hashin
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.1.7' }],
+    });
     const execSnapshots = mockExecAll();
 
     expect(
@@ -209,7 +219,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -217,10 +227,9 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
@@ -235,6 +244,10 @@ describe('modules/manager/pip_requirements/artifacts', () => {
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('new content');
+    // hashin
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.1.7' }],
+    });
     const execSnapshots = mockExecAll();
 
     expect(

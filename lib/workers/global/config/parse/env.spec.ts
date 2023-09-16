@@ -161,13 +161,20 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
-    it('does not support GitHub fine-grained PATs', () => {
+    it('supports GitHub fine-grained PATs', () => {
       const envParam: NodeJS.ProcessEnv = {
         GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
         RENOVATE_TOKEN: 'a github.com token',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(env.getConfig(envParam)).toEqual({
         token: 'a github.com token',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+        ],
       });
     });
 
@@ -266,7 +273,6 @@ describe('workers/global/config/parse/env', () => {
       beforeAll(() => {
         processExit = jest
           .spyOn(process, 'exit')
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
           .mockImplementation((() => {}) as never);
       });
 

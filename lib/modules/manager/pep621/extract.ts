@@ -27,7 +27,7 @@ export function extractPackageFile(
     return null;
   }
   const pythonConstraint = def.project?.['requires-python'];
-  const constraints = is.nonEmptyString(pythonConstraint)
+  const extractedConstraints = is.nonEmptyString(pythonConstraint)
     ? { extractedConstraints: { python: pythonConstraint } }
     : {};
 
@@ -48,5 +48,7 @@ export function extractPackageFile(
     processedDeps = processor.process(def, processedDeps);
   }
 
-  return processedDeps.length ? { ...constraints, deps: processedDeps } : null;
+  return processedDeps.length
+    ? { ...extractedConstraints, deps: processedDeps }
+    : null;
 }

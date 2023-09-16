@@ -1,19 +1,21 @@
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
-import hasha from 'hasha';
-import { infer as Infer, ZodType } from 'zod';
+import type { SetRequired } from 'type-fest';
+import { infer as Infer, type ZodError, ZodType } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { hash } from '../hash';
+import { type AsyncResult, Result } from '../result';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { getThrottle } from './throttle';
+import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -27,6 +29,9 @@ import type {
 import './legacy';
 
 export { RequestError as HttpError };
+
+export class EmptyResultError extends Error {}
+export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
 type JsonArgs<
   Opts extends HttpOptions & HttpRequestOptions<ResT>,
@@ -42,7 +47,7 @@ type Task<T> = () => Promise<HttpResponse<T>>;
 
 // Copying will help to avoid circular structure
 // and mutation of the cached response.
-function copyResponse<T extends Buffer | string | any>(
+function copyResponse<T>(
   response: HttpResponse<T>,
   deep: boolean
 ): HttpResponse<T> {
@@ -50,7 +55,7 @@ function copyResponse<T extends Buffer | string | any>(
   return deep
     ? {
         statusCode,
-        body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
+        body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
         headers: clone(headers),
       }
     : {
@@ -77,7 +82,7 @@ function applyDefaultHeaders(options: Options): void {
 // `request`.
 async function gotTask<T>(
   url: string,
-  options: GotOptions,
+  options: SetRequired<GotOptions, 'method'>,
   requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
 ): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
@@ -102,9 +107,10 @@ async function gotTask<T>(
       duration =
         error.timings?.phases.total ??
         /* istanbul ignore next: can't be tested */ -1;
-      const method = options.method?.toUpperCase() ?? 'GET';
-      const code = error.code ?? 'UNKNOWN';
-      const retryCount = error.request?.retryCount ?? -1;
+      const method = options.method.toUpperCase();
+      const code = error.code ?? /* istanbul ignore next */ 'UNKNOWN';
+      const retryCount =
+        error.request?.retryCount ?? /* istanbul ignore next */ -1;
       logger.debug(
         `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`
       );
@@ -125,16 +131,20 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
+  protected getThrottle(url: string): Throttle | null {
+    return getThrottle(url);
+  }
+
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions: InternalHttpOptions & HttpRequestOptions<T> = {}
+    httpOptions: InternalHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
 
-    let options: GotOptions = merge<GotOptions>(
+    let options = merge<SetRequired<GotOptions, 'method'>, GotOptions>(
       {
         method: 'get',
         ...this.options,
@@ -144,8 +154,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     );
 
     const etagCache =
-      httpOptions.etagCache &&
-      (options.method === 'get' || options.method === 'head')
+      httpOptions.etagCache && options.method === 'get'
         ? httpOptions.etagCache
         : null;
     if (etagCache) {
@@ -171,18 +180,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
     options = applyAuthorization(options);
 
-    // use sha512: https://www.npmjs.com/package/hasha#algorithm
     const memCacheKey =
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
-        ? hasha([
-            'got-',
-            JSON.stringify({
+        ? hash(
+            `got-${JSON.stringify({
               url,
               headers: options.headers,
               method: options.method,
-            }),
-          ])
+            })}`
+          )
         : null;
 
     let resPromise: Promise<HttpResponse<T>> | null = null;
@@ -198,13 +205,13 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const httpTask: Task<T> = () => {
         const queueDuration = Date.now() - startTime;
         return gotTask(url, options, {
-          method: options.method ?? 'get',
+          method: options.method,
           url,
           queueDuration,
         });
       };
 
-      const throttle = getThrottle(url);
+      const throttle = this.getThrottle(url);
       const throttledTask: Task<T> = throttle
         ? () => throttle.add<HttpResponse<T>>(httpTask)
         : httpTask;
@@ -343,6 +350,32 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return this.requestJson<ResT>('get', args);
   }
 
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(
+    url: string,
+    options: Opts & HttpRequestOptions<Infer<Schema>>,
+    schema: Schema
+  ): AsyncResult<Infer<Schema>, SafeJsonError>;
+  getJsonSafe<
+    ResT extends NonNullable<unknown>,
+    Schema extends ZodType<ResT> = ZodType<ResT>
+  >(
+    arg1: string,
+    arg2?: (Opts & HttpRequestOptions<ResT>) | Schema,
+    arg3?: Schema
+  ): AsyncResult<ResT, SafeJsonError> {
+    const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
+    return Result.wrap(this.requestJson<ResT>('get', args)).transform(
+      (response) => Result.ok(response.body)
+    );
+  }
+
   headJson(url: string, httpOptions?: Opts): Promise<HttpResponse<never>> {
     return this.requestJson<never>('head', { url, httpOptions });
   }
@@ -424,7 +457,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     let combinedOptions: any = {
       method: 'get',
       ...this.options,

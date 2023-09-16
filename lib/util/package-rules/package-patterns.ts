@@ -5,11 +5,25 @@ import { regEx } from '../regex';
 import { Matcher } from './base';
 import { massagePattern } from './utils';
 
+function matchPatternsAgainstName(
+  matchPackagePatterns: string[],
+  name: string
+): boolean {
+  let isMatch = false;
+  for (const packagePattern of matchPackagePatterns) {
+    if (isPackagePatternMatch(packagePattern, name)) {
+      isMatch = true;
+    }
+  }
+  return isMatch;
+}
+
 export class PackagePatternsMatcher extends Matcher {
   override matches(
     { depName, packageName }: PackageRuleInputConfig,
-    { matchPackagePatterns }: PackageRule
+    packageRule: PackageRule
   ): boolean | null {
+    const { matchPackagePatterns } = packageRule;
     if (is.undefined(matchPackagePatterns)) {
       return null;
     }
@@ -18,26 +32,21 @@ export class PackagePatternsMatcher extends Matcher {
       return false;
     }
 
-    const namesToMatchAgainst = [depName];
-
     if (
       is.string(packageName) &&
-      process.env.RENOVATE_X_MATCH_PACKAGE_NAMES_MORE
+      matchPatternsAgainstName(matchPackagePatterns, packageName)
     ) {
-      namesToMatchAgainst.push(packageName);
+      return true;
+    }
+    if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
+      logger.once.info(
+        { packageRule, packageName, depName },
+        'Use matchDepPatterns instead of matchPackagePatterns'
+      );
+      return true;
     }
 
-    let isMatch = false;
-    for (const packagePattern of matchPackagePatterns) {
-      if (
-        namesToMatchAgainst.some((p) =>
-          isPackagePatternMatch(packagePattern, p)
-        )
-      ) {
-        isMatch = true;
-      }
-    }
-    return isMatch;
+    return false;
   }
 
   override excludes(

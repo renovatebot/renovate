@@ -13,7 +13,6 @@ describe('workers/repository/errors-warnings', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>();
     });
 
@@ -46,11 +45,8 @@ describe('workers/repository/errors-warnings', () => {
   });
 
   describe('getDepWarningsPR()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns 2 pr warnings text dependencyDashboard true', () => {
+      const config: RenovateConfig = {};
       const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -84,7 +80,7 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
 
-      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
+      const res = getDepWarningsPR(packageFiles, config, dependencyDashboard);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -98,6 +94,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('returns 2 pr warnings text dependencyDashboard false', () => {
+      const config: RenovateConfig = {};
       const dependencyDashboard = false;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -131,7 +128,7 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
 
-      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
+      const res = getDepWarningsPR(packageFiles, config, dependencyDashboard);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -145,17 +142,23 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('PR warning returns empty string', () => {
+      const config: RenovateConfig = {};
       const packageFiles: Record<string, PackageFile[]> = {};
-      const res = getDepWarningsPR(packageFiles);
+      const res = getDepWarningsPR(packageFiles, config);
+      expect(res).toBe('');
+    });
+
+    it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {
+      const config: RenovateConfig = {
+        suppressNotifications: ['dependencyLookupWarnings'],
+      };
+      const packageFiles: Record<string, PackageFile[]> = {};
+      const res = getDepWarningsPR(packageFiles, config);
       expect(res).toBe('');
     });
   });
 
   describe('getDepWarningsDashboard()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns dependency dashboard warning text', () => {
       const config: RenovateConfig = {};
       const packageFiles: Record<string, PackageFile[]> = {
@@ -227,7 +230,6 @@ describe('workers/repository/errors-warnings', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>();
     });
 
@@ -261,6 +263,7 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsOnboardingPR()', () => {
     it('returns onboarding warning text', () => {
+      const config: RenovateConfig = {};
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -292,7 +295,7 @@ describe('workers/repository/errors-warnings', () => {
           },
         ],
       };
-      const res = getDepWarningsOnboardingPR(packageFiles);
+      const res = getDepWarningsOnboardingPR(packageFiles, config);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
@@ -308,6 +311,20 @@ describe('workers/repository/errors-warnings', () => {
 
         "
       `);
+    });
+
+    it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {
+      const config: RenovateConfig = {
+        suppressNotifications: ['dependencyLookupWarnings'],
+      };
+      const packageFiles: Record<string, PackageFile[]> = {};
+      const res = getDepWarningsOnboardingPR(packageFiles, config);
+      expect(res).toBe('');
+    });
+
+    it('handles undefined', () => {
+      const res = getDepWarningsOnboardingPR(undefined as never, {});
+      expect(res).toBe('');
     });
   });
 });

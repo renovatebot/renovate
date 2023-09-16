@@ -58,7 +58,10 @@ export function addSecretForSanitizing(
   }
 }
 
-export function clearSanitizedSecretsList(type = 'repo'): void {
-  const secrets = type === 'repo' ? repoSecrets : globalSecrets;
-  secrets.clear();
+export function clearRepoSanitizedSecretsList(): void {
+  repoSecrets.clear();
+}
+
+export function clearGlobalSanitizedSecretsList(): void {
+  globalSecrets.clear();
 }

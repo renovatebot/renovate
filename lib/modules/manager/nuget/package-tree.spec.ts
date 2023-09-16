@@ -7,7 +7,13 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { getDependentPackageFiles } from './package-tree';
 
 jest.mock('fs', () => memfs);
-jest.mock('fs-extra', () => Fixtures.fsExtra());
+jest.mock('fs-extra', () =>
+  jest
+    .requireActual<typeof import('../../../../test/fixtures')>(
+      '../../../../test/fixtures'
+    )
+    .fsExtra()
+);
 jest.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {

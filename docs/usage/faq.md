@@ -23,18 +23,25 @@ Renovate will:
 Only the latest version of Renovate is supported by the Renovate maintainers.
 The Renovate team only fixes bugs in an older version if:
 
-- the hosted app needs to stay on that older major version for a short time, or
+- the Mend Renovate App needs to stay on that older major version for a short time, or
 - some critical bug needs to be fixed and the new major is blocked
 
-If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
+If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
 If you're self hosting Renovate, use the latest release if possible.
+
+## When is the Mend Renovate App updated with new Renovate versions?
+
+The Renovate maintainers manually update the app.
+The maintainers don't follow any release schedule or release cadence.
+This means the Mend Renovate App can lag a few hours to a week behind the open source version.
+Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
 ## Renovate core features not supported on all platforms
 
-| Feature              | Platforms which lack feature                               | See Renovate issue(s)                                        |
-| -------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| Hosted app           | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
+| Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
+| --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| The Mend Renovate App | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
 
 ## Major platform features not supported by Renovate
 

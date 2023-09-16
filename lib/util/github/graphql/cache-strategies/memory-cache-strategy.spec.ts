@@ -1,5 +1,6 @@
 import { DateTime, Settings } from 'luxon';
 import * as memCache from '../../../cache/memory';
+import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy';
 
@@ -32,7 +33,6 @@ type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 
 describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     memCache.init();
   });
 
@@ -44,7 +44,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items,
       createdAt: isoTs('2022-10-01 15:30'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     // At this moment, cache is valid
     let now = '2022-10-31 15:29:59';
@@ -84,7 +84,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-10-31 15:30';
     mockTime(now);
@@ -120,7 +120,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-10-31 15:30';
     mockTime(now);
@@ -146,7 +146,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-12-31 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-12-31 23:59';
     mockTime(now);
@@ -190,7 +190,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-10-31 15:30';
     mockTime(now);

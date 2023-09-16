@@ -1,20 +1,31 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
+import {
+  env,
+  fs,
+  git,
+  mocked,
+  mockedFunction,
+  partial,
+} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipenv from '.';
+
+const datasource = mocked(_datasource);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -26,17 +37,20 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
-const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
+const dockerAdminConfig = {
+  ...adminConfig,
+  binarySource: 'docker',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+};
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('modules/manager/pipenv/artifacts', () => {
-  // TODO: #7154
+  // TODO: #22198
   let pipFileLock: any;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -150,6 +164,10 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    // pipenv
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '2023.1.2' }],
+    });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -176,6 +194,10 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    // pipenv
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '2023.1.2' }],
+    });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({

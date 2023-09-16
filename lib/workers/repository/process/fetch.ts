@@ -1,12 +1,10 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import {
-  getDefaultConfig,
-  getDefaultVersioning,
-} from '../../../modules/datasource';
+import { getDefaultConfig } from '../../../modules/datasource';
+import { getDefaultVersioning } from '../../../modules/datasource/common';
 import type {
   PackageDependency,
   PackageFile,
@@ -14,6 +12,7 @@ import type {
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../../util/cache/memory';
 import type { LookupStats } from '../../../util/cache/memory/types';
+import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
 import { PackageFiles } from '../package-files';
@@ -37,7 +36,7 @@ async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  const dep = structuredClone(indep);
+  const dep = clone(indep);
   dep.updates = [];
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
@@ -61,7 +60,7 @@ async function fetchDepUpdates(
   depConfig = applyPackageRules(depConfig);
   depConfig.packageName ??= depConfig.depName;
   if (depConfig.ignoreDeps!.includes(depName!)) {
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
@@ -76,7 +75,7 @@ async function fetchDepUpdates(
         Object.assign(dep, updateResult);
       } catch (err) {
         if (
-          packageFileConfig.repoIsOnboarded ||
+          packageFileConfig.repoIsOnboarded === true ||
           !(err instanceof ExternalHostError)
         ) {
           throw err;
@@ -86,12 +85,12 @@ async function fetchDepUpdates(
         dep.warnings ??= [];
         dep.warnings.push({
           topic: 'Lookup Error',
-          // TODO: types (#7154)
+          // TODO: types (#22198)
           message: `${depName!}: ${cause.message}`,
         });
       }
     }
-    dep.updates = dep.updates ?? [];
+    dep.updates ??= [];
   }
   return dep;
 }
@@ -102,15 +101,13 @@ async function fetchManagerPackagerFileUpdates(
   pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;
+  const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   if (pFile.extractedConstraints) {
-    pFile.constraints = {
+    packageFileConfig.constraints = {
       ...pFile.extractedConstraints,
       ...config.constraints,
-      ...pFile.constraints,
     };
-    delete pFile.extractedConstraints;
   }
-  const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => (): Promise<PackageDependency> =>

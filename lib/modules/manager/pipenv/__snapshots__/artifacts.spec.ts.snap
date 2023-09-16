@@ -99,7 +99,7 @@ exports[`modules/manager/pipenv/artifacts returns updated Pipfile.lock 1`] = `
 exports[`modules/manager/pipenv/artifacts supports docker mode 1`] = `
 [
   {
-    "cmd": "docker pull containerbase/sidecar",
+    "cmd": "docker pull ghcr.io/containerbase/sidecar",
     "options": {
       "encoding": "utf-8",
     },
@@ -116,7 +116,6 @@ exports[`modules/manager/pipenv/artifacts supports docker mode 1`] = `
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -138,7 +137,7 @@ exports[`modules/manager/pipenv/artifacts supports docker mode 1`] = `
 exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile 1`] = `
 [
   {
-    "cmd": "docker pull containerbase/sidecar",
+    "cmd": "docker pull ghcr.io/containerbase/sidecar",
     "options": {
       "encoding": "utf-8",
     },
@@ -155,7 +154,6 @@ exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile 1`] =
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -176,7 +174,7 @@ exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile 1`] =
 exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile dev packages 1`] = `
 [
   {
-    "cmd": "docker pull containerbase/sidecar",
+    "cmd": "docker pull ghcr.io/containerbase/sidecar",
     "options": {
       "encoding": "utf-8",
     },
@@ -193,7 +191,6 @@ exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile dev p
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -214,7 +211,7 @@ exports[`modules/manager/pipenv/artifacts uses pipenv version from Pipfile dev p
 exports[`modules/manager/pipenv/artifacts uses pipenv version from config 1`] = `
 [
   {
-    "cmd": "docker pull containerbase/sidecar",
+    "cmd": "docker pull ghcr.io/containerbase/sidecar",
     "options": {
       "encoding": "utf-8",
     },
@@ -231,7 +228,6 @@ exports[`modules/manager/pipenv/artifacts uses pipenv version from config 1`] = 
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

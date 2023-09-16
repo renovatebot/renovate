@@ -190,7 +190,7 @@ function getNewValue({
 
   // Explicitly check whether this is a fully-qualified version
   if (
-    (VERSION_PATTERN.exec(newVersion)?.groups?.release || '').split('.')
+    (VERSION_PATTERN.exec(newVersion)?.groups?.release ?? '').split('.')
       .length !== 3
   ) {
     logger.debug(

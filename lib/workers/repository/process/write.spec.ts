@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mocked,
   partial,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
@@ -42,7 +42,6 @@ limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
 });

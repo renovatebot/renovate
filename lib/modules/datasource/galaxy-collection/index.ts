@@ -35,8 +35,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, projectName] = packageName.split('.');
 
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;

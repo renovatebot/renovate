@@ -17,7 +17,11 @@
   },
   "omnisharp.autoStart": false,
   "jest.autoRun": "off",
-  "jest.jestCommandLine": "yarn jest",
-  "npm.packageManager": "yarn",
-  "prettier.prettierPath": "./node_modules/prettier"
+  "jest.jestCommandLine": "pnpm jest",
+  "npm.packageManager": "pnpm",
+  "prettier.prettierPath": "./node_modules/prettier",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
 }

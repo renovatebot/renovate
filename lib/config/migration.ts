@@ -104,6 +104,30 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
       }
     }
+    const languages = [
+      'docker',
+      'dotnet',
+      'golang',
+      'java',
+      'js',
+      'node',
+      'php',
+      'python',
+      'ruby',
+      'rust',
+    ];
+    for (const language of languages) {
+      if (is.nonEmptyObject(migratedConfig[language])) {
+        migratedConfig.packageRules ??= [];
+        const currentContent = migratedConfig[language] as any;
+        const packageRule = {
+          matchCategories: [language],
+          ...currentContent,
+        };
+        migratedConfig.packageRules.unshift(packageRule);
+        delete migratedConfig[language];
+      }
+    }
     // Migrate nested packageRules
     if (is.nonEmptyArray(migratedConfig.packageRules)) {
       const existingRules = migratedConfig.packageRules;
@@ -113,7 +137,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
-            // TODO: fix types #7154
+            // TODO: fix types #22198
             const combinedRule = mergeChildConfig(
               packageRule,
               subrule as PackageRule
