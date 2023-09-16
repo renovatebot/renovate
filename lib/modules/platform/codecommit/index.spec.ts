@@ -49,6 +49,7 @@ describe('modules/platform/codecommit/index', () => {
     codeCommitClient.reset();
     config.prList = undefined;
     config.repository = undefined;
+    jest.useRealTimers();
   });
 
   it('validates massageMarkdown functionality', () => {
@@ -223,7 +224,6 @@ describe('modules/platform/codecommit/index', () => {
       ).toBe(
         `https://access-key-id:${token}@git-codecommit.eu-central-1.amazonaws.com/v1/repos/name`
       );
-      jest.useRealTimers();
     });
   });
 
