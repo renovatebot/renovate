@@ -15,32 +15,23 @@ import {
 } from '../../../util/fs';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { PypiDatasource } from '../../datasource/pypi';
 import { dependencyPattern } from '../pip_requirements/extract';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { PoetryFile, PoetryLock, PoetrySource } from './types';
+import { Lockfile } from './schema';
+import type { PoetryFile, PoetrySource } from './types';
 
 export function getPythonConstraint(
   existingLockFileContent: string
-): string | undefined | null {
-  try {
-    const data = parse(existingLockFileContent) as PoetryLock;
-    if (is.string(data?.metadata?.['python-versions'])) {
-      return data?.metadata?.['python-versions'];
-    }
-  } catch (err) {
-    // Do nothing
-  }
-  return undefined;
+): string | null {
+  return Result.parse(
+    existingLockFileContent,
+    Lockfile.transform(({ pythonVersions }) => pythonVersions)
+  ).unwrapOrNull();
 }
 
 const pkgValRegex = regEx(`^${dependencyPattern}$`);
-
-const poetryConstraint: Record<string, string> = {
-  '1.0': '<1.1.0',
-  '1.1': '<1.3.0',
-  '2.0': '>=1.3.0',
-};
 
 export function getPoetryRequirement(
   pyProjectContent: string,
@@ -53,18 +44,16 @@ export function getPoetryRequirement(
     logger.debug('Using poetry version from poetry.lock header');
     return poetryVersionMatch[1];
   }
-  try {
-    const data = parse(existingLockFileContent) as PoetryLock;
-    const lockVersion = data?.metadata?.['lock-version'];
-    if (is.string(lockVersion)) {
-      if (poetryConstraint[lockVersion]) {
-        logger.debug('Using poetry version from poetry.lock metadata');
-        return poetryConstraint[lockVersion];
-      }
-    }
-  } catch (err) {
-    // Do nothing
+
+  const { val: lockfilePoetryConstraint } = Result.parse(
+    existingLockFileContent,
+    Lockfile.transform(({ poetryConstraint }) => poetryConstraint)
+  ).unwrap();
+  if (lockfilePoetryConstraint) {
+    logger.debug('Using poetry version from poetry.lock metadata');
+    return lockfilePoetryConstraint;
   }
+
   try {
     const pyproject: PoetryFile = parse(pyProjectContent);
     // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
@@ -118,11 +107,9 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   return sourceArray;
 }
 
-function getMatchingHostRule(source: PoetrySource): HostRule {
-  const scopedMatch = find({ hostType: PypiDatasource.id, url: source.url });
-  return is.nonEmptyObject(scopedMatch)
-    ? scopedMatch
-    : find({ url: source.url });
+function getMatchingHostRule(url: string | undefined): HostRule {
+  const scopedMatch = find({ hostType: PypiDatasource.id, url });
+  return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
 }
 
 function getSourceCredentialVars(
@@ -133,7 +120,7 @@ function getSourceCredentialVars(
   const envVars: Record<string, string> = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = getMatchingHostRule(source);
+    const matchingHostRule = getMatchingHostRule(source.url);
     const formattedSourceName = source.name
       .replace(regEx(/(\.|-)+/g), '_')
       .toUpperCase();
@@ -148,6 +135,7 @@ function getSourceCredentialVars(
   }
   return envVars;
 }
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,

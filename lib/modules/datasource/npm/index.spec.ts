@@ -1,4 +1,3 @@
-import mockDate from 'mockdate';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
@@ -7,8 +6,6 @@ import * as hostRules from '../../../util/host-rules';
 import { NpmDatasource, setNpmrc } from '.';
 
 const datasource = NpmDatasource.id;
-
-jest.mock('delay');
 
 let npmResponse: any;
 
@@ -46,7 +43,6 @@ describe('modules/datasource/npm/index', () => {
 
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
-    mockDate.reset();
   });
 
   it('should return null for no versions', async () => {

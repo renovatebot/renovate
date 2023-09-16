@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../../test/fixtures';
-import { getConfig } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
@@ -26,7 +26,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     beforeEach(() => {
-      // TODO: fix types (#7154)
+      // TODO: fix types (#22198)
       upgrade = getConfig() as BranchUpgradeConfig;
       upgrade.packageFile = 'test';
       upgrade.manager = 'html';

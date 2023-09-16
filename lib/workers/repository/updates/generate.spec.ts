@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import type { UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -46,6 +46,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
+      expect(res.recreateClosed).toBe(false);
     });
 
     it('handles lockFileMaintenance', () => {
@@ -143,6 +144,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
+      expect(res.recreateClosed).toBe(false);
     });
 
     it('groups multiple upgrades same version', () => {
@@ -215,6 +217,7 @@ describe('workers/repository/updates/generate', () => {
         foo: '1.0.0',
         bar: '2.0.0',
       });
+      expect(res.recreateClosed).toBe(false);
     });
 
     it('groups major updates with different versions but same newValue, no recreateWhen', () => {
@@ -528,7 +531,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeUndefined();
+      expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
@@ -571,7 +574,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeUndefined();
+      expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
     });
@@ -1416,6 +1419,30 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
       expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
+    });
+
+    it('merges additionalReviewers', () => {
+      const upgrades = [
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          additionalReviewers: ['foo'],
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          additionalReviewers: ['bar'],
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(upgrades);
+      expect(res.additionalReviewers).toEqual(['foo', 'bar']);
     });
   });
 });

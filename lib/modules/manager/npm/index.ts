@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
@@ -12,12 +12,10 @@ export {
 } from './update';
 export { getRangeStrategy } from './range';
 
-export const language: ProgrammingLanguage = 'js';
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)package\\.json$'],
-  rollbackPrs: true,
   versioning: npmVersioning.id,
   digest: {
     prBodyDefinitions: {
@@ -30,5 +28,7 @@ export const defaultConfig = {
       "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
   },
 };
+
+export const categories: Category[] = ['js'];
 
 export const supportedDatasources = [GithubTagsDatasource.id, NpmDatasource.id];

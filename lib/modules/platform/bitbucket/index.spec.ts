@@ -789,6 +789,170 @@ describe('modules/platform/bitbucket/index', () => {
         })
       ).toMatchSnapshot();
     });
+
+    it('finds closed pr with no reopen comments', async () => {
+      const prComment = {
+        content: {
+          raw: 'some comment',
+        },
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'closed',
+            },
+          ],
+        })
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [prComment] });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        prTitle: 'title',
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('finds closed pr with reopen comment on private repository', async () => {
+      const prComment = {
+        content: {
+          raw: 'reopen! comment',
+        },
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
+      };
+
+      const scope = await initRepoMock({}, { is_private: true });
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'closed',
+            },
+          ],
+        })
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [prComment] });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        prTitle: 'title',
+      });
+      expect(pr).toBeNull();
+    });
+
+    it('finds closed pr with reopen comment on public repository from workspace member', async () => {
+      const workspaceMember = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+
+      const prComment = {
+        content: {
+          raw: 'reopen! comment',
+        },
+        user: workspaceMember,
+      };
+
+      const scope = await initRepoMock({}, { is_private: false });
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'closed',
+            },
+          ],
+        })
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [prComment] })
+        .get(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(200, { values: [workspaceMember] });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        prTitle: 'title',
+      });
+      expect(pr).toBeNull();
+    });
+
+    it('finds closed pr with reopen comment on public repository from non-workspace member', async () => {
+      const nonWorkspaceMember = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+
+      const prComment = {
+        content: {
+          raw: 'reopen! comment',
+        },
+        user: nonWorkspaceMember,
+      };
+
+      const scope = await initRepoMock({}, { is_private: false });
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              source: { branch: { name: 'branch' } },
+              destination: { branch: { name: 'master' } },
+              title: 'title',
+              state: 'closed',
+            },
+          ],
+        })
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [prComment] })
+        .get(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(404);
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        prTitle: 'title',
+      });
+      expect(pr?.number).toBe(5);
+    });
   });
 
   describe('createPr()', () => {
@@ -1015,6 +1179,56 @@ describe('modules/platform/bitbucket/index', () => {
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
 
+    it('removes reviewer if they are also the author of the pr', async () => {
+      const reviewers = [
+        {
+          user: {
+            display_name: 'Bob Smith',
+            uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+            account_id: '123',
+          },
+        },
+        {
+          user: {
+            display_name: 'Jane Smith',
+            uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+            account_id: '456',
+          },
+        },
+      ];
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
+        .reply(200, {
+          values: reviewers,
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(400, {
+          type: 'error',
+          error: {
+            fields: {
+              reviewers: [
+                'Jane Smith is the author and cannot be included as a reviewer.',
+              ],
+            },
+          },
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
+      expect(pr?.number).toBe(5);
+    });
+
     it('rethrows exception when PR create error due to unknown reviewers error', async () => {
       const reviewer = {
         user: {
@@ -1175,7 +1389,12 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'new_base',
+        })
       ).toResolve();
     });
 

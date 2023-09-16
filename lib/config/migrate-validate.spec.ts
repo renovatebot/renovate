@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig } from '../../test/util';
+import type { RenovateConfig } from '../../test/util';
+import { getConfig } from './defaults';
 import { migrateAndValidate } from './migrate-validate';
 
 let config: RenovateConfig;

@@ -1,9 +1,29 @@
+import type { PlatformId } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
+import { find, getAll } from '../host-rules';
 import { regEx } from '../regex';
+import { createURLFromHostOrURL, validateUrl } from '../url';
 import type { AuthenticationRule } from './types';
 import { parseGitUrl } from './url';
+
+const githubApiUrls = new Set([
+  'github.com',
+  'api.github.com',
+  'https://api.github.com',
+  'https://api.github.com/',
+]);
+
+const standardGitAllowedHostTypes = [
+  // All known git platforms
+  'azure',
+  'bitbucket',
+  'bitbucket-server',
+  'gitea',
+  'github',
+  'gitlab',
+] satisfies PlatformId[];
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
@@ -16,7 +36,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token) {
     logger.warn(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `Could not create environment variable for ${matchHost!} as token was empty`
     );
     return { ...environmentVariables };
@@ -123,4 +143,68 @@ export function getAuthenticationRules(
   });
 
   return authenticationRules;
+}
+
+export function getGitEnvironmentVariables(
+  additionalHostTypes: string[] = []
+): NodeJS.ProcessEnv {
+  let environmentVariables: NodeJS.ProcessEnv = {};
+
+  // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
+  const githubToken = find({
+    hostType: 'github',
+    url: 'https://api.github.com/',
+  });
+
+  if (githubToken?.token) {
+    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+      'https://github.com/',
+      githubToken
+    );
+  }
+
+  // construct the Set of allowed hostTypes consisting of the standard Git provides
+  // plus additionalHostTypes, which are provided as parameter
+  const gitAllowedHostTypes = new Set<string>([
+    ...standardGitAllowedHostTypes,
+    ...additionalHostTypes,
+  ]);
+
+  // filter rules without `matchHost` and `token` and github api github rules
+  const hostRules = getAll()
+    .filter((r) => r.matchHost && r.token)
+    .filter((r) => !githubToken || !githubApiUrls.has(r.matchHost!));
+
+  // for each hostRule without hostType we add additional authentication variables to the environmentVariables
+  // for each hostRule with hostType we add additional authentication variables to the environmentVariables
+  for (const hostRule of hostRules) {
+    if (!hostRule.hostType || gitAllowedHostTypes.has(hostRule.hostType)) {
+      environmentVariables = addAuthFromHostRule(
+        hostRule,
+        environmentVariables
+      );
+    }
+  }
+  return environmentVariables;
+}
+
+function addAuthFromHostRule(
+  hostRule: HostRule,
+  env: NodeJS.ProcessEnv
+): NodeJS.ProcessEnv {
+  let environmentVariables = env;
+  const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
+  if (validateUrl(httpUrl)) {
+    logger.trace(`Adding Git authentication for ${httpUrl} using token auth.`);
+    environmentVariables = getGitAuthenticatedEnvironmentVariables(
+      httpUrl!,
+      hostRule,
+      environmentVariables
+    );
+  } else {
+    logger.debug(
+      `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`
+    );
+  }
+  return environmentVariables;
 }

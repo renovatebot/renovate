@@ -1,6 +1,5 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -20,11 +19,13 @@ import {
   readLocalFile,
   renameLocalFile,
 } from '../../../../util/fs';
+import { minimatch } from '../../../../util/minimatch';
 import { trimSlashes } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function generateLockFile(
   lockFileDir: string,
@@ -41,13 +42,19 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
-      constraint: config.constraints?.npm,
+      constraint:
+        config.constraints?.npm ??
+        getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
     };
     const commands: string[] = [];
     let cmdOptions = '';
-    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
+    if (
+      postUpdateOptions?.includes('npmDedupe') === true ||
+      skipInstalls === false
+    ) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
@@ -67,7 +74,7 @@ export async function generateLockFile(
       cwdFile: lockFileName,
       extraEnv,
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
         npmToolConstraint,
       ],
       docker: {},
@@ -157,7 +164,7 @@ export async function generateLockFile(
     }
 
     // Read the result
-    // TODO #7154
+    // TODO #22198
     lockFile = (await readLocalFile(
       upath.join(lockFileDir, filename),
       'utf8'
@@ -167,13 +174,16 @@ export async function generateLockFile(
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile
     if (lockUpdates.length) {
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
-      if (lockFileParsed?.lockfileVersion === 2) {
+      if (
+        lockFileParsed?.lockfileVersion === 2 ||
+        lockFileParsed?.lockfileVersion === 3
+      ) {
         lockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
             | 'dependencies'
             | 'optionalDependencies';
 
-          // TODO #7154
+          // TODO #22198
           if (
             lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
           ) {
@@ -242,7 +252,7 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns ?? []) {
-          if (minimatch(workspaceDir, workspacePattern)) {
+          if (minimatch(workspacePattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;
           }

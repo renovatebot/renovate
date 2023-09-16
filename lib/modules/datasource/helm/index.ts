@@ -60,6 +60,9 @@ export class HelmDatasource extends Datasource {
       }
       const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
+        if (releases.length === 0) {
+          continue;
+        }
         const latestRelease = releases[0];
         const sourceUrl = findSourceUrl(latestRelease);
         result[name] = {
@@ -68,6 +71,7 @@ export class HelmDatasource extends Datasource {
           releases: releases.map((release) => ({
             version: release.version,
             releaseTimestamp: release.created ?? null,
+            newDigest: release.digest,
           })),
         };
       }

@@ -1,6 +1,5 @@
 import {
   RenovateConfig,
-  getConfig,
   git,
   partial,
   platform,
@@ -16,10 +15,15 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
-  config.platform = 'github';
-  config.errors = [];
-  config.warnings = [];
+  config = partial<RenovateConfig>({
+    repoIsOnboarded: true,
+    branchPrefix: `renovate/`,
+    pruneStaleBranches: true,
+    ignoredAuthors: [],
+    platform: 'github',
+    errors: [],
+    warnings: [],
+  });
 });
 
 describe('workers/repository/finalize/prune', () => {

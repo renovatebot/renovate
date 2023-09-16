@@ -5,7 +5,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { delimiters, extractRubyVersion } from './common';
+import { delimiters, extractRubyVersion, getLockFilePath } from './common';
 import { extractLockFileEntries } from './locked-version';
 
 function formatContent(input: string): string {
@@ -210,14 +210,16 @@ export async function extractPackageFile(
   }
 
   if (packageFile) {
-    const gemfileLock = `${packageFile}.lock`;
-    const lockContent = await readLocalFile(gemfileLock, 'utf8');
+    const gemfileLockPath = await getLockFilePath(packageFile);
+    const lockContent = await readLocalFile(gemfileLockPath, 'utf8');
     if (lockContent) {
-      logger.debug(`Found Gemfile.lock file packageFile: ${packageFile}`);
-      res.lockFiles = [gemfileLock];
+      logger.debug(
+        `Found lock file ${gemfileLockPath} for packageFile: ${packageFile}`
+      );
+      res.lockFiles = [gemfileLockPath];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         const lockedDepValue = lockedEntries.get(`${dep.depName!}`);
         if (lockedDepValue) {
           dep.lockedVersion = lockedDepValue;

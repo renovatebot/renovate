@@ -23,7 +23,7 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 
 ```json
 {
-  "extends": ["config:base", ":dependencyDashboard"]
+  "extends": ["config:recommended", ":dependencyDashboard"]
 }
 ```
 
@@ -41,7 +41,7 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 
 ```json
 {
-  "extends": ["config:base", ":disableDependencyDashboard"]
+  "extends": ["config:recommended", ":disableDependencyDashboard"]
 }
 ```
 
@@ -86,7 +86,7 @@ To require manual approval for _all updates_, add the `:dependencyDashboardAppro
 
 ```json
 {
-  "extends": ["config:base", ":dependencyDashboardApproval"]
+  "extends": ["config:recommended", ":dependencyDashboardApproval"]
 }
 ```
 

@@ -73,6 +73,7 @@ describe('modules/versioning/index', () => {
 
   describe('should return the same interface', () => {
     const optionalFunctions = [
+      'allowUnstableMajorUpgrades',
       'isLessThanRange',
       'valueToVersion',
       'constructor',

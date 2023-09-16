@@ -9,6 +9,9 @@ import { logger } from '../../../../logger';
 import { readSystemFile } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
+  if (upath.basename(file) === '.renovaterc') {
+    return JSON5.parse(await readSystemFile(file, 'utf8'));
+  }
   switch (upath.extname(file)) {
     case '.yaml':
     case '.yml':
@@ -71,6 +74,9 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.debug('No config file found on disk - skipping');
     }
   }
+
+  await deleteNonDefaultConfig(env); // Try deletion only if RENOVATE_CONFIG_FILE is specified
+
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
@@ -80,4 +86,29 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     config = migratedConfig;
   }
   return config;
+}
+
+export async function deleteNonDefaultConfig(
+  env: NodeJS.ProcessEnv
+): Promise<void> {
+  const configFile = env.RENOVATE_CONFIG_FILE;
+
+  if (is.undefined(configFile) || is.emptyStringOrWhitespace(configFile)) {
+    return;
+  }
+
+  if (env.RENOVATE_X_DELETE_CONFIG_FILE !== 'true') {
+    return;
+  }
+
+  if (!(await fs.pathExists(configFile))) {
+    return;
+  }
+
+  try {
+    await fs.remove(configFile);
+    logger.trace({ path: configFile }, 'config file successfully deleted');
+  } catch (err) {
+    logger.warn({ err }, 'error deleting config file');
+  }
 }

@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
+import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
 
@@ -15,11 +16,6 @@ const defaultExtractConfig = {
 const input01Content = Fixtures.get('inputs/01.json', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
-const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
-const workspacesSimpleContent = Fixtures.get(
-  'inputs/workspaces-simple.json',
-  '..'
-);
 const vendorisedContent = Fixtures.get('is-object.json', '..');
 const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
@@ -164,6 +160,32 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('warns when multiple lock files found', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'yarn.lock') {
+          return Promise.resolve('# yarn.lock');
+        }
+        if (fileName === 'package-lock.json') {
+          return Promise.resolve('# package-lock.json');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultExtractConfig
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+      );
+      expect(res).toMatchObject({
+        managerData: {
+          npmLock: 'package-lock.json',
+          yarnLock: 'yarn.lock',
+        },
+      });
+    });
+
     it('finds and filters .npmrc', async () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.npmrc') {
@@ -272,120 +294,6 @@ describe('modules/manager/npm/extract/index', () => {
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
-    it('finds lerna', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{}');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          lernaClient: 'npm',
-          lernaJsonFile: 'lerna.json',
-          lernaPackages: undefined,
-        },
-      });
-    });
-
-    it('finds "npmClient":"npm" in lerna.json', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{ "npmClient": "npm" }');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          lernaClient: 'npm',
-          lernaJsonFile: 'lerna.json',
-          lernaPackages: undefined,
-        },
-      });
-    });
-
-    it('finds "npmClient":"yarn" in lerna.json', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{ "npmClient": "yarn" }');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          lernaClient: 'yarn',
-          lernaJsonFile: 'lerna.json',
-          lernaPackages: undefined,
-        },
-      });
-    });
-
-    it('finds simple yarn workspaces', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{}');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        workspacesSimpleContent,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: { workspacesPackages: ['packages/*'] },
-      });
-    });
-
-    it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{"useWorkspaces": true}');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        workspacesSimpleContent,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: { workspacesPackages: ['packages/*'] },
-      });
-    });
-
-    it('finds complex yarn workspaces', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{}');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        workspacesContent,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: { workspacesPackages: ['packages/*'] },
-      });
-    });
-
     it('extracts engines', async () => {
       const pJson = {
         dependencies: {
@@ -490,6 +398,7 @@ describe('modules/manager/npm/extract/index', () => {
           yarn: '1.12.3',
           npm: '5.9.0',
           pnpm: '6.11.2',
+          invalid: '1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -505,6 +414,12 @@ describe('modules/manager/npm/extract/index', () => {
             depType: 'volta',
             currentValue: '6.11.2',
             depName: 'pnpm',
+            prettyDepType: 'volta',
+          },
+          {
+            depType: 'volta',
+            currentValue: '1.0.0',
+            depName: 'invalid',
             prettyDepType: 'volta',
             skipReason: 'unknown-volta',
           },
@@ -870,6 +785,50 @@ describe('modules/manager/npm/extract/index', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('.extractAllPackageFiles()', () => {
+    it('runs', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(input02Content);
+      const res = await npmExtract.extractAllPackageFiles(
+        defaultExtractConfig,
+        ['package.json']
+      );
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '7.0.0',
+              datasource: 'npm',
+              depName: '@babel/core',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+            {
+              currentValue: '1.21.0',
+              datasource: 'npm',
+              depName: 'config',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+          ],
+          extractedConstraints: {},
+          managerData: {
+            hasPackageManager: false,
+            npmLock: undefined,
+            packageJsonName: 'renovate',
+            pnpmShrinkwrap: undefined,
+            workspacesPackages: undefined,
+            yarnLock: undefined,
+            yarnZeroInstall: false,
+          },
+          npmrc: undefined,
+          packageFile: 'package.json',
+          packageFileVersion: '1.0.0',
+          skipInstalls: true,
+        },
+      ]);
     });
   });
 

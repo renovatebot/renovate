@@ -1,4 +1,5 @@
-import { getConfig, mocked, partial, scm } from '../../../../test/util';
+import { mocked, partial, scm } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -25,6 +26,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
+      delete config.regexManagers; // for coverage
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('ansible');
     });
@@ -35,7 +37,9 @@ describe('workers/repository/extract/index', () => {
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       const res = await extractAllDependencies(config);
-      expect(res).toMatchObject({ packageFiles: { npm: [{}] } });
+      expect(res).toMatchObject({
+        packageFiles: { npm: [{}] },
+      });
     });
 
     it('warns if no packages found for a enabled manager', async () => {
@@ -55,7 +59,9 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
-      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
+      config.regexManagers = [
+        { customType: 'regex', fileMatch: ['README'], matchStrings: [''] },
+      ];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('regex');
     });

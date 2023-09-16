@@ -36,6 +36,10 @@ function parseDepName(depType: string, key: string): string {
   return depName;
 }
 
+function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
+  return Object.values(lockFiles).filter(is.string).length > 1;
+}
+
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
 );
@@ -64,7 +68,7 @@ export async function extractPackageFile(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = packageFile;
     error.validationError =
-      'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
+      'Nested package.json must not contain Renovate configuration. Please use `packageRules` with `matchFileNames` in your main config instead.';
     throw error;
   }
   const packageJsonName = packageJson.name;
@@ -100,6 +104,12 @@ export async function extractPackageFile(
   lockFiles.npmLock = lockFiles.packageLock ?? lockFiles.shrinkwrapJson;
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
+
+  if (hasMultipleLockFiles(lockFiles)) {
+    logger.warn(
+      'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+    );
+  }
 
   let npmrc: string | undefined;
   const npmrcFileName = getSiblingFileName(packageFile, '.npmrc');
@@ -156,31 +166,7 @@ export async function extractPackageFile(
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
-  let lernaJsonFile: string | undefined;
-  let lernaPackages: string[] | undefined;
-  let lernaClient: 'yarn' | 'npm' | undefined;
   let hasFancyRefs = false;
-  let lernaJson:
-    | {
-        packages: string[];
-        npmClient: string;
-        useWorkspaces?: boolean;
-      }
-    | undefined;
-  try {
-    lernaJsonFile = getSiblingFileName(packageFile, 'lerna.json');
-    // TODO #7154
-    lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, lernaJsonFile }, 'Could not parse lerna.json');
-  }
-  if (lernaJson && !lernaJson.useWorkspaces) {
-    lernaPackages = lernaJson.packages;
-    lernaClient =
-      lernaJson.npmClient === 'yarn' || lockFiles.yarnLock ? 'yarn' : 'npm';
-  } else {
-    lernaJsonFile = undefined;
-  }
 
   const depTypes = {
     dependencies: 'dependency',
@@ -263,6 +249,9 @@ export async function extractPackageFile(
         }
       } else if (depName === 'npm') {
         dep.datasource = NpmDatasource.id;
+      } else if (depName === 'pnpm') {
+        dep.datasource = NpmDatasource.id;
+        dep.commitMessageTopic = 'pnpm';
       } else {
         dep.skipReason = 'unknown-volta';
       }
@@ -434,7 +423,7 @@ export async function extractPackageFile(
             dep.managerData = { key };
           }
           if (depType === 'overrides' && !is.string(val)) {
-            // TODO: fix type #7154
+            // TODO: fix type #22198
             deps.push(
               ...extractOverrideDepsRec(
                 [depName],
@@ -442,7 +431,7 @@ export async function extractPackageFile(
               )
             );
           } else {
-            // TODO: fix type #7154
+            // TODO: fix type #22198
             dep = { ...dep, ...extractDependency(depType, depName, val!) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
@@ -462,10 +451,9 @@ export async function extractPackageFile(
     logger.debug('Package file has no deps');
     if (
       !(
-        packageJsonName ||
-        packageFileVersion ||
-        npmrc ||
-        lernaJsonFile ||
+        !!packageJsonName ||
+        !!packageFileVersion ||
+        !!npmrc ||
         workspacesPackages
       )
     ) {
@@ -494,9 +482,6 @@ export async function extractPackageFile(
     npmrc,
     managerData: {
       ...lockFiles,
-      lernaClient,
-      lernaJsonFile,
-      lernaPackages,
       packageJsonName,
       yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(

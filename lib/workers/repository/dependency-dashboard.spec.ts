@@ -4,11 +4,11 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mockedFunction,
   platform,
 } from '../../../test/util';
+import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
   PackageDependency,
@@ -92,6 +92,26 @@ async function dryRun(
 
 describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
+    it('parses invalid dashboard body without throwing error', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: null as never,
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {},
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
@@ -618,6 +638,38 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
+
+    it('contains logged problems with custom header', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
+          ],
+          result: 'pending',
+          branchName: 'branchName1',
+        },
+      ];
+      logger.getProblems.mockReturnValueOnce([
+        {
+          level: ERROR,
+          msg: 'i am a non-duplicated problem',
+        },
+      ]);
+      config.dependencyDashboard = true;
+      config.customizeDashboard = {
+        repoProblemsHeader: 'platform is {{platform}}',
+      };
+
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
+        'platform is github'
+      );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 

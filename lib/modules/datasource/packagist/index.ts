@@ -184,6 +184,13 @@ export class PackagistDatasource extends Datasource {
     try {
       const meta = await this.getRegistryMeta(registryUrl);
 
+      if (
+        meta.availablePackages &&
+        !meta.availablePackages.includes(packageName)
+      ) {
+        return null;
+      }
+
       if (meta.metadataUrl) {
         const packagistResult = await this.packagistV2Lookup(
           registryUrl,

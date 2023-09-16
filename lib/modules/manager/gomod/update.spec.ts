@@ -144,7 +144,7 @@ describe('modules/manager/gomod/update', () => {
     });
 
     it('returns null if error', () => {
-      // TODO: #7154 bad test, uses invalid null to throwing nullref error
+      // TODO: #22198 bad test, uses invalid null to throwing nullref error
       const res = updateDependency({
         fileContent: null as never,
         upgrade: null as never,

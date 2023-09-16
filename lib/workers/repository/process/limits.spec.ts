@@ -1,11 +1,5 @@
 import { DateTime } from 'luxon';
-import {
-  RenovateConfig,
-  getConfig,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
+import { RenovateConfig, partial, platform, scm } from '../../../../test/util';
 import type { Pr } from '../../../modules/platform/types';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
@@ -14,7 +8,13 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({
+    branchPrefix: 'foo/',
+    onboardingBranch: 'bar/configure',
+    prHourlyLimit: 2,
+    prConcurrentLimit: 10,
+    branchConcurrentLimit: null,
+  });
 });
 
 describe('workers/repository/process/limits', () => {
@@ -36,8 +36,6 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getPrHourlyRemaining({
         ...config,
         prHourlyLimit: 10,
-        branchPrefix: 'foo/',
-        onboardingBranch: 'bar/configure',
       });
       expect(res).toBe(7);
     });
@@ -133,7 +131,7 @@ describe('workers/repository/process/limits', () => {
 
     it('returns prConcurrentLimit if errored', async () => {
       config.branchConcurrentLimit = 2;
-      // TODO: #7154
+      // TODO: #22198
       const res = await limits.getConcurrentBranchesRemaining(
         config,
         null as never

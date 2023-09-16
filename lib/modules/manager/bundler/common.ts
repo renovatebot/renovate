@@ -1,5 +1,9 @@
 import { logger } from '../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import {
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact } from '../types';
 
@@ -67,4 +71,13 @@ export function getBundlerConstraint(
     }
   }
   return null;
+}
+
+export async function getLockFilePath(
+  packageFilePath: string
+): Promise<string> {
+  logger.debug(`Looking for lockfile for ${packageFilePath}`);
+  return (await localPathExists(`${packageFilePath}.lock`))
+    ? `${packageFilePath}.lock`
+    : `Gemfile.lock`;
 }

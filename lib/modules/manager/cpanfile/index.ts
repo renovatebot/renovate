@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { CpanDatasource } from '../../datasource/cpan';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 
@@ -10,6 +11,8 @@ export const url =
 export const defaultConfig = {
   fileMatch: ['(^|/)cpanfile$'],
 };
+
+export const categories: Category[] = ['perl'];
 
 export const supportedDatasources = [
   CpanDatasource.id,

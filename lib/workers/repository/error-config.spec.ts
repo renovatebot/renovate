@@ -1,10 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  getConfig,
-  partial,
-  platform,
-} from '../../../test/util';
+import { RenovateConfig, partial, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -20,7 +15,13 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  config = getConfig();
+  // default values
+  config = partial<RenovateConfig>({
+    onboardingBranch: 'configure/renovate',
+    suppressNotifications: ['deprecationWarningIssues'],
+    configWarningReuseIssue: true,
+    confidential: false,
+  });
 });
 
 describe('workers/repository/error-config', () => {

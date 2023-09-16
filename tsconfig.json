@@ -33,5 +33,9 @@
     "config.js",
     "tmp"
   ],
-  "ts-node": { "transpileOnly": true, "esm": true }
+  "ts-node": {
+    "transpileOnly": true,
+    "esm": false,
+    "swc": true
+  }
 }

@@ -8,7 +8,7 @@ import { extractAllPackageFiles } from '.';
 jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
-  // TODO: fix types, jest is using wrong overload (#7154)
+  // TODO: fix types, jest is using wrong overload (#22198)
   fs.getLocalFiles.mockImplementation((fileNames: string[]): Promise<any> => {
     const fileContentMap: Record<string, string | null> = {};
     for (const fileName of fileNames) {

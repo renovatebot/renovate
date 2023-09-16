@@ -6,6 +6,10 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import {
+  findGithubToken,
+  takePersonalAccessTokenIfPossible,
+} from '../../../util/check-token';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
@@ -27,12 +31,10 @@ import { Lockfile, PackageFile } from './schema';
 import type { AuthJson } from './types';
 import {
   extractConstraints,
-  findGithubToken,
   getComposerArguments,
   getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
-  takePersonalAccessTokenIfPossible,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -177,7 +179,9 @@ export async function updateArtifacts({
         (
           'update ' +
           updatedDeps
-            .map((dep) => dep.depName)
+            .map((dep) =>
+              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName
+            )
             .filter(is.string)
             .map((dep) => quote(dep))
             .join(' ')

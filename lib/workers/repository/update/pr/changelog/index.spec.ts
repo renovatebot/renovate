@@ -5,6 +5,7 @@ import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchConfig } from '../../../../types';
+import * as releases from './releases';
 import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
@@ -13,6 +14,7 @@ const githubApiHost = 'https://api.github.com';
 
 const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
 const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
+const getInRangeReleasesMock = jest.spyOn(releases, 'getInRangeReleases');
 
 const upgrade = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
@@ -55,6 +57,15 @@ describe('workers/repository/update/pr/changelog/index', () => {
       ).toBeNull();
     });
 
+    it('handles unsupported changelog source', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://dev.azure.com/unknown-repo',
+        })
+      ).toBeNull();
+    });
+
     it('returns null if no currentVersion', async () => {
       expect(
         await getChangeLogJSON({
@@ -84,7 +95,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('works without Github', async () => {
-      githubTagsMock.mockRejectedValueOnce(new Error('Unknown'));
+      githubTagsMock.mockRejectedValue(new Error('Unknown'));
       // 4 versions, so 4 calls without cache
       githubReleasesMock
         .mockRejectedValueOnce(new Error('Unknown'))
@@ -156,7 +167,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('filters unnecessary warns', async () => {
-      githubTagsMock.mockRejectedValueOnce(new Error('Unknown Github Repo'));
+      githubTagsMock.mockRejectedValue(new Error('Unknown Github Repo'));
       githubReleasesMock.mockRejectedValueOnce(
         new Error('Unknown Github Repo')
       );
@@ -260,9 +271,17 @@ describe('workers/repository/update/pr/changelog/index', () => {
       ).toBeNull();
     });
 
+    it('will call getInRangeReleases when releases is undefined', async () => {
+      await getChangeLogJSON({
+        ...upgrade,
+        releases: undefined,
+      });
+      expect(getInRangeReleasesMock).toHaveBeenCalledOnce();
+    });
+
     it('supports github enterprise and github.com changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock.scope(githubApiHost).persist().get(/.*/).reply(200, []);
       hostRules.add({
         hostType: 'github',
@@ -295,8 +314,8 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock
         .scope('https://github-enterprise.example.com')
         .persist()
@@ -335,8 +354,8 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports github.com and github enterprise changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock
         .scope('https://github-enterprise.example.com')
         .persist()

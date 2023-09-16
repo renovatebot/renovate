@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../../constants';
@@ -12,11 +13,37 @@ import { dnsLookup } from './dns';
 import { keepaliveAgents } from './keepalive';
 import type { GotOptions } from './types';
 
-export function findMatchingRules(options: GotOptions, url: string): HostRule {
+export type HostRulesGotOptions = Pick<
+  GotOptions,
+  | 'hostType'
+  | 'url'
+  | 'noAuth'
+  | 'headers'
+  | 'token'
+  | 'username'
+  | 'password'
+  | 'context'
+  | 'enabled'
+  | 'abortOnError'
+  | 'abortIgnoreStatusCodes'
+  | 'timeout'
+  | 'lookup'
+  | 'agent'
+  | 'http2'
+>;
+
+export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
+  options: GotOptions,
+  url: string
+): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
-  if (res.token || res.username || res.password) {
+  if (
+    is.nonEmptyString(res.token) ||
+    is.nonEmptyString(res.username) ||
+    is.nonEmptyString(res.password)
+  ) {
     // do not fallback if we already have auth infos
     return res;
   }
@@ -66,20 +93,38 @@ export function findMatchingRules(options: GotOptions, url: string): HostRule {
     };
   }
 
+  // Fallback to `gitea` hostType
+  if (
+    hostType &&
+    GITEA_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== 'gitea'
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: 'gitea',
+        url,
+      }),
+      ...res,
+    };
+  }
+
   return res;
 }
 
 // Apply host rules to requests
-export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
+export function applyHostRules<GotOptions extends HostRulesGotOptions>(
+  url: string,
+  inOptions: GotOptions
+): GotOptions {
   const options: GotOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
-    options.headers?.authorization ||
-    options.password ||
-    options.token
+    is.nonEmptyString(options.headers?.authorization) ||
+    is.nonEmptyString(options.password) ||
+    is.nonEmptyString(options.token)
   ) {
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {

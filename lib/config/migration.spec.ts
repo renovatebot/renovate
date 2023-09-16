@@ -122,6 +122,9 @@ describe('config/migration', () => {
             ],
           },
         ],
+        dotnet: {
+          enabled: false,
+        },
         exposeEnv: true,
         lockFileMaintenance: {
           exposeEnv: false,
@@ -132,6 +135,14 @@ describe('config/migration', () => {
         devDependencies: {
           automerge: 'minor',
           schedule: null,
+        },
+        python: {
+          packageRules: [
+            {
+              matchPackageNames: ['foo'],
+              enabled: false,
+            },
+          ],
         },
         nvmrc: {
           pathRules: [
@@ -159,7 +170,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig.depTypes).toBeUndefined();
       expect(migratedConfig.automerge).toBe(false);
-      expect(migratedConfig.packageRules).toHaveLength(9);
+      expect(migratedConfig.packageRules).toHaveLength(11);
       expect(migratedConfig.hostRules).toHaveLength(1);
     });
 
@@ -302,30 +313,11 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
-      // TODO: fix types #7154
+      // TODO: fix types #22198
       expect(
         (migratedConfig.lockFileMaintenance as RenovateConfig)
           ?.packageRules?.[0].respectLatest
       ).toBeFalse();
-    });
-
-    it('migrates node to travis', () => {
-      const config: TestRenovateConfig = {
-        node: {
-          enabled: true,
-          automerge: 'none' as never,
-        },
-      };
-      const { isMigrated, migratedConfig } =
-        configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTrue();
-      expect(
-        (migratedConfig.node as RenovateSharedConfig).enabled
-      ).toBeUndefined();
-      expect((migratedConfig.travis as RenovateSharedConfig).enabled).toBe(
-        true
-      );
     });
 
     it('migrates packageFiles', () => {
@@ -564,13 +556,41 @@ describe('config/migration', () => {
             matchBaseBranches: ['master'],
             matchDatasources: ['orb'],
             matchDepTypes: ['peerDependencies'],
-            matchLanguages: ['python'],
+            matchCategories: ['python'],
             matchManagers: ['dockerfile'],
             matchPackageNames: ['foo'],
             matchPackagePatterns: ['^bar'],
-            matchPaths: ['package.json'],
+            matchFileNames: ['package.json'],
             matchSourceUrlPrefixes: ['https://github.com/lodash'],
             matchUpdateTypes: ['major'],
+          },
+        ],
+      });
+    });
+
+    it('migrates in order of precedence', () => {
+      const config: TestRenovateConfig = {
+        packageRules: [
+          {
+            matchFiles: ['matchFiles'],
+            matchPaths: ['matchPaths'],
+          },
+          {
+            matchPaths: ['matchPaths'],
+            matchFiles: ['matchFiles'],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            matchFileNames: ['matchPaths'],
+          },
+          {
+            matchFileNames: ['matchFiles'],
           },
         ],
       });

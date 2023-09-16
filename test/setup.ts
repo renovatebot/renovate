@@ -40,7 +40,7 @@ declare global {
       Matchers<R extends void | Promise<void> ? R : void>,
       'toMatchObject'
     > & {
-      // TODO: override, because type issues (#7154)
+      // TODO: override, because type issues (#22198)
       /**
        * Used to check that a JavaScript object matches a subset of the properties of an object
        *
@@ -110,7 +110,7 @@ interface JestEach extends JestItEach {
 }
 
 interface JestIt extends Global.It {
-  // TODO: override, because type issues (#7154)
+  // TODO: override, because type issues (#22198)
   each: JestEach;
 }
 
@@ -123,7 +123,7 @@ declare global {
   const expect: JestExpect;
   const it: JestIt;
   const jest: Omit<Jest, 'fn'> & {
-    // TODO: override, because type issues (#7154)
+    // TODO: override, because type issues (#22198)
     fn(): jest.Mock;
     fn<T, Y extends any[]>(implementation?: (...args: Y) => T): jest.Mock<T, Y>;
   };
@@ -151,7 +151,7 @@ declare global {
     type MockInstance<T, Y extends any[]> = JestMockInstance<(...args: Y) => T>;
 
     interface Mock<T = any, Y extends any[] = any>
-      extends Function,
+      extends Function, // eslint-disable-line @typescript-eslint/ban-types
         MockInstance<T, Y> {
       new (...args: Y): T;
       (...args: Y): T;
@@ -165,10 +165,9 @@ declare global {
     type SpyInstance<T, Y extends any[]> = JestSpyInstance<(...args: Y) => T>;
 
     // Extension point for jest matchers
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface Expect {}
     // Extension point for jest matchers
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R> {}
   }
 }

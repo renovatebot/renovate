@@ -222,7 +222,7 @@ describe('modules/platform/azure/util', () => {
     });
 
     it('throws when repo name is invalid', () => {
-      // TODO: better error handling #7154
+      // TODO: better error handling #22198
       expect(() => getRepoByName(undefined as never, [])).toThrow();
       expect(() => getRepoByName(null as never, [])).toThrow();
       expect(() => getRepoByName('foo/bar/baz', [])).toThrow();

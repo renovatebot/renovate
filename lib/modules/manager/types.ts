@@ -5,7 +5,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../../config/types';
-import type { ProgrammingLanguage } from '../../constants';
+import type { Category } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
@@ -56,7 +56,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
 export interface PackageFileContent<T = Record<string, any>>
   extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  constraints?: Record<string, string>;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
@@ -118,7 +117,7 @@ export interface PackageDependency<T = Record<string, any>>
   versioning?: string;
   dataType?: string;
   enabled?: boolean;
-  bumpVersion?: ReleaseType | string;
+  bumpVersion?: ReleaseType;
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
@@ -230,7 +229,8 @@ export interface GlobalManagerConfig {
 
 export interface ManagerApi extends ModuleApi {
   defaultConfig: Record<string, unknown>;
-  language?: ProgrammingLanguage;
+
+  categories?: Category[];
   supportsLockFileMaintenance?: boolean;
 
   supportedDatasources: string[];
@@ -238,7 +238,7 @@ export interface ManagerApi extends ModuleApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string
+    bumpVersion: ReleaseType
   ): Result<BumpPackageVersionResult>;
 
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
@@ -273,6 +273,8 @@ export interface ManagerApi extends ModuleApi {
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>,
     ManagerData<T> {
+  // TODO: remove null
+  constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean | null;

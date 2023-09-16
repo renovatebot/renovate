@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
+import { RenovateConfig, mocked } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { MavenDatasource } from '../../../modules/datasource/maven';
 import type { PackageFile } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';

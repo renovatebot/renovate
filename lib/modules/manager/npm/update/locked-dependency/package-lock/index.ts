@@ -30,11 +30,11 @@ export async function updateLockedDependency(
   try {
     let packageJson: PackageJson;
     let packageLockJson: PackageLockOrEntry;
-    // TODO #7154
+    // TODO #22198
     const detectedIndent = detectIndent(lockFileContent!).indent || '  ';
     let newPackageJsonContent: string | null | undefined;
     try {
-      // TODO #7154
+      // TODO #22198
       packageJson = JSON.parse(packageFileContent!);
       packageLockJson = JSON.parse(lockFileContent!);
     } catch (err) {
@@ -68,7 +68,7 @@ export async function updateLockedDependency(
       } else {
         if (lockfileVersion !== 1) {
           logger.debug(
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             `Found lockfileVersion ${packageLockJson.lockfileVersion!}`
           );
           status = 'update-failed';
@@ -150,7 +150,7 @@ export async function updateLockedDependency(
         // Parent dependency is compatible with the new version we want
         logger.debug(
           `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             parentDepName ? `${parentDepName}@${parentVersion!}` : packageFile
           }`
         );
@@ -202,7 +202,7 @@ export async function updateLockedDependency(
           newVersion,
         })!;
         newPackageJsonContent = updateDependency({
-          // TODO #7154
+          // TODO #22198
           fileContent: packageFileContent!,
           upgrade: { depName, depType, newValue },
         });
@@ -234,8 +234,7 @@ export async function updateLockedDependency(
       // istanbul ignore if: hard to test due to recursion
       if (!parentUpdateResult.files) {
         logger.debug(
-          // TODO: types (#7154)
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          // TODO: types (#22198)
           `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
         );
         return { status: 'update-failed' };

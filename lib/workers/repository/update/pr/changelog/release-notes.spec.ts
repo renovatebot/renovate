@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
 import { mocked, partial } from '../../../../../../test/util';
+import { clone } from '../../../../../util/clone';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
 import * as _hostRules from '../../../../../util/host-rules';
@@ -13,6 +14,7 @@ import {
   getReleaseNotes,
   getReleaseNotesMd,
   releaseNotesCacheMinutes,
+  shouldSkipChangelogMd,
 } from './release-notes';
 import type {
   ChangeLogNotes,
@@ -1134,7 +1136,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('handles github sourceDirectory', async () => {
       const sourceDirectory = 'packages/foo';
-      const subdirTree = structuredClone(githubTreeResponse);
+      const subdirTree = clone(githubTreeResponse);
       for (const file of subdirTree.tree) {
         file.path = `${sourceDirectory}/${file.path}`;
       }
@@ -1239,7 +1241,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
-          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-httpswwwgithubcomyargsyargscomparev1520v1530-2020-03-08',
+          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-2020-03-08',
         });
       });
 
@@ -1269,7 +1271,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         expect(res).toMatchSnapshot({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
-          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-httpswwwgithubcomyargsyargscomparev1510v1520-2020-03-01',
+          url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-2020-03-01',
         });
       });
 
@@ -1305,7 +1307,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       it('handles gitlab sourceDirectory', async () => {
         const sourceDirectory = 'packages/foo';
-        const response = structuredClone(gitlabTreeResponse).map((file) => ({
+        const response = clone(gitlabTreeResponse).map((file) => ({
           ...file,
           path: `${sourceDirectory}/${file.path}`,
         }));
@@ -1339,12 +1341,36 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         });
       });
 
+      it('handles skipped packages', async () => {
+        const res = await getReleaseNotesMd(
+          {
+            ...githubProject,
+            repository: 'facebook/react-native',
+          },
+          partial<ChangeLogRelease>({
+            version: '0.72.3',
+            gitRef: '0.72.3',
+          })
+        );
+        expect(res).toBeNull();
+      });
+
       it('isUrl', () => {
         expect(versionOneNotes).not.toMatchObject(versionTwoNotes);
       });
 
       it('15.3.0 is not equal to 15.2.0', () => {
         expect(versionOneNotes).not.toMatchObject(versionTwoNotes);
+      });
+    });
+
+    describe('shouldSkipChangelogMd', () => {
+      it('should skip for flagged repository', () => {
+        expect(shouldSkipChangelogMd('facebook/react-native')).toBeTrue();
+      });
+
+      it('should continue for other repository', () => {
+        expect(shouldSkipChangelogMd('some/repo')).toBeFalse();
       });
     });
   });

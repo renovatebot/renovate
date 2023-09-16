@@ -8,6 +8,13 @@ export type PlatformId =
   | 'gitlab'
   | 'local';
 
+export const GITEA_API_USING_HOST_TYPES = [
+  'gitea',
+  'gitea-changelog',
+  'gitea-releases',
+  'gitea-tags',
+];
+
 export const GITHUB_API_USING_HOST_TYPES = [
   'github',
   'github-releases',
@@ -26,4 +33,8 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-changelog',
 ];
 
-export const BITBUCKET_API_USING_HOST_TYPES = ['bitbucket', 'bitbucket-tags'];
+export const BITBUCKET_API_USING_HOST_TYPES = [
+  'bitbucket',
+  'bitbucket-changelog',
+  'bitbucket-tags',
+];

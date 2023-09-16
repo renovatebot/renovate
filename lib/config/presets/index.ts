@@ -6,6 +6,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
+import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
 import * as migration from '../migration';
@@ -62,7 +63,7 @@ export function replaceArgs(
 ): Record<string, any>[];
 
 /**
- * TODO: fix me #7154
+ * TODO: fix me #22198
  * @param obj
  * @param argMapping
  */
@@ -139,6 +140,7 @@ export function parsePreset(input: string): ParsedPreset {
     'docker',
     'group',
     'helpers',
+    'mergeConfidence',
     'monorepo',
     'npm',
     'packages',
@@ -273,7 +275,7 @@ export async function resolveConfigPresets(
   _ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<AllConfig> {
-  let ignorePresets = structuredClone(_ignorePresets);
+  let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets ?? [];
   }

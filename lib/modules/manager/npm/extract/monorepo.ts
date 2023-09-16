@@ -10,13 +10,10 @@ export async function detectMonorepos(
   packageFiles: Partial<PackageFile<NpmManagerData>>[]
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
-  logger.debug('Detecting Lerna and Yarn Workspaces');
+  logger.debug('Detecting workspaces');
   for (const p of packageFiles) {
     const { packageFile, npmrc, managerData = {}, skipInstalls } = p;
     const {
-      lernaClient,
-      lernaJsonFile,
-      lernaPackages,
       npmLock,
       yarnZeroInstall,
       hasPackageManager,
@@ -24,9 +21,7 @@ export async function detectMonorepos(
       yarnLock,
     } = managerData;
 
-    const packages = (workspacesPackages ?? lernaPackages) as
-      | string[]
-      | undefined;
+    const packages = workspacesPackages as string[] | undefined;
     if (packages?.length) {
       const internalPackagePatterns = (
         is.array(packages) ? packages : [packages]
@@ -52,10 +47,8 @@ export async function detectMonorepos(
 
       for (const subPackage of internalPackageFiles) {
         subPackage.managerData = subPackage.managerData ?? {};
-        subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
         subPackage.managerData.hasPackageManager = hasPackageManager;
-        subPackage.managerData.lernaClient = lernaClient;
         subPackage.managerData.yarnLock ??= yarnLock;
         subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true

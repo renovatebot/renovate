@@ -77,7 +77,7 @@ spec:
           restartPolicy: Never
 ```
 
-And also this accompanying `secret.yaml`:
+And the `secret.yaml` that goes with it:
 
 ```yaml
 apiVersion: v1
@@ -248,7 +248,7 @@ module.exports = {
   token: '**gitlab_token**',
   platform: 'gitlab',
   onboardingConfig: {
-    extends: ['config:base'],
+    extends: ['config:recommended'],
   },
   repositories: ['username/repo', 'orgname/repo'],
 };
@@ -411,7 +411,7 @@ The logging level output is controlled by the Bunyan logging library.
 ## Self-signed TLS/SSL certificates
 
 Renovate and invoked helper programs (like Git, or npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
-If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be told to trust these additional certificates.
+If the remote hosts uses self-signed certificates or certificate authorities then Renovate must be told to trust them.
 
 ### Renovate Node.js app
 

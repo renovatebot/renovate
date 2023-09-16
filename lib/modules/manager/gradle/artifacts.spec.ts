@@ -35,6 +35,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const osPlatformSpy = jest.spyOn(os, 'platform');
@@ -77,7 +78,7 @@ describe('modules/manager/gradle/artifacts', () => {
       })
     );
 
-    // TODO: fix types, jest is using wrong overload (#7154)
+    // TODO: fix types, jest is using wrong overload (#22198)
     fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
       let content = '';
       if (fileName === 'gradle.lockfile') {
@@ -85,451 +86,708 @@ describe('modules/manager/gradle/artifacts', () => {
       } else if (fileName === 'gradle/wrapper/gradle-wrapper.properties') {
         content =
           'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.2-bin.zip';
+      } else if (fileName === 'gradle/verification-metadata.xml') {
+        content =
+          '<verify-metadata>true</verify-metadata><sha256 value="hash" origin="test data"/>';
       }
 
       return Promise.resolve(content);
     });
   });
 
-  it('aborts if no lockfile is found', async () => {
-    const execSnapshots = mockExecAll();
-    scm.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
+  describe('lockfile tests', () => {
+    it('aborts if no lockfile is found', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
 
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: {},
-      })
-    ).toBeNull();
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: {},
+        })
+      ).toBeNull();
 
-    expect(logger.logger.debug).toHaveBeenCalledWith(
-      'No Gradle dependency lockfiles found - skipping update'
-    );
-    expect(execSnapshots).toBeEmptyArray();
-  });
-
-  it('aborts if lock file exists but no gradle wrapper', async () => {
-    const execSnapshots = mockExecAll();
-    fs.findUpLocal.mockResolvedValue(null);
-
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: {},
-      })
-    ).toBeNull();
-
-    expect(logger.logger.debug).toHaveBeenCalledWith(
-      'Found Gradle dependency lockfiles but no gradlew - aborting update'
-    );
-    expect(execSnapshots).toBeEmptyArray();
-  });
-
-  it('updates lock file', async () => {
-    const execSnapshots = mockExecAll();
-
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [
-        { depName: 'org.junit.jupiter:junit-jupiter-api' },
-        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
-      ],
-      newPackageFileContent: '',
-      config: {},
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No Gradle dependency lockfiles or verification metadata found - skipping update'
+      );
+      expect(execSnapshots).toBeEmptyArray();
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine > /dev/null',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-    ]);
-  });
+    it('aborts if lock file exists but no gradle wrapper', async () => {
+      const execSnapshots = mockExecAll();
+      fs.findUpLocal.mockResolvedValue(null);
 
-  it('updates lock file in win32', async () => {
-    osPlatformSpy.mockReturnValue('win32');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: {},
+        })
+      ).toBeNull();
 
-    const execSnapshots = mockExecAll();
-
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [
-        { depName: 'org.junit.jupiter:junit-jupiter-api' },
-        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
-      ],
-      newPackageFileContent: '',
-      config: {},
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Found Gradle dependency lockfiles but no gradlew - aborting update'
+      );
+      expect(execSnapshots).toBeEmptyArray();
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
-        },
-      },
-    ]);
+    it('updates lock file', async () => {
+      const execSnapshots = mockExecAll();
 
-    // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'gradlew.bat --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: 'gradlew.bat --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-    ]);
-  });
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
 
-  it('prefers packageName over depName if provided', async () => {
-    const execSnapshots = mockExecAll();
-
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [
+      expect(res).toEqual([
         {
-          depType: 'plugin',
-          depName: 'org.springframework.boot',
-          packageName:
-            'org.springframework.boot:org.springframework.boot.gradle.plugin',
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
         },
-      ],
-      newPackageFileContent: '',
-      config: {},
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+        {
+          cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin > /dev/null',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-    ]);
-  });
+    it('updates lock file in win32', async () => {
+      osPlatformSpy.mockReturnValue('win32');
 
-  it('aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project', async () => {
-    expect(
-      await updateArtifacts({
-        packageFileName: 'somedir/settings.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
-      })
-    ).toBeNull();
+      const execSnapshots = mockExecAll();
 
-    expect(logger.logger.trace).toHaveBeenCalledWith(
-      'No build.gradle(.kts) file or not in root project - skipping lock file maintenance'
-    );
-  });
-
-  it('performs lock file maintenance', async () => {
-    const execSnapshots = mockExecAll();
-
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [],
-      newPackageFileContent: '',
-      config: { isLockFileMaintenance: true },
-    });
-
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-    ]);
-  });
-
-  it('performs lock file maintenance (docker)', async () => {
-    const execSnapshots = mockExecAll();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [],
-      newPackageFileContent: '',
-      config: { isLockFileMaintenance: true },
-    });
-
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e GRADLE_OPTS ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
-          ' bash -l -c "' +
-          'install-tool java 16.0.1' +
-          ' && ' +
-          './gradlew --console=plain -q properties' +
-          '"',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e GRADLE_OPTS ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
-          ' bash -l -c "' +
-          'install-tool java 16.0.1' +
-          ' && ' +
-          './gradlew --console=plain -q :dependencies --write-locks > /dev/null' +
-          '"',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
-  });
-
-  it('performs lock file maintenance (install)', async () => {
-    const execSnapshots = mockExecAll();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [],
-      newPackageFileContent: '',
-      config: { isLockFileMaintenance: true },
-    });
-
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool java 16.0.1' },
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      { cmd: 'install-tool java 16.0.1' },
-      {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
-  });
-
-  it('updates all included projects', async () => {
-    const execSnapshots = mockExecSequence([
-      { stdout: "subprojects: [project ':sub1', project ':sub2']", stderr: '' },
-      { stdout: '', stderr: '' },
-    ]);
-
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [],
-      newPackageFileContent: '',
-      config: { isLockFileMaintenance: true },
-    });
-
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-      {
-        cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks > /dev/null',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-    ]);
-  });
-
-  it('does not update lockfile if content is unchanged', async () => {
-    mockExecAll();
-    fs.readLocalFile.mockResolvedValue('Current gradle.lockfile');
-
-    expect(
-      await updateArtifacts({
+      const res = await updateArtifacts({
         packageFileName: 'build.gradle',
-        updatedDeps: [],
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
         newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
-      })
-    ).toBeNull();
-  });
-
-  it('gradlew failed', async () => {
-    const execSnapshots = mockExecAll(new Error('failed'));
-
-    expect(
-      await updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
-      })
-    ).toEqual([
-      {
-        artifactError: {
-          lockFile: 'build.gradle',
-          stderr: 'failed',
-        },
-      },
-    ]);
-
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
-    ]);
-  });
-
-  it('rethrows temporary error', async () => {
-    const execError = new ExecError(TEMPORARY_ERROR, {
-      cmd: '',
-      stdout: '',
-      stderr: '',
-      options: { encoding: 'utf8' },
-    });
-    mockExecAll(execError);
-
-    await expect(
-      updateArtifacts({
-        packageFileName: 'build.gradle',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
         config: {},
-      })
-    ).rejects.toThrow(TEMPORARY_ERROR);
-  });
+      });
 
-  it('fallback to default Java version if Gradle version not extractable', async () => {
-    const execSnapshots = mockExecAll();
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fs.readLocalFile
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce('New gradle.lockfile');
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+      ]);
 
-    const res = await updateArtifacts({
-      packageFileName: 'build.gradle',
-      updatedDeps: [],
-      newPackageFileContent: '',
-      config: { isLockFileMaintenance: true },
+      // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'gradlew.bat --console=plain -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+        {
+          cmd: 'gradlew.bat --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'gradle.lockfile',
-          contents: 'New gradle.lockfile',
+    it('prefers packageName over depName if provided', async () => {
+      const execSnapshots = mockExecAll();
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          {
+            depType: 'plugin',
+            depName: 'org.springframework.boot',
+            packageName:
+              'org.springframework.boot:org.springframework.boot.gradle.plugin',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
         },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool java 11.0.1' },
-      {
-        cmd: './gradlew --console=plain -q properties',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      { cmd: 'install-tool java 11.0.1' },
-      {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+        {
+          cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project', async () => {
+      expect(
+        await updateArtifacts({
+          packageFileName: 'somedir/settings.gradle',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: { isLockFileMaintenance: true },
+        })
+      ).toBeNull();
+
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'No build.gradle(.kts) file or not in root project - skipping lock file maintenance'
+      );
+    });
+
+    it('performs lock file maintenance', async () => {
+      const execSnapshots = mockExecAll();
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+        {
+          cmd: './gradlew --console=plain -q :dependencies --write-locks',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('performs lock file maintenance (docker)', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+        {
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e GRADLE_OPTS ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'ghcr.io/containerbase/sidecar' +
+            ' bash -l -c "' +
+            'install-tool java 16.0.1' +
+            ' && ' +
+            './gradlew --console=plain -q properties' +
+            '"',
+          options: { cwd: '/tmp/github/some/repo' },
+        },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+        {
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e GRADLE_OPTS ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'ghcr.io/containerbase/sidecar' +
+            ' bash -l -c "' +
+            'install-tool java 16.0.1' +
+            ' && ' +
+            './gradlew --console=plain -q :dependencies --write-locks' +
+            '"',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('performs lock file maintenance (install)', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool java 16.0.1' },
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: { cwd: '/tmp/github/some/repo' },
+        },
+        { cmd: 'install-tool java 16.0.1' },
+        {
+          cmd: './gradlew --console=plain -q :dependencies --write-locks',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('updates all included projects', async () => {
+      const execSnapshots = mockExecSequence([
+        {
+          stdout: "subprojects: [project ':sub1', project ':sub2']",
+          stderr: '',
+        },
+        { stdout: '', stderr: '' },
+      ]);
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+        {
+          cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('does not update lockfile if content is unchanged', async () => {
+      mockExecAll();
+      fs.readLocalFile.mockResolvedValue('Current gradle.lockfile');
+
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: { isLockFileMaintenance: true },
+        })
+      ).toBeNull();
+    });
+
+    it('gradlew failed', async () => {
+      const execSnapshots = mockExecAll(new Error('failed'));
+
+      expect(
+        await updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: { isLockFileMaintenance: true },
+        })
+      ).toEqual([
+        {
+          artifactError: {
+            lockFile: 'build.gradle',
+            stderr: 'failed',
+          },
+        },
+      ]);
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+      ]);
+    });
+
+    it('rethrows temporary error', async () => {
+      const execError = new ExecError(TEMPORARY_ERROR, {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: { encoding: 'utf8' },
+      });
+      mockExecAll(execError);
+
+      await expect(
+        updateArtifacts({
+          packageFileName: 'build.gradle',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {},
+        })
+      ).rejects.toThrow(TEMPORARY_ERROR);
+    });
+
+    it('fallback to default Java version if Gradle version not extractable', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('New gradle.lockfile');
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { isLockFileMaintenance: true },
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool java 11.0.1' },
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: { cwd: '/tmp/github/some/repo' },
+        },
+        { cmd: 'install-tool java 11.0.1' },
+        {
+          cmd: './gradlew --console=plain -q :dependencies --write-locks',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('dependency verification tests', () => {
+    it('updates verification metadata file', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        })
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle/verification-metadata.xml',
+            contents:
+              '<verify-metadata>true</verify-metadata><sha256 value="hash" origin="test data"/>',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('updates verification metadata and lock file', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle.lockfile',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [
+            'build.gradle',
+            'gradle.lockfile',
+            'gradle/verification-metadata.xml',
+          ],
+        })
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'New gradle.lockfile',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle/verification-metadata.xml',
+            contents:
+              '<verify-metadata>true</verify-metadata><sha256 value="hash" origin="test data"/>',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q properties',
+          options: {
+            cwd: '/tmp/github/some/repo',
+          },
+        },
+        {
+          cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+        {
+          cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('uses sha256 as default if only weak hash algorithms are found', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        })
+      );
+      fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+        let content = '';
+        if (fileName === 'gradle/verification-metadata.xml') {
+          content =
+            '<verify-metadata>true</verify-metadata><sha1 value="hash" origin="test data"/>';
+        }
+        return Promise.resolve(content);
+      });
+
+      await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('uses pgp hashType if verify-signatures is enabled', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        })
+      );
+      fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+        let content = '';
+        if (fileName === 'gradle/verification-metadata.xml') {
+          content = '<verify-signatures>true</verify-signatures>';
+        }
+        return Promise.resolve(content);
+      });
+
+      await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain -q --write-verification-metadata sha256,pgp help',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
+    it('does not exec any commands when verification metadata exists, but neither checksum nor signature verification is enabled', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        })
+      );
+      fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+        let content = '';
+        if (fileName === 'gradle/verification-metadata.xml') {
+          content =
+            '<verify-metadata>false</verify-metadata><verify-signatures>false</verify-signatures>';
+        }
+        return Promise.resolve(content);
+      });
+
+      await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(execSnapshots).toMatchObject([]);
+    });
   });
 });
