@@ -75,8 +75,8 @@ importers:
         specifier: 3.0.7
         version: 3.0.7
       '@renovatebot/ruby-semver':
-        specifier: 3.0.13
-        version: 3.0.13
+        specifier: 3.0.14
+        version: 3.0.14
       '@sindresorhus/is':
         specifier: 4.6.0
         version: 4.6.0
@@ -243,8 +243,8 @@ importers:
         specifier: 3.3.6
         version: 3.3.6
       node-html-parser:
-        specifier: 6.1.7
-        version: 6.1.7
+        specifier: 6.1.8
+        version: 6.1.8
       openpgp:
         specifier: 5.10.1
         version: 5.10.1
@@ -497,8 +497,8 @@ importers:
         specifier: 1.8.2
         version: 1.8.2
       conventional-changelog-conventionalcommits:
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 7.0.2
+        version: 7.0.2
       diff:
         specifier: 5.1.0
         version: 5.1.0
@@ -3008,8 +3008,8 @@ packages:
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
-  /@renovatebot/ruby-semver@3.0.13:
-    resolution: {integrity: sha512-VZO3BCaL0JToh/T+LwB3invT3J4wbut8gux63aC6xGm1SjrZt5/aNLkjy5/vabDNGXLU442VbVtMIIHVyM91CA==}
+  /@renovatebot/ruby-semver@3.0.14:
+    resolution: {integrity: sha512-3VFQ8ylW2FcvMzOnN+z0LW497sadrZQIQeIsw5iGAdN/XuYwdwNEZzOp37lAm/KUvs9iSmNZtzE+9ednUQNN4A==}
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
@@ -5225,8 +5225,8 @@ packages:
       compare-func: 2.0.0
     dev: true
 
-  /conventional-changelog-conventionalcommits@7.0.1:
-    resolution: {integrity: sha512-VfFJxBmi+LYXeb4pIfZGbuaFCpWZh0qXbUAKP/s6B8tigV6R4D8j5PDlTtMMWawa7+DcNySVoF7kPWz0EMYuCQ==}
+  /conventional-changelog-conventionalcommits@7.0.2:
+    resolution: {integrity: sha512-NKXYmMR/Hr1DevQegFB4MwfM5Vv0m4UIxKZTTYuD98lpTknaZlSRrDOG4X7wIXpGkfsYxZTghUN+Qq+T0YQI7w==}
     engines: {node: '>=16'}
     dependencies:
       compare-func: 2.0.0
@@ -8669,8 +8669,8 @@ packages:
     dev: false
     optional: true
 
-  /node-html-parser@6.1.7:
-    resolution: {integrity: sha512-OuraCzBo9x0JMTZScoNyWXydOX4kCjNJeSS2MQRbjAMJpfCn/1mQR8Jbsa+UGawX0aP+cbjFd9+EqP9wTroHLQ==}
+  /node-html-parser@6.1.8:
+    resolution: {integrity: sha512-bi3ChNi5Ne8XM2vDPvE2TOS6+AjgD9ASRJ81P1+45VTe9odNbsNb3SvVZzHho4qnu5gJ1yUYLGlQZ7tveSYNSg==}
     dependencies:
       css-select: 5.1.0
       he: 1.2.0
