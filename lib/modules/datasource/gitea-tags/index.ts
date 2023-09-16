@@ -7,9 +7,9 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { CommitsSchema, TagSchema, TagsSchema } from './schema';
 
 export class GiteaTagsDatasource extends Datasource {
-  override http = new GiteaHttp(GiteaTagsDatasource.id);
-
   static readonly id = 'gitea-tags';
+
+  override http = new GiteaHttp(GiteaTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://gitea.com'];
 
