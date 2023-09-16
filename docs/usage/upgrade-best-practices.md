@@ -193,6 +193,8 @@ Say you're on version `1` of a dependency, and the latest `major` version is at 
 You should update to `2`, then `3` and finally `4`.
 Avoid updating from `1` directly to `4`.
 
+Use the [`:separateMultipleMajorReleases`](https://docs.renovatebot.com/presets-default/#separatemultiplemajorreleases) preset to get separate `major` updates.
+
 ### Update development tools
 
 Finally update development tools like Prettier, ESLint, TSLint, Cypress, and so on.
