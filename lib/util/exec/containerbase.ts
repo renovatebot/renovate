@@ -17,6 +17,12 @@ import { id as semverCoercedVersioningId } from '../../modules/versioning/semver
 import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
+  bun: {
+    datasource: 'github-releases',
+    packageName: 'oven-sh/bun',
+    extractVersion: '^bun-v(?<version>.*)$',
+    versioning: npmVersioningId,
+  },
   bundler: {
     datasource: 'rubygems',
     packageName: 'bundler',
