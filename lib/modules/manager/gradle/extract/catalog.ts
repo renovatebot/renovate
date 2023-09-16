@@ -254,7 +254,7 @@ function extractDependency({
   }
 
   if (isVersionPointer(descriptor.version)) {
-    dependency.groupName = descriptor.version.ref;
+    dependency.groupName = normalizeAlias(descriptor.version.ref);
   }
 
   return dependency;
