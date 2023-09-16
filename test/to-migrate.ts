@@ -24,8 +24,6 @@ expect.extend({
     CustomMigration: MigrationConstructor,
     originalConfig: RenovateConfig,
     expectedConfig: RenovateConfig,
-    // not inferrable type https://github.com/typescript-eslint/typescript-eslint/issues/5199
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     isMigrated: boolean = true
   ) {
     class CustomMigrationsService extends MigrationsService {

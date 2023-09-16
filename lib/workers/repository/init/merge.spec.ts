@@ -34,7 +34,6 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   memCache.init();
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -47,6 +46,7 @@ describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
+      jest.restoreAllMocks();
     });
 
     it('returns config if not found', async () => {

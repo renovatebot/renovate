@@ -29,7 +29,6 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = {
         ...getConfig(),
         errors: [],
@@ -38,7 +37,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       };
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
-      platform.massageMarkdown = jest.fn((input) => input);
+      platform.massageMarkdown.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>());
       GlobalConfig.reset();
     });
@@ -187,7 +186,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
         const hash =
-          '8d5d8373c3fc54803f573ea57ded60686a9df8eb0430ad25da281472eed9ce4e'; // no rebase checkbox PR hash
+          '30029ee05ed80b34d2f743afda6e78fe20247a1eedaa9ce6a8070045c229ebfa'; // no rebase checkbox PR hash
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         platform.getBranchPr.mockResolvedValue(
@@ -275,9 +274,9 @@ describe('workers/repository/onboarding/pr/index', () => {
       const err = partial<RequestError>({ response });
 
       beforeEach(() => {
-        jest.resetAllMocks();
         GlobalConfig.reset();
         scm.deleteBranch.mockResolvedValue();
+        platform.createPr.mockReset();
       });
 
       it('throws when trying to create a new PR', async () => {

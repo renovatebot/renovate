@@ -1,7 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
 } from '../../config/types';
@@ -9,6 +8,7 @@ import type { Category } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
+import type { CustomExtractConfig } from './custom/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -21,12 +21,6 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
-}
-
-export interface CustomExtractConfig extends RegexManagerTemplates {
-  autoReplaceStringTemplate?: string;
-  matchStrings?: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface UpdateArtifactsConfig {
@@ -117,7 +111,7 @@ export interface PackageDependency<T = Record<string, any>>
   versioning?: string;
   dataType?: string;
   enabled?: boolean;
-  bumpVersion?: ReleaseType | string;
+  bumpVersion?: ReleaseType;
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
   gitRef?: boolean;
@@ -238,7 +232,7 @@ export interface ManagerApi extends ModuleApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string
+    bumpVersion: ReleaseType
   ): Result<BumpPackageVersionResult>;
 
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
@@ -273,6 +267,8 @@ export interface ManagerApi extends ModuleApi {
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>,
     ManagerData<T> {
+  // TODO: remove null
+  constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipInstalls?: boolean | null;

@@ -222,4 +222,4 @@ To change it, configure `packageRules` like this:
 
 ## Future work
 
-Contributions and/or feature requests are welcome to support more patterns or additional use cases.
+We welcome contributions or feature requests to support more patterns or use cases.

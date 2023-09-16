@@ -1,4 +1,5 @@
 The `github-actions` manager extracts dependencies from GitHub Actions workflow and workflow template files.
+It can also be used for Gitea and Forgejo Actions workflows as such are compatible with GitHub Actions workflows.
 
 If you like to use digest pinning but want to follow the action version tag, you can use the following sample:
 
@@ -23,4 +24,19 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 {
   "extends": ["helpers:pinGitHubActionDigests"]
 }
+```
+
+Renovate ignores any GitHub runners which are configured in variables.
+For example, Renovate ignores the runner configured in the `RUNNER` variable:
+
+```yaml
+name: build
+on: [push]
+
+env:
+  RUNNER: ubuntu-20.04
+
+jobs:
+  build:
+    runs-on: ${{ env.RUNNER }}
 ```

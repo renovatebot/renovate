@@ -7,8 +7,7 @@ import { extractPackageFile } from '.';
 
 jest.mock('simple-git');
 const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const Git = jest.requireActual('simple-git') as SimpleGitFactory;
+const Git = jest.requireActual<SimpleGitFactory>('simple-git');
 
 const gitMock = mock<SimpleGit>();
 
@@ -57,6 +56,65 @@ describe('modules/manager/git-submodules/extract', () => {
       expect(res?.deps[0].currentValue).toBe('main');
     });
 
+    it('default branch is detected with using git environment variables when no branch is specified', async () => {
+      gitMock.listRemote.mockResolvedValueOnce(
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+      );
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 'abc123',
+      });
+      const res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('main');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        '--symref',
+        'https://github.com/PowerShell/PowerShell-Docs',
+        'HEAD',
+      ]);
+    });
+
+    it('combined token from host rule is used to detect branch', async () => {
+      gitMock.listRemote.mockResolvedValueOnce(
+        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+      );
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 'x-access-token:ghs_abc123',
+      });
+      const res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('main');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:ghs_abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:ghs_abc123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:ghs_abc123@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        '--symref',
+        'https://github.com/PowerShell/PowerShell-Docs',
+        'HEAD',
+      ]);
+    });
+
     it('default to master if no branch can be detected', async () => {
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);
@@ -75,6 +133,35 @@ describe('modules/manager/git-submodules/extract', () => {
       expect(res?.deps[0].packageName).toBe(
         'https://github.com/PowerShell/PowerShell-Docs'
       );
+    });
+
+    it('combined username+pwd from host rule is used to detect branch for gitlab', async () => {
+      gitMock.listRemote.mockResolvedValueOnce(
+        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+      );
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'gitlab.com',
+        username: 'username',
+        password: 'password',
+      });
+      const res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('main');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://username:password@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://username:password@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://username:password@gitlab.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
+        GIT_CONFIG_VALUE_1: 'git@gitlab.com:',
+        GIT_CONFIG_VALUE_2: 'https://gitlab.com/',
+      });
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        '--symref',
+        'https://github.com/PowerShell/PowerShell-Docs',
+        'HEAD',
+      ]);
     });
 
     it('extracts multiple submodules', async () => {
@@ -137,6 +224,30 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: 'dev',
             depName: 'some-gitlab',
             packageName: 'https://gitlab.com/some/repo.git',
+          },
+        ],
+      });
+    });
+
+    it('whitespaces in submodule URL are encoded properly', async () => {
+      hostRules.add({
+        matchHost: 'organization@dev.azure.com/organization',
+        token: 'pat',
+        hostType: 'azure',
+      });
+      gitMock.listRemote.mockResolvedValueOnce(
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+      );
+      const res = await extractPackageFile('', '.gitmodules.6', {});
+      expect(res).toEqual({
+        datasource: 'git-refs',
+        deps: [
+          {
+            currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            currentValue: 'main',
+            depName: 'some-azure',
+            packageName:
+              'https://dev.azure.com/organization/whitespace%20project/_git/repo',
           },
         ],
       });

@@ -20,11 +20,11 @@ Multi-platform and multi-language.
   - each week
   - each month
 - Relevant package files are discovered automatically
-- Supports monorepo architectures like Lerna or Yarn workspaces with no extra configuration
+- Supports monorepo architectures with workspaces with no extra configuration
 - Bot behavior is customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
 - Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
+- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement, works with _most_ managers, see [issue 14149](https://github.com/renovatebot/renovate/issues/14149) for exceptions
 - Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
 
 ## Supported Platforms

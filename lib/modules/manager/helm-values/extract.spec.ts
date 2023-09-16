@@ -11,10 +11,6 @@ const helmMultiAndNestedImageValues = Fixtures.get(
 
 describe('modules/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [');
       expect(result).toBeNull();
@@ -41,6 +37,29 @@ describe('modules/manager/helm-values/extract', () => {
       const result = extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
       expect(result?.deps).toHaveLength(5);
+    });
+
+    it('extract data from file with multiple documents', () => {
+      const multiDocumentFile = Fixtures.get(
+        'single_file_with_multiple_documents.yaml'
+      );
+      const result = extractPackageFile(multiDocumentFile);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: 'v0.13.10',
+            depName: 'quay.io/metallb/controller',
+            datasource: 'docker',
+            versioning: 'docker',
+          },
+          {
+            currentValue: 'v0.13.10',
+            depName: 'quay.io/metallb/speaker',
+            datasource: 'docker',
+            versioning: 'docker',
+          },
+        ],
+      });
     });
   });
 });

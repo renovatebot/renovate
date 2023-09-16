@@ -14,6 +14,10 @@ jest.mock('../init/apis');
 jest.mock('../init/config');
 jest.mock('../init/merge');
 jest.mock('../../../config/secrets');
+jest.mock('../../../modules/platform', () => ({
+  platform: { initRepo: jest.fn() },
+  getPlatformList: jest.fn(),
+}));
 
 const apis = mocked(_apis);
 const config = mocked(_config);

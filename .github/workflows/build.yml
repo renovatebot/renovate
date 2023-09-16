@@ -38,7 +38,7 @@ env:
     data/
     tools/
     package.json
-    yarn.lock
+    pnpm-lock.yaml
     codecov.yml
 
 jobs:
@@ -94,7 +94,7 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
@@ -121,7 +121,7 @@ jobs:
           FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
-          echo "$(yarn -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
+          echo "$(pnpm -s schedule-test-shards)" >> "$GITHUB_OUTPUT"
 
   prefetch:
     needs: [setup]
@@ -150,7 +150,7 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
@@ -172,7 +172,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -181,13 +181,13 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
 
       - name: Lint
-        run: yarn -s eslint-ci
+        run: pnpm eslint-ci
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -200,7 +200,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -215,7 +215,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -224,13 +224,13 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
 
       - name: Lint
-        run: yarn -s prettier --cache-location .cache/prettier
+        run: pnpm prettier --cache-location .cache/prettier
 
       - name: Remove cache
         if: github.event_name == 'push'
@@ -243,7 +243,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -255,7 +255,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -264,13 +264,13 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@8f3516061301755c97ff833a8e933f09282cc5b5 # v11.0.0
+        uses: DavidAnson/markdownlint-cli2-action@3aaa38e446fbd2c288af4291aa0f55d64651050f # v12.0.0
 
       - name: Lint fenced code blocks
-        run: yarn -s doc-fence-check
+        run: pnpm doc-fence-check
 
-      - name: Lint website docs
-        run: yarn -s lint-website-docs
+      - name: Lint documentation
+        run: pnpm lint-documentation
 
   lint-other:
     needs: [setup]
@@ -279,7 +279,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -288,13 +288,13 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint project file structure
-        run: yarn -s ls-lint
+        run: pnpm ls-lint
 
       - name: Check git version
-        run: yarn -s git-check
+        run: pnpm git-check
 
       - name: Test schema
-        run: yarn -s test-schema
+        run: pnpm test-schema
 
   test:
     needs: [setup, prefetch]
@@ -313,7 +313,7 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -322,7 +322,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache jest
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: .cache/jest
           key: |
@@ -331,7 +331,7 @@ jobs:
             }}-${{
               env.NODE_VERSION
             }}-${{
-              hashFiles('yarn.lock')
+              hashFiles('pnpm-lock.yaml')
             }}-${{
               matrix.cache-key
             }}
@@ -341,7 +341,7 @@ jobs:
         run: |
           for shard in ${{ matrix.shards }};
           do
-            TEST_SHARD="$shard" yarn -s jest \
+            TEST_SHARD="$shard" pnpm jest \
               --ci \
               --test-timeout ${{ matrix.test-timeout-milliseconds }} \
               --coverage ${{ matrix.coverage }}
@@ -360,7 +360,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: coverage
           path: |
@@ -374,7 +374,7 @@ jobs:
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
@@ -396,12 +396,15 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Merge coverage reports
-        run: yarn -s nyc merge ./coverage/json ./coverage/nyc/coverage.json
+        run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
+
+      - name: Report coverage
+        run: pnpm nyc report -t ./coverage/nyc --skip-full -r text -r text-summary
 
       - name: Check coverage threshold
         run: |
-          yarn -s nyc check-coverage -t ./coverage/nyc \
-            --branches 98 \
+          pnpm nyc check-coverage -t ./coverage/nyc \
+            --branches 99.61 \
             --functions 100 \
             --lines 100 \
             --statements 100
@@ -446,7 +449,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -455,16 +458,16 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Build
-        run: yarn -s build
+        run: pnpm build
 
       - name: Pack
-        run: yarn -s test-e2e:pack
+        run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: renovate-package
-          path: renovate-v0.0.0-semantic-release.tgz
+          path: renovate-0.0.0-semantic-release.tgz
 
   build-docs:
     needs: [lint-docs]
@@ -473,7 +476,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -482,10 +485,10 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Build
-        run: yarn -s build:docs
+        run: pnpm build:docs
 
       - name: Upload
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: docs
           path: tmp/docs/
@@ -499,12 +502,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable corepack
+        shell: bash
+        run: corepack enable
 
       - name: Download package
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -512,10 +519,10 @@ jobs:
           name: renovate-package
 
       - name: Install dependencies
-        run: yarn -s test-e2e:install
+        run: pnpm test-e2e:install
 
       - name: E2E Test
-        run: yarn -s test-e2e:run
+        run: pnpm test-e2e:run
 
   release:
     needs:
@@ -538,7 +545,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
 
@@ -560,8 +567,8 @@ jobs:
 
       - name: semantic-release
         run: |
-          echo '//registry.yarnpkg.com/:_authToken=${NPM_TOKEN}' >> ./.npmrc
-          yarn -s semantic-release --dry-run ${{env.DRY_RUN}}
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
+          pnpm semantic-release --dry-run ${{env.DRY_RUN}}
           git checkout -- .npmrc
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

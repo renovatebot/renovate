@@ -6,6 +6,10 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import {
+  findGithubToken,
+  takePersonalAccessTokenIfPossible,
+} from '../../../util/check-token';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
@@ -20,6 +24,7 @@ import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Json } from '../../../util/schema-utils';
+import { coerceString } from '../../../util/string';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -27,12 +32,10 @@ import { Lockfile, PackageFile } from './schema';
 import type { AuthJson } from './types';
 import {
   extractConstraints,
-  findGithubToken,
   getComposerArguments,
   getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
-  takePersonalAccessTokenIfPossible,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -69,7 +72,7 @@ function getAuthJson(): string | null {
     }
 
     if (gitlabHostRule?.token) {
-      const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
+      const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
       authJson['gitlab-token'][host] = gitlabHostRule.token;
       // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
@@ -177,7 +180,9 @@ export async function updateArtifacts({
         (
           'update ' +
           updatedDeps
-            .map((dep) => dep.depName)
+            .map((dep) =>
+              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName
+            )
             .filter(is.string)
             .map((dep) => quote(dep))
             .join(' ')

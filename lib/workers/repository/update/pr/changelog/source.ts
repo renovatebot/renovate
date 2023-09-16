@@ -12,21 +12,22 @@ import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import type {
   ChangeLogError,
+  ChangeLogPlatform,
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
 
 export abstract class ChangeLogSource {
-  private platform;
-  private datasource;
-  private cacheNamespace: string;
+  private readonly cacheNamespace: string;
 
   constructor(
-    platform: 'bitbucket' | 'github' | 'gitlab',
-    datasource: 'bitbucket-tags' | 'github-tags' | 'gitlab-tags'
+    private readonly platform: ChangeLogPlatform,
+    private readonly datasource:
+      | 'bitbucket-tags'
+      | 'gitea-tags'
+      | 'github-tags'
+      | 'gitlab-tags'
   ) {
-    this.platform = platform;
-    this.datasource = datasource;
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 

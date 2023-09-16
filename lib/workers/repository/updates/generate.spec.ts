@@ -15,7 +15,6 @@ const {
 let requiredDefaultOptions = {};
 
 beforeEach(() => {
-  jest.resetAllMocks();
   requiredDefaultOptions = {
     commitMessage,
     commitMessagePrefix,
@@ -1419,6 +1418,30 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
       expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
+    });
+
+    it('merges additionalReviewers', () => {
+      const upgrades = [
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          additionalReviewers: ['foo'],
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          additionalReviewers: ['bar'],
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(upgrades);
+      expect(res.additionalReviewers).toEqual(['foo', 'bar']);
     });
   });
 });

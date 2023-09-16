@@ -1,4 +1,3 @@
-import mockDate from 'mockdate';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
@@ -12,7 +11,6 @@ let npmResponse: any;
 
 describe('modules/datasource/npm/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     GlobalConfig.reset();
     hostRules.clear();
     setNpmrc();
@@ -44,7 +42,6 @@ describe('modules/datasource/npm/index', () => {
 
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
-    mockDate.reset();
   });
 
   it('should return null for no versions', async () => {

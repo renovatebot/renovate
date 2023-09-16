@@ -2,6 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
 import { RepologyDatasource } from './index';
@@ -56,6 +57,10 @@ const fixtureJdk = Fixtures.get(`openjdk.json`);
 const fixturePython = Fixtures.get(`python.json`);
 
 describe('modules/datasource/repology/index', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {
@@ -200,6 +205,17 @@ describe('modules/datasource/repology/index', () => {
           packageName: 'invalid-lookup-name',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws on disabled host', async () => {
+      hostRules.add({ matchHost: repologyHost, enabled: false });
+      expect(
+        await getPkgReleases({
+          datasource,
+          versioning,
+          packageName: 'debian_stable/nginx',
+        })
+      ).toBeNull();
     });
 
     it('returns correct version for binary package', async () => {
