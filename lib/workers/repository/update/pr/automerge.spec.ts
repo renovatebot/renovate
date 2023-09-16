@@ -1,4 +1,4 @@
-import { getConfig, partial, platform, scm } from '../../../../../test/util';
+import { partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
@@ -12,11 +12,14 @@ describe('workers/repository/update/pr/automerge', () => {
     let pr: Pr;
 
     beforeEach(() => {
-      // TODO #7154 incompatible types
       config = {
-        ...getConfig(),
-      } as BranchConfig;
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        branchName: 'renovate/pin',
+        upgrades: [],
+      } satisfies BranchConfig;
       pr = partial<Pr>();
+      spy.mockReturnValue(true);
     });
 
     it('should not automerge if not configured', async () => {

@@ -25,8 +25,6 @@ repositories:
   url: https://charts.bitnami.com/bitnami
 - name: prometheus-community
   url: https://prometheus-community.github.io/helm-charts
-- name: incubator
-  url: https://charts.helm.sh/incubator/
 
 templates:
   external-chart: &external-chart

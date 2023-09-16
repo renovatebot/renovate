@@ -10,6 +10,9 @@ import { regEx } from '../../../util/regex';
  * are made
  */
 export function hashicorp2npm(input: string): string {
+  if (!input) {
+    return input;
+  }
   return input
     .split(',')
     .map((single) => {
@@ -62,6 +65,9 @@ export function hashicorp2npm(input: string): string {
  * It cannot handle `*`, `1.x.x`, range with `-`, `||`
  */
 export function npm2hashicorp(input: string): string {
+  if (!input) {
+    return input;
+  }
   return input
     .split(' ')
     .map((single) => {

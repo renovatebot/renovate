@@ -33,7 +33,7 @@ export function getConfigDesc(
   config: RenovateConfig,
   packageFiles?: Record<string, PackageFile[]>
 ): string {
-  // TODO: type (#7154)
+  // TODO: type (#22198)
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : defaultConfigFile;

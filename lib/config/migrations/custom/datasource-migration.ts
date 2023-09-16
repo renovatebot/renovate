@@ -18,6 +18,8 @@ export function migrateDatasource(value: string): string {
       return 'java-version';
     case 'dotnet':
       return 'dotnet-version';
+    case 'node':
+      return 'node-version';
   }
   return value;
 }

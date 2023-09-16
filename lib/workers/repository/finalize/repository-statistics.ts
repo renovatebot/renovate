@@ -2,7 +2,10 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
-import type { BranchCache } from '../../../util/cache/repository/types';
+import type {
+  BranchCache,
+  BranchUpgradeCache,
+} from '../../../util/cache/repository/types';
 import type {
   BaseBranchMetadata,
   BranchMetadata,
@@ -60,7 +63,61 @@ function branchCacheToMetadata({
   };
 }
 
-export function runBranchSummary(): void {
+function filterDependencyDashboardData(
+  branches: BranchCache[]
+): Partial<BranchCache>[] {
+  const branchesFiltered: Partial<BranchCache>[] = [];
+  for (const branch of branches) {
+    const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
+    const { branchName, prNo, prTitle, result, upgrades, prBlockedBy } = branch;
+
+    for (const upgrade of upgrades ?? []) {
+      const {
+        datasource,
+        depName,
+        displayPending,
+        fixedVersion,
+        currentVersion,
+        currentValue,
+        newValue,
+        newVersion,
+        packageFile,
+        updateType,
+        packageName,
+      } = upgrade;
+
+      const filteredUpgrade: Partial<BranchUpgradeCache> = {
+        datasource,
+        depName,
+        displayPending,
+        fixedVersion,
+        currentVersion,
+        currentValue,
+        newValue,
+        newVersion,
+        packageFile,
+        updateType,
+        packageName,
+      };
+      upgradesFiltered.push(filteredUpgrade);
+    }
+
+    const filteredBranch: Partial<BranchCache> = {
+      branchName,
+      prNo,
+      prTitle,
+      result,
+      prBlockedBy,
+      upgrades: upgradesFiltered,
+    };
+    branchesFiltered.push(filteredBranch);
+  }
+
+  return branchesFiltered;
+}
+
+export function runBranchSummary(config: RenovateConfig): void {
+  const defaultBranch = config.defaultBranch;
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
@@ -83,8 +140,14 @@ export function runBranchSummary(): void {
     cacheModified: isCacheModified(),
     baseBranches: baseMetadata,
     branches: branchMetadata,
+    defaultBranch,
     inactiveBranches,
   };
 
   logger.debug(res, 'Branch summary');
+
+  if (branches?.length) {
+    const branchesInformation = filterDependencyDashboardData(branches);
+    logger.debug({ branchesInformation }, 'branches info extended');
+  }
 }

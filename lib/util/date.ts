@@ -26,3 +26,7 @@ export function getElapsedHours(date: Date | string): number {
   const diff = DateTime.now().diff(pastDate, 'hours');
   return Math.floor(diff.hours);
 }
+
+export function getElapsedMs(timestamp: string): number {
+  return new Date().getTime() - new Date(timestamp).getTime();
+}

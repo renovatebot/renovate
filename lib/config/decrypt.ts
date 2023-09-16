@@ -94,9 +94,7 @@ export async function tryDecrypt(
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       try {
-        const decryptedObj = DecryptedObject.safeParse(
-          JSON.parse(decryptedObjStr)
-        );
+        const decryptedObj = DecryptedObject.safeParse(decryptedObjStr);
         // istanbul ignore if
         if (!decryptedObj.success) {
           const error = new Error('config-validation');
@@ -177,7 +175,8 @@ export async function decryptConfig(
 ): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
-  const { privateKey, privateKeyOld } = GlobalConfig.get();
+  const privateKey = GlobalConfig.get('privateKey');
+  const privateKeyOld = GlobalConfig.get('privateKeyOld');
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');

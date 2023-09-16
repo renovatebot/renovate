@@ -112,6 +112,7 @@ It does _not_ mean "amount of work for the maintainers".
     platform:azure
     platform:bitbucket
     platform:bitbucket-server
+    platform:codecommit
     platform:gitea
     platform:github
     platform:gitlab
@@ -127,6 +128,8 @@ Keep in mind that an issue can be both affecting a platform and a self-hosted in
     <summary>Core labels</summary>
 
     core:automerge
+    core:autoreplace
+    core:cache
     core:changelogs
     core:config
     core:dashboard
@@ -182,14 +185,17 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 <details>
     <summary>Housekeeping</summary>
 
+    duplicate
     good first issue
     help wanted
     logs:problem
+    needs-code-formatting
     reproduction:needed
     reproduction:provided
-    duplicate
 
 </details>
+
+Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
@@ -202,10 +208,10 @@ Add a label `logs:problem` to indicate that there's a problem with the logs, and
 1. Provide more logs (in case current logs are insufficient)
 1. Format their logs properly
 
+Add a label `needs-code-formatting` to issues with logs/code that needs to be formatted.
+
 Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduction:provided` once there is a public reproduction.
-
-Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
 ### Self-hosted
 

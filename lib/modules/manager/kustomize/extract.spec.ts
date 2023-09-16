@@ -7,10 +7,10 @@ import { HelmDatasource } from '../../datasource/helm';
 import {
   extractHelmChart,
   extractImage,
-  extractPackageFile,
   extractResource,
   parseKustomize,
 } from './extract';
+import { extractPackageFile } from '.';
 
 const kustomizeGitSSHBase = Fixtures.get('gitSshBase.yaml');
 const kustomizeEmpty = Fixtures.get('kustomizeEmpty.yaml');

@@ -16,9 +16,11 @@ export interface Config {
   prList: Pr[];
   repository: string;
   ignorePrAuthor: boolean;
+  is_private: boolean;
 }
 
 export interface PagedResult<T = any> {
+  page?: number;
   pagelen: number;
   size?: number;
   next?: string;
@@ -32,6 +34,7 @@ export interface RepoInfo {
   mergeMethod: string;
   has_issues: boolean;
   uuid: string;
+  is_private: boolean;
 }
 
 export interface RepoBranchingModel {
@@ -62,6 +65,8 @@ export interface RepoInfoBody {
   mainbranch: { name: string };
   has_issues: boolean;
   uuid: string;
+  full_name: string;
+  is_private: boolean;
 }
 
 export interface PrResponse {

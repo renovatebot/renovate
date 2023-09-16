@@ -1,14 +1,16 @@
 import { logger } from '../../../logger';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
-import type { Config } from './types';
-import { accumulateValues } from './utils';
+import type { Account, Config, PagedResult } from './types';
+
+export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
 
 const bitbucketHttp = new BitbucketHttp();
 
 interface Comment {
   content: { raw: string };
   id: number;
+  user: Account;
 }
 
 export type CommentsConfig = Pick<Config, 'repository'>;
@@ -21,9 +23,14 @@ async function getComments(
   config: CommentsConfig,
   prNo: number
 ): Promise<Comment[]> {
-  const comments = await accumulateValues<Comment>(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`
-  );
+  const comments = (
+    await bitbucketHttp.getJson<PagedResult<Comment>>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
+      {
+        paginate: true,
+      }
+    )
+  ).body.values;
 
   logger.debug(`Found ${comments.length} comments`);
   return comments;
@@ -119,6 +126,19 @@ export async function ensureComment({
   }
 }
 
+export async function reopenComments(
+  config: CommentsConfig,
+  prNo: number
+): Promise<Comment[]> {
+  const comments = await getComments(config, prNo);
+
+  const reopenComments = comments.filter((comment) =>
+    comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD)
+  );
+
+  return reopenComments;
+}
+
 export async function ensureCommentRemoval(
   config: CommentsConfig,
   deleteConfig: EnsureCommentRemovalConfig
@@ -153,8 +173,13 @@ export async function ensureCommentRemoval(
 }
 
 function sanitizeCommentBody(body: string): string {
-  return body.replace(
-    'checking the rebase/retry box above',
-    'renaming this PR to start with "rebase!"'
-  );
+  return body
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming this PR to start with "rebase!"'
+    )
+    .replace(
+      'rename this PR to get a fresh replacement',
+      'add a comment starting with "reopen!" to get a fresh replacement'
+    );
 }

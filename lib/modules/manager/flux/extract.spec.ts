@@ -728,6 +728,49 @@ describe('modules/manager/flux/extract', () => {
       ]);
     });
 
+    it('should handle HelmRepository with type OCI', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '0.4.0',
+              datasource: DockerDatasource.id,
+              depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              packageName:
+                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        },
+      ]);
+    });
+
+    it('should handle HelmRepository w/o type oci and url starts with oci', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource2.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '2.6.0',
+              datasource: DockerDatasource.id,
+              depName: 'kyverno',
+              packageName: 'ghcr.io/kyverno/charts/kyverno',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
+        },
+      ]);
+    });
+
     it('ignores files that do not exist', async () => {
       const result = await extractAllPackageFiles(config, [
         'lib/modules/manager/flux/__fixtures__/bogus.yaml',

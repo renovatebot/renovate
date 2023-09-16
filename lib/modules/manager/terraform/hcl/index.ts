@@ -1,10 +1,12 @@
-import * as hcl_parser from 'hcl2-parser';
-
+import { parse } from '@cdktf/hcl2json';
 import type { TerraformDefinitionFile } from './types';
 
-export function parseHCL(content: string): TerraformDefinitionFile | null {
+export async function parseHCL(
+  content: string,
+  fileName: string
+): Promise<TerraformDefinitionFile | null> {
   try {
-    return hcl_parser.parseToObject(content)[0];
+    return await parse(fileName, content);
   } catch (err) /* istanbul ignore next */ {
     return null;
   }

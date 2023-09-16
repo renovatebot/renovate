@@ -10,7 +10,7 @@ import type {
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
   let deps = [];
@@ -19,11 +19,11 @@ export function extractPackageFile(
   try {
     doc = load(content, { json: true }); // TODO #9610
   } catch (err) {
-    logger.debug(`Failed to parse helm requirements.yaml in ${fileName}`);
+    logger.debug({ packageFile }, `Failed to parse helm requirements.yaml`);
     return null;
   }
   if (!(doc && is.array(doc.dependencies))) {
-    logger.debug(`requirements.yaml in ${fileName} has no dependencies`);
+    logger.debug({ packageFile }, `requirements.yaml has no dependencies`);
     return null;
   }
   deps = doc.dependencies.map((dep: Record<string, any>) => {
@@ -75,7 +75,10 @@ export function extractPackageFile(
           res.skipReason = 'local-dependency';
         }
       } catch (err) {
-        logger.debug({ err }, 'Error parsing url');
+        logger.debug(
+          { err, packageFile, url: dep.repository },
+          'Error parsing url'
+        );
         res.skipReason = 'invalid-url';
       }
     }

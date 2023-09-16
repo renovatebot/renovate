@@ -20,11 +20,14 @@ import { fileTestRegex } from './util';
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   _config?: ExtractConfig
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
   if (fileTestRegex.test(content) === false) {
+    logger.debug(
+      `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`
+    );
     return null;
   }
 
@@ -32,7 +35,7 @@ export function extractPackageFile(
   try {
     definitions = loadAll(content) as ApplicationDefinition[];
   } catch (err) {
-    logger.debug({ err, fileName }, 'Failed to parse ArgoCD definition.');
+    logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
     return null;
   }
 

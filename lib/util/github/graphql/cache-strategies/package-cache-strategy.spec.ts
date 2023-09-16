@@ -4,7 +4,7 @@ import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy';
 
-const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
+const isoTs = (t: string) => t.replace(' ', 'T') + ':00.000Z';
 
 const mockTime = (input: string): void => {
   const now = DateTime.fromISO(isoTs(input)).valueOf();

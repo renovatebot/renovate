@@ -1,5 +1,4 @@
 import { fs, git, mocked } from '../../../../../../test/util';
-import { getConfig } from '../../../../../config/defaults';
 import { GlobalConfig } from '../../../../../config/global';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update';
 import * as lerna from '../../../../../modules/manager/npm/post-update/lerna';
@@ -10,7 +9,6 @@ import type { PostUpdateConfig } from '../../../../../modules/manager/types';
 import * as _hostRules from '../../../../../util/host-rules';
 
 const config: PostUpdateConfig = {
-  ...getConfig(),
   upgrades: [],
   branchName: 'some-branch',
 };
@@ -29,7 +27,6 @@ const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 describe('workers/repository/update/branch/lock-files/index', () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
@@ -94,10 +91,6 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       });
       jest.spyOn(lerna, 'generateLockFiles');
       jest.spyOn(lockFiles, 'determineLockFileDirs');
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {

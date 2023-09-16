@@ -347,7 +347,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
         packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one matching image to return that image"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: false,
@@ -366,7 +366,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
         packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one deprecated matching image to return that image"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: true,
@@ -385,7 +385,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
         packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching image to return the newest image"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: false,
@@ -395,6 +395,43 @@ describe('modules/datasource/aws-machine-image/index', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('loadConfig()', () => {
+    const ec2DataSource = new AwsMachineImageDataSource();
+
+    it('loads filters without aws config', () => {
+      const res = ec2DataSource.loadConfig(
+        '[{"Name":"testname","Values":["testvalue"]}]'
+      );
+      expect(res).toEqual([
+        [
+          {
+            Name: 'testname',
+            Values: ['testvalue'],
+          },
+        ],
+        {},
+      ]);
+    });
+
+    it('loads filters with multiple aws configs', () => {
+      const res = ec2DataSource.loadConfig(
+        '[{"Name":"testname","Values":["testvalue"]},{"region":"us-west-2"},{"profile":"test-profile"},{"region":"eu-central-1"}]'
+      );
+      expect(res).toEqual([
+        [
+          {
+            Name: 'testname',
+            Values: ['testvalue'],
+          },
+        ],
+        {
+          region: 'eu-central-1',
+          profile: 'test-profile',
+        },
+      ]);
     });
   });
 });

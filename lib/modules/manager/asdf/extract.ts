@@ -6,10 +6,10 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import { upgradeableTooling } from './upgradeable-tooling';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
-  logger.trace('asdf.extractPackageFile()');
+  logger.trace(`asdf.extractPackageFile()`);
 
   const regex = regEx(
-    /^(?<toolName>([\w_-]+)) (?<version>[^\s#]+)(?: [^\s#]+)* *(?: #(?<comment>.*))?$/gm
+    /^(?<toolName>([\w_-]+)) +(?<version>[^\s#]+)(?: +[^\s#]+)* *(?: #(?<comment>.*))?$/gm
   );
 
   const deps: PackageDependency[] = [];

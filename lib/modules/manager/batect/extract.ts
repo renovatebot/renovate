@@ -119,9 +119,9 @@ function extractReferencedConfigFiles(
 
 export function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string
 ): ExtractionResult | null {
-  logger.trace(`batect.extractPackageFile() fileName: ${fileName}`);
+  logger.trace(`batect.extractPackageFile(${packageFile})`);
 
   try {
     const config = loadConfig(content);
@@ -132,13 +132,13 @@ export function extractPackageFile(
 
     const referencedConfigFiles = extractReferencedConfigFiles(
       config,
-      fileName
+      packageFile
     );
 
     return { deps, referencedConfigFiles };
   } catch (err) {
-    logger.warn(
-      { err, fileName },
+    logger.debug(
+      { err, packageFile },
       'Extracting dependencies from Batect configuration file failed'
     );
 
@@ -160,7 +160,7 @@ export async function extractAllPackageFiles(
     filesAlreadyExamined.add(packageFile);
 
     const content = await readLocalFile(packageFile, 'utf8');
-    // TODO #7154
+    // TODO #22198
     const result = extractPackageFile(content!, packageFile);
 
     if (result !== null) {

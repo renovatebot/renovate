@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { partial } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import type { GithubTagItem } from '../../../util/github/graphql/types';
 import * as hostRules from '../../../util/host-rules';
@@ -11,7 +12,6 @@ describe('modules/datasource/github-tags/index', () => {
   const github = new GithubTagsDatasource();
 
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.spyOn(hostRules, 'hosts').mockReturnValue([]);
     jest.spyOn(hostRules, 'find').mockReturnValue({
       token: 'some-token',
@@ -77,11 +77,11 @@ describe('modules/datasource/github-tags/index', () => {
           releaseTimestamp: '2021-01-01',
           hash: '123',
         },
-        {
+        partial<GithubTagItem>({
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
           releaseTimestamp: '2022-01-01',
-        } as GithubTagItem,
+        }),
       ]);
       const res = await github.getDigest({ packageName }, 'v2.0.0');
       expect(res).toBeNull();
@@ -162,12 +162,14 @@ describe('modules/datasource/github-tags/index', () => {
             version: 'v1.0.0',
             releaseTimestamp: '2021-01-01T00:00:00.000Z',
             isStable: true,
+            newDigest: '123',
           },
           {
             gitRef: 'v2.0.0',
             version: 'v2.0.0',
             releaseTimestamp: '2022-01-01T00:00:00.000Z',
             isStable: false,
+            newDigest: 'abc',
           },
         ],
 

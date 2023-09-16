@@ -1,4 +1,4 @@
-import { getConfig, platform } from '../../../../../test/util';
+import { partial, platform } from '../../../../../test/util';
 import {
   ConfidenceConfig,
   StabilityConfig,
@@ -12,15 +12,12 @@ describe('workers/repository/update/branch/status-checks', () => {
     let config: StabilityConfig;
 
     beforeEach(() => {
-      config = {
-        ...getConfig(),
+      config = partial<StabilityConfig>({
         branchName: 'renovate/some-branch',
-      };
+      });
     });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
+    afterEach(() => {});
 
     it('returns if not configured', async () => {
       await setStability(config);
@@ -55,13 +52,8 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     beforeEach(() => {
       config = {
-        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('returns if not configured', async () => {

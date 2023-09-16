@@ -2,7 +2,6 @@ import { cache } from '../../../util/cache/package/decorator';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { PagedResult, RepoInfoBody } from '../../platform/bitbucket/types';
-import * as utils from '../../platform/bitbucket/utils';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { BitbucketCommit, BitbucketTag } from './types';
@@ -56,7 +55,11 @@ export class BitbucketTagsDatasource extends Datasource {
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
-    const bitbucketTags = await utils.accumulateValues(url);
+    const bitbucketTags = (
+      await this.bitbucketHttp.getJson<PagedResult<BitbucketTag>>(url, {
+        paginate: true,
+      })
+    ).body.values;
 
     const dependency: ReleaseResult = {
       sourceUrl: BitbucketTagsDatasource.getSourceUrl(repo, registryUrl),

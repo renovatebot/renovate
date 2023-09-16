@@ -76,9 +76,13 @@ export function cache<T>({
       finalKey
     );
 
-    const softTtl = ttlMinutes;
+    const ttlOverride = getTtlOverride(finalNamespace);
+    const softTtl = ttlOverride ?? ttlMinutes;
 
-    const cacheHardTtlMinutes = GlobalConfig.get().cacheHardTtlMinutes ?? 0;
+    const cacheHardTtlMinutes = GlobalConfig.get(
+      'cacheHardTtlMinutes',
+      7 * 24 * 60
+    );
     let hardTtl = softTtl;
     if (methodName === 'getReleases' || methodName === 'getDigest') {
       hardTtl = Math.max(softTtl, cacheHardTtlMinutes);
@@ -117,7 +121,7 @@ export function cache<T>({
 
     if (!is.undefined(newData)) {
       const newRecord: DecoratorCachedRecord = {
-        cachedAt: DateTime.local().toISO(),
+        cachedAt: DateTime.local().toISO()!,
         value: newData,
       };
       await packageCache.set(finalNamespace, finalKey, newRecord, hardTtl);
@@ -125,4 +129,12 @@ export function cache<T>({
 
     return newData;
   });
+}
+
+function getTtlOverride(namespace: string): number | undefined {
+  const ttl: unknown = GlobalConfig.get('cacheTtlOverride', {})[namespace];
+  if (is.number(ttl)) {
+    return ttl;
+  }
+  return undefined;
 }

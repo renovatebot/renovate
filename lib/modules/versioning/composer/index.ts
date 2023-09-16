@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
@@ -66,6 +67,57 @@ function normalizeVersion(input: string): string {
   return convertStabilityModifier(output);
 }
 
+/**
+ * @param versions Version list in any format, it recognizes the specific patch format x.x.x-pXX
+ * @param range Range in composer format
+ * @param minMode If true, it will calculate minSatisfyingVersion, if false, it calculates the maxSatisfyingVersion
+ * @returns min or max satisfyingVersion from the input
+ */
+function calculateSatisfyingVersionIntenal(
+  versions: string[],
+  range: string,
+  minMode: boolean
+): string | null {
+  // Because composer -p versions are considered stable, we have to remove the suffix for the npm.XXX functions.
+  const versionsMapped = versions.map((x) => {
+    return {
+      origianl: x,
+      cleaned: removeComposerSpecificPatchPart(x),
+      npmVariant: composer2npm(removeComposerSpecificPatchPart(x)[0]),
+    };
+  });
+
+  const npmVersions = versionsMapped.map((x) => x.npmVariant);
+  const npmVersion = minMode
+    ? npm.minSatisfyingVersion(npmVersions, composer2npm(range))
+    : npm.getSatisfyingVersion(npmVersions, composer2npm(range));
+
+  if (!npmVersion) {
+    return null;
+  }
+
+  // After we find the npm versions, we select from them back in the mapping the possible patches.
+  const candidates = versionsMapped
+    .filter((x) => x.npmVariant === npmVersion)
+    .sort((a, b) => (minMode ? 1 : -1) * sortVersions(a.origianl, b.origianl));
+
+  return candidates[0].origianl;
+}
+
+/**
+ * @param intput Version in any format, it recognizes the specific patch format x.x.x-pXX
+ * @returns If input contains the specific patch, it returns the input with removed the patch and true, otherwise it retunrs the same string and false.
+ */
+function removeComposerSpecificPatchPart(input: string): [string, boolean] {
+  // the regex is based on the original from composer implementation https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L137
+  const pattern = /^v?\d+(\.\d+(\.\d+(\.\d+)?)?)?(?<suffix>-p[1-9]\d*)$/gi;
+  const match = pattern.exec(input);
+
+  return match
+    ? [input.replace(match.groups!.suffix, ''), true]
+    : [input, false];
+}
+
 function composer2npm(input: string): string {
   return input
     .split(regEx(/\s*\|\|?\s*/g))
@@ -91,8 +143,14 @@ function composer2npm(input: string): string {
         '>=$1 <1'
       );
 
+      // add extra digits to <8-DEV and <8.0-DEV
+      output = output
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0')
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0');
+
       return output + stability;
     })
+    .map((part) => part.replace(/([a-z])([0-9])/gi, '$1.$2'))
     .join(' || ');
 }
 
@@ -112,11 +170,14 @@ function getMinor(version: string): number | null {
 
 function getPatch(version: string): number | null {
   const semverVersion = semver.coerce(composer2npm(version));
+
+  // This returns only the numbers without the optional `-pXX` patch version supported by composer. Fixing that would require a bigger
+  // refactoring, because the API supports only numbers.
   return semverVersion ? npm.getPatch(semverVersion) : null;
 }
 
 function isGreaterThan(a: string, b: string): boolean {
-  return npm.isGreaterThan(composer2npm(a), composer2npm(b));
+  return sortVersions(a, b) === 1;
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -128,7 +189,14 @@ function isSingleVersion(input: string): boolean {
 }
 
 function isStable(version: string): boolean {
-  return !!(version && npm.isStable(composer2npm(version)));
+  if (version) {
+    // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568 but npm not.
+    // In order to be able to use the standard npm.isStable function, we remove the potential patch version for the check.
+    const [withoutPatch] = removeComposerSpecificPatchPart(version);
+    return npm.isStable(composer2npm(withoutPatch));
+  }
+
+  return false;
 }
 
 export function isValid(input: string): boolean {
@@ -147,24 +215,23 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.getSatisfyingVersion(
-    versions.map(composer2npm),
-    composer2npm(range)
-  );
+  return calculateSatisfyingVersionIntenal(versions, range, false);
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.minSatisfyingVersion(
-    versions.map(composer2npm),
-    composer2npm(range)
-  );
+  return calculateSatisfyingVersionIntenal(versions, range, true);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
-  return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+  try {
+    return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+  } catch (err) {
+    logger.trace({ err }, 'composer.subset error');
+    return false;
+  }
 }
 
 function getNewValue({
@@ -197,16 +264,16 @@ function getNewValue({
     const operator = currentValue.substring(0, 1);
     // handle ~0.4 case first
     if (toMajor === 0) {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       newValue = `${operator}0.${toMinor!}`;
     } else {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       newValue = `${operator}${toMajor!}.0`;
     }
   } else if (regEx(/^[~^]([0-9]*)$/).test(currentValue)) {
     // handle ~4 case
     const operator = currentValue.substring(0, 1);
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     newValue = `${operator}${toMajor!}`;
   } else if (
     toMajor &&
@@ -215,7 +282,10 @@ function getNewValue({
     const operator = currentValue.substring(0, 1);
     if (rangeStrategy === 'bump') {
       newValue = `${operator}${newVersion}`;
-    } else if ((currentMajor && toMajor > currentMajor) || !toMinor) {
+    } else if (
+      (is.number(currentMajor) && toMajor > currentMajor) ||
+      !toMinor
+    ) {
       // handle ~4.1 case
       newValue = `${operator}${toMajor}.0`;
     } else {
@@ -284,7 +354,21 @@ function getNewValue({
 }
 
 function sortVersions(a: string, b: string): number {
-  return npm.sortVersions(composer2npm(a), composer2npm(b));
+  const [aWithoutPatch, aContainsPatch] = removeComposerSpecificPatchPart(a);
+  const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);
+
+  if (aContainsPatch === bContainsPatch) {
+    // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
+    return npm.sortVersions(composer2npm(a), composer2npm(b));
+  } else if (
+    npm.equals(composer2npm(aWithoutPatch), composer2npm(bWithoutPatch))
+  ) {
+    // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
+    return aContainsPatch ? 1 : -1;
+  } else {
+    // All other cases can be compared correctly by npm
+    return npm.sortVersions(composer2npm(a), composer2npm(b));
+  }
 }
 
 function isCompatible(version: string): boolean {

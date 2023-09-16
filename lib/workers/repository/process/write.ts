@@ -15,7 +15,7 @@ import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
-export function generateBranchFingerprintConfig(
+export function generateCommitFingerprintConfig(
   branch: BranchConfig
 ): UpgradeFingerprintConfig[] {
   const res = branch.upgrades.map((upgrade) => {
@@ -31,14 +31,14 @@ export function generateBranchFingerprintConfig(
 
 export function canSkipBranchUpdateCheck(
   branchState: BranchCache,
-  branchFingerprint: string
+  commitFingerprint: string
 ): boolean {
-  if (!branchState.branchFingerprint) {
+  if (!branchState.commitFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
     return false;
   }
 
-  if (branchFingerprint !== branchState.branchFingerprint) {
+  if (commitFingerprint !== branchState.commitFingerprint) {
     logger.debug('branch.isUpToDate(): needs recalculation');
     return false;
   }
@@ -98,7 +98,7 @@ export async function syncBranchState(
     delete branchState.isBehindBase;
     delete branchState.isConflicted;
     delete branchState.isModified;
-    delete branchState.branchFingerprint;
+    delete branchState.commitFingerprint;
 
     // update cached branchSha
     branchState.sha = branchSha;
@@ -148,21 +148,21 @@ export async function writeUpdates(
           .filter(is.string)
       ),
     ].sort();
-    const branchFingerprint = fingerprint({
-      branchFingerprintConfig: generateBranchFingerprintConfig(branch),
+    const commitFingerprint = fingerprint({
+      commitFingerprintConfig: generateCommitFingerprintConfig(branch),
       managers,
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
       branchState,
-      branchFingerprint
+      commitFingerprint
     );
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
-    branch.branchFingerprint = res?.updatesVerified
-      ? branchFingerprint
-      : branchState.branchFingerprint;
+    branch.commitFingerprint = res?.updatesVerified
+      ? commitFingerprint
+      : branchState.commitFingerprint;
 
     if (res?.commitSha) {
       setBranchNewCommit(branchName, baseBranch, res.commitSha);

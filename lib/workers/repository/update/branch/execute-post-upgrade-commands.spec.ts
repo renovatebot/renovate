@@ -26,6 +26,12 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         updatedArtifacts: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
           { type: 'addition', path: 'artifact', contents: '' },
+          {
+            type: 'addition',
+            path: 'symlink',
+            contents: 'dest',
+            isSymlink: true,
+          },
         ],
         artifactErrors: [],
         upgrades: [],
@@ -45,8 +51,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false);
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
       fs.localPathExists
+        .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
 
@@ -55,7 +63,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         config
       );
 
-      expect(res.updatedArtifacts).toHaveLength(2);
+      expect(res.updatedArtifacts).toHaveLength(3);
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
   });

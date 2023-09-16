@@ -2,7 +2,6 @@ import crypto from 'node:crypto';
 import { expect, jest } from '@jest/globals';
 import type { Plugin } from 'pretty-format';
 import upath from 'upath';
-import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
 import { Platform, platform as _platform } from '../lib/modules/platform';
@@ -17,8 +16,8 @@ import { regEx } from '../lib/util/regex';
  * Simple wrapper for getting mocked version of a module
  * @param module module which is mocked by `jest.mock`
  */
-export function mocked<T extends object>(module: T): jest.MockedObject<T> {
-  return module as jest.MockedObject<T>;
+export function mocked<T extends object>(module: T): jest.Mocked<T> {
+  return jest.mocked(module);
 }
 
 /**
@@ -42,19 +41,17 @@ export function partial(obj: unknown = {}): unknown {
   return obj;
 }
 
-export const fs = mocked(_fs);
-export const git = mocked(_git);
+export const fs = jest.mocked(_fs);
+export const git = jest.mocked(_git);
 
-// TODO: fix types, jest / typescript is using wrong overload (#7154)
-export const platform = mocked(partial<Required<Platform>>(_platform));
-export const scm = mocked(_scm);
-export const env = mocked(_env);
-export const hostRules = mocked(_hostRules);
-export const logger = mocked(_logger);
+// TODO: fix types, jest / typescript is using wrong overload (#22198)
+export const platform = jest.mocked(partial<Required<Platform>>(_platform));
+export const scm = jest.mocked(_scm);
+export const env = jest.mocked(_env);
+export const hostRules = jest.mocked(_hostRules);
+export const logger = jest.mocked(_logger);
 
 export type { RenovateConfig };
-
-export { getConfig };
 
 function getCallerFileName(): string | null {
   let result: string | null = null;
@@ -72,7 +69,7 @@ function getCallerFileName(): string | null {
 
     let currentFile: string | null = null;
     for (const frame of stack) {
-      const fileName = frame.getFileName();
+      const fileName = frame.getFileName() ?? null;
       if (!currentFile) {
         currentFile = fileName;
       } else if (currentFile !== fileName) {

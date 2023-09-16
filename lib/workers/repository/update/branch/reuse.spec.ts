@@ -22,7 +22,6 @@ describe('workers/repository/update/branch/reuse', () => {
         rebaseWhen: 'behind-base-branch',
         upgrades: [],
       };
-      jest.resetAllMocks();
     });
 
     it('returns false if branch does not exist', async () => {
@@ -113,40 +112,6 @@ describe('workers/repository/update/branch/reuse', () => {
       scm.isBranchModified.mockResolvedValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeTrue();
-    });
-
-    it('returns false if PR title rebase!', async () => {
-      scm.branchExists.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...pr,
-        title: 'rebase!Update foo to v4',
-      });
-      const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBeFalse();
-    });
-
-    it('returns false if PR body check rebase', async () => {
-      scm.branchExists.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...pr,
-        title: 'Update foo to v4',
-        bodyStruct: {
-          hash: '123',
-          rebaseRequested: true,
-        },
-      });
-      const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBeFalse();
-    });
-
-    it('returns false if manual rebase by label', async () => {
-      scm.branchExists.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...pr,
-        labels: ['rebase'],
-      });
-      const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).toBeFalse();
     });
 
     it('returns false if unmergeable and can rebase', async () => {

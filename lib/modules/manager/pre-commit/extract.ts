@@ -146,26 +146,29 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageFileContent | null {
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
   try {
     parsedContent = load(content, { json: true }) as ParsedContent;
   } catch (err) {
-    logger.debug({ filename, err }, 'Failed to parse pre-commit config YAML');
+    logger.debug(
+      { filename: packageFile, err },
+      'Failed to parse pre-commit config YAML'
+    );
     return null;
   }
   if (!is.plainObject<Record<string, unknown>>(parsedContent)) {
-    logger.warn(
-      { filename },
+    logger.debug(
+      { packageFile },
       `Parsing of pre-commit config YAML returned invalid result`
     );
     return null;
   }
   if (!matchesPrecommitConfigHeuristic(parsedContent)) {
     logger.debug(
-      { filename },
+      { packageFile },
       `File does not look like a pre-commit config file`
     );
     return null;
@@ -177,7 +180,10 @@ export function extractPackageFile(
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ filename, err }, 'Error scanning parsed pre-commit config');
+    logger.debug(
+      { packageFile, err },
+      'Error scanning parsed pre-commit config'
+    );
   }
   return null;
 }

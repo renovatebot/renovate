@@ -17,9 +17,9 @@ import { detectSemanticCommits } from '../../util/git/semantic';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
-import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
+import { extractRepoProblems } from './common';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
@@ -56,7 +56,7 @@ export async function renovateRepository(
     addSplit('init');
     const performExtract =
       config.repoIsOnboarded! ||
-      !config.onboardingRebaseCheckbox ||
+      !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
     const { branches, branchList, packageFiles } = performExtract
       ? await instrument('extract', () => extractDependencies(config))
@@ -64,6 +64,7 @@ export async function renovateRepository(
     if (config.semanticCommits === 'auto') {
       config.semanticCommits = await detectSemanticCommits();
     }
+
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
@@ -72,7 +73,6 @@ export async function renovateRepository(
         ensureOnboardingPr(config, packageFiles, branches)
       );
       addSplit('onboarding');
-
       const res = await instrument('update', () =>
         updateRepo(config, branches)
       );
@@ -83,7 +83,7 @@ export async function renovateRepository(
       }
       if (res === 'automerged') {
         if (canRetry) {
-          logger.info('Renovating repository again after automerge result');
+          logger.info('Restarting repository job after automerge result');
           const recursiveRes = await renovateRepository(repoConfig, false);
           return recursiveRes;
         }
@@ -92,9 +92,10 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
-      // TODO #7154
+      // TODO #22198
       repoResult = processResult(config, res!);
     }
+    printRepositoryProblems(config.repository);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
@@ -126,7 +127,6 @@ export async function renovateRepository(
   printLookupStats();
   printDnsStats();
   clearDnsCache();
-  schemaUtil.reportErrors();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;
@@ -139,4 +139,14 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
     branchList: [config.onboardingBranch!], // to prevent auto closing
     packageFiles: {},
   };
+}
+
+export function printRepositoryProblems(repository: string | undefined): void {
+  const repoProblems = extractRepoProblems(repository);
+  if (repoProblems.size) {
+    logger.debug(
+      { repoProblems: Array.from(repoProblems) },
+      'repository problems'
+    );
+  }
 }

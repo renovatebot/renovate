@@ -1,15 +1,9 @@
 import type { Indent } from 'detect-indent';
 import JSON5 from 'json5';
 import { Fixtures } from '../../../../../test/fixtures';
-import {
-  RenovateConfig,
-  getConfig,
-  git,
-  partial,
-  scm,
-} from '../../../../../test/util';
+import { RenovateConfig, git, partial, scm } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
-import { checkoutBranch } from '../../../../util/git';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
@@ -60,7 +54,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
       await rebaseMigrationBranch(config, migratedConfigData);
 
-      expect(checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
@@ -76,7 +70,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
         await rebaseMigrationBranch(config, migratedConfigData);
 
-        expect(checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
         expect(git.getFile).toHaveBeenCalledTimes(1);
       }
@@ -93,7 +87,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
       await rebaseMigrationBranch(config, migratedConfigData);
 
-      expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+      expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
     });
 
@@ -111,7 +105,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
         await rebaseMigrationBranch(config, migratedConfigData);
 
-        expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
         expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/migrate-config',
@@ -144,7 +138,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
         await rebaseMigrationBranch(config, migratedConfigData);
 
-        expect(checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       }
     );

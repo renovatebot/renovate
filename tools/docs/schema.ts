@@ -49,7 +49,12 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     if (hasKey('format', option) && option.format) {
       temp.format = option.format;
     }
-    if (option.allowedValues) {
+    if (option.name === 'versioning') {
+      temp.oneOf = [
+        { enum: option.allowedValues },
+        { type: 'string', pattern: '^regex:' },
+      ];
+    } else if (option.allowedValues) {
       temp.enum = option.allowedValues;
     }
   }
@@ -83,7 +88,13 @@ function addChildrenArrayInParents(): void {
         allOf: [
           {
             type: 'object',
-            properties: {},
+            properties: {
+              description: {
+                type: 'string',
+                description:
+                  'A custom description for this configuration object',
+              },
+            },
           },
         ],
       };

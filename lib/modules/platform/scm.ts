@@ -3,6 +3,7 @@ import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { DefaultGitScm } from './default-scm';
 import { GithubScm } from './github/scm';
+import { LocalFs } from './local/scm';
 import type { PlatformScm } from './types';
 
 export const platformScmImpls = new Map<PlatformId, Constructor<PlatformScm>>();
@@ -13,6 +14,7 @@ platformScmImpls.set('bitbucket-server', DefaultGitScm);
 platformScmImpls.set('gitea', DefaultGitScm);
 platformScmImpls.set('github', GithubScm);
 platformScmImpls.set('gitlab', DefaultGitScm);
+platformScmImpls.set('local', LocalFs);
 
 let _scm: PlatformScm | undefined;
 

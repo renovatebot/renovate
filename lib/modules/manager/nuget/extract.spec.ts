@@ -22,10 +22,10 @@ describe('modules/manager/nuget/extract', () => {
       GlobalConfig.reset();
     });
 
-    it('returns empty for invalid csproj', async () => {
-      expect(await extractPackageFile('nothing here', 'bogus', config)).toEqual(
-        { deps: [] }
-      );
+    it('returns null for invalid csproj', async () => {
+      expect(
+        await extractPackageFile('nothing here', 'bogus', config)
+      ).toBeNull();
     });
 
     it('extracts package version dependency', async () => {
@@ -344,6 +344,12 @@ describe('modules/manager/nuget/extract', () => {
             packageFile,
             config
           )
+        ).toBeNull();
+      });
+
+      it('returns null for no deps', async () => {
+        expect(
+          await extractPackageFile('{"version": 1}', packageFile, config)
         ).toBeNull();
       });
 

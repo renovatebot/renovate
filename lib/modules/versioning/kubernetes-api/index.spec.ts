@@ -3,7 +3,7 @@ import { KubernetesApiVersioningApi } from './index';
 describe('modules/versioning/kubernetes-api/index', () => {
   const versioning = new KubernetesApiVersioningApi();
 
-  test.each`
+  it.each`
     version       | expected
     ${'v1'}       | ${true}
     ${'v2'}       | ${true}
@@ -13,7 +13,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     expect(versioning.isStable(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                          | expected
     ${'v1'}                          | ${true}
     ${'v2'}                          | ${true}
@@ -34,7 +34,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     expect(versioning.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version       | major | minor | patch
     ${'v1'}       | ${1}  | ${0}  | ${0}
     ${'v2'}       | ${2}  | ${0}  | ${0}
@@ -51,7 +51,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version       | other                     | expected
     ${'v1'}       | ${'v1'}                   | ${true}
     ${'v1'}       | ${'v2'}                   | ${false}
@@ -78,7 +78,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version       | other         | expected
     ${'v1'}       | ${'v1'}       | ${true}
     ${'v1'}       | ${'v2'}       | ${false}
@@ -97,7 +97,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version       | other         | expected
     ${'v1'}       | ${'v2'}       | ${false}
     ${'v1'}       | ${'v1alpha1'} | ${true}

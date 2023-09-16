@@ -1,7 +1,7 @@
 import deb from '.';
 
 describe('modules/versioning/deb/index', () => {
-  test.each`
+  it.each`
     version                                        | expected
     ${'1.1'}                                       | ${true}
     ${'1.3.RC2'}                                   | ${true}
@@ -57,7 +57,7 @@ describe('modules/versioning/deb/index', () => {
     expect(deb.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                         | b                         | expected
     ${'2.4'}                  | ${'2.4'}                  | ${true}
     ${'2.4.0'}                | ${'2.4.0'}                | ${true}
@@ -81,7 +81,7 @@ describe('modules/versioning/deb/index', () => {
     expect(deb.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                    | b                    | expected
     ${'2.4.0'}           | ${'2.4'}             | ${true}
     ${'2.4.2'}           | ${'2.4.1'}           | ${true}
@@ -125,7 +125,7 @@ describe('modules/versioning/deb/index', () => {
     expect(deb.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version     | expected
     ${'1.2.0'}  | ${true}
     ${'^1.2.0'} | ${false}
@@ -133,7 +133,7 @@ describe('modules/versioning/deb/index', () => {
     expect(deb.isSingleVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${'v1.3.0'}          | ${1}
     ${'2-0-1'}           | ${2}
@@ -146,7 +146,7 @@ describe('modules/versioning/deb/index', () => {
     expect(deb.getMajor(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${'v1.3.0'}          | ${3}
     ${'2-0-1'}           | ${0}
@@ -159,7 +159,7 @@ describe('modules/versioning/deb/index', () => {
     expect(deb.getMinor(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${'v1.3.0'}          | ${0}
     ${'2-0-1'}           | ${1}

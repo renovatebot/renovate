@@ -1,6 +1,13 @@
 import later from '@breejs/later';
-import { parseCron } from '@cheap-glitch/mi-cron';
 import is from '@sindresorhus/is';
+import {
+  CronExpression,
+  DayOfTheMonthRange,
+  DayOfTheWeekRange,
+  HourRange,
+  MonthRange,
+  parseExpression,
+} from 'cron-parser';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
@@ -9,9 +16,20 @@ import { logger } from '../../../../logger';
 const minutesChar = '*';
 
 const scheduleMappings: Record<string, string> = {
-  'every month': 'before 3am on the first day of the month',
-  monthly: 'before 3am on the first day of the month',
+  'every month': 'before 5am on the first day of the month',
+  monthly: 'before 5am on the first day of the month',
 };
+
+function parseCron(
+  scheduleText: string,
+  timezone?: string
+): CronExpression | undefined {
+  try {
+    return parseExpression(scheduleText, { tz: timezone });
+  } catch (err) {
+    return undefined;
+  }
+}
 
 export function hasValidTimezone(timezone: string): [true] | [false, string] {
   if (!DateTime.local().setZone(timezone).isValid) {
@@ -36,7 +54,7 @@ export function hasValidSchedule(
     const parsedCron = parseCron(scheduleText);
     if (parsedCron !== undefined) {
       if (
-        parsedCron.minutes.length !== 60 ||
+        parsedCron.fields.minute.length !== 60 ||
         scheduleText.indexOf(minutesChar) !== 0
       ) {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
@@ -80,30 +98,37 @@ export function hasValidSchedule(
   return [true];
 }
 
-function cronMatches(cron: string, now: DateTime): boolean {
-  const parsedCron = parseCron(cron);
+function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
+  const parsedCron = parseCron(cron, timezone);
 
-  // istanbul ignore if: doesn't return undefined but type will include undefined
+  // it will always parse because it is checked beforehand
+  // istanbul ignore if
   if (!parsedCron) {
     return false;
   }
 
-  if (parsedCron.hours.indexOf(now.hour) === -1) {
+  if (parsedCron.fields.hour.indexOf(now.hour as HourRange) === -1) {
     // Hours mismatch
     return false;
   }
 
-  if (parsedCron.days.indexOf(now.day) === -1) {
+  if (
+    parsedCron.fields.dayOfMonth.indexOf(now.day as DayOfTheMonthRange) === -1
+  ) {
     // Days mismatch
     return false;
   }
 
-  if (!parsedCron.weekDays.includes(now.weekday % 7)) {
+  if (
+    !parsedCron.fields.dayOfWeek.includes(
+      (now.weekday % 7) as DayOfTheWeekRange
+    )
+  ) {
     // Weekdays mismatch
     return false;
   }
 
-  if (parsedCron.months.indexOf(now.month) === -1) {
+  if (parsedCron.fields.month.indexOf(now.month as MonthRange) === -1) {
     // Months mismatch
     return false;
   }
@@ -118,7 +143,7 @@ export function isScheduledNow(
 ): boolean {
   let configSchedule = config[scheduleKey];
   logger.debug(
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     `Checking schedule(${String(configSchedule)}, ${config.timezone!})`
   );
   if (
@@ -142,7 +167,7 @@ export function isScheduledNow(
     return true;
   }
   let now = DateTime.local();
-  logger.trace(`now=${now.toISO()}`);
+  logger.trace(`now=${now.toISO()!}`);
   // Adjust the time if repo is in a different timezone to renovate
   if (config.timezone) {
     logger.debug(`Found timezone: ${config.timezone}`);
@@ -153,7 +178,7 @@ export function isScheduledNow(
     }
     logger.debug('Adjusting now for timezone');
     now = now.setZone(config.timezone);
-    logger.trace(`now=${now.toISO()}`);
+    logger.trace(`now=${now.toISO()!}`);
   }
   const currentDay = now.weekday;
   logger.trace(`currentDay=${currentDay}`);
@@ -174,7 +199,7 @@ export function isScheduledNow(
     const cronSchedule = parseCron(scheduleText);
     if (cronSchedule) {
       // We have Cron syntax
-      if (cronMatches(scheduleText, now)) {
+      if (cronMatches(scheduleText, now, config.timezone)) {
         logger.debug(`Matches schedule ${scheduleText}`);
         return true;
       }

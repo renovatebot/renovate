@@ -7,15 +7,23 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
-import { checkoutBranch, setGitAuthor } from '../../../../util/git';
+import type { Pr } from '../../../../modules/platform';
+import { scm } from '../../../../modules/platform/scm';
+import { getCache } from '../../../../util/cache/repository';
+import { getBranchCommit, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { OnboardingState } from '../common';
 import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
-import { rebaseOnboardingBranch } from './rebase';
+import {
+  deleteOnboardingCache,
+  hasOnboardingBranchChanged,
+  isOnboardingBranchConflicted,
+  isOnboardingBranchModified,
+  setOnboardingCache,
+} from './onboarding-branch-cache';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig
@@ -23,9 +31,14 @@ export async function checkOnboardingBranch(
   logger.debug('checkOnboarding()');
   logger.trace({ config });
   let onboardingBranch = config.onboardingBranch;
+  let isConflicted = false;
+  let isModified = false;
   const repoIsOnboarded = await isOnboarded(config);
   if (repoIsOnboarded) {
     logger.debug('Repo is onboarded');
+
+    // delete onboarding cache
+    deleteOnboardingCache();
     return { ...config, repoIsOnboarded };
   }
   if (config.isFork && config.forkProcessing !== 'enabled') {
@@ -35,22 +48,36 @@ export async function checkOnboardingBranch(
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
+  // TODO #22198
+  const branchList = [onboardingBranch!];
   if (onboardingPr) {
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
     logger.debug('Onboarding PR already exists');
-    const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
-    const commit = await rebaseOnboardingBranch(config, rawConfigHash);
-    if (commit) {
-      logger.info(
-        { branch: config.onboardingBranch, commit, onboarding: true },
-        'Branch updated'
+
+    if (
+      isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
+      isOnboardingCacheValid(config.defaultBranch!, config.onboardingBranch!) &&
+      !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
+    ) {
+      logger.debug(
+        'Skip processing since the onboarding branch is up to date and default branch has not changed'
       );
+      OnboardingState.onboardingCacheValid = true;
+      return { ...config, repoIsOnboarded, onboardingBranch, branchList };
     }
-    // istanbul ignore if
-    if (platform.refreshPr) {
-      await platform.refreshPr(onboardingPr.number);
+    OnboardingState.onboardingCacheValid = false;
+
+    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
+    if (isModified) {
+      if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
+        invalidateExtractCache(config.baseBranch!);
+      }
+      isConflicted = await isOnboardingBranchConflicted(
+        config.baseBranch!,
+        config.onboardingBranch!
+      );
     }
   } else {
     logger.debug('Onboarding PR does not exist');
@@ -81,12 +108,19 @@ export async function checkOnboardingBranch(
     }
   }
   if (!GlobalConfig.get('dryRun')) {
-    logger.debug('Checkout onboarding branch.');
-    // TODO #7154
-    await checkoutBranch(onboardingBranch!);
+    // TODO #22198
+    if (!isConflicted) {
+      logger.debug('Merge onboarding branch in default branch');
+      await scm.mergeToLocal(onboardingBranch!);
+    }
   }
-  // TODO #7154
-  const branchList = [onboardingBranch!];
+  setOnboardingCache(
+    getBranchCommit(config.defaultBranch!)!,
+    getBranchCommit(onboardingBranch!)!,
+    isConflicted,
+    isModified
+  );
+
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
 }
 
@@ -103,4 +137,39 @@ function handleOnboardingManualRebase(onboardingPr: Pr): void {
     logger.debug('Manual onboarding PR update requested');
     OnboardingState.prUpdateRequested = true;
   }
+}
+
+function invalidateExtractCache(baseBranch: string): void {
+  const cache = getCache();
+  cache.scan ||= {};
+
+  if (cache.scan?.[baseBranch]) {
+    delete cache.scan[baseBranch];
+  }
+}
+
+function isOnboardingCacheValid(
+  defaultBranch: string,
+  onboardingBranch: string
+): boolean {
+  const cache = getCache();
+  const onboardingBranchCache = cache?.onboardingBranchCache;
+  return !!(
+    onboardingBranchCache &&
+    onboardingBranchCache.defaultBranchSha === getBranchCommit(defaultBranch) &&
+    onboardingBranchCache.onboardingBranchSha ===
+      getBranchCommit(onboardingBranch) &&
+    onboardingBranchCache.configFileName &&
+    onboardingBranchCache.configFileParsed
+  );
+}
+
+function isConfigHashPresent(pr: Pr): boolean {
+  const platform = GlobalConfig.get('platform')!;
+  // if platform does not support html comments return true
+  if (!['github', 'gitlab', 'gitea'].includes(platform)) {
+    return true;
+  }
+
+  return !!pr.bodyStruct?.rawConfigHash;
 }

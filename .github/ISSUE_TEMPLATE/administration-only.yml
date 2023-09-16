@@ -1,0 +1,37 @@
+name: Administration only
+description: For administrators only
+labels: ['status:ready', 'priority-3-medium', 'needs-discussion']
+body:
+  - type: markdown
+    attributes:
+      value: '# This form is for Renovate administrators only.'
+
+  - type: markdown
+    attributes:
+      value: |
+        **Stop!** This form is for the Renovate administrators only.
+        If you're a user of Renovate, please create a GitHub Discussion.
+        Please go back a step and select _Start a discussion_ instead of Issue.
+
+  - type: textarea
+    id: describe-proposed-changes
+    attributes:
+      label: Describe the proposed change(s).
+      description: 'Do not report any security concerns here. Email renovate-disclosure@mend.io instead.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: describe-why-we-need-want-these-changes
+    attributes:
+      label: Describe why we need/want these change(s).
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '# Reminder for administrators:'
+
+  - type: markdown
+    attributes:
+      value: 'Before submitting the issue: add the correct **type:** label and remove the **needs-discussion** label.'

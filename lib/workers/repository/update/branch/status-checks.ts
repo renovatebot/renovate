@@ -65,8 +65,8 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   const context = `renovate/stability-days`;
   const description =
     config.stabilityStatus === 'green'
-      ? 'Updates have met stability days requirement'
-      : 'Updates have not met stability days requirement';
+      ? 'Updates have met minimum release age requirement'
+      : 'Updates have not met minimum release age requirement';
   await setStatusCheck(
     config.branchName,
     context,

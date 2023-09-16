@@ -1,5 +1,3 @@
-// TODO #7154
-import URL from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
@@ -9,7 +7,11 @@ import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import { coerceString } from '../../../../../util/string';
+import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
+import * as bitbucket from './bitbucket';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -23,6 +25,8 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
+const repositoriesToSkipMdFetching = ['facebook/react-native'];
+
 export async function getReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
@@ -31,11 +35,14 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseList(project, release);
       case 'gitlab':
         return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
-
+      case 'bitbucket':
+        return bitbucket.getReleaseList(project, release);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -57,7 +64,7 @@ export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
     project.repository
   }`;
@@ -75,7 +82,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string
 ): string {
-  let body = input ?? '';
+  let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
   // semantic-release cleanup
@@ -127,7 +134,7 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   const { packageName, repository } = project;
   const { version, gitRef } = release;
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
@@ -231,17 +238,6 @@ function sectionize(text: string, level: number): string[] {
   return result;
 }
 
-function isUrl(url: string): boolean {
-  try {
-    return !!URL.parse(url).hostname;
-  } catch (err) {
-    // istanbul ignore next
-    logger.debug({ err }, `Error parsing ${url} in URL.parse`);
-  }
-  // istanbul ignore next
-  return false;
-}
-
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
@@ -250,6 +246,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       case 'gitlab':
         return await gitlab.getReleaseNotesMd(
           repository,
@@ -262,7 +264,12 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory
         );
-
+      case 'bitbucket':
+        return await bitbucket.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
@@ -286,7 +293,7 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
     project.sourceDirectory ? `-${project.sourceDirectory}` : ''
   }-${project.apiBaseUrl!}`;
@@ -307,11 +314,11 @@ export async function getReleaseNotesMd(
   const { baseUrl, repository } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
-  const skippedRepos = ['facebook/react-native'];
-  // istanbul ignore if
-  if (skippedRepos.includes(repository)) {
+
+  if (shouldSkipChangelogMd(repository)) {
     return null;
   }
+
   const changelog = await getReleaseNotesMdFile(project);
   if (!changelog) {
     return null;
@@ -338,14 +345,15 @@ export async function getReleaseNotesMd(
             .filter(Boolean);
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
-            if (word.includes(version) && !isUrl(word)) {
+            if (word.includes(version) && !validateUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
               const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
-              const url =
-                notesSourceUrl +
-                '#' +
-                title.join('-').replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const mdHeadingLink = title
+                .filter((word) => !validateUrl(word))
+                .join('-')
+                .replace(regEx(/[^A-Za-z0-9-]/g), '');
+              const url = `${notesSourceUrl}#${mdHeadingLink}`;
               body = massageBody(body, baseUrl);
               if (body?.length) {
                 try {
@@ -364,7 +372,10 @@ export async function getReleaseNotesMd(
             }
           }
         } catch (err) /* istanbul ignore next */ {
-          logger.warn({ err }, `Error parsing ${changelogFile}`);
+          logger.warn(
+            { file: changelogFile, err },
+            `Error parsing changelog file`
+          );
         }
       }
     }
@@ -445,4 +456,12 @@ export async function addReleaseNotes(
     output.hasReleaseNotes = !!output.hasReleaseNotes || !!releaseNotes;
   }
   return output;
+}
+
+/**
+ * Skip fetching changelog/release-notes markdown files.
+ * Will force a fallback to using GitHub release notes
+ */
+export function shouldSkipChangelogMd(repository: string): boolean {
+  return repositoriesToSkipMdFetching.includes(repository);
 }

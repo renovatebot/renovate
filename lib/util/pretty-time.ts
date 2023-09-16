@@ -7,15 +7,19 @@ const splitRegex = regEx(/(.*?[a-z]+)/);
 
 function split(time: string): string[] {
   return time
-    .toLocaleLowerCase()
     .split(splitRegex)
     .map((x) => x.trim())
     .filter(is.nonEmptyString);
 }
 
+function applyCustomFormat(spec: string): string {
+  const monthRegex = regEx(/^(\d+)\s*(?:months?|M)$/);
+  return spec.replace(monthRegex, (_, months) => `${months * 30} days`);
+}
+
 export function toMs(time: string): number | null {
   try {
-    const specs = split(time);
+    const specs = split(time).map(applyCustomFormat);
     if (!specs.length) {
       logger.debug({ time }, `Invalid time specifier: '${time}'`);
       return null;

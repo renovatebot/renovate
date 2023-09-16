@@ -27,7 +27,8 @@ export function extractRepository(
     // same project, which is not currently accessible here. It could be deduced later by exposing
     // the repository URL to managers.
     // https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources-repositories-repository?view=azure-pipelines#types
-    const { platform, endpoint } = GlobalConfig.get();
+    const platform = GlobalConfig.get('platform');
+    const endpoint = GlobalConfig.get('endpoint');
     if (platform === 'azure' && endpoint) {
       if (repository.name.includes('/')) {
         const [projectName, repoName] = repository.name.split('/');
@@ -101,13 +102,13 @@ export function extractAzurePipelinesTasks(
 
 export function parseAzurePipelines(
   content: string,
-  filename: string
+  packageFile: string
 ): AzurePipelines | null {
   let pkg: AzurePipelines | null = null;
   try {
     pkg = load(content, { json: true }) as AzurePipelines;
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ filename, err }, 'Error parsing azure-pipelines content');
+    logger.debug({ packageFile, err }, 'Error parsing azure-pipelines content');
     return null;
   }
 
@@ -116,12 +117,12 @@ export function parseAzurePipelines(
 
 export function extractPackageFile(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageFileContent | null {
-  logger.trace(`azurePipelines.extractPackageFile(${filename})`);
+  logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
-  const pkg = parseAzurePipelines(content, filename);
+  const pkg = parseAzurePipelines(content, packageFile);
   if (!pkg) {
     return null;
   }

@@ -71,7 +71,8 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       return null;
     }
 
-    const { major, minor, patch, build, prerelease, compatibility } = groups;
+    const { major, minor, patch, build, revision, prerelease, compatibility } =
+      groups;
     const release = [
       typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
       typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
@@ -80,6 +81,9 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
     if (build) {
       release.push(Number.parseInt(build, 10));
+      if (revision) {
+        release.push(Number.parseInt(revision, 10));
+      }
     }
 
     return {

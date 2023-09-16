@@ -19,7 +19,7 @@ export type GotExtraOptions = {
   token?: string;
   hostType?: string;
   enabled?: boolean;
-  useCache?: boolean;
+  memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
 };
@@ -45,6 +45,7 @@ export interface GraphqlOptions {
   limit?: number;
   cursor?: string | null;
   acceptHeader?: string;
+  token?: string;
 }
 
 export interface HttpOptions {
@@ -62,9 +63,16 @@ export interface HttpOptions {
   throwHttpErrors?: boolean;
 
   token?: string;
-  useCache?: boolean;
+  memCache?: boolean;
+}
 
-  onSchemaError?: 'warn' | 'throw';
+export interface EtagCache<T = any> {
+  etag: string;
+  data: T;
+}
+
+export interface HttpRequestOptions<T = any> {
+  etagCache?: EtagCache<T>;
 }
 
 export interface InternalHttpOptions extends HttpOptions {

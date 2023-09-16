@@ -63,7 +63,7 @@ export function replaceArgs(
 ): Record<string, any>[];
 
 /**
- * TODO: fix me #7154
+ * TODO: fix me #22198
  * @param obj
  * @param argMapping
  */
@@ -140,6 +140,7 @@ export function parsePreset(input: string): ParsedPreset {
     'docker',
     'group',
     'helpers',
+    'mergeConfidence',
     'monorepo',
     'npm',
     'packages',
@@ -182,9 +183,9 @@ export function parsePreset(input: string): ParsedPreset {
       throw new Error(PRESET_INVALID);
     }
     ({ repo, presetPath, presetName, tag } =
-      nonScopedPresetWithSubdirRegex.exec(str)?.groups ?? {});
+      nonScopedPresetWithSubdirRegex.exec(str)!.groups!);
   } else {
-    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups ?? {});
+    ({ repo, presetName, tag } = gitPresetRegex.exec(str)!.groups!);
 
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;

@@ -100,7 +100,7 @@ module.exports = {
 
     // TODO: fix lint
     '@typescript-eslint/no-explicit-any': 0,
-    // TODO: https://github.com/renovatebot/renovate/issues/7154
+    // TODO: https://github.com/renovatebot/renovate/discussions/22198
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
       2,
@@ -137,7 +137,7 @@ module.exports = {
       },
     ],
 
-    '@typescript-eslint/unbound-method': 2,
+    '@typescript-eslint/unbound-method': [2, { ignoreStatic: true }],
     '@typescript-eslint/ban-types': 2,
     '@renovate/jest-root-describe': 2,
 
@@ -208,6 +208,7 @@ module.exports = {
           'error',
           { devDependencies: true },
         ],
+        'no-console': 'off',
       },
     },
     {

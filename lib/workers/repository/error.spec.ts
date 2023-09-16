@@ -1,9 +1,10 @@
-import { RenovateConfig, getConfig } from '../../../test/util';
+import { RenovateConfig, partial } from '../../../test/util';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
+  MISSING_API_CREDENTIALS,
   NO_VULNERABILITY_ALERTS,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -35,8 +36,7 @@ jest.mock('./error-config');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({ branchList: [] });
 });
 
 describe('workers/repository/error', () => {
@@ -59,6 +59,7 @@ describe('workers/repository/error', () => {
       PLATFORM_BAD_CREDENTIALS,
       PLATFORM_RATE_LIMIT_EXCEEDED,
       MANAGER_LOCKFILE_ERROR,
+      MISSING_API_CREDENTIALS,
       SYSTEM_INSUFFICIENT_DISK_SPACE,
       SYSTEM_INSUFFICIENT_MEMORY,
       NO_VULNERABILITY_ALERTS,

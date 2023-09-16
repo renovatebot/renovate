@@ -55,6 +55,24 @@ function isVersionPointer(
   return hasKey('ref', obj);
 }
 
+function normalizeAlias(alias: string): string {
+  return alias.replace(regEx(/[-_]/g), '.');
+}
+
+function findOriginalAlias(
+  versions: Record<string, GradleVersionPointerTarget>,
+  alias: string
+): string {
+  const normalizedAlias = normalizeAlias(alias);
+  for (const sectionKey of Object.keys(versions)) {
+    if (normalizeAlias(sectionKey) === normalizedAlias) {
+      return sectionKey;
+    }
+  }
+
+  return alias;
+}
+
 interface VersionExtract {
   currentValue?: string;
   fileReplacePosition?: number;
@@ -79,12 +97,12 @@ function extractVersion({
   versionSubContent: string;
 }): VersionExtract {
   if (isVersionPointer(version)) {
-    // everything else is ignored
+    const originalAlias = findOriginalAlias(versions, version.ref);
     return extractLiteralVersion({
-      version: versions[version.ref],
+      version: versions[originalAlias],
       depStartIndex: versionStartIndex,
       depSubContent: versionSubContent,
-      sectionKey: version.ref,
+      sectionKey: originalAlias,
     });
   } else {
     return extractLiteralVersion({
@@ -108,7 +126,7 @@ function extractLiteralVersion({
   sectionKey: string;
 }): VersionExtract {
   if (!version) {
-    return { skipReason: 'no-version' };
+    return { skipReason: 'unspecified-version' };
   } else if (is.string(version)) {
     const fileReplacePosition =
       depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
@@ -146,7 +164,7 @@ function extractLiteralVersion({
     }
   }
 
-  return { skipReason: 'unknown-version' };
+  return { skipReason: 'unspecified-version' };
 }
 
 function extractDependency({
@@ -174,7 +192,7 @@ function extractDependency({
     if (!currentValue) {
       return {
         depName,
-        skipReason: 'no-version',
+        skipReason: 'unspecified-version',
       };
     }
     return {
@@ -203,8 +221,26 @@ function extractDependency({
       skipReason,
     };
   }
-
+  const versionRef = isVersionPointer(descriptor.version)
+    ? normalizeAlias(descriptor.version.ref)
+    : null;
+  if (isArtifactDescriptor(descriptor)) {
+    const { group, name } = descriptor;
+    const groupName = is.nullOrUndefined(versionRef)
+      ? group
+      : /* istanbul ignore next: hard to test */ versionRef; // usage of common variable should have higher priority than other values
+    return {
+      depName: `${group}:${name}`,
+      groupName,
+      currentValue,
+      managerData: { fileReplacePosition },
+    };
+  }
+  const [depGroupName, name] = descriptor.module.split(':');
+  const groupName = is.nullOrUndefined(versionRef) ? depGroupName : versionRef;
   const dependency: PackageDependency<GradleManagerData> = {
+    depName: `${depGroupName}:${name}`,
+    groupName,
     currentValue,
     managerData: { fileReplacePosition },
   };
@@ -280,7 +316,7 @@ export function parseCatalog(
       dependency.skipReason = skipReason;
     }
     if (isVersionPointer(version) && dependency.commitMessageTopic) {
-      dependency.groupName = version.ref;
+      dependency.groupName = normalizeAlias(version.ref);
       delete dependency.commitMessageTopic;
     }
 

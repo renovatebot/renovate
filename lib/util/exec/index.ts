@@ -10,7 +10,6 @@ import {
   removeDockerContainer,
   sideCarImage,
 } from './docker';
-import { getChildProcessEnv } from './env';
 import { getHermitEnvs, isHermit } from './hermit';
 import type {
   DockerOptions,
@@ -20,40 +19,10 @@ import type {
   Opt,
   RawExecOptions,
 } from './types';
-
-export function getChildEnv({
-  extraEnv,
-  env: forcedEnv = {},
-}: ExecOptions): Record<string, string> {
-  const globalConfigEnv = GlobalConfig.get('customEnvVariables');
-
-  const inheritedKeys: string[] = [];
-  for (const [key, val] of Object.entries(extraEnv ?? {})) {
-    if (is.string(val)) {
-      inheritedKeys.push(key);
-    }
-  }
-
-  const parentEnv = getChildProcessEnv(inheritedKeys);
-  const combinedEnv = {
-    ...extraEnv,
-    ...parentEnv,
-    ...globalConfigEnv,
-    ...forcedEnv,
-  };
-
-  const result: Record<string, string> = {};
-  for (const [key, val] of Object.entries(combinedEnv)) {
-    if (is.string(val)) {
-      result[key] = `${val}`;
-    }
-  }
-
-  return result;
-}
+import { getChildEnv } from './utils';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
-  const extraEnvKeys = Object.keys(extraEnv || {});
+  const extraEnvKeys = Object.keys(extraEnv);
   return extraEnvKeys.filter((key) => is.nonEmptyString(childEnv[key]));
 }
 
@@ -87,12 +56,16 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
 
   // Set default max buffer size to 10MB
   rawExecOptions.maxBuffer = rawExecOptions.maxBuffer ?? 10 * 1024 * 1024;
+
+  if (opts.ignoreStdout) {
+    rawExecOptions.stdio = ['pipe', 'ignore', 'pipe'];
+  }
+
   return rawExecOptions;
 }
 
 function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
-  const { binarySource } = GlobalConfig.get();
-  return binarySource === 'docker' && !!docker;
+  return GlobalConfig.get('binarySource') === 'docker' && !!docker;
 }
 
 interface RawExecArguments {
@@ -102,16 +75,16 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd: string | string[],
-  opts: ExecOptions = {}
+  opts: ExecOptions
 ): Promise<RawExecArguments> {
   const { docker } = opts;
+  const preCommands = opts.preCommands ?? [];
   const { customEnvVariables, containerbaseDir, binarySource } =
     GlobalConfig.get();
 
   if (binarySource === 'docker' || binarySource === 'install') {
     logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
     opts.env ??= {};
-    opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
     opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
   }
 
@@ -128,18 +101,16 @@ async function prepareRawExec(
     const childEnv = getChildEnv(opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
-      'BUILDPACK_CACHE_DIR',
       'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
-    const preCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(opts.preCommands ?? []),
-    ];
     const dockerCommand = await generateDockerCommand(
       rawCommands,
-      preCommands,
+      [
+        ...(await generateInstallCommands(opts.toolConstraints)),
+        ...preCommands,
+      ],
       dockerOptions
     );
     rawCommands = [dockerCommand];
@@ -147,7 +118,7 @@ async function prepareRawExec(
     logger.debug('Using containerbase dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
-      ...(opts.preCommands ?? []),
+      ...preCommands,
       ...rawCommands,
     ];
   } else if (isHermit()) {
@@ -170,8 +141,7 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix =
-    GlobalConfig.get('dockerChildPrefix') ?? 'renovate_';
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
 
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
   const useDocker = isDocker(docker);

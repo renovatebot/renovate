@@ -10,7 +10,7 @@ const repo = load(Fixtures.get('sample.yaml'), {
 
 describe('modules/datasource/helm/common', () => {
   describe('findSourceUrl', () => {
-    test.each`
+    it.each`
       input                     | output
       ${'airflow'}              | ${'https://github.com/bitnami/charts/tree/master/bitnami/airflow'}
       ${'coredns'}              | ${'https://github.com/coredns/helm'}

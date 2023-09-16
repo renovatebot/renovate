@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { id as semverId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
@@ -21,10 +22,12 @@ export class HexpmBobDatasource extends Datasource {
 
   override readonly caching = true;
 
+  override readonly defaultVersioning = semverId;
+
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl ?? defaultRegistryUrl}:${packageName}`,
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,

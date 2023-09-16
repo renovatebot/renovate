@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
-import * as schema from '../../../util/schema';
+import { GithubHttp } from '../../../util/http/github';
 import { getPrBodyStruct } from '../pr-body';
-import * as platformSchemas from '../schemas';
 import type { GhPr, GhRestPr } from './types';
+
+export const githubApi = new GithubHttp();
 
 /**
  * @see https://docs.github.com/en/rest/reference/pulls#list-pull-requests
@@ -32,7 +33,7 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.labels = pr.labels.map(({ name }) => name);
   }
 
-  if (pr.assignee || is.nonEmptyArray(pr.assignees)) {
+  if (!!pr.assignee || is.nonEmptyArray(pr.assignees)) {
     result.hasAssignees = true;
   }
 
@@ -54,6 +55,5 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.targetBranch = pr.base.ref;
   }
 
-  schema.match(platformSchemas.Pr, result, 'warn');
   return result;
 }

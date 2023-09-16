@@ -1,13 +1,15 @@
 import {
   addSecretForSanitizing,
-  clearSanitizedSecretsList,
+  clearGlobalSanitizedSecretsList,
+  clearRepoSanitizedSecretsList,
   sanitize,
 } from './sanitize';
 import { toBase64 } from './string';
 
 describe('util/sanitize', () => {
   beforeEach(() => {
-    clearSanitizedSecretsList();
+    clearRepoSanitizedSecretsList();
+    clearGlobalSanitizedSecretsList();
   });
 
   it('sanitizes empty string', () => {
