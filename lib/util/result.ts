@@ -1,14 +1,18 @@
+import { SafeParseReturnType, ZodError, ZodType, ZodTypeDef, z } from 'zod';
 import { logger } from '../logger';
 
-interface Ok<T> {
+type Val = NonNullable<unknown>;
+type Nullable<T extends Val> = T | null | undefined;
+
+interface Ok<T extends Val> {
   readonly ok: true;
-  readonly val: NonNullable<T>;
+  readonly val: T;
   readonly err?: never;
 }
 
-interface Err<E> {
+interface Err<E extends Val> {
   readonly ok: false;
-  readonly err: NonNullable<E>;
+  readonly err: E;
   readonly val?: never;
 
   /**
@@ -18,7 +22,66 @@ interface Err<E> {
   readonly _uncaught?: true;
 }
 
-type Res<T, E> = Ok<T> | Err<E>;
+type Res<T extends Val, E extends Val> = Ok<T> | Err<E>;
+
+function isZodResult<Input, Output extends Val>(
+  input: unknown
+): input is SafeParseReturnType<Input, Output> {
+  if (
+    typeof input !== 'object' ||
+    input === null ||
+    Object.keys(input).length !== 2 ||
+    !('success' in input) ||
+    typeof input.success !== 'boolean'
+  ) {
+    return false;
+  }
+
+  if (input.success) {
+    return (
+      'data' in input &&
+      typeof input.data !== 'undefined' &&
+      input.data !== null
+    );
+  } else {
+    return 'error' in input && input.error instanceof ZodError;
+  }
+}
+
+function fromZodResult<ZodInput, ZodOutput extends Val>(
+  input: SafeParseReturnType<ZodInput, ZodOutput>
+): Result<ZodOutput, ZodError<ZodInput>> {
+  return input.success ? Result.ok(input.data) : Result.err(input.error);
+}
+
+/**
+ * All non-nullable values that also are not Promises nor Zod results.
+ * It's useful for restricting Zod results to not return `null` or `undefined`.
+ */
+type RawValue<T extends Val> = Exclude<
+  T,
+  SafeParseReturnType<unknown, T> | Promise<unknown>
+>;
+
+function fromNullable<
+  T extends Val,
+  ErrForNull extends Val,
+  ErrForUndefined extends Val
+>(
+  input: Nullable<T>,
+  errForNull: ErrForNull,
+  errForUndefined: ErrForUndefined
+): Result<T, ErrForNull | ErrForUndefined> {
+  if (input === null) {
+    return Result.err(errForNull);
+  }
+
+  if (input === undefined) {
+    return Result.err(errForUndefined);
+  }
+
+  return Result.ok(input);
+}
 
 /**
  * Class for representing a result that can fail.
@@ -28,18 +91,18 @@ type Res<T, E> = Ok<T> | Err<E>;
  * - `.transform()` are pipes which can be chained
  * - `.unwrap()` is the point of consumption
  */
-export class Result<T, E = Error> {
+export class Result<T extends Val, E extends Val = Error> {
   private constructor(private readonly res: Res<T, E>) {}
 
-  static ok<T>(val: NonNullable<T>): Result<T, never> {
+  static ok<T extends Val>(val: T): Result<T, never> {
     return new Result({ ok: true, val });
   }
 
-  static err<E>(err: NonNullable<E>): Result<never, E> {
+  static err<E extends Val>(err: E): Result<never, E> {
     return new Result({ ok: false, err });
   }
 
-  static _uncaught<E>(err: NonNullable<E>): Result<never, E> {
+  static _uncaught<E extends Val>(err: E): Result<never, E> {
     return new Result({ ok: false, err, _uncaught: true });
   }
 
@@ -72,19 +135,34 @@ export class Result<T, E = Error> {
    *
    *   ```
    */
-  static wrap<T, E = Error>(callback: () => NonNullable<T>): Result<T, E>;
-  static wrap<T, E = Error, EE = never>(
+  static wrap<T extends Val, Input = unknown>(
+    zodResult: SafeParseReturnType<Input, T>
+  ): Result<T, ZodError<Input>>;
+  static wrap<T extends Val, E extends Val = Error>(
+    callback: () => RawValue<T>
+  ): Result<T, E>;
+  static wrap<T extends Val, E extends Val = Error, EE extends Val = never>(
     promise: Promise<Result<T, EE>>
   ): AsyncResult<T, E | EE>;
-  static wrap<T, E = Error>(
-    promise: Promise<NonNullable<T>>
+  static wrap<T extends Val, E extends Val = Error>(
+    promise: Promise<RawValue<T>>
   ): AsyncResult<T, E>;
-  static wrap<T, E = Error, EE = never>(
+  static wrap<
+    T extends Val,
+    E extends Val = Error,
+    EE extends Val = never,
+    Input = unknown
+  >(
     input:
-      | (() => NonNullable<T>)
+      | SafeParseReturnType<Input, T>
+      | (() => RawValue<T>)
       | Promise<Result<T, EE>>
-      | Promise<NonNullable<T>>
-  ): Result<T, E | EE> | AsyncResult<T, E | EE> {
+      | Promise<RawValue<T>>
+  ): Result<T, ZodError<Input>> | Result<T, E | EE> | AsyncResult<T, E | EE> {
+    if (isZodResult<Input, T>(input)) {
+      return fromZodResult(input);
+    }
+
     if (input instanceof Promise) {
       return AsyncResult.wrap(input as never);
     }
@@ -105,7 +183,7 @@ export class Result<T, E = Error> {
    * hence never re-thrown.
    *
    * Since functions and promises returning nullable can't be wrapped with `Result.wrap()`
-   * because `val` is constrained by being `NonNullable<T>`, `null` and `undefined`
+   * because `val` is constrained by being `NonNullable`, `null` and `undefined`
    * must be converted to some sort of `err` value.
    *
    * This method does exactly this, i.g. it is the feature-rich shorthand for:
@@ -141,82 +219,106 @@ export class Result<T, E = Error> {
    *
    *   ```
    */
-  static wrapNullable<T, E = Error, NullableError = Error>(
-    callback: () => T,
-    nullableError: NonNullable<NullableError>
-  ): Result<T, E | NullableError>;
-  static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
-    callback: () => T,
-    nullError: NonNullable<NullError>,
-    undefinedError: NonNullable<UndefinedError>
-  ): Result<T, E | NullError | UndefinedError>;
-  static wrapNullable<T, E = Error, NullableError = Error>(
-    promise: Promise<T>,
-    nullableError: NonNullable<NullableError>
-  ): AsyncResult<T, E | NullableError>;
-  static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
-    promise: Promise<T>,
-    nullError: NonNullable<NullError>,
-    undefinedError: NonNullable<UndefinedError>
-  ): AsyncResult<T, E | NullError | UndefinedError>;
-  static wrapNullable<T, E = Error, NullError = Error, UndefinedError = Error>(
-    input: (() => T) | Promise<T>,
-    arg2: NonNullable<NullError>,
-    arg3?: NonNullable<UndefinedError>
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNullable extends Val = Error
+  >(
+    callback: () => Nullable<T>,
+    errForNullable: ErrForNullable
+  ): Result<T, E | ErrForNullable>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNull extends Val = Error,
+    ErrForUndefined extends Val = Error
+  >(
+    callback: () => Nullable<T>,
+    errForNull: ErrForNull,
+    errForUndefined: ErrForUndefined
+  ): Result<T, E | ErrForNull | ErrForUndefined>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNullable extends Val = Error
+  >(
+    promise: Promise<Nullable<T>>,
+    errForNullable: ErrForNullable
+  ): AsyncResult<T, E | ErrForNullable>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNull extends Val = Error,
+    ErrForUndefined extends Val = Error
+  >(
+    promise: Promise<Nullable<T>>,
+    errForNull: ErrForNull,
+    errForUndefined: ErrForUndefined
+  ): AsyncResult<T, E | ErrForNull | ErrForUndefined>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNullable extends Val = Error
+  >(
+    value: Nullable<T>,
+    errForNullable: ErrForNullable
+  ): Result<T, E | ErrForNullable>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNull extends Val = Error,
+    ErrForUndefined extends Val = Error
+  >(
+    value: Nullable<T>,
+    errForNull: ErrForNull,
+    errForUndefined: ErrForUndefined
+  ): Result<T, E | ErrForNull | ErrForUndefined>;
+  static wrapNullable<
+    T extends Val,
+    E extends Val = Error,
+    ErrForNull extends Val = Error,
+    ErrForUndefined extends Val = Error
+  >(
+    input: (() => Nullable<T>) | Promise<Nullable<T>> | Nullable<T>,
+    arg2: ErrForNull,
+    arg3?: ErrForUndefined
   ):
-    | Result<T, E | NullError | UndefinedError>
-    | AsyncResult<T, E | NullError | UndefinedError> {
-    const nullError = arg2;
-    const undefinedError = arg3 ?? arg2;
+    | Result<T, E | ErrForNull | ErrForUndefined>
+    | AsyncResult<T, E | ErrForNull | ErrForUndefined> {
+    const errForNull = arg2;
+    const errForUndefined = arg3 ?? arg2;
 
     if (input instanceof Promise) {
-      return AsyncResult.wrapNullable(input, nullError, undefinedError);
+      return AsyncResult.wrapNullable(input, errForNull, errForUndefined);
     }
 
-    try {
-      const result = input();
-
-      if (result === null) {
-        return Result.err(nullError);
+    if (input instanceof Function) {
+      try {
+        const result = input();
+        return fromNullable(result, errForNull, errForUndefined);
+      } catch (error) {
+        return Result.err(error);
       }
-
-      if (result === undefined) {
-        return Result.err(undefinedError);
-      }
-
-      return Result.ok(result);
-    } catch (error) {
-      return Result.err(error);
     }
+
+    return fromNullable(input, errForNull, errForUndefined);
   }
 
   /**
    * Returns a discriminated union for type-safe consumption of the result.
-   * When `fallback` is provided, the error is discarded and value is returned directly.
    * When error was uncaught during transformation, it's being re-thrown here.
    *
    *   ```ts
    *
-   *   // DESTRUCTURING
    *   const { val, err } = Result.ok('foo').unwrap();
    *   expect(val).toBe('foo');
    *   expect(err).toBeUndefined();
    *
-   *   // FALLBACK
-   *   const value = Result.err('bar').unwrap('foo');
-   *   expect(val).toBe('foo');
-   *
    *   ```
    */
-  unwrap(): Res<T, E>;
-  unwrap(fallback: NonNullable<T>): NonNullable<T>;
-  unwrap(fallback?: NonNullable<T>): Res<T, E> | NonNullable<T> {
+  unwrap(): Res<T, E> {
     if (this.res.ok) {
-      return fallback === undefined ? this.res : this.res.val;
-    }
-
-    if (fallback !== undefined) {
-      return fallback;
+      return this.res;
     }
 
     if (this.res._uncaught) {
@@ -227,9 +329,32 @@ export class Result<T, E = Error> {
   }
 
   /**
+   * Returns a success value or a fallback value.
+   * When error was uncaught during transformation, it's being re-thrown here.
+   *
+   *   ```ts
+   *
+   *   const value = Result.err('bar').unwrapOrElse('foo');
+   *   expect(val).toBe('foo');
+   *
+   *   ```
+   */
+  unwrapOrElse(fallback: T): T {
+    if (this.res.ok) {
+      return this.res.val;
+    }
+
+    if (this.res._uncaught) {
+      throw this.res.err;
+    }
+
+    return fallback;
+  }
+
+  /**
    * Returns the ok-value or throw the error.
    */
-  unwrapOrThrow(): NonNullable<T> {
+  unwrapOrThrow(): T {
     if (this.res.ok) {
       return this.res.val;
     }
@@ -238,11 +363,29 @@ export class Result<T, E = Error> {
   }
 
   /**
+   * Returns the ok-value or `null`.
+   * When error was uncaught during transformation, it's being re-thrown here.
+   */
+  unwrapOrNull(): T | null {
+    if (this.res.ok) {
+      return this.res.val;
+    }
+
+    if (this.res._uncaught) {
+      throw this.res.err;
+    }
+
+    return null;
+  }
+
+  /**
    * Transforms the ok-value, sync or async way.
    *
    * Transform functions SHOULD NOT throw.
    * Uncaught errors are logged and wrapped to `Result._uncaught()`,
    * which leads to re-throwing them in `unwrap()`.
+   *
+   * Zod `.safeParse()` results are converted automatically.
    *
    *   ```ts
    *
@@ -261,29 +404,39 @@ export class Result<T, E = Error> {
    *
    *   ```
    */
-  transform<U, EE>(
-    fn: (value: NonNullable<T>) => Result<U, E | EE>
+  transform<U extends Val, EE extends Val>(
+    fn: (value: T) => Result<U, E | EE>
   ): Result<U, E | EE>;
-  transform<U, EE>(
-    fn: (value: NonNullable<T>) => AsyncResult<U, E | EE>
+  transform<U extends Val, EE extends Val>(
+    fn: (value: T) => AsyncResult<U, E | EE>
   ): AsyncResult<U, E | EE>;
-  transform<U, EE>(
-    fn: (value: NonNullable<T>) => Promise<Result<U, E | EE>>
+  transform<U extends Val, Input = unknown>(
+    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>
+  ): Result<U, E | ZodError<Input>>;
+  transform<U extends Val, Input = unknown>(
+    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>
+  ): AsyncResult<U, E | ZodError<Input>>;
+  transform<U extends Val, EE extends Val>(
+    fn: (value: T) => Promise<Result<U, E | EE>>
   ): AsyncResult<U, E | EE>;
-  transform<U>(
-    fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
+  transform<U extends Val>(
+    fn: (value: T) => Promise<RawValue<U>>
   ): AsyncResult<U, E>;
-  transform<U>(fn: (value: NonNullable<T>) => NonNullable<U>): Result<U, E>;
-  transform<U, EE>(
+  transform<U extends Val>(fn: (value: T) => RawValue<U>): Result<U, E>;
+  transform<U extends Val, EE extends Val, Input = unknown>(
     fn: (
-      value: NonNullable<T>
+      value: T
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
+      | SafeParseReturnType<Input, NonNullable<U>>
+      | Promise<SafeParseReturnType<Input, NonNullable<U>>>
       | Promise<Result<U, E | EE>>
-      | Promise<NonNullable<U>>
-      | NonNullable<U>
-  ): Result<U, E | EE> | AsyncResult<U, E | EE> {
+      | Promise<RawValue<U>>
+      | RawValue<U>
+  ):
+    | Result<U, E | EE | ZodError<Input>>
+    | AsyncResult<U, E | EE | ZodError<Input>> {
     if (!this.res.ok) {
       return Result.err(this.res.err);
     }
@@ -297,6 +450,10 @@ export class Result<T, E = Error> {
 
       if (result instanceof AsyncResult) {
         return result;
+      }
+
+      if (isZodResult<Input, U>(result)) {
+        return fromZodResult(result);
       }
 
       if (result instanceof Promise) {
@@ -313,18 +470,18 @@ export class Result<T, E = Error> {
     }
   }
 
-  catch<U = T, EE = E>(
-    fn: (err: NonNullable<E>) => Result<U, E | EE>
+  catch<U extends Val = T, EE extends Val = E>(
+    fn: (err: E) => Result<U, E | EE>
   ): Result<T | U, E | EE>;
-  catch<U = T, EE = E>(
-    fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>
+  catch<U extends Val = T, EE extends Val = E>(
+    fn: (err: E) => AsyncResult<U, E | EE>
   ): AsyncResult<T | U, E | EE>;
-  catch<U = T, EE = E>(
-    fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>
+  catch<U extends Val = T, EE extends Val = E>(
+    fn: (err: E) => Promise<Result<U, E | EE>>
   ): AsyncResult<T | U, E | EE>;
-  catch<U = T, EE = E>(
+  catch<U extends Val = T, EE extends Val = E>(
     fn: (
-      err: NonNullable<E>
+      err: E
     ) => Result<U, E | EE> | AsyncResult<U, E | EE> | Promise<Result<U, E | EE>>
   ): Result<T | U, E | EE> | AsyncResult<T | U, E | EE> {
     if (this.res.ok) {
@@ -354,6 +511,93 @@ export class Result<T, E = Error> {
       return Result._uncaught(err);
     }
   }
+
+  /**
+   * Given a `schema` and `input`, returns a `Result` with `val` being the parsed value.
+   * Additionally, `null` and `undefined` values are converted into Zod error.
+   */
+  static parse<
+    T,
+    Schema extends ZodType<T, ZodTypeDef, Input>,
+    Input = unknown
+  >(
+    input: unknown,
+    schema: Schema
+  ): Result<NonNullable<z.infer<Schema>>, ZodError<Input>> {
+    const parseResult = schema
+      .transform((result, ctx): NonNullable<T> => {
+        if (result === undefined) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
+          });
+          return z.NEVER;
+        }
+
+        if (result === null) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
+          });
+          return z.NEVER;
+        }
+
+        return result;
+      })
+      .safeParse(input);
+
+    return fromZodResult(parseResult);
+  }
+
+  /**
+   * Given a `schema`, returns a `Result` with `val` being the parsed value.
+   * Additionally, `null` and `undefined` values are converted into Zod error.
+   */
+  parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
+    schema: Schema
+  ): Result<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
+    if (this.res.ok) {
+      return Result.parse(this.res.val, schema);
+    }
+
+    const err = this.res.err;
+
+    if (this.res._uncaught) {
+      return Result._uncaught(err);
+    }
+
+    return Result.err(err);
+  }
+
+  /**
+   * Call `fn` on the `val` if the result is ok.
+   */
+  onValue(fn: (value: T) => void): Result<T, E> {
+    if (this.res.ok) {
+      try {
+        fn(this.res.val);
+      } catch (err) {
+        return Result._uncaught(err);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * Call `fn` on the `err` if the result is err.
+   */
+  onError(fn: (err: E) => void): Result<T, E> {
+    if (!this.res.ok) {
+      try {
+        fn(this.res.err);
+      } catch (err) {
+        return Result._uncaught(err);
+      }
+    }
+
+    return this;
+  }
 }
 
 /**
@@ -362,7 +606,9 @@ export class Result<T, E = Error> {
  *
  * All the methods resemble `Result` methods, but work asynchronously.
  */
-export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
+export class AsyncResult<T extends Val, E extends Val>
+  implements PromiseLike<Result<T, E>>
+{
   private constructor(private asyncResult: Promise<Result<T, E>>) {}
 
   then<TResult1 = Result<T, E>>(
@@ -374,17 +620,25 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
     return this.asyncResult.then(onfulfilled);
   }
 
-  static ok<T>(val: NonNullable<T>): AsyncResult<T, never> {
+  static ok<T extends Val>(val: T): AsyncResult<T, never> {
     return new AsyncResult(Promise.resolve(Result.ok(val)));
   }
 
-  static err<E>(err: NonNullable<E>): AsyncResult<never, E> {
+  static err<E extends Val>(err: NonNullable<E>): AsyncResult<never, E> {
     // eslint-disable-next-line promise/no-promise-in-callback
     return new AsyncResult(Promise.resolve(Result.err(err)));
   }
 
-  static wrap<T, E = Error, EE = never>(
-    promise: Promise<Result<T, EE>> | Promise<NonNullable<T>>,
+  static wrap<
+    T extends Val,
+    E extends Val = Error,
+    EE extends Val = never,
+    Input = unknown
+  >(
+    promise:
+      | Promise<SafeParseReturnType<Input, T>>
+      | Promise<Result<T, EE>>
+      | Promise<RawValue<T>>,
     onErr?: (err: NonNullable<E>) => Result<T, E>
   ): AsyncResult<T, E | EE> {
     return new AsyncResult(
@@ -393,6 +647,11 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
           if (value instanceof Result) {
             return value;
           }
+
+          if (isZodResult<Input, T>(value)) {
+            return fromZodResult(value);
+          }
+
           return Result.ok(value);
         })
         .catch((err) => {
@@ -404,62 +663,66 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
     );
   }
 
-  static wrapNullable<T, E, NullError, UndefinedError>(
-    promise: Promise<T>,
-    nullError: NonNullable<NullError>,
-    undefinedError: NonNullable<UndefinedError>
-  ): AsyncResult<T, E | NullError | UndefinedError> {
+  static wrapNullable<
+    T extends Val,
+    E extends Val,
+    ErrForNull extends Val,
+    ErrForUndefined extends Val
+  >(
+    promise: Promise<Nullable<T>>,
+    errForNull: NonNullable<ErrForNull>,
+    errForUndefined: NonNullable<ErrForUndefined>
+  ): AsyncResult<T, E | ErrForNull | ErrForUndefined> {
     return new AsyncResult(
       promise
-        .then((value) => {
-          if (value === null) {
-            return Result.err(nullError);
-          }
-
-          if (value === undefined) {
-            return Result.err(undefinedError);
-          }
-
-          return Result.ok(value);
-        })
+        .then((value) => fromNullable(value, errForNull, errForUndefined))
         .catch((err) => Result.err(err))
     );
   }
 
   /**
    * Returns a discriminated union for type-safe consumption of the result.
-   * When `fallback` is provided, the error is discarded and value is returned directly.
    *
    *   ```ts
    *
-   *   // DESTRUCTURING
    *   const { val, err } = await Result.wrap(readFile('foo.txt')).unwrap();
    *   expect(val).toBe('foo');
    *   expect(err).toBeUndefined();
    *
-   *   // FALLBACK
-   *   const val = await Result.wrap(readFile('foo.txt')).unwrap('bar');
+   *   ```
+   */
+  unwrap(): Promise<Res<T, E>> {
+    return this.asyncResult.then<Res<T, E>>((res) => res.unwrap());
+  }
+
+  /**
+   * Returns a success value or a fallback value.
+   *
+   *   ```ts
+   *
+   *   const val = await Result.wrap(readFile('foo.txt')).unwrapOrElse('bar');
    *   expect(val).toBe('bar');
    *   expect(err).toBeUndefined();
    *
    *   ```
    */
-  unwrap(): Promise<Res<T, E>>;
-  unwrap(fallback: NonNullable<T>): Promise<NonNullable<T>>;
-  unwrap(
-    fallback?: NonNullable<T>
-  ): Promise<Res<T, E>> | Promise<NonNullable<T>> {
-    return fallback === undefined
-      ? this.asyncResult.then<Res<T, E>>((res) => res.unwrap())
-      : this.asyncResult.then<NonNullable<T>>((res) => res.unwrap(fallback));
+  unwrapOrElse(fallback: T): Promise<T> {
+    return this.asyncResult.then<T>((res) => res.unwrapOrElse(fallback));
   }
 
   /**
    * Returns the ok-value or throw the error.
    */
-  async unwrapOrThrow(): Promise<NonNullable<T>> {
+  async unwrapOrThrow(): Promise<T> {
     const result = await this.asyncResult;
     return result.unwrapOrThrow();
+  }
+
+  /**
+   * Returns the ok-value or `null`.
+   */
+  unwrapOrNull(): Promise<T | null> {
+    return this.asyncResult.then<T | null>((res) => res.unwrapOrNull());
   }
 
   /**
@@ -468,6 +731,8 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
    * Transform functions SHOULD NOT throw.
    * Uncaught errors are logged and wrapped to `Result._uncaught()`,
    * which leads to re-throwing them in `unwrap()`.
+   *
+   * Zod `.safeParse()` results are converted automatically.
    *
    *   ```ts
    *
@@ -479,31 +744,37 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
    *
    *   ```
    */
-  transform<U, EE>(
-    fn: (value: NonNullable<T>) => Result<U, E | EE>
+  transform<U extends Val, EE extends Val>(
+    fn: (value: T) => Result<U, E | EE>
   ): AsyncResult<U, E | EE>;
-  transform<U, EE>(
-    fn: (value: NonNullable<T>) => AsyncResult<U, E | EE>
+  transform<U extends Val, EE extends Val>(
+    fn: (value: T) => AsyncResult<U, E | EE>
   ): AsyncResult<U, E | EE>;
-  transform<U, EE>(
-    fn: (value: NonNullable<T>) => Promise<Result<U, E | EE>>
+  transform<U extends Val, Input = unknown>(
+    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>
+  ): AsyncResult<U, E | ZodError<Input>>;
+  transform<U extends Val, Input = unknown>(
+    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>
+  ): AsyncResult<U, E | ZodError<Input>>;
+  transform<U extends Val, EE extends Val>(
+    fn: (value: T) => Promise<Result<U, E | EE>>
   ): AsyncResult<U, E | EE>;
-  transform<U>(
-    fn: (value: NonNullable<T>) => Promise<NonNullable<U>>
+  transform<U extends Val>(
+    fn: (value: T) => Promise<RawValue<U>>
   ): AsyncResult<U, E>;
-  transform<U>(
-    fn: (value: NonNullable<T>) => NonNullable<U>
-  ): AsyncResult<U, E>;
-  transform<U, EE>(
+  transform<U extends Val>(fn: (value: T) => RawValue<U>): AsyncResult<U, E>;
+  transform<U extends Val, EE extends Val, Input = unknown>(
     fn: (
-      value: NonNullable<T>
+      value: T
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
+      | SafeParseReturnType<Input, NonNullable<U>>
+      | Promise<SafeParseReturnType<Input, NonNullable<U>>>
       | Promise<Result<U, E | EE>>
-      | Promise<NonNullable<U>>
-      | NonNullable<U>
-  ): AsyncResult<U, E | EE> {
+      | Promise<RawValue<U>>
+      | RawValue<U>
+  ): AsyncResult<U, E | EE | ZodError<Input>> {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => {
@@ -521,6 +792,10 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
 
             if (result instanceof AsyncResult) {
               return result;
+            }
+
+            if (isZodResult<Input, U>(result)) {
+              return fromZodResult(result);
             }
 
             if (result instanceof Promise) {
@@ -546,16 +821,16 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
     );
   }
 
-  catch<U = T, EE = E>(
+  catch<U extends Val = T, EE extends Val = E>(
     fn: (err: NonNullable<E>) => Result<U, E | EE>
   ): AsyncResult<T | U, E | EE>;
-  catch<U = T, EE = E>(
+  catch<U extends Val = T, EE extends Val = E>(
     fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>
   ): AsyncResult<T | U, E | EE>;
-  catch<U = T, EE = E>(
+  catch<U extends Val = T, EE extends Val = E>(
     fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>
   ): AsyncResult<T | U, E | EE>;
-  catch<U = T, EE = E>(
+  catch<U extends Val = T, EE extends Val = E>(
     fn: (
       err: NonNullable<E>
     ) => Result<U, E | EE> | AsyncResult<U, E | EE> | Promise<Result<U, E | EE>>
@@ -565,5 +840,44 @@ export class AsyncResult<T, E> implements PromiseLike<Result<T, E>> {
       result.catch(fn as never)
     );
     return AsyncResult.wrap(caughtAsyncResult);
+  }
+
+  /**
+   * Given a `schema`, returns a `Result` with `val` being the parsed value.
+   * Additionally, `null` and `undefined` values are converted into Zod error.
+   */
+  parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
+    schema: Schema
+  ): AsyncResult<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
+    return new AsyncResult(
+      this.asyncResult
+        .then((oldResult) => oldResult.parse(schema))
+        .catch(
+          /* istanbul ignore next: should never happen */
+          (err) => Result._uncaught(err)
+        )
+    );
+  }
+
+  onValue(fn: (value: T) => void): AsyncResult<T, E> {
+    return new AsyncResult(
+      this.asyncResult
+        .then((result) => result.onValue(fn))
+        .catch(
+          /* istanbul ignore next: should never happen */
+          (err) => Result._uncaught(err)
+        )
+    );
+  }
+
+  onError(fn: (err: E) => void): AsyncResult<T, E> {
+    return new AsyncResult(
+      this.asyncResult
+        .then((result) => result.onError(fn))
+        .catch(
+          /* istanbul ignore next: should never happen */
+          (err) => Result._uncaught(err)
+        )
+    );
   }
 }

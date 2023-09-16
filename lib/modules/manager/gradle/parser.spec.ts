@@ -756,7 +756,7 @@ describe('modules/manager/gradle/parser', () => {
       const { deps } = parseGradle(content);
       const [res] = deps;
       const idx = content
-        // TODO #7154
+        // TODO #22198
         .slice(res.managerData!.fileReplacePosition)
         .indexOf('1.2.3');
       expect(idx).toBe(0);
@@ -766,7 +766,7 @@ describe('modules/manager/gradle/parser', () => {
       const content = Fixtures.get('build.gradle.example1');
       const { deps } = parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
-        // TODO #7154
+        // TODO #22198
         content.slice(managerData!.fileReplacePosition).indexOf(currentValue!)
       );
       expect(replacementIndices.every((idx) => idx === 0)).toBeTrue();
@@ -940,6 +940,11 @@ describe('modules/manager/gradle/parser', () => {
 
         object Libraries {
           val deps = mapOf("api" to "org.slf4j:slf4j-api:\${Versions.baz}")
+          val deps2 = listOf(
+            "androidx.appcompat:appcompat:4.5.6",
+            "androidx.core:core-ktx:\${Versions.baz}",
+            listOf("androidx.webkit:webkit:\${Versions.baz}")
+          )
           val dep: String = "foo:bar:" + Versions.baz
         }
       `;
@@ -955,6 +960,20 @@ describe('modules/manager/gradle/parser', () => {
         deps: [
           {
             depName: 'org.slf4j:slf4j-api',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+          {
+            depName: 'androidx.appcompat:appcompat',
+            currentValue: '4.5.6',
+          },
+          {
+            depName: 'androidx.core:core-ktx',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+          {
+            depName: 'androidx.webkit:webkit',
             groupName: 'Versions.baz',
             currentValue: '1.2.3',
           },

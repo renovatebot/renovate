@@ -17,6 +17,7 @@ const Categories = [
   'js',
   'kubernetes',
   'node',
+  'perl',
   'php',
   'python',
   'ruby',

@@ -47,7 +47,7 @@ type Task<T> = () => Promise<HttpResponse<T>>;
 
 // Copying will help to avoid circular structure
 // and mutation of the cached response.
-function copyResponse<T extends Buffer | string | any>(
+function copyResponse<T>(
   response: HttpResponse<T>,
   deep: boolean
 ): HttpResponse<T> {
@@ -55,7 +55,7 @@ function copyResponse<T extends Buffer | string | any>(
   return deep
     ? {
         statusCode,
-        body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
+        body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
         headers: clone(headers),
       }
     : {
@@ -372,7 +372,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ): AsyncResult<ResT, SafeJsonError> {
     const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
     return Result.wrap(this.requestJson<ResT>('get', args)).transform(
-      (response) => response.body
+      (response) => Result.ok(response.body)
     );
   }
 
@@ -457,7 +457,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    // TODO: fix types (#7154)
+    // TODO: fix types (#22198)
     let combinedOptions: any = {
       method: 'get',
       ...this.options,

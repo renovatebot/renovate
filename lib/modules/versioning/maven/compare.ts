@@ -430,7 +430,7 @@ function rangeToStr(fullRange: Range[] | null): string | null {
     return null;
   }
 
-  const valToStr = (val: string | null): string => (val === null ? '' : val);
+  const valToStr = (val: string | null): string => val ?? '';
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];

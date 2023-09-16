@@ -10,6 +10,7 @@ const requirements2 = Fixtures.get('composer2.json');
 const requirements3 = Fixtures.get('composer3.json');
 const requirements4 = Fixtures.get('composer4.json');
 const requirements5 = Fixtures.get('composer5.json');
+const requirements6 = Fixtures.get('composer6.json');
 const requirements5Lock = Fixtures.get('composer5.lock');
 
 describe('modules/manager/composer/extract', () => {
@@ -86,8 +87,7 @@ describe('modules/manager/composer/extract', () => {
             datasource: 'github-tags',
             depName: 'php',
             depType: 'require',
-            extractVersion: '^php-(?<version>.*)$',
-            packageName: 'php/php-src',
+            packageName: 'containerbase/php-prebuild',
           },
           {
             currentValue: '~1.0.12',
@@ -211,6 +211,35 @@ describe('modules/manager/composer/extract', () => {
             depName: 'awesome/git',
             depType: 'require',
             packageName: 'https://my-git.example/my-git-repo',
+          },
+        ],
+      });
+    });
+
+    it('extracts bitbucket repositories and registryUrls', async () => {
+      const res = await extractPackageFile(requirements6, packageFile);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'bitbucket-tags',
+            depName: 'awesome/bitbucket-repo1',
+            depType: 'require',
+            packageName: 'awesome/bitbucket-repo1',
+          },
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'bitbucket-tags',
+            depName: 'awesome/bitbucket-repo2',
+            depType: 'require',
+            packageName: 'awesome/bitbucket-repo2',
+          },
+          {
+            currentValue: 'dev-trunk',
+            datasource: 'bitbucket-tags',
+            depName: 'awesome/bitbucket-repo3',
+            depType: 'require',
+            packageName: 'awesome/bitbucket-repo3',
           },
         ],
       });

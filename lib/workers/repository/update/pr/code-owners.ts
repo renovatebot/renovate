@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import ignore from 'ignore';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -102,9 +103,11 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     // Convert CODEOWNERS file into list of matching rules
     const fileOwnerRules = codeOwnersFile
       .split(newlineRegex)
-      // Remove empty and commented lines
+      // Remove comments
+      .map((line) => line.split('#')[0])
+      // Remove empty lines
       .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith('#'))
+      .filter(is.nonEmptyString)
       // Extract pattern & usernames
       .map(extractOwnersFromLine);
 

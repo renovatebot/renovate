@@ -18,10 +18,13 @@ export function getRollbackUpdate(
     );
     return null;
   }
-  const lessThanVersions = versions.filter((v) =>
-    // TODO #7154
-    version.isLessThanRange!(v.version, currentValue!)
-  );
+  const lessThanVersions = versions.filter((v) => {
+    try {
+      return version.isLessThanRange!(v.version, currentValue!);
+    } catch (err) /* istanbul ignore next */ {
+      return false;
+    }
+  });
   // istanbul ignore if
   if (!lessThanVersions.length) {
     logger.debug(
@@ -60,14 +63,14 @@ export function getRollbackUpdate(
     return null;
   }
   const newValue = version.getNewValue({
-    // TODO #7154
+    // TODO #22198
     currentValue: currentValue!,
     rangeStrategy: 'replace',
     newVersion,
   });
   return {
     bucket: 'rollback',
-    // TODO #7154
+    // TODO #22198
     newMajor: version.getMajor(newVersion)!,
     newValue: newValue!,
     newVersion,

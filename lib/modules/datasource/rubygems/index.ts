@@ -13,10 +13,10 @@ import { MetadataCache } from './metadata-cache';
 import { GemInfo, MarshalledVersionInfo } from './schema';
 import { VersionsEndpointCache } from './versions-endpoint-cache';
 
-function unlessServerSide<T, E>(
-  err: E,
-  cb: () => AsyncResult<T, E>
-): AsyncResult<T, E> {
+function unlessServerSide<
+  T extends NonNullable<unknown>,
+  E extends NonNullable<unknown>
+>(err: E, cb: () => AsyncResult<T, E>): AsyncResult<T, E> {
   if (err instanceof HttpError && err.response?.statusCode) {
     const code = err.response.statusCode;
     if (code >= 500 && code <= 599) {
@@ -101,10 +101,9 @@ export class RubyGemsDatasource extends Datasource {
     packageName: string
   ): AsyncResult<ReleaseResult, Error | ZodError> {
     const url = joinUrlParts(registryUrl, '/info', packageName);
-    return Result.wrap(this.http.get(url)).transform(({ body }) => {
-      const res = GemInfo.safeParse(body);
-      return res.success ? Result.ok(res.data) : Result.err(res.error);
-    });
+    return Result.wrap(this.http.get(url))
+      .transform(({ body }) => body)
+      .parse(GemInfo);
   }
 
   private getReleasesViaDeprecatedAPI(
@@ -115,12 +114,8 @@ export class RubyGemsDatasource extends Datasource {
     const query = getQueryString({ gems: packageName });
     const url = `${path}?${query}`;
     const bufPromise = this.http.getBuffer(url);
-    return Result.wrap(bufPromise).transform(({ body }) => {
-      const data = Marshal.parse(body);
-      const releases = MarshalledVersionInfo.safeParse(data);
-      return releases.success
-        ? Result.ok(releases.data)
-        : Result.err(releases.error);
-    });
+    return Result.wrap(bufPromise).transform(({ body }) =>
+      MarshalledVersionInfo.safeParse(Marshal.parse(body))
+    );
   }
 }

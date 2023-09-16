@@ -42,7 +42,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';
       OnboardingState.prUpdateRequested = false;
@@ -94,7 +93,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           .files[0] as FileAddition;
         const contents = file.contents?.toString();
         expect(contents).toBeJsonString();
-        // TODO #7154
+        // TODO #22198
         expect(JSON.parse(contents!)).toEqual({
           $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         });
@@ -130,7 +129,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
-      // TODO #7154
+      // TODO #22198
       expect(JSON.parse(contents!)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['some/renovate-config'],
@@ -259,7 +258,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(git.mergeBranch).toHaveBeenCalledOnce();
+      expect(scm.mergeToLocal).toHaveBeenCalledOnce();
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
@@ -287,7 +286,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         .mockReturnValueOnce('onboarding-sha');
       config.onboardingRebaseCheckbox = true;
       await checkOnboardingBranch(config);
-      expect(git.mergeBranch).not.toHaveBeenCalled();
+      expect(scm.mergeToLocal).not.toHaveBeenCalled();
     });
 
     it('processes modified onboarding branch and invalidates extract cache', async () => {
@@ -312,7 +311,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       await checkOnboardingBranch(config);
-      expect(git.mergeBranch).toHaveBeenCalledOnce();
+      expect(scm.mergeToLocal).toHaveBeenCalledOnce();
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
         'default-sha',
         'new-onboarding-sha',
@@ -336,7 +335,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(true);
       await checkOnboardingBranch(config);
-      expect(git.mergeBranch).not.toHaveBeenCalled();
+      expect(scm.mergeToLocal).not.toHaveBeenCalled();
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
         'default-sha',
         'onboarding-sha',
@@ -354,7 +353,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         .mockReturnValueOnce('onboarding-sha');
       onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(false);
       await checkOnboardingBranch(config);
-      expect(git.mergeBranch).toHaveBeenCalled();
+      expect(scm.mergeToLocal).toHaveBeenCalled();
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
         'default-sha',
         'onboarding-sha',
@@ -383,7 +382,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           `Platform '${pl}' does not support extended markdown`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -397,7 +396,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           `No rebase checkbox was found in the onboarding PR`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -411,7 +410,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           `Manual onboarding PR update requested`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -422,7 +421,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(OnboardingState.prUpdateRequested).toBeFalse();
-        expect(git.mergeBranch).toHaveBeenCalledOnce();
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
     });

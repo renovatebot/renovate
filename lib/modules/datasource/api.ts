@@ -23,8 +23,11 @@ import { GalaxyDatasource } from './galaxy';
 import { GalaxyCollectionDatasource } from './galaxy-collection';
 import { GitRefsDatasource } from './git-refs';
 import { GitTagsDatasource } from './git-tags';
+import { GiteaReleasesDatasource } from './gitea-releases';
+import { GiteaTagsDatasource } from './gitea-tags';
 import { GithubReleaseAttachmentsDatasource } from './github-release-attachments';
 import { GithubReleasesDatasource } from './github-releases';
+import { GithubRunnersDatasource } from './github-runners';
 import { GithubTagsDatasource } from './github-tags';
 import { GitlabPackagesDatasource } from './gitlab-packages';
 import { GitlabReleasesDatasource } from './gitlab-releases';
@@ -85,11 +88,14 @@ api.set(GalaxyDatasource.id, new GalaxyDatasource());
 api.set(GalaxyCollectionDatasource.id, new GalaxyCollectionDatasource());
 api.set(GitRefsDatasource.id, new GitRefsDatasource());
 api.set(GitTagsDatasource.id, new GitTagsDatasource());
+api.set(GiteaReleasesDatasource.id, new GiteaReleasesDatasource());
+api.set(GiteaTagsDatasource.id, new GiteaTagsDatasource());
 api.set(
   GithubReleaseAttachmentsDatasource.id,
   new GithubReleaseAttachmentsDatasource()
 );
 api.set(GithubReleasesDatasource.id, new GithubReleasesDatasource());
+api.set(GithubRunnersDatasource.id, new GithubRunnersDatasource());
 api.set(GithubTagsDatasource.id, new GithubTagsDatasource());
 api.set(GitlabPackagesDatasource.id, new GitlabPackagesDatasource());
 api.set(GitlabReleasesDatasource.id, new GitlabReleasesDatasource());

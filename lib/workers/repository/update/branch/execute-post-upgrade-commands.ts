@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
@@ -46,19 +46,19 @@ export async function postUpgradeCommandsExecutor(
       `Checking for post-upgrade tasks`
     );
     const commands = upgrade.postUpgradeTasks?.commands ?? [];
-    const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? [];
+    const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
         const canWriteFile = await localPathIsFile(file.path);
-        if (file.type === 'addition' && canWriteFile) {
+        if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
           }
-          // TODO #7154
+          // TODO #22198
           await writeLocalFile(file.path, contents!);
         }
       }
@@ -163,8 +163,9 @@ export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
-    (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
-    (config.updatedArtifacts && config.updatedArtifacts.length > 0);
+    (is.array(config.updatedPackageFiles) &&
+      config.updatedPackageFiles.length > 0) ||
+    (is.array(config.updatedArtifacts) && config.updatedArtifacts.length > 0);
 
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */

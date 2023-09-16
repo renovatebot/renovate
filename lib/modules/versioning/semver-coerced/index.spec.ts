@@ -44,7 +44,7 @@ describe('modules/versioning/semver-coerced/index', () => {
     });
 
     it('invalid version', () => {
-      expect(semverCoerced.getMajor('xxx')).toBeNull();
+      expect(semverCoerced.getMinor('xxx')).toBeNull();
     });
   });
 

@@ -33,4 +33,14 @@ describe('modules/datasource/datasource', () => {
       testDatasource.getReleases(partial<GetReleasesConfig>())
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
+
+  it('should throw on statusCode >=500 && <600', async () => {
+    const testDatasource = new TestDatasource();
+
+    httpMock.scope(exampleUrl).get('/').reply(504);
+
+    await expect(
+      testDatasource.getReleases(partial<GetReleasesConfig>())
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+  });
 });

@@ -35,7 +35,8 @@ describe('modules/manager/npm/extract/monorepo', () => {
               depName: '@org/c',
             },
             {
-              depName: 'foo',
+              depName: 'lerna',
+              currentValue: '^6.0.0',
             },
           ],
         },
@@ -60,13 +61,65 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
           packageFile.deps?.some((dep) => dep.isInternal)
         )
       ).toBeTrue();
+    });
+
+    it('skips lerna package settings if v7 or later', async () => {
+      const packageFiles: Partial<PackageFile>[] = [
+        {
+          packageFile: 'package.json',
+          managerData: {
+            lernaJsonFile: 'lerna.json',
+            lernaPackages: ['packages/*'],
+          },
+          deps: [
+            {
+              depName: '@org/a',
+            },
+            {
+              depName: '@org/b',
+            },
+            {
+              depName: '@org/c',
+            },
+            {
+              depName: 'lerna',
+              currentValue: '^7.0.0',
+            },
+          ],
+        },
+        {
+          packageFile: 'packages/a/package.json',
+          managerData: { packageJsonName: '@org/a' },
+          deps: [
+            {
+              depName: '@org/b',
+            },
+            {
+              depName: '@org/c',
+            },
+            {
+              depName: 'bar',
+            },
+          ],
+        },
+        {
+          packageFile: 'packages/b/package.json',
+          managerData: { packageJsonName: '@org/b' },
+        },
+      ];
+      await detectMonorepos(packageFiles);
+      expect(packageFiles[1].managerData?.lernaJsonFile).toBeUndefined();
+      expect(
+        packageFiles.some((packageFile) =>
+          packageFile.deps?.some((dep) => dep.isInternal)
+        )
+      ).toBeFalse();
     });
 
     it('updates internal packages', async () => {
@@ -88,7 +141,8 @@ describe('modules/manager/npm/extract/monorepo', () => {
               depName: '@org/c',
             },
             {
-              depName: 'foo',
+              depName: 'lerna',
+              currentValue: '6.1.0',
             },
           ],
         },
@@ -113,7 +167,6 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
       expect(
         packageFiles.some((packageFile) =>
@@ -132,6 +185,12 @@ describe('modules/manager/npm/extract/monorepo', () => {
             lernaPackages: ['oldpackages/*'],
             workspacesPackages: ['packages/*'],
           },
+          deps: [
+            {
+              depName: 'lerna',
+              currentValue: '^6.0.0',
+            },
+          ],
         },
         {
           packageFile: 'packages/a/package.json',
@@ -143,7 +202,6 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
       ];
       await detectMonorepos(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');
     });
 
