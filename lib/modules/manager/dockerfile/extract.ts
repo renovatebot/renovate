@@ -61,8 +61,10 @@ function processDepForAutoReplace(
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
       if (
-        (dep.currentValue && lines[lineNumber].includes(dep.currentValue)) ||
-        (dep.currentDigest && lines[lineNumber].includes(dep.currentDigest))
+        (is.string(dep.currentValue) &&
+          lines[lineNumber].includes(dep.currentValue)) ||
+        (is.string(dep.currentDigest) &&
+          lines[lineNumber].includes(dep.currentDigest))
       ) {
         lineNumberRangesToReplace.push(lineNumberRange);
       }
@@ -239,7 +241,7 @@ export function getDep(
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  _packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];

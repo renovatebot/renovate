@@ -1,3 +1,4 @@
+import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import {
   GitPullRequest,
@@ -8,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import delay from 'delay';
 import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,
@@ -17,6 +17,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -48,7 +49,6 @@ import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
@@ -57,7 +57,6 @@ import {
 
 interface Config {
   repoForceRebase: boolean;
-  defaultMergeMethod: GitPullRequestMergeStrategy;
   mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
@@ -115,8 +114,6 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   return repos.map((repo) => `${repo.project?.name}/${repo.name}`);
 }
 
@@ -125,47 +122,65 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<string | null> {
-  const azureApiGit = await azureApi.gitApi();
+  try {
+    const azureApiGit = await azureApi.gitApi();
 
-  let repoId: string | undefined;
-  if (repoName) {
-    const repos = await azureApiGit.getRepositories();
-    const repo = getRepoByName(repoName, repos);
-    repoId = repo?.id;
-  } else {
-    repoId = config.repoId;
+    let repoId: string | undefined;
+    if (repoName) {
+      const repos = await azureApiGit.getRepositories();
+      const repo = getRepoByName(repoName, repos);
+      repoId = repo?.id;
+    } else {
+      repoId = config.repoId;
+    }
+
+    if (!repoId) {
+      logger.debug('No repoId so cannot getRawFile');
+      return null;
+    }
+
+    const versionDescriptor: GitVersionDescriptor = {
+      version: branchOrTag,
+    } satisfies GitVersionDescriptor;
+
+    const buf = await azureApiGit.getItemContent(
+      repoId,
+      fileName,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      branchOrTag ? versionDescriptor : undefined
+    );
+
+    const str = await streamToString(buf);
+    return str;
+  } catch (err) /* istanbul ignore next */ {
+    if (
+      err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
+    ) {
+      logger.debug(
+        'Azure DevOps is currently unavailable when attempting to fetch file - throwing ExternalHostError'
+      );
+      throw new ExternalHostError(err, id);
+    }
+    if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
+      throw new ExternalHostError(err, id);
+    }
+    if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+      throw new ExternalHostError(err, id);
+    }
+    throw err;
   }
-
-  if (!repoId) {
-    logger.debug('No repoId so cannot getRawFile');
-    return null;
-  }
-
-  const versionDescriptor: GitVersionDescriptor = {
-    version: branchOrTag,
-  } as GitVersionDescriptor;
-
-  const buf = await azureApiGit.getItemContent(
-    repoId,
-    fileName,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    branchOrTag ? versionDescriptor : undefined
-  );
-
-  const str = await streamToString(buf);
-  return str;
 }
 
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? JSON5.parse(raw) : null;
 }
@@ -193,7 +208,7 @@ export async function initRepo({
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
   }
-  // TODO #7154
+  // TODO #22198
   config.repoId = repo.id!;
 
   config.project = repo.project!.name!;
@@ -202,14 +217,6 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-  const names = getProjectAndRepo(repository);
-  config.defaultMergeMethod = await azureHelper.getMergeMethod(
-    // TODO #7154
-    repo.id!,
-    names.project,
-    null,
-    defaultBranch
-  );
   config.mergeMethods = {};
   config.repoForceRebase = false;
 
@@ -218,7 +225,7 @@ export async function initRepo({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   const manualUrl = `${defaults.endpoint!}${encodeURIComponent(
     projectName
   )}/_git/${encodeURIComponent(repoName)}`;
@@ -297,6 +304,7 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  targetBranch,
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
@@ -329,14 +337,24 @@ export async function findPr({
   if (prsFiltered.length === 0) {
     return null;
   }
+  if (targetBranch && prsFiltered.length > 1) {
+    const pr = prsFiltered.find((item) => item.targetBranch === targetBranch);
+    if (pr) {
+      return pr;
+    }
+  }
   return prsFiltered[0];
 }
 
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  logger.debug(`getBranchPr(${branchName})`);
+export async function getBranchPr(
+  branchName: string,
+  targetBranch?: string
+): Promise<Pr | null> {
+  logger.debug(`getBranchPr(${branchName}, ${targetBranch})`);
   const existingPr = await findPr({
     branchName,
     state: 'open',
+    targetBranch,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -346,12 +364,12 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
   const branch = await azureApiGit.getBranch(
     config.repoId,
 
-    // TODO: fix undefined (#7154)
+    // TODO: fix undefined (#22198)
     getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   // only grab the latest statuses, it will group any by context
   return azureApiGit.getStatuses(
-    // TODO #7154
+    // TODO #22198
     branch.commit!.commitId!,
     config.repoId,
     undefined,
@@ -377,7 +395,7 @@ export async function getBranchStatusCheck(
   const res = await getStatusCheck(branchName);
   for (const check of res) {
     if (getGitStatusContextCombinedName(check.context) === context) {
-      // TODO #7154
+      // TODO #22198
       return azureToRenovateStatusMapping[check.state!] ?? 'yellow';
     }
   }
@@ -427,6 +445,20 @@ export async function getBranchStatus(
   return 'green';
 }
 
+async function getMergeStrategy(
+  targetRefName: string
+): Promise<GitPullRequestMergeStrategy> {
+  return (
+    config.mergeMethods[targetRefName] ??
+    (config.mergeMethods[targetRefName] = await azureHelper.getMergeMethod(
+      config.repoId,
+      config.project,
+      targetRefName,
+      config.defaultBranch
+    ))
+  );
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -457,20 +489,21 @@ export async function createPr({
     config.repoId
   );
   if (platformOptions?.usePlatformAutomerge) {
+    const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
-          // TODO #7154
+          // TODO #22198
           id: pr.createdBy!.id,
         },
         completionOptions: {
-          mergeStrategy: config.defaultMergeMethod,
+          mergeStrategy,
           deleteSourceBranch: true,
           mergeCommitMessage: title,
         },
       },
       config.repoId,
-      // TODO #7154
+      // TODO #22198
       pr.pullRequestId!
     );
   }
@@ -483,7 +516,7 @@ export async function createPr({
         isRequired: false,
       },
       config.repoId,
-      // TODO #7154
+      // TODO #22198
       pr.pullRequestId!,
       pr.createdBy!.id!
     );
@@ -495,7 +528,7 @@ export async function createPr({
           name: label,
         },
         config.repoId,
-        // TODO #7154
+        // TODO #22198
         pr.pullRequestId!
       )
     )
@@ -509,6 +542,7 @@ export async function updatePr({
   prBody: body,
   state,
   platformOptions,
+  targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -517,13 +551,19 @@ export async function updatePr({
     title,
   };
 
+  if (targetBranch) {
+    objToUpdate.targetRefName = getNewBranchName(targetBranch);
+  }
+
   if (body) {
     objToUpdate.description = max4000Chars(sanitize(body));
   }
 
   if (state === 'open') {
     await azureApiGit.updatePullRequest(
-      { status: PullRequestStatus.Active },
+      {
+        status: PullRequestStatus.Active,
+      },
       config.repoId,
       prNo
     );
@@ -540,7 +580,7 @@ export async function updatePr({
         isRequired: false,
       },
       config.repoId,
-      // TODO #7154
+      // TODO #22198
       pr.pullRequestId!,
       pr.createdBy!.id!
     );
@@ -566,7 +606,7 @@ export async function ensureComment({
   threads.forEach((thread) => {
     const firstCommentContent = thread.comments?.[0].content;
     if (
-      (topic && firstCommentContent?.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) === true ||
       (!topic && firstCommentContent === body)
     ) {
       threadIdFound = thread.id;
@@ -596,7 +636,7 @@ export async function ensureComment({
       config.repoId,
       number,
       threadIdFound,
-      // TODO #7154
+      // TODO #22198
       commentIdFound!
     );
     logger.debug(
@@ -684,7 +724,7 @@ export async function setBranchStatus({
   };
   await azureApiGit.createCommitStatus(
     statusToCreate,
-    // TODO #7154
+    // TODO #22198
     branch.commit!.commitId!,
     config.repoId
   );
@@ -700,21 +740,12 @@ export async function mergePr({
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
-  // TODO #7154
-  const mergeMethod =
-    config.mergeMethods[pr.targetRefName!] ??
-    (config.mergeMethods[pr.targetRefName!] = await azureHelper.getMergeMethod(
-      config.repoId,
-      config.project,
-      pr.targetRefName,
-      config.defaultBranch
-    ));
-
+  const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,
     completionOptions: {
-      mergeStrategy: mergeMethod,
+      mergeStrategy,
       deleteSourceBranch: true,
       mergeCommitMessage: pr.title,
     },
@@ -724,11 +755,10 @@ export async function mergePr({
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       pr.lastMergeSourceCommit?.commitId
-    } using mergeStrategy ${mergeMethod} (${
-      GitPullRequestMergeStrategy[mergeMethod]
+    } using mergeStrategy ${mergeStrategy} (${
+      GitPullRequestMergeStrategy[mergeStrategy]
     })`
   );
 
@@ -749,7 +779,7 @@ export async function mergePr({
         `Updated PR to closed status but change has not taken effect yet. Retrying...`
       );
 
-      await delay(sleepMs);
+      await setTimeout(sleepMs);
       pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
       isClosed = pr.status === PullRequestStatus.Completed;
     }
@@ -759,7 +789,7 @@ export async function mergePr({
         { pullRequestId, status: pr.status },
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
-          // TODO #7154
+          // TODO #22198
         }. However, it is ${PullRequestStatus[pr.status!]}.`
       );
     }
@@ -816,13 +846,13 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const repo = repos.filter((c) => c.id === config.repoId)[0];
   const requiredReviewerPrefix = 'required:';
 
-  // TODO #7154
+  // TODO #22198
   const teams = await azureApiCore.getTeams(repo.project!.id!);
   const members = await Promise.all(
     teams.map(
       async (t) =>
         await azureApiCore.getTeamMembersWithExtendedProperties(
-          // TODO #7154
+          // TODO #22198
           repo.project!.id!,
           t.id!
         )
@@ -844,7 +874,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
           reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
         ) {
           if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
-            // TODO #7154
+            // TODO #22198
             ids.push({
               id: m.identity.id!,
               name: reviewer,
@@ -866,7 +896,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
       }
       if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
         if (ids.filter((c) => c.id === t.id).length === 0) {
-          // TODO #7154
+          // TODO #22198
           ids.push({ id: t.id!, name: reviewer, isRequired });
         }
       }

@@ -55,8 +55,22 @@ function isVersionPointer(
   return hasKey('ref', obj);
 }
 
-function normalizeVersionPointer(versionPointer: string): string {
-  return versionPointer.replace(regEx(/[._]/g), '-');
+function normalizeAlias(alias: string): string {
+  return alias.replace(regEx(/[-_]/g), '.');
+}
+
+function findOriginalAlias(
+  versions: Record<string, GradleVersionPointerTarget>,
+  alias: string
+): string {
+  const normalizedAlias = normalizeAlias(alias);
+  for (const sectionKey of Object.keys(versions)) {
+    if (normalizeAlias(sectionKey) === normalizedAlias) {
+      return sectionKey;
+    }
+  }
+
+  return alias;
 }
 
 interface VersionExtract {
@@ -83,13 +97,12 @@ function extractVersion({
   versionSubContent: string;
 }): VersionExtract {
   if (isVersionPointer(version)) {
-    const parsedVersion = normalizeVersionPointer(version.ref);
-    // everything else is ignored
+    const originalAlias = findOriginalAlias(versions, version.ref);
     return extractLiteralVersion({
-      version: versions[parsedVersion],
+      version: versions[originalAlias],
       depStartIndex: versionStartIndex,
       depSubContent: versionSubContent,
-      sectionKey: parsedVersion,
+      sectionKey: originalAlias,
     });
   } else {
     return extractLiteralVersion({
@@ -113,7 +126,7 @@ function extractLiteralVersion({
   sectionKey: string;
 }): VersionExtract {
   if (!version) {
-    return { skipReason: 'no-version' };
+    return { skipReason: 'unspecified-version' };
   } else if (is.string(version)) {
     const fileReplacePosition =
       depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
@@ -151,7 +164,7 @@ function extractLiteralVersion({
     }
   }
 
-  return { skipReason: 'unknown-version' };
+  return { skipReason: 'unspecified-version' };
 }
 
 function extractDependency({
@@ -179,7 +192,7 @@ function extractDependency({
     if (!currentValue) {
       return {
         depName,
-        skipReason: 'no-version',
+        skipReason: 'unspecified-version',
       };
     }
     return {
@@ -210,11 +223,13 @@ function extractDependency({
     };
   }
   const versionRef = isVersionPointer(descriptor.version)
-    ? normalizeVersionPointer(descriptor.version.ref)
+    ? normalizeAlias(descriptor.version.ref)
     : null;
   if (isArtifactDescriptor(descriptor)) {
     const { group, name } = descriptor;
-    const groupName = is.nullOrUndefined(versionRef) ? group : versionRef; // usage of common variable should have higher priority than other values
+    const groupName = is.nullOrUndefined(versionRef)
+      ? group
+      : /* istanbul ignore next: hard to test */ versionRef; // usage of common variable should have higher priority than other values
     return {
       depName: `${group}:${name}`,
       groupName,
@@ -289,7 +304,7 @@ export function parseCatalog(
       dependency.skipReason = skipReason;
     }
     if (isVersionPointer(version) && dependency.commitMessageTopic) {
-      dependency.groupName = normalizeVersionPointer(version.ref);
+      dependency.groupName = normalizeAlias(version.ref);
       delete dependency.commitMessageTopic;
     }
 

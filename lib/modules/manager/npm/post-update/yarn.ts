@@ -24,9 +24,11 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { uniqueStrings } from '../../../../util/string';
 import { NpmDatasource } from '../../../datasource/npm';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function checkYarnrc(
   lockFileDir: string
@@ -98,13 +100,15 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades, lockFileDir),
+      await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility = yarnUpdate
-      ? yarnUpdate.newValue
-      : config.constraints?.yarn;
+    const yarnCompatibility =
+      (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
+      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+      getYarnVersionFromLock(await getYarnLock(lockFileName));
     const minYarnVersion =
       semver.validRange(yarnCompatibility) &&
       semver.minVersion(yarnCompatibility);
@@ -125,7 +129,10 @@ export async function generateLockFile(
       !!upgrades[0]?.managerData?.hasPackageManager;
 
     if (!isYarn1 && hasPackageManager) {
-      toolConstraints.push({ toolName: 'corepack' });
+      toolConstraints.push({
+        toolName: 'corepack',
+        constraint: config.constraints?.corepack,
+      });
     } else {
       toolConstraints.push(yarnTool);
       if (isYarn1 && minYarnVersion) {
@@ -198,7 +205,7 @@ export async function generateLockFile(
 
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
@@ -224,7 +231,7 @@ export async function generateLockFile(
         // `yarn up -R` updates to the latest release in each range
         commands.push(
           `yarn up -R ${lockUpdates
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             .map((update) => `${update.depName!}`)
             .filter(uniqueStrings)
             .map(quote)

@@ -73,7 +73,7 @@ async function generateBranchCache(
     let isBehindBase: boolean | undefined;
     let isConflicted: boolean | undefined;
     if (baseBranchSha && branchSha) {
-      const branchPr = await platform.getBranchPr(branchName);
+      const branchPr = await platform.getBranchPr(branchName, baseBranch);
       if (branchPr) {
         prNo = branchPr.number;
       }
@@ -98,14 +98,14 @@ async function generateBranchCache(
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
-    const branchFingerprint = branch.branchFingerprint;
+    const commitFingerprint = branch.commitFingerprint;
     const prCache = getPrCache(branchName);
 
     return {
       automerge,
       baseBranchSha,
       baseBranch,
-      branchFingerprint,
+      commitFingerprint,
       branchName,
       isBehindBase,
       isConflicted,

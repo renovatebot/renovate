@@ -42,7 +42,7 @@ export async function filterInternalChecks(
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
         versioning,
-        // TODO #7154
+        // TODO #22198
         currentVersion!,
         candidateRelease.version
       );
@@ -72,7 +72,7 @@ export async function filterInternalChecks(
         }
       }
 
-      // TODO #7154
+      // TODO #22198
       if (isActiveConfidenceLevel(minimumConfidence!)) {
         const confidenceLevel =
           (await getMergeConfidenceLevel(
@@ -82,7 +82,7 @@ export async function filterInternalChecks(
             newVersion,
             updateType!
           )) ?? 'neutral';
-        // TODO #7154
+        // TODO #22198
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.trace(
             { depName, check: 'minimumConfidence' },
@@ -113,6 +113,6 @@ export async function filterInternalChecks(
     }
   }
 
-  // TODO #7154
+  // TODO #22198
   return { release: release!, pendingChecks, pendingReleases };
 }

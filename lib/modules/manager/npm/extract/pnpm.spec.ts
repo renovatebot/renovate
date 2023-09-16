@@ -1,19 +1,24 @@
 import yaml from 'js-yaml';
 import { Fixtures } from '../../../../../test/fixtures';
-import { getFixturePath, logger } from '../../../../../test/util';
+import { getFixturePath, logger, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as fs from '../../../../util/fs';
+import type { PackageFile } from '../../types';
+import type { NpmManagerData } from '../types';
 import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
   findPnpmWorkspace,
-  getConstraints,
   getPnpmLock,
 } from './pnpm';
 
 describe('modules/manager/npm/extract/pnpm', () => {
   beforeAll(() => {
     GlobalConfig.set({ localDir: getFixturePath('pnpm-monorepo/', '..') });
+  });
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('.extractPnpmFilters()', () => {
@@ -67,6 +72,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
 
     it('detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found', async () => {
+      jest
+        .spyOn(fs, 'findLocalSiblingOrParent')
+        .mockResolvedValueOnce('pnpm-workspace.yaml');
       jest.spyOn(fs, 'localPathExists').mockResolvedValueOnce(false);
 
       const packageFile = 'package.json';
@@ -84,7 +92,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
   describe('.detectPnpmWorkspaces()', () => {
     it('uses pnpm workspaces', async () => {
-      const packageFiles = [
+      const packageFiles = partial<PackageFile<NpmManagerData>>([
         {
           packageFile: 'package.json',
           managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
@@ -92,80 +100,80 @@ describe('modules/manager/npm/extract/pnpm', () => {
         {
           packageFile: 'nested-packages/group/a/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/nested-group-a',
           },
         },
         {
           packageFile: 'nested-packages/group/b/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/nested-group-b',
           },
         },
         {
           packageFile: 'non-nested-packages/a/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/non-nested-a',
           },
         },
         {
           packageFile: 'non-nested-packages/b/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/non-nested-b',
           },
         },
         {
           packageFile: 'solo-package/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/solo',
           },
         },
         {
           packageFile: 'solo-package-leading-dot-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/solo-leading-dot-slash',
           },
         },
         {
           packageFile: 'solo-package-leading-double-dot-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/solo-leading-double-dot-slash',
           },
         },
         {
           packageFile: 'solo-package-trailing-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/solo-trailing-slash',
           },
         },
         {
           packageFile: 'test/test-package/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/test-package',
           },
         },
         {
           packageFile: 'tests/test-package2/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined as undefined | string,
+            pnpmShrinkwrap: undefined,
             packageJsonName: '@demo/test-package2',
           },
         },
-      ];
+      ]);
 
       await detectPnpmWorkspaces(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(
         packageFiles.every(
-          (packageFile) => packageFile.managerData.pnpmShrinkwrap
+          (packageFile) => packageFile.managerData?.pnpmShrinkwrap !== undefined
         )
       ).toBeTrue();
     });
@@ -196,12 +204,12 @@ describe('modules/manager/npm/extract/pnpm', () => {
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          managerData: { pnpmShrinkwrap: undefined as undefined | string },
+          managerData: { pnpmShrinkwrap: undefined },
         },
         {
           packageFile: 'not-matching/b/package.json',
           packageJsonName: '@not-matching/b',
-          managerData: { pnpmShrinkwrap: undefined as undefined | string },
+          managerData: { pnpmShrinkwrap: undefined },
         },
       ];
 
@@ -231,86 +239,34 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
   });
 
-  describe('getConstraints()', () => {
-    // no constraints
-    it.each([
-      [6.0, undefined, '>=8'],
-      [5.4, undefined, '>=7 <8'],
-      [5.3, undefined, '>=6 <7'],
-      [5.2, undefined, '>=5.10.0 <6'],
-      [5.1, undefined, '>=3.5.0 <5.9.3'],
-      [5.0, undefined, '>=3 <3.5.0'],
-    ])('adds constraints for %f', (lockfileVersion, constraints, expected) => {
-      expect(getConstraints(lockfileVersion, constraints)).toBe(expected);
-    });
-
-    // constraints present
-    it.each([
-      [6.0, '>=8.2.0', '>=8.2.0'],
-      [6.0, '>=7', '>=7 >=8'],
-
-      [5.4, '^7.2.0', '^7.2.0'],
-      [5.4, '<7.2.0', '<7.2.0 >=7'],
-      [5.4, '>7.2.0', '>7.2.0 <8'],
-      [5.4, '>=6', '>=6 >=7 <8'],
-
-      [5.3, '^6.0.0', '^6.0.0'],
-      [5.3, '<6.2.0', '<6.2.0 >=6'],
-      [5.3, '>6.2.0', '>6.2.0 <7'],
-      [5.3, '>=5', '>=5 >=6 <7'],
-
-      [5.2, '5.10.0', '5.10.0'],
-      [5.2, '>5.0.0 <5.18.0', '>5.0.0 <5.18.0 >=5.10.0'],
-      [5.2, '>5.10.0', '>5.10.0 <6'],
-      [5.2, '>=5', '>=5 >=5.10.0 <6'],
-
-      [5.1, '^4.0.0', '^4.0.0'],
-      [5.1, '<4', '<4 >=3.5.0'],
-      [5.1, '>=4', '>=4 <5.9.3'],
-      [5.1, '>=3', '>=3 >=3.5.0 <5.9.3'],
-
-      [5.0, '3.1.0', '3.1.0'],
-      [5.0, '^3.0.0', '^3.0.0 <3.5.0'],
-      [5.0, '>=3', '>=3 <3.5.0'],
-      [5.0, '>=2', '>=2 >=3 <3.5.0'],
-    ])('adds constraints for %f', (lockfileVersion, constraints, expected) => {
-      expect(getConstraints(lockfileVersion, constraints)).toBe(expected);
-    });
-  });
-
   describe('.getPnpmLock()', () => {
-    const readLocalFile = jest.spyOn(fs, 'readLocalFile');
-
     it('returns empty if failed to parse', async () => {
-      readLocalFile.mockResolvedValueOnce(undefined as never);
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(undefined as never);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(res.lockedVersionsWithPath).toBeUndefined();
     });
 
-    it('extracts', async () => {
+    it('extracts version from monorepo', async () => {
       const plocktest1Lock = Fixtures.get('pnpm-monorepo/pnpm-lock.yaml', '..');
-      readLocalFile.mockResolvedValueOnce(plocktest1Lock);
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(8);
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(11);
     });
 
-    it('logs when packagePath is invalid', async () => {
+    it('extracts version from normal repo', async () => {
       const plocktest1Lock = Fixtures.get(
         'lockfile-parsing/pnpm-lock.yaml',
         '..'
       );
-      readLocalFile.mockResolvedValueOnce(plocktest1Lock);
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(2);
-      expect(logger.logger.trace).toHaveBeenLastCalledWith(
-        'Invalid package path /sux-1.2.4'
-      );
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
     });
 
     it('returns empty if no deps', async () => {
-      readLocalFile.mockResolvedValueOnce('{}');
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce('{}');
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(res.lockedVersionsWithPath).toBeUndefined();
     });
   });
 });

@@ -2,7 +2,12 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseLinkHeader, parseUrl } from '../url';
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
+import type {
+  HttpOptions,
+  HttpRequestOptions,
+  HttpResponse,
+  InternalHttpOptions,
+} from './types';
 import { Http } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -21,7 +26,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GitlabHttpOptions
+    options?: InternalHttpOptions & GitlabHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     const opts = {
       baseUrl,

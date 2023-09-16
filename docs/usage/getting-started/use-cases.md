@@ -121,15 +121,15 @@ Renovate finds and updates internal dependencies just like external or Open Sour
 
 Renovate's automerge feature is really useful for internal dependencies where you can say "if it passes tests let's merge it".
 
-To learn more about "automerge" read the [key concepts, automerge](https://docs.renovatebot.com/key-concepts/automerge/) documentation.
+To learn more about "automerge" read the [key concepts, automerge](../key-concepts/automerge.md) documentation.
 
 #### Example of automerging internal dependencies
 
 We use these Renovate features to automerge an internal dependency:
 
 - [Git submodule support](https://docs.renovatebot.com/modules/manager/git-submodules/)
-- [`automerge`](https://docs.renovatebot.com/configuration-options/#automerge) set to `true`
-- [`automergeType`](https://docs.renovatebot.com/configuration-options/#automergetype) set to `branch`
+- [`automerge`](../configuration-options.md#automerge) set to `true`
+- [`automergeType`](../configuration-options.md#automergetype) set to `branch`
 
 ##### Background information
 
@@ -213,7 +213,7 @@ This also means that you might want a similar config for all of your repositorie
 You can use configuration "presets" to avoid duplicating your configuration across your repositories.
 
 Configuration presets are JSON configuration files which are committed to repositories and then referenced from others.
-Renovate includes over 100 built-in presets, like the default recommended `config:base` preset.
+Renovate includes over 100 built-in presets, like the default recommended `config:recommended` preset.
 
 The typical workflow for a company is:
 

@@ -45,6 +45,7 @@ export interface GraphqlOptions {
   limit?: number;
   cursor?: string | null;
   acceptHeader?: string;
+  token?: string;
 }
 
 export interface HttpOptions {
@@ -63,6 +64,15 @@ export interface HttpOptions {
 
   token?: string;
   memCache?: boolean;
+}
+
+export interface EtagCache<T = any> {
+  etag: string;
+  data: T;
+}
+
+export interface HttpRequestOptions<T = any> {
+  etagCache?: EtagCache<T>;
 }
 
 export interface InternalHttpOptions extends HttpOptions {

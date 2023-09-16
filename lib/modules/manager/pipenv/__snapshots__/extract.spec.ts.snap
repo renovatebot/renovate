@@ -68,7 +68,7 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pi
       "depName": "requests",
       "depType": "packages",
       "managerData": {},
-      "skipReason": "any-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": ">0.5.0",
@@ -105,14 +105,14 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pi
       "registryUrls": [
         "https://pypi.python.org/simple",
       ],
-      "skipReason": "any-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "*",
       "depName": "nose",
       "depType": "dev-packages",
       "managerData": {},
-      "skipReason": "any-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": ">=1.0,<3.0",

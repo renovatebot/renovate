@@ -12,7 +12,7 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 
@@ -21,13 +21,11 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 describe('modules/manager/cargo/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
@@ -210,17 +208,16 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
@@ -229,7 +226,6 @@ describe('modules/manager/cargo/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
           },
         },
@@ -272,7 +268,6 @@ describe('modules/manager/cargo/artifacts', () => {
           cwd: '/tmp/github/some/repo',
           encoding: 'utf-8',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
           },
         },
@@ -282,7 +277,6 @@ describe('modules/manager/cargo/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
           },
         },

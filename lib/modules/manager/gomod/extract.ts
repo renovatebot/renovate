@@ -49,7 +49,10 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
   };
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
   try {
@@ -106,7 +109,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting go modules');
+    logger.warn({ err, packageFile }, 'Error extracting go modules');
   }
   if (!deps.length) {
     return null;

@@ -16,7 +16,7 @@ When Renovate finds Angular-style commits, Renovate creates commit messages and 
 
 By default, Renovate uses the `chore` prefix.
 
-If you extend from `config:base` then Renovate:
+If you extend from `config:recommended` then Renovate:
 
 - still defaults to the `chore` prefix
 - uses the `fix` prefix for npm production dependencies

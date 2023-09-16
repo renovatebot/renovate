@@ -76,5 +76,8 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
-  return quickStringify(JSON5.parse(json)) ?? null;
+  return (
+    quickStringify(JSON5.parse(json)) ??
+    /* istanbul ignore next: should never happen */ null
+  );
 }

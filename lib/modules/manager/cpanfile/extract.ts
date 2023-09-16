@@ -3,7 +3,7 @@ import { parse } from './parser';
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  _packageFile?: string
 ): PackageFileContent | null {
   const result = parse(content);
   if (!result?.deps.length) {

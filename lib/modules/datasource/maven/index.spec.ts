@@ -176,7 +176,6 @@ describe('modules/datasource/maven/index', () => {
       matchHost: 'custom.registry.renovatebot.com',
       token: '123test',
     });
-    jest.resetAllMocks();
   });
 
   afterEach(() => {

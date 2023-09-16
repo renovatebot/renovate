@@ -10,10 +10,10 @@ import type {
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
-  logger.trace('ansible.extractPackageFile()');
+  logger.trace(`ansible.extractPackageFile(${packageFile})`);
   let deps: PackageDependency[] = [];
   const re = regEx(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
   for (const line of content.split(newlineRegex)) {

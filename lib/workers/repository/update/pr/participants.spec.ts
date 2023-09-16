@@ -1,12 +1,12 @@
-import { mocked, platform } from '../../../../../test/util';
+import { mocked, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';
-import * as _util from '../../../../util';
+import * as _util from '../../../../util/sample';
 import * as _codeOwners from './code-owners';
 import { addParticipants } from './participants';
 
-jest.mock('../../../../util');
+jest.mock('../../../../util/sample');
 const util = mocked(_util);
 
 jest.mock('./code-owners');
@@ -21,11 +21,10 @@ describe('workers/repository/update/pr/participants', () => {
     reviewersSampleSize: null,
   } as never;
 
-  const pr: Pr = { number: 123 } as never;
+  const pr = partial<Pr>({ number: 123 });
 
   beforeEach(() => {
     GlobalConfig.reset();
-    jest.resetAllMocks();
   });
 
   describe('assignees', () => {
@@ -54,7 +53,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('supports dry run assignee adding', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await addParticipants(config, pr);
       expect(platform.addAssignees).not.toHaveBeenCalled();
     });
@@ -91,7 +90,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('supports dry run assignee adding', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await addParticipants(config, pr);
       expect(platform.addReviewers).not.toHaveBeenCalled();
     });

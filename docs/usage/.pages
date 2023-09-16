@@ -30,7 +30,6 @@ nav:
       - 'Semantic Commit Messages': 'semantic-commits.md'
       - 'Noise Reduction': 'noise-reduction.md'
   - Included Presets:
-      - 'Compatibility Presets': 'presets-compatibility.md'
       - 'Default Presets': 'presets-default.md'
       - 'Docker Presets': 'presets-docker.md'
       - 'Full Config Presets': 'presets-config.md'

@@ -47,7 +47,7 @@ function interpretLine(
 function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
   const dep = dependency;
   if (dependency.managerData.version === null) {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
     return false;
   }
   const source = dep.managerData.src ?? '';

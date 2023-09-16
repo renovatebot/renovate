@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import type { PagedResult } from '../../modules/platform/bitbucket/types';
 import { parseUrl, resolveBaseUrl } from '../url';
-import type { HttpOptions, HttpResponse } from './types';
+import type { HttpOptions, HttpRequestOptions, HttpResponse } from './types';
 import { Http } from '.';
 
 const MAX_PAGES = 100;
@@ -26,7 +26,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
   protected override async request<T>(
     path: string,
-    options?: BitbucketHttpOptions
+    options?: BitbucketHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
 
@@ -34,7 +34,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
     // istanbul ignore if: this should never happen
     if (is.nullOrUndefined(resolvedURL)) {
-      logger.error(`Bitbucket: cannot parse path ${path}`);
+      logger.error({ path }, 'Bitbucket: cannot parse path');
       throw new Error(`Bitbucket: cannot parse path ${path}`);
     }
 
@@ -53,7 +53,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
       while (is.nonEmptyString(nextURL) && page <= MAX_PAGES) {
         const nextResult = await super.request<PagedResult<T>>(
           nextURL,
-          options
+          options as BitbucketHttpOptions
         );
 
         resultBody.values.push(...nextResult.body.values);
@@ -64,8 +64,12 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
-      resultBody.size = page > MAX_PAGES ? undefined : resultBody.values.length;
-      resultBody.next = page > MAX_PAGES ? undefined : nextURL;
+      resultBody.size =
+        page <= MAX_PAGES
+          ? resultBody.values.length
+          : /* istanbul ignore next */ undefined;
+      resultBody.next =
+        page <= MAX_PAGES ? nextURL : /* istanbul ignore next */ undefined;
     }
 
     return result;

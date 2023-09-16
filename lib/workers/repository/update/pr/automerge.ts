@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
@@ -90,7 +90,7 @@ export async function checkAutoMerge(
     };
   }
   if (automergeType === 'pr-comment') {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.debug(`Applying automerge comment: ${automergeComment!}`);
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
@@ -119,7 +119,7 @@ export async function checkAutoMerge(
   // Let's merge this
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.info(
       `DRY-RUN: Would merge PR #${
         pr.number
@@ -130,7 +130,7 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'DryRun',
     };
   }
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
   const res = await platform.mergePr({
     branchName,

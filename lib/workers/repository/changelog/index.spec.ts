@@ -1,7 +1,7 @@
 import { mockedFunction, partial } from '../../../../test/util';
 import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '../update/pr/changelog';
-import { embedChangelogs, needsChangelogs } from '.';
+import { embedChangelogs } from '.';
 
 jest.mock('../update/pr/changelog');
 
@@ -26,24 +26,5 @@ describe('workers/repository/changelog/index', () => {
       { logJSON: { hasReleaseNotes: true } },
       { logJSON: null },
     ]);
-  });
-
-  it('needsChangelogs', () => {
-    expect(needsChangelogs(partial<BranchUpgradeConfig>())).toBeFalse();
-    expect(
-      needsChangelogs(
-        partial<BranchUpgradeConfig>({
-          commitBody: '{{#if logJSON.hasReleaseNotes}}has changelog{{/if}}',
-        })
-      )
-    ).toBeFalse();
-    expect(
-      needsChangelogs(
-        partial<BranchUpgradeConfig>({
-          commitBody: '{{#if logJSON.hasReleaseNotes}}has changelog{{/if}}',
-        }),
-        ['commitBody']
-      )
-    ).toBeTrue();
   });
 });

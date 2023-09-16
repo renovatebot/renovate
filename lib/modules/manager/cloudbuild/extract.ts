@@ -4,7 +4,10 @@ import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     // TODO: fix types
@@ -29,12 +32,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug(
-        { err },
+        { err, packageFile },
         'YAML exception extracting Docker images from a Cloud Build configuration file.'
       );
     } else {
-      logger.warn(
-        { err },
+      logger.debug(
+        { err, packageFile },
         'Error extracting Docker images from a Cloud Build configuration file.'
       );
     }

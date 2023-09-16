@@ -1,11 +1,18 @@
-name: 'Code scanning - action'
+name: 'Code scanning'
 
 on:
   push:
     branches: [main]
+
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
   schedule:
     - cron: '0 13 * * 1'
 
@@ -19,10 +26,10 @@ permissions:
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.draft != true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Delete fixtures to suppress false positives
         run: |
@@ -30,7 +37,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@29b1f65c5e92e24fe6b6647da1eaabe529cec70f # v2.3.3
+        uses: github/codeql-action/init@04daf014b50eaf774287bf3f0f1869d4b4c4b913 # v2.21.7
         with:
           languages: javascript
 
@@ -40,7 +47,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        uses: github/codeql-action/autobuild@29b1f65c5e92e24fe6b6647da1eaabe529cec70f # v2.3.3
+        uses: github/codeql-action/autobuild@04daf014b50eaf774287bf3f0f1869d4b4c4b913 # v2.21.7
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
@@ -54,4 +61,4 @@ jobs:
       #   make release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@29b1f65c5e92e24fe6b6647da1eaabe529cec70f # v2.3.3
+        uses: github/codeql-action/analyze@04daf014b50eaf774287bf3f0f1869d4b4c4b913 # v2.21.7

@@ -39,12 +39,13 @@ export interface BranchUpgradeConfig
   currentDigestShort?: string;
   currentValue?: string;
   depIndex?: number;
+
+  displayPending?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
-  language?: string;
   manager: string;
   packageFile?: string;
   lockFile?: string;
@@ -126,7 +127,7 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
-  branchFingerprint?: string;
+  commitFingerprint?: string;
   skipBranchUpdate?: boolean;
 }
 

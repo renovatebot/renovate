@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
@@ -26,6 +26,11 @@ describe('modules/manager/pep621/extract', () => {
     it('should return dependencies for valid content', function () {
       const result = extractPackageFile(pdmPyProject, 'pyproject.toml');
 
+      expect(result).toMatchObject({
+        extractedConstraints: {
+          python: '>=3.7',
+        },
+      });
       const dependencies = result?.deps.filter(
         (dep) => dep.depType === 'project.dependencies'
       );
@@ -35,7 +40,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'blinker',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
         },
         {
           packageName: 'packaging',
@@ -63,7 +68,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'pyproject-hooks',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
         },
         {
           packageName: 'unearth',
@@ -105,7 +110,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'typing-extensions',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
         },
         {
           packageName: 'importlib-metadata',
@@ -131,7 +136,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'pytest-mock',
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           depName: 'pytest/pytest-mock',
         },
       ]);
@@ -144,7 +149,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'pdm',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           depName: 'test/pdm',
         },
         {
@@ -158,7 +163,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'tox',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           depName: 'tox/tox',
         },
         {
@@ -180,7 +185,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'blinker',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',

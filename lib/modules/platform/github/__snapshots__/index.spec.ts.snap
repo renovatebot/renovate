@@ -111,7 +111,7 @@ exports[`modules/platform/github/index initRepo should squash 1`] = `
 }
 `;
 
-exports[`modules/platform/github/index initRepo should update fork when using forkToken 1`] = `
+exports[`modules/platform/github/index initRepo should update fork when using forkToken and forkOrg 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,

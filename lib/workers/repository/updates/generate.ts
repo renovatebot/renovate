@@ -9,6 +9,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
+import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
 
@@ -83,6 +84,8 @@ export function generateBranchConfig(
   const toVersions: string[] = [];
   const toValues = new Set<string>();
   for (const upg of branchUpgrades) {
+    upg.recreateClosed = upg.recreateWhen === 'always';
+
     if (upg.currentDigest) {
       upg.currentDigestShort =
         upg.currentDigestShort ??
@@ -102,6 +105,10 @@ export function generateBranchConfig(
     } else if (!upg.isLockFileMaintenance) {
       upg.displayFrom = upg.currentValue;
       upg.displayTo = upg.newValue;
+    }
+
+    if (upg.isLockFileMaintenance) {
+      upg.recreateClosed = upg.recreateWhen !== 'never';
     }
     upg.displayFrom ??= '';
     upg.displayTo ??= '';
@@ -178,14 +185,14 @@ export function generateBranchConfig(
       logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (
       newValue.length > 1 &&
       (upgrade.isDigest || upgrade.isPinDigest)
     ) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
@@ -359,7 +366,7 @@ export function generateBranchConfig(
         }
 
         return acc;
-      }, {} as Record<string, boolean>)
+      }, {})
     );
   }
 
@@ -408,6 +415,15 @@ export function generateBranchConfig(
       table.push(row);
     }
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
+  }
+  const additionalReviewers = uniq(
+    config.upgrades
+      .map((upgrade) => upgrade.additionalReviewers)
+      .flat()
+      .filter(is.nonEmptyString)
+  );
+  if (additionalReviewers.length > 0) {
+    config.additionalReviewers = additionalReviewers;
   }
   return config;
 }

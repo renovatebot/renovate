@@ -1,7 +1,7 @@
-import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalDirectory } from '../../../util/fs';
+import { minimatch } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
 import { HermitDatasource } from '../../datasource/hermit';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -14,12 +14,12 @@ const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
  * and looking for .{packageName}-{version}.pkg
  */
 export async function extractPackageFile(
-  content: string,
-  filename: string
+  _content: string,
+  packageFile: string
 ): Promise<PackageFileContent | null> {
-  logger.trace('hermit.extractPackageFile()');
+  logger.trace(`hermit.extractPackageFile(${packageFile})`);
   const dependencies = [] as PackageDependency[];
-  const packages = await listHermitPackages(filename);
+  const packages = await listHermitPackages(packageFile);
 
   if (!packages?.length) {
     return null;
@@ -46,18 +46,18 @@ export async function extractPackageFile(
  * listHermitPackages will fetch all installed packages from the bin folder
  */
 async function listHermitPackages(
-  hermitFile: string
+  packageFile: string
 ): Promise<HermitListItem[] | null> {
   logger.trace('hermit.listHermitPackages()');
-  const hermitFolder = upath.dirname(hermitFile);
+  const hermitFolder = upath.dirname(packageFile);
 
   let files: string[] = [];
 
   try {
     files = await readLocalDirectory(hermitFolder);
-  } catch (e) {
+  } catch (err) {
     logger.debug(
-      { hermitFolder, err: e },
+      { hermitFolder, err, packageFile },
       'error listing hermit package references'
     );
     return null;
@@ -68,7 +68,7 @@ async function listHermitPackages(
   const out = [] as HermitListItem[];
 
   for (const f of files) {
-    if (!minimatch(f, '.*.pkg')) {
+    if (!minimatch('.*.pkg').match(f)) {
       continue;
     }
 

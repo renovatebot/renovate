@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -12,8 +13,7 @@ import { updateArtifacts } from '.';
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
-jest.mock('../../platform');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 const datasource = mocked(_datasource);
 
@@ -26,11 +26,11 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 describe('modules/manager/cocoapods/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
     // can't be mocked
@@ -252,16 +252,15 @@ describe('modules/manager/cocoapods/artifacts', () => {
       config,
     });
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool ruby 3.1.0' +
           ' && ' +

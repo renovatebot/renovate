@@ -104,6 +104,9 @@ zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
 ktlint 0.48.1
+yamlfmt 0.9.0
+typos 1.16.1
+steampipe 0.20.10
 dummy 1.2.3
 `
       );
@@ -509,8 +512,62 @@ dummy 1.2.3
             depName: 'ktlint',
           },
           {
+            currentValue: '0.9.0',
+            datasource: 'github-releases',
+            packageName: 'google/yamlfmt',
+            depName: 'yamlfmt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.16.1',
+            datasource: 'github-releases',
+            packageName: 'crate-ci/typos',
+            depName: 'typos',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.20.10',
+            datasource: 'github-releases',
+            packageName: 'turbot/steampipe',
+            depName: 'steampipe',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             depName: 'dummy',
             skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('can handle multiple tools with indented versions in one file', () => {
+      const res = extractPackageFile(
+        codeBlock`
+adr-tools 3.0.0
+argocd    2.5.4
+awscli    2.8.6
+`
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '3.0.0',
+            datasource: 'github-tags',
+            packageName: 'npryce/adr-tools',
+            depName: 'adr-tools',
+          },
+          {
+            currentValue: '2.5.4',
+            datasource: 'github-releases',
+            packageName: 'argoproj/argo-cd',
+            depName: 'argocd',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '2.8.6',
+            datasource: 'github-tags',
+            packageName: 'aws/aws-cli',
+            depName: 'awscli',
           },
         ],
       });
@@ -540,8 +597,8 @@ dummy 1.2.3
     });
 
     it('can handle java jre / jdk', () => {
-      const jdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
-      expect(jdkRes).toEqual({
+      const adoptOpenJdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
+      expect(adoptOpenJdkRes).toEqual({
         deps: [
           {
             currentValue: '16.0.0+36',
@@ -551,8 +608,32 @@ dummy 1.2.3
           },
         ],
       });
-      const jreRes = extractPackageFile('java adoptopenjdk-jre-16.0.0+36');
-      expect(jreRes).toEqual({
+      const adoptOpenJreRes = extractPackageFile(
+        'java adoptopenjdk-jre-16.0.0+36'
+      );
+      expect(adoptOpenJreRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jre',
+          },
+        ],
+      });
+      const temurinJdkRes = extractPackageFile('java temurin-16.0.0+36');
+      expect(temurinJdkRes).toEqual({
+        deps: [
+          {
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jdk',
+          },
+        ],
+      });
+      const temurinJreRes = extractPackageFile('java temurin-jre-16.0.0+36');
+      expect(temurinJreRes).toEqual({
         deps: [
           {
             currentValue: '16.0.0+36',

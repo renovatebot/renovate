@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/cpanfile/extract', () => {
   describe('extractPackageFile()', () => {
@@ -59,7 +59,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Try::Tiny',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             datasource: 'cpan',
@@ -124,7 +124,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Crypt::URandom',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             datasource: 'cpan',
@@ -154,7 +154,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Authen::Simple::Passwd',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
         ],
       });
@@ -228,7 +228,7 @@ describe('modules/manager/cpanfile/extract', () => {
               datasource: 'cpan',
               depName: 'Test::Requires',
               depType: 'test',
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
           ],
         });
@@ -251,13 +251,13 @@ describe('modules/manager/cpanfile/extract', () => {
               datasource: 'cpan',
               depName: 'FCGI',
               depType: 'runtime',
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               datasource: 'cpan',
               depName: 'FCGI::ProcManager',
               depType: 'runtime',
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
           ],
         });

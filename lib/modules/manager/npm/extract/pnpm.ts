@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import { load } from 'js-yaml';
-import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -11,9 +10,8 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
-import { regEx } from '../../../../util/regex';
 import type { PackageFile } from '../../types';
-import type { PnpmLockFile } from '../post-update/types';
+import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
 import type { LockFile, PnpmWorkspaceFile } from './types';
 
@@ -25,7 +23,7 @@ export async function extractPnpmFilters(
   fileName: string
 ): Promise<string[] | undefined> {
   try {
-    // TODO #7154
+    // TODO #22198
     const contents = load((await readLocalFile(fileName, 'utf8'))!, {
       json: true,
     }) as PnpmWorkspaceFile;
@@ -101,7 +99,7 @@ export async function detectPnpmWorkspaces(
     }
 
     // search for corresponding pnpm workspace
-    // TODO #7154
+    // TODO #22198
     const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
     if (pnpmWorkspace === null) {
       continue;
@@ -111,7 +109,7 @@ export async function detectPnpmWorkspaces(
     // check if package matches workspace filter
     if (!packagePathCache.has(workspaceYamlPath)) {
       const filters = await extractPnpmFilters(workspaceYamlPath);
-      const { localDir } = GlobalConfig.get();
+      const localDir = GlobalConfig.get('localDir');
       const packages = await findPackages(
         upath.dirname(upath.join(localDir, workspaceYamlPath)),
         {
@@ -161,29 +159,10 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       ? lockParsed.lockfileVersion
       : parseFloat(lockParsed.lockfileVersion);
 
-    const lockedVersions: Record<string, string> = {};
-    const packagePathRegex = regEx(
-      /^\/(?<packageName>.+)(?:@|\/)(?<version>[^/@]+)$/
-    ); // eg. "/<packageName>(@|/)<version>"
+    const lockedVersions = getLockedVersions(lockParsed);
 
-    for (const packagePath of Object.keys(lockParsed.packages ?? {})) {
-      const result = packagePath.match(packagePathRegex);
-      if (!result?.groups) {
-        logger.trace(`Invalid package path ${packagePath}`);
-        continue;
-      }
-
-      const packageName = result.groups.packageName;
-      const version = result.groups.version;
-      logger.trace({
-        packagePath,
-        packageName,
-        version,
-      });
-      lockedVersions[packageName] = version;
-    }
     return {
-      lockedVersions,
+      lockedVersionsWithPath: lockedVersions,
       lockfileVersion,
     };
   } catch (err) {
@@ -192,100 +171,54 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
   }
 }
 
-export function getConstraints(
-  lockfileVersion: number,
-  constraints?: string
-): string {
-  let newConstraints = constraints;
+function getLockedVersions(
+  lockParsed: PnpmLockFile
+): Record<string, Record<string, Record<string, string>>> {
+  const lockedVersions: Record<
+    string,
+    Record<string, Record<string, string>>
+  > = {};
 
-  // find matching lockfileVersion and use its constraints
-  // if no match found use lockfileVersion 5
-  // lockfileVersion 5 is the minimum version required to generate the pnpm-lock.yaml file
-  const { lowerBound, upperBound, lowerConstraint, upperConstraint } =
-    lockToPnpmVersionMapping.find(
-      (m) => m.lockfileVersion === lockfileVersion
-    ) ?? {
-      lockfileVersion: 5.0,
-      lowerBound: '2.24.0',
-      upperBound: '3.5.0',
-      lowerConstraint: '>=3',
-      upperConstraint: '<3.5.0',
-    };
-
-  // inorder to ensure that the constraint doesn't allow any pnpm versions that can't generate the extracted lockfileVersion
-  // compare the current constraint to the lowerBound and upperBound of the lockfileVersion
-  // if the current constraint is not comaptible, add the lowerConstraint and upperConstraint, whichever is needed
-  if (newConstraints) {
-    // if constraint satisfies versions lower than lowerBound add the lowerConstraint to narrow the range
-    if (semver.satisfies(lowerBound, newConstraints)) {
-      newConstraints += ` ${lowerConstraint}`;
-    }
-
-    // if constraint satisfies versions higher than upperBound add the upperConstraint to narrow the range
-    if (
-      upperBound &&
-      upperConstraint &&
-      semver.satisfies(upperBound, newConstraints)
-    ) {
-      newConstraints += ` ${upperConstraint}`;
+  // monorepo
+  if (is.nonEmptyObject(lockParsed.importers)) {
+    for (const [importer, imports] of Object.entries(lockParsed.importers)) {
+      lockedVersions[importer] = getLockedDependencyVersions(imports);
     }
   }
-  // if no constraint is present, add the lowerConstraint and upperConstraint corresponding to the lockfileVersion
+  // normal repo
   else {
-    newConstraints = `${lowerConstraint}${
-      upperConstraint ? ` ${upperConstraint}` : ''
-    }`;
+    lockedVersions['.'] = getLockedDependencyVersions(lockParsed);
   }
 
-  return newConstraints;
+  return lockedVersions;
 }
 
-/**
- pnpm lockfiles have corresponding version numbers called "lockfileVersion"
- each lockfileVersion can only be generated by a certain pnpm version ranges
- eg. lockfileVersion: 5.4 can only be generated by pnpm version >=7 && <8
- official list can be found here : https:github.com/pnpm/spec/tree/master/lockfile
- we use the mapping present below to find the compatible pnpm version range for a given lockfileVersion
+function getLockedDependencyVersions(
+  obj: PnpmLockFile | Record<string, PnpmDependencySchema>
+): Record<string, Record<string, string>> {
+  const dependencyTypes = [
+    'dependencies',
+    'devDependencies',
+    'optionalDependencies',
+  ] as const;
 
- the various terms used in the mapping are explained below:
- lowerConstriant : lowest pnpm version that can generate the lockfileVersion
- upperConstraint : highest pnpm version that can generate the lockfileVersion
- lowerBound      : highest pnpm version that is less than the lowerConstraint
- upperBound      : lowest pnpm version that is greater than upperConstraint
+  const res: Record<string, Record<string, string>> = {};
+  for (const depType of dependencyTypes) {
+    res[depType] = {};
+    for (const [pkgName, versionCarrier] of Object.entries(
+      obj[depType] ?? {}
+    )) {
+      let version: string;
+      if (is.object(versionCarrier)) {
+        version = versionCarrier['version'];
+      } else {
+        version = versionCarrier;
+      }
 
- For handling future lockfileVersions, we need to:
- 1. add a upperBound and upperConstraint to the current lastest lockfileVersion
- 2. add an object for the new lockfileVersion with lowerBound and lowerConstraint
- */
+      const pkgVersion = version.split('(')[0].trim();
+      res[depType][pkgName] = pkgVersion;
+    }
+  }
 
-const lockToPnpmVersionMapping = [
-  { lockfileVersion: 6.0, lowerBound: '7.32.0', lowerConstraint: '>=8' },
-  {
-    lockfileVersion: 5.4,
-    lowerBound: '6.35.1',
-    upperBound: '8.0.0',
-    lowerConstraint: '>=7',
-    upperConstraint: '<8',
-  },
-  {
-    lockfileVersion: 5.3,
-    lowerBound: '5.18.10',
-    upperBound: '7.0.0',
-    lowerConstraint: '>=6',
-    upperConstraint: '<7',
-  },
-  {
-    lockfileVersion: 5.2,
-    lowerBound: '5.9.3',
-    upperBound: '5.18.10',
-    lowerConstraint: '>=5.10.0',
-    upperConstraint: '<6',
-  },
-  {
-    lockfileVersion: 5.1,
-    lowerBound: '3.4.1',
-    upperBound: '5.9.3',
-    lowerConstraint: '>=3.5.0',
-    upperConstraint: '<5.9.3',
-  },
-];
+  return res;
+}

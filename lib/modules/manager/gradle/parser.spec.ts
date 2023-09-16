@@ -435,8 +435,8 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'} | ${'kotlin("foo", baz)'}               | ${{ ...output, groupName: 'baz' }}
         ${'baz = "1.2.3"'} | ${'kotlin("foo", version = baz)'}     | ${output}
         ${'baz = "1.2.3"'} | ${'kotlin("foo", property("baz"))'}   | ${output}
-        ${'baz = "1.2.3"'} | ${'kotlin("foo", "${baz}456")'}       | ${{ skipReason: 'unknown-version' }}
-        ${'baz = "1.2.3"'} | ${'kotlin("foo", baz + "456")'}       | ${{ skipReason: 'unknown-version' }}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", "${baz}456")'}       | ${{ skipReason: 'unspecified-version' }}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", baz + "456")'}       | ${{ skipReason: 'unspecified-version' }}
         ${''}              | ${'kotlin("foo", some)'}              | ${null}
         ${''}              | ${'kotlin(["foo", "1.2.3"])'}         | ${null}
         ${''}              | ${'kotlin("foo", "1.2.3", "4.5.6")'}  | ${null}
@@ -458,7 +458,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'some = "foo"'}  | ${'group: some, name: some, version: "1.2.3"'}                                    | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'group: "${some}", name: "${some}", version: "1.2.3"'}                          | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: "${baz}"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: "${baz}456"'}                              | ${{ depName: 'foo:bar', skipReason: 'unknown-version' }}
+        ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: "${baz}456"'}                              | ${{ depName: 'foo:bar', skipReason: 'unspecified-version' }}
         ${''}              | ${'(group: "foo", name: "bar", version: "1.2.3", classifier: "sources")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${''}              | ${'(group: "foo", name: "bar", version: "1.2.3") {exclude module: "spring-jcl"}'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${''}              | ${"implementation platform(group: 'foo', name: 'bar', version: '1.2.3')"}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
@@ -468,8 +468,8 @@ describe('modules/manager/gradle/parser', () => {
         ${'some = "foo"'}  | ${'(group = "${some}", name = "${some}", version = "1.2.3")'}                     | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'(group = "${some}" + some, name = some + "bar" + some, version = "1.2.3")'}    | ${{ depName: 'foofoo:foobarfoo', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = "${baz}")'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
-        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = "${baz}456")'}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3456', skipReason: 'unknown-version' }}
-        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = baz + "456")'}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3456', skipReason: 'unknown-version' }}
+        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = "${baz}456")'}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3456', skipReason: 'unspecified-version' }}
+        ${'baz = "1.2.3"'} | ${'(group = "foo", name = "bar", version = baz + "456")'}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3456', skipReason: 'unspecified-version' }}
         ${''}              | ${'(group = "foo", name = "bar", version = "1.2.3", changing: true)'}             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
@@ -563,16 +563,16 @@ describe('modules/manager/gradle/parser', () => {
         ${''}               | ${'id "foo".version("1.2.3")'}             | ${null}
         ${''}               | ${'id("foo.bar") version("1.2.3")'}        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id("foo.bar") version "1.2.3"'}         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
+        ${''}               | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'id "foo.bar" version "x${ab}cd"'}       | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
-        ${''}               | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
-        ${''}               | ${'id("foo.bar") version "x${ab}cd"'}      | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
-        ${''}               | ${'id("foo.bar") version "1" + "2.3"'}     | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
-        ${''}               | ${'id("foo.bar") version property("qux")'} | ${{ depName: 'foo.bar', skipReason: 'unknown-version' }}
+        ${''}               | ${'id "foo.bar" version "x${ab}cd"'}       | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
+        ${''}               | ${'id("foo.bar") version "$baz"'}          | ${{ depName: 'foo.bar', skipReason: 'unspecified-version', currentValue: 'baz' }}
+        ${''}               | ${'id("foo.bar") version "x${ab}cd"'}      | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
+        ${''}               | ${'id("foo.bar") version "1" + "2.3"'}     | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
+        ${''}               | ${'id("foo.bar") version property("qux")'} | ${{ depName: 'foo.bar', skipReason: 'unspecified-version' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version property("baz")'} | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
-        ${''}               | ${'id "foo.bar" version baz'}              | ${{ depName: 'foo.bar', currentValue: 'baz', skipReason: 'unknown-version' }}
+        ${''}               | ${'id "foo.bar" version baz'}              | ${{ depName: 'foo.bar', currentValue: 'baz', skipReason: 'unspecified-version' }}
         ${'baz = "1.2.3"'}  | ${'id "foo.bar" version baz'}              | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar") version baz'}             | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'}  | ${'id("foo.bar").version(baz)'}            | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
@@ -709,8 +709,8 @@ describe('modules/manager/gradle/parser', () => {
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz)'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version("${baz}")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(property("baz"))'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version("${baz}xy")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3xy', skipReason: 'unknown-version' }}
-      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz + ".45")'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3.45', skipReason: 'unknown-version' }}
+      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version("${baz}xy")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3xy', skipReason: 'unspecified-version' }}
+      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz + ".45")'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3.45', skipReason: 'unspecified-version' }}
       ${'group = "foo"; artifact = "bar"'}          | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}", "${b}").version("1.2.3")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'library("foo.bar", property("f"), "${b}").version(v)'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
@@ -756,7 +756,7 @@ describe('modules/manager/gradle/parser', () => {
       const { deps } = parseGradle(content);
       const [res] = deps;
       const idx = content
-        // TODO #7154
+        // TODO #22198
         .slice(res.managerData!.fileReplacePosition)
         .indexOf('1.2.3');
       expect(idx).toBe(0);
@@ -766,7 +766,7 @@ describe('modules/manager/gradle/parser', () => {
       const content = Fixtures.get('build.gradle.example1');
       const { deps } = parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
-        // TODO #7154
+        // TODO #22198
         content.slice(managerData!.fileReplacePosition).indexOf(currentValue!)
       );
       expect(replacementIndices.every((idx) => idx === 0)).toBeTrue();
@@ -919,8 +919,8 @@ describe('modules/manager/gradle/parser', () => {
       ${''}              | ${'spotbugs { toolVersion = "1.2.3" }'}                          | ${{ depName: 'spotbugs', packageName: GRADLE_PLUGINS['spotbugs'][1], currentValue: '1.2.3' }}
       ${''}              | ${'pmd { toolVersion = "@@@" }'}                                 | ${null}
       ${''}              | ${'pmd { toolVersion = "${baz}" }'}                              | ${null}
-      ${'baz = "1.2.3"'} | ${'pmd { toolVersion = "${baz}.456" }'}                          | ${{ depName: 'pmd', currentValue: '1.2.3.456', skipReason: 'unknown-version' }}
-      ${'baz = "1.2.3"'} | ${'pmd { toolVersion = baz + ".456" }'}                          | ${{ depName: 'pmd', currentValue: '1.2.3.456', skipReason: 'unknown-version' }}
+      ${'baz = "1.2.3"'} | ${'pmd { toolVersion = "${baz}.456" }'}                          | ${{ depName: 'pmd', currentValue: '1.2.3.456', skipReason: 'unspecified-version' }}
+      ${'baz = "1.2.3"'} | ${'pmd { toolVersion = baz + ".456" }'}                          | ${{ depName: 'pmd', currentValue: '1.2.3.456', skipReason: 'unspecified-version' }}
       ${''}              | ${'pmd { [toolVersion = "6.36.0"] }'}                            | ${null}
       ${''}              | ${'unknown { toolVersion = "1.2.3" }'}                           | ${null}
       ${''}              | ${'composeOptions { kotlinCompilerExtensionVersion = "1.2.3" }'} | ${{ depName: 'composeOptions', packageName: GRADLE_PLUGINS['composeOptions'][1], currentValue: '1.2.3' }}
@@ -940,6 +940,11 @@ describe('modules/manager/gradle/parser', () => {
 
         object Libraries {
           val deps = mapOf("api" to "org.slf4j:slf4j-api:\${Versions.baz}")
+          val deps2 = listOf(
+            "androidx.appcompat:appcompat:4.5.6",
+            "androidx.core:core-ktx:\${Versions.baz}",
+            listOf("androidx.webkit:webkit:\${Versions.baz}")
+          )
           val dep: String = "foo:bar:" + Versions.baz
         }
       `;
@@ -955,6 +960,20 @@ describe('modules/manager/gradle/parser', () => {
         deps: [
           {
             depName: 'org.slf4j:slf4j-api',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+          {
+            depName: 'androidx.appcompat:appcompat',
+            currentValue: '4.5.6',
+          },
+          {
+            depName: 'androidx.core:core-ktx',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+          {
+            depName: 'androidx.webkit:webkit',
             groupName: 'Versions.baz',
             currentValue: '1.2.3',
           },
@@ -981,8 +1000,10 @@ describe('modules/manager/gradle/parser', () => {
             const val core = "androidx.test:core:\${Deps.Test.version}"
 
             object Espresso {
-              private const val version = "3.3.0-rc01"
-              const val espressoCore = "androidx.test.espresso:espresso-core:$version"
+              object Release {
+                private const val version = "3.3.0-rc01"
+                const val espressoCore = "androidx.test.espresso:espresso-core:$version"
+              }
             }
 
             object Androidx {
@@ -1003,8 +1024,8 @@ describe('modules/manager/gradle/parser', () => {
             key: 'Deps.Test.version',
             value: '1.3.0-rc01',
           },
-          'Deps.Test.Espresso.version': {
-            key: 'Deps.Test.Espresso.version',
+          'Deps.Test.Espresso.Release.version': {
+            key: 'Deps.Test.Espresso.Release.version',
             value: '3.3.0-rc01',
           },
         },
@@ -1022,7 +1043,7 @@ describe('modules/manager/gradle/parser', () => {
           {
             depName: 'androidx.test.espresso:espresso-core',
             currentValue: '3.3.0-rc01',
-            groupName: 'Deps.Test.Espresso.version',
+            groupName: 'Deps.Test.Espresso.Release.version',
           },
           {
             depName: 'androidx.test:core-ktx',

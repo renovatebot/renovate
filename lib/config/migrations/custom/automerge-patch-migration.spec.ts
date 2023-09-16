@@ -19,13 +19,13 @@ describe('config/migrations/custom/automerge-patch-migration', () => {
       {
         automergePatch: 'some-value',
         patch: {
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
       },
       {
         patch: {
           automerge: true,
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
       }
     );

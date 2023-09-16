@@ -1,4 +1,5 @@
 import { logger } from '../logger';
+import { clone } from '../util/clone';
 import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils';
 import * as options from './options';
 import type { RenovateConfig } from './types';
@@ -11,8 +12,8 @@ export function mergeChildConfig<
   if (!child) {
     return parent as never;
   }
-  const parentConfig = structuredClone(parent);
-  const childConfig = structuredClone(child);
+  const parentConfig = clone(parent);
+  const childConfig = clone(child);
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
 
   // Ensure highest severity survives parent / child merge

@@ -27,7 +27,9 @@ export const presets: Record<string, Preset> = {
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
       'replacements:renovate-pep440-to-renovatebot-pep440',
+      'replacements:rollup-babel-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rome-to-biome',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
@@ -566,7 +568,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
         replacementNameTemplate:
-          "{{{replace 'k8s\\.gcr\\.io/' 'registry\\.k8s\\.io/' packageName}}}",
+          "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}",
       },
     ],
   },
@@ -666,6 +668,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-babel-to-scoped': {
+    description: 'The babel plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-babel'],
+        replacementName: '@rollup/plugin-babel',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
   'rollup-node-resolve-to-scoped': {
     description: 'The node-resolve plugin for rollup became scoped.',
     packageRules: [
@@ -674,6 +687,18 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'rome-to-biome': {
+    description:
+      'The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rome'],
+        replacementName: '@biomejs/biome',
+        replacementVersion: '1.0.0',
       },
     ],
   },

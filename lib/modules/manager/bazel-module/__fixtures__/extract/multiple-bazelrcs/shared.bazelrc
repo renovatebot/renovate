@@ -1,0 +1,5 @@
+# shared.bazelrc
+
+build --show_timestamps
+
+import %workspace%/foo.bazelrc

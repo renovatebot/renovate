@@ -1,13 +1,21 @@
+import toml from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency } from '../types';
+import { PyProject, PyProjectSchema } from './schema';
 import type { Pep508ParseResult } from './types';
 
 const pep508Regex = regEx(
   /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i
 );
+
+export const depTypes = {
+  dependencies: 'project.dependencies',
+  optionalDependencies: 'project.optional-dependencies',
+  pdmDevDependencies: 'tool.pdm.dev-dependencies',
+};
 
 export function parsePEP508(
   value: string | null | undefined
@@ -58,7 +66,7 @@ export function pep508ToPackageDependency(
   };
 
   if (is.nullOrUndefined(parsed.currentValue)) {
-    dep.skipReason = 'any-version';
+    dep.skipReason = 'unspecified-version';
   } else {
     dep.currentValue = parsed.currentValue;
   }
@@ -98,4 +106,20 @@ export function parseDependencyList(
     }
   }
   return deps;
+}
+
+export function parsePyProject(
+  packageFile: string,
+  content: string
+): PyProject | null {
+  try {
+    const jsonMap = toml.parse(content);
+    return PyProjectSchema.parse(jsonMap);
+  } catch (err) {
+    logger.debug(
+      { packageFile, err },
+      `Failed to parse and validate pyproject file`
+    );
+    return null;
+  }
 }
