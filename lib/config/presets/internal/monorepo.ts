@@ -477,6 +477,7 @@ const patternGroups = {
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
+  forge: '^@forge/',
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
