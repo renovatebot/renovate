@@ -4,17 +4,17 @@ The `regex` manager is unique in Renovate because:
 
 - It is configurable via regex named capture groups
 - It can extract any `datasource`
-- By using the `regexManagers` config, you can create multiple "regex managers" for the same repository
+- By using the `customManagers` config, you can create multiple "regex managers" for the same repository
 
 We have [additional Handlebars helpers](https://docs.renovatebot.com/templates/#additional-handlebars-helpers) to help you perform common transformations on the regex manager's template fields.
-Also read the documentation for the [`regexManagers` config option](https://docs.renovatebot.com/configuration-options/#regexmanagers).
+Also read the documentation for the [`customManagers` config option](https://docs.renovatebot.com/configuration-options/#custommanagers).
 
 ### Required Fields
 
 The first two required fields are `fileMatch` and `matchStrings`:
 
 - `fileMatch` works the same as any manager
-- `matchStrings` is a `regexManagers` concept and is used for configuring a regular expression with named capture groups
+- `matchStrings` is a `regex` managers concept and is used for configuring a regular expression with named capture groups
 
 Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
 
@@ -64,8 +64,9 @@ Continuing the above example with Yarn, here is the full Renovate config:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\\n"],
       "depNameTemplate": "yarn",
@@ -78,7 +79,7 @@ Continuing the above example with Yarn, here is the full Renovate config:
 ### Advanced Capture
 
 Say your `Dockerfile` has many `ENV` variables that you want to keep up-to-date.
-But you don't want to write a `regexManagers` rule for _each_ variable.
+But you don't want to write a `customManagers` rule for _each_ variable.
 Instead you enhance your `Dockerfile` like this:
 
 ```Dockerfile
@@ -100,8 +101,9 @@ You could configure Renovate to update the `Dockerfile` like this:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
         "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
@@ -125,7 +127,7 @@ But we included the `versioningTemplate` config option to show you why we call t
 You should use triple brace `{{{ }}}` templates like `{{{versioning}}}` to be safe.
 This is because Handlebars escapes special characters with double braces (by default).
 
-By adding `renovate: datasource=` and `depName=` comments to the `Dockerfile` you only need _one_ `regexManager` instead of _four_.
+By adding `renovate: datasource=` and `depName=` comments to the `Dockerfile` you only need _one_ `customManager` instead of _four_.
 The `Dockerfile` is documented better as well.
 
 The syntax in the example is arbitrary, and you can set your own syntax.
@@ -145,12 +147,13 @@ type: application
 appVersion: 'v0.4.0'
 ```
 
-Using the `regexManagers` below, Renovate looks for available Docker tags of the image `amazon/amazon-eks-pod-identity-webhook`.
+Using the `customManagers` below, Renovate looks for available Docker tags of the image `amazon/amazon-eks-pod-identity-webhook`.
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "datasourceTemplate": "docker",
       "fileMatch": ["(^|/)Chart\\.yaml$"],
       "matchStrings": [
@@ -161,7 +164,7 @@ Using the `regexManagers` below, Renovate looks for available Docker tags of the
 }
 ```
 
-### Using regexManager to update the dependency name in addition to version
+### Using customManager to update the dependency name in addition to version
 
 #### Updating `gitlab-ci include` dep names
 
@@ -173,8 +176,9 @@ For example:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": [".*y[a]?ml$"],
       "matchStringsStrategy": "combination",
       "matchStrings": [

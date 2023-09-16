@@ -7,12 +7,13 @@ To fetch the latest digest of a reference instead of the named reference, specif
 **Usage example**
 
 The following is an example where you would maintain the HEAD digest of the `master` branch of a repository.
-You would configure a generic regex manager in `renovate.json` for files named `versions.ini`:
+You would configure a generic custom manager in `renovate.json` for files named `versions.ini`:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^versions.ini$"],
       "matchStrings": ["GOOGLE_API_VERSION=(?<currentDigest>.*?)\\n"],
       "currentValueTemplate": "master",

@@ -9,12 +9,13 @@ To specify where to find a self-hosted GitLab instance, specify `registryUrl`. A
 **Usage Example**
 
 A real-world example for this specific datasource would be maintaining package versions in a config file.
-This can be achieved by configuring a generic regex manager in `renovate.json` for files named `versions.ini`:
+This can be achieved by configuring a generic custom manager in `renovate.json` for files named `versions.ini`:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^versions.ini$"],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION=(?<currentValue>.*)\\s"

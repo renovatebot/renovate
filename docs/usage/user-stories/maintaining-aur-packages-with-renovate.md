@@ -39,12 +39,13 @@ Renovate comes with over 50 different datasources, but the one that is important
 Managers are the Renovate concept for package managers.
 There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](https://docs.renovatebot.com/modules/manager/regex/) that I can use.
 
-I can create a `renovate.json` configuration with the following regex manager configuration:
+I can create a `renovate.json` configuration with the following custom manager configuration:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["(^|/)PKGBUILD$"],
       "matchStrings": [
         "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"

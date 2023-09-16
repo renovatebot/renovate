@@ -113,6 +113,15 @@ exports[`config/validation validateConfig(config) errors for unsafe fileMatches 
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors if customManager fields are missing 1`] = `
+[
+  {
+    "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 1`] = `
 [
   {

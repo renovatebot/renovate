@@ -444,7 +444,7 @@ export async function validateConfig(
                   if (is.nonEmptyArray(customManager.fileMatch)) {
                     switch (customManager.customType) {
                       case 'regex':
-                        validatecustomManagerFields(
+                        validateRegexManagerFields(
                           customManager,
                           currentPath,
                           errors
@@ -454,7 +454,7 @@ export async function validateConfig(
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Regex Manager must contain a non-empty fileMatch array`,
+                      message: `Each Custom Manager must contain a non-empty fileMatch array`,
                     });
                   }
                 } else {
@@ -464,7 +464,7 @@ export async function validateConfig(
                   ) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Regex Manager must contain a non-empty customType string`,
+                      message: `Each Custom Manager must contain a non-empty customType string`,
                     });
                   } else {
                     errors.push({
@@ -658,7 +658,7 @@ export async function validateConfig(
   return { errors, warnings };
 }
 
-function validatecustomManagerFields(
+function validateRegexManagerFields(
   customManager: Partial<RegexManagerConfig>,
   currentPath: string,
   errors: ValidationMessage[]
@@ -677,7 +677,7 @@ function validatecustomManagerFields(
   } else {
     errors.push({
       topic: 'Configuration Error',
-      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+      message: `Each Custom Manager must contain a non-empty matchStrings array`,
     });
   }
 

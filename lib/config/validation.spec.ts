@@ -410,7 +410,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty fileMatch array",
+            "message": "Each Custom Manager must contain a non-empty fileMatch array",
             "topic": "Configuration Error",
           },
         ]
@@ -437,7 +437,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty customType string",
+            "message": "Each Custom Manager must contain a non-empty customType string",
             "topic": "Configuration Error",
           },
         ]
