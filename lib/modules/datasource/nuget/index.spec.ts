@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -10,7 +11,7 @@ const datasource = NugetDatasource.id;
 
 const hostRules: any = _hostRules;
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const pkgInfoV3FromNuget = Fixtures.get('nunit/v3_nuget_org.xml');
 const pkgListV3Registration = Fixtures.get('nunit/v3_registration.json');
@@ -95,10 +96,6 @@ const configV3Multiple = {
 
 describe('modules/datasource/nuget/index', () => {
   describe('parseRegistryUrl', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('extracts feed version from registry URL hash (v3)', () => {
       const parsed = parseRegistryUrl('https://my-registry#protocolVersion=3');
 
@@ -130,7 +127,6 @@ describe('modules/datasource/nuget/index', () => {
 
   describe('getReleases', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.hosts.mockReturnValue([]);
       hostRules.find.mockReturnValue({});
     });

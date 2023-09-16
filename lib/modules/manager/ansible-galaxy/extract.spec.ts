@@ -79,7 +79,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
     it('check galaxy definition file', () => {
       const res = extractPackageFile(galaxy, 'galaxy.yml');
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toHaveLength(7);
     });
   });
 

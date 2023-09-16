@@ -6,6 +6,7 @@ import {
   isGetPkgReleasesConfig,
 } from '../../../../../modules/datasource';
 import { VersioningApi, get } from '../../../../../modules/versioning';
+import { coerceArray } from '../../../../../util/array';
 import type { BranchUpgradeConfig } from '../../../../types';
 
 function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {
@@ -57,7 +58,7 @@ export async function getInRangeReleases(
           matchesUnstable(version, newVersion, release.version)
       );
     if (version.valueToVersion) {
-      for (const release of releases || []) {
+      for (const release of coerceArray(releases)) {
         release.version = version.valueToVersion(release.version);
       }
     }

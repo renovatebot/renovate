@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, hostRules, mockedFunction } from '../../../../test/util';
@@ -10,8 +11,8 @@ import { updateArtifacts } from '.';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules');
-jest.mock('../../datasource');
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('../../datasource', () => mockDeep());
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
@@ -29,8 +30,6 @@ const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     hostRules.getAll.mockReturnValue([]);
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

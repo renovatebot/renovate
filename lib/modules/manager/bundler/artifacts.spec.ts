@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import {
   envMock,
@@ -23,10 +24,10 @@ const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
@@ -52,7 +53,6 @@ const updatedGemfileLock = {
 describe('modules/manager/bundler/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       jest.resetModules();
 
       delete process.env.GEM_HOME;
@@ -100,6 +100,29 @@ describe('modules/manager/bundler/artifacts', () => {
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
+      ]);
+    });
+
+    it('executes commands from lockFile path', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce();
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        })
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'teamA/Gemfile',
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+          newPackageFileContent: 'Updated Gemfile content',
+          config,
+        })
+      ).toBeNull();
+      expect(execSnapshots).toMatchObject([
+        { options: { cwd: '/tmp/github/some/repo' } },
       ]);
     });
 

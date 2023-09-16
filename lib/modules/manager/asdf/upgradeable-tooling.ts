@@ -468,6 +468,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  steampipe: {
+    asdfPluginUrl: 'https://github.com/carnei-ro/asdf-steampipe',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'turbot/steampipe',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   terraform: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
     config: {

@@ -25,9 +25,10 @@ export function addDepAsBitbucketTag(
 
 export function addDepAsDockerImage(
   deps: PackageDependency[],
-  currentDockerImage: string
+  currentDockerImage: string,
+  registryAliases?: Record<string, string>
 ): void {
-  const dep = getDep(currentDockerImage);
+  const dep = getDep(currentDockerImage, true, registryAliases);
   dep.depType = 'docker';
   deps.push(dep);
 }
@@ -37,7 +38,8 @@ export function addDepFromObject(
   lines: string[],
   start: number,
   len: number,
-  spaces: string
+  spaces: string,
+  registryAliases?: Record<string, string>
 ): number {
   const nameRegex = regEx(
     `^${spaces}\\s+name:\\s*['"]?(?<image>[^\\s'"]+)['"]?\\s*$`
@@ -54,7 +56,7 @@ export function addDepFromObject(
 
     const groups = nameRegex.exec(line)?.groups;
     if (groups) {
-      const dep = getDep(groups.image);
+      const dep = getDep(groups.image, true, registryAliases);
       dep.depType = 'docker';
       deps.push(dep);
       return idx;

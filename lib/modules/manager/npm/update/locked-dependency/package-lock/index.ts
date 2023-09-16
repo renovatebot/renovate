@@ -151,7 +151,9 @@ export async function updateLockedDependency(
         logger.debug(
           `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
             // TODO: types (#22198)
-            parentDepName ? `${parentDepName}@${parentVersion!}` : packageFile
+            parentDepName
+              ? `${parentDepName}@${parentVersion!}`
+              : /* istanbul ignore next: hard to test */ packageFile
           }`
         );
       } else if (parentDepName && parentVersion) {
@@ -242,7 +244,8 @@ export async function updateLockedDependency(
       newPackageJsonContent =
         parentUpdateResult.files[packageFile] || newPackageJsonContent;
       newLockFileContent =
-        parentUpdateResult.files[lockFile] || newLockFileContent;
+        parentUpdateResult.files[lockFile] ||
+        /* istanbul ignore next: hard to test */ newLockFileContent;
     }
     const files: Record<string, string> = {};
     if (newLockFileContent) {

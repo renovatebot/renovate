@@ -9,10 +9,6 @@ const indexYaml = Fixtures.get('index.yaml');
 
 describe('modules/datasource/helm/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null if packageName was not provided', async () => {
       expect(
         await getPkgReleases({
@@ -56,7 +52,7 @@ describe('modules/datasource/helm/index', () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, undefined);
+        .reply(200);
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
@@ -201,6 +197,28 @@ describe('modules/datasource/helm/index', () => {
         registryUrl: 'https://example-repository.com/subdir',
         sourceUrl: 'https://github.com/datawire/ambassador',
         releases: expect.toBeArrayOfSize(27),
+      });
+    });
+
+    it('uses undefined as the newDigest when no digest is provided', async () => {
+      httpMock
+        .scope('https://example-repository.com')
+        .get('/index.yaml')
+        .reply(200, Fixtures.get('index_blank-digest.yaml'));
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'blank-digest',
+        registryUrls: ['https://example-repository.com'],
+      });
+      expect(releases).toMatchObject({
+        registryUrl: 'https://example-repository.com',
+        releases: [
+          {
+            newDigest: undefined,
+            releaseTimestamp: '2023-09-05T13:24:19.046Z',
+            version: '3.2.1',
+          },
+        ],
       });
     });
   });

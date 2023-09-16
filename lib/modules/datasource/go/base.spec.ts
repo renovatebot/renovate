@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -7,7 +8,7 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 
@@ -30,13 +31,8 @@ describe('modules/datasource/go/base', () => {
 
   describe('go-get requests', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     describe('meta name=go-source', () => {
