@@ -39,7 +39,7 @@ function containsPlaceholder(str: string | null | undefined): boolean {
 
 function depFromNode(
   node: XmlElement,
-  underBuildSettingsElement = false
+  underBuildSettingsElement: boolean
 ): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
@@ -198,7 +198,10 @@ function applyPropsInternal(
           groupName = propKey;
         }
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource = propValue.packageFile ?? undefined;
+        propSource =
+          propValue.packageFile ??
+          // istanbul ignore next
+          undefined;
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
           fatal = true;
