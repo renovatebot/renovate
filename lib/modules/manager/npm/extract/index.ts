@@ -501,6 +501,15 @@ export async function extractPackageFile(
     }
   }
 
+  for (const [constraintName, constaintValue] of Object.entries(
+    extractedConstraints
+  )) {
+    // delete any extracted constraints which aren't valid semver ranges
+    if (!isValid(constaintValue)) {
+      delete extractedConstraints[constraintName];
+    }
+  }
+
   return {
     deps,
     packageFileVersion,
