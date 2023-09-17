@@ -20,16 +20,18 @@ export async function generateLoginCmd(
     logger.trace({ repository }, `Using ecr auth for Helm registry`);
     const [, region] = coerceArray(ecrRegex.exec(repository));
     const auth = await getECRAuthToken(region, hostRule);
-    if (auth) {
-      const [username, password] = fromBase64(auth).split(':');
-      if (username && password) {
-        addSecretForSanitizing(username);
-        addSecretForSanitizing(password);
-        return `${loginCMD} --username ${quote(username)} --password ${quote(
-          password
-        )} ${repository}`;
-      }
+    if (!auth) {
+      return null;
     }
+    const [username, password] = fromBase64(auth).split(':');
+    if (!username || !password) {
+      return null;
+    }
+    addSecretForSanitizing(username);
+    addSecretForSanitizing(password);
+    return `${loginCMD} --username ${quote(username)} --password ${quote(
+      password
+    )} ${repository}`;
   }
   if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
