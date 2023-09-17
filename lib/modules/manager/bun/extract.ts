@@ -26,18 +26,18 @@ export async function extractAllPackageFiles(
     const packageFile = getSiblingFileName(matchedFile, 'package.json');
     const packageFileContent = await readLocalFile(packageFile, 'utf8');
     if (!packageFileContent) {
-      logger.debug({ packageFileName: packageFile }, 'No package.json found');
+      logger.debug({ packageFile }, 'No package.json found');
       continue;
     }
     const packageJson: NpmPackage = safeParseJson(packageFileContent);
     if (!packageJson) {
-      logger.debug({ packageFileName: packageFile }, 'Invalid package.json');
+      logger.debug({ packageFile }, 'Invalid package.json');
       continue;
     }
 
     const extracted = extractPackageJson(packageJson, packageFile);
     if (!extracted) {
-      logger.debug({ packageFileName: packageFile }, 'No dependencies found');
+      logger.debug({ packageFile }, 'No dependencies found');
       continue;
     }
     packageFiles.push({
