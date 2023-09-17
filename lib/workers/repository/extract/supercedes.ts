@@ -1,11 +1,6 @@
 import is from '@sindresorhus/is';
 import { get } from '../../../modules/manager';
-import type { PackageFile } from '../../../modules/manager/types';
-
-interface ExtractResults {
-  manager: string;
-  packageFiles?: PackageFile[] | null;
-}
+import type { ExtractResults } from './types';
 
 export function processSupercedesManagers(
   extractResults: ExtractResults[]
@@ -25,12 +20,14 @@ export function processSupercedesManagers(
         );
         if (supercededManagerResults?.packageFiles) {
           supercededManagerResults.packageFiles =
-            supercededManagerResults.packageFiles.filter(({ packageFile }) => {
-              !supercedingPackageFileNames.includes(packageFile);
+            supercededManagerResults.packageFiles.filter((packageFile) => {
+              if (
+                supercedingPackageFileNames.includes(packageFile.packageFile)
+              ) {
+                return false;
+              }
+              return true;
             });
-          if (!supercededManagerResults.packageFiles.length) {
-            supercededManagerResults.packageFiles = null;
-          }
         }
       }
     }
