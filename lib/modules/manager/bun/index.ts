@@ -4,7 +4,7 @@ import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
 
 export { updateArtifacts } from './artifacts';
-export { extractAllPackageFiles } from './extract';
+export { extractAllPackageFiles } from './extract/extract';
 export { getRangeStrategy, updateDependency } from '../npm';
 
 export const supercedesManagers = ['npm'];

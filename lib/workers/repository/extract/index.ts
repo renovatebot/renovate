@@ -2,12 +2,13 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { allManagersList, get, hashMap } from '../../../modules/manager';
+import { allManagersList, hashMap } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
+import { processSupercedesManagers } from './supercedes';
 
 export async function extractAllDependencies(
   config: RenovateConfig
@@ -66,31 +67,10 @@ export async function extractAllDependencies(
       return { manager: managerConfig.manager, packageFiles };
     })
   );
-  for (const { manager, packageFiles } of extractResults) {
-    if (!packageFiles) {
-      continue;
-    }
-    const supercedesManagers = get(manager, 'supercedesManagers');
-    if (is.nonEmptyArray(supercedesManagers)) {
-      const supercedingPackageFileNames = packageFiles.map(
-        (packageFile) => packageFile.packageFile
-      );
-      for (const supercededManager of supercedesManagers) {
-        const supercededManagerResults = extractResults.find(
-          (result) => result.manager === supercededManager
-        );
-        if (supercededManagerResults?.packageFiles) {
-          supercededManagerResults.packageFiles =
-            supercededManagerResults.packageFiles.filter(({ packageFile }) => {
-              !supercedingPackageFileNames.includes(packageFile);
-            });
-          if (!supercededManagerResults.packageFiles.length) {
-            supercededManagerResults.packageFiles = null;
-          }
-        }
-      }
-    }
-  }
+
+  // De-duplicate results using supercedesManagers
+  processSupercedesManagers(extractResults);
+
   logger.debug(
     { managers: extractDurations },
     'manager extract durations (ms)'
