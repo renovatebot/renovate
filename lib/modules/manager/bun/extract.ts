@@ -1,10 +1,10 @@
-import { logger } from '../../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { logger } from '../../../logger';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 
-import { extractPackageJson } from '../../npm/extract/common/package-file';
-import type { NpmPackage } from '../../npm/extract/types';
-import type { NpmManagerData } from '../../npm/types';
-import type { ExtractConfig, PackageFile } from '../../types';
+import { extractPackageJson } from '../npm/extract/common/package-file';
+import type { NpmPackage } from '../npm/extract/types';
+import type { NpmManagerData } from '../npm/types';
+import type { ExtractConfig, PackageFile } from '../types';
 
 function safeParseJson(json: string): any {
   try {
