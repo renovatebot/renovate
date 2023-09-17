@@ -430,25 +430,21 @@ export async function addReleaseNotes(
     let releaseNotes: ChangeLogNotes | null | undefined;
     const cacheKey = `${cacheKeyPrefix}:${v.version}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
-    // istanbul ignore else: no cache tests
-    if (!releaseNotes) {
-      releaseNotes = await getReleaseNotesMd(input.project, v);
-      // istanbul ignore else: should be tested
-      if (!releaseNotes) {
-        releaseNotes = await getReleaseNotes(input.project, v, config);
-      }
-      // Small hack to force display of release notes when there is a compare url
-      if (!releaseNotes && v.compare.url) {
-        releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
-      }
-      const cacheMinutes = releaseNotesCacheMinutes(v.date);
-      await packageCache.set(
-        cacheNamespace,
-        cacheKey,
-        releaseNotes,
-        cacheMinutes
-      );
+    releaseNotes ??= await getReleaseNotesMd(input.project, v);
+    releaseNotes ??= await getReleaseNotes(input.project, v, config);
+
+    // Small hack to force display of release notes when there is a compare url
+    if (!releaseNotes && v.compare.url) {
+      releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
     }
+
+    const cacheMinutes = releaseNotesCacheMinutes(v.date);
+    await packageCache.set(
+      cacheNamespace,
+      cacheKey,
+      releaseNotes,
+      cacheMinutes
+    );
     output.versions!.push({
       ...v,
       releaseNotes: releaseNotes!,
