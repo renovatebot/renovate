@@ -418,7 +418,11 @@ export async function addReleaseNotes(
     logger.debug('Missing project or versions');
     return input ?? null;
   }
-  const output: ChangeLogResult = { ...input, versions: [] };
+  const output: ChangeLogResult = {
+    ...input,
+    versions: [],
+    hasReleaseNotes: false,
+  };
 
   const { repository, sourceDirectory, type: projectType } = input.project;
   const cacheNamespace = `changelog-${projectType}-notes@v2`;
@@ -449,7 +453,10 @@ export async function addReleaseNotes(
       ...v,
       releaseNotes: releaseNotes!,
     });
-    output.hasReleaseNotes = !!output.hasReleaseNotes || !!releaseNotes;
+
+    if (releaseNotes) {
+      output.hasReleaseNotes = true;
+    }
   }
   return output;
 }
