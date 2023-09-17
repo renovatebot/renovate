@@ -1,7 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
-import { DockerDatasource } from '../../datasource/docker';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from '.';
 
