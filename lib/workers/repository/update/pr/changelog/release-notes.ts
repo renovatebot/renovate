@@ -419,16 +419,16 @@ export async function addReleaseNotes(
     return input ?? null;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
-  const { repository, sourceDirectory } = input.project;
-  const cacheNamespace = `changelog-${input.project.type}-notes@v2`;
-  function getCacheKey(version: string): string {
-    return `${repository}:${
-      sourceDirectory ? `${sourceDirectory}:` : ''
-    }${version}`;
-  }
+
+  const { repository, sourceDirectory, type: projectType } = input.project;
+  const cacheNamespace = `changelog-${projectType}-notes@v2`;
+  const cacheKeyPrefix = sourceDirectory
+    ? `${repository}:${sourceDirectory}`
+    : `${repository}`;
+
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = getCacheKey(v.version);
+    const cacheKey = `${cacheKeyPrefix}:${v.version}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore else: no cache tests
     if (!releaseNotes) {
