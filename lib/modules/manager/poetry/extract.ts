@@ -7,7 +7,7 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import { Result } from '../../../util/result';
-import { DockerDatasource } from '../../datasource/docker';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import type { PackageFileContent } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
 
@@ -40,7 +40,10 @@ export async function extractPackageFile(
       }
       return {
         ...dep,
-        datasource: DockerDatasource.id,
+        // We use containerbase python as source, as there are a lot docker tags which can cause
+        // issues with poetry versioning.
+        packageName: 'containerbase/python-prebuild',
+        datasource: GithubReleasesDatasource.id,
         commitMessageTopic: 'Python',
         registryUrls: null,
       };
