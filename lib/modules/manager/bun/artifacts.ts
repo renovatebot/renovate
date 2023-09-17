@@ -30,7 +30,7 @@ export async function updateArtifacts(
     return null;
   }
 
-  const oldLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const oldLockFileContent = await readLocalFile(lockFileName);
   if (!oldLockFileContent) {
     logger.debug(`No ${lockFileName} found`);
     return null;
@@ -53,7 +53,7 @@ export async function updateArtifacts(
     };
 
     await exec('bun install', execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
+    const newLockFileContent = await readLocalFile(lockFileName);
     if (oldLockFileContent === newLockFileContent) {
       return null;
     }
