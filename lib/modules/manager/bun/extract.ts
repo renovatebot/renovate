@@ -6,9 +6,9 @@ import type { NpmPackage } from '../npm/extract/types';
 import type { NpmManagerData } from '../npm/types';
 import type { ExtractConfig, PackageFile } from '../types';
 
-function safeParseJson(json: string): any {
+function safeParseJson(input: string): any {
   try {
-    return JSON.parse(json);
+    return JSON.parse(input);
   } catch (err) {
     logger.debug({ err }, 'Error parsing JSON');
     return null;
