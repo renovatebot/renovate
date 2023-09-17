@@ -54,7 +54,10 @@ export async function updateArtifacts(
 
     await exec('bun install', execOptions);
     const newLockFileContent = await readLocalFile(lockFileName);
-    if (oldLockFileContent === newLockFileContent) {
+    if (
+      !newLockFileContent ||
+      Buffer.compare(oldLockFileContent, newLockFileContent) // returns 0 if same
+    ) {
       return null;
     }
     return [
