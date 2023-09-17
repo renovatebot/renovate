@@ -15,7 +15,7 @@ In general, you should:
 - Update your dependencies often
 - Read the changelogs for the updates
 - Update to new `major` versions in good time
-- Talk with your team about the update stategy
+- Talk with your team about the update strategy
 
 If Renovate is too noisy for you, read the [noise reduction docs](./noise-reduction.md).
 
