@@ -298,8 +298,9 @@ describe('modules/manager/poetry/extract', () => {
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchObject({
         depName: 'python',
+        packageName: 'containerbase/python-prebuild',
         currentValue: '^3.11',
-        datasource: DockerDatasource.id,
+        datasource: GithubTagsDatasource.id,
         commitMessageTopic: 'Python',
         registryUrls: null,
       });

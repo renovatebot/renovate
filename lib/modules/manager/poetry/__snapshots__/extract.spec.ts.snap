@@ -474,12 +474,13 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
   {
     "commitMessageTopic": "Python",
     "currentValue": "~2.7 || ^3.4",
-    "datasource": "docker",
+    "datasource": "github-tags",
     "depName": "python",
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "containerbase/python-prebuild",
     "registryUrls": null,
     "versioning": "poetry",
   },
@@ -569,12 +570,13 @@ exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVers
     {
       "commitMessageTopic": "Python",
       "currentValue": "^3.9",
-      "datasource": "docker",
+      "datasource": "github-tags",
       "depName": "python",
       "depType": "dependencies",
       "managerData": {
         "nestedVersion": false,
       },
+      "packageName": "containerbase/python-prebuild",
       "registryUrls": null,
       "versioning": "poetry",
     },
