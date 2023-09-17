@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from '.';
 
@@ -299,7 +300,7 @@ describe('modules/manager/poetry/extract', () => {
         depName: 'python',
         packageName: 'containerbase/python-prebuild',
         currentValue: '^3.11',
-        datasource: GithubTagsDatasource.id,
+        datasource: GithubReleasesDatasource.id,
         commitMessageTopic: 'Python',
         registryUrls: null,
       });
