@@ -1,22 +1,16 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { safeParseJson } from '../../../util/parse';
 
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
 import type { NpmManagerData } from '../npm/types';
 import type { ExtractConfig, PackageFile } from '../types';
 
-function safeParseJson(input: string): any {
-  try {
-    return JSON.parse(input);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing JSON');
-    return null;
-  }
-}
-
-function matchesName(fileName: string, name: string): boolean {
-  return fileName === name || fileName.endsWith(`/${name}`);
+function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
+  return (
+    fileNameWithPath === fileName || fileNameWithPath.endsWith(`/${fileName}`)
+  );
 }
 
 export async function extractAllPackageFiles(
@@ -25,7 +19,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
   for (const matchedFile of matchedFiles) {
-    if (!matchesName(matchedFile, 'bun.lockb')) {
+    if (!matchesFileName(matchedFile, 'bun.lockb')) {
       logger.warn({ matchedFile }, 'Invalid bun lockfile match');
       continue;
     }
