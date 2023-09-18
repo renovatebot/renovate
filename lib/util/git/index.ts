@@ -643,7 +643,6 @@ export async function isBranchModified(
   // Retrieve the commit authors
   let branchAuthors: string[] = [];
   try {
-    // istanbul ignore if
     if (baseBranch) {
       logger.debug(
         `branch.isModified(): using git to calculate authors between ${branchName} and ${baseBranch}`

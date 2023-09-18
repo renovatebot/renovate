@@ -77,6 +77,20 @@ describe('util/git/index', () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/multiple_commits', defaultBranch);
+    await fs.writeFile(base.path + '/commit1', 'commit1');
+    await repo.add(['commit1']);
+    await repo.addConfig('user.email', 'author1@example.com');
+    await repo.commit('commit1 message');
+    await fs.writeFile(base.path + '/commit2', 'commit2');
+    await repo.add(['commit2']);
+    await repo.addConfig('user.email', 'author2@example.com');
+    await repo.commit('commit2 message');
+    await fs.writeFile(base.path + '/commit3', 'commit3');
+    await repo.add(['commit3']);
+    await repo.addConfig('user.email', 'author1@example.com');
+    await repo.commit('commit3 message');
+
     await repo.checkoutBranch('renovate/nested_files', defaultBranch);
     await fs.mkdirp(base.path + '/bin/');
     await fs.writeFile(base.path + '/bin/nested', 'nested');
@@ -301,6 +315,15 @@ describe('util/git/index', () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
       expect(
         await git.isBranchModified('renovate/custom_author', defaultBranch)
+      ).toBeTrue();
+    });
+
+    it('should return true if any commit is modified', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['author1@example.com'],
+      });
+      expect(
+        await git.isBranchModified('renovate/multiple_commits', defaultBranch)
       ).toBeTrue();
     });
 
