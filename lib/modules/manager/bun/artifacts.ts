@@ -38,7 +38,7 @@ export async function updateArtifacts(
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    if (config.isLockFileMaintenance) {
+    if (isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
 
@@ -56,7 +56,7 @@ export async function updateArtifacts(
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
       !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) // returns 0 if same
+      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
     ) {
       return null;
     }
@@ -70,7 +70,6 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) {
-    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
