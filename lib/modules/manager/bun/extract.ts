@@ -1,6 +1,5 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { safeParseJson } from '../../../util/parse';
 
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
@@ -29,9 +28,12 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'No package.json found');
       continue;
     }
-    const packageJson: NpmPackage = safeParseJson(packageFileContent);
-    if (!packageJson) {
-      logger.debug({ packageFile }, 'Invalid package.json');
+
+    let packageJson: NpmPackage;
+    try {
+      packageJson = JSON.parse(packageFileContent);
+    } catch (err) {
+      logger.debug({ err }, 'Error parsing package.json');
       continue;
     }
 
