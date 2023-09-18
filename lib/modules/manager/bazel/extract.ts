@@ -1,6 +1,10 @@
 import type { PackageDependency, PackageFileContent } from '../types';
 import { parse } from './parser';
 import { extractDepsFromFragment } from './rules';
+import { dockerRules } from './rules/docker';
+import { ociRules } from './rules/oci';
+import { gitRules } from './rules/git';
+import { goRules } from './rules/go';
 import type { RecordFragment } from './types';
 
 export function extractPackageFile(
@@ -19,15 +23,11 @@ export function extractPackageFile(
     for (const dep of extractDepsFromFragment(fragment)) {
       dep.managerData = { idx };
 
-      // Selectively provide `replaceString` in order
-      // to auto-replace functionality work correctly.
+      // Selectively provide `replaceString` in order to make auto-replace
+      // functionality work correctly.
+      const rules = [...dockerRules, ...ociRules, ...gitRules, ...goRules];
       const replaceString = fragment.value;
-      if (
-        replaceString.startsWith('container_pull') ||
-        replaceString.startsWith('oci_pull') ||
-        replaceString.startsWith('git_repository') ||
-        replaceString.startsWith('go_repository')
-      ) {
+      if (rules.some((rule) => replaceString.startsWith(rule))) {
         if (dep.currentValue && dep.currentDigest) {
           dep.replaceString = replaceString;
         }
