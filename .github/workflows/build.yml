@@ -272,6 +272,9 @@ jobs:
       - name: Lint documentation
         run: pnpm lint-documentation
 
+      - name: Markdown lint
+        run: pnpm markdown-lint
+
   lint-other:
     needs: [setup]
     runs-on: ubuntu-latest
