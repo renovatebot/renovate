@@ -80,6 +80,8 @@ The [GitHub Docs, using third-party actions](https://docs.github.com/en/actions/
 We recommend pinning _all_ Actions.
 That's why the `helpers:pinGitHubActionDigests` preset pins all GitHub Actions.
 
+For an in-depth explanation why you should pin your Github Actions, read the [Palo Alto Networks blogpost about the GitHub Actions worm](https://www.paloaltonetworks.com/blog/prisma-cloud/github-actions-worm-dependencies/).
+
 #### Extends `:pinDevDependencies`
 
 Pinning your development dependencies means you, and your team, are using the same versions of development tools.
