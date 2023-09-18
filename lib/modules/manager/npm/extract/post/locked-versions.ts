@@ -1,14 +1,13 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
 import { dirname, relative } from 'upath';
-import { logger } from '../../../../logger';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
-import { getNpmLock } from './npm';
-import { getPnpmLock } from './pnpm';
-import type { LockFile } from './types';
-import { getYarnLock, getYarnVersionFromLock } from './yarn';
-
+import { logger } from '../../../../../logger';
+import type { PackageFile } from '../../../types';
+import type { NpmManagerData } from '../../types';
+import { getNpmLock } from '../npm';
+import { getPnpmLock } from '../pnpm';
+import type { LockFile } from '../types';
+import { getYarnLock, getYarnVersionFromLock } from '../yarn';
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[]
 ): Promise<void> {
