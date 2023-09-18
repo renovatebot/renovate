@@ -2,12 +2,10 @@ import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
+import { postExtract } from './post';
 import * as npmExtract from '.';
 
 jest.mock('../../../../util/fs');
-const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
-  '../../../../util/fs'
-);
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -27,7 +25,7 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      const realFs = jest.requireActual<typeof fs>('../../../../util/fs');
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
@@ -447,7 +445,6 @@ describe('modules/manager/npm/extract/index', () => {
           npm: '^8.0.0',
           pnpm: '^1.2.0',
           vscode: '>=1.49.3',
-          yarn: 'disabled',
         },
         deps: [
           { depName: 'angular', currentValue: '1.6.0' },
@@ -956,7 +953,7 @@ describe('modules/manager/npm/extract/index', () => {
 
   describe('.postExtract()', () => {
     it('runs', async () => {
-      await expect(npmExtract.postExtract([])).resolves.not.toThrow();
+      await expect(postExtract([])).resolves.not.toThrow();
     });
   });
 });

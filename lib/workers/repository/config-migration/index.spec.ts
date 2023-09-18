@@ -21,7 +21,6 @@ const config = {
 
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
       filename,
       content,

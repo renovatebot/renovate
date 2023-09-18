@@ -669,9 +669,6 @@ describe('config/migration', () => {
 
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {
-      gradle: {
-        enabled: false,
-      },
       'gradle-lite': {
         enabled: true,
         fileMatch: ['foo'],

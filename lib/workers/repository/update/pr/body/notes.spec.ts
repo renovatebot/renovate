@@ -6,10 +6,6 @@ jest.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/notes', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('renders notes', () => {
     template.compile.mockImplementation((x) => x);
     const res = getPrNotes({

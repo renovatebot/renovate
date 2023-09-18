@@ -7,6 +7,7 @@ import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import { coerceString } from '../../../../../util/string';
 import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
@@ -81,7 +82,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string
 ): string {
-  let body = input ?? '';
+  let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
   // semantic-release cleanup

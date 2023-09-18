@@ -28,7 +28,6 @@ async function updateAllLocks(
         packageName: lock.packageName,
       };
       const { releases } = (await getPkgReleases(updateConfig)) ?? {};
-      // istanbul ignore if: needs test
       if (!releases) {
         return null;
       }

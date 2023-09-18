@@ -6,7 +6,7 @@ import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { detectRepoFileConfig } from '../../init/merge';
-import { MigratedDataFactory } from './migrated-data';
+import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/git');
@@ -26,7 +26,6 @@ const formattedMigratedData = Fixtures.getJson(
 describe('workers/repository/config-migration/branch/migrated-data', () => {
   describe('MigratedDataFactory.getAsync', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       mockedFunction(detectIndent).mockReturnValue({
         type: 'space',
         amount: 2,
@@ -189,6 +188,16 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       await expect(
         MigratedDataFactory.applyPrettierFormatting(migratedData)
       ).resolves.toEqual(formatted);
+    });
+
+    it('formats with default 2 spaces', async () => {
+      mockedFunction(scm.getFileList).mockResolvedValue(['.prettierrc']);
+      await expect(
+        applyPrettierFormatting(migratedData.content, 'json', {
+          amount: 0,
+          indent: '  ',
+        })
+      ).resolves.toEqual(formattedMigratedData.content);
     });
   });
 });

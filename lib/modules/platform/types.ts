@@ -169,6 +169,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 export interface AutodiscoverConfig {
   topics?: string[];
   includeMirrors?: boolean;
+  namespaces?: string[];
 }
 
 export interface Platform {
