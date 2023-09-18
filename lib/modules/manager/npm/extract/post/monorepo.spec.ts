@@ -165,6 +165,10 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
           packageFile: 'packages/b/package.json',
           managerData: { packageJsonName: '@org/b' },
         },
+        // for coverage
+        {
+          packageFile: 'packages/c/package.json',
+        },
       ];
       await detectMonorepos(packageFiles);
       expect(packageFiles[1].managerData?.lernaJsonFile).toBe('lerna.json');

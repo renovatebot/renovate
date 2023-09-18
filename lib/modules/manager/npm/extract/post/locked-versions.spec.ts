@@ -295,6 +295,34 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
+    it('does nothing if managerData is not present', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
+        lockfileVersion: 1,
+      });
+      const packageFiles = [
+        {
+          extractedConstraints: {},
+          deps: [
+            { depName: 'a', currentValue: '1.0.0' },
+            { depName: 'b', currentValue: '2.0.0' },
+          ],
+          packageFile: 'some-file',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          extractedConstraints: {},
+          deps: [
+            { currentValue: '1.0.0', depName: 'a' },
+            { currentValue: '2.0.0', depName: 'b' },
+          ],
+          packageFile: 'some-file',
+        },
+      ]);
+    });
+
     it('uses package-lock.json with npm v7.0.0', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
