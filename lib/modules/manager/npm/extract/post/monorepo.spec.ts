@@ -1,9 +1,9 @@
-import type { PackageFile } from '../../types';
+import type { PackageFile } from '../../../types';
 import { detectMonorepos } from './monorepo';
 
-jest.mock('./pnpm');
+jest.mock('../pnpm');
 
-describe('modules/manager/npm/extract/monorepo', () => {
+describe('modules/manager/npm/extract/post/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('handles no monorepo', async () => {
       const packageFiles: Partial<PackageFile>[] = [
