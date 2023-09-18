@@ -1,11 +1,11 @@
-import { processSupercedesManagers } from './supercedes';
+import { processSupersedesManagers } from './supersedes';
 import type { ExtractResults } from './types';
 
-describe('workers/repository/extract/supercedes', () => {
+describe('workers/repository/extract/supersedes', () => {
   describe('processSupercedesManagers', () => {
     it('handles empty extractResults', () => {
       const extractResults: ExtractResults[] = [];
-      processSupercedesManagers(extractResults);
+      processSupersedesManagers(extractResults);
       expect(extractResults).toHaveLength(0);
     });
 
@@ -24,7 +24,7 @@ describe('workers/repository/extract/supercedes', () => {
           ],
         },
       ];
-      processSupercedesManagers(extractResults);
+      processSupersedesManagers(extractResults);
       expect(extractResults).toMatchObject([
         { manager: 'ansible' },
         {

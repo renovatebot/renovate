@@ -8,7 +8,7 @@ import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
-import { processSupercedesManagers } from './supercedes';
+import { processSupersedesManagers } from './supersedes';
 
 export async function extractAllDependencies(
   config: RenovateConfig
@@ -68,8 +68,8 @@ export async function extractAllDependencies(
     })
   );
 
-  // De-duplicate results using supercedesManagers
-  processSupercedesManagers(extractResults);
+  // De-duplicate results using supersedesManagers
+  processSupersedesManagers(extractResults);
 
   logger.debug(
     { managers: extractDurations },

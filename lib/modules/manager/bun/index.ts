@@ -7,7 +7,7 @@ export { updateArtifacts } from './artifacts';
 export { extractAllPackageFiles } from './extract';
 export { getRangeStrategy, updateDependency } from '../npm';
 
-export const supercedesManagers = ['npm'];
+export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {

@@ -2,19 +2,19 @@ import is from '@sindresorhus/is';
 import { get } from '../../../modules/manager';
 import type { ExtractResults } from './types';
 
-export function processSupercedesManagers(
+export function processSupersedesManagers(
   extractResults: ExtractResults[]
 ): void {
   for (const { manager, packageFiles } of extractResults) {
     if (!packageFiles) {
       continue;
     }
-    const supercedesManagers = get(manager, 'supercedesManagers');
-    if (is.nonEmptyArray(supercedesManagers)) {
+    const supersedesManagers = get(manager, 'supersedesManagers');
+    if (is.nonEmptyArray(supersedesManagers)) {
       const supercedingPackageFileNames = packageFiles.map(
         (packageFile) => packageFile.packageFile
       );
-      for (const supercededManager of supercedesManagers) {
+      for (const supercededManager of supersedesManagers) {
         const supercededManagerResults = extractResults.find(
           (result) => result.manager === supercededManager
         );
