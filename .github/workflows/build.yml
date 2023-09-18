@@ -287,6 +287,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
+      - name: Type check
+        run: pnpm type-check
+
       - name: Lint project file structure
         run: pnpm ls-lint
 
