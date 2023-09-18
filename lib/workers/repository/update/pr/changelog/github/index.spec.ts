@@ -37,7 +37,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
-    jest.resetAllMocks();
   });
 
   describe('getChangeLogJSON', () => {

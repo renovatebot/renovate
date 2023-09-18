@@ -560,7 +560,7 @@ export async function getAdditionalFiles(
         lockFile: npmLock,
         stderr: res.stderr,
       });
-    } else {
+    } else if (res.lockFile) {
       const existingContent = await getFile(
         npmLock,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
@@ -574,7 +574,7 @@ export async function getAdditionalFiles(
           path: npmLock,
           // TODO: can this be undefined? (#22198)
 
-          contents: res.lockFile!.replace(tokenRe, ''),
+          contents: res.lockFile.replace(tokenRe, ''),
         });
       }
     }

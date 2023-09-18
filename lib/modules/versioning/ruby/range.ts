@@ -28,7 +28,7 @@ const parse = (range: string): Range => {
 
   const match = regExp.exec(value);
   if (match?.groups) {
-    const { version = '', operator = '', delimiter = ' ' } = match.groups;
+    const { version, operator = '', delimiter } = match.groups;
     return { version, operator, delimiter };
   }
 

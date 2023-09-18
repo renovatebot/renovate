@@ -17,7 +17,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });

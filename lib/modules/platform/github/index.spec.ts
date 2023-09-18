@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
@@ -24,7 +25,7 @@ const githubApiHost = 'https://api.github.com';
 
 jest.mock('timers/promises');
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http/queue');
 const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
 
@@ -33,7 +34,6 @@ const git: jest.Mocked<typeof _git> = mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -1405,6 +1405,23 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatusCheck('somebranch', 'context-4');
       expect(res).toBeNull();
+    });
+
+    it('returns yellow if state not present in context object', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [
+          {
+            context: 'context-1',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatusCheck('somebranch', 'context-1');
+      expect(res).toBe('yellow');
     });
   });
 

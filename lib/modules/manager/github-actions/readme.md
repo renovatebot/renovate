@@ -1,4 +1,5 @@
 The `github-actions` manager extracts dependencies from GitHub Actions workflow and workflow template files.
+It can also be used for Gitea and Forgejo Actions workflows as such are compatible with GitHub Actions workflows.
 
 If you like to use digest pinning but want to follow the action version tag, you can use the following sample:
 

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import type { CustomManager } from '../../types';
+import type { CustomManager } from '../../../modules/manager/custom/types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class RegexManagersMigration extends AbstractMigration {

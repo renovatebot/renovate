@@ -1,4 +1,5 @@
 import os from 'node:os';
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import {
   envMock,
@@ -26,7 +27,7 @@ import { updateArtifacts } from '.';
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

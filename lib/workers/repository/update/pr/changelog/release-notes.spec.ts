@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
 import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
@@ -23,7 +24,7 @@ import type {
   ChangeLogResult,
 } from './types';
 
-jest.mock('../../../../../util/host-rules');
+jest.mock('../../../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 
@@ -144,6 +145,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         project: partial<ChangeLogProject>({
           type: 'gitlab',
           repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
+          sourceDirectory: 'lib',
         }),
         versions: [
           partial<ChangeLogRelease>({
@@ -159,6 +161,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         project: {
           repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
           type: 'gitlab',
+          sourceDirectory: 'lib',
         },
         versions: [
           {
