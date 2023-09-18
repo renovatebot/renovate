@@ -114,15 +114,16 @@ export abstract class ChangeLogSource {
     }
 
     const changelogReleases: ChangeLogRelease[] = [];
-    // compare versions
-    const include = (v: string): boolean =>
+
+    // Check if `v` belongs to the range (currentVersion, newVersion]
+    const inRange = (v: string): boolean =>
       version.isGreaterThan(v, currentVersion) &&
       !version.isGreaterThan(v, newVersion);
 
     for (let i = 1; i < validReleases.length; i += 1) {
       const prev = validReleases[i - 1];
       const next = validReleases[i];
-      if (!include(next.version)) {
+      if (!inRange(next.version)) {
         continue;
       }
       let release = await packageCache.get(
@@ -244,7 +245,7 @@ export abstract class ChangeLogSource {
     if (is.nullOrUndefined(parsedUrl)) {
       return '';
     }
-    const protocol = parsedUrl.protocol;
+    const protocol = parsedUrl.protocol.replace(regEx(/^git\+/), '');
     const host = parsedUrl.host;
     return `${protocol}//${host}/`;
   }

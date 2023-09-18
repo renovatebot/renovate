@@ -203,10 +203,10 @@ describe('modules/manager/bundler/artifacts', () => {
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         expect.objectContaining({
-          cmd: 'bundler lock --patch --strict --conservative --update bar',
+          cmd: 'bundler lock --patch --conservative --update bar',
         }),
         expect.objectContaining({
-          cmd: 'bundler lock --minor --strict --conservative --update foo',
+          cmd: 'bundler lock --minor --conservative --update foo',
         }),
       ]);
     });
