@@ -48,6 +48,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'bun',
+          constraint: updateArtifact?.config?.constraints?.bun,
         },
       ],
     };
