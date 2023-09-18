@@ -2,9 +2,9 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import { parse } from './parser';
 import { extractDepsFromFragment } from './rules';
 import { dockerRules } from './rules/docker';
-import { ociRules } from './rules/oci';
 import { gitRules } from './rules/git';
 import { goRules } from './rules/go';
+import { ociRules } from './rules/oci';
 import type { RecordFragment } from './types';
 
 export function extractPackageFile(
