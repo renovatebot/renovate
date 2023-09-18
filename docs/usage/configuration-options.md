@@ -650,39 +650,6 @@ These datasources can be referred by CustomManagers or can be used to overwrite 
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
-## customizeDashboard
-
-You can use the `customizeDashboard` object to customize dependency dashboard.
-
-Supported fields:
-
-- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
-
-### defaultRegistryUrlTemplate
-
-`registryUrl` which is used, if none is return by extraction.
-As this is a template it can be dynamically set. E.g. add the `packageName` as part of the URL:
-
-```json5
-{
-  customDatasources: {
-    foo: {
-      defaultRegistryUrlTemplate: 'https://exmaple.foo.bar/v1/{{ packageName }}',
-    },
-  },
-}
-```
-
-### format
-
-Defines which format the API is returning.
-Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
-
-### transformTemplates
-
-`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
-Use this if the API does not return a Renovate compatible schema.
-
 ## customManagers
 
 Use `customManagers` entries to configure the custom managers in Renovate.
@@ -979,6 +946,39 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 # The image of the service <registry>/<repo>/<image>:<tag>
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
+
+## customizeDashboard
+
+You can use the `customizeDashboard` object to customize dependency dashboard.
+
+Supported fields:
+
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
+
+### defaultRegistryUrlTemplate
+
+`registryUrl` which is used, if none is return by extraction.
+As this is a template it can be dynamically set. E.g. add the `packageName` as part of the URL:
+
+```json5
+{
+  customDatasources: {
+    foo: {
+      defaultRegistryUrlTemplate: 'https://exmaple.foo.bar/v1/{{ packageName }}',
+    },
+  },
+}
+```
+
+### format
+
+Defines which format the API is returning.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
+
+### transformTemplates
+
+`transformTemplates` is a list of [jsonata rules](https://docs.jsonata.org/simple) which get applied serially.
+Use this if the API does not return a Renovate compatible schema.
 
 ## defaultRegistryUrls
 
