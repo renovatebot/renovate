@@ -437,7 +437,7 @@ export async function addReleaseNotes(
     releaseNotes ??= await getReleaseNotesMd(input.project, v);
     releaseNotes ??= await getReleaseNotes(input.project, v, config);
 
-    // Small hack to force display of release notes when there is a compare url
+    // If there is no release notes, at least try to show the compare URL
     if (!releaseNotes && v.compare.url) {
       releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
     }
