@@ -37,6 +37,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  lockFiles?: string[];
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -226,7 +227,7 @@ export interface ManagerApi extends ModuleApi {
 
   categories?: Category[];
   supportsLockFileMaintenance?: boolean;
-
+  supersedesManagers?: string[];
   supportedDatasources: string[];
 
   bumpPackageVersion?(
