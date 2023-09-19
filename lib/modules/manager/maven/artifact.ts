@@ -7,7 +7,6 @@ import type { ExecResult } from '../../../util/exec/types';
 import { readLocalFile, writeLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { fs } from 'memfs';
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -21,29 +20,18 @@ export async function updateArtifacts({
     }
     // copied from helmfile/artifact.ts. We need the pom in the state after the update
     await writeLocalFile(packageFileName, newPackageFileContent);
-    const file = getLockfilePath(rootDir);
-    if (fs.existsSync(file)) {
-      const execOptions = {
-        cwd: rootDir,
-      };
-      const maven_lockfile_version = await getLockfileVersion(rootDir);
-      // Generate the Maven lockfile using the `mvn` command
-      const cmd = `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
-      const result: ExecResult = await exec(cmd, execOptions);
-      logger.trace({ result }, 'maven-lockfile.updateArtifacts() result');
-      const status = await getRepoStatus();
-      const res: UpdateArtifactsResult[] = await addUpdatedLockfiles(status);
-      return res;
-    } else {
-      logger.debug('No lockfile.json file found');
-      return [
-        {
-          artifactError: {
-            stderr: "No 'lockfile.json' file found",
-          },
-        },
-      ];
-    }
+
+    const execOptions = {
+      cwd: rootDir,
+    };
+    const maven_lockfile_version = await getLockfileVersion(rootDir);
+    // Generate the Maven lockfile using the `mvn` command
+    const cmd = `mvn io.github.chains-project:maven-lockfile:${maven_lockfile_version}:generate`;
+    const result: ExecResult = await exec(cmd, execOptions);
+    logger.trace({ result }, 'maven-lockfile.updateArtifacts() result');
+    const status = await getRepoStatus();
+    const res: UpdateArtifactsResult[] = await addUpdatedLockfiles(status);
+    return res;
   } catch (err) {
     logger.error({ err }, 'maven-lockfile.updateArtifacts() error');
     return [
@@ -99,7 +87,6 @@ function getLockfilePath(directoryPath: string): string {
 export async function getLockfileVersion(folder: string): Promise<string> {
   const lockFile: string = getLockfilePath(folder);
   const fileContent = await readLocalFile(lockFile, 'utf8');
-  //TODO:(MartinWitt): add check if file exists?
   if (!fileContent) {
     throw new Error('Could not read lockfile.json');
   }
