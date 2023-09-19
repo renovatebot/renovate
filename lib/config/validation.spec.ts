@@ -501,11 +501,11 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
         ]
