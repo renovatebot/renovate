@@ -19,8 +19,8 @@ By default, Renovate uses the `chore` prefix.
 If you extend from `config:recommended` then Renovate uses the `chore` prefix for nearly all updates.
 There are some exceptions:
 
-- if `matchDepTypes=dependencies` or `matchDepTypes=require`, then Renovate uses the `fix` prefix
-- if a update uses the `maven` datasource _and_ `matchDepTypes` is `compile`, `provided`, `runtime`, `system`, `import` or `parent` then Renovate uses the `fix` prefix
+- if the `depType` is a known "production dependency" type (e.g. `dependencies` or `require`), then Renovate uses the `fix` prefix
+- if an update uses the `maven` datasource _and_ `matchDepTypes` is a known production type (e.g. `compile`, `provided`, `runtime`, `system`, `import` or `parent`) then Renovate uses the `fix` prefix
 
 ## Manually enabling or disabling semantic commits
 
