@@ -2183,7 +2183,6 @@ const options: RenovateOptions[] = [
       'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
-      'pnpmDedupeIgnoreScripts',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
     ],

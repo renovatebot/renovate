@@ -78,11 +78,6 @@ export async function generateLockFile(
     commands.push(`${cmd} ${args}`);
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      logger.debug('Performing pnpm dedupe');
-      commands.push('pnpm dedupe');
-    }
-
     if (config.postUpdateOptions?.includes('pnpmDedupeIgnoreScripts')) {
       logger.debug('Performing pnpm dedupe --ignore-scripts');
       commands.push('pnpm dedupe --ignore-scripts');

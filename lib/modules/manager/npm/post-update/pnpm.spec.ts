@@ -68,27 +68,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('performs dedupe', async () => {
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    const postUpdateOptions = ['pnpmDedupe'];
-    const res = await pnpmHelper.generateLockFile(
-      'some-dir',
-      {},
-      { ...config, postUpdateOptions }
-    );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
-      },
-      {
-        cmd: 'pnpm dedupe',
-      },
-    ]);
-  });
-
   it('performs dedupe --ignore-scripts', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
