@@ -167,7 +167,7 @@
     "@renovatebot/ruby-semver": "3.0.14",
     "@sindresorhus/is": "4.6.0",
     "@types/ms": "0.7.31",
-    "@types/tmp": "0.2.3",
+    "@types/tmp": "0.2.4",
     "@yarnpkg/core": "3.5.3",
     "@yarnpkg/parsers": "2.5.1",
     "agentkeepalive": "4.5.0",
