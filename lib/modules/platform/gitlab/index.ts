@@ -4,6 +4,7 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import pMap from 'p-map';
 import semver from 'semver';
+import { z } from 'zod';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -63,7 +64,6 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-import { GitlabCommit } from './schema';
 
 let config: {
   repository: string;
@@ -890,24 +890,6 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-async function getGitlabPipelineId(branchSha: string): Promise<number | null> {
-  return await gitlabApi
-    .getJson(`projects/${config.repository}/repository/commits/${branchSha!}`)
-    .then((r) => {
-      const gitlabCommit = GitlabCommit.safeParse(r.body);
-
-      if (!gitlabCommit.success) {
-        return null;
-      }
-
-      if (!gitlabCommit.data.last_pipeline) {
-        return null;
-      }
-
-      return gitlabCommit.data.last_pipeline.id;
-    });
-}
-
 export async function setBranchStatus({
   branchName,
   context,
@@ -931,15 +913,27 @@ export async function setBranchStatus({
     description,
     context,
   };
+
   if (targetUrl) {
     options.target_url = targetUrl;
   }
+
   if (branchSha) {
-    const pipelineId = await getGitlabPipelineId(branchSha);
-    if (pipelineId) {
-      options.pipeline_id = pipelineId;
-    }
+    const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
+    const LastPipelineId = z
+      .object({
+        last_pipeline: z.object({
+          id: z.number(),
+        }),
+      })
+      .transform(({ last_pipeline }) => last_pipeline.id);
+    await gitlabApi
+      .getJsonSafe(commitUrl, LastPipelineId)
+      .onValue((pipelineId) => {
+        options.pipeline_id = pipelineId;
+      });
   }
+
   try {
     // give gitlab some time to create pipelines for the sha
     await setTimeout(
