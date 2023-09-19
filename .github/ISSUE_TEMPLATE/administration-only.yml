@@ -21,13 +21,6 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: describe-why-we-need-want-these-changes
-    attributes:
-      label: Describe why we need/want these change(s).
-    validations:
-      required: true
-
   - type: markdown
     attributes:
       value: '# Reminder for administrators:'

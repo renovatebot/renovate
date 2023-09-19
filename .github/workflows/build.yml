@@ -272,6 +272,9 @@ jobs:
       - name: Lint documentation
         run: pnpm lint-documentation
 
+      - name: Markdown lint
+        run: pnpm markdown-lint
+
   lint-other:
     needs: [setup]
     runs-on: ubuntu-latest
@@ -286,6 +289,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - name: Type check
+        run: pnpm type-check
 
       - name: Lint project file structure
         run: pnpm ls-lint
@@ -404,7 +410,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 99.61 \
+            --branches 100 \
             --functions 100 \
             --lines 100 \
             --statements 100

@@ -52,6 +52,29 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBeNull();
     });
 
+    // for coverage
+    it('uses depName or packageName', async () => {
+      upgrade.baseDeps = [
+        {
+          datasource: 'cdnjs',
+          packageName: 'react-router/react-router-test.min.js',
+          currentValue: '4.2.1',
+          replaceString:
+            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
+        },
+        {
+          datasource: 'cdnjs',
+          depName: 'react-router-test',
+          currentValue: '4.1.1',
+          replaceString:
+            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
+        },
+      ];
+      reuseExistingBranch = true;
+      const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
+      expect(res).toBeNull();
+    });
+
     it('updates version only', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';

@@ -103,6 +103,29 @@ describe('modules/manager/bundler/artifacts', () => {
       ]);
     });
 
+    it('executes commands from lockFile path', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce();
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        })
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'teamA/Gemfile',
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+          newPackageFileContent: 'Updated Gemfile content',
+          config,
+        })
+      ).toBeNull();
+      expect(execSnapshots).toMatchObject([
+        { options: { cwd: '/tmp/github/some/repo' } },
+      ]);
+    });
+
     it('works for default binarySource', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.readLocalFile.mockResolvedValueOnce(null);
@@ -180,10 +203,10 @@ describe('modules/manager/bundler/artifacts', () => {
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         expect.objectContaining({
-          cmd: 'bundler lock --patch --strict --conservative --update bar',
+          cmd: 'bundler lock --patch --conservative --update bar',
         }),
         expect.objectContaining({
-          cmd: 'bundler lock --minor --strict --conservative --update foo',
+          cmd: 'bundler lock --minor --conservative --update foo',
         }),
       ]);
     });
