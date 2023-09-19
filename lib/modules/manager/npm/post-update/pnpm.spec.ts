@@ -71,7 +71,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   it('performs dedupe --ignore-scripts', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    const postUpdateOptions = ['pnpmDedupeIgnoreScripts'];
+    const postUpdateOptions = ['pnpmDedupe'];
     const res = await pnpmHelper.generateLockFile(
       'some-dir',
       {},
