@@ -62,8 +62,8 @@ import type {
   GitlabPr,
   MergeMethod,
   RepoResponse,
-  GitlabCommit,
 } from './types';
+import { GitlabCommit } from './schema';
 
 let config: {
   repository: string;
@@ -890,12 +890,22 @@ export async function getBranchStatusCheck(
   return null;
 }
 
-async function getGitlabPipelineId(branchSha: string): Promise<number> {
+async function getGitlabPipelineId(branchSha: string): Promise<number | null> {
   return await gitlabApi
-    .getJson<GitlabCommit>(
-      `projects/${config.repository}/repository/commits/${branchSha!}`
-    )
-    .then((r) => r.body.last_pipeline.id);
+    .getJson(`projects/${config.repository}/repository/commits/${branchSha!}`)
+    .then((r) => {
+      const gitlabCommit = GitlabCommit.safeParse(r.body);
+
+      if (!gitlabCommit.success) {
+        return null;
+      }
+
+      if (!gitlabCommit.data.last_pipeline) {
+        return null;
+      }
+
+      return gitlabCommit.data.last_pipeline.id;
+    });
 }
 
 export async function setBranchStatus({

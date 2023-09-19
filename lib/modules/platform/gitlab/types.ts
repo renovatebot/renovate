@@ -37,38 +37,6 @@ export interface GitLabMergeRequest {
   };
 }
 
-export interface GitlabCommit {
-  id: string;
-  short_id: string;
-  title: string;
-  author_name: string;
-  author_email: string;
-  committer_name: string;
-  committer_email: string;
-  created_at: string;
-  message: string;
-  committed_date: string;
-  authored_date: string;
-  parent_ids: string[];
-  last_pipeline: LastPipeline;
-  stats: Stats;
-  status: string;
-  web_url: string;
-}
-
-export interface LastPipeline {
-  id: number;
-  ref: string;
-  sha: string;
-  status: string;
-}
-
-export interface Stats {
-  additions: number;
-  deletions: number;
-  total: number;
-}
-
 export interface GitlabPr extends Pr {
   headPipelineStatus?: string;
 }
