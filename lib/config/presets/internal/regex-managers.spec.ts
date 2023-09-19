@@ -173,6 +173,81 @@ describe('config/presets/internal/regex-managers', () => {
     });
   });
 
+  describe('Update `_VERSION` environment variables in GitLab pipeline file', () => {
+    const regexManager = presets['gitlabPipelineVersions'].regexManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        variables:
+          # renovate: datasource=node depName=node versioning=node
+          NODE_VERSION: 18.13.0
+          # renovate: datasource=npm depName=pnpm
+          PNPM_VERSION: "7.25.1"
+          # renovate: datasource=npm depName=yarn
+          YARN_VERSION: '3.3.1'
+          # renovate: datasource=custom.hashicorp depName=consul
+          CONSUL_VERSION: 1.3.1
+
+        lint:
+          image: node:\${NODE_VERSION}
+          script:
+            - npm install -g pnpm@\${PNPM_VERSION}
+      `;
+
+      const res = await extractPackageFile(
+        fileContent,
+        'gitlab-ci.yml',
+        regexManager!
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '18.13.0',
+          datasource: 'node-version',
+          depName: 'node',
+          replaceString:
+            '# renovate: datasource=node depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
+          versioning: 'node',
+        },
+        {
+          currentValue: '7.25.1',
+          datasource: 'npm',
+          depName: 'pnpm',
+          replaceString:
+            '# renovate: datasource=npm depName=pnpm\n  PNPM_VERSION: "7.25.1"\n',
+        },
+        {
+          currentValue: '3.3.1',
+          datasource: 'npm',
+          depName: 'yarn',
+          replaceString:
+            "# renovate: datasource=npm depName=yarn\n  YARN_VERSION: '3.3.1'\n",
+        },
+        {
+          currentValue: '1.3.1',
+          datasource: 'custom.hashicorp',
+          depName: 'consul',
+          replaceString:
+            '# renovate: datasource=custom.hashicorp depName=consul\n  CONSUL_VERSION: 1.3.1\n',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                        | expected
+        ${'.gitlab-ci.yaml'}        | ${true}
+        ${'.gitlab-ci.yml'}         | ${true}
+        ${'foo.yaml'}               | ${false}
+        ${'foo.yml'}                | ${false}
+        ${'.gitlab/ci.yml'}         | ${false}
+        ${'includes/gitlab-ci.yml'} | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(regexMatches(path, regexManager!.fileMatch)).toBe(expected);
+      });
+    });
+  });
+
   describe('Update `appVersion` value in Helm chart Chart.yaml', () => {
     const regexManager = presets['helmChartYamlAppVersions'].regexManagers?.[0];
 
