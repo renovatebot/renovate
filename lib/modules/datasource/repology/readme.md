@@ -14,7 +14,7 @@ For example, the `Alpine Linux 3.12` repository has this URL: `https://repology.
 Say you're using system packages in a Dockerfile and want to update them with Repology.
 With the Repology datasource you can "pin" each dependency, and get automatic updates.
 
-First you would set a generic custom manager in your `renovate.json` file for `Dockerfile`:
+First you would set a custom manager in your `renovate.json` file for `Dockerfile`:
 
 ```json
 {

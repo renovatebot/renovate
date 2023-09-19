@@ -1,8 +1,9 @@
 import type { Preset } from '../types';
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
-    description: 'Update `_VERSION` variables in Dockerfiles.',
     customManagers: [
       {
         customType: 'regex',
@@ -15,10 +16,9 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description: 'Update `_VERSION` variables in Dockerfiles.',
   },
   githubActionsVersions: {
-    description:
-      'Update `_VERSION` environment variables in GitHub Action files.',
     customManagers: [
       {
         customType: 'regex',
@@ -28,9 +28,10 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description:
+      'Update `_VERSION` environment variables in GitHub Action files.',
   },
   helmChartYamlAppVersions: {
-    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
     customManagers: [
       {
         customType: 'regex',
@@ -41,9 +42,9 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
   },
   tfvarsVersions: {
-    description: 'Update `*_version` variables in `.tfvars` files.',
     customManagers: [
       {
         customType: 'regex',
@@ -54,5 +55,6 @@ export const presets: Record<string, Preset> = {
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
     ],
+    description: 'Update `*_version` variables in `.tfvars` files.',
   },
 };
