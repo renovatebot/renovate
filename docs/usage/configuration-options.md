@@ -2670,6 +2670,7 @@ Table with options:
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `npmDedupe`                  | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
 | `pnpmDedupe`                 | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `pnpmDedupeIgnoreScripts`    | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml`                                                                                                  |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 

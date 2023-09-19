@@ -89,6 +89,27 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
+  it('performs dedupe --ignore-scripts', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const postUpdateOptions = ['pnpmDedupeIgnoreScripts'];
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, postUpdateOptions }
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm dedupe --ignore-scripts',
+      },
+    ]);
+  });
+
   it('uses the new version if packageManager is updated', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
