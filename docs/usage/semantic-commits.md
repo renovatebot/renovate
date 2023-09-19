@@ -16,11 +16,11 @@ When Renovate finds Angular-style commits, Renovate creates commit messages and 
 
 By default, Renovate uses the `chore` prefix.
 
-If you extend from `config:recommended` then Renovate:
+If you extend from `config:recommended` then Renovate uses the `chore` prefix for nearly all updates.
+There are some exceptions:
 
-- still defaults to the `chore` prefix
-- uses the `fix` prefix for npm production dependencies
-- uses the `chore` prefix for npm development dependencies (`devDependencies`)
+- if `matchDepTypes=dependencies` or `matchDepTypes=require`, then Renovate uses the `fix` prefix
+- if a update uses the `maven` datasource _and_ `matchDepTypes` is `compile`, `provided`, `runtime`, `system`, `import` or `parent` then Renovate uses the `fix` prefix
 
 ## Manually enabling or disabling semantic commits
 
