@@ -84,8 +84,8 @@ importers:
         specifier: 0.7.31
         version: 0.7.31
       '@types/tmp':
-        specifier: 0.2.3
-        version: 0.2.3
+        specifier: 0.2.4
+        version: 0.2.4
       '@yarnpkg/core':
         specifier: 3.5.3
         version: 3.5.3(typanion@3.14.0)
@@ -467,8 +467,8 @@ importers:
         specifier: 1.1.1
         version: 1.1.1
       '@types/tar':
-        specifier: 6.1.5
-        version: 6.1.5
+        specifier: 6.1.6
+        version: 6.1.6
       '@types/traverse':
         specifier: 0.6.32
         version: 0.6.32
@@ -4015,15 +4015,15 @@ packages:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
     dev: true
 
-  /@types/tar@6.1.5:
-    resolution: {integrity: sha512-qm2I/RlZij5RofuY7vohTpYNaYcrSQlN2MyjucQc7ZweDwaEWkdN/EeNh6e9zjK6uEm6PwjdMXkcj05BxZdX1Q==}
+  /@types/tar@6.1.6:
+    resolution: {integrity: sha512-HQ06kiiDXz9uqtmE9ksQUn1ovcPr1gGV9EgaCWo6FGYKD0onNBCetBzL0kfcS8Kbj1EFxJWY9jL2W4ZvvtGI8Q==}
     dependencies:
       '@types/node': 18.17.5
       minipass: 4.2.8
     dev: true
 
-  /@types/tmp@0.2.3:
-    resolution: {integrity: sha512-dDZH/tXzwjutnuk4UacGgFRwV+JSLaXL1ikvidfJprkb7L9Nx1njcRHHmi3Dsvt7pgqqTEeucQuOrWHPFgzVHA==}
+  /@types/tmp@0.2.4:
+    resolution: {integrity: sha512-Vq3rwM+2KgiLacq68EjTJD9cuJ/ne5pXntWn8B8Rxj25SLkGAhCgooCZ1lhcIcV5OFveJ+s5Cqpi+XKfFM/xZA==}
     dev: false
 
   /@types/traverse@0.6.32:
