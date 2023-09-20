@@ -3528,6 +3528,12 @@ Configure this to `true` if you wish to get one PR for every separate major vers
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
+## separateMultipleMinor
+
+Configure this to `true` if you wish to get one PR for every separate minor version upgrade of a dependency.
+e.g. if you are on webpack@v3.0.0 currently then default behavior is a PR for upgrading to webpack@v3.4.0 and not for webpack@v3.3.0, webpack@v3.2.0 and webpack@v3.1.0
+If this setting is true then you would get one PR for webpack@v3.4.0, webpack@v3.3.0, webpack@v3.2.0 and webpack@v3.1.0
+
 ## stopUpdatingLabel
 
 This feature only works on supported platforms, check the table above.
