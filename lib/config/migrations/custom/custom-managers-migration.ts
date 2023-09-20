@@ -11,7 +11,7 @@ export class CustomManagersMigration extends AbstractMigration {
         if (mgr.customType) {
           return mgr;
         }
-        return Object.assign({ customType: 'regex' }, mgr); // to make sure customType is at top, looks good when migration pr is created
+        return Object.assign({ customType: 'regex' }, mgr); // to make sure customType is at top, looks good when migration PR is created
       });
 
       this.rewrite(customManagers);

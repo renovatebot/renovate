@@ -646,7 +646,7 @@ When using with `npm`, we recommend you:
 ## customDatasources
 
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
-These datasources can be referred by CustomManagers or can be used to overwrite default datasources.
+These datasources can be referred by `customManagers` or can be used to overwrite default datasources.
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
@@ -659,7 +659,8 @@ You can define custom managers to handle:
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
-Currently we only have one custom manager. The `regex` manager which is based on using Regular Expression named capture groups.
+Currently we only have one custom manager.
+The `regex` manager which is based on using Regular Expression named capture groups.
 
 You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
@@ -668,7 +669,7 @@ You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ config
 - `currentValue`
 
 Use named capture group matching _or_ set a corresponding template.
-We recommend you use only one of these methods, or you'll get confused.
+We recommend you use only _one_ of these methods, or you'll get confused.
 
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
@@ -699,7 +700,7 @@ Example:
 
 ### matchStrings
 
-`matchStrings` should each be a valid regular expression, optionally with named capture groups.
+Each `matchStrings` must be a valid regular expression, optionally with named capture groups.
 
 Example:
 
@@ -725,7 +726,7 @@ Three options are available:
 Each provided `matchString` will be matched individually to the content of the `packageFile`.
 If a `matchString` has multiple matches in a file each will be interpreted as an independent dependency.
 
-As example the following configuration will update all 3 lines in the Dockerfile.
+As example the following configuration will update all three lines in the Dockerfile.
 renovate.json:
 
 ```json
@@ -745,7 +746,7 @@ renovate.json:
 }
 ```
 
-a Dockerfile:
+A Dockerfile:
 
 ```dockerfile
 FROM amd64/ubuntu:18.04
@@ -758,7 +759,7 @@ ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
 If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
 This can be used to narrow down the search area to prevent multiple matches.
 But the `recursive` strategy still allows the matching of multiple dependencies as described below.
-All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
+All matches of the first `matchStrings` pattern are detected, then each of these matches will be used as basis for the input for the next `matchStrings` pattern, and so on.
 If the next `matchStrings` pattern has multiple matches then it will split again.
 This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
 
@@ -820,10 +821,11 @@ example.json:
 
 #### combination
 
-This option allows the possibility to combine the values of multiple lines inside a file.
-While using multiple lines is also possible using both other `matchStringStrategy` values, the `combination` approach is less susceptible to white space or line breaks stopping a match.
+You may use this option to combine the values of multiple lines inside a file.
+You can combine multiple lines with `matchStringStrategy` values, but the `combination` approach is less susceptible to white space or line breaks stopping a match.
 
-`combination` will only match at most one dependency per file, so if you want to update multiple dependencies using `combination` you have to define multiple custom managers.
+`combination` can only match _one_ dependency per file.
+To update multiple dependencies with `combination` you must define multiple custom managers.
 
 Matched group values will be merged to form a single dependency.
 
@@ -855,7 +857,7 @@ renovate.json:
 }
 ```
 
-Ansible variable file ( yaml ):
+Ansible variable file (YAML):
 
 ```yaml
 prometheus_image: "prom/prometheus"  // a comment
@@ -914,14 +916,14 @@ Allows overwriting how the matched string is replaced.
 This allows for some migration strategies.
 E.g. moving from one Docker image repository to another one.
 
-helm-values.yaml:
+`helm-values.yaml`:
 
 ```yaml
 # The image of the service <registry>/<repo>/<image>:<tag>
 image: my.old.registry/aRepository/andImage:1.18-alpine
 ```
 
-regex definition:
+The regex definition:
 
 ```json
 {
@@ -949,7 +951,7 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 
 ## customizeDashboard
 
-You can use the `customizeDashboard` object to customize dependency dashboard.
+You may use the `customizeDashboard` object to customize the Dependency Dashboard.
 
 Supported fields:
 
@@ -958,7 +960,8 @@ Supported fields:
 ### defaultRegistryUrlTemplate
 
 `registryUrl` which is used, if none is return by extraction.
-As this is a template it can be dynamically set. E.g. add the `packageName` as part of the URL:
+As this is a template it can be dynamically set.
+E.g. add the `packageName` as part of the URL:
 
 ```json5
 {
