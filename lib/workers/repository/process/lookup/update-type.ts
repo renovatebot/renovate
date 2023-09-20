@@ -4,6 +4,7 @@ import type * as allVersioning from '../../../../modules/versioning';
 export interface UpdateTypeConfig {
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
+  separateMultipleMinor?: boolean;
   separateMinorPatch?: boolean;
 }
 

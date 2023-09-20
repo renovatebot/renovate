@@ -1384,6 +1384,19 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(3);
     });
 
+    it('should upgrade to 16 minors', async () => {
+      config.currentValue = '1.0.0';
+      config.separateMultipleMinor = true;
+      config.packageName = 'webpack';
+      config.datasource = NpmDatasource.id;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(16);
+    });
+
     it('does not jump  major unstable', async () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
