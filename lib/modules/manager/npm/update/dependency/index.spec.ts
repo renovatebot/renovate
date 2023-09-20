@@ -347,5 +347,33 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(testContent).toEqual(expected);
     });
+
+    it('handles override dependency object where lastParent === depName', () => {
+      const upgrade = {
+        depType: 'overrides',
+        depName: 'typescript',
+        newValue: '0.60.0',
+        managerData: { parents: ['typescript'] },
+      };
+      const overrideDependencies = `{
+        "overrides": {
+          "typescript": {
+           ".": "3.0.0"
+         }
+        }
+      }`;
+      const expected = `{
+        "overrides": {
+          "typescript": {
+           ".": "0.60.0"
+         }
+        }
+      }`;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: overrideDependencies,
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
+    });
   });
 });
