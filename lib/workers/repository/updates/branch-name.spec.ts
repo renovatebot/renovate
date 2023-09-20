@@ -44,6 +44,23 @@ describe('workers/repository/updates/branch-name', () => {
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('major-2-some-group-slug-grouptopic');
     });
+
+    it('separates minor with groups', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'minor',
+        separateMultipleMinor: true,
+        newMinor: 2.1,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('minor-2.1-some-group-slug-grouptopic');
+    });
+
     it('separates minor when separateMultipleMinor=true', () => {
       const upgrade: RenovateConfig = {
         branchName:
@@ -122,7 +139,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{else}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}{{/if}}',
         depName: 'dep',
         group: {},
       };
@@ -142,7 +159,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{else}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}{{/if}}',
         depName: 'dep',
         group: {},
       };
