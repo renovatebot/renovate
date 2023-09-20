@@ -14,7 +14,7 @@ Also read the documentation for the [`customManagers` config option](https://doc
 The first two required fields are `fileMatch` and `matchStrings`:
 
 - `fileMatch` works the same as any manager
-- `matchStrings` is a `regex` managers concept and is used for configuring a regular expression with named capture groups
+- `matchStrings` is a `regex` manager concept and is used for configuring a regular expression with named capture groups
 
 Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
 
