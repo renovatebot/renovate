@@ -9,7 +9,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
-import {logger, mocked} from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
@@ -18,7 +18,7 @@ const hostRules = mocked(_hostRules);
 const googleAuth = mocked(_googleAuth);
 
 jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('google-auth-library')
+jest.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
 
@@ -360,18 +360,24 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports Google ADC authentication for gcr', async () => {
-      httpMock.scope(gcrUrl)
+      httpMock
+        .scope(gcrUrl)
         .get('/')
         .reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .head('/some-project/some-package/manifests/some-tag')
-        .matchHeader('authorization', 'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+        )
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue("some-token")
-      })));
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
 
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
@@ -393,12 +399,17 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .head('/some-project/some-repo/some-package/manifests/some-tag')
-        .matchHeader('authorization', 'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+        )
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue("some-token")
-      })));
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
 
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
@@ -421,12 +432,17 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .head('/some-project/some-package/manifests/some-tag')
-        .matchHeader('authorization', 'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue("some-token")
-      })));
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
 
       const res = await getDigest(
         {
@@ -447,12 +463,17 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .head('/some-project/some-repo/some-package/manifests/some-tag')
-        .matchHeader('authorization', 'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue("some-token")
-      })));
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
 
       const res = await getDigest(
         {
@@ -480,8 +501,7 @@ describe('modules/datasource/docker/index', () => {
       const res = await getDigest(
         {
           datasource: 'docker',
-          packageName:
-            'eu.gcr.io/some-project/some-package',
+          packageName: 'eu.gcr.io/some-project/some-package',
         },
         'some-tag'
       );
@@ -517,14 +537,15 @@ describe('modules/datasource/docker/index', () => {
       httpMock.scope(gcrUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
-      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue(undefined)
-      })));
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        }))
+      );
       const res = await getDigest(
         {
           datasource: 'docker',
-          packageName:
-            'eu.gcr.io/some-project/some-package',
+          packageName: 'eu.gcr.io/some-project/some-package',
         },
         'some-tag'
       );
@@ -537,9 +558,11 @@ describe('modules/datasource/docker/index', () => {
       httpMock.scope(garUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
-      googleAuth.GoogleAuth.mockImplementationOnce(jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockRejectedValue("some-error")
-      })));
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockRejectedValue('some-error'),
+        }))
+      );
       const res = await getDigest(
         {
           datasource: 'docker',
