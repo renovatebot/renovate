@@ -961,10 +961,11 @@ Supported fields:
 
 This field is used to build a `registryUrl` for the dependency.
 It is not needed if either:
- - The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
- - The regex groups you specified as part of the matching already include a `registryUrl` group
-As this is a template it can be dynamically set.
-E.g. add the `packageName` as part of the URL:
+
+- The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
+- The regex groups you specified as part of the matching already include a `registryUrl` group
+  As this is a template it can be dynamically set.
+  E.g. add the `packageName` as part of the URL:
 
 ```json5
 {
