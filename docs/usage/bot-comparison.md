@@ -16,7 +16,6 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 | Upgrades common monorepo packages at once | No                                                                                                                                                                           | Yes                                                                                                                            |
 | Officially supported platforms            | GitHub only                                                                                                                                                                  | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](https://docs.renovatebot.com/#supported-platforms)                    |
 | Supported languages                       | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) | [List for Renovate](https://docs.renovatebot.com/modules/manager/)                                                             |
-| Customizability                           | Low                                                                                                                                                                          | High                                                                                                                           |
 | Show changelogs                           | Yes                                                                                                                                                                          | Yes                                                                                                                            |
 | Compatibility score badges                | One badge with overall compatibility score                                                                                                                                   | Four badges showing: Age, Adoption, Passing, Confidence                                                                        |
 | Built-in to GitHub                        | Yes                                                                                                                                                                          | No, requires app or self-hosting                                                                                               |
@@ -65,13 +64,6 @@ Read the [list of Renovate platforms](https://docs.renovatebot.com/modules/platf
 
 - [Renovate's supported managers](https://docs.renovatebot.com/modules/manager/)
 - [Dependabot's supported repositories and ecosystems](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems)
-
-### Customizability
-
-Both Renovate and Dependabot come with good default settings.
-
-Renovate gives you more control over _when_ and _how_ you'll get the updates.
-Renovate gives you tools to reduce the "update noise", read our [Noise reduction](./noise-reduction.md) page to learn more.
 
 ### Show changelogs
 
