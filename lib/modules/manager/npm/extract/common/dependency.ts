@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
+import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { NpmDatasource } from '../../../../datasource/npm';
@@ -97,15 +98,22 @@ export function extractDependency(
   if (dep.currentValue.startsWith('npm:')) {
     dep.npmPackageAlias = true;
     const valSplit = dep.currentValue.replace('npm:', '').split('@');
-    if (valSplit.length === 2) {
+    if (valSplit.length === 1) {
+      dep.packageName = depName;
+      dep.currentValue = valSplit[0];
+    } else if (valSplit.length === 2) {
       dep.packageName = valSplit[0];
       dep.currentValue = valSplit[1];
     } else if (valSplit.length === 3) {
       dep.packageName = valSplit[0] + '@' + valSplit[1];
       dep.currentValue = valSplit[2];
     } else {
-      dep.packageName = depName;
-      dep.currentValue = valSplit[0];
+      logger.debug(
+        'Invalid npm package alias for dependency: ' +
+          depName +
+          ':' +
+          dep.currentValue
+      );
     }
   }
   if (dep.currentValue.startsWith('file:')) {
