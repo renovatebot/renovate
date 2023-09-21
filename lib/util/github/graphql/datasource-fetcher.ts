@@ -8,10 +8,12 @@ import type {
   GithubHttpOptions,
 } from '../../http/github';
 import type { HttpResponse } from '../../http/types';
+import { parseUrl } from '../../url';
 import { getApiBaseUrl } from '../url';
 import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy';
 import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy';
 import type {
+  FastCache,
   GithubDatasourceItem,
   GithubGraphqlCacheStrategy,
   GithubGraphqlDatasourceAdapter,
@@ -47,12 +49,14 @@ export class GithubGraphqlDatasourceFetcher<
   static async query<T, U extends GithubDatasourceItem>(
     config: GithubPackageConfig,
     http: GithubHttp,
-    adapter: GithubGraphqlDatasourceAdapter<T, U>
+    adapter: GithubGraphqlDatasourceAdapter<T, U>,
+    fastCache: FastCache | null
   ): Promise<U[]> {
     const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,
-      adapter
+      adapter,
+      fastCache
     );
     const items = await instance.getItems();
     return items;
@@ -76,7 +80,8 @@ export class GithubGraphqlDatasourceFetcher<
     private datasourceAdapter: GithubGraphqlDatasourceAdapter<
       GraphqlItem,
       ResultItem
-    >
+    >,
+    private fastCache: FastCache | null
   ) {
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
@@ -160,8 +165,9 @@ export class GithubGraphqlDatasourceFetcher<
     this.queryCount += 1;
 
     if (this.isCacheable === null) {
-      // For values other than explicit `false`,
+      // For `isRepoPrivate` values other than explicit `false`,
       // we assume that items can not be cached.
+      // Hence, `isCacheable` is `true` only for public repositories.
       this.isCacheable = data.repository.isRepoPrivate === false;
     }
 
@@ -283,7 +289,21 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   async getItems(): Promise<ResultItem[]> {
-    const res = await this.doConcurrentQuery();
+    const isGithubHost = parseUrl(this.baseUrl)?.host === 'api.github.com';
+    const cacheKey = `${this.getCacheNs()}:${this.getCacheKey()}`;
+    if (isGithubHost && this.fastCache) {
+      const cachedValue = this.fastCache.get(cacheKey);
+      if (cachedValue) {
+        return cachedValue;
+      }
+    }
+
+    const res = await this.doPaginatedQuery();
+
+    if (this.isCacheable && isGithubHost && this.fastCache) {
+      this.fastCache.set(cacheKey, res);
+    }
+
     return res;
   }
 }

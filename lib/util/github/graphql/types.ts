@@ -1,3 +1,5 @@
+import type { LRUCache } from 'lru-cache';
+
 export interface GithubDatasourceItem {
   version: string;
   releaseTimestamp: string;
@@ -100,3 +102,5 @@ export interface GithubGraphqlCacheStrategy<
   reconcile(items: GithubItem[]): Promise<boolean>;
   finalize(): Promise<GithubItem[]>;
 }
+
+export type FastCache = LRUCache<string, any>;
