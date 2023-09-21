@@ -289,7 +289,6 @@ describe('config/validation', () => {
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
         labels: 5 as any,
-        prCommitsPerRunLimit: false as any,
         semanticCommitType: 7 as any,
         lockFileMaintenance: false as any,
         extends: [':timezone(Europe/Brussel)'],
@@ -317,7 +316,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(15);
+      expect(errors).toHaveLength(14);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {

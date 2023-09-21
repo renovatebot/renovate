@@ -67,10 +67,6 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
     "topic": "Configuration Error",
   },
   {
-    "message": "Configuration option \`prCommitsPerRunLimit\` should be an integer. Found: false (boolean)",
-    "topic": "Configuration Error",
-  },
-  {
     "message": "Configuration option \`semanticCommitType\` should be a string",
     "topic": "Configuration Error",
   },

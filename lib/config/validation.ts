@@ -31,6 +31,15 @@ let optionGlobals: Record<string, RenovateOptions['globalOnly']>;
 
 const managerList = getManagerList();
 
+// allow these global options in repo config
+const allowedGlobalOptions = [
+  'customEnvVariables',
+  'migratePresets',
+  'productLinks',
+  'secrets',
+  'customizeDashboard',
+];
+
 const topLevelObjects = managerList;
 
 const ignoredNodes = [
@@ -141,15 +150,15 @@ export async function validateConfig(
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
     }
-    if (optionGlobals[key]) {
-      if (!isFileConfig) {
-        errors.push({
-          topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
-        });
-      } else {
-        validateGlobalOption(key, val, currentPath, errors);
-      }
+    if (
+      optionGlobals[key] &&
+      !isFileConfig &&
+      !allowedGlobalOptions.includes(key)
+    ) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+      });
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -622,15 +631,7 @@ export async function validateConfig(
                   }
                 }
               }
-            } else if (
-              [
-                'customEnvVariables',
-                'migratePresets',
-                'productLinks',
-                'secrets',
-                'customizeDashboard',
-              ].includes(key)
-            ) {
+            } else if (allowedGlobalOptions.includes(key)) {
               const res = validatePlainObject(val);
               if (res !== true) {
                 errors.push({
@@ -716,10 +717,3 @@ function validateRegexManagerFields(
     }
   }
 }
-
-function validateGlobalOption(
-  key: string,
-  val: unknown,
-  currentPath: string,
-  errors: ValidationMessage[]
-): void {}
