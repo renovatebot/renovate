@@ -20,7 +20,8 @@ async function validate(
   desc: string,
   config: RenovateConfig,
   strict: boolean,
-  isPreset = false
+  isPreset = false,
+  isFileConfig = false
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -36,7 +37,12 @@ async function validate(
     }
   }
   const massagedConfig = massageConfig(migratedConfig);
-  const res = await validateConfig(massagedConfig, isPreset);
+  const res = await validateConfig(
+    massagedConfig,
+    isPreset,
+    undefined,
+    isFileConfig
+  );
   if (res.errors.length) {
     logger.error(
       { file: desc, errors: res.errors },
@@ -134,7 +140,7 @@ type PackageJson = {
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validate(file, fileConfig, strict);
+          await validate(file, fileConfig, strict, true);
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;

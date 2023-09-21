@@ -27,6 +27,7 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, RenovateOptions['parent']>;
+let optionGlobals: Record<string, RenovateOptions['globalOnly']>;
 
 const managerList = getManagerList();
 
@@ -97,7 +98,8 @@ export function getParentName(parentPath: string | undefined): string {
 export async function validateConfig(
   config: RenovateConfig,
   isPreset?: boolean,
-  parentPath?: string
+  parentPath?: string,
+  isFileConfig?: boolean
 ): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
@@ -113,6 +115,13 @@ export async function validateConfig(
       }
     });
   }
+  if (!optionGlobals) {
+    optionGlobals = {};
+    options.forEach((option) => {
+      optionGlobals[option.name] = option.globalOnly;
+    });
+  }
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -131,6 +140,16 @@ export async function validateConfig(
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
+    }
+    if (optionGlobals[key]) {
+      if (!isFileConfig) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        });
+      } else {
+        validateGlobalOption(key, val, currentPath, errors);
+      }
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -697,3 +716,10 @@ function validateRegexManagerFields(
     }
   }
 }
+
+function validateGlobalOption(
+  key: string,
+  val: unknown,
+  currentPath: string,
+  errors: ValidationMessage[]
+): void {}
