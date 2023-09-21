@@ -125,9 +125,11 @@ export async function validateConfig(
     });
   }
   if (!optionGlobals) {
+    optionGlobals = new Set<string>();
     for (const option of options) {
-      optionGlobals = new Set<string>();
-      if (option.globalOnly) optionGlobals.add(option.name);
+      if (option.globalOnly) {
+        optionGlobals.add(option.name);
+      }
     }
   }
 
