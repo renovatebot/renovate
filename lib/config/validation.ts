@@ -22,6 +22,8 @@ import type {
   ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import { CreateVpnConnectionRequestFilterSensitiveLog } from '@aws-sdk/client-ec2';
+import { ScanningConfigurationFailureCode } from '@aws-sdk/client-ecr';
 
 const options = getOptions();
 
@@ -157,6 +159,11 @@ export async function validateConfig(
       !isGlobalConfig &&
       !allowedGlobalOptions.includes(key)
     ) {
+      // token is a global config option
+      // and a field of repo config option hostRules.encrypted
+      if (key === 'token' && parentPath?.includes('hostRules')) {
+        continue;
+      }
       errors.push({
         topic: 'Configuration Error',
         message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
