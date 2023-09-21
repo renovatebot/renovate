@@ -41,7 +41,6 @@ function mockEcrAuthReject(msg: string) {
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
-    googleAuth.GoogleAuth.mockReset();
     ecrMock.reset();
     hostRules.find.mockReturnValue({
       username: 'some-username',
@@ -492,7 +491,6 @@ describe('modules/datasource/docker/index', () => {
         .scope(gcrUrl)
         .get('/')
         .reply(200, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .head('/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
@@ -514,7 +512,6 @@ describe('modules/datasource/docker/index', () => {
         .scope(garUrl)
         .get('/')
         .reply(200, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         })
         .head('/some-project/some-repo/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
