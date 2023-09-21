@@ -32,9 +32,9 @@ describe('config/validation', () => {
       const config = {
         binarySource: 'something',
       };
-      const { warnings } = await configValidation.validateConfig(config);
-      expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchSnapshot([
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot([
         {
           message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
         },
