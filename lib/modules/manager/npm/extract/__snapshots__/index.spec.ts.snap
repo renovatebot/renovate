@@ -352,10 +352,38 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
       "prettyDepType": "dependency",
     },
     {
-      "currentValue": "npm:foo",
+      "currentValue": "^1.2.3",
+      "datasource": "npm",
       "depName": "c",
       "depType": "dependencies",
       "npmPackageAlias": true,
+      "packageName": "c",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "1.2.3",
+      "datasource": "npm",
+      "depName": "d",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "packageName": "d",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "1.x.x",
+      "datasource": "npm",
+      "depName": "e",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "packageName": "e",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "foo",
+      "depName": "f",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "packageName": "f",
       "prettyDepType": "dependency",
       "skipReason": "unspecified-version",
     },
@@ -375,7 +403,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": false,
+  "skipInstalls": true,
 }
 `;
 

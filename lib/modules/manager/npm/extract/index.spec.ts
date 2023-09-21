@@ -761,7 +761,10 @@ describe('modules/manager/npm/extract/index', () => {
         dependencies: {
           a: 'npm:foo@1',
           b: 'npm:@foo/bar@1.2.3',
-          c: 'npm:foo',
+          c: 'npm:^1.2.3',
+          d: 'npm:1.2.3',
+          e: 'npm:1.x.x',
+          f: 'npm:foo',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -774,7 +777,15 @@ describe('modules/manager/npm/extract/index', () => {
         deps: [
           { packageName: 'foo' },
           { packageName: '@foo/bar' },
-          { depName: 'c' },
+          { packageName: 'c', currentValue: '^1.2.3' },
+          { packageName: 'd', currentValue: '1.2.3' },
+          { packageName: 'e', currentValue: '1.x.x' },
+          {
+            packageName: 'f',
+            currentValue: 'foo',
+            npmPackageAlias: true,
+            skipReason: 'unspecified-version',
+          },
         ],
       });
     });

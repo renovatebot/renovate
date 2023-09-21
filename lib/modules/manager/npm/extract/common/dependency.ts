@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
-import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { NpmDatasource } from '../../../../datasource/npm';
@@ -105,7 +104,8 @@ export function extractDependency(
       dep.packageName = valSplit[0] + '@' + valSplit[1];
       dep.currentValue = valSplit[2];
     } else {
-      logger.debug('Invalid npm package alias: ' + dep.currentValue);
+      dep.packageName = depName;
+      dep.currentValue = valSplit[0];
     }
   }
   if (dep.currentValue.startsWith('file:')) {
