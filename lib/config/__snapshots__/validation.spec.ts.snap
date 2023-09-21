@@ -47,6 +47,10 @@ exports[`config/validation validateConfig(config) catches invalid templates 1`] 
 exports[`config/validation validateConfig(config) errors for all types 1`] = `
 [
   {
+    "message": "Configuration option \`azureWorkItemId\` should be an integer. Found: false (boolean)",
+    "topic": "Configuration Error",
+  },
+  {
     "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
     "topic": "Configuration Error",
   },
