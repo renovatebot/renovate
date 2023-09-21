@@ -22,8 +22,6 @@ import type {
   ValidationResult,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
-import { CreateVpnConnectionRequestFilterSensitiveLog } from '@aws-sdk/client-ec2';
-import { ScanningConfigurationFailureCode } from '@aws-sdk/client-ecr';
 
 const options = getOptions();
 
