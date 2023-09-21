@@ -155,7 +155,7 @@ export async function validateConfig(
       !isFileConfig &&
       !allowedGlobalOptions.includes(key)
     ) {
-      errors.push({
+      warnings.push({
         topic: 'Configuration Error',
         message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
       });
