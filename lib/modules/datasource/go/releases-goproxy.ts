@@ -59,7 +59,7 @@ export class GoProxyDatasource extends Datasource {
         }
 
         const res = await this.getVersionsWithInfo(url, packageName);
-        if (res.releases.length) {
+        if (res.releases.length || res.tags?.latest) {
           result = res;
           try {
             const datasource = await BaseGoDatasource.getDatasource(
@@ -72,7 +72,9 @@ export class GoProxyDatasource extends Datasource {
           } catch (err) {
             logger.trace({ err }, `Can't get datasource for ${packageName}`);
           }
-          break;
+          if (result.releases.length) {
+            break;
+          }
         }
       } catch (err) {
         const statusCode = err?.response?.statusCode;
