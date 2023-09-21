@@ -490,8 +490,7 @@ describe('modules/datasource/docker/index', () => {
       httpMock
         .scope(gcrUrl)
         .get('/')
-        .reply(200, '', {
-        })
+        .reply(200, '', {})
         .head('/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
@@ -511,8 +510,7 @@ describe('modules/datasource/docker/index', () => {
       httpMock
         .scope(garUrl)
         .get('/')
-        .reply(200, '', {
-        })
+        .reply(200, '', {})
         .head('/some-project/some-repo/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
