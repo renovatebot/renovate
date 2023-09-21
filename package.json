@@ -201,6 +201,7 @@
     "glob": "10.3.4",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
+    "google-auth-library": "9.0.0",
     "got": "11.8.6",
     "graph-data-structure": "3.3.0",
     "handlebars": "4.7.8",
