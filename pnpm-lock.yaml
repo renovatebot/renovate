@@ -374,8 +374,8 @@ importers:
         specifier: 1.11.3
         version: 1.11.3
       '@types/breejs__later':
-        specifier: 4.1.2
-        version: 4.1.2
+        specifier: 4.1.3
+        version: 4.1.3
       '@types/bunyan':
         specifier: 1.8.8
         version: 1.8.8
@@ -3759,8 +3759,8 @@ packages:
       '@babel/types': 7.22.19
     dev: true
 
-  /@types/breejs__later@4.1.2:
-    resolution: {integrity: sha512-qTLhBWIdaFcBhYu/2eg2B4bjXXtGKzKfN+Hpmr3A2fyXJx4hx1nMcP84NpfYAjZ8ktKsXhu37/P41W3x/cP7jg==}
+  /@types/breejs__later@4.1.3:
+    resolution: {integrity: sha512-VfelZ1XShSzkthxVm98S0Jn1SXQk5Umk11EODMVdVzU8piGToVVHlVfjF748sWb8Nsuh0Ajdb2mW9IL2ZuWv1g==}
     dev: true
 
   /@types/bunyan@1.8.8:
