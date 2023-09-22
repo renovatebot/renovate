@@ -64,7 +64,7 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
         if (res.tags?.latest) {
-          result = res
+          result = res;
         }
       } catch (err) {
         const statusCode = err?.response?.statusCode;
@@ -80,17 +80,15 @@ export class GoProxyDatasource extends Datasource {
       }
     }
 
-    if (result && ! result.sourceUrl) {
+    if (result && !result.sourceUrl) {
       try {
-        const datasource = await BaseGoDatasource.getDatasource(
-          packageName
-        );
+        const datasource = await BaseGoDatasource.getDatasource(packageName);
         const sourceUrl = getSourceUrl(datasource);
         if (sourceUrl) {
           result.sourceUrl = sourceUrl;
         }
       } catch (err) {
-        logger.trace({err}, `Can't get datasource for ${packageName}`);
+        logger.trace({ err }, `Can't get datasource for ${packageName}`);
       }
     }
 
