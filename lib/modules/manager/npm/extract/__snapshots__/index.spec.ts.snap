@@ -387,6 +387,14 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
       "prettyDepType": "dependency",
       "skipReason": "unspecified-version",
     },
+    {
+      "currentValue": "npm:@foo/@bar/@1.2.3",
+      "depName": "g",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "prettyDepType": "dependency",
+      "skipReason": "unspecified-version",
+    },
   ],
   "extractedConstraints": {},
   "managerData": {
@@ -403,7 +411,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
   },
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "skipInstalls": true,
+  "skipInstalls": false,
 }
 `;
 

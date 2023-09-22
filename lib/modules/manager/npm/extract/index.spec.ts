@@ -765,6 +765,7 @@ describe('modules/manager/npm/extract/index', () => {
           d: 'npm:1.2.3',
           e: 'npm:1.x.x',
           f: 'npm:foo',
+          g: 'npm:@foo/@bar/@1.2.3',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -772,6 +773,9 @@ describe('modules/manager/npm/extract/index', () => {
         pJsonStr,
         'package.json',
         defaultExtractConfig
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"'
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -783,6 +787,12 @@ describe('modules/manager/npm/extract/index', () => {
           {
             packageName: 'f',
             currentValue: 'foo',
+            npmPackageAlias: true,
+            skipReason: 'unspecified-version',
+          },
+          {
+            depName: 'g',
+            currentValue: 'npm:@foo/@bar/@1.2.3',
             npmPackageAlias: true,
             skipReason: 'unspecified-version',
           },
