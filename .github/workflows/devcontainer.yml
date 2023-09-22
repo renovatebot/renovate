@@ -9,6 +9,9 @@ on:
       - reopened
       - ready_for_review
 
+permissions:
+  contents: read
+
 jobs:
   devcontainer-test:
     runs-on: ubuntu-latest
