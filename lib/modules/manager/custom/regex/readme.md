@@ -14,7 +14,7 @@ Also read the documentation for the [`customManagers` config option](https://doc
 The first two required fields are `fileMatch` and `matchStrings`:
 
 - `fileMatch` works the same as any manager
-- `matchStrings` is a `regex` manager concept and is used for configuring a regular expression with named capture groups
+- `matchStrings` is a `regex` custom manager concept and is used for configuring a regular expression with named capture groups
 
 Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
 
@@ -79,7 +79,7 @@ Continuing the above example with Yarn, here is the full Renovate config:
 ### Advanced Capture
 
 Say your `Dockerfile` has many `ENV` variables that you want to keep up-to-date.
-But you don't want to write a `customManagers` rule for _each_ variable.
+But you don't want to write a regex custom manager rule for _each_ variable.
 Instead you enhance your `Dockerfile` like this:
 
 ```Dockerfile

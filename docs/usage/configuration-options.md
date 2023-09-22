@@ -652,7 +652,7 @@ For more details see the [`custom` datasource documentation](/modules/datasource
 
 ## customManagers
 
-Use `customManagers` entries to configure the custom managers in Renovate.
+Use `customManagers`(previously `regexManagers`) entries to configure the custom managers in Renovate.
 
 You can define custom managers to handle:
 
@@ -674,7 +674,7 @@ We recommend you use only _one_ of these methods, or you'll get confused.
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
+For more details and examples about it, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 <!-- prettier-ignore -->
@@ -963,7 +963,7 @@ This field is used to build a `registryUrl` for the dependency.
 It is not needed if either:
 
 - The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
-- The regex groups you specified as part of the matching already include a `registryUrl` group
+- The matching groups you specified as part of the matching already include a `registryUrl` group
   As this is a template it can be dynamically set.
   E.g. add the `packageName` as part of the URL:
 

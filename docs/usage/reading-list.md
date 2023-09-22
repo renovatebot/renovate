@@ -58,7 +58,7 @@ Feel free to read up on anything that looks interesting to you.
 First, complete the "Beginners" and the "Intermediate" reading list.
 Then read:
 
-- Define your own custom manager with [`customManagers`](./configuration-options.md#custommanagers)
+- Define your own custom manager with [`customManagers`](./configuration-options.md#custommanagers)(previously `regexManagers`)
 - [Shareable config presets](./config-presets.md)
 
 ## Self-hosting Renovate
