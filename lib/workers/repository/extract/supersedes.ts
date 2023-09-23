@@ -22,6 +22,7 @@ export function processSupersedesManagers(
           supercededManagerResults.packageFiles =
             supercededManagerResults.packageFiles.filter((packageFile) => {
               if (
+                !packageFile.lockFiles?.length &&
                 supercedingPackageFileNames.includes(packageFile.packageFile)
               ) {
                 return false;

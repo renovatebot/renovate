@@ -148,6 +148,7 @@ export function parsePreset(input: string): ParsedPreset {
     'regexManagers',
     'replacements',
     'schedule',
+    'security',
     'workarounds',
   ];
   if (

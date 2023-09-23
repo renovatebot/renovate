@@ -44,6 +44,21 @@ export const presets: Record<string, Preset> = {
     ],
     description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
   },
+  mavenPropertyVersions: {
+    description: 'Update `*.version` properties in `pom.xml` files.',
+    regexManagers: [
+      {
+        customType: 'regex',
+        datasourceTemplate:
+          '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
+        fileMatch: ['^pom\\.xml$'],
+        matchStrings: [
+          '<!--\\s?renovate:( datasource=(?<datasource>[a-z-.]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
+        ],
+        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
+      },
+    ],
+  },
   tfvarsVersions: {
     customManagers: [
       {

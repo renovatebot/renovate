@@ -754,5 +754,28 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toBeNull();
     });
+
+    it('returns latest even if package has no releases', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(200)
+        .get('/@latest')
+        .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [],
+        sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v0.0.0-20230905200255-921286631fa9' },
+      });
+    });
   });
 });
