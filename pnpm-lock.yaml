@@ -72,8 +72,8 @@ importers:
         specifier: 1.3.7
         version: 1.3.7
       '@renovatebot/pep440':
-        specifier: 3.0.7
-        version: 3.0.7
+        specifier: 3.0.8
+        version: 3.0.8
       '@renovatebot/ruby-semver':
         specifier: 3.0.14
         version: 3.0.14
@@ -2950,8 +2950,8 @@ packages:
       - encoding
     dev: false
 
-  /@renovatebot/pep440@3.0.7:
-    resolution: {integrity: sha512-NYFLpPZxvW8//KngYm0wWEIPA1vX/JX/uWoGUfjNK74Y8gS5CxEQGHvj5ZxCIcoxa4aMtYbtLG/dcgTN4WeHww==}
+  /@renovatebot/pep440@3.0.8:
+    resolution: {integrity: sha512-Sf1B1AziXTD4tdL5dDuBjrQl/ivlNm8ACtlLj3vA4zqQ4AKAa+giYyIFKvDNiF15p8X7RBX75T96M8vd+gMsdg==}
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
