@@ -481,6 +481,7 @@ const patternGroups = {
   forge: '^@forge/',
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
+  'prometheus-simpleclient': '^io.prometheus:simpleclient',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',

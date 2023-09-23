@@ -232,4 +232,52 @@ describe('config/presets/internal/regex-managers', () => {
       });
     });
   });
+
+  describe('finds dependencies in pom.xml properties', () => {
+    const regexManager = presets['mavenPropertyVersions'].regexManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        <!-- renovate: depName=org.ow2.asm:asm -->
+        <asm.version>9.3</asm.version>
+
+        <!--renovate: depName=org.codehaus.groovy:groovy versioning=semver -->
+        <groovy.version>4.0.10</groovy.version>
+
+        <!-- renovate: datasource=docker depName=mongo -->
+        <mongo.container.version>4.4.6</mongo.container.version>        
+      `;
+
+      const res = await extractPackageFile(
+        fileContent,
+        'pom.xml',
+        regexManager!
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '9.3',
+          datasource: 'maven',
+          depName: 'org.ow2.asm:asm',
+          replaceString:
+            '<!-- renovate: depName=org.ow2.asm:asm -->\n<asm.version>9.3</asm.version>',
+        },
+        {
+          currentValue: '4.0.10',
+          datasource: 'maven',
+          depName: 'org.codehaus.groovy:groovy',
+          replaceString:
+            '<!--renovate: depName=org.codehaus.groovy:groovy versioning=semver -->\n<groovy.version>4.0.10</groovy.version>',
+          versioning: 'semver',
+        },
+        {
+          currentValue: '4.4.6',
+          datasource: 'docker',
+          depName: 'mongo',
+          replaceString:
+            '<!-- renovate: datasource=docker depName=mongo -->\n<mongo.container.version>4.4.6</mongo.container.version>',
+        },
+      ]);
+    });
+  });
 });

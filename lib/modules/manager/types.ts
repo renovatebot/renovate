@@ -154,6 +154,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   currentRawValue?: any;
   depGroup?: string;
   lockFiles?: string[];
+  manager?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;

@@ -15,7 +15,7 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
-  logger.debug({ updateArtifact }, `bun.updateArtifacts(${packageFileName})`);
+  logger.debug(`bun.updateArtifacts(${packageFileName})`);
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
 
   if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
@@ -23,7 +23,9 @@ export async function updateArtifacts(
     return null;
   }
 
-  const lockFileName = config.lockFiles?.[0];
+  // Find the first bun dependency in order to handle mixed manager updates
+  const lockFileName = updatedDeps.find((dep) => dep.manager === 'bun')
+    ?.lockFiles?.[0];
 
   if (!lockFileName) {
     logger.debug(`No ${lockFileName} found`);
