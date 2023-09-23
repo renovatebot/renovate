@@ -44,6 +44,7 @@ Start by reading:
 First, complete the "Beginners" reading list.
 Read this list _after_ experiencing Renovate's default behavior, once you really want/need to make changes to Renovate's behavior.
 
+- [Upgrade best practices](./upgrade-best-practices.md)
 - [Key concepts, presets](./key-concepts/presets.md)
 - [Key concepts, Renovate scheduling](./key-concepts/scheduling.md)
 - [Key concepts, automerge](./key-concepts/automerge.md)
