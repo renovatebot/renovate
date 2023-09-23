@@ -52,7 +52,7 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(res.body);
+  return parsePreset(res.body, fileName.includes('json5'));
 }
 
 export function getPresetFromEndpoint(

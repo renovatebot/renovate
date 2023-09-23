@@ -3,6 +3,7 @@ import { parseJsonWithFallback } from '../../util/common';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { FetchPresetConfig, Preset } from './types';
+import JSON5 from 'json5';
 
 export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_INVALID = 'invalid preset';
@@ -87,9 +88,9 @@ export async function fetchPreset({
   return jsonContent;
 }
 
-export function parsePreset(content: string): Preset {
+export function parsePreset(content: string, isJson5: boolean): Preset {
   try {
-    return parseJsonWithFallback(content);
+    return isJson5 ? JSON5.parse(content) : parseJsonWithFallback(content);
   } catch (err) {
     throw new Error(PRESET_INVALID_JSON);
   }
