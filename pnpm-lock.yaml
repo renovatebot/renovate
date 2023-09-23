@@ -566,8 +566,8 @@ importers:
         specifier: 0.9.2
         version: 0.9.2
       memfs:
-        specifier: 4.3.0
-        version: 4.3.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
+        specifier: 4.4.0
+        version: 4.4.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
       nock:
         specifier: 13.3.3
         version: 13.3.3
@@ -8313,8 +8313,8 @@ packages:
   /mdurl@1.0.1:
     resolution: {integrity: sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g==}
 
-  /memfs@4.3.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2):
-    resolution: {integrity: sha512-bOMyYalKCLeEkd5l3sYv0XIsVPQW+2oGhYm8LwD1htXS637VmIdoXVrWPxZdbJlEogDIrTnm6wqqZBrYb7ZFPw==}
+  /memfs@4.4.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2):
+    resolution: {integrity: sha512-MFFpiLokgpA0P8ZjENj6NGlgQ0desKQD9G+3ehEbLjNVO9eXh8CKokPRdKVTo6GRjRxhzZo32TShY/1WmhpfpA==}
     engines: {node: '>= 4.0.0'}
     peerDependencies:
       tslib: '2'
