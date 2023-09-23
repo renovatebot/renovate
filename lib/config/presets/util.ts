@@ -1,9 +1,9 @@
+import JSON5 from 'json5';
 import { logger } from '../../logger';
 import { parseJsonWithFallback } from '../../util/common';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { FetchPresetConfig, Preset } from './types';
-import JSON5 from 'json5';
 
 export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_INVALID = 'invalid preset';
