@@ -197,7 +197,6 @@ function extractDependency({
     }
     return {
       depName: `${groupName}:${name}`,
-      groupName,
       currentValue,
       managerData: {
         fileReplacePosition:
@@ -222,27 +221,24 @@ function extractDependency({
       skipReason,
     };
   }
-  const versionRef = isVersionPointer(descriptor.version)
-    ? normalizeAlias(descriptor.version.ref)
-    : null;
-  if (isArtifactDescriptor(descriptor)) {
-    const { group, name } = descriptor;
-    const groupName = is.nullOrUndefined(versionRef) ? group : versionRef; // usage of common variable should have higher priority than other values
-    return {
-      depName: `${group}:${name}`,
-      groupName,
-      currentValue,
-      managerData: { fileReplacePosition },
-    };
-  }
-  const [depGroupName, name] = descriptor.module.split(':');
-  const groupName = is.nullOrUndefined(versionRef) ? depGroupName : versionRef;
-  const dependency = {
-    depName: `${depGroupName}:${name}`,
-    groupName,
+
+  const dependency: PackageDependency<GradleManagerData> = {
     currentValue,
     managerData: { fileReplacePosition },
   };
+
+  if (isArtifactDescriptor(descriptor)) {
+    const { group, name } = descriptor;
+    dependency.depName = `${group}:${name}`;
+  } else {
+    const [depGroupName, name] = descriptor.module.split(':');
+    dependency.depName = `${depGroupName}:${name}`;
+  }
+
+  if (isVersionPointer(descriptor.version)) {
+    dependency.groupName = normalizeAlias(descriptor.version.ref);
+  }
+
   return dependency;
 }
 

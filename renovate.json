@@ -26,12 +26,13 @@
       "groupName": "jest monorepo"
     },
     {
-      "matchPaths": ["**/__fixtures__/**"],
+      "matchFileNames": ["**/__fixtures__/**"],
       "enabled": false
     }
   ],
   "regexManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["config/options/index.ts"],
       "matchStrings": [
         "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"

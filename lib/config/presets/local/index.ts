@@ -48,7 +48,7 @@ export function getPreset({
     repo,
     presetName,
     presetPath,
-    // TODO: fix type #7154
+    // TODO: fix type #22198
     endpoint!,
     tag
   );

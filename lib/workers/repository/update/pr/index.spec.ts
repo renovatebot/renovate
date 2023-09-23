@@ -77,7 +77,6 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
     });
@@ -356,7 +355,7 @@ describe('workers/repository/update/pr/index', () => {
 
     describe('dry-run', () => {
       beforeEach(() => {
-        GlobalConfig.set({ dryRun: true });
+        GlobalConfig.set({ dryRun: 'full' });
       });
 
       it('dry-runs PR creation', async () => {

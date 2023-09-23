@@ -114,10 +114,9 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         "
       `);
       expect(removedSections[0].value).toMatchInlineSnapshot(`
-        "string-width@^1.0.1:
-          version "1.0.2"
-          resolved "https://registry.yarnpkg.com/string-width/-/string-width-1.0.2.tgz#118bdf5b8cdc51a2a7e70d211e07e2b0b9b107d3"
-          integrity sha1-EYvfW4zcUaKn5w0hHgfisLmxB9M=
+        "  version "2.0.0"
+          resolved "https://registry.yarnpkg.com/string-width/-/string-width-2.1.1.tgz#ab93f27a8dc13d28cac815c462143a6d9012ae9e"
+          integrity sha512-nOqH59deCq9SRHlxq1Aw85Jnt4w6KvLKqWVik6oA9ZklXLNIOlqg4F2yrT1MVaTjAqvVwdfeZ7w7aCvJD7ugkw==
         "
       `);
     });

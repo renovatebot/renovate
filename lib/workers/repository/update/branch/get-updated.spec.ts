@@ -476,6 +476,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: '',
         bumpVersion: 'patch',
         manager: 'npm',
+        packageFileVersion: 'old version',
       });
       npm.updateDependency.mockReturnValue('old version');
       npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
@@ -497,6 +498,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: '',
         bumpVersion: 'patch',
         manager: 'helmv3',
+        packageFileVersion: '0.0.1',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
       helmv3.bumpPackageVersion.mockReturnValue({

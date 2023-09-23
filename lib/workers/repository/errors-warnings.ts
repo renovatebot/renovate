@@ -1,7 +1,8 @@
-// TODO #7154
+// TODO #22198
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
+import { coerceArray } from '../../util/array';
 import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
@@ -39,10 +40,10 @@ function getDepWarnings(
   const warningFiles: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
     for (const file of files ?? []) {
-      // TODO: remove condition when type is fixed (#7154)
+      // TODO: remove condition when type is fixed (#22198)
       if (file.packageFile) {
-        for (const dep of file.deps ?? []) {
-          for (const w of dep.warnings ?? []) {
+        for (const dep of coerceArray(file.deps)) {
+          for (const w of coerceArray(dep.warnings)) {
             const message = w.message;
             if (!warnings.includes(message)) {
               warnings.push(message);
@@ -54,6 +55,9 @@ function getDepWarnings(
         }
       }
     }
+  }
+  if (warnings.length) {
+    logger.warn({ warnings, files: warningFiles }, 'Package lookup failures');
   }
   return { warnings, warningFiles };
 }
@@ -70,7 +74,6 @@ export function getDepWarningsOnboardingPR(
   if (!warnings.length) {
     return '';
   }
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -90,7 +93,7 @@ export function getDepWarningsPR(
   config: RenovateConfig,
   dependencyDashboard?: boolean
 ): string {
-  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  const { warnings } = getDepWarnings(packageFiles);
   if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
     return '';
   }
@@ -98,7 +101,6 @@ export function getDepWarningsPR(
   if (!warnings.length) {
     return '';
   }
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );
@@ -130,7 +132,6 @@ export function getDepWarningsDashboard(
     .map((dep) => '`' + dep + '`')
     .join(', ');
 
-  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
   let warningText = emojify(
     `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
   );

@@ -103,6 +103,8 @@ RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
 }
 ```
 
+The search for repositories is case-insensitive.
+
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
@@ -123,10 +125,32 @@ If using negations, all repositories except those who match the regex are added 
 }
 ```
 
+## autodiscoverNamespaces
+
+You can use this option to autodiscover projects in specific namespaces (a.k.a. groups/organizations/workspaces).
+In contrast to `autodiscoverFilter` the filtering is done by the platform and therefore more efficient.
+
+For example:
+
+```json
+{
+  "platform": "gitlab",
+  "autodiscoverNamespaces": ["a-group", "another-group/some-subgroup"]
+}
+```
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
 topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
+
+For example:
+
+```json
+{
+  "autodiscoverTopics": ["managed-by-renovate"]
+}
+```
 
 ## baseDir
 
@@ -152,19 +176,22 @@ If the "development branch" is configured but the branch itself does not exist (
 ## binarySource
 
 Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
-By default, Renovate uses a child process to run such tools, so they must be:
 
-- installed before running Renovate
-- available in the path
+Renovate supports four possible ways to access those tools:
 
-But you can tell Renovate to use "sidecar" containers for third-party tools by setting `binarySource=docker`.
+- `global`: Uses pre-installed tools, e.g. `npm` installed via `npm install -g npm`.
+- `install` (default): Downloads and installs tools at runtime if running in a [Containerbase](https://github.com/containerbase/base) environment, otherwise falls back to `global`
+- `docker`: Runs tools inside Docker "sidecar" containers using `docker run`.
+- `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
+
+Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`.
+If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
+
+If you are building your own Renovate image, e.g. by installing Renovate using `npm`, then you will need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
+
+The `binarySource=docker` approach should not be necessary in most cases now and `binarySource=install` is recommended instead.
+If you have a use case where you cannot use `binarySource=install` but can use `binarySource=docker` then please share it in a GitHub Discussion so that the maintainers can understand it.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
-Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
-
-Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
-This mode means that Renovate will dynamically install the desired version of each tool needed.
-
-If all projects are managed by Hermit, you can tell Renovate to use the tool versions specified in each project via Hermit by setting `binarySource=hermit`.
 
 ## cacheDir
 
@@ -193,6 +220,19 @@ Results which are soft expired are reused in the following manner:
 
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+
+## cacheTtlOverride
+
+Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
+For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+```json
+{
+  "cacheTtlOverride": {
+    "datasource-docker-tags": 120
+  }
+}
+```
 
 ## checkedBranches
 
@@ -479,6 +519,12 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
+## includeMirrors
+
+By default, Renovate does not autodiscover repositories that are mirrors.
+
+Change this setting to `true` to include repositories that are mirrors as Renovate targets.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -545,7 +591,8 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 ## onboardingPrTitle
 
-Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+If you have an existing Renovate installation and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
+This is similar to what happens when you change the `onboardingBranch` config option.
 
 ## onboardingRebaseCheckbox
 
@@ -553,14 +600,26 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 When this option is `true`, Renovate will do the following during repository initialization:
 
-- Attempt to fetch the default config file (`renovate.json`)
-- Check if the file contains `"enabled": false`
+1. Try to fetch the default config file (e.g. `renovate.json`)
+1. Check if the file contains `"enabled": false`
+1. If so, skip cloning and skip the repository immediately
+
+If `onboardingConfigFileName` is set, that file name will be used instead of the default.
 
 If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
 Otherwise, it will continue as normal.
 
-This option is only useful where the ratio of disabled repos is quite high.
-It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
+`optimizeForDisabled` can make initialization quicker in cases where most repositories are disabled, but it uses an extra API call for enabled repositories.
+
+A second, advanced, use also exists when the bot global config has `extends: [":disableRenovate"]`.
+In that case, Renovate searches the repository config file for any of these configurations:
+
+- `extends: [":enableRenovate"]`
+- `ignorePresets: [":disableRenovate"]`
+- `enabled: true`
+
+If Renovate finds any of the above configurations, it continues initializing the repository.
+If not, then Renovate skips the repository without cloning it.
 
 ## password
 
@@ -687,7 +746,7 @@ Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define additional settings:
+Elements in the `repositories` array can be an object if you wish to define more settings:
 
 ```js
 {
@@ -713,7 +772,7 @@ Set this to an S3 URI to enable S3 backed repository cache.
 
 <!-- prettier-ignore -->
 !!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running Renovate within an EC2 instance in an ECS cluster. In this case, no extra environment variables are required.
     Otherwise, the following environment variables should be set for the S3 client to work.
 
 ```
@@ -812,7 +871,7 @@ For example: `:warning:` will be replaced with `⚠️`.
 You may need to set a `username` if you:
 
 - use the Bitbucket platform, or
-- use the GitHub App with CLI (required)
+- use a self-hosted GitHub App with CLI (required)
 
 If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 

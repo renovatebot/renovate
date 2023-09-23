@@ -49,7 +49,7 @@ export async function getConcurrentPrsRemaining(
       const openPrs: Pr[] = [];
       for (const { branchName } of branches) {
         try {
-          const pr = await platform.getBranchPr(branchName);
+          const pr = await platform.getBranchPr(branchName, config.baseBranch);
           if (
             pr &&
             pr.sourceBranch !== config.onboardingBranch &&
@@ -119,7 +119,7 @@ export async function getConcurrentBranchesRemaining(
 
       return concurrentRemaining;
     } catch (err) {
-      // TODO: #7154 should never throw
+      // TODO: #22198 should never throw
       logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }

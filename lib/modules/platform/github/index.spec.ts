@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
@@ -16,14 +17,15 @@ import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import { hashBody } from '../pr-body';
 import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
+import * as branch from './branch';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
 
-jest.mock('delay');
+jest.mock('timers/promises');
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http/queue');
 const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
 
@@ -32,7 +34,6 @@ const git: jest.Mocked<typeof _git> = mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -56,12 +57,53 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if fine-grained token', async () => {
+    it('should throw if using fine-grained token with GHE <3.10 ', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.9.0' });
       await expect(
-        github.initPlatform({ token: 'github_pat_XXXXXX' })
+        github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'github_pat_XXXXXX',
+        })
       ).rejects.toThrow(
-        'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
+        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.'
       );
+    });
+
+    it('should throw if using fine-grained token with GHE unknown version ', async () => {
+      httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'github_pat_XXXXXX',
+        })
+      ).rejects.toThrow(
+        'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.'
+      );
+    });
+
+    it('should support fine-grained token with GHE >=3.10', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.10.0' })
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, [{ email: 'user@domain.com' }]);
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'github_pat_XXXXXX',
+        })
+      ).toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: 'github_pat_XXXXXX',
+      });
     });
 
     it('should throw if user failure', async () => {
@@ -117,6 +159,67 @@ describe('modules/platform/github/index', () => {
           },
         ]);
       expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+    });
+
+    it('should autodetect email/user on default endpoint with GitHub App', async () => {
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({ token: 'x-access-token:ghs_123test' })
+      ).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+      expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
+    it('should throw error when cant request App information on default endpoint with GitHub App', async () => {
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' })
+      ).rejects.toThrowWithMessage(Error, 'Init: Authentication failure');
+    });
+
+    it('should autodetect email/user on custom endpoint with GitHub App', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com', {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'x-access-token:ghs_123test',
+        })
+      ).toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor:
+          'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
     });
 
     it('should support custom endpoint', async () => {
@@ -190,6 +293,33 @@ describe('modules/platform/github/index', () => {
         ]);
       const repos = await github.getRepos();
       expect(repos).toMatchSnapshot();
+    });
+
+    it('should filters repositories by topics', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user/repos?per_page=100')
+        .reply(200, [
+          {
+            full_name: 'a/b',
+            archived: false,
+            topics: [],
+          },
+          {
+            full_name: 'c/d',
+            archived: false,
+            topics: ['managed-by-renovate'],
+          },
+          {
+            full_name: 'e/f',
+            archived: true,
+            topics: ['managed-by-renovate'],
+          },
+          null,
+        ]);
+
+      const repos = await github.getRepos({ topics: ['managed-by-renovate'] });
+      expect(repos).toEqual(['c/d']);
     });
 
     it('should return an array of repos when using Github App endpoint', async () => {
@@ -912,8 +1042,6 @@ describe('modules/platform/github/index', () => {
         ])
         .head('/repos/some/repo/git/commits/123')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
-        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
@@ -926,6 +1054,7 @@ describe('modules/platform/github/index', () => {
           updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const pr = await github.getBranchPr('somebranch');
       const pr2 = await github.getBranchPr('somebranch');
@@ -1009,12 +1138,11 @@ describe('modules/platform/github/index', () => {
         ])
         .head('/repos/some/repo/git/commits/123')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
-        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(422);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getBranchPr('somebranch');
@@ -1042,9 +1170,8 @@ describe('modules/platform/github/index', () => {
           },
         ])
         .head('/repos/some/repo/git/commits/123')
-        .reply(200)
-        .head('/repos/some/repo/git/refs/heads/somebranch')
-        .reply(422);
+        .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockRejectedValueOnce('oops');
 
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.getBranchPr('somebranch');
@@ -1278,6 +1405,23 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatusCheck('somebranch', 'context-4');
       expect(res).toBeNull();
+    });
+
+    it('returns yellow if state not present in context object', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [
+          {
+            context: 'context-1',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatusCheck('somebranch', 'context-1');
+      expect(res).toBe('yellow');
     });
   });
 
@@ -3360,10 +3504,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3390,10 +3533,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3420,12 +3562,11 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(422)
         .post('/repos/some/repo/git/refs')
         .reply(200);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -3452,10 +3593,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '222' })
         .head('/repos/some/repo/git/commits/222')
         .reply(200)
-        .head('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
+      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',

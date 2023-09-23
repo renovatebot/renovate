@@ -1,4 +1,3 @@
-import hasha from 'hasha';
 import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -7,6 +6,7 @@ import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
+import { toSha256 } from '../../../util/hash';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
@@ -38,8 +38,7 @@ export class CrateDatasource extends Datasource {
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `${registryUrl}/${packageName}`,
     cacheable: ({ registryUrl }: GetReleasesConfig) =>
       CrateDatasource.areReleasesCacheable(registryUrl),
@@ -214,9 +213,7 @@ export class CrateDatasource extends Datasource {
   private static cacheDirFromUrl(url: URL): string {
     const proto = url.protocol.replace(regEx(/:$/), '');
     const host = url.hostname;
-    const hash = hasha(url.pathname, {
-      algorithm: 'sha256',
-    }).substring(0, 7);
+    const hash = toSha256(url.pathname).substring(0, 7);
 
     return `crate-registry-${proto}-${host}-${hash}`;
   }

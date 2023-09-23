@@ -21,7 +21,7 @@ If you're self-hosting or need to update private packages, complete the relevant
 
 If you're new to Renovate, you should:
 
-- Use the Mend-hosted GitHub App, or let somebody else host Renovate for you
+- Use the Mend Renovate App, or let someone else host Renovate for you
 - Stick with the `config:recommended` preset
 - Use the Dependency Dashboard (`config:recommended` enables it automatically)
 - Read the pages in the "Beginners" list
@@ -44,6 +44,7 @@ Start by reading:
 First, complete the "Beginners" reading list.
 Read this list _after_ experiencing Renovate's default behavior, once you really want/need to make changes to Renovate's behavior.
 
+- [Upgrade best practices](./upgrade-best-practices.md)
 - [Key concepts, presets](./key-concepts/presets.md)
 - [Key concepts, Renovate scheduling](./key-concepts/scheduling.md)
 - [Key concepts, automerge](./key-concepts/automerge.md)
@@ -65,6 +66,7 @@ Then read:
 
 If you're going to self-host Renovate then read:
 
+- [Running Renovate](./getting-started/running.md)
 - [Self-hosting examples](./examples/self-hosting.md)
 - Skim the [self hosted configuration options](./self-hosted-configuration.md)
 

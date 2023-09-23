@@ -9,8 +9,6 @@ describe('util/http/gitea', () => {
   beforeEach(() => {
     giteaHttp = new GiteaHttp();
 
-    jest.resetAllMocks();
-
     setBaseUrl(baseUrl);
   });
 

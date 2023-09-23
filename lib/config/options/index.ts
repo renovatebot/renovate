@@ -1,4 +1,5 @@
 import { getManagers } from '../../modules/manager';
+import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import type { RenovateOptions } from '../types';
@@ -67,6 +68,16 @@ const options: RenovateOptions[] = [
     parent: 'postUpgradeTasks',
     default: ['**/*'],
     cli: false,
+  },
+  {
+    name: 'format',
+    description: 'Format of the custom datasource',
+    type: 'string',
+    parent: 'customDatasources',
+    default: 'json',
+    allowedValues: ['json', 'plain'],
+    cli: false,
+    env: false,
   },
   {
     name: 'executionMode',
@@ -213,8 +224,6 @@ const options: RenovateOptions[] = [
     description: `Enable or disable Renovate bot.`,
     stage: 'package',
     type: 'boolean',
-    cli: false,
-    env: false,
   },
   {
     name: 'constraintsFiltering',
@@ -335,6 +344,14 @@ const options: RenovateOptions[] = [
     default: {},
   },
   {
+    name: 'customDatasources',
+    description: 'Defines custom datasources for usage by managers',
+    type: 'object',
+    experimental: true,
+    experimentalIssues: [23286],
+    default: {},
+  },
+  {
     name: 'dockerChildPrefix',
     description:
       'Change this value to add a prefix to the Renovate Docker sidecar container names and labels.',
@@ -354,7 +371,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.1.0',
+    default: 'ghcr.io/containerbase/sidecar:9.20.3',
     globalOnly: true,
   },
   {
@@ -440,6 +457,15 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
     default: 'auto',
+  },
+  {
+    name: 'includeMirrors',
+    description:
+      'Whether to process repositories that are mirrors. By default, repositories that are mirrors are skipped.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+    globalOnly: true,
   },
   {
     name: 'forkToken',
@@ -772,14 +798,25 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'autodiscoverTopics',
-    description: '',
+    name: 'autodiscoverNamespaces',
+    description:
+      'Filter the list of autodiscovered repositories by namespaces.',
     stage: 'global',
     type: 'array',
     subType: 'string',
     default: null,
     globalOnly: true,
     supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'autodiscoverTopics',
+    description: 'Filter the list of autodiscovered repositories by topics.',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -833,7 +870,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Additional Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
+      'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -924,6 +961,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'defaultRegistryUrlTemplate',
+    description:
+      'Template for generating a defaultRegistryUrl for custom datasource',
+    type: 'string',
+    default: '',
+    parent: 'customDatasources',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'registryUrls',
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
@@ -964,7 +1011,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure'],
+    supportedPlatforms: ['azure', 'gitlab'],
   },
   // depType
   {
@@ -985,12 +1032,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'packageRules',
-    description: 'Rules for matching package names.',
+    description: 'Rules for matching packages.',
     type: 'array',
     stage: 'package',
     mergeable: true,
-    cli: false,
-    env: false,
   },
   {
     name: 'matchCategories',
@@ -1001,6 +1046,32 @@ const options: RenovateOptions[] = [
     allowString: true,
     parent: 'packageRules',
     stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchRepositories',
+    description:
+      'List of repositories to match (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludeRepositories',
+    description:
+      'List of repositories to exclude (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
     mergeable: true,
     cli: false,
     env: false,
@@ -1742,6 +1813,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'transformTemplates',
+    description: 'List of jsonata transformation rules',
+    type: 'array',
+    subType: 'string',
+    parent: 'customDatasources',
+    default: [],
+  },
+  {
     name: 'transitiveRemediation',
     description: 'Enable remediation of transitive dependencies.',
     type: 'boolean',
@@ -1907,6 +1986,15 @@ const options: RenovateOptions[] = [
       'Text added here will be placed last in the PR body, with a divider separator before it.',
     type: 'string',
     default: `This PR has been generated by [Renovate Bot](https://github.com/renovatebot/renovate).`,
+  },
+  {
+    name: 'customizeDashboard',
+    description: 'Customize sections in the dependency dashboard issue.',
+    type: 'object',
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'lockFileMaintenance',
@@ -2272,13 +2360,53 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'httpsCertificateAuthority',
+    description: 'The overriding trusted CA certificate.',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'httpsPrivateKey',
+    description: 'The private key in PEM format.',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'httpsCertificate',
+    description: 'The certificate chains in PEM format.',
+    type: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'cacheHardTtlMinutes',
     description:
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 24 * 60,
+    default: 7 * 24 * 60,
     globalOnly: true,
+  },
+  {
+    name: 'cacheTtlOverride',
+    description: 'An object that contains cache namespace TTL override values',
+    type: 'object',
+    stage: 'repository',
+    default: {},
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'prBodyDefinitions',
@@ -2296,6 +2424,13 @@ const options: RenovateOptions[] = [
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
+      Age: "[![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' depName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
+      Adoption:
+        "[![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' depName}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
+      Passing:
+        "[![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
+      Confidence:
+        "[![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true)](https://docs.renovatebot.com/merge-confidence/)",
     },
   },
   {
@@ -2308,7 +2443,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyNotes',
     description:
-      'List of additional notes/templates to include in the Pull Request body.',
+      'List of extra notes or templates to include in the Pull Request body.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -2366,6 +2501,16 @@ const options: RenovateOptions[] = [
     stage: 'package',
     cli: true,
     mergeable: true,
+  },
+  {
+    name: 'customType',
+    description:
+      'Custom manager to use. Valid only within a `regexManagers` object.',
+    type: 'string',
+    allowedValues: ['regex'],
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
   },
   {
     name: 'matchStrings',
@@ -2582,7 +2727,8 @@ export function getOptions(): RenovateOptions[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, config] of getManagers().entries()) {
+  const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
+  for (const [name, config] of allManagers.entries()) {
     if (config.defaultConfig) {
       const managerConfig: RenovateOptions = {
         name,

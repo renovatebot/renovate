@@ -30,6 +30,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
@@ -132,7 +133,10 @@ export async function processBranch(
     }
   }
 
-  let branchPr = await platform.getBranchPr(config.branchName);
+  let branchPr = await platform.getBranchPr(
+    config.branchName,
+    config.baseBranch
+  );
   logger.debug(`branchExists=${branchExists}`);
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
@@ -250,7 +254,7 @@ export async function processBranch(
         if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
-          if (!(dependencyDashboardCheck || config.rebaseRequested)) {
+          if (!(!!dependencyDashboardCheck || config.rebaseRequested)) {
             return {
               branchExists,
               prNo: branchPr.number,
@@ -262,6 +266,7 @@ export async function processBranch(
         const oldPr = await platform.findPr({
           branchName: config.branchName,
           state: '!open',
+          targetBranch: config.baseBranch,
         });
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
@@ -309,8 +314,10 @@ export async function processBranch(
           result: 'update-not-scheduled',
         };
       }
-      // istanbul ignore if
-      if (!branchPr) {
+      if (
+        !branchPr &&
+        !(config.automerge && config.automergeType === 'branch') // if branch is configured for automerge there's no need for a PR
+      ) {
         logger.debug('Skipping PR creation out of schedule');
         return {
           branchExists,
@@ -326,7 +333,7 @@ export async function processBranch(
       config.upgrades.some(
         (upgrade) =>
           (is.nonEmptyString(upgrade.minimumReleaseAge) &&
-            upgrade.releaseTimestamp) ||
+            is.nonEmptyString(upgrade.releaseTimestamp)) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!)
       )
     ) {
@@ -340,7 +347,7 @@ export async function processBranch(
           upgrade.releaseTimestamp
         ) {
           const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-          if (timeElapsed < (toMs(upgrade.minimumReleaseAge) ?? 0)) {
+          if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
             logger.debug(
               {
                 depName: upgrade.depName,
@@ -398,7 +405,7 @@ export async function processBranch(
       }
     }
 
-    const userRebaseRequested =
+    let userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
       !!config.dependencyDashboardRebaseAllOpen ||
       !!config.rebaseRequested;
@@ -410,6 +417,7 @@ export async function processBranch(
     } else if (dependencyDashboardCheck === 'global-config') {
       logger.debug(`Manual create/rebase requested via checkedBranches`);
       config.reuseExistingBranch = false;
+      userRebaseRequested = true;
     } else if (userApproveAllPendingPR) {
       logger.debug(
         'A user manually approved all pending PRs via the Dependency Dashboard.'
@@ -443,7 +451,7 @@ export async function processBranch(
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
       await scm.checkoutBranch(config.baseBranch);
@@ -818,7 +826,7 @@ export async function processBranch(
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         config.artifactErrors.forEach((error) => {
           content += `##### File name: ${error.lockFile!}\n\n`;
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
@@ -845,7 +853,7 @@ export async function processBranch(
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
         // skip automerge if there is a new commit since status checks aren't done yet
-        if (!commitSha || config.ignoreTests) {
+        if (config.ignoreTests === true || !commitSha) {
           logger.debug('checking auto-merge');
           const prAutomergeResult = await checkAutoMerge(pr, config);
           if (prAutomergeResult?.automerged) {
