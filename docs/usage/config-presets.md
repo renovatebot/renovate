@@ -210,7 +210,7 @@ Renovate will determine the current platform and look up the preset from there.
 
 ## Contributing to presets
 
-Have you configured a rule that you think others might benefit from?
+Have you configured a rule that could help others?
 Please consider contributing it to the [Renovate repository](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) so that it gains higher visibility and saves others from reinventing the same thing.
 
 Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.

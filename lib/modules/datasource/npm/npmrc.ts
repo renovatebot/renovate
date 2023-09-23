@@ -136,7 +136,7 @@ export function setNpmrc(input?: string): void {
       if (
         !exposeAllEnv &&
         key.endsWith('registry') &&
-        val &&
+        is.string(val) &&
         val.includes('localhost')
       ) {
         logger.debug(
@@ -173,7 +173,7 @@ export function resolveRegistryUrl(packageName: string): string {
       !matchPackagePrefixes ||
       packageName.startsWith(matchPackagePrefixes[0])
     ) {
-      // TODO: fix types #7154
+      // TODO: fix types #22198
       registryUrl = registryUrls![0];
     }
   }

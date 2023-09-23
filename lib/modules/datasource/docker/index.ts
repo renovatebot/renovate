@@ -7,6 +7,7 @@ import { HttpError } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
+import { type AsyncResult, Result } from '../../../util/result';
 import { isDockerDigest } from '../../../util/string';
 import {
   ensurePathPrefix,
@@ -14,28 +15,36 @@ import {
   parseLinkHeader,
 } from '../../../util/url';
 import { id as dockerVersioningId } from '../../versioning/docker';
-import { isArtifactoryServer } from '../common';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
+import { isArtifactoryServer } from '../util';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
   extractDigestFromResponseBody,
+  findHelmSourceUrl,
   findLatestStable,
   getAuthHeaders,
   getRegistryRepository,
   gitRefLabel,
   isDockerHost,
+  sourceLabel,
   sourceLabels,
 } from './common';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
-import type {
-  Image,
-  ImageConfig,
-  ImageList,
-  OciImage,
-  OciImageList,
-} from './types';
+import {
+  DistributionManifest,
+  DockerHubTagsPage,
+  ManifestJson,
+  OciHelmConfig,
+  OciImageConfig,
+  OciImageManifest,
+} from './schema';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -170,7 +179,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     configDigest: string
-  ): Promise<HttpResponse<ImageConfig> | undefined> {
+  ): Promise<HttpResponse<OciImageConfig> | undefined> {
     logger.trace(
       `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
     );
@@ -192,10 +201,59 @@ export class DockerDatasource extends Datasource {
       'blobs',
       configDigest
     );
-    return await this.http.getJson<ImageConfig>(url, {
-      headers,
-      noAuth: true,
-    });
+    return await this.http.getJson(
+      url,
+      {
+        headers,
+        noAuth: true,
+      },
+      OciImageConfig
+    );
+  }
+
+  @cache({
+    namespace: 'datasource-docker-imageconfig',
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      configDigest: string
+    ) => `${registryHost}:${dockerRepository}@${configDigest}`,
+    ttlMinutes: 1440 * 28,
+  })
+  public async getHelmConfig(
+    registryHost: string,
+    dockerRepository: string,
+    configDigest: string
+  ): Promise<HttpResponse<OciHelmConfig> | undefined> {
+    logger.trace(
+      `getImageConfig(${registryHost}, ${dockerRepository}, ${configDigest})`
+    );
+
+    const headers = await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository
+    );
+    // istanbul ignore if: Should never happen
+    if (!headers) {
+      logger.warn('No docker auth found - returning');
+      return undefined;
+    }
+    const url = joinUrlParts(
+      registryHost,
+      'v2',
+      dockerRepository,
+      'blobs',
+      configDigest
+    );
+    return await this.http.getJson(
+      url,
+      {
+        headers,
+        noAuth: true,
+      },
+      OciHelmConfig
+    );
   }
 
   private async getConfigDigest(
@@ -203,11 +261,23 @@ export class DockerDatasource extends Datasource {
     dockerRepository: string,
     tag: string
   ): Promise<string | null> {
+    return (
+      (await this.getManifest(registry, dockerRepository, tag))?.config
+        ?.digest ?? null
+    );
+  }
+
+  private async getManifest(
+    registry: string,
+    dockerRepository: string,
+    tag: string
+  ): Promise<OciImageManifest | DistributionManifest | null> {
     const manifestResponse = await this.getManifestResponse(
       registry,
       dockerRepository,
       tag
     );
+
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
@@ -215,85 +285,45 @@ export class DockerDatasource extends Datasource {
     if (!manifestResponse) {
       return null;
     }
-    const manifest = JSON.parse(manifestResponse.body) as
-      | ImageList
-      | Image
-      | OciImageList
-      | OciImage;
-    if (manifest.schemaVersion !== 2) {
+
+    // Softfail on invalid manifests
+    const parsed = ManifestJson.safeParse(manifestResponse.body);
+    if (!parsed.success) {
       logger.debug(
-        { registry, dockerRepository, tag },
-        'Manifest schema version is not 2'
+        { registry, dockerRepository, tag, err: parsed.error },
+        'Invalid manifest response'
       );
       return null;
     }
 
-    if (
-      manifest.mediaType ===
-      'application/vnd.docker.distribution.manifest.list.v2+json'
-    ) {
-      if (manifest.manifests.length) {
+    const manifest = parsed.data;
+
+    switch (manifest.mediaType) {
+      case 'application/vnd.docker.distribution.manifest.v2+json':
+      case 'application/vnd.oci.image.manifest.v1+json':
+        return manifest;
+      case 'application/vnd.docker.distribution.manifest.list.v2+json':
+      case 'application/vnd.oci.image.index.v1+json':
+        if (!manifest.manifests.length) {
+          logger.debug(
+            { manifest },
+            'Invalid manifest list with no manifests - returning'
+          );
+          return null;
+        }
         logger.trace(
           { registry, dockerRepository, tag },
           'Found manifest list, using first image'
         );
-        return this.getConfigDigest(
+        return this.getManifest(
           registry,
           dockerRepository,
           manifest.manifests[0].digest
         );
-      } else {
-        logger.debug(
-          { manifest },
-          'Invalid manifest list with no manifests - returning'
-        );
+      // istanbul ignore next: can't happen
+      default:
         return null;
-      }
     }
-
-    if (
-      manifest.mediaType ===
-        'application/vnd.docker.distribution.manifest.v2+json' &&
-      is.string(manifest.config?.digest)
-    ) {
-      return manifest.config?.digest;
-    }
-
-    // OCI image lists are not required to specify a mediaType
-    if (
-      manifest.mediaType === 'application/vnd.oci.image.index.v1+json' ||
-      (!manifest.mediaType && 'manifests' in manifest)
-    ) {
-      if (manifest.manifests.length) {
-        logger.trace(
-          { registry, dockerRepository, tag },
-          'Found manifest index, using first image'
-        );
-        return this.getConfigDigest(
-          registry,
-          dockerRepository,
-          manifest.manifests[0].digest
-        );
-      } else {
-        logger.debug(
-          { manifest },
-          'Invalid manifest index with no manifests - returning'
-        );
-        return null;
-      }
-    }
-
-    // OCI manifests are not required to specify a mediaType
-    if (
-      (manifest.mediaType === 'application/vnd.oci.image.manifest.v1+json' ||
-        (!manifest.mediaType && 'config' in manifest)) &&
-      is.string(manifest.config?.digest)
-    ) {
-      return manifest.config?.digest;
-    }
-
-    logger.debug({ manifest }, 'Invalid manifest - returning');
-    return null;
   }
 
   @cache({
@@ -321,7 +351,10 @@ export class DockerDatasource extends Datasource {
           'head'
         );
       } catch (_err) {
-        const err = _err instanceof ExternalHostError ? _err.err : _err;
+        const err =
+          _err instanceof ExternalHostError
+            ? _err.err
+            : /* istanbul ignore next: can never happen */ _err;
 
         if (
           typeof err.statusCode === 'number' &&
@@ -359,7 +392,13 @@ export class DockerDatasource extends Datasource {
         dockerRepository,
         configDigest
       );
-      if (configResponse) {
+
+      // TODO: fix me, architecture is required in spec
+      if (
+        configResponse &&
+        ('config' in configResponse.body ||
+          'architecture' in configResponse.body)
+      ) {
         const architecture = configResponse.body.architecture ?? null;
         logger.debug(
           `Current digest ${currentDigest} relates to architecture ${
@@ -392,49 +431,91 @@ export class DockerDatasource extends Datasource {
     namespace: 'datasource-docker-labels',
     key: (registryHost: string, dockerRepository: string, tag: string) =>
       `${registryHost}:${dockerRepository}:${tag}`,
-    ttlMinutes: 60,
+    ttlMinutes: 24 * 60,
   })
   public async getLabels(
     registryHost: string,
     dockerRepository: string,
     tag: string
-  ): Promise<Record<string, string>> {
+  ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
+    // Docker Hub library images don't have labels we need
+    if (
+      registryHost === 'https://index.docker.io' &&
+      dockerRepository.startsWith('library/')
+    ) {
+      logger.debug('Docker Hub library image - skipping label lookup');
+      return {};
+    }
     try {
-      let labels: Record<string, string> = {};
-      const configDigest = await this.getConfigDigest(
+      let labels: Record<string, string> | undefined = {};
+      const manifest = await this.getManifest(
         registryHost,
         dockerRepository,
         tag
       );
-      if (!configDigest) {
-        return {};
-      }
 
-      const headers = await getAuthHeaders(
-        this.http,
-        registryHost,
-        dockerRepository
-      );
-      // istanbul ignore if: Should never happen
-      if (!headers) {
-        logger.warn('No docker auth found - returning');
-        return {};
-      }
-      const url = `${registryHost}/v2/${dockerRepository}/blobs/${configDigest}`;
-      const configResponse = await this.http.get(url, {
-        headers,
-        noAuth: true,
-      });
-
-      const body = JSON.parse(configResponse.body);
-      if (body.config) {
-        labels = body.config.Labels;
-      } else {
+      if (!manifest) {
         logger.debug(
-          { headers: configResponse.headers, body },
-          `manifest blob response body missing the "config" property`
+          { registryHost, dockerRepository, tag },
+          'No manifest found'
         );
+        return undefined;
+      }
+
+      if ('annotations' in manifest && manifest.annotations) {
+        labels = manifest.annotations;
+      }
+
+      switch (manifest.config.mediaType) {
+        case 'application/vnd.cncf.helm.config.v1+json': {
+          if (labels[sourceLabel]) {
+            // we already have the source url, so no need to pull the config
+            return labels;
+          }
+          const configResponse = await this.getHelmConfig(
+            registryHost,
+            dockerRepository,
+            manifest.config.digest
+          );
+
+          if (configResponse) {
+            // Helm chart
+            const url = findHelmSourceUrl(configResponse.body);
+            if (url) {
+              labels[sourceLabel] = url;
+            }
+          }
+          break;
+        }
+        case 'application/vnd.oci.image.config.v1+json':
+        case 'application/vnd.docker.container.image.v1+json': {
+          if (labels[sourceLabel] && labels[gitRefLabel]) {
+            // we already have the source url, so no need to pull the config
+            return labels;
+          }
+          const configResponse = await this.getImageConfig(
+            registryHost,
+            dockerRepository,
+            manifest.config.digest
+          );
+
+          // istanbul ignore if: should never happen
+          if (!configResponse) {
+            return labels;
+          }
+
+          const body = configResponse.body;
+          if (body.config) {
+            labels = { ...labels, ...body.config.Labels };
+          } else {
+            logger.debug(
+              { headers: configResponse.headers, body },
+              `manifest blob response body missing the "config" property`
+            );
+          }
+          break;
+        }
       }
 
       if (labels) {
@@ -559,7 +640,10 @@ export class DockerDatasource extends Datasource {
       logger.debug('Failed to get authHeaders for getTags lookup');
       return null;
     }
-    let page = 1;
+    let page = 0;
+    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
+      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
+      : 20;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -594,7 +678,7 @@ export class DockerDatasource extends Datasource {
         url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
       }
       page += 1;
-    } while (url && page < 20);
+    } while (url && page < pages);
     return tags;
   }
 
@@ -712,8 +796,7 @@ export class DockerDatasource extends Datasource {
       registryUrl!
     );
     logger.debug(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`
     );
     const newTag = newValue ?? 'latest';
@@ -748,7 +831,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (
-        architecture ||
+        is.string(architecture) ||
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
@@ -763,21 +846,19 @@ export class DockerDatasource extends Datasource {
         );
 
         if (architecture && manifestResponse) {
-          const manifestList = JSON.parse(manifestResponse.body) as
-            | ImageList
-            | Image
-            | OciImageList
-            | OciImage;
+          const parse = ManifestJson.safeParse(manifestResponse.body);
+          const manifestList = parse.success
+            ? parse.data
+            : /* istanbul ignore next: hard to test */ null;
           if (
-            manifestList.schemaVersion === 2 &&
+            manifestList &&
             (manifestList.mediaType ===
               'application/vnd.docker.distribution.manifest.list.v2+json' ||
               manifestList.mediaType ===
-                'application/vnd.oci.image.index.v1+json' ||
-              (!manifestList.mediaType && 'manifests' in manifestList))
+                'application/vnd.oci.image.index.v1+json')
           ) {
             for (const manifest of manifestList.manifests) {
-              if (manifest.platform['architecture'] === architecture) {
+              if (manifest.platform?.architecture === architecture) {
                 digest = manifest.digest;
                 break;
               }
@@ -786,6 +867,10 @@ export class DockerDatasource extends Datasource {
         }
 
         if (!digest) {
+          logger.debug(
+            { registryHost, dockerRepository, newTag },
+            'Extraction digest from manifest response body is deprecated'
+          );
           digest = extractDigestFromResponseBody(manifestResponse!);
         }
       }
@@ -809,7 +894,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (manifestResponse) {
-        // TODO: fix types (#7154)
+        // TODO: fix types (#22198)
         logger.debug(`Got docker digest ${digest!}`);
       }
     } catch (err) /* istanbul ignore next */ {
@@ -828,6 +913,28 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
+  async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
+    const result: Release[] = [];
+    let url:
+      | null
+      | string = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
+    while (url) {
+      const { val, err } = await this.http
+        .getJsonSafe(url, DockerHubTagsPage)
+        .unwrap();
+
+      if (err) {
+        logger.debug({ err }, `Docker: error fetching data from DockerHub`);
+        return null;
+      }
+
+      result.push(...val.items);
+      url = val.nextPage;
+    }
+
+    return result;
+  }
+
   /**
    * docker.getReleases
    *
@@ -839,6 +946,20 @@ export class DockerDatasource extends Datasource {
    *
    * This function will filter only tags that contain a semver version
    */
+  @cache({
+    namespace: 'datasource-docker-releases-v2',
+    key: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!
+      );
+      return `${registryHost}:${dockerRepository}`;
+    },
+    cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
+      const { registryHost } = getRegistryRepository(packageName, registryUrl!);
+      return registryHost === 'https://index.docker.io';
+    },
+  })
   async getReleases({
     packageName,
     registryUrl,
@@ -847,19 +968,46 @@ export class DockerDatasource extends Datasource {
       packageName,
       registryUrl!
     );
-    const tags = await this.getTags(registryHost, dockerRepository);
-    if (!tags) {
+
+    type TagsResultType = AsyncResult<
+      Release[],
+      NonNullable<Error | 'tags-error' | 'dockerhub-error'>
+    >;
+
+    const getTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getTags(registryHost, dockerRepository),
+        'tags-error' as const
+      ).transform((tags) => tags.map((version) => ({ version })));
+
+    const getDockerHubTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getDockerHubTags(dockerRepository),
+        'dockerhub-error' as const
+      ).catch(getTags);
+
+    const tagsResult =
+      registryHost === 'https://index.docker.io' &&
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+        ? getDockerHubTags()
+        : getTags();
+
+    const { val: releases, err } = await tagsResult.unwrap();
+    if (err instanceof Error) {
+      throw err;
+    } else if (err) {
       return null;
     }
-    const releases = tags.map((version) => ({ version }));
+
     const ret: ReleaseResult = {
       registryUrl: registryHost,
       releases,
     };
 
+    const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags);
+      : findLatestStable(tags) ?? tags[tags.length - 1];
 
     // istanbul ignore if: needs test
     if (!latestTag) {

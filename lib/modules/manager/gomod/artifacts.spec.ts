@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -11,22 +12,22 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from '.';
 
+type FS = typeof import('../../../util/fs');
+
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs', () => {
   // restore
   return {
     __esModules: true,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    ...(jest.createMockFromModule('../../../util/fs') as any),
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    isValidLocalPath: (jest.requireActual('../../../util/fs') as any)
-      .isValidLocalPath,
+    ...jest.createMockFromModule<FS>('../../../util/fs'),
+    isValidLocalPath:
+      jest.requireActual<FS>('../../../util/fs').isValidLocalPath,
   };
 });
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -78,9 +79,6 @@ const goEnv = {
 
 describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
@@ -901,7 +899,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    // TODO: #7154 can be null
+    // TODO: #22198 can be null
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(

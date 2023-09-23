@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
+import { getExcludedVersions, getFilteredRange } from '../common';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { hashicorp2npm, npm2hashicorp } from './convertor';
@@ -34,21 +35,46 @@ export function isValid(input: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
-  return isValid(range) && npm.matches(version, hashicorp2npm(range));
+  const excludedVersions = getExcludedVersions(range);
+  if (excludedVersions.includes(version)) {
+    return false;
+  }
+
+  const filteredRange = getFilteredRange(range);
+  return (
+    isValid(filteredRange) && npm.matches(version, hashicorp2npm(filteredRange))
+  );
 }
 
 function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.getSatisfyingVersion(versions, hashicorp2npm(range));
+  const excludedVersions = getExcludedVersions(range);
+  const filteredRange = getFilteredRange(range);
+  const filteredVersions = versions.filter(
+    (version) => !excludedVersions.includes(version)
+  );
+
+  return npm.getSatisfyingVersion(
+    filteredVersions,
+    hashicorp2npm(filteredRange)
+  );
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.minSatisfyingVersion(versions, hashicorp2npm(range));
+  const excludedVersions = getExcludedVersions(range);
+  const filteredRange = getFilteredRange(range);
+  const filteredVersions = versions.filter(
+    (version) => !excludedVersions.includes(version)
+  );
+  return npm.minSatisfyingVersion(
+    filteredVersions,
+    hashicorp2npm(filteredRange)
+  );
 }
 
 function getNewValue({

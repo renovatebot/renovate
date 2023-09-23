@@ -219,7 +219,7 @@ export async function extractPackageFile(
       res.lockFiles = [gemfileLockPath];
       const lockedEntries = extractLockFileEntries(lockContent);
       for (const dep of res.deps) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         const lockedDepValue = lockedEntries.get(`${dep.depName!}`);
         if (lockedDepValue) {
           dep.lockedVersion = lockedDepValue;

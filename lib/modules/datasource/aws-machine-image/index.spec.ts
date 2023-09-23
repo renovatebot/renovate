@@ -397,4 +397,41 @@ describe('modules/datasource/aws-machine-image/index', () => {
       });
     });
   });
+
+  describe('loadConfig()', () => {
+    const ec2DataSource = new AwsMachineImageDataSource();
+
+    it('loads filters without aws config', () => {
+      const res = ec2DataSource.loadConfig(
+        '[{"Name":"testname","Values":["testvalue"]}]'
+      );
+      expect(res).toEqual([
+        [
+          {
+            Name: 'testname',
+            Values: ['testvalue'],
+          },
+        ],
+        {},
+      ]);
+    });
+
+    it('loads filters with multiple aws configs', () => {
+      const res = ec2DataSource.loadConfig(
+        '[{"Name":"testname","Values":["testvalue"]},{"region":"us-west-2"},{"profile":"test-profile"},{"region":"eu-central-1"}]'
+      );
+      expect(res).toEqual([
+        [
+          {
+            Name: 'testname',
+            Values: ['testvalue'],
+          },
+        ],
+        {
+          region: 'eu-central-1',
+          profile: 'test-profile',
+        },
+      ]);
+    });
+  });
 });

@@ -61,18 +61,10 @@ export class GoProxyDatasource extends Datasource {
         const res = await this.getVersionsWithInfo(url, packageName);
         if (res.releases.length) {
           result = res;
-          try {
-            const datasource = await BaseGoDatasource.getDatasource(
-              packageName
-            );
-            const sourceUrl = getSourceUrl(datasource);
-            if (sourceUrl) {
-              result.sourceUrl = sourceUrl;
-            }
-          } catch (err) {
-            logger.trace({ err }, `Can't get datasource for ${packageName}`);
-          }
           break;
+        }
+        if (res.tags?.latest) {
+          result = res;
         }
       } catch (err) {
         const statusCode = err?.response?.statusCode;
@@ -85,6 +77,18 @@ export class GoProxyDatasource extends Datasource {
         if (!canFallback) {
           break;
         }
+      }
+    }
+
+    if (result && !result.sourceUrl) {
+      try {
+        const datasource = await BaseGoDatasource.getDatasource(packageName);
+        const sourceUrl = getSourceUrl(datasource);
+        if (sourceUrl) {
+          result.sourceUrl = sourceUrl;
+        }
+      } catch (err) {
+        logger.trace({ err }, `Can't get datasource for ${packageName}`);
       }
     }
 
@@ -310,8 +314,7 @@ export class GoProxyDatasource extends Datasource {
   static getCacheKey({ packageName }: GetReleasesConfig): string {
     const goproxy = process.env.GOPROXY;
     const noproxy = GoProxyDatasource.parseNoproxy();
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

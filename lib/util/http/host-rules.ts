@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../../constants';
@@ -29,6 +30,7 @@ export type HostRulesGotOptions = Pick<
   | 'lookup'
   | 'agent'
   | 'http2'
+  | 'https'
 >;
 
 export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
@@ -38,7 +40,11 @@ export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
-  if (res.token || res.username || res.password) {
+  if (
+    is.nonEmptyString(res.token) ||
+    is.nonEmptyString(res.username) ||
+    is.nonEmptyString(res.password)
+  ) {
     // do not fallback if we already have auth infos
     return res;
   }
@@ -88,6 +94,21 @@ export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  // Fallback to `gitea` hostType
+  if (
+    hostType &&
+    GITEA_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== 'gitea'
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: 'gitea',
+        url,
+      }),
+      ...res,
+    };
+  }
+
   return res;
 }
 
@@ -102,9 +123,9 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
-    options.headers?.authorization ||
-    options.password ||
-    options.token
+    is.nonEmptyString(options.headers?.authorization) ||
+    is.nonEmptyString(options.password) ||
+    is.nonEmptyString(options.token)
   ) {
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
@@ -142,6 +163,28 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   if (!hasProxy() && foundRules.enableHttp2 === true) {
     options.http2 = true;
   }
+
+  if (is.nonEmptyString(foundRules.httpsCertificateAuthority)) {
+    options.https = {
+      ...(options.https ?? {}),
+      certificateAuthority: foundRules.httpsCertificateAuthority,
+    };
+  }
+
+  if (is.nonEmptyString(foundRules.httpsPrivateKey)) {
+    options.https = {
+      ...(options.https ?? {}),
+      key: foundRules.httpsPrivateKey,
+    };
+  }
+
+  if (is.nonEmptyString(foundRules.httpsCertificate)) {
+    options.https = {
+      ...(options.https ?? {}),
+      certificate: foundRules.httpsCertificate,
+    };
+  }
+
   return options;
 }
 
