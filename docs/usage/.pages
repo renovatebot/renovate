@@ -1,11 +1,13 @@
 nav:
   - Home: 'index.md'
+  - Reading List: 'reading-list.md'
   - ... | getting-started
   - Troubleshooting: 'troubleshooting.md'
   - Configuration:
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Repository': 'configuration-options.md'
       - 'Presets': 'config-presets.md'
+      - 'Validation': 'config-validation.md'
   - ... | key-concepts
   - ... | modules
   - Language Support:
@@ -27,8 +29,8 @@ nav:
       - 'Updating and Rebasing Branches': 'updating-rebasing.md'
       - 'Semantic Commit Messages': 'semantic-commits.md'
       - 'Noise Reduction': 'noise-reduction.md'
+      - 'Upgrade best practices': 'upgrade-best-practices.md'
   - Included Presets:
-      - 'Compatibility Presets': 'presets-compatibility.md'
       - 'Default Presets': 'presets-default.md'
       - 'Docker Presets': 'presets-docker.md'
       - 'Full Config Presets': 'presets-config.md'
@@ -41,6 +43,7 @@ nav:
       - 'Regex Manager Presets': 'presets-regexManagers.md'
       - 'Replacement Presets': 'presets-replacements.md'
       - 'Schedule Presets': 'presets-schedule.md'
+      - 'Security Presets': 'security-schedule.md'
       - 'Workaround Presets': 'presets-workarounds.md'
   - All Other:
       - ... | user-stories

@@ -11,7 +11,7 @@ describe('util/fs/util', () => {
     GlobalConfig.set({ localDir, cacheDir });
   });
 
-  test.each`
+  it.each`
     path     | fullPath
     ${''}    | ${`${localDir}`}
     ${'baz'} | ${`${localDir}/baz`}
@@ -19,7 +19,7 @@ describe('util/fs/util', () => {
     expect(ensureLocalPath(path)).toBe(fullPath);
   });
 
-  test.each`
+  it.each`
     path
     ${'..'}
     ${'../etc/passwd'}
@@ -30,7 +30,7 @@ describe('util/fs/util', () => {
     expect(() => ensureLocalPath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
   });
 
-  test.each`
+  it.each`
     path     | fullPath
     ${''}    | ${`${cacheDir}`}
     ${'baz'} | ${`${cacheDir}/baz`}
@@ -38,7 +38,7 @@ describe('util/fs/util', () => {
     expect(ensureCachePath(path)).toBe(fullPath);
   });
 
-  test.each`
+  it.each`
     path
     ${'..'}
     ${'../etc/passwd'}
@@ -64,14 +64,14 @@ describe('util/fs/util', () => {
     ${'./foo/..../bar'} | ${true}
     ${'./..'}           | ${false}
     ${'\\foo'}          | ${false}
-    ${"foo'"}           | ${false}
-    ${'fo"o'}           | ${false}
-    ${'fo&o'}           | ${false}
+    ${"foo'"}           | ${true}
+    ${'fo"o'}           | ${true}
+    ${'fo&o'}           | ${true}
     ${'f;oo'}           | ${true}
     ${'f o o'}          | ${true}
     ${'/'}              | ${false}
     ${'/foo'}           | ${false}
-    ${'&&'}             | ${false}
+    ${'&&'}             | ${true}
     ${';'}              | ${true}
     ${'./[foo]/bar'}    | ${true}
   `('isValidPath($value) == $expected', ({ value, expected }) => {

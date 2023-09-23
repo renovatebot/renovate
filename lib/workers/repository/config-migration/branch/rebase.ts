@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
-import { checkoutBranch, getFile } from '../../../../util/git';
+import { getFile } from '../../../../util/git';
 import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
@@ -42,7 +42,7 @@ export async function rebaseMigrationBranch(
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 
-  await checkoutBranch(config.defaultBranch!);
+  await scm.checkoutBranch(config.defaultBranch!);
   contents = await MigratedDataFactory.applyPrettierFormatting(
     migratedConfigData
   );
@@ -76,5 +76,8 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
-  return quickStringify(JSON5.parse(json)) ?? null;
+  return (
+    quickStringify(JSON5.parse(json)) ??
+    /* istanbul ignore next: should never happen */ null
+  );
 }

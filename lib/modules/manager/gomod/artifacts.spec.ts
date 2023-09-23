@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -11,24 +12,24 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as gomod from '.';
 
+type FS = typeof import('../../../util/fs');
+
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs', () => {
   // restore
   return {
     __esModules: true,
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    ...(jest.createMockFromModule('../../../util/fs') as any),
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    isValidLocalPath: (jest.requireActual('../../../util/fs') as any)
-      .isValidLocalPath,
+    ...jest.createMockFromModule<FS>('../../../util/fs'),
+    isValidLocalPath:
+      jest.requireActual<FS>('../../../util/fs').isValidLocalPath,
   };
 });
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
@@ -59,6 +60,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const config: UpdateArtifactsConfig = {
@@ -77,9 +79,6 @@ const goEnv = {
 
 describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     delete process.env.GOPATH;
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
@@ -308,7 +307,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -322,10 +321,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -333,9 +331,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-          },
+          env: {},
         },
       },
     ]);
@@ -378,9 +374,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'go get -d -t ./...',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
-          },
+          env: {},
         },
       },
     ]);
@@ -465,7 +459,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -492,10 +486,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GIT_CONFIG_VALUE_4 ' +
           '-e GIT_CONFIG_KEY_5 ' +
           '-e GIT_CONFIG_VALUE_5 ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -504,7 +497,6 @@ describe('modules/manager/gomod/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             GIT_CONFIG_COUNT: '6',
             GIT_CONFIG_KEY_0:
               'url.https://ssh:some-token@github.com/.insteadOf',
@@ -576,7 +568,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         options: {
@@ -907,7 +899,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    // TODO: #7154 can be null
+    // TODO: #22198 can be null
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
@@ -990,7 +982,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         cmd:
@@ -1004,10 +996,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -1055,7 +1046,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         cmd:
@@ -1069,10 +1060,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -1120,7 +1110,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         cmd:
@@ -1134,10 +1124,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -1185,7 +1174,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         cmd:
@@ -1199,10 +1188,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -1362,9 +1350,11 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
@@ -1405,9 +1395,11 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
@@ -1838,7 +1830,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     const expectedResult = [
       {
-        cmd: 'docker pull containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/containerbase/sidecar',
       },
       {},
       {
@@ -1853,10 +1845,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.17.0' +
           ' && ' +
@@ -1913,7 +1904,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     const expectedResult = [
       {
-        cmd: 'docker pull containerbase/sidecar',
+        cmd: 'docker pull ghcr.io/containerbase/sidecar',
       },
       {},
       {
@@ -1928,10 +1919,9 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e GOINSECURE ' +
           '-e GOFLAGS ' +
           '-e CGO_ENABLED ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'containerbase/sidecar' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -1973,7 +1963,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t . foo .bar/... cat',
+        cmd: "go get -d -t . foo .bar/... '&&' cat",
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -2039,7 +2029,7 @@ describe('modules/manager/gomod/artifacts', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          goGetDirs: ['&&', '||'],
+          goGetDirs: ['/etc', '../../../'],
         },
       })
     ).toEqual([

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { ZodError, z } from 'zod';
 import * as httpMock from '../../../test/http-mock';
 import { logger } from '../../../test/util';
 import {
@@ -10,7 +10,7 @@ import * as hostRules from '../host-rules';
 import * as queue from './queue';
 import * as throttle from './throttle';
 import type { HttpResponse } from './types';
-import { Http } from '.';
+import { Http, HttpError } from '.';
 
 const baseUrl = 'http://renovate.com';
 
@@ -320,7 +320,6 @@ describe('util/http/index', () => {
       .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
 
     beforeEach(() => {
-      jest.resetAllMocks();
       memCache.init();
     });
 
@@ -362,6 +361,47 @@ describe('util/http/index', () => {
         await expect(
           http.getJson('http://renovate.com', SomeSchema)
         ).rejects.toThrow(z.ZodError);
+      });
+    });
+
+    describe('getJsonSafe', () => {
+      it('uses schema for response body', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .reply(200, JSON.stringify({ x: 2, y: 2 }));
+
+        const { val, err } = await http
+          .getJsonSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBe('2 + 2 = 4');
+        expect(err).toBeUndefined();
+      });
+
+      it('returns schema error result', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .reply(200, JSON.stringify({ x: '2', y: '2' }));
+
+        const { val, err } = await http
+          .getJsonSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(ZodError);
+      });
+
+      it('returns error result', async () => {
+        httpMock.scope('http://example.com').get('/').replyWithError('unknown');
+
+        const { val, err } = await http
+          .getJsonSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(HttpError);
       });
     });
 
@@ -423,6 +463,80 @@ describe('util/http/index', () => {
       const t2 = Date.now();
 
       expect(t2 - t1).toBeGreaterThanOrEqual(4000);
+    });
+  });
+
+  describe('Etag caching', () => {
+    it('returns cached data for status=304', async () => {
+      type FooBar = { foo: string; bar: string };
+      const data: FooBar = { foo: 'foo', bar: 'bar' };
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(304);
+
+      const res = await http.getJson<FooBar>(`/foo`, {
+        baseUrl,
+        etagCache: {
+          etag: 'foobar',
+          data,
+        },
+      });
+
+      expect(res.statusCode).toBe(304);
+      expect(res.body).toEqual(data);
+      expect(res.body).not.toBe(data);
+    });
+
+    it('bypasses schema parsing', async () => {
+      const FooBar = z
+        .object({ foo: z.string(), bar: z.string() })
+        .transform(({ foo, bar }) => ({
+          foobar: `${foo}${bar}`.toUpperCase(),
+        }));
+      const data = FooBar.parse({ foo: 'foo', bar: 'bar' });
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(304);
+
+      const res = await http.getJson(
+        `/foo`,
+        {
+          baseUrl,
+          etagCache: {
+            etag: 'foobar',
+            data,
+          },
+        },
+        FooBar
+      );
+
+      expect(res.statusCode).toBe(304);
+      expect(res.body).toEqual(data);
+      expect(res.body).not.toBe(data);
+    });
+
+    it('returns new data for status=200', async () => {
+      type FooBar = { foo: string; bar: string };
+      const oldData: FooBar = { foo: 'foo', bar: 'bar' };
+      const newData: FooBar = { foo: 'FOO', bar: 'BAR' };
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(200, newData);
+
+      const res = await http.getJson<FooBar>(`/foo`, {
+        baseUrl,
+        etagCache: {
+          etag: 'foobar',
+          data: oldData,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual(newData);
+      expect(res.body).not.toBe(newData);
     });
   });
 });

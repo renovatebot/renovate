@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mocked,
   partial,
   scm,
 } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
@@ -22,7 +22,7 @@ import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import {
   canSkipBranchUpdateCheck,
-  generateBranchFingerprintConfig,
+  generateCommitFingerprintConfig,
   syncBranchState,
   writeUpdates,
 } from './write';
@@ -42,7 +42,6 @@ limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
 });
@@ -153,7 +152,7 @@ describe('workers/repository/process/write', () => {
           partial<BranchCache>({
             branchName: 'new/some-branch',
             sha: '111',
-            branchFingerprint: '111',
+            commitFingerprint: '111',
           }),
         ],
       });
@@ -181,7 +180,7 @@ describe('workers/repository/process/write', () => {
         branches: [
           partial<BranchCache>({
             branchName: 'new/some-branch',
-            branchFingerprint: '222',
+            commitFingerprint: '222',
           }),
         ],
       });
@@ -199,12 +198,12 @@ describe('workers/repository/process/write', () => {
             .filter(is.string)
         ),
       ].sort();
-      const branchFingerprint = fingerprint({
-        branchFingerprintConfig: generateBranchFingerprintConfig(branch),
+      const commitFingerprint = fingerprint({
+        commitFingerprintConfig: generateCommitFingerprintConfig(branch),
         managers,
       });
       expect(await writeUpdates(config, branches)).toBe('done');
-      expect(branch.branchFingerprint).toBe(branchFingerprint);
+      expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
     it('caches same fingerprint when no commit is made and branch cache existed', async () => {
@@ -229,7 +228,7 @@ describe('workers/repository/process/write', () => {
         ),
       ].sort();
 
-      const branchFingerprint = fingerprint({
+      const commitFingerprint = fingerprint({
         branch,
         managers,
       });
@@ -238,7 +237,7 @@ describe('workers/repository/process/write', () => {
           partial<BranchCache>({
             branchName: 'new/some-branch',
             baseBranch: 'base_branch',
-            branchFingerprint,
+            commitFingerprint,
           }),
         ],
       });
@@ -249,7 +248,7 @@ describe('workers/repository/process/write', () => {
       scm.branchExists.mockResolvedValue(true);
       config.repositoryCache = 'enabled';
       expect(await writeUpdates(config, branches)).toBe('done');
-      expect(branch.branchFingerprint).toBe(branchFingerprint);
+      expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
     it('caches same fingerprint when no commit is made', async () => {
@@ -273,7 +272,7 @@ describe('workers/repository/process/write', () => {
             .filter(is.string)
         ),
       ].sort();
-      const branchFingerprint = fingerprint({
+      const commitFingerprint = fingerprint({
         branch,
         managers,
       });
@@ -282,7 +281,7 @@ describe('workers/repository/process/write', () => {
           partial<BranchCache>({
             branchName: 'new/some-branch',
             baseBranch: 'base_branch',
-            branchFingerprint,
+            commitFingerprint,
           }),
         ],
       });
@@ -291,7 +290,7 @@ describe('workers/repository/process/write', () => {
         result: 'done',
       });
       expect(await writeUpdates(config, branches)).toBe('done');
-      expect(branch.branchFingerprint).toBe(branchFingerprint);
+      expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
     it('creates new branchCache when cache is not enabled', async () => {
@@ -359,7 +358,7 @@ describe('workers/repository/process/write', () => {
         ...branchCache,
         branchName: 'new/some-branch',
         sha: '111',
-        branchFingerprint: '211',
+        commitFingerprint: '211',
       };
       expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(false);
     });
@@ -369,7 +368,7 @@ describe('workers/repository/process/write', () => {
         ...branchCache,
         branchName: 'new/some-branch',
         sha: '111',
-        branchFingerprint: '222',
+        commitFingerprint: '222',
       };
       expect(canSkipBranchUpdateCheck(branchCache, '222')).toBe(true);
     });
@@ -469,7 +468,7 @@ describe('workers/repository/process/write', () => {
             isModified: true,
             pristine: true,
             isConflicted: true,
-            branchFingerprint: '123',
+            commitFingerprint: '123',
             upgrades: [],
             automerge: false,
             prNo: null,
@@ -504,7 +503,7 @@ describe('workers/repository/process/write', () => {
             isBehindBase: true,
             isModified: true,
             isConflicted: true,
-            branchFingerprint: '123',
+            commitFingerprint: '123',
             upgrades: [],
             automerge: false,
             prNo: null,
@@ -525,7 +524,7 @@ describe('workers/repository/process/write', () => {
         isBehindBase: true,
         isModified: true,
         isConflicted: true,
-        branchFingerprint: '123',
+        commitFingerprint: '123',
         upgrades: [],
         automerge: false,
         prNo: null,

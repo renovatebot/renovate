@@ -1,24 +1,20 @@
-import util from 'node:util';
 import fs from 'fs-extra';
-import _glob from 'glob';
+import { glob } from 'glob';
 import hasha from 'hasha';
-import minimatch from 'minimatch';
-import shell from 'shelljs';
+import { minimatch } from 'minimatch';
 import upath from 'upath';
 
-const glob = util.promisify(_glob);
-
-shell.echo('generating imports');
+console.log('generating imports');
 const newFiles = new Set();
 
 if (!fs.existsSync('lib')) {
-  shell.echo('> missing sources');
-  shell.exit(0);
+  console.log('> missing sources');
+  process.exit(0);
 }
 
 if (!fs.existsSync('data')) {
-  shell.echo('> missing data folder');
-  shell.exit(0);
+  console.log('> missing data folder');
+  process.exit(0);
 }
 
 /**
@@ -88,14 +84,23 @@ async function getFileHash(filePath) {
 /**
  *
  * @param {string} managerName
+ * @param {boolean} isCustomManager
  * @returns {Promise<string>}
  */
-export async function getManagerHash(managerName) {
+export async function getManagerHash(managerName, isCustomManager) {
   /** @type {string[]} */
   let hashes = [];
-  const files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
-    (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+  let folderPattern = `lib/modules/manager/${managerName}/**`;
+  if (isCustomManager) {
+    folderPattern = `lib/modules/manager/custom/${managerName}/**`;
+  }
+
+  const files = (await glob(folderPattern)).filter((fileName) =>
+    minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
   );
+
+  // sort files in case glob order changes
+  files.sort();
 
   for (const fileAddr of files) {
     const hash = await getFileHash(fileAddr);
@@ -124,7 +129,7 @@ async function generateData() {
     const rawFileContent = await fs.readFile(file, 'utf8');
     const value = JSON.stringify(rawFileContent);
 
-    shell.echo(`> ${key}`);
+    console.log(`> ${key}`);
     contentMapAssignments.push(`data.set('${key}', ${value});`);
   }
 
@@ -140,35 +145,47 @@ async function generateData() {
 }
 
 async function generateHash() {
-  shell.echo('generating hashes');
+  console.log('generating hashes');
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
-    /** @type {string[]} */
+    /** @type {Record<string, string>[]} */
     let hashes = [];
     // get managers list
     const managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })
     )
       .filter((file) => file.isDirectory())
+      .map((file) => file.name)
+      .filter((mgr) => mgr !== 'custom');
+
+    const customManagers = (
+      await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
+    )
+      .filter((file) => file.isDirectory())
       .map((file) => file.name);
 
     for (const manager of managers) {
-      const hash = await getManagerHash(manager);
-      hashes.push(hash);
+      const hash = await getManagerHash(manager, false);
+      hashes.push({ manager, hash });
+    }
+
+    for (const manager of customManagers) {
+      const hash = await getManagerHash(manager, true);
+      hashes.push({ manager, hash });
     }
 
     //add manager hashes to hashMap {key->manager, value->hash}
-    hashes = (await Promise.all(hashes)).map(
-      (hash, index) => `hashMap.set('${managers[index]}','${hash}');`
+    const hashStrings = (await Promise.all(hashes)).map(
+      ({ manager, hash }) => `hashMap.set('${manager}','${hash}');`
     );
 
     //write hashMap to fingerprint.generated.ts
     await updateFile(
       'lib/modules/manager/fingerprint.generated.ts',
-      [hashMap, hashes.join('\n')].join('\n\n')
+      [hashMap, hashStrings.join('\n')].join('\n\n')
     );
   } catch (err) {
-    shell.echo('ERROR:', err.message);
+    console.log('ERROR:', err.message);
     process.exit(1);
   }
 }
@@ -179,13 +196,17 @@ await (async () => {
     await generateData();
     await generateHash();
     await Promise.all(
-      shell
-        .find('lib/**/*.generated.ts')
+      (
+        await glob('lib/**/*.generated.ts')
+      )
+        .map((f) => upath.join(f))
         .filter((f) => !newFiles.has(f))
-        .map((file) => fs.remove(file))
+        .map(async (file) => {
+          await fs.remove(file);
+        })
     );
   } catch (e) {
-    shell.echo(e.toString());
-    shell.exit(1);
+    console.log(e.toString());
+    process.exit(1);
   }
 })();

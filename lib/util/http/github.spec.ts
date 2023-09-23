@@ -55,7 +55,6 @@ describe('util/http/github', () => {
     delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
-    jest.resetAllMocks();
     repoCache = {};
     repositoryCache.getCache.mockReturnValue(repoCache);
   });
@@ -621,7 +620,7 @@ describe('util/http/github', () => {
         .reply(200, { data: { repository } });
 
       const res = await githubApi.requestGraphql(graphqlQuery);
-      expect(res?.data).toStrictEqual({ repository });
+      expect(res?.data).toEqual({ repository });
     });
 
     it('queryRepoField', async () => {

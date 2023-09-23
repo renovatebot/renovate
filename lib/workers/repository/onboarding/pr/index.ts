@@ -4,11 +4,12 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
+import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
-import { toSha256 } from '../../../../util/hasha';
+import { toSha256 } from '../../../../util/hash';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {
@@ -19,6 +20,7 @@ import {
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
+import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
 import { OnboardingState, defaultConfigFile } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
@@ -30,17 +32,41 @@ export async function ensureOnboardingPr(
   branches: BranchConfig[]
 ): Promise<void> {
   if (
-    config.repoIsOnboarded ||
+    config.repoIsOnboarded === true ||
+    OnboardingState.onboardingCacheValid ||
     (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
   ) {
     return;
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
-  // TODO #7154
-  const existingPr = await platform.getBranchPr(config.onboardingBranch!);
-  const { rebaseCheckBox, renovateConfigHashComment } =
-    await getRebaseCheckboxComponents(config);
+  // TODO #22198
+  const existingPr = await platform.getBranchPr(
+    config.onboardingBranch!,
+    config.defaultBranch
+  );
+  if (existingPr) {
+    // skip pr-update if branch is conflicted
+    if (
+      await isOnboardingBranchConflicted(
+        config.defaultBranch!,
+        config.onboardingBranch!
+      )
+    ) {
+      await ensureComment({
+        number: existingPr.number,
+        topic: 'Branch Conflicted',
+        content: emojify(
+          `:warning: This PR has a merge conflict which Renovate is unable to automatically resolve, so updates to this PR description are now paused. Please resolve the merge conflict manually.\n\n`
+        ),
+      });
+      return;
+    }
+  }
+  const onboardingConfigHashComment = await getOnboardingConfigHashComment(
+    config
+  );
+  const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
     config.productLinks!.homepage
@@ -53,7 +79,7 @@ export async function ensureOnboardingPr(
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`
         );
-  // TODO #7154
+  // TODO #22198
   prTemplate += emojify(
     `
 
@@ -94,32 +120,15 @@ If you need any further assistance then you can also [request help here](${
   }
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
-  } else if (await scm.isBranchModified(config.onboardingBranch!)) {
-    configDesc = emojify(
-      `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
-        config.productLinks!.help
-      }) if you have any doubts and would like it reviewed.\n\n`
-    );
-    const isConflicted = await scm.isBranchConflicted(
-      config.baseBranch!,
-      config.onboardingBranch!
-    );
-    if (isConflicted) {
-      configDesc += emojify(
-        `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
-      );
-    } else {
-      configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
-    }
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!)
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config)
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
@@ -131,7 +140,7 @@ If you need any further assistance then you can also [request help here](${
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
 
-  prBody += renovateConfigHashComment;
+  prBody += onboardingConfigHashComment;
 
   logger.trace('prBody:\n' + prBody);
 
@@ -164,7 +173,7 @@ If you need any further assistance then you can also [request help here](${
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
-      // TODO #7154
+      // TODO #22198
       const pr = await platform.createPr({
         sourceBranch: config.onboardingBranch!,
         targetBranch: config.defaultBranch!,
@@ -199,29 +208,23 @@ If you need any further assistance then you can also [request help here](${
   }
 }
 
-interface RebaseCheckboxComponents {
-  rebaseCheckBox: string;
-  renovateConfigHashComment: string;
-}
-
-async function getRebaseCheckboxComponents(
-  config: RenovateConfig
-): Promise<RebaseCheckboxComponents> {
+function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
   let rebaseCheckBox = '';
-  let renovateConfigHashComment = '';
-  if (!config.onboardingRebaseCheckbox) {
-    return { rebaseCheckBox, renovateConfigHashComment };
+  if (onboardingRebaseCheckbox) {
+    // Create markdown checkbox
+    rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
   }
 
-  // Create markdown checkbox
-  rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
+  return rebaseCheckBox;
+}
 
-  // Create hashMeta
+async function getOnboardingConfigHashComment(
+  config: RenovateConfig
+): Promise<string> {
   const configFile = defaultConfigFile(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
   const hash = toSha256(existingContents);
-  renovateConfigHashComment = `\n<!--renovate-config-hash:${hash}-->\n`;
 
-  return { rebaseCheckBox, renovateConfigHashComment };
+  return `\n<!--renovate-config-hash:${hash}-->\n`;
 }

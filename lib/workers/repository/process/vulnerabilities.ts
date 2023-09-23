@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
@@ -6,7 +6,7 @@ import { parseCvssVector } from 'vuln-vects';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getDefaultVersioning } from '../../../modules/datasource';
+import { getDefaultVersioning } from '../../../modules/datasource/common';
 import type {
   PackageDependency,
   PackageFile,
@@ -18,7 +18,12 @@ import {
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { DependencyVulnerabilities, Vulnerability } from './types';
+import { titleCase } from '../../../util/string';
+import type {
+  DependencyVulnerabilities,
+  SeverityDetails,
+  Vulnerability,
+} from './types';
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
@@ -38,7 +43,6 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
   private async initialize(): Promise<void> {
@@ -454,12 +458,19 @@ export class Vulnerabilities {
     logger.debug(
       `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
     );
+
+    const severityDetails = this.extractSeverityDetails(
+      vulnerability,
+      affected
+    );
+
     return {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
+      vulnerabilitySeverity: severityDetails.severityLevel,
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
@@ -470,9 +481,7 @@ export class Vulnerabilities {
   private evaluateCvssVector(vector: string): [string, string] {
     try {
       const parsedCvss: CvssScore = parseCvssVector(vector);
-      const severityLevel =
-        parsedCvss.cvss3OverallSeverityText.charAt(0).toUpperCase() +
-        parsedCvss.cvss3OverallSeverityText.slice(1);
+      const severityLevel = parsedCvss.cvss3OverallSeverityText;
 
       return [parsedCvss.baseScore.toFixed(1), severityLevel];
     } catch (err) {
@@ -513,26 +522,16 @@ export class Vulnerabilities {
     content += `#### Details\n${details ?? 'No details.'}\n`;
 
     content += '#### Severity\n';
-    const cvssVector =
-      vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
-      vulnerability.severity?.[0]?.score ??
-      (affected.database_specific?.cvss as string); // RUSTSEC
-    if (cvssVector) {
-      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
-      const score = baseScore ? `${baseScore} / 10 (${severity})` : 'Unknown';
-      content += `- CVSS Score: ${score}\n`;
-      content += `- Vector String: \`${cvssVector}\`\n`;
-    } else if (
-      vulnerability.id.startsWith('GHSA-') &&
-      vulnerability.database_specific?.severity
-    ) {
-      const severity = vulnerability.database_specific.severity as string;
-      content +=
-        severity.charAt(0).toUpperCase() +
-        severity.slice(1).toLowerCase() +
-        '\n';
+    const severityDetails = this.extractSeverityDetails(
+      vulnerability,
+      affected
+    );
+
+    if (severityDetails.cvssVector) {
+      content += `- CVSS Score: ${severityDetails.score}\n`;
+      content += `- Vector String: \`${severityDetails.cvssVector}\`\n`;
     } else {
-      content += 'Unknown severity.\n';
+      content += `${titleCase(severityDetails.severityLevel)}\n`;
     }
 
     content += `\n#### References\n${
@@ -557,5 +556,38 @@ export class Vulnerabilities {
     content += `</details>`;
 
     return [sanitizeMarkdown(content)];
+  }
+
+  private extractSeverityDetails(
+    vulnerability: Osv.Vulnerability,
+    affected: Osv.Affected
+  ): SeverityDetails {
+    let severityLevel = 'UNKNOWN';
+    let score = 'Unknown';
+
+    const cvssVector =
+      vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
+      vulnerability.severity?.[0]?.score ??
+      (affected.database_specific?.cvss as string); // RUSTSEC
+
+    if (cvssVector) {
+      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
+      severityLevel = severity.toUpperCase();
+      score = baseScore
+        ? `${baseScore} / 10 (${titleCase(severityLevel)})`
+        : 'Unknown';
+    } else if (
+      vulnerability.id.startsWith('GHSA-') &&
+      vulnerability.database_specific?.severity
+    ) {
+      const severity = vulnerability.database_specific.severity as string;
+      severityLevel = severity.toUpperCase();
+    }
+
+    return {
+      cvssVector,
+      score,
+      severityLevel,
+    };
   }
 }

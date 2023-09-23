@@ -17,3 +17,9 @@ export interface DependencyVulnerabilities {
   versioningApi: VersioningApi;
   vulnerabilities: Vulnerability[];
 }
+
+export interface SeverityDetails {
+  cvssVector: string;
+  score: string;
+  severityLevel: string;
+}

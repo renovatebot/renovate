@@ -1,5 +1,6 @@
 import { ERROR } from 'bunyan';
-import shell from 'shelljs';
+import fs from 'fs-extra';
+import * as tar from 'tar';
 import { getProblems, logger } from '../lib/logger';
 import { generateConfig } from './docs/config';
 import { generateDatasources } from './docs/datasources';
@@ -22,20 +23,13 @@ process.on('unhandledRejection', (err) => {
 (async () => {
   try {
     const dist = 'tmp/docs';
-    let r: shell.ShellString;
 
     logger.info('generating docs');
 
-    r = shell.mkdir('-p', `${dist}/`);
-    if (r.code) {
-      return;
-    }
+    await fs.mkdir(`${dist}/`, { recursive: true });
 
     logger.info('* static');
-    r = shell.cp('-r', 'docs/usage/.', `${dist}`);
-    if (r.code) {
-      return;
-    }
+    await fs.copy('docs/usage/.', `${dist}`);
 
     logger.info('* fetching open GitHub issues');
     const openItems = await getOpenGitHubItems();
@@ -79,16 +73,16 @@ process.on('unhandledRejection', (err) => {
     logger.info('* json-schema');
     await generateSchema(dist);
 
-    r = shell.exec('tar -czf ./tmp/docs.tgz -C ./tmp/docs .');
-    if (r.code) {
-      return;
-    }
+    await tar.create(
+      { file: './tmp/docs.tgz', cwd: './tmp/docs', gzip: true },
+      ['.']
+    );
   } catch (err) {
     logger.error({ err }, 'Unexpected error');
   } finally {
     const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
     if (loggerErrors.length) {
-      shell.exit(1);
+      process.exit(1);
     }
   }
 })();

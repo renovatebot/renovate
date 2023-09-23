@@ -62,8 +62,10 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
-        }
+        },
+        {}
       );
       expect(res).toBeEmptyString();
     });
@@ -91,8 +93,10 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
-        }
+        },
+        {}
       );
 
       expect(upgrade).toMatchObject({
@@ -128,8 +132,10 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
-        }
+        },
+        {}
       );
 
       expect(upgrade).toMatchObject({
@@ -155,8 +161,10 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
-        }
+        },
+        {}
       );
       expect(res).toContain('PR BODY');
       expect(res).toContain(`<!--renovate-debug`);
@@ -178,8 +186,10 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
-        }
+        },
+        {}
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
     });
@@ -199,8 +209,10 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
-        }
+        },
+        {}
       );
 
       const match = prDebugDataRe.exec(res);
@@ -247,8 +259,10 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
-        }
+        },
+        {}
       );
       const expected =
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +

@@ -18,3 +18,8 @@ terraform {
   source = "github.com/hashicorp/example?ref=v1.0.0"
 }
 ```
+
+### Terraform lockfiles
+
+The Terragrunt manager supports [lock file maintenance](https://docs.renovatebot.com/configuration-options/#lockfilemaintenance) for `.terraform.lock.hcl` artifacts.
+These artifacts will be updated if and only if the update type is `lockFileMaintenance`.

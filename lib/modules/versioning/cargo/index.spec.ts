@@ -1,7 +1,7 @@
 import { api as semver } from '.';
 
 describe('modules/versioning/cargo/index', () => {
-  test.each`
+  it.each`
     version    | range                     | expected
     ${'4.2.0'} | ${'4.2, >= 3.0, < 5.0.0'} | ${true}
     ${'4.2.0'} | ${'2.0, >= 3.0, < 5.0.0'} | ${false}
@@ -15,7 +15,7 @@ describe('modules/versioning/cargo/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                                  | range               | expected
     ${['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'4.*.0, < 4.2.5'} | ${'4.2.1'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3']} | ${'5.0, > 5.0.0'}   | ${'5.0.3'}
@@ -26,7 +26,7 @@ describe('modules/versioning/cargo/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version                                | expected
     ${'1'}                                 | ${true}
     ${'1.2'}                               | ${true}
@@ -40,7 +40,7 @@ describe('modules/versioning/cargo/index', () => {
     expect(!!semver.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | expected
     ${'1'}     | ${false}
     ${'1.2'}   | ${false}
@@ -49,7 +49,7 @@ describe('modules/versioning/cargo/index', () => {
     expect(!!semver.isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | range                  | expected
     ${'0.9.0'} | ${'>= 1.0.0 <= 2.0.0'} | ${true}
     ${'1.9.0'} | ${'>= 1.0.0 <= 2.0.0'} | ${false}
@@ -60,7 +60,7 @@ describe('modules/versioning/cargo/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                         | range                         | expected
     ${['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0']} | ${'4.*, > 4.2'}               | ${'4.3.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']}          | ${'4.0.0'}                    | ${'4.2.0'}
@@ -74,7 +74,7 @@ describe('modules/versioning/cargo/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version            | expected
     ${'1.2.3'}         | ${false}
     ${'1.2.3-alpha.1'} | ${false}
@@ -90,7 +90,7 @@ describe('modules/versioning/cargo/index', () => {
     expect(!!semver.isSingleVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     currentValue             | rangeStrategy | currentVersion | newVersion      | expected
     ${'*'}                   | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}
     ${'1'}                   | ${'pin'}      | ${'1.0.0'}     | ${'1.0.0'}      | ${'=1.0.0'}

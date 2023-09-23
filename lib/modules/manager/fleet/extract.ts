@@ -28,7 +28,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   if (!currentValue) {
     return {
       ...dep,
-      skipReason: 'no-version',
+      skipReason: 'unspecified-version',
     };
   }
 
@@ -71,7 +71,7 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   if (!doc.version) {
     return {
       ...dep,
-      skipReason: 'no-version',
+      skipReason: 'unspecified-version',
     };
   }
 
@@ -135,7 +135,7 @@ export function extractPackageFile(
       deps.push(...gitRepoDeps);
     }
   } catch (err) {
-    logger.warn({ error: err, packageFile }, 'Failed to parse fleet YAML');
+    logger.debug({ error: err, packageFile }, 'Failed to parse fleet YAML');
   }
 
   return deps.length ? { deps } : null;

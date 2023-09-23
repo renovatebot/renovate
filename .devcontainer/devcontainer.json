@@ -1,33 +1,30 @@
 {
   "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "name": "Renovate",
+  "dockerFile": "Dockerfile",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+  "capAdd": ["SYS_PTRACE"],
+  "privileged": true,
+  "securityOpt": ["seccomp=unconfined"],
   "hostRequirements": {
     "cpus": 4,
     "memory": "7gb",
     "storage": "32gb"
   },
-  "name": "Renovate",
-  "dockerFile": "Dockerfile",
   "customizations": {
     "vscode": {
-      "settings": {
-        "terminal.integrated.profiles.linux": {
-          "bash": { "path": "/bin/bash" }
-        },
-        "terminal.integrated.defaultProfile.linux": "bash"
-      },
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "orta.vscode-jest",
-        "EditorConfig.editorconfig"
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions"
       ]
     }
   },
-  "runArgs": [
-    "--cap-add=SYS_PTRACE",
-    "--security-opt",
-    "seccomp=unconfined",
-    "--privileged"
-  ],
-  "postCreateCommand": "yarn install"
+  "postCreateCommand": [".devcontainer/post-create.sh"],
+  // Otherwise jest watcher fails because deps were not installed yet
+  "waitFor": "postCreateCommand"
 }

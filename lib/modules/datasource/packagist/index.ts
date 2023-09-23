@@ -69,7 +69,9 @@ export class PackagistDatasource extends Datasource {
     regFile: RegistryFile
   ): string {
     const { key, hash } = regFile;
-    const fileName = hash ? key.replace('%hash%', hash) : key;
+    const fileName = hash
+      ? key.replace('%hash%', hash)
+      : /* istanbul ignore next: hard to test */ key;
     const url = resolveBaseUrl(regUrl, fileName);
     return url;
   }
@@ -183,6 +185,13 @@ export class PackagistDatasource extends Datasource {
 
     try {
       const meta = await this.getRegistryMeta(registryUrl);
+
+      if (
+        meta.availablePackages &&
+        !meta.availablePackages.includes(packageName)
+      ) {
+        return null;
+      }
 
       if (meta.metadataUrl) {
         const packagistResult = await this.packagistV2Lookup(

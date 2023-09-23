@@ -276,6 +276,61 @@ describe('modules/manager/bazel/artifacts', () => {
     expect(res).toBeNull();
   });
 
+  it('errors for _http_archive without urls', async () => {
+    const input = codeBlock`
+      _http_archive(
+        name = "bazel_skylib",
+        sha256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f",
+        strip_prefix = "bazel-skylib-0.5.0",
+      )
+    `;
+
+    const upgrade = {
+      depName: 'bazel_skylib',
+      depType: 'http_archive',
+      repo: 'bazelbuild/bazel-skylib',
+      managerData: { idx: 0 },
+      currentValue: '0.5.0',
+      newValue: '0.6.2',
+    };
+    const res = await updateArtifacts(
+      partial<UpdateArtifact>({
+        packageFileName: 'WORKSPACE',
+        updatedDeps: [upgrade],
+        newPackageFileContent: input,
+      })
+    );
+    expect(res).toBeNull();
+  });
+
+  it('errors for maybe(_http_archive) without urls', async () => {
+    const input = codeBlock`
+      maybe(
+        _http_archive,
+        name = "bazel_skylib",
+        sha256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f",
+        strip_prefix = "bazel-skylib-0.5.0",
+      )
+    `;
+
+    const upgrade = {
+      depName: 'bazel_skylib',
+      depType: 'http_archive',
+      repo: 'bazelbuild/bazel-skylib',
+      managerData: { idx: 0 },
+      currentValue: '0.5.0',
+      newValue: '0.6.2',
+    };
+    const res = await updateArtifacts(
+      partial<UpdateArtifact>({
+        packageFileName: 'WORKSPACE',
+        updatedDeps: [upgrade],
+        newPackageFileContent: input,
+      })
+    );
+    expect(res).toBeNull();
+  });
+
   it('updates http_archive with urls array', async () => {
     const inputHash =
       'b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f';
@@ -349,6 +404,140 @@ describe('modules/manager/bazel/artifacts', () => {
     const input = codeBlock`
       maybe(
         http_archive,
+        name = "bazel_skylib",
+        sha256 = "${inputHash}",
+        strip_prefix = "bazel-skylib-0.5.0",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
+            "https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
+        ],
+      )
+    `;
+
+    const currentValue = '0.5.0';
+    const newValue = '0.6.2';
+    const upgrade = {
+      depName: 'bazel_skylib',
+      depType: 'http_archive',
+      repo: 'bazelbuild/bazel-skylib',
+      managerData: { idx: 0 },
+      currentValue,
+      newValue,
+    };
+
+    const tarContent = Buffer.from('foo');
+    const outputHash = crypto
+      .createHash('sha256')
+      .update(tarContent)
+      .digest('hex');
+
+    const output = input
+      .replace(currentValue, newValue)
+      .replace(currentValue, newValue)
+      .replace(currentValue, newValue)
+      .replace(inputHash, outputHash);
+
+    httpMock
+      .scope('https://github.com')
+      .get('/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+      .reply(200, tarContent);
+    httpMock
+      .scope('https://mirror.bazel.build')
+      .get('/github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+      .reply(200, tarContent);
+
+    const res = await updateArtifacts(
+      partial<UpdateArtifact>({
+        packageFileName: 'WORKSPACE',
+        updatedDeps: [upgrade],
+        newPackageFileContent: input,
+      })
+    );
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: output,
+          path: 'WORKSPACE',
+          type: 'addition',
+        },
+      },
+    ]);
+  });
+
+  it('updates _http_archive with urls array', async () => {
+    const inputHash =
+      'b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f';
+    const input = codeBlock`
+      _http_archive(
+        name = "bazel_skylib",
+        sha256 = "${inputHash}",
+        strip_prefix = "bazel-skylib-0.5.0",
+        urls = [
+          "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
+          "https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
+        ],
+      )
+    `;
+
+    const currentValue = '0.5.0';
+    const newValue = '0.6.2';
+    const upgrade = {
+      depName: 'bazel_skylib',
+      depType: 'http_archive',
+      repo: 'bazelbuild/bazel-skylib',
+      managerData: { idx: 0 },
+      currentValue,
+      newValue,
+    };
+
+    const tarContent = Buffer.from('foo');
+    const outputHash = crypto
+      .createHash('sha256')
+      .update(tarContent)
+      .digest('hex');
+
+    const output = input
+      .replace(currentValue, newValue)
+      .replace(currentValue, newValue)
+      .replace(currentValue, newValue)
+      .replace(inputHash, outputHash);
+
+    httpMock
+      .scope('https://github.com')
+      .get('/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+      .reply(200, tarContent);
+
+    httpMock
+      .scope('https://mirror.bazel.build')
+      .get('/github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+      .reply(200, tarContent);
+
+    const res = await updateArtifacts(
+      partial<UpdateArtifact>({
+        packageFileName: 'WORKSPACE',
+        updatedDeps: [upgrade],
+        newPackageFileContent: input,
+      })
+    );
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: output,
+          path: 'WORKSPACE',
+          type: 'addition',
+        },
+      },
+    ]);
+  });
+
+  it('updates maybe(_http_archive) with urls array', async () => {
+    const inputHash =
+      'b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f';
+    const input = codeBlock`
+      maybe(
+        _http_archive,
         name = "bazel_skylib",
         sha256 = "${inputHash}",
         strip_prefix = "bazel-skylib-0.5.0",

@@ -43,6 +43,7 @@ import type {
   Label,
   PR,
   PRMergeMethod,
+  PRUpdateParams,
   Repo,
   RepoSortMethod,
   SortMethod,
@@ -88,7 +89,7 @@ function toRenovateIssue(data: Issue): Issue {
   };
 }
 
-// TODO #7154
+// TODO #22198
 function toRenovatePR(data: PR): Pr | null {
   if (!data) {
     return null;
@@ -165,7 +166,7 @@ function getLabelList(): Promise<Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
       .getRepoLabels(config.repository, {
-        useCache: false,
+        memCache: false,
       })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} repo labels`);
@@ -174,7 +175,7 @@ function getLabelList(): Promise<Label[]> {
 
     const orgLabels = helper
       .getOrgLabels(config.repository.split('/')[0], {
-        useCache: false,
+        memCache: false,
       })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} org labels`);
@@ -253,8 +254,8 @@ const platform: Platform = {
     fileName: string,
     repoName?: string,
     branchOrTag?: string
-  ): Promise<any | null> {
-    // TODO #7154
+  ): Promise<any> {
+    // TODO #22198
     const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
     return JSON5.parse(raw);
   },
@@ -270,7 +271,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
 
-    // Attempt to fetch information about repository
+    // Try to fetch information about repository
     try {
       repo = await helper.getRepo(repository);
     } catch (err) {
@@ -382,7 +383,7 @@ const platform: Platform = {
 
       // Refresh caches by re-fetching commit status for branch
       await helper.getCombinedCommitStatus(config.repository, branchName, {
-        useCache: false,
+        memCache: false,
       });
     } catch (err) {
       logger.warn({ err }, 'Failed to set branch status');
@@ -449,7 +450,7 @@ const platform: Platform = {
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
-        .searchPRs(config.repository, { state: 'all' }, { useCache: false })
+        .searchPRs(config.repository, { state: 'all' }, { memCache: false })
         .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
@@ -473,7 +474,7 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (config.prList !== null) {
-        // TODO #7154
+        // TODO #22198
         (await config.prList).push(pr!);
       }
     }
@@ -622,17 +623,23 @@ const platform: Platform = {
     prTitle,
     prBody: body,
     state,
+    targetBranch,
   }: UpdatePrConfig): Promise<void> {
     let title = prTitle;
     if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
       title = DRAFT_PREFIX + title;
     }
 
-    await helper.updatePR(config.repository, number, {
+    const prUpdateParams: PRUpdateParams = {
       title,
       ...(body && { body }),
       ...(state && { state }),
-    });
+    };
+    if (targetBranch) {
+      prUpdateParams.base = targetBranch;
+    }
+
+    await helper.updatePR(config.repository, number, prUpdateParams);
   },
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
@@ -650,7 +657,7 @@ const platform: Platform = {
   getIssueList(): Promise<Issue[]> {
     if (config.issueList === null) {
       config.issueList = helper
-        .searchIssues(config.repository, { state: 'all' }, { useCache: false })
+        .searchIssues(config.repository, { state: 'all' }, { memCache: false })
         .then((issues) => {
           const issueList = issues.map(toRenovateIssue);
           logger.debug(`Retrieved ${issueList.length} Issues`);
@@ -661,12 +668,10 @@ const platform: Platform = {
     return config.issueList;
   },
 
-  async getIssue(number: number, useCache = true): Promise<Issue | null> {
+  async getIssue(number: number, memCache = true): Promise<Issue | null> {
     try {
       const body = (
-        await helper.getIssue(config.repository, number, {
-          useCache,
-        })
+        await helper.getIssue(config.repository, number, { memCache })
       ).body;
       return {
         number,
@@ -687,9 +692,9 @@ const platform: Platform = {
     if (!issue) {
       return null;
     }
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.debug(`Found Issue #${issue.number!}`);
-    // TODO #7154
+    // TODO #22198
     return getIssue!(issue.number!);
   },
 
@@ -738,9 +743,9 @@ const platform: Platform = {
         // Close any duplicate issues
         for (const issue of issues) {
           if (issue.state === 'open' && issue.number !== activeIssue.number) {
-            // TODO: types (#7154)
-            logger.warn(`Closing duplicate Issue #${issue.number!}`);
-            // TODO #7154
+            // TODO: types (#22198)
+            logger.warn({ issueNo: issue.number! }, 'Closing duplicate issue');
+            // TODO #22198
             await helper.closeIssue(config.repository, issue.number!);
           }
         }
@@ -752,18 +757,18 @@ const platform: Platform = {
           activeIssue.state === 'open'
         ) {
           logger.debug(
-            // TODO: types (#7154)
+            // TODO: types (#22198)
             `Issue #${activeIssue.number!} is open and up to date - nothing to do`
           );
           return null;
         }
 
         // Update issue body and re-open if enabled
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         logger.debug(`Updating Issue #${activeIssue.number!}`);
         const existingIssue = await helper.updateIssue(
           config.repository,
-          // TODO #7154
+          // TODO #22198
           activeIssue.number!,
           {
             body,
@@ -784,7 +789,7 @@ const platform: Platform = {
         ) {
           await helper.updateIssueLabels(
             config.repository,
-            // TODO #7154
+            // TODO #22198
             activeIssue.number!,
             {
               labels,
@@ -818,7 +823,7 @@ const platform: Platform = {
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
         logger.debug(`Closing issue...issueNo: ${issue.number!}`);
-        // TODO #7154
+        // TODO #22198
         await helper.closeIssue(config.repository, issue.number!);
       }
     }
@@ -904,7 +909,7 @@ const platform: Platform = {
       return;
     }
 
-    // Attempt to delete comment
+    // Try to delete comment
     try {
       await helper.deleteComment(config.repository, comment.id);
     } catch (err) {

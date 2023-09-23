@@ -39,12 +39,13 @@ export interface BranchUpgradeConfig
   currentDigestShort?: string;
   currentValue?: string;
   depIndex?: number;
+
+  displayPending?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
-  language?: string;
   manager: string;
   packageFile?: string;
   lockFile?: string;
@@ -111,6 +112,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
+  automergedPreviously?: boolean;
   baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
@@ -125,16 +127,16 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
-  branchFingerprint?: string;
+  commitFingerprint?: string;
   skipBranchUpdate?: boolean;
 }
 
 export interface BranchMetadata {
   branchName: string;
-  branchSha: string | null;
+  branchSha?: string | null;
   baseBranch?: string;
   baseBranchSha?: string | null;
-  automerge: boolean;
+  automerge?: boolean;
   isModified?: boolean;
   isPristine?: boolean;
 }
@@ -145,9 +147,10 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  cacheModified?: boolean;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
+  cacheModified?: boolean;
+  defaultBranch?: string;
   inactiveBranches: string[];
 }
 

@@ -15,6 +15,8 @@ export function getPrConfigDescription(config: BranchConfig): string {
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
   if (config.automerge) {
     prBody += 'Enabled.';
+  } else if (config.automergedPreviously) {
+    prBody += 'Disabled because a matching PR was automerged previously.';
   } else {
     prBody +=
       'Disabled by config. Please merge this manually once you are satisfied.';
@@ -31,8 +33,6 @@ export function getPrConfigDescription(config: BranchConfig): string {
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`
     );
   } else {

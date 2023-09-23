@@ -86,7 +86,7 @@ describe('modules/manager/gitlabci/extract', () => {
       });
       expect(deps).toHaveLength(8);
 
-      // TODO #7154
+      // TODO #22198
       expect(deps.some((dep) => dep.currentValue!.includes("'"))).toBeFalse();
     });
 
@@ -111,7 +111,7 @@ describe('modules/manager/gitlabci/extract', () => {
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.4.yaml',
       ]);
       expect(res).toBeNull();
-      expect(logger.logger.warn).toHaveBeenCalled();
+      expect(logger.logger.debug).toHaveBeenCalled();
     });
 
     it('skips images with variables', async () => {

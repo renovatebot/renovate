@@ -16,13 +16,25 @@ describe('workers/global/autodiscover', () => {
   let config: RenovateConfig;
 
   beforeEach(async () => {
-    jest.resetAllMocks();
     config = {};
     await platform.initPlatform({
       platform: 'github',
       token: '123test',
       endpoint: 'endpoint',
     });
+  });
+
+  it('throws if local and repositories defined', async () => {
+    config.platform = 'local';
+    config.repositories = ['a'];
+    await expect(autodiscoverRepositories(config)).rejects.toThrow();
+  });
+
+  it('returns local', async () => {
+    config.platform = 'local';
+    expect((await autodiscoverRepositories(config)).repositories).toEqual([
+      'local',
+    ]);
   });
 
   it('returns if not autodiscovering', async () => {
@@ -150,5 +162,19 @@ describe('workers/global/autodiscover', () => {
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(expectedRepositories);
+  });
+
+  it('filters autodiscovered github repos case-insensitive', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = ['project/re*'];
+    config.platform = 'github';
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'PROJECT/repo2'])
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/repo', 'PROJECT/repo2']);
   });
 });

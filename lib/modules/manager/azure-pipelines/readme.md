@@ -58,7 +58,7 @@ stages:
 
 Read the [resources block][resources-docs] and the [tasks block][tasks-docs] Azure Pipelines documentation for more information.
 
-Files that are processed by the manager includes:
+The `azure-pipelines` manager can process these files:
 
 - `.azure-pipelines/**/*.yaml`
 - `.azure-pipelines.yaml`
@@ -69,6 +69,11 @@ Files that are processed by the manager includes:
 - `azure-pipeline/**/*.yaml`
 - `azure-pipeline.yaml`
 - `azure-pipeline.yml`
+
+<!-- prettier-ignore -->
+!!! warning
+    Renovate can't update (root) container-element in containers jobs, see [issue #21987](https://github.com/renovatebot/renovate/issues/21987).
+    Renovate can't read Azure repositories defined in resource blocks, see [issue #15028](https://github.com/renovatebot/renovate/issues/15028).
 
 [resources-docs]: https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources?view=azure-pipelines
 [tasks-docs]: https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/steps-task?view=azure-pipelines

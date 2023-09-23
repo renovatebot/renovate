@@ -50,7 +50,7 @@ export function filterVersions(
       const versionRelease = releases.find(
         (release) => release.version === v.version
       );
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       if (versionRelease!.isDeprecated) {
         logger.trace(
           `Skipping ${config.depName!}@${v.version} because it is deprecated`
@@ -80,7 +80,10 @@ export function filterVersions(
         'Falling back to npm semver syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter((v) =>
-        semver.satisfies(semver.coerce(v.version)!, allowedVersions)
+        semver.satisfies(
+          semver.valid(v.version) ? v.version : semver.coerce(v.version)!,
+          allowedVersions
+        )
       );
     } else if (
       config.versioning === poetryVersioning.id &&
@@ -128,12 +131,21 @@ export function filterVersions(
 
   // if current is unstable then allow unstable in the current major only
   // Allow unstable only in current major
-  return filteredVersions.filter(
-    (v) =>
-      isVersionStable(v.version) ||
-      (versioning.getMajor(v.version) === versioning.getMajor(currentVersion) &&
-        versioning.getMinor(v.version) ===
-          versioning.getMinor(currentVersion) &&
-        versioning.getPatch(v.version) === versioning.getPatch(currentVersion))
-  );
+  return filteredVersions.filter((v) => {
+    if (isVersionStable(v.version)) {
+      return true;
+    }
+    if (
+      versioning.getMajor(v.version) !== versioning.getMajor(currentVersion)
+    ) {
+      return false;
+    }
+    if (versioning.allowUnstableMajorUpgrades) {
+      return true;
+    }
+    return (
+      versioning.getMinor(v.version) === versioning.getMinor(currentVersion) &&
+      versioning.getPatch(v.version) === versioning.getPatch(currentVersion)
+    );
+  });
 }

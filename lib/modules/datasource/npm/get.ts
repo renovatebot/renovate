@@ -1,6 +1,7 @@
 import url from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -13,11 +14,6 @@ import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
 
-interface PackageSource {
-  sourceUrl?: string;
-  sourceDirectory?: string;
-}
-
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/
 );
@@ -28,26 +24,48 @@ const platformMapping: Record<string, string> = {
   gitlab: 'https://gitlab.com/',
 };
 
-function getPackageSource(repository: any): PackageSource {
-  const res: PackageSource = {};
-  if (repository) {
-    if (is.nonEmptyString(repository)) {
-      const shortMatch = repository.match(SHORT_REPO_REGEX);
-      if (shortMatch?.groups) {
-        const { platform = 'github', shortRepo } = shortMatch.groups;
-        res.sourceUrl = platformMapping[platform] + shortRepo;
-      } else {
-        res.sourceUrl = repository;
-      }
-    } else if (is.nonEmptyString(repository.url)) {
-      res.sourceUrl = repository.url;
-    }
-    if (is.nonEmptyString(repository.directory)) {
-      res.sourceDirectory = repository.directory;
-    }
-  }
-  return res;
+interface PackageSource {
+  sourceUrl: string | null;
+  sourceDirectory: string | null;
 }
+
+const PackageSource = z
+  .union([
+    z
+      .string()
+      .nonempty()
+      .transform((repository): PackageSource => {
+        let sourceUrl: string | null = null;
+        const sourceDirectory = null;
+        const shortMatch = repository.match(SHORT_REPO_REGEX);
+        if (shortMatch?.groups) {
+          const { platform = 'github', shortRepo } = shortMatch.groups;
+          sourceUrl = platformMapping[platform] + shortRepo;
+        } else {
+          sourceUrl = repository;
+        }
+        return { sourceUrl, sourceDirectory };
+      }),
+    z
+      .object({
+        url: z.string().nonempty().nullish(),
+        directory: z.string().nonempty().nullish(),
+      })
+      .transform(({ url, directory }) => {
+        const res: PackageSource = { sourceUrl: null, sourceDirectory: null };
+
+        if (url) {
+          res.sourceUrl = url;
+        }
+
+        if (directory) {
+          res.sourceDirectory = directory;
+        }
+
+        return res;
+      }),
+  ])
+  .catch({ sourceUrl: null, sourceDirectory: null });
 
 export async function getDependency(
   http: Http,
@@ -86,8 +104,13 @@ export async function getDependency(
   const softExpireAt = DateTime.local()
     .plus({ minutes: cacheMinutes })
     .toISO()!;
-  let { cacheHardTtlMinutes } = GlobalConfig.get();
-  if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
+  let cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
+  if (
+    !(
+      is.number(cacheHardTtlMinutes) &&
+      /* istanbul ignore next: needs test */ cacheHardTtlMinutes > cacheMinutes
+    )
+  ) {
     cacheHardTtlMinutes = cacheMinutes;
   }
 
@@ -124,17 +147,23 @@ export async function getDependency(
     res.repository ??= latestVersion?.repository;
     res.homepage ??= latestVersion?.homepage;
 
-    const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
+    const { sourceUrl, sourceDirectory } = PackageSource.parse(res.repository);
 
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       homepage: res.homepage,
-      sourceUrl,
-      sourceDirectory,
       releases: [],
       tags: res['dist-tags'],
       registryUrl,
     };
+
+    if (sourceUrl) {
+      dep.sourceUrl = sourceUrl;
+    }
+
+    if (sourceDirectory) {
+      dep.sourceDirectory = sourceDirectory;
+    }
 
     if (latestVersion?.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
@@ -152,7 +181,11 @@ export async function getDependency(
       if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;
       }
-      const source = getPackageSource(res.versions?.[version].repository);
+      const nodeConstraint = res.versions?.[version].engines?.node;
+      if (is.nonEmptyString(nodeConstraint)) {
+        release.constraints = { node: [nodeConstraint] };
+      }
+      const source = PackageSource.parse(res.versions?.[version].repository);
       if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
         release.sourceUrl = source.sourceUrl;
       }
@@ -176,7 +209,9 @@ export async function getDependency(
         cacheNamespace,
         packageUrl,
         { ...dep, cacheData },
-        etag ? cacheHardTtlMinutes : cacheMinutes
+        etag
+          ? /* istanbul ignore next: needs test */ cacheHardTtlMinutes
+          : cacheMinutes
       );
     } else {
       dep.isPrivate = true;

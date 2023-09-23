@@ -22,7 +22,7 @@ export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
       });
 
       if (is.nullOrUndefined(workspace.terraform_version)) {
-        dep.skipReason = 'no-version';
+        dep.skipReason = 'unspecified-version';
       }
       dependencies.push({
         ...dep,

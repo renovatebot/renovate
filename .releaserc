@@ -17,7 +17,6 @@
     [
       "@semantic-release/exec",
       {
-        "verifyConditionsCmd": "run-s verify",
         "prepareCmd": "run-s \"release:prepare -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}",
         "publishCmd": "run-s \"release:publish -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}"
       }

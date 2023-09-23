@@ -53,3 +53,11 @@ resource "helm_release" "karpenter_oci_repo" {
   chart = "karpenter"
   version = "v0.22.1"
 }
+
+## chart in OCI registry
+resource "helm_release" "proxy_oci_repo" {
+  name  = "kube-prometheus"
+  repository = "oci://hub.proxy.test/bitnamicharts"
+  chart = "kube-prometheus"
+  version = "8.9.1"
+}

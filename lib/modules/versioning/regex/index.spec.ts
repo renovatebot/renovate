@@ -22,18 +22,17 @@ describe('modules/versioning/regex/index', () => {
     });
 
     describe('throws', () => {
-      for (const re of [
-        '^(?<major>\\d+)(',
-        '^(?<major>\\d+)?(?<!y)x$',
-        '^(?<major>\\d+)?(?<=y)x$',
-      ]) {
-        it(re, () => {
-          expect(() => get(`regex:${re}`)).toThrow(CONFIG_VALIDATION);
-        });
-      }
+      it.each`
+        regex
+        ${'^(?<major>\\d+)('}
+        ${'^(?<major>\\d+)?(?<!y)x$'}
+        ${'^(?<major>\\d+)?(?<=y)x$'}
+      `(`on invalid regex: "$regex"`, ({ re }: { re: string }) => {
+        expect(() => get(`regex:${re}`)).toThrow(CONFIG_VALIDATION);
+      });
     });
 
-    test.each`
+    it.each`
       version               | expected
       ${'1'}                | ${false}
       ${'aardvark'}         | ${false}
@@ -56,7 +55,7 @@ describe('modules/versioning/regex/index', () => {
       expect(regex.isValid(version)).toBe(expected);
     });
 
-    test.each`
+    it.each`
       version             | range               | expected
       ${'1.2.3'}          | ${'2.3.4'}          | ${true}
       ${'1.2.3a1'}        | ${'2.3.4'}          | ${true}
@@ -81,7 +80,7 @@ describe('modules/versioning/regex/index', () => {
       }
     );
 
-    test.each`
+    it.each`
       version               | expected
       ${'1.2.3'}            | ${true}
       ${'1.2.3a1'}          | ${true}
@@ -102,7 +101,7 @@ describe('modules/versioning/regex/index', () => {
       expect(res).toBe(expected);
     });
 
-    test.each`
+    it.each`
       version          | expected
       ${'1.2.3'}       | ${true}
       ${'1.2.3-foo'}   | ${true}
@@ -113,7 +112,7 @@ describe('modules/versioning/regex/index', () => {
       expect(res).toBe(expected);
     });
 
-    test.each`
+    it.each`
       version               | expected
       ${'1.2.3'}            | ${true}
       ${'1.2.3a1'}          | ${true}
@@ -133,7 +132,7 @@ describe('modules/versioning/regex/index', () => {
       expect(!!regex.isVersion(version)).toBe(expected);
     });
 
-    test.each`
+    it.each`
       version          | major | minor | patch
       ${'1.2.3'}       | ${1}  | ${2}  | ${3}
       ${'1.2.3a1'}     | ${1}  | ${2}  | ${3}
@@ -147,7 +146,7 @@ describe('modules/versioning/regex/index', () => {
       }
     );
 
-    test.each`
+    it.each`
       a                | b                | expected
       ${'1.2.3'}       | ${'1.2.3'}       | ${true}
       ${'1.2.3a1'}     | ${'1.2.3a1'}     | ${true}
@@ -169,7 +168,7 @@ describe('modules/versioning/regex/index', () => {
       expect(regex.equals(a, b)).toBe(expected);
     });
 
-    test.each`
+    it.each`
       a            | b                | expected
       ${'2.0.0'}   | ${'1.0.0'}       | ${true}
       ${'2.2.0'}   | ${'2.1.0'}       | ${true}
@@ -202,7 +201,7 @@ describe('modules/versioning/regex/index', () => {
       expect(regex.isGreaterThan(a, b)).toBe(expected);
     });
 
-    test.each`
+    it.each`
       version          | range            | expected
       ${'1.2.2'}       | ${'1.2.3'}       | ${true}
       ${'1.2.2'}       | ${'1.2.3-bar'}   | ${true}
@@ -251,7 +250,7 @@ describe('modules/versioning/regex/index', () => {
       }
     );
 
-    test.each`
+    it.each`
       versions                                      | range          | expected
       ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6'}     | ${'2.1.6'}
       ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6-foo'} | ${'2.1.6'}
@@ -265,7 +264,7 @@ describe('modules/versioning/regex/index', () => {
       }
     );
 
-    test.each`
+    it.each`
       versions                                      | range          | expected
       ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6'}     | ${'2.1.6'}
       ${['2.1.5', '2.1.6a1', '2.1.6', '2.1.6-foo']} | ${'2.1.6-foo'} | ${'2.1.6'}
@@ -302,7 +301,7 @@ describe('modules/versioning/regex/index', () => {
       });
     });
 
-    test.each`
+    it.each`
       version          | range            | expected
       ${'1.2.2'}       | ${'1.2.2'}       | ${true}
       ${'1.2.2'}       | ${'1.2.2-bar'}   | ${true}
@@ -357,7 +356,7 @@ describe('modules/versioning/regex/index', () => {
       'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$'
     );
 
-    test.each`
+    it.each`
       version                    | expected
       ${'12.7.0-debian-10-r69'}  | ${true}
       ${'12.7.0-debian-10-r100'} | ${true}
@@ -365,7 +364,7 @@ describe('modules/versioning/regex/index', () => {
       expect(!!re.isValid(version)).toBe(expected);
     });
 
-    test.each`
+    it.each`
       version                   | range                      | expected
       ${'12.7.0-debian-10-r69'} | ${'12.7.0-debian-10-r100'} | ${true}
     `(
@@ -376,7 +375,7 @@ describe('modules/versioning/regex/index', () => {
       }
     );
 
-    test.each`
+    it.each`
       a                          | b                          | expected
       ${'12.7.0-debian-10-r69'}  | ${'12.7.0-debian-10-r100'} | ${false}
       ${'12.7.0-debian-10-r169'} | ${'12.7.0-debian-10-r100'} | ${true}
@@ -384,7 +383,7 @@ describe('modules/versioning/regex/index', () => {
       expect(re.isGreaterThan(a, b)).toBe(expected);
     });
 
-    test.each`
+    it.each`
       version                  | range                     | expected
       ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r69'} | ${true}
       ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r68'} | ${true}

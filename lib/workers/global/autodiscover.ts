@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
@@ -13,6 +13,19 @@ function repoName(value: string | { repository: string }): string {
 export async function autodiscoverRepositories(
   config: AllConfig
 ): Promise<AllConfig> {
+  if (config.platform === 'local') {
+    if (config.repositories?.length) {
+      logger.debug(
+        { repositories: config.repositories },
+        'Found repositories when in local mode'
+      );
+      throw new Error(
+        'Invalid configuration: repositories list not supported when platform=local'
+      );
+    }
+    config.repositories = ['local'];
+    return config;
+  }
   if (!config.autodiscover) {
     if (!config.repositories?.length) {
       logger.warn(
@@ -22,7 +35,11 @@ export async function autodiscoverRepositories(
     return config;
   }
   // Autodiscover list of repositories
-  let discovered = await platform.getRepos();
+  let discovered = await platform.getRepos({
+    topics: config.autodiscoverTopics,
+    includeMirrors: config.includeMirrors,
+    namespaces: config.autodiscoverNamespaces,
+  });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug(
@@ -90,7 +107,7 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
       }
       res = repos.filter(autodiscoveryPred);
     } else {
-      res = repos.filter(minimatch.filter(filter));
+      res = repos.filter(minimatch.filter(filter, { nocase: true }));
     }
     for (const repository of res) {
       matched.add(repository);

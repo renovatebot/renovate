@@ -1,10 +1,15 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { z } from 'zod';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import {
+  findGithubToken,
+  takePersonalAccessTokenIfPossible,
+} from '../../../util/check-token';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
@@ -18,18 +23,19 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { Json } from '../../../util/schema-utils';
+import { coerceString } from '../../../util/string';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { AuthJson, ComposerLock } from './types';
+import { Lockfile, PackageFile } from './schema';
+import type { AuthJson } from './types';
 import {
   extractConstraints,
-  findGithubToken,
   getComposerArguments,
   getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
-  takePersonalAccessTokenIfPossible,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -66,7 +72,7 @@ function getAuthJson(): string | null {
     }
 
     if (gitlabHostRule?.token) {
-      const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
+      const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
       authJson['gitlab-token'][host] = gitlabHostRule.token;
       // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
@@ -105,10 +111,19 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
+  const file = Json.pipe(PackageFile).parse(newPackageFileContent);
+
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
-    logger.debug('No composer.lock found');
+  const lockfile = await z
+    .string()
+    .transform((f) => readLocalFile(f, 'utf8'))
+    .pipe(Json)
+    .pipe(Lockfile)
+    .nullable()
+    .catch(null)
+    .parseAsync(lockFileName);
+  if (!lockfile) {
+    logger.debug('Composer: unable to read lockfile');
     return null;
   }
 
@@ -118,12 +133,8 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractConstraints(
-        JSON.parse(newPackageFileContent),
-        existingLockFile
-      ),
+      ...extractConstraints(file, lockfile),
       ...config.constraints,
     };
 
@@ -150,7 +161,7 @@ export async function updateArtifacts({
     const commands: string[] = [];
 
     // Determine whether install is required before update
-    if (requireComposerDependencyInstallation(existingLockFile)) {
+    if (requireComposerDependencyInstallation(lockfile)) {
       const preCmd = 'composer';
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);
@@ -169,7 +180,9 @@ export async function updateArtifacts({
         (
           'update ' +
           updatedDeps
-            .map((dep) => dep.depName)
+            .map((dep) =>
+              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName
+            )
             .filter(is.string)
             .map((dep) => quote(dep))
             .join(' ')

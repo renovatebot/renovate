@@ -1,4 +1,3 @@
-import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -29,9 +28,7 @@ export function getPythonConstraint(
     return python;
   }
   try {
-    const result = PipfileLockSchema.safeParse(
-      JSON.parse(existingLockFileContent)
-    );
+    const result = PipfileLockSchema.safeParse(existingLockFileContent);
     // istanbul ignore if: not easily testable
     if (!result.success) {
       logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
@@ -63,9 +60,7 @@ export function getPipenvConstraint(
     return pipenv;
   }
   try {
-    const result = PipfileLockSchema.safeParse(
-      JSON.parse(existingLockFileContent)
-    );
+    const result = PipfileLockSchema.safeParse(existingLockFileContent);
     // istanbul ignore if: not easily testable
     if (!result.success) {
       logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
@@ -114,11 +109,14 @@ export async function updateArtifacts({
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
       docker: {},
-      preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
       toolConstraints: [
         {
           toolName: 'python',
           constraint: tagConstraint,
+        },
+        {
+          toolName: 'pipenv',
+          constraint: pipenvConstraint,
         },
       ],
     };

@@ -23,13 +23,13 @@ export function massageProviderLookupName(dep: PackageDependency): void {
     dep.packageName = dep.depName;
   }
 
-  // TODO #7154
+  // TODO #22198
   if (!dep.packageName!.includes('/')) {
     dep.packageName = `hashicorp/${dep.packageName!}`;
   }
 
   // handle cases like `Telmate/proxmox`
-  // TODO #7154
+  // TODO #22198
   dep.packageName = dep.packageName!.toLowerCase();
 }
 
@@ -55,7 +55,7 @@ export async function extractLocksForPackageFile(
   fileName: string
 ): Promise<ProviderLock[]> {
   const locks: ProviderLock[] = [];
-  const lockFilePath = findLockFile(fileName);
+  const lockFilePath = await findLockFile(fileName);
   if (lockFilePath) {
     const lockFileContent = await readLockFile(lockFilePath);
     if (lockFileContent) {

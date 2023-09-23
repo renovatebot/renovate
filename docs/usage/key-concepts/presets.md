@@ -18,17 +18,17 @@ Use presets to:
 
 ## How to use presets
 
-Let's say you're using the `config:base` preset, and want to pin your GitHub Action digests.
+Let's say you're using the `config:recommended` preset, and want to pin your GitHub Action digests.
 Instead of writing your own Renovate config, you search through Renovate's built-in presets.
 You find the the `helpers:pinGitHubActionDigests` preset and add it to the `extends` array:
 
 ```json
 {
-  "extends": ["config:base", "helpers:pinGitHubActionDigests"]
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"]
 }
 ```
 
-Renovate now follows the rules for `config:base` plus the rules for `helpers:pinGitHubActionDigests`.
+Renovate now follows the rules for `config:recommended` plus the rules for `helpers:pinGitHubActionDigests`.
 If there is a logical conflict between presets, then the last preset in the array wins.
 
 ## Managing config for many repositories
@@ -39,7 +39,8 @@ This way you have all global configuration in a single file, in a single reposit
 
 ## Presets are modular
 
-Preset configs are modular, they can be as small as a single package rule or as large as an entire configuration, just like an ESLint config.
+Preset configs are modular, they can be as small as a single package rule or as large as an entire configuration.
+This is similar to the way you can share ESLint configurations.
 
 ## Built-in presets
 

@@ -2,13 +2,13 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   git,
   mockedFunction,
   partial,
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -33,7 +33,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       GlobalConfig.set({
         dryRun: null,
       });
-      jest.resetAllMocks();
       config = getConfig();
       config.branchPrefix = 'some/';
     });
@@ -54,9 +53,9 @@ describe('workers/repository/config-migration/branch/index', () => {
       platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists'
@@ -70,9 +69,9 @@ describe('workers/repository/config-migration/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
@@ -81,9 +80,9 @@ describe('workers/repository/config-migration/branch/index', () => {
         'committed'
       );
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
@@ -96,9 +95,9 @@ describe('workers/repository/config-migration/branch/index', () => {
         'committed'
       );
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
@@ -112,7 +111,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         scm.branchExists.mockResolvedValueOnce(true);
         const res = await checkConfigMigrationBranch(config, migratedData);
         expect(res).toBeNull();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
         expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledWith(
@@ -122,7 +121,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.ensureComment).toHaveBeenCalledWith({
           content:
-            '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.',
+            '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.',
           topic: 'Renovate Ignore Notification',
           number: 1,
         });

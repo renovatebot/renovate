@@ -19,9 +19,9 @@ const commentMatchRegExp = regEx(/#.*$/);
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string
 ): Promise<PackageFileContent | null> {
-  logger.trace('mix.extractPackageFile()');
+  logger.trace(`mix.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
   const contentArr = content
     .split(newlineRegex)
@@ -71,7 +71,7 @@ export async function extractPackageFile(
   }
   const res: PackageFileContent = { deps };
   const lockFileName =
-    (await findLocalSiblingOrParent(fileName, 'mix.lock')) ?? 'mix.lock';
+    (await findLocalSiblingOrParent(packageFile, 'mix.lock')) ?? 'mix.lock';
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];

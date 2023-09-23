@@ -3,22 +3,18 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { replaceAt } from '../../../util/string';
 import type { BumpPackageVersionResult } from '../types';
+import { findVersion } from './util';
 
 export function bumpPackageVersion(
   content: string,
-  currentValue: string | undefined,
-  bumpVersion: ReleaseType | string
+  currentValue: string,
+  bumpVersion: ReleaseType
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
     'Checking if we should bump project version'
   );
   let bumpedContent = content;
-
-  if (!currentValue) {
-    logger.warn('Unable to bump project version, project has no version');
-    return { bumpedContent };
-  }
 
   if (!semver.valid(currentValue)) {
     logger.warn(
@@ -30,11 +26,30 @@ export function bumpPackageVersion(
 
   try {
     const project = new XmlDocument(content);
-    const versionNode = project.descendantWithPath('PropertyGroup.Version')!;
-    const startTagPosition = versionNode.startTagPosition;
-    const versionPosition = content.indexOf(versionNode.val, startTagPosition);
+    const versionNode = findVersion(project);
+    if (!versionNode) {
+      logger.warn(
+        "Couldn't find Version or VersionPrefix in any PropertyGroup"
+      );
+      return { bumpedContent };
+    }
 
-    const newProjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+    const currentProjVersion = versionNode.val;
+    if (currentProjVersion !== currentValue) {
+      logger.warn(
+        { currentValue, currentProjVersion },
+        "currentValue passed to bumpPackageVersion() doesn't match value found"
+      );
+      return { bumpedContent };
+    }
+
+    const startTagPosition = versionNode.startTagPosition;
+    const versionPosition = content.indexOf(
+      currentProjVersion,
+      startTagPosition
+    );
+
+    const newProjVersion = semver.inc(currentValue, bumpVersion);
     if (!newProjVersion) {
       throw new Error('semver inc failed');
     }
@@ -46,12 +61,6 @@ export function bumpPackageVersion(
       currentValue,
       newProjVersion
     );
-
-    if (bumpedContent === content) {
-      logger.debug('Version was already bumped');
-    } else {
-      logger.debug('project version bumped');
-    }
   } catch (err) {
     logger.warn(
       {

@@ -31,7 +31,7 @@ Before you start any Pull Request, it's recommended that you open a [discussion]
 That way you can be sure that the maintainer(s) agree on what to change and how, and you can hopefully get a quick merge afterwards.
 Also, let the maintainers know that you plan to work on a particular issue so that no one else starts any duplicate work.
 
-Pull Requests can only be merged once all status checks are green, which means `yarn test` passes, and coverage is 100%.
+Pull Requests can only be merged once all status checks are green, which means `pnpm test` passes, and coverage is 100%.
 
 ## Do not force push to your pull request branch
 
@@ -59,8 +59,8 @@ Read the [GitHub docs, Applying suggested changes](https://docs.github.com/en/pu
 
 ## Resolve review comments instead of commenting
 
-A maintainer/contributor can ask you to make changes, without providing a suggestion that you can apply.
-In this case you need to do some work yourself to address the feedback.
+A maintainer/contributor can ask you to make changes, without giving you a _suggestion_ that you can apply.
+In this case you should make the necessary changes.
 
 Once you've done the work, resolve the conversation by selecting the **Resolve conversation** button in the PR overview.
 Avoid posting comments like "I've done the work", or "Done".
@@ -79,7 +79,7 @@ The codebase can be difficult to navigate, especially for a first-time contribut
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
-Please email rhys@arkins.net and simply mention that you need an invitation to the channel and you'll be added ASAP.
+Please email <rhys@arkins.net> and simply mention that you need an invitation to the channel and you'll be added ASAP.
 
 Important: this Slack group is restricted to development questions only in order to keep the volume of messages lower - all technical support questions should still be posted to this repository's Discussions instead.
 

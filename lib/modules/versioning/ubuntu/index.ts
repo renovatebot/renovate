@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
 import { DistroInfo } from '../distro';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -44,7 +45,7 @@ function isStable(version: string): boolean {
 
   const match = ver.match(regEx(/^\d+.\d+/));
 
-  if (!di.isReleased(match ? match[0] : ver)) {
+  if (!di.isReleased(coerceString(match?.[0], ver))) {
     return false;
   }
 
@@ -126,12 +127,7 @@ function minSatisfyingVersion(
   return getSatisfyingVersion(versions, range);
 }
 
-function getNewValue({
-  currentValue,
-  rangeStrategy,
-  currentVersion,
-  newVersion,
-}: NewValueConfig): string {
+function getNewValue({ currentValue, newVersion }: NewValueConfig): string {
   if (di.isCodename(currentValue)) {
     return di.getCodenameByVersion(newVersion);
   }

@@ -1,5 +1,6 @@
-import { getConfig } from '../../../../test/util';
+import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import type { RepositoryCacheConfig } from '../../../config/types';
 import type { WorkerPlatformConfig } from './apis';
 import { initializeCaches } from './cache';
 
@@ -9,7 +10,9 @@ describe('workers/repository/init/cache', () => {
 
     beforeEach(() => {
       config = {
-        ...getConfig(),
+        repository: '',
+        repositoryCache: partial<RepositoryCacheConfig>(),
+        repositoryCacheType: 'local',
         repoFingerprint: '0123456789abcdef',
         defaultBranch: 'main',
         isFork: false,

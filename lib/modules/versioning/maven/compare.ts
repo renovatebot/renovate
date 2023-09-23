@@ -111,19 +111,12 @@ function isNull(token: Token): boolean {
   );
 }
 
-const zeroToken: NumberToken = {
-  prefix: PREFIX_HYPHEN,
-  type: TYPE_NUMBER,
-  val: 0,
-  isTransition: false,
-};
-
 function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
   iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
-    if (token.prefix === PREFIX_HYPHEN) {
+    if (token.prefix === PREFIX_HYPHEN || token.type === TYPE_QUALIFIER) {
       buf = [];
     }
     buf.push(token);
@@ -136,7 +129,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
       buf = [];
     }
   });
-  return result.length ? result : [zeroToken];
+  return result;
 }
 
 function nullFor(token: Token): Token {
@@ -154,10 +147,7 @@ function nullFor(token: Token): Token {
 }
 
 function commonOrder(token: Token): number {
-  if (token.prefix === PREFIX_DOT && token.type === TYPE_QUALIFIER) {
-    return 0;
-  }
-  if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_QUALIFIER) {
+  if (token.type === TYPE_QUALIFIER) {
     return 1;
   }
   if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_NUMBER) {
@@ -433,7 +423,7 @@ function rangeToStr(fullRange: Range[] | null): string | null {
     return null;
   }
 
-  const valToStr = (val: string | null): string => (val === null ? '' : val);
+  const valToStr = (val: string | null): string => val ?? '';
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];

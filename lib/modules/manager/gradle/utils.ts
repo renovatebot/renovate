@@ -113,6 +113,11 @@ export function isPropsFile(path: string): boolean {
   return filename === 'gradle.properties';
 }
 
+export function isKotlinSourceFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.kt');
+}
+
 export function isTOMLFile(path: string): boolean {
   const filename = upath.basename(path).toLowerCase();
   return filename.endsWith('.toml');

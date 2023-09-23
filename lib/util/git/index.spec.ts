@@ -18,7 +18,7 @@ import { setNoVerify } from '.';
 jest.mock('./conflicts-cache');
 jest.mock('./behind-base-branch-cache');
 jest.mock('./modified-cache');
-jest.mock('delay');
+jest.mock('timers/promises');
 jest.mock('../cache/repository');
 const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
@@ -346,6 +346,22 @@ describe('util/git/index', () => {
 
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
+    });
+  });
+
+  describe('mergeToLocal(branchName)', () => {
+    it('should perform a branch merge without push', async () => {
+      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+
+      await git.mergeToLocal('renovate/future_branch');
+
+      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeTrue();
+      expect(pushSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw', async () => {
+      await expect(git.mergeToLocal('not_found')).rejects.toThrow();
     });
   });
 
@@ -876,10 +892,6 @@ describe('util/git/index', () => {
     });
 
     describe('cachedConflictResult', () => {
-      beforeEach(() => {
-        jest.resetAllMocks();
-      });
-
       it('returns cached values', async () => {
         conflictsCache.getCachedConflictResult.mockReturnValue(true);
 

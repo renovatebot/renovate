@@ -6,14 +6,14 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
-import { getFileList, getFiles, getRepoStatus } from '../../../util/git';
+import { getFiles, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
+import { scm } from '../../platform/scm';
 import {
   extraEnv,
   extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
-  nullRedirectionCommand,
   prepareGradleCommand,
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -36,7 +36,10 @@ async function getUpdatedLockfiles(
   const status = await getRepoStatus();
 
   for (const modifiedFile of status.modified) {
-    if (isLockFile(modifiedFile)) {
+    if (
+      isLockFile(modifiedFile) ||
+      modifiedFile.endsWith('gradle/verification-metadata.xml')
+    ) {
       const newContent = await readLocalFile(modifiedFile, 'utf8');
       if (oldLockFileContentMap[modifiedFile] !== newContent) {
         res.push({
@@ -86,6 +89,48 @@ async function getGradleVersion(gradlewFile: string): Promise<string | null> {
   return extractResult ? extractResult.version : null;
 }
 
+async function buildUpdateVerificationMetadataCmd(
+  verificationMetadataFile: string | undefined,
+  baseCmd: string
+): Promise<string | null> {
+  if (!verificationMetadataFile) {
+    return null;
+  }
+  const hashTypes: string[] = [];
+  const verificationMetadata = await readLocalFile(verificationMetadataFile);
+  if (
+    verificationMetadata?.includes('<verify-metadata>true</verify-metadata>')
+  ) {
+    logger.debug('Dependency verification enabled - generating checksums');
+    for (const hashType of ['sha256', 'sha512']) {
+      if (verificationMetadata?.includes(`<${hashType}`)) {
+        hashTypes.push(hashType);
+      }
+    }
+    if (!hashTypes.length) {
+      hashTypes.push('sha256');
+    }
+  }
+  if (
+    verificationMetadata?.includes(
+      '<verify-signatures>true</verify-signatures>'
+    )
+  ) {
+    logger.debug(
+      'Dependency signature verification enabled - generating PGP signatures'
+    );
+    // signature verification requires at least one checksum type as fallback.
+    if (!hashTypes.length) {
+      hashTypes.push('sha256');
+    }
+    hashTypes.push('pgp');
+  }
+  if (!hashTypes.length) {
+    return null;
+  }
+  return `${baseCmd} --write-verification-metadata ${hashTypes.join(',')} help`;
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -94,10 +139,15 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gradle.updateArtifacts(${packageFileName})`);
 
-  const fileList = await getFileList();
+  const fileList = await scm.getFileList();
   const lockFiles = fileList.filter((file) => isLockFile(file));
-  if (!lockFiles.length) {
-    logger.debug('No Gradle dependency lockfiles found - skipping update');
+  const verificationMetadataFile = fileList.find((fileName) =>
+    fileName.endsWith('gradle/verification-metadata.xml')
+  );
+  if (!lockFiles.length && !verificationMetadataFile) {
+    logger.debug(
+      'No Gradle dependency lockfiles or verification metadata found - skipping update'
+    );
     return null;
   }
 
@@ -127,7 +177,7 @@ export async function updateArtifacts({
     const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
-    let cmd = `${gradlewName} --console=plain -q`;
+    const baseCmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
@@ -142,32 +192,48 @@ export async function updateArtifacts({
       ],
     };
 
-    const subprojects = await getSubProjectList(cmd, execOptions);
-    cmd += ` ${subprojects
-      .map((project) => project + ':dependencies')
-      .map(quote)
-      .join(' ')}`;
+    const cmds = [];
+    if (lockFiles.length) {
+      const subprojects = await getSubProjectList(baseCmd, execOptions);
+      let lockfileCmd = `${baseCmd} ${subprojects
+        .map((project) => `${project}:dependencies`)
+        .map(quote)
+        .join(' ')}`;
 
-    if (config.isLockFileMaintenance || isGcvPropsFile(packageFileName)) {
-      cmd += ' --write-locks';
-    } else {
-      const updatedDepNames = updatedDeps
-        .map(({ depName, packageName }) => packageName ?? depName)
-        .filter(is.nonEmptyStringAndNotWhitespace);
+      if (
+        config.isLockFileMaintenance === true ||
+        !updatedDeps.length ||
+        isGcvPropsFile(packageFileName)
+      ) {
+        lockfileCmd += ' --write-locks';
+      } else {
+        const updatedDepNames = updatedDeps
+          .map(({ depName, packageName }) => packageName ?? depName)
+          .filter(is.nonEmptyStringAndNotWhitespace);
 
-      cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
+        lockfileCmd += ` --update-locks ${updatedDepNames
+          .map(quote)
+          .join(',')}`;
+      }
+      cmds.push(lockfileCmd);
     }
 
-    // `./gradlew :dependencies` command can output huge text due to `:dependencies`
-    // that renders dependency graphs. Given the output can exceed `ExecOptions.maxBuffer` size,
-    // drop stdout from the command.
-    //
-    // Note: Windows without docker doesn't supported this yet
-    const nullRedirection = nullRedirectionCommand();
-    cmd += nullRedirection;
+    const updateVerificationMetadataCmd =
+      await buildUpdateVerificationMetadataCmd(
+        verificationMetadataFile,
+        baseCmd
+      );
+    if (updateVerificationMetadataCmd) {
+      cmds.push(updateVerificationMetadataCmd);
+    }
+
+    if (!cmds.length) {
+      logger.debug('No lockfile or verification metadata update necessary');
+      return null;
+    }
 
     await writeLocalFile(packageFileName, newPackageFileContent);
-    await exec(cmd, execOptions);
+    await exec(cmds, { ...execOptions, ignoreStdout: true });
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);
     logger.debug('Returning updated Gradle dependency lockfiles');

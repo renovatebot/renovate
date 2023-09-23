@@ -1,7 +1,7 @@
 import loose from '.';
 
 describe('modules/versioning/loose/index', () => {
-  test.each`
+  it.each`
     version      | expected
     ${'1.1'}     | ${true}
     ${'1.3.RC2'} | ${true}
@@ -10,7 +10,7 @@ describe('modules/versioning/loose/index', () => {
     expect(!!loose.isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                                        | expected
     ${'v1.4'}                                      | ${true}
     ${'3.5.0'}                                     | ${true}
@@ -37,7 +37,7 @@ describe('modules/versioning/loose/index', () => {
     expect(!!loose.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a          | b          | expected
     ${'2.4'}   | ${'2.4'}   | ${true}
     ${'2.4.0'} | ${'2.4.0'} | ${true}
@@ -48,29 +48,32 @@ describe('modules/versioning/loose/index', () => {
     expect(loose.equals(a, b)).toBe(expected);
   });
 
-  test.each`
-    a             | b              | expected
-    ${'2.4.0'}    | ${'2.4'}       | ${true}
-    ${'2.4.2'}    | ${'2.4.1'}     | ${true}
-    ${'2.4.beta'} | ${'2.4.alpha'} | ${true}
-    ${'1.9'}      | ${'2'}         | ${false}
-    ${'1.9'}      | ${'1.9.1'}     | ${false}
-    ${'2.4'}      | ${'2.4.beta'}  | ${true}
-    ${'2.4.0'}    | ${'2.4.beta'}  | ${true}
-    ${'2.4.beta'} | ${'2.4'}       | ${false}
-    ${'2.4.beta'} | ${'2.4.0'}     | ${false}
+  it.each`
+    a                               | b                               | expected
+    ${'2.4.0'}                      | ${'2.4'}                        | ${true}
+    ${'2.4.2'}                      | ${'2.4.1'}                      | ${true}
+    ${'2.4.beta'}                   | ${'2.4.alpha'}                  | ${true}
+    ${'1.9'}                        | ${'2'}                          | ${false}
+    ${'1.9'}                        | ${'1.9.1'}                      | ${false}
+    ${'2.4'}                        | ${'2.4.beta'}                   | ${true}
+    ${'2.4.0'}                      | ${'2.4.beta'}                   | ${true}
+    ${'2.4.beta'}                   | ${'2.4'}                        | ${false}
+    ${'2.4.beta'}                   | ${'2.4.0'}                      | ${false}
+    ${'2024-07-21T11-33-05.abc123'} | ${'2023-06-21T11-33-05.abc123'} | ${true}
+    ${'2023-07-21T11-33-05.abc123'} | ${'2023-07-21T11-33-04.abc123'} | ${true}
+    ${'2023-07-21-113305-abc123'}   | ${'2023-07-21-113304-abc123'}   | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(loose.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | expected
     ${'1.2.0'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {
     expect(loose.isCompatible(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version     | expected
     ${'1.2.0'}  | ${true}
     ${'^1.2.0'} | ${false}

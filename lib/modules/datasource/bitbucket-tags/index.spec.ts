@@ -124,5 +124,23 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       expect(res).toBeString();
       expect(res).toBe('123');
     });
+
+    it('returns null for missing hash', async () => {
+      const body = {
+        name: 'v1.0.0',
+      };
+      httpMock
+        .scope('https://api.bitbucket.org')
+        .get('/2.0/repositories/some/dep2/refs/tags/v1.0.0')
+        .reply(200, body);
+      const res = await getDigest(
+        {
+          datasource,
+          packageName: 'some/dep2',
+        },
+        'v1.0.0'
+      );
+      expect(res).toBeNull();
+    });
   });
 });

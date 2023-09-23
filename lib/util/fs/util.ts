@@ -3,10 +3,6 @@ import { GlobalConfig } from '../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 
-// http://www.mtu.edu/umc/services/digital/writing/characters-avoid/
-// We allow spaces, but not newlines
-const restricted = /[#%&<>*?\b\n\r\0!'"|‘“^`]/;
-
 function assertBaseDir(path: string, baseDir: string): void {
   if (!path.startsWith(baseDir)) {
     logger.debug(
@@ -18,11 +14,6 @@ function assertBaseDir(path: string, baseDir: string): void {
 }
 
 function ensurePath(path: string, key: 'localDir' | 'cacheDir'): string {
-  if (restricted.test(path)) {
-    logger.debug({ path }, 'Preventing access to path with illegal characters');
-    throw new Error(FILE_ACCESS_VIOLATION_ERROR);
-  }
-
   const baseDir = upath.resolve(GlobalConfig.get(key)!);
   const fullPath = upath.resolve(
     upath.isAbsolute(path) ? path : upath.join(baseDir, path)
@@ -43,10 +34,6 @@ export function isValidPath(
   path: string,
   key: 'localDir' | 'cacheDir'
 ): boolean {
-  if (restricted.test(path)) {
-    return false;
-  }
-
   const baseDir = upath.resolve(GlobalConfig.get(key)!);
   const fullPath = upath.resolve(
     upath.isAbsolute(path) ? path : upath.join(baseDir, path)

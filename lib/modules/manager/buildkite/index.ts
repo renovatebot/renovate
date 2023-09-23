@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from './extract';
 
@@ -9,5 +10,7 @@ export const defaultConfig = {
   commitMessageExtra:
     'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{newValue}}}{{/if}}',
 };
+
+export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [GithubTagsDatasource.id];

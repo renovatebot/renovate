@@ -1,8 +1,5 @@
-import shell from 'shelljs';
+import { exec } from './utils/exec.mjs';
 
-shell.echo(`Verifying ...`);
+console.log(`Verifying ...`);
 
-const res = shell.exec(`npm whoami`);
-if (res.code !== 0) {
-  shell.exit(2);
-}
+exec(`npm whoami`);

@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';

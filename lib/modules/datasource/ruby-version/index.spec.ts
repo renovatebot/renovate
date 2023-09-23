@@ -19,14 +19,16 @@ describe('modules/datasource/ruby-version/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('throws for empty result', async () => {
+    it('returns null for empty result', async () => {
       httpMock
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(200, {});
-      await expect(
-        getPkgReleases({ datasource, packageName: 'ruby' })
-      ).rejects.toThrow();
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'ruby',
+      });
+      expect(res).toBeNull();
     });
 
     it('throws for 404', async () => {

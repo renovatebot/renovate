@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
 import { getDep } from '../../../dockerfile/extract';
-import type { PackageDependency } from '../../../types';
+import type { ExtractConfig, PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
+import type { ProviderLock } from '../../lockfile/types';
 import { generic_image_resource } from './utils';
 
 export class GenericDockerImageRefExtractor extends DependencyExtractor {
@@ -10,7 +11,11 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     return generic_image_resource.map((value) => `"${value.type}"`);
   }
 
-  extract(hclMap: TerraformDefinitionFile): PackageDependency[] {
+  extract(
+    hclMap: TerraformDefinitionFile,
+    _locks: ProviderLock[],
+    config: ExtractConfig
+  ): PackageDependency[] {
     const resourceTypMap = hclMap.resource;
     if (is.nullOrUndefined(resourceTypMap)) {
       return [];
@@ -28,7 +33,9 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
 
       // loop over instances of a resource type
       for (const instance of Object.values(resourceInstancesMap).flat()) {
-        dependencies.push(...this.walkPath({ depType: type }, instance, path));
+        dependencies.push(
+          ...this.walkPath({ depType: type }, instance, path, config)
+        );
       }
     }
     return dependencies;
@@ -45,7 +52,8 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
   private walkPath(
     abstractDep: PackageDependency,
     parentElement: unknown,
-    leftPath: string[]
+    leftPath: string[],
+    config: ExtractConfig
   ): PackageDependency[] {
     const dependencies: PackageDependency[] = [];
     // if there are no path elements left, we have reached the end of the path
@@ -59,7 +67,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
           },
         ];
       }
-      const test = getDep(parentElement);
+      const test = getDep(parentElement, true, config.registryAliases);
       const dep: PackageDependency = {
         ...abstractDep,
         ...test,
@@ -87,11 +95,11 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     if (is.array(element)) {
       for (const arrayElement of element) {
         dependencies.push(
-          ...this.walkPath(abstractDep, arrayElement, leftPath.slice(1))
+          ...this.walkPath(abstractDep, arrayElement, leftPath.slice(1), config)
         );
       }
       return dependencies;
     }
-    return this.walkPath(abstractDep, element, leftPath.slice(1));
+    return this.walkPath(abstractDep, element, leftPath.slice(1), config);
   }
 }

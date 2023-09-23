@@ -138,7 +138,7 @@ const qKotlinMapOfExpr = (
   );
 
 // val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")
-const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
+export const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
   .op('=')
   .sym('mapOf')
   .tree({

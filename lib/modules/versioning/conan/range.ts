@@ -1,8 +1,7 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import * as semver from 'semver';
 import { SemVer, parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
+import { coerceString } from '../../../util/string';
 import type { NewValueConfig } from '../types';
 import {
   cleanVersion,
@@ -91,7 +90,7 @@ export function fixParsedRange(range: string): any {
         major,
       };
 
-      let full = `${operator ?? ''}${major}`;
+      let full = `${coerceString(operator)}${major}`;
       if (minor) {
         NewSemVer.minor = minor;
         full = `${full}.${minor}`;
@@ -144,7 +143,7 @@ export function replaceRange({
   }
   if (element.operator === '<=') {
     let res;
-    if (element.patch || suffix.length) {
+    if (!!element.patch || suffix.length) {
       res = `<=${newVersion}`;
     } else if (element.minor) {
       res = `<=${toVersionMajor}.${toVersionMinor}`;

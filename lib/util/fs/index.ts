@@ -65,6 +65,10 @@ export async function writeLocalFile(
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
+  // This a failsafe and hopefully will never be triggered
+  if (GlobalConfig.get('platform') === 'local') {
+    throw new Error('Cannot delete file when platform=local');
+  }
   const localDir = GlobalConfig.get('localDir');
   if (localDir) {
     const localFileName = ensureLocalPath(fileName);
@@ -202,7 +206,7 @@ export async function findUpLocal(
   fileName: string | string[],
   cwd: string
 ): Promise<string | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const absoluteCwd = upath.join(localDir, cwd);
   const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
   const res = await findUp(fileName, {

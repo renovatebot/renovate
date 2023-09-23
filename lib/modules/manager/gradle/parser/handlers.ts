@@ -139,7 +139,7 @@ export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
 
   if (versionTokens.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
@@ -177,7 +177,7 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
   const methodName = ctx.tokenMap.methodName ?? null;
   if (versionTokens.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {
@@ -227,7 +227,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
 
   if (pluginVersion.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (pluginVersion[0].type === 'symbol') {
     const varData = findVariable(pluginVersion[0].value, ctx);
     if (varData) {
@@ -238,7 +238,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
         packageFile: varData.packageFile,
       };
     } else {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
     }
   }
 
@@ -370,7 +370,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
   }
 
   const matchResult = parseGradle(
-    // TODO #7154
+    // TODO #22198
     ctx.fileContents[scriptFilePath]!,
     ctx.globalVars,
     scriptFilePath,
@@ -409,7 +409,7 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
 
   if (versionTokens.length > 1) {
     // = template string with multiple variables
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
     if (varData) {

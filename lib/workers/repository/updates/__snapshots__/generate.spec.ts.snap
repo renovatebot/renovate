@@ -23,6 +23,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
+  "recreateClosed": false,
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
   "upgrades": [
@@ -41,6 +42,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
       "newValue": "0.6.0",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "recreateClosed": false,
     },
     {
       "branchName": "some-branch",
@@ -59,6 +61,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
       "newValue": "1.0.0",
       "prTitle": "some-other-title",
       "prettyDepType": "dependency",
+      "recreateClosed": false,
     },
     {
       "branchName": "some-branch",
@@ -74,6 +77,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
       "newValue": "0.5.7",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "recreateClosed": false,
     },
   ],
 }
@@ -136,6 +140,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
       "newValue": "1.0.0",
       "prTitle": "some-other-title",
       "prettyDepType": "dependency",
+      "recreateClosed": false,
     },
     {
       "branchName": "some-branch",
@@ -155,6 +160,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
       "prTitle": "some-title",
       "prettyDepType": "dependency",
       "prettyNewVersion": "v0.5.8",
+      "recreateClosed": false,
     },
   ],
 }
@@ -178,6 +184,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "prBodyColumns": [],
   "prTitle": "some-title",
   "prettyDepType": "dependency",
+  "recreateClosed": true,
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
   "upgrades": [
@@ -191,6 +198,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
       "manager": "some-manager",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
+      "recreateClosed": true,
     },
   ],
 }
@@ -221,6 +229,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "prTitle": "some-title",
   "prettyDepType": "dependency",
   "prettyNewVersion": "v1.0.1",
+  "recreateClosed": false,
   "releaseTimestamp": undefined,
   "reuseLockFiles": true,
   "upgrades": [
@@ -241,6 +250,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
       "prTitle": "some-title",
       "prettyDepType": "dependency",
       "prettyNewVersion": "v1.0.1",
+      "recreateClosed": false,
     },
   ],
 }

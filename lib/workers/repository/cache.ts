@@ -22,23 +22,37 @@ function generateBranchUpgradeCache(
   const {
     datasource,
     depName,
+    depType,
+    displayPending,
     packageName,
     fixedVersion,
     currentVersion,
     newVersion,
+    currentValue,
+    newValue,
     currentDigest,
     newDigest,
+    packageFile,
     sourceUrl,
+    remediationNotPossible,
+    updateType,
   } = upgrade;
   const result: BranchUpgradeCache = {
     datasource,
     depName,
+    depType,
+    displayPending,
     fixedVersion,
     currentVersion,
+    currentValue,
+    newValue,
     newVersion,
     currentDigest,
     newDigest,
+    packageFile,
     sourceUrl,
+    remediationNotPossible,
+    updateType,
   };
   if (packageName) {
     result.packageName = packageName;
@@ -49,7 +63,7 @@ function generateBranchUpgradeCache(
 async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
-  const { baseBranch, branchName } = branch;
+  const { baseBranch, branchName, prBlockedBy, prTitle, result } = branch;
   try {
     const branchSha = await scm.getBranchCommit(branchName);
     const baseBranchSha = await scm.getBranchCommit(baseBranch);
@@ -59,7 +73,7 @@ async function generateBranchCache(
     let isBehindBase: boolean | undefined;
     let isConflicted: boolean | undefined;
     if (baseBranchSha && branchSha) {
-      const branchPr = await platform.getBranchPr(branchName);
+      const branchPr = await platform.getBranchPr(branchName, baseBranch);
       if (branchPr) {
         prNo = branchPr.number;
       }
@@ -79,24 +93,29 @@ async function generateBranchCache(
           baseBranchSha
         ) ?? undefined;
     }
+
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
-    const branchFingerprint = branch.branchFingerprint;
+    const commitFingerprint = branch.commitFingerprint;
     const prCache = getPrCache(branchName);
+
     return {
       automerge,
       baseBranchSha,
       baseBranch,
-      branchFingerprint,
+      commitFingerprint,
       branchName,
       isBehindBase,
       isConflicted,
       isModified,
+      prBlockedBy,
       pristine,
       prCache,
       prNo,
+      prTitle,
+      result,
       sha: branchSha,
       upgrades,
     };

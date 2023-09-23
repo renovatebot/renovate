@@ -9,11 +9,12 @@ import { MAVEN_REPO } from '../../datasource/maven/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
-export function parsePom(raw: string): XmlDocument | null {
+function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
     project = new XmlDocument(raw);
-  } catch (e) {
+  } catch (err) {
+    logger.debug({ packageFile }, `Failed to parse as XML`);
     return null;
   }
   const { name, attr, children } = project;
@@ -38,7 +39,7 @@ function containsPlaceholder(str: string | null | undefined): boolean {
 
 function depFromNode(
   node: XmlElement,
-  underBuildSettingsElement = false
+  underBuildSettingsElement: boolean
 ): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
@@ -197,7 +198,10 @@ function applyPropsInternal(
           groupName = propKey;
         }
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource = propValue.packageFile ?? undefined;
+        propSource =
+          propValue.packageFile ??
+          // istanbul ignore next
+          undefined;
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
           fatal = true;
@@ -258,7 +262,7 @@ export function extractPackage(
     return null;
   }
 
-  const project = parsePom(rawContent);
+  const project = parsePom(rawContent, packageFile);
   if (!project) {
     return null;
   }
@@ -475,7 +479,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
-      logger.trace({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
       continue;
     }
     if (packageFile.endsWith('settings.xml')) {

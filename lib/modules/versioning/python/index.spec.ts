@@ -3,7 +3,7 @@ import type { NewValueConfig } from '../types';
 import { api as versioning } from '.';
 
 describe('modules/versioning/python/index', () => {
-  test.each`
+  it.each`
     version                                          | expected
     ${'17.04.00'}                                    | ${true}
     ${'17.b4.0'}                                     | ${false}
@@ -27,7 +27,7 @@ describe('modules/versioning/python/index', () => {
     expect(!!versioning.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version      | range                     | expected
     ${'4.2.0'}   | ${'4.2, >= 3.0, < 5.0.0'} | ${true}
     ${'4.2.0'}   | ${'2.0, >= 3.0, < 5.0.0'} | ${false}
@@ -53,7 +53,7 @@ describe('modules/versioning/python/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | range                  | expected
     ${'0.9.0'} | ${'>= 1.0.0 <= 2.0.0'} | ${true}
     ${'1.9.0'} | ${'>= 1.0.0 <= 2.0.0'} | ${false}
@@ -65,7 +65,7 @@ describe('modules/versioning/python/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                         | range                          | expected
     ${['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0']} | ${'4.*, > 4.2'}                | ${'4.3.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']}          | ${'^4.0.0'}                    | ${'4.2.0'}
@@ -82,7 +82,7 @@ describe('modules/versioning/python/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                                  | range               | expected
     ${['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'4.*.0, < 4.2.5'} | ${'4.2.1'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3']} | ${'5.0, > 5.0.0'}   | ${'5.0.3'}
@@ -101,7 +101,7 @@ describe('modules/versioning/python/index', () => {
   });
 });
 
-test.each`
+it.each`
   a                     | b                     | expected
   ${'1.0.0'}            | ${'1.0.0'}            | ${true}
   ${'1.0.0'}            | ${'>=1.0.0'}          | ${true}

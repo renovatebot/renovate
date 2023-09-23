@@ -1,7 +1,7 @@
 import { api as hexScheme } from '.';
 
 describe('modules/versioning/hex/index', () => {
-  test.each`
+  it.each`
     version    | range                     | expected
     ${'4.2.0'} | ${'~> 4.0'}               | ${true}
     ${'2.1.0'} | ${'~> 2.0.0'}             | ${false}
@@ -16,7 +16,7 @@ describe('modules/versioning/hex/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                         | range         | expected
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${'4.0.0'}
@@ -27,7 +27,7 @@ describe('modules/versioning/hex/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     input                      | expected
     ${'>= 1.0.0 and <= 2.0.0'} | ${true}
     ${'>= 1.0.0 or <= 2.0.0'}  | ${true}
@@ -38,7 +38,7 @@ describe('modules/versioning/hex/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | range                      | expected
     ${'0.1.0'} | ${'>= 1.0.0 and <= 2.0.0'} | ${true}
     ${'1.9.0'} | ${'>= 1.0.0 and <= 2.0.0'} | ${false}
@@ -51,7 +51,7 @@ describe('modules/versioning/hex/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                | range         | expected
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${null}
@@ -62,7 +62,7 @@ describe('modules/versioning/hex/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue               | rangeStrategy | currentVersion | newVersion | expected
     ${'== 1.2.3'}              | ${'pin'}      | ${'1.2.3'}     | ${'2.0.7'} | ${'== 2.0.7'}
     ${'== 3.6.1'}              | ${'bump'}     | ${'3.6.1'}     | ${'3.6.2'} | ${'== 3.6.2'}
