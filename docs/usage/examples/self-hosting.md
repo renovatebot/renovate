@@ -77,7 +77,7 @@ spec:
           restartPolicy: Never
 ```
 
-And also this accompanying `secret.yaml`:
+And the `secret.yaml` that goes with it:
 
 ```yaml
 apiVersion: v1
@@ -95,7 +95,7 @@ stringData:
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
 
-A `config.js` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com):
+A `config.json` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com):
 
 ```yaml
 ---
@@ -154,6 +154,12 @@ spec:
 
 ### CircleCI
 
+<!-- prettier-ignore -->
+!!! warning
+    The CircleCI configuration examples are for version `2` of `daniel-shuy/renovate`, which is outdated.
+    Do you know how to get `daniel-shuy/renovate` version `3` working?
+    Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
+
 If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
@@ -201,7 +207,7 @@ workflows:
 ### GitLab CI/CD pipeline
 
 For GitLab pipelines we recommend you use the [`renovate-runner` project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
-We prepared some pipeline templates so its easy to run Renovate on pipeline schedules.
+We created some pipeline templates to help you run Renovate on pipeline schedules.
 You can also find the configuration steps there.
 
 For self-hosted GitLab clone/import the [`renovate-runner` project on GitLab](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
@@ -242,7 +248,7 @@ module.exports = {
   token: '**gitlab_token**',
   platform: 'gitlab',
   onboardingConfig: {
-    extends: ['config:base'],
+    extends: ['config:recommended'],
   },
   repositories: ['username/repo', 'orgname/repo'],
 };
@@ -314,7 +320,7 @@ metadata:
   namespace: <namespace>
 ```
 
-Then you just need to add Git author, and mount volumes.
+Then you need to add a Git author, and configure the mount volumes.
 The final configuration should look something like this:
 
 ```yml
@@ -405,7 +411,7 @@ The logging level output is controlled by the Bunyan logging library.
 ## Self-signed TLS/SSL certificates
 
 Renovate and invoked helper programs (like Git, or npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
-If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be told to trust these additional certificates.
+If the remote hosts uses self-signed certificates or certificate authorities then Renovate must be told to trust them.
 
 ### Renovate Node.js app
 

@@ -1,6 +1,7 @@
 import { logger } from '../../../../logger';
 import * as fs from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { coerceString } from '../../../../util/string';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
 import { isDependencyString, versionLikeSubstring } from '../utils';
@@ -59,9 +60,9 @@ export function parseGcv(
   propsFileName: string,
   fileContents: Record<string, string | null>
 ): PackageDependency<GradleManagerData>[] {
-  const propsFileContent = fileContents[propsFileName] ?? '';
+  const propsFileContent = coerceString(fileContents[propsFileName]);
   const lockFileName = fs.getSiblingFileName(propsFileName, VERSIONS_LOCK);
-  const lockFileContent = fileContents[lockFileName] ?? '';
+  const lockFileContent = coerceString(fileContents[lockFileName]);
   const lockFileMap = parseLockFile(lockFileContent);
   const [propsFileExactMap, propsFileRegexMap] =
     parsePropsFile(propsFileContent);
@@ -80,7 +81,7 @@ export function parseGcv(
         currentValue: versionAndPosition.version,
         lockedVersion: lockFileMap.get(propDep)?.version,
         depType: lockFileMap.get(propDep)?.depType,
-      } as PackageDependency<GradleManagerData>;
+      } satisfies PackageDependency<GradleManagerData>;
       extractedDeps.push(newDep);
       // Remove from the lockfile map so the same exact lib will not be included in globbing
       lockFileMap.delete(propDep);
@@ -102,7 +103,7 @@ export function parseGcv(
           lockedVersion: lockVersionAndDepType.version,
           depType: lockVersionAndDepType.depType,
           groupName: propDepGlob,
-        } as PackageDependency<GradleManagerData>;
+        } satisfies PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
         // Remove from the lockfile map so the same lib will not be included in more generic globs later
         lockFileMap.delete(exactDep);

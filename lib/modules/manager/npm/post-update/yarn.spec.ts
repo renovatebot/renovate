@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { mockDeep } from 'jest-mock-extended';
 import {
   ExecSnapshots,
   envMock,
@@ -16,11 +17,15 @@ import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
-  require('../../../../../test/fixtures').Fixtures.fsExtra()
+  jest
+    .requireActual<typeof import('../../../../../test/fixtures')>(
+      '../../../../../test/fixtures'
+    )
+    .fsExtra()
 );
 jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
-jest.mock('../../../datasource');
+jest.mock('../../../datasource', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -34,14 +39,16 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
 env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
 describe('modules/manager/npm/post-update/yarn', () => {
+  const removeDockerContainer = jest.spyOn(docker, 'removeDockerContainer');
+
   beforeEach(() => {
     delete process.env.BUILDPACK;
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
+    removeDockerContainer.mockResolvedValue();
     docker.resetPrefetchedImages();
     mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
@@ -350,14 +357,14 @@ describe('modules/manager/npm/post-update/yarn', () => {
     Fixtures.mock({});
     const execSnapshots = mockExecAll(new Error('some-error'));
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
 
   it('supports corepack', async () => {
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -403,7 +410,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack on grouping', async () => {
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -451,10 +458,69 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe('package-lock-contents');
   });
 
+  it('supports customizing corepack version via config constraints', async () => {
+    process.env.CONTAINERBASE = 'true';
+
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+
+    Fixtures.mock(
+      {
+        'package.json': '{ "packageManager": "yarn@3.0.0" }',
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir'
+    );
+
+    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+      releases: [
+        { version: '0.17.0' },
+        { version: '0.17.1' },
+        { version: '0.18.0' },
+      ],
+    });
+
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+
+    const config = partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+      constraints: {
+        yarn: '^3.0.0',
+        corepack: '^0.17.0',
+      },
+    });
+
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool corepack 0.17.1', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --mode=update-lockfile',
+        options: {
+          cwd: 'some-dir',
+          env: {
+            YARN_ENABLE_GLOBAL_CACHE: '1',
+            YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+            YARN_HTTP_TIMEOUT: '100000',
+          },
+        },
+      },
+    ]);
+
+    expect(res.lockFile).toBe('package-lock-contents');
+  });
+
   it('uses slim yarn instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.BUILDPACK = 'true';
+    process.env.CONTAINERBASE = 'true';
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -536,6 +602,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       localDir: '.',
       binarySource: 'docker',
       cacheDir: '/tmp/cache',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     Fixtures.mock(
       {
@@ -555,10 +622,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = { encoding: 'utf-8' };
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar', options },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar', options },
       {
         cmd:
-          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "some-dir" containerbase/sidecar ` +
+          `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/containerbase/sidecar ` +
           `bash -l -c "` +
           `install-tool node 16.16.0` +
           ` && ` +

@@ -10,9 +10,8 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
-import { regEx } from '../../../../util/regex';
 import type { PackageFile } from '../../types';
-import type { PnpmLockFile } from '../post-update/types';
+import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
 import type { LockFile, PnpmWorkspaceFile } from './types';
 
@@ -24,7 +23,7 @@ export async function extractPnpmFilters(
   fileName: string
 ): Promise<string[] | undefined> {
   try {
-    // TODO #7154
+    // TODO #22198
     const contents = load((await readLocalFile(fileName, 'utf8'))!, {
       json: true,
     }) as PnpmWorkspaceFile;
@@ -100,7 +99,7 @@ export async function detectPnpmWorkspaces(
     }
 
     // search for corresponding pnpm workspace
-    // TODO #7154
+    // TODO #22198
     const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
     if (pnpmWorkspace === null) {
       continue;
@@ -110,7 +109,7 @@ export async function detectPnpmWorkspaces(
     // check if package matches workspace filter
     if (!packagePathCache.has(workspaceYamlPath)) {
       const filters = await extractPnpmFilters(workspaceYamlPath);
-      const { localDir } = GlobalConfig.get();
+      const localDir = GlobalConfig.get('localDir');
       const packages = await findPackages(
         upath.dirname(upath.join(localDir, workspaceYamlPath)),
         {
@@ -160,33 +159,66 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       ? lockParsed.lockfileVersion
       : parseFloat(lockParsed.lockfileVersion);
 
-    const lockedVersions: Record<string, string> = {};
-    const packagePathRegex = regEx(
-      /^\/(?<packageName>.+)(?:@|\/)(?<version>[^/@]+)$/
-    ); // eg. "/<packageName>(@|/)<version>"
+    const lockedVersions = getLockedVersions(lockParsed);
 
-    for (const packagePath of Object.keys(lockParsed.packages ?? {})) {
-      const result = packagePath.match(packagePathRegex);
-      if (!result?.groups) {
-        logger.trace(`Invalid package path ${packagePath}`);
-        continue;
-      }
-
-      const packageName = result.groups.packageName;
-      const version = result.groups.version;
-      logger.trace({
-        packagePath,
-        packageName,
-        version,
-      });
-      lockedVersions[packageName] = version;
-    }
     return {
-      lockedVersions,
+      lockedVersionsWithPath: lockedVersions,
       lockfileVersion,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
     return { lockedVersions: {} };
   }
+}
+
+function getLockedVersions(
+  lockParsed: PnpmLockFile
+): Record<string, Record<string, Record<string, string>>> {
+  const lockedVersions: Record<
+    string,
+    Record<string, Record<string, string>>
+  > = {};
+
+  // monorepo
+  if (is.nonEmptyObject(lockParsed.importers)) {
+    for (const [importer, imports] of Object.entries(lockParsed.importers)) {
+      lockedVersions[importer] = getLockedDependencyVersions(imports);
+    }
+  }
+  // normal repo
+  else {
+    lockedVersions['.'] = getLockedDependencyVersions(lockParsed);
+  }
+
+  return lockedVersions;
+}
+
+function getLockedDependencyVersions(
+  obj: PnpmLockFile | Record<string, PnpmDependencySchema>
+): Record<string, Record<string, string>> {
+  const dependencyTypes = [
+    'dependencies',
+    'devDependencies',
+    'optionalDependencies',
+  ] as const;
+
+  const res: Record<string, Record<string, string>> = {};
+  for (const depType of dependencyTypes) {
+    res[depType] = {};
+    for (const [pkgName, versionCarrier] of Object.entries(
+      obj[depType] ?? {}
+    )) {
+      let version: string;
+      if (is.object(versionCarrier)) {
+        version = versionCarrier['version'];
+      } else {
+        version = versionCarrier;
+      }
+
+      const pkgVersion = version.split('(')[0].trim();
+      res[depType][pkgName] = pkgVersion;
+    }
+  }
+
+  return res;
 }

@@ -7,6 +7,7 @@ import type {
 } from '../types';
 import { processors } from './processors';
 import {
+  depTypes,
   parseDependencyGroupRecord,
   parseDependencyList,
   parsePyProject,
@@ -26,17 +27,17 @@ export function extractPackageFile(
     return null;
   }
   const pythonConstraint = def.project?.['requires-python'];
-  const constraints = is.nonEmptyString(pythonConstraint)
+  const extractedConstraints = is.nonEmptyString(pythonConstraint)
     ? { extractedConstraints: { python: pythonConstraint } }
     : {};
 
   // pyProject standard definitions
   deps.push(
-    ...parseDependencyList('project.dependencies', def.project?.dependencies)
+    ...parseDependencyList(depTypes.dependencies, def.project?.dependencies)
   );
   deps.push(
     ...parseDependencyGroupRecord(
-      'project.optional-dependencies',
+      depTypes.optionalDependencies,
       def.project?.['optional-dependencies']
     )
   );
@@ -47,5 +48,7 @@ export function extractPackageFile(
     processedDeps = processor.process(def, processedDeps);
   }
 
-  return processedDeps.length ? { ...constraints, deps: processedDeps } : null;
+  return processedDeps.length
+    ? { ...extractedConstraints, deps: processedDeps }
+    : null;
 }

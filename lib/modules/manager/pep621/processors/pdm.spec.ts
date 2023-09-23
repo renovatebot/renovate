@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
+import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 
 jest.mock('../../../../util/fs');
@@ -40,7 +41,11 @@ describe('modules/manager/pep621/processors/pdm', () => {
 
     it('return null if the lock file is unchanged', async () => {
       const execSnapshots = mockExecAll();
-      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -66,7 +71,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull containerbase/sidecar',
+          cmd: 'docker pull ghcr.io/containerbase/sidecar',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -76,16 +81,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'containerbase/sidecar ' +
+            'ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
             'install-tool python 3.11.2 ' +
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update dep1' +
+            'pdm update --no-sync dep1' +
             '"',
         },
       ]);
@@ -130,7 +134,28 @@ describe('modules/manager/pep621/processors/pdm', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const updatedDeps = [{ packageName: 'dep1' }, { packageName: 'dep2' }];
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+        },
+        { packageName: 'dep2', depType: depTypes.dependencies },
+        {
+          depName: 'group1/dep3',
+          depType: depTypes.optionalDependencies,
+        },
+        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
+        {
+          depName: 'group2/dep5',
+          depType: depTypes.pdmDevDependencies,
+        },
+        { depName: 'group2/dep6', depType: depTypes.pdmDevDependencies },
+        {
+          depName: 'group3/dep7',
+          depType: depTypes.pdmDevDependencies,
+        },
+        { depName: 'group3/dep8', depType: depTypes.pdmDevDependencies },
+      ];
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -151,7 +176,16 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update dep1 dep2',
+          cmd: 'pdm update --no-sync dep1 dep2',
+        },
+        {
+          cmd: 'pdm update --no-sync -G group1 dep3 dep4',
+        },
+        {
+          cmd: 'pdm update --no-sync -dG group2 dep5 dep6',
+        },
+        {
+          cmd: 'pdm update --no-sync -dG group3 dep7 dep8',
         },
       ]);
     });
@@ -193,7 +227,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update',
+          cmd: 'pdm update --no-sync',
           options: {
             cwd: '/tmp/github/some/repo/folder',
           },

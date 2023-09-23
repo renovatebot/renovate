@@ -6,10 +6,10 @@ Follow these best practices when you're working on our code.
 ## Git branch names
 
 Branch names should start with a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) scope like `feat/` or `fix/`.
-If you're closing an issue with your PR then put the issue number after that.
-Finally, add some short human-readable text to make it easier to identify.
+If you're closing an issue with your PR then put the issue number after the scope.
+Finally, describe the changes in the branch in a few words.
 
-For example:
+Some good branch names:
 
 - `feat/13732-cacache-cleanup`
 - `fix/15431-gitea-automerge-strategy`
@@ -27,7 +27,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 
 - Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
 - Prefer `interface` over `type` for TypeScript type declarations
-- Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use union or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
+- Avoid [Enums](https://github.com/renovatebot/renovate/issues/13743), use unions or [immutable objects](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/pep440/range.ts#L8-L20) instead
 - Always add unit tests for full code coverage
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
@@ -44,7 +44,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 - Use `function foo(){...}` to declare named functions
 - Use function declaration instead of assigning function expression into local variables (`const f = function(){...}`) (TypeScript already prevents rebinding functions)
   - Exception: if the function accesses the outer scope's `this` then use arrow functions assigned to variables instead of function declarations
-- Regular functions (as opposed to arrow functions and methods) _should not_ access `this`
+- Regular functions _should not_ access `this`, but arrow functions and methods may access `this`
 - Only use nested functions when the [lexical scope](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures) is used
 
 #### Use arrow functions in expressions
@@ -63,17 +63,21 @@ bar(() => {
 });
 ```
 
-Generally `this` pointer _should not_ be rebound.
-Function expressions may only be used if dynamically rebinding `this` is needed.
+Generally the `this` pointer _should not_ be rebound.
+Only use function expressions if you need to dynamically rebind `this`.
 
 Source: [Google TypeScript Style Guide, function declarations](https://google.github.io/styleguide/tsguide.html#function-declarations).
 
-## Code simplicity
+## Code style
 
-### Write simple code
+### Write understandable code
 
-Simple code is easy to read, review and maintain.
-Choose to write verbose and understandable code instead of "clever" code which might take someone a few attempts to understand what it does.
+Write code that is easier to read, review and maintain.
+Avoid "clever" code that's hard to understand.
+
+Prefer verbose code which is easier for others to read and maintain than concise code which may be hard or slower for others to understand.
+For example, Array `reduce()` functions are often hard to understand first time, and can be replaced with simpler `for` loops.
+A `for` loop is just as fast but is simpler to understand and maintain.
 
 #### Write single purpose functions
 
@@ -108,7 +112,7 @@ function print(...)     { /* code */ }
 #### Keep indentation level low
 
 Fail quickly.
-Nested code logic is difficult to read and prone to logic mistakes.
+Nested code logic is hard to read and prone to logic mistakes.
 
 ```ts
 function foo(str: string): boolean {
@@ -144,11 +148,16 @@ function foo(str: string): boolean {
 
 ## Logging
 
-Use logger metadata if logging for `WARN`, `ERROR`, `FATAL`, or if the result is a complex metadata object needing a multiple-line pretty stringification.
-Otherwise, inline metadata into the log message if logging at `INFO` or below, or if the metadata object is complex.
+For `WARN`, `ERROR` and `FATAL log messages use logger metadata.
+Also use logger metadata the result is a complex metadata object needing a multiple-line pretty stringification.
 
-`WARN` and above messages are often used in metrics or error catching services, and should have a consistent `msg` component so that they will be automatically grouped/associated together.
-Metadata which is separate from its message is harder for human readability, so try to combine it in the message unless it's too complex to do so.
+For `INFO` log messages inline the metadata into the log message.
+Also inline the metadata if the metadata object is complex.
+
+`WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
+These log messages should have a consistent `msg` component, so they can be automatically grouped or associated.
+Metadata that's seperate from its message is hard for humans to read.
+Try to combine the metadata into the message, unless it's too complex to do so.
 
 Good:
 
@@ -176,7 +185,8 @@ const a = new Array(2); // [undefined, undefined]
 const b = new Array(2, 3); // [2, 3];
 ```
 
-Instead, always use bracket notation to initialize arrays, or `from` to initialize an Array with a certain size i.e.
+Instead, always use bracket notation to initialize arrays, or `from` to initialize an Array with a certain size.
+For example:
 
 ```ts
 // [0, 0, 0, 0, 0]
@@ -195,7 +205,7 @@ Use `for ( ... of ...)` loops instead of `[Array|Set|Map].prototype.forEach` and
 
 Only use `Array.prototype.map()` when the return value is used, otherwise use `for ( ... of ...)`.
 
-[Source](https://google.github.io/styleguide/tsguide.html#iterating-objects)
+Source: [Google TypeScript Style Guide, iterating objects](https://google.github.io/styleguide/tsguide.html#iterating-objects)
 
 ## Exports
 
@@ -203,11 +213,12 @@ Use named exports in all code.
 Avoid default `exports`.
 This way all `imports` follow the same pattern.
 
-[Source, reasoning and examples.](https://google.github.io/styleguide/tsguide.html#exports)
+Source: [Google TypeScript Style Guide, exports](https://google.github.io/styleguide/tsguide.html#exports)
 
 ## Imports
 
-Use [ES6 module](https://exploringjs.com/es6/ch_modules.html#sec_basics-of-es6-modules) syntax, i.e.
+Use [ES6 module](https://exploringjs.com/es6/ch_modules.html#sec_basics-of-es6-modules) syntax.
+For example:
 
 ```ts
 import { square, diag } from 'lib';
@@ -225,8 +236,8 @@ import x = require('...');
 
 ## HTTP & RESTful API request handling
 
-Prefer using `Http` from `util/http` to simplify HTTP request handling and to enable authentication and caching, As our `Http` class will transparently handle host rules.
-Example:
+Prefer using `Http` from `util/http` to simplify HTTP request handling and to enable authentication and caching, as our `Http` class will transparently handle host rules.
+For example:
 
 ```ts
 import { Http } from '../../../util/http';
@@ -247,14 +258,23 @@ Never use `Promise.reject` in async functions, instead throw an `Error` class ty
 
 ## Dates and times
 
-Use [`Luxon`](https://www.npmjs.com/package/luxon) to handle dates and times.
+Use the [`Luxon` package](https://www.npmjs.com/package/luxon) to handle dates and times.
 Use `UTC` to be time zone independent.
 
-[Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.ts#L133-L134)
+[Example from our code](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.ts#L133-L134)
+:
+
+```ts
+if (end) {
+  const now = DateTime.now().toUTC();
+  const eol = DateTime.fromISO(end, { zone: 'utc' });
+  return eol < now;
+}
+```
 
 ## Unit testing
 
-- Separate _Arrange_, _Act_ and _Assert_ phases with empty line
+- Separate the _Arrange_, _Act_ and _Assert_ phases with newlines
 - Use `it.each` rather than `test.each`
 - Prefer [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, Prettier will help with formatting
   - See [Example](https://github.com/renovatebot/renovate/blob/768e178419437a98f5ce4996bafd23f169e530b4/lib/modules/platform/util.spec.ts#L8-L18)
@@ -269,11 +289,12 @@ Use `UTC` to be time zone independent.
   - huge complex objects where you only need to test parts
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
-  - Use `partial<T>()` from `test/util` If only a partial object is required,
+  - Use `partial<T>()` from `test/util` if only a partial object is required
 
 ## Fixtures
 
-- Use `Fixture` class for loading fixtures
+Use the `Fixture` class to load fixtures.
+For example:
 
 ```ts
 Fixture.get('./file.json'); // for loading string data
@@ -283,7 +304,7 @@ Fixture.getBinary('./file.json'); // for retrieving a buffer
 
 ## Working with vanilla JS files (renovate/tools only)
 
-Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototypes.
+Declare types and function prototypes with [JSDoc](https://jsdoc.app/index.html).
 
 [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/tools/distro-json-generate.mjs#L7-L17)
 
@@ -297,8 +318,8 @@ Use [JSDoc](https://jsdoc.app/index.html) to declare types and function prototyp
 [Source](https://en.wikipedia.org/wiki/Pure_function)
 
 - Omit constructors when defining Static classes
-- [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields). instead, use TypeScript's visibility annotations
-- Avoid underscore suffixes or prefixes, for example: `_prop`, use [whole words](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope) as suffix/prefix i.e. `internalProp`
+- [No `#private` fields](https://google.github.io/styleguide/tsguide.html#private-fields), use TypeScript's visibility annotations instead
+- Avoid underscore suffixes or prefixes like `_prop`, instead use [whole words](https://google.github.io/styleguide/tsguide.html#properties-used-outside-of-class-lexical-scope) as the suffix or prefix like `internalProp`
 
 ## regex
 
@@ -313,5 +334,5 @@ You can do this by running this Git command:
 git config --global core.autocrlf input
 ```
 
-This prevents the carriage return `\r\n` which may confuse Renovate bot.
+This prevents the carriage return `\r\n` which may confuse Renovate.
 You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.

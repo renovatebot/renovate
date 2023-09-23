@@ -68,7 +68,7 @@ A production repository usually has:
 
 Having lots of "moving parts" makes debugging tricky, because debug break points can be triggered hundreds of times.
 
-When you have lots of custom config for Renovate, it's easy to think that you've found the root cause of the behavior.
+When you have lots of custom config for Renovate, it's hard to find the root cause of the behavior.
 Bugs are often caused by multiple features interacting.
 Reducing the config to a minimum helps us find out exactly which config elements are required to trigger the bug.
 
@@ -84,4 +84,5 @@ After a while, issues without a reproduction may be closed unfixed.
 
 ### "I already described what you need in the issue"
 
-If it's simple then it shouldn't take you much time to commit it to a repo.
+Thank you for describing your issue in detail.
+But we still need a minimal reproduction in a repository, and we'd like you to be the one to make sure it matches both your description as well as expected behavior.

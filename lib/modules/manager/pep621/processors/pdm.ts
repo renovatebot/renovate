@@ -9,10 +9,13 @@ import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../../types';
 import type { PyProject } from '../schema';
-import { parseDependencyGroupRecord } from '../utils';
+import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
+
+const pdmUpdateCMD = 'pdm update --no-sync';
 
 export class PdmProcessor implements PyProjectProcessor {
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
@@ -23,7 +26,7 @@ export class PdmProcessor implements PyProjectProcessor {
 
     deps.push(
       ...parseDependencyGroupRecord(
-        'tool.pdm.dev-dependencies',
+        depTypes.pdmDevDependencies,
         pdm['dev-dependencies']
       )
     );
@@ -84,13 +87,13 @@ export class PdmProcessor implements PyProjectProcessor {
 
       // on lockFileMaintenance do not specify any packages and update the complete lock file
       // else only update specific packages
-      let packageList = '';
-      if (!isLockFileMaintenance) {
-        packageList = ' ';
-        packageList += updatedDeps.map((value) => value.packageName).join(' ');
+      const cmds: string[] = [];
+      if (isLockFileMaintenance) {
+        cmds.push(pdmUpdateCMD);
+      } else {
+        cmds.push(...generateCMDs(updatedDeps));
       }
-      const cmd = `pdm update${packageList}`;
-      await exec(cmd, execOptions);
+      await exec(cmds, execOptions);
 
       // check for changes
       const fileChanges: UpdateArtifactsResult[] = [];
@@ -125,4 +128,53 @@ export class PdmProcessor implements PyProjectProcessor {
       ];
     }
   }
+}
+
+function generateCMDs(updatedDeps: Upgrade[]): string[] {
+  const cmds: string[] = [];
+  const packagesByCMD: Record<string, string[]> = {};
+  for (const dep of updatedDeps) {
+    switch (dep.depType) {
+      case depTypes.optionalDependencies: {
+        const [group, name] = dep.depName!.split('/');
+        addPackageToCMDRecord(
+          packagesByCMD,
+          `${pdmUpdateCMD} -G ${group}`,
+          name
+        );
+        break;
+      }
+      case depTypes.pdmDevDependencies: {
+        const [group, name] = dep.depName!.split('/');
+        addPackageToCMDRecord(
+          packagesByCMD,
+          `${pdmUpdateCMD} -dG ${group}`,
+          name
+        );
+        break;
+      }
+      default: {
+        addPackageToCMDRecord(packagesByCMD, pdmUpdateCMD, dep.packageName!);
+      }
+    }
+  }
+
+  for (const commandPrefix in packagesByCMD) {
+    const packageList = packagesByCMD[commandPrefix].join(' ');
+    const cmd = `${commandPrefix} ${packageList}`;
+    cmds.push(cmd);
+  }
+
+  return cmds;
+}
+
+function addPackageToCMDRecord(
+  packagesByCMD: Record<string, string[]>,
+  commandPrefix: string,
+  packageName: string
+): void {
+  if (is.nullOrUndefined(packagesByCMD[commandPrefix])) {
+    packagesByCMD[commandPrefix] = [];
+  }
+  packagesByCMD[commandPrefix].push(packageName);
 }

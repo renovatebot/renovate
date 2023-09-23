@@ -1,21 +1,38 @@
 import is from '@sindresorhus/is';
 import type { Options } from 'got';
 import {
+  GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../../constants';
 import type { GotOptions } from './types';
 
-export function applyAuthorization(inOptions: GotOptions): GotOptions {
+export type AuthGotOptions = Pick<
+  GotOptions,
+  | 'hostType'
+  | 'headers'
+  | 'noAuth'
+  | 'context'
+  | 'token'
+  | 'username'
+  | 'password'
+>;
+
+export function applyAuthorization<GotOptions extends AuthGotOptions>(
+  inOptions: GotOptions
+): GotOptions {
   const options: GotOptions = { ...inOptions };
 
-  if (options.headers?.authorization || options.noAuth) {
+  if (is.nonEmptyString(options.headers?.authorization) || options.noAuth) {
     return options;
   }
 
   options.headers ??= {};
   if (options.token) {
-    if (options.hostType === 'gitea') {
+    if (
+      options.hostType &&
+      GITEA_API_USING_HOST_TYPES.includes(options.hostType)
+    ) {
       options.headers.authorization = `token ${options.token}`;
     } else if (
       options.hostType &&

@@ -1,6 +1,11 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import type { ExtractConfig, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
+import type { DependencyExtractor } from './base';
 import { resourceExtractors } from './extractors';
 import * as hcl from './hcl';
 import {
@@ -15,7 +20,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace({ content }, `terraform.extractPackageFile(${packageFile})`);
 
-  const passedExtractors = [];
+  const passedExtractors: DependencyExtractor[] = [];
   for (const extractor of resourceExtractors) {
     if (checkFileContainsDependency(content, extractor.getCheckList())) {
       passedExtractors.push(extractor);
@@ -36,7 +41,7 @@ export async function extractPackageFile(
       .toString()}]`
   );
 
-  const dependencies = [];
+  const dependencies: PackageDependency[] = [];
   const hclMap = await hcl.parseHCL(content, packageFile);
   if (is.nullOrUndefined(hclMap)) {
     logger.debug({ packageFile }, 'failed to parse HCL file');
@@ -51,5 +56,5 @@ export async function extractPackageFile(
   }
 
   dependencies.forEach((value) => delete value.managerData);
-  return { deps: dependencies };
+  return dependencies.length ? { deps: dependencies } : null;
 }

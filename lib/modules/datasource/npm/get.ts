@@ -104,8 +104,13 @@ export async function getDependency(
   const softExpireAt = DateTime.local()
     .plus({ minutes: cacheMinutes })
     .toISO()!;
-  let { cacheHardTtlMinutes } = GlobalConfig.get();
-  if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
+  let cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
+  if (
+    !(
+      is.number(cacheHardTtlMinutes) &&
+      /* istanbul ignore next: needs test */ cacheHardTtlMinutes > cacheMinutes
+    )
+  ) {
     cacheHardTtlMinutes = cacheMinutes;
   }
 
@@ -176,6 +181,10 @@ export async function getDependency(
       if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;
       }
+      const nodeConstraint = res.versions?.[version].engines?.node;
+      if (is.nonEmptyString(nodeConstraint)) {
+        release.constraints = { node: [nodeConstraint] };
+      }
       const source = PackageSource.parse(res.versions?.[version].repository);
       if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
         release.sourceUrl = source.sourceUrl;
@@ -200,7 +209,9 @@ export async function getDependency(
         cacheNamespace,
         packageUrl,
         { ...dep, cacheData },
-        etag ? cacheHardTtlMinutes : cacheMinutes
+        etag
+          ? /* istanbul ignore next: needs test */ cacheHardTtlMinutes
+          : cacheMinutes
       );
     } else {
       dep.isPrivate = true;

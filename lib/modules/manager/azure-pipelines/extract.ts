@@ -27,7 +27,8 @@ export function extractRepository(
     // same project, which is not currently accessible here. It could be deduced later by exposing
     // the repository URL to managers.
     // https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources-repositories-repository?view=azure-pipelines#types
-    const { platform, endpoint } = GlobalConfig.get();
+    const platform = GlobalConfig.get('platform');
+    const endpoint = GlobalConfig.get('endpoint');
     if (platform === 'azure' && endpoint) {
       if (repository.name.includes('/')) {
         const [projectName, repoName] = repository.name.split('/');

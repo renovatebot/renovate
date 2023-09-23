@@ -1,15 +1,15 @@
 import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
-import * as _exec from '../exec';
+import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
-jest.mock('../exec');
+jest.mock('../exec/utils');
 
-const exec = mocked(_exec);
+const execUtils = mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {
-    exec.getChildEnv.mockReturnValue({
+    execUtils.getChildEnv.mockReturnValue({
       CUSTOM_FOO: 'foo',
       HOME: '/root',
     });

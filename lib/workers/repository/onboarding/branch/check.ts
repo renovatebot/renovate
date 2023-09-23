@@ -30,7 +30,7 @@ async function configFileExists(): Promise<boolean> {
 
 async function packageJsonConfigExists(): Promise<boolean> {
   try {
-    // TODO #7154
+    // TODO #22198
     const pJson = JSON.parse((await readLocalFile('package.json', 'utf8'))!);
     if (pJson.renovate) {
       return true;
@@ -46,6 +46,7 @@ function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
     branchName: config.onboardingBranch!,
     prTitle: config.onboardingPrTitle,
     state: '!open',
+    targetBranch: config.baseBranch,
   });
 }
 
@@ -141,7 +142,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     await ensureComment({
       number: closedOnboardingPr.number,
       topic: `Renovate is disabled`,
-      content: `Renovate is disabled due to lack of config. If you wish to re-enable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
+      content: `Renovate is disabled because there is no Renovate configuration file. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
     });
   }
   throw new Error(REPOSITORY_CLOSED_ONBOARDING);
@@ -150,5 +151,8 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 export async function getOnboardingPr(
   config: RenovateConfig
 ): Promise<Pr | null> {
-  return await platform.getBranchPr(config.onboardingBranch!);
+  return await platform.getBranchPr(
+    config.onboardingBranch!,
+    config.baseBranch
+  );
 }

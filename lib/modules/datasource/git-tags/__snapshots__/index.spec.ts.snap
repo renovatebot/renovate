@@ -1,9 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/datasource/git-tags/index getDigest() returns digest for HEAD 1`] = `"a9920c014aebc28dc1b23e7efcc006d0455cc710"`;
-
-exports[`modules/datasource/git-tags/index getDigest() returns digest for tag 1`] = `"9cb93e0b236385a4e2efd089d7c6a458f5ff321f"`;
-
 exports[`modules/datasource/git-tags/index getReleases returns versions filtered from tags 1`] = `
 {
   "releases": [

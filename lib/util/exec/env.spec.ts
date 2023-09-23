@@ -11,6 +11,9 @@ describe('util/exec/env', () => {
     'LC_ALL',
     'LANG',
     'DOCKER_HOST',
+    'SSL_CERT_FILE',
+    'URL_REPLACE_1_FROM',
+    'URL_REPLACE_1_TO',
   ];
 
   beforeEach(() => {
@@ -33,6 +36,9 @@ describe('util/exec/env', () => {
       LC_ALL: 'LC_ALL',
       NO_PROXY: 'NO_PROXY',
       PATH: 'PATH',
+      SSL_CERT_FILE: 'SSL_CERT_FILE',
+      URL_REPLACE_1_FROM: 'URL_REPLACE_1_FROM',
+      URL_REPLACE_1_TO: 'URL_REPLACE_1_TO',
     });
   });
 

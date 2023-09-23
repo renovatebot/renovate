@@ -3,9 +3,9 @@ import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { detectPlatform } from '../../../util/common';
+import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { simpleGitConfig } from '../../../util/git/config';
-import { getHttpUrl, getRemoteUrlWithToken } from '../../../util/git/url';
+import { getHttpUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import type { ExtractConfig, PackageFileContent } from '../types';
@@ -37,11 +37,16 @@ async function getUrl(
 const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
 
 async function getDefaultBranch(subModuleUrl: string): Promise<string> {
-  const val = await Git(simpleGitConfig()).listRemote([
-    '--symref',
-    subModuleUrl,
-    'HEAD',
-  ]);
+  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables();
+  const gitEnv = {
+    // pass all existing env variables
+    ...process.env,
+    // add all known git Variables
+    ...gitSubmoduleAuthEnvironmentVariables,
+  };
+  const val = await Git(simpleGitConfig())
+    .env(gitEnv)
+    .listRemote(['--symref', subModuleUrl, 'HEAD']);
   return headRefRe.exec(val)?.groups?.branch ?? 'master';
 }
 
@@ -95,7 +100,7 @@ export default async function extractPackageFile(
   packageFile: string,
   _config: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const git = Git(localDir, simpleGitConfig());
   const gitModulesPath = upath.join(localDir, packageFile);
 
@@ -113,11 +118,7 @@ export default async function extractPackageFile(
         .replace(regEx(/^[-+]/), '')
         .split(regEx(/\s/));
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
-      // hostRules only understands HTTP URLs
-      // Find HTTP URL, then apply token
-      let httpSubModuleUrl = getHttpUrl(subModuleUrl);
-      const hostType = detectPlatform(httpSubModuleUrl) ?? GitRefsDatasource.id;
-      httpSubModuleUrl = getRemoteUrlWithToken(httpSubModuleUrl, hostType);
+      const httpSubModuleUrl = getHttpUrl(subModuleUrl);
       const currentValue = await getBranch(
         gitModulesPath,
         name,
@@ -125,7 +126,7 @@ export default async function extractPackageFile(
       );
       deps.push({
         depName: path,
-        packageName: getHttpUrl(subModuleUrl),
+        packageName: httpSubModuleUrl,
         currentValue,
         currentDigest,
       });

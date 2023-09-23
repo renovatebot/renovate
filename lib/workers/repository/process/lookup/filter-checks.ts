@@ -9,6 +9,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { coerceNumber } from '../../../../util/number';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { toMs } from '../../../../util/pretty-time';
 import type { LookupUpdateConfig, UpdateResult } from './types';
@@ -42,7 +43,7 @@ export async function filterInternalChecks(
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
         versioning,
-        // TODO #7154
+        // TODO #22198
         currentVersion!,
         candidateRelease.version
       );
@@ -61,7 +62,10 @@ export async function filterInternalChecks(
         updateType,
       } = releaseConfig;
       if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
-        if (getElapsedMs(releaseTimestamp) < (toMs(minimumReleaseAge) ?? 0)) {
+        if (
+          getElapsedMs(releaseTimestamp) <
+          coerceNumber(toMs(minimumReleaseAge), 0)
+        ) {
           // Skip it if it doesn't pass checks
           logger.trace(
             { depName, check: 'minimumReleaseAge' },
@@ -72,7 +76,7 @@ export async function filterInternalChecks(
         }
       }
 
-      // TODO #7154
+      // TODO #22198
       if (isActiveConfidenceLevel(minimumConfidence!)) {
         const confidenceLevel =
           (await getMergeConfidenceLevel(
@@ -82,7 +86,7 @@ export async function filterInternalChecks(
             newVersion,
             updateType!
           )) ?? 'neutral';
-        // TODO #7154
+        // TODO #22198
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.trace(
             { depName, check: 'minimumConfidence' },
@@ -113,6 +117,6 @@ export async function filterInternalChecks(
     }
   }
 
-  // TODO #7154
+  // TODO #22198
   return { release: release!, pendingChecks, pendingReleases };
 }

@@ -1,8 +1,10 @@
+import { mockDeep } from 'jest-mock-extended';
 import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
+import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { getPkgReleases as _getPkgReleases } from '../../../modules/datasource';
+import * as modulesDatasource from '../../../modules/datasource';
 import type { VolumeOption } from '../types';
 import {
   generateDockerCommand,
@@ -14,15 +16,9 @@ import {
   sideCarImage,
 } from '.';
 
-const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
-  _getPkgReleases as any;
-jest.mock('../../../modules/datasource');
+jest.mock('../../../modules/datasource', () => mockDeep());
 
 describe('util/exec/docker/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('prefetchDockerImage', () => {
     beforeEach(() => {
       resetPrefetchedImages();
@@ -56,13 +52,15 @@ describe('util/exec/docker/index', () => {
     });
 
     it('returns "latest" for bad release results', async () => {
-      getPkgReleases.mockResolvedValueOnce(undefined as never);
+      jest
+        .spyOn(modulesDatasource, 'getPkgReleases')
+        .mockResolvedValueOnce(undefined as never)
+        .mockResolvedValueOnce(partial<modulesDatasource.ReleaseResult>())
+        .mockResolvedValueOnce(
+          partial<modulesDatasource.ReleaseResult>({ releases: [] })
+        );
       expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
-
-      getPkgReleases.mockResolvedValueOnce({} as never);
       expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
-
-      getPkgReleases.mockResolvedValueOnce({ releases: [] } as never);
       expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
     });
 
@@ -87,7 +85,11 @@ describe('util/exec/docker/index', () => {
         { version: '2.1.1' },
         { version: '2.1.2' },
       ];
-      getPkgReleases.mockResolvedValueOnce({ releases } as never);
+      jest
+        .spyOn(modulesDatasource, 'getPkgReleases')
+        .mockResolvedValueOnce(
+          partial<modulesDatasource.ReleaseResult>({ releases })
+        );
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
     });
 
@@ -98,7 +100,11 @@ describe('util/exec/docker/index', () => {
         { version: '14.0.2' },
         { version: '15.0.2' },
       ];
-      getPkgReleases.mockResolvedValueOnce({ releases } as never);
+      jest
+        .spyOn(modulesDatasource, 'getPkgReleases')
+        .mockResolvedValueOnce(
+          partial<modulesDatasource.ReleaseResult>({ releases })
+        );
       expect(await getDockerTag('foo', '>=12', 'node')).toBe('14.0.2');
     });
   });
@@ -208,19 +214,23 @@ describe('util/exec/docker/index', () => {
       cwd: '/tmp/foobar',
       envVars,
     };
-    const command = (img: string, vol?: string): string =>
+    const command = (img: string, vol?: string, opts?: string): string =>
       `docker run --rm ` +
       `--name=renovate_${img} ` +
       `--label=renovate_child ` +
       `--user=some-user ` +
       (vol ? `${vol} ` : '') +
+      (opts ? `${opts} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `containerbase/${img} ` +
+      `ghcr.io/containerbase/sidecar ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
-      GlobalConfig.set({ dockerUser: 'some-user' });
+      GlobalConfig.set({
+        dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
     });
 
     it('returns executable command', async () => {
@@ -258,6 +268,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -278,6 +289,7 @@ describe('util/exec/docker/index', () => {
         cacheDir: '/tmp/cache',
         containerbaseDir: '/tmp/cache/containerbase',
         dockerUser: 'some-user',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
@@ -289,11 +301,28 @@ describe('util/exec/docker/index', () => {
       );
     });
 
+    it('add multiple docker cli option', async () => {
+      mockExecAll();
+      GlobalConfig.set({
+        dockerUser: 'some-user',
+        dockerCliOptions: '--memory=4g --cpus=".5"',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+      });
+      expect(res).toBe(command(image, undefined, `--memory=4g --cpus=".5"`));
+    });
+
     // TODO: it('handles tag constraint', async () => {
     //   mockExecAll();
-    //   getPkgReleases.mockResolvedValueOnce({
+    // jest
+    // .spyOn(modulesDatasource, 'getPkgReleases')
+    // .mockResolvedValue(
+    //   partial<modulesDatasource.ReleaseResult>({
     //     releases: [{ version: '5.5.5' }, { version: '6.0.0' }],
-    //   } as never);
+    //   })
+    // );
     //   const res = await generateDockerCommand(commands, preCommands, {
     //     ...dockerOptions,
     //   });

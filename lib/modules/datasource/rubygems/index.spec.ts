@@ -1,355 +1,304 @@
+import * as marshal from '@hyrious/marshal';
+import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as rubyVersioning from '../../versioning/ruby';
-import { VersionsDatasource, memCache } from './versions-datasource';
+import { memCache } from './versions-endpoint-cache';
 import { RubyGemsDatasource } from '.';
 
-const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
-const railsInfo = Fixtures.getJson('rails/info.json');
-const railsVersions = Fixtures.getJson('rails/versions.json');
-const railsDependencies = Fixtures.getBinary('dependencies-rails.dat');
-const emptyMarshalArray = Buffer.from([4, 8, 91, 0]);
+const rubygemsOrgVersions = codeBlock`
+  created_at: 2023-01-01T00:00:00.000Z
+  ---
+  foobar 1.0.0,2.0.0,3.0.0 01010101010101010101010101010101
+`;
+
+const rubyMarshal = (data: unknown) => Buffer.from(marshal.dump(data));
 
 describe('modules/datasource/rubygems/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       memCache.clear();
-      jest.resetAllMocks();
     });
 
     it('returns null for missing pkg', async () => {
       httpMock
-        .scope('https://firstparty.com')
-        .get('/basepath/versions')
-        .reply(404);
-      httpMock
-        .scope('https://firstparty.com')
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200, { name: 'rails' })
-        .get('/basepath/api/v1/versions/rails.json')
-        .reply(200, []);
-      httpMock.scope('https://thirdparty.com').get('/versions').reply(404);
-      httpMock
-        .scope('https://thirdparty.com')
-        .get('/api/v1/gems/rails.json')
-        .reply(200, { name: 'rails' })
-        .get('/api/v1/versions/rails.json')
-        .reply(200, []);
+        .scope('https://example.com')
+        .get('/api/v1/versions/foobar.json')
+        .reply(200, [])
+        .get('/info/foobar')
+        .reply(200, '')
+        .get('/api/v1/dependencies?gems=foobar')
+        .reply(200, rubyMarshal([]));
       expect(
         await getPkgReleases({
           versioning: rubyVersioning.id,
           datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [
-            'https://thirdparty.com',
-            'https://firstparty.com/basepath/',
-          ],
+          packageName: 'foobar',
+          registryUrls: ['https://example.com'],
         })
       ).toBeNull();
     });
 
     it('returns null for rubygems.org package miss', async () => {
-      httpMock
-        .scope('https://rubygems.org')
-        .get('/versions')
-        .reply(404, rubygemsOrgVersions);
+      httpMock.scope('https://rubygems.org').get('/versions').reply(404);
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
-        packageName: 'rails',
+        packageName: 'foobar',
         registryUrls: [],
       });
       expect(res).toBeNull();
-    });
-
-    it('returns null for an error without "not_supported" reason', async () => {
-      const versionsdataSourceSpy = jest
-        .spyOn(VersionsDatasource.prototype, 'syncVersions')
-        .mockImplementationOnce(() => {
-          throw new Error();
-        });
-
-      try {
-        const res = await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [],
-        });
-        expect(res).toBeNull();
-      } finally {
-        versionsdataSourceSpy.mockRestore();
-      }
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
-        .reply(200, rubygemsOrgVersions);
+        .reply(200, rubygemsOrgVersions)
+        .get('/api/v1/versions/foobar.json')
+        .reply(200, [
+          { number: '1.0.0', created_at: '2021-01-01' },
+          { number: '2.0.0', created_at: '2022-01-01' },
+          { number: '3.0.0', created_at: '2023-01-01' },
+        ])
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {});
+
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
-        packageName: '1pass',
+        packageName: 'foobar',
         registryUrls: [],
       });
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(2);
-      expect(res).toMatchSnapshot();
-      expect(
-        res?.releases.find((release) => release.version === '0.1.1')
-      ).toBeDefined();
-      expect(
-        res?.releases.find((release) => release.version === '0.1.2')
-      ).toBeUndefined();
-    });
 
-    it('returns a dep for a package hit on an arbitrary registry that only supports old format endpoints', async () => {
-      const contribsysComVersions = `
-        created_at: 2022-06-15T17:10:25+00:00
-        ---
-        sidekiq-ent 0.7.10,1.0.0,1.0.1,1.2.4,2.0.0,2.1.2 4c0f62a49b15b4775b7fb6824ec34d45
-      `;
-      httpMock
-        .scope('https://enterprise.contribsys.com')
-        .get('/versions')
-        .reply(200, contribsysComVersions);
-      const res = await getPkgReleases({
-        versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
-        packageName: 'sidekiq-ent',
-        registryUrls: ['https://enterprise.contribsys.com'],
+      expect(res).toEqual({
+        registryUrl: 'https://rubygems.org',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2021-01-01T00:00:00.000Z' },
+          { version: '2.0.0', releaseTimestamp: '2022-01-01T00:00:00.000Z' },
+          { version: '3.0.0', releaseTimestamp: '2023-01-01T00:00:00.000Z' },
+        ],
       });
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(6);
-      expect(res).toMatchObject({
-        registryUrl: 'https://enterprise.contribsys.com',
-        releases: expect.arrayContaining([
-          {
-            version: '0.7.10',
-          },
-          {
-            version: '1.0.0',
-          },
-        ]),
-      });
-      expect(
-        res?.releases.find((release) => release.version === '2.1.2')
-      ).toBeDefined();
-      expect(
-        res?.releases.find((release) => release.version === '2.1.3')
-      ).toBeUndefined();
     });
 
     it('uses rubygems.org if no registry urls were provided', async () => {
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
-        .reply(200, rubygemsOrgVersions);
-
-      expect(
-        await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [],
-        })
-      ).toBeNull();
+        .reply(200, rubygemsOrgVersions)
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {})
+        .get('/api/v1/versions/foobar.json')
+        .reply(200, [
+          { number: '1.0.0', created_at: '2021-01-01' },
+          { number: '2.0.0', created_at: '2022-01-01' },
+          { number: '3.0.0', created_at: '2023-01-01' },
+        ]);
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
-        packageName: '1pass',
+        packageName: 'foobar',
         registryUrls: [],
       });
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(2);
-      expect(res).toMatchSnapshot();
-    });
 
-    it('works with real data', async () => {
-      httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, railsInfo)
-        .get('/api/v1/versions/rails.json')
-        .reply(200, railsVersions);
-
-      const res = await getPkgReleases({
-        versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
-        packageName: 'rails',
-        registryUrls: [
-          'https://thirdparty.com',
-          'https://firstparty.com/basepath/',
+      expect(res).toEqual({
+        registryUrl: 'https://rubygems.org',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2021-01-01T00:00:00.000Z' },
+          { version: '2.0.0', releaseTimestamp: '2022-01-01T00:00:00.000Z' },
+          { version: '3.0.0', releaseTimestamp: '2023-01-01T00:00:00.000Z' },
         ],
       });
-      expect(res?.releases).toHaveLength(339);
-      expect(res).toMatchSnapshot();
     });
 
     it('uses multiple source urls', async () => {
       httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
+        .scope('https://registry-1.com/')
+        .get('/api/v1/versions/foobar.json')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(401);
+        .get('/info/foobar')
+        .reply(404)
+        .get('/api/v1/dependencies?gems=foobar')
+        .reply(404);
+
       httpMock
-        .scope('https://firstparty.com/')
-        .get('/basepath/versions')
-        .reply(404)
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200, railsInfo)
-        .get('/basepath/api/v1/versions/rails.json')
-        .reply(200, railsVersions);
+        .scope('https://registry-2.com/nested/path')
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {})
+        .get('/api/v1/versions/foobar.json')
+        .reply(200, [
+          { number: '1.0.0', created_at: '2021-01-01' },
+          { number: '2.0.0', created_at: '2022-01-01' },
+          { number: '3.0.0', created_at: '2023-01-01' },
+        ]);
 
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
-        packageName: 'rails',
+        packageName: 'foobar',
         registryUrls: [
-          'https://thirdparty.com',
-          'https://firstparty.com/basepath/',
+          'https://registry-1.com',
+          'https://registry-2.com/nested/path',
         ],
       });
-      expect(res?.releases).toHaveLength(339);
-      expect(res).toMatchSnapshot();
+
+      expect(res).toEqual({
+        registryUrl: 'https://registry-2.com/nested/path',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2021-01-01T00:00:00.000Z' },
+          { version: '2.0.0', releaseTimestamp: '2022-01-01T00:00:00.000Z' },
+          { version: '3.0.0', releaseTimestamp: '2023-01-01T00:00:00.000Z' },
+        ],
+      });
     });
 
-    it('returns null if mismatched name', async () => {
+    it('falls back to dependencies API', async () => {
       httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
+        .scope('https://example.com/')
+        .get('/api/v1/versions/foobar.json')
+        .reply(404, {})
+        .get('/info/foobar')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, { ...railsInfo, name: 'oooops' });
-      httpMock
-        .scope('https://firstparty.com/')
-        .get('/basepath/versions')
-        .reply(404)
-        .get('/basepath/api/v1/gems/rails.json')
-        .reply(200);
-      expect(
-        await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [
-            'https://thirdparty.com',
-            'https://firstparty.com/basepath/',
-          ],
-        })
-      ).toBeNull();
-    });
+        .get('/api/v1/dependencies?gems=foobar')
+        .reply(
+          200,
+          rubyMarshal([
+            { number: '1.0.0' },
+            { number: '2.0.0' },
+            { number: '3.0.0' },
+          ])
+        );
 
-    it('falls back to info when version request fails', async () => {
-      httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, railsInfo)
-        .get('/api/v1/versions/rails.json')
-        .reply(400, {});
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
-        packageName: 'rails',
-        registryUrls: [
-          'https://thirdparty.com',
-          'https://firstparty.com/basepath/',
+        packageName: 'foobar',
+        registryUrls: ['https://example.com'],
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
         ],
       });
-      expect(res?.releases).toHaveLength(1);
-      expect(res?.releases[0].version).toBe(railsInfo.version);
     });
 
-    it('errors when version request fails with anything other than 400 or 404', async () => {
+    it('supports /info endpoint', async () => {
       httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
+        .scope('https://example.com/')
+        .get('/api/v1/versions/foobar.json')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(200, railsInfo)
-        .get('/api/v1/versions/rails.json')
-        .reply(500, {});
+        .get('/info/foobar')
+        .reply(
+          200,
+          codeBlock`
+            1.0.0 |checksum:aaa
+            2.0.0 |checksum:bbb
+            3.0.0 |checksum:ccc
+          `
+        );
+
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'foobar',
+        registryUrls: ['https://example.com'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
+        ],
+      });
+    });
+
+    it('errors when version request fails with server error', async () => {
       httpMock
-        .scope('https://firstparty.com/basepath')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/gems/rails.json')
+        .scope('https://example.com/')
+        .get('/api/v1/versions/foobar.json')
         .reply(500);
-      expect(
-        await getPkgReleases({
+
+      await expect(
+        getPkgReleases({
           versioning: rubyVersioning.id,
           datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: [
-            'https://thirdparty.com',
-            'https://firstparty.com/basepath/',
-          ],
+          packageName: 'foobar',
+          registryUrls: ['https://example.com'],
         })
-      ).toBeNull();
+      ).rejects.toThrow(ExternalHostError);
     });
 
-    it('falls back to dependencies api', async () => {
+    it('errors when dependencies request fails server error', async () => {
       httpMock
-        .scope('https://thirdparty.com/')
-        .get('/versions')
+        .scope('https://example.com/')
+        .get('/info/foobar')
         .reply(404)
-        .get('/api/v1/gems/rails.json')
-        .reply(404, railsInfo)
-        .get('/api/v1/dependencies?gems=rails')
-        .reply(200, railsDependencies);
+        .get('/api/v1/versions/foobar.json')
+        .reply(404)
+        .get('/api/v1/dependencies?gems=foobar')
+        .reply(500);
 
-      const res = await getPkgReleases({
-        versioning: rubyVersioning.id,
-        datasource: RubyGemsDatasource.id,
-        packageName: 'rails',
-        registryUrls: [
-          'https://thirdparty.com',
-          'https://firstparty.com/basepath/',
-        ],
-      });
-      expect(res?.releases).toHaveLength(339);
+      await expect(
+        getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'foobar',
+          registryUrls: ['https://example.com'],
+        })
+      ).rejects.toThrow(ExternalHostError);
     });
 
     it('returns null for GitHub Packages package miss', async () => {
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/dependencies?gems=rails')
-        .reply(200, emptyMarshalArray);
-      expect(
-        await getPkgReleases({
-          versioning: rubyVersioning.id,
-          datasource: RubyGemsDatasource.id,
-          packageName: 'rails',
-          registryUrls: ['https://rubygems.pkg.github.com/example'],
-        })
-      ).toBeNull();
+        .get('/api/v1/dependencies?gems=foobar')
+        .reply(200, rubyMarshal([]));
+
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'foobar',
+        registryUrls: ['https://rubygems.pkg.github.com/example'],
+      });
+
+      expect(res).toBeNull();
     });
 
     it('returns a dep for GitHub Packages package hit', async () => {
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
-        .get('/versions')
-        .reply(404)
-        .get('/api/v1/dependencies?gems=rails')
-        .reply(200, railsDependencies);
+        .get('/api/v1/dependencies?gems=foobar')
+        .reply(
+          200,
+          rubyMarshal([
+            { number: '1.0.0' },
+            { number: '2.0.0' },
+            { number: '3.0.0' },
+          ])
+        );
+
       const res = await getPkgReleases({
         versioning: rubyVersioning.id,
         datasource: RubyGemsDatasource.id,
-        packageName: 'rails',
+        packageName: 'foobar',
         registryUrls: ['https://rubygems.pkg.github.com/example'],
       });
-      expect(res?.releases).toHaveLength(339);
-      expect(res).toMatchSnapshot();
+
+      expect(res).toEqual({
+        registryUrl: 'https://rubygems.pkg.github.com/example',
+        releases: [
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
+        ],
+      });
     });
   });
 });

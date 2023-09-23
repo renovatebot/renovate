@@ -7,7 +7,7 @@ import type { IndentationType } from './indentation-type';
 
 export class EditorConfig {
   public static async getCodeFormat(fileName: string): Promise<CodeFormat> {
-    const { localDir } = GlobalConfig.get();
+    const localDir = GlobalConfig.get('localDir', '');
     try {
       const knownProps = await parse(upath.join(localDir, fileName));
       return {

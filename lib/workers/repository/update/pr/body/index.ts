@@ -1,3 +1,4 @@
+import type { RenovateConfig } from '../../../../../config/types';
 import { PrDebugData, platform } from '../../../../../modules/platform';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
@@ -22,7 +23,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
       changelogUrl,
       dependencyUrl,
     } = upgrade;
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     let depNameLinked = upgrade.depName!;
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
@@ -67,7 +68,8 @@ const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 
 export function getPrBody(
   branchConfig: BranchConfig,
-  prBodyConfig: PrBodyConfig
+  prBodyConfig: PrBodyConfig,
+  config: RenovateConfig
 ): string {
   massageUpdateMetadata(branchConfig);
   let warnings = '';
@@ -75,6 +77,7 @@ export function getPrBody(
   if (branchConfig.packageFiles) {
     warnings += getDepWarningsPR(
       branchConfig.packageFiles,
+      config,
       branchConfig.dependencyDashboard
     );
   }

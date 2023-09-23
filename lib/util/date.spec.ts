@@ -7,7 +7,7 @@ import {
 } from './date';
 
 describe('util/date', () => {
-  const t0 = DateTime.fromISO('2020-10-10');
+  const t0 = DateTime.fromISO('2020-10-10', { zone: 'utc' });
 
   beforeAll(() => {
     jest.useFakeTimers();

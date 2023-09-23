@@ -10,18 +10,20 @@ describe('workers/global/config/parse/env', () => {
     });
 
     it('supports boolean true', () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'true' };
-      expect(env.getConfig(envParam).recreateClosed).toBeTrue();
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG_MIGRATION: 'true' };
+      expect(env.getConfig(envParam).configMigration).toBeTrue();
     });
 
     it('supports boolean false', () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'false' };
-      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG_MIGRATION: 'false',
+      };
+      expect(env.getConfig(envParam).configMigration).toBeFalse();
     });
 
     it('throws exception for invalid boolean value', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_RECREATE_CLOSED: 'badvalue',
+        RENOVATE_CONFIG_MIGRATION: 'badvalue',
       };
       expect(() => env.getConfig(envParam)).toThrow(
         Error(
@@ -30,7 +32,7 @@ describe('workers/global/config/parse/env', () => {
       );
     });
 
-    delete process.env.RENOVATE_RECREATE_CLOSED;
+    delete process.env.RENOVATE_CONFIG_MIGRATION;
 
     it('supports list single', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a' };
@@ -81,6 +83,17 @@ describe('workers/global/config/parse/env', () => {
       };
       const res = env.getConfig(envParam);
       expect(res).toMatchObject({ hostRules: [{ foo: 'bar' }] });
+    });
+
+    test.each`
+      envArg                                   | config
+      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}  | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'false' }} | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'auto' }}    | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'always' }}  | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'never' }}   | ${{ recreateWhen: 'never' }}
+    `('"$envArg" -> $config', ({ envArg, config }) => {
+      expect(env.getConfig(envArg)).toMatchObject(config);
     });
 
     it('skips misconfigured arrays', () => {
@@ -148,13 +161,20 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
-    it('does not support GitHub fine-grained PATs', () => {
+    it('supports GitHub fine-grained PATs', () => {
       const envParam: NodeJS.ProcessEnv = {
         GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
         RENOVATE_TOKEN: 'a github.com token',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(env.getConfig(envParam)).toEqual({
         token: 'a github.com token',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+        ],
       });
     });
 
@@ -253,7 +273,6 @@ describe('workers/global/config/parse/env', () => {
       beforeAll(() => {
         processExit = jest
           .spyOn(process, 'exit')
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
           .mockImplementation((() => {}) as never);
       });
 

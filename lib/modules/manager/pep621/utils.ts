@@ -11,6 +11,12 @@ const pep508Regex = regEx(
   /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i
 );
 
+export const depTypes = {
+  dependencies: 'project.dependencies',
+  optionalDependencies: 'project.optional-dependencies',
+  pdmDevDependencies: 'tool.pdm.dev-dependencies',
+};
+
 export function parsePEP508(
   value: string | null | undefined
 ): Pep508ParseResult | null {

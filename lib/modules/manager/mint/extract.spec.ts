@@ -3,6 +3,10 @@ import { extractPackageFile } from '.';
 
 describe('modules/manager/mint/extract', () => {
   describe('extractPackageFile()', () => {
+    it('returns null for empty', () => {
+      expect(extractPackageFile('')).toBeNull();
+    });
+
     it('Mintfile With Version Description', () => {
       const res = extractPackageFile(codeBlock`
         SwiftGen/SwiftGen@6.6.1

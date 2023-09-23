@@ -18,6 +18,6 @@ jobs:
   reaction:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/label-actions@074b96a62f35c226ecb38e840f44941bde0343a6 # v3.0.0
+      - uses: dessant/label-actions@ade7bcd4c1b30de6ba8e556cc31301fd4f79ca65 # v3.1.0
         with:
           github-token: ${{ github.token }}

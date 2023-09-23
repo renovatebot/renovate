@@ -15,24 +15,27 @@ import type {
   PackageFileContent,
   PostUpdateConfig,
 } from '../../types';
+import type { PackageJsonSchema } from '../schema';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 // Exported for testability
-export function getLernaVersion(
-  lernaPackageFile: Partial<PackageFile<NpmManagerData>>
+export function getLernaConstraint(
+  lernaPackageFile: Partial<PackageFile<NpmManagerData>>,
+  lazyPkgJson: PackageJsonSchema
 ): string | null {
-  const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
-  if (!lernaDep?.currentValue || !semver.validRange(lernaDep.currentValue)) {
+  const constraint =
+    lazyPkgJson.dependencies?.lerna ?? lazyPkgJson.devDependencies?.lerna;
+  if (!constraint || !semver.validRange(constraint)) {
     logger.warn(
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
     );
     return null;
   }
-  return lernaDep.currentValue;
+  return constraint;
 }
 
 export async function generateLockFiles(
@@ -48,18 +51,22 @@ export async function generateLockFiles(
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  const toolConstraints: ToolConstraint[] = [
-    await getNodeToolConstraint(config, [], lockFileDir),
-  ];
+
   const cmd: string[] = [];
   let cmdOptions = '';
   try {
+    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const toolConstraints: ToolConstraint[] = [
+      await getNodeToolConstraint(config, [], lockFileDir, lazyPgkJson),
+    ];
     if (lernaClient === 'yarn') {
       const yarnTool: ToolConstraint = {
         toolName: 'yarn',
         constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
       };
-      const yarnCompatibility = config.constraints?.yarn;
+      const yarnCompatibility =
+        config.constraints?.yarn ??
+        getPackageManagerVersion('yarn', await lazyPgkJson.getValue());
       if (semver.validRange(yarnCompatibility)) {
         yarnTool.constraint = yarnCompatibility;
       }
@@ -71,7 +78,9 @@ export async function generateLockFiles(
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
       const npmTool: ToolConstraint = { toolName: 'npm' };
-      const npmCompatibility = config.constraints?.npm;
+      const npmCompatibility =
+        config.constraints?.npm ??
+        getPackageManagerVersion('npm', await lazyPgkJson.getValue());
       if (semver.validRange(npmCompatibility)) {
         npmTool.constraint = npmCompatibility;
       }
@@ -105,12 +114,26 @@ export async function generateLockFiles(
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
-    const lernaVersion = getLernaVersion(lernaPackageFile);
-    logger.debug(`Using lerna version ${lernaVersion ?? 'latest'}`);
-    toolConstraints.push({ toolName: 'lerna', constraint: lernaVersion });
-    cmd.push('lerna info || echo "Ignoring lerna info failure"');
-    cmd.push(`${lernaClient} install ${cmdOptions}`);
-    cmd.push(lernaCommand);
+    const lernaConstraint =
+      config.constraints?.lerna ??
+      getLernaConstraint(lernaPackageFile, await lazyPgkJson.getValue());
+    if (
+      !is.string(lernaConstraint) ||
+      (semver.valid(lernaConstraint) &&
+        semver.gte(lernaConstraint, '7.0.0')) === true ||
+      (semver.validRange(lernaConstraint) &&
+        (semver.satisfies('7.0.0', lernaConstraint) ||
+          semver.satisfies('7.999.999', lernaConstraint)))
+    ) {
+      logger.debug('Skipping lerna bootstrap for lerna >= 7.0.0');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
+    } else {
+      logger.debug(`Using lerna version ${lernaConstraint}`);
+      toolConstraints.push({ toolName: 'lerna', constraint: lernaConstraint });
+      cmd.push('lerna info || echo "Ignoring lerna info failure"');
+      cmd.push(`${lernaClient} install ${cmdOptions}`);
+      cmd.push(lernaCommand);
+    }
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {

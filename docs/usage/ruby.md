@@ -5,7 +5,7 @@ description: Ruby Bundler support in Renovate
 
 # Automated dependency updates for Ruby Bundler dependencies
 
-Renovate supports upgrading dependencies in Bundler's Gemfiles and their accompanying `Gemfile.lock` files.
+Renovate supports upgrading dependencies in Bundler's Gemfiles and associated `Gemfile.lock` files.
 
 ## How it works
 

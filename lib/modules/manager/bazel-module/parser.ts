@@ -5,13 +5,18 @@ import type { RecordFragment } from './fragments';
 import * as starlark from './starlark';
 
 const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
-const supportedRules = ['bazel_dep'];
+const supportedRules = [
+  'archive_override',
+  'bazel_dep',
+  'git_override',
+  'local_path_override',
+  'single_version_override',
+];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
 /**
  * Matches key-value pairs:
  * - `name = "foobar"`
- * - `dev_dependeny = True`
  **/
 const kvParams = q
   .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))

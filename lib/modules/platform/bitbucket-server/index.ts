@@ -1,4 +1,4 @@
-import delay from 'delay';
+import { setTimeout } from 'timers/promises';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -37,7 +37,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { repoFingerprint } from '../util';
+import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -110,7 +110,7 @@ export async function getRepos(): Promise<string[]> {
     );
     const result = repos.map(
       (r: { project: { key: string }; slug: string }) =>
-        `${r.project.key.toLowerCase()}/${r.slug}`
+        `${r.project.key}/${r.slug}`
     );
     logger.debug({ result }, 'result of getRepos()');
     return result;
@@ -144,8 +144,8 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
-  // TODO #7154
+): Promise<any> {
+  // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -193,7 +193,7 @@ export async function initRepo({
 
     const url = utils.getRepoGitUrl(
       config.repositorySlug,
-      // TODO #7154
+      // TODO #22198
       defaults.endpoint!,
       gitUrl,
       info,
@@ -265,7 +265,7 @@ export async function getPr(
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
-  // TODO #7154
+  // TODO #22198
   pr.version = updatePrVersion(pr.number, pr.version!);
 
   return pr;
@@ -349,7 +349,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
 // istanbul ignore next
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
-  await delay(1000);
+  await setTimeout(1000);
   // refresh cache
   await getPr(number, true);
 }
@@ -362,7 +362,7 @@ async function getStatus(
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       { memCache }
     )
@@ -407,7 +407,7 @@ function getStatusCheck(
   const branchCommit = git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
     { memCache }
@@ -481,7 +481,7 @@ export async function setBranchStatus({
     }
 
     await bitbucketServerHttp.postJson(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/build-status/1.0/commits/${branchCommit!}`,
       { body }
     );
@@ -564,7 +564,7 @@ export async function addReviewers(
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    // TODO: can `reviewers` be undefined? (#7154)
+    // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
@@ -834,7 +834,7 @@ export async function createPr({
     ...utils.prInfo(prInfoRes.body),
   };
 
-  // TODO #7154
+  // TODO #22198
   updatePrVersion(pr.number, pr.version!);
 
   // istanbul ignore if
@@ -851,6 +851,7 @@ export async function updatePr({
   prBody: rawDescription,
   state,
   bitbucketInvalidReviewers,
+  targetBranch,
 }: UpdatePrConfig & {
   bitbucketInvalidReviewers: string[] | undefined;
 }): Promise<void> {
@@ -863,29 +864,32 @@ export async function updatePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
+    const body: any = {
+      title,
+      description,
+      version: pr.version,
+      reviewers: pr.reviewers
+        ?.filter((name: string) => !bitbucketInvalidReviewers?.includes(name))
+        .map((name: string) => ({ user: { name } })),
+    };
+    if (targetBranch) {
+      body.toRef = {
+        id: getNewBranchName(targetBranch),
+      };
+    }
+
     const { body: updatedPr } = await bitbucketServerHttp.putJson<{
       version: number;
       state: string;
     }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-      {
-        body: {
-          title,
-          description,
-          version: pr.version,
-          reviewers: pr.reviewers
-            ?.filter(
-              (name: string) => !bitbucketInvalidReviewers?.includes(name)
-            )
-            .map((name: string) => ({ user: { name } })),
-        },
-      }
+      { body }
     );
 
     updatePrVersion(prNo, updatedPr.version);
 
     const currentState = updatedPr.state;
-    // TODO #7154
+    // TODO #22198
     const newState = {
       ['open']: 'OPEN',
       ['closed']: 'DECLINED',
@@ -942,7 +946,7 @@ export async function mergePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/api/1.0/projects/${config.projectKey}/repos/${
         config.repositorySlug
       }/pull-requests/${prNo}/merge?version=${pr.version!}`

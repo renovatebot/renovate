@@ -38,11 +38,11 @@ export function decorate<T>(fn: Handler<T>): Decorator<T> {
   const result: Decorator<T> = (
     target,
     key,
-    /* TODO: Can descriptor be undefined ? */
-    descriptor = Object.getOwnPropertyDescriptor(target, key) ?? {
+    descriptor = {
       enumerable: true,
       configurable: true,
       writable: true,
+      ...Object.getOwnPropertyDescriptor(target, key),
     }
   ) => {
     const { value } = descriptor;

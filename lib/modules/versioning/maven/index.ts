@@ -1,4 +1,5 @@
 import type { RangeStrategy } from '../../../types/versioning';
+import { coerceString } from '../../../util/string';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   EXCLUDING_POINT,
@@ -152,7 +153,10 @@ function getNewValue({
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return newVersion;
   }
-  return autoExtendMavenRange(currentValue, newVersion) ?? currentValue;
+  return coerceString(
+    autoExtendMavenRange(currentValue, newVersion),
+    currentValue
+  );
 }
 
 export { isValid };
