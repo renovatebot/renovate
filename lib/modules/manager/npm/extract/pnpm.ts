@@ -23,7 +23,7 @@ export async function extractPnpmFilters(
   fileName: string
 ): Promise<string[] | undefined> {
   try {
-    // TODO #7154
+    // TODO #22198
     const contents = load((await readLocalFile(fileName, 'utf8'))!, {
       json: true,
     }) as PnpmWorkspaceFile;
@@ -99,7 +99,7 @@ export async function detectPnpmWorkspaces(
     }
 
     // search for corresponding pnpm workspace
-    // TODO #7154
+    // TODO #22198
     const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
     if (pnpmWorkspace === null) {
       continue;
@@ -109,7 +109,7 @@ export async function detectPnpmWorkspaces(
     // check if package matches workspace filter
     if (!packagePathCache.has(workspaceYamlPath)) {
       const filters = await extractPnpmFilters(workspaceYamlPath);
-      const { localDir } = GlobalConfig.get();
+      const localDir = GlobalConfig.get('localDir');
       const packages = await findPackages(
         upath.dirname(upath.join(localDir, workspaceYamlPath)),
         {
@@ -182,8 +182,6 @@ function getLockedVersions(
   // monorepo
   if (is.nonEmptyObject(lockParsed.importers)) {
     for (const [importer, imports] of Object.entries(lockParsed.importers)) {
-      // eslint-disable-next-line
-      console.log(imports);
       lockedVersions[importer] = getLockedDependencyVersions(imports);
     }
   }

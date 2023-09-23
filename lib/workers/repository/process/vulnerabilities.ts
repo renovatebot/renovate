@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
@@ -6,7 +6,7 @@ import { parseCvssVector } from 'vuln-vects';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getDefaultVersioning } from '../../../modules/datasource';
+import { getDefaultVersioning } from '../../../modules/datasource/common';
 import type {
   PackageDependency,
   PackageFile,
@@ -43,7 +43,6 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
   private async initialize(): Promise<void> {

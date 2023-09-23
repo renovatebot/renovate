@@ -1,7 +1,7 @@
 import { lang, lexer, parser, query as q } from 'good-enough-parser';
-import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
+import { hash } from '../../../util/hash';
 import { supportedRulesRegex } from './rules';
 import type { NestedFragment, RecordFragment } from './types';
 
@@ -261,7 +261,7 @@ function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
 /**
  * Matches regular rules:
  * - `git_repository(...)`
- * - `go_repository(...)`
+ * - `_go_repository(...)`
  */
 const regularRule = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) =>
@@ -272,7 +272,7 @@ const regularRule = q
 /**
  * Matches "maybe"-form rules:
  * - `maybe(git_repository, ...)`
- * - `maybe(go_repository, ...)`
+ * - `maybe(_go_repository, ...)`
  */
 const maybeRule = q
   .sym<Ctx>('maybe', recordStartHandler)
@@ -294,8 +294,8 @@ const query = q.tree<Ctx>({
 });
 
 function getCacheKey(input: string): string {
-  const hash = hasha(input);
-  return `bazel-parser-${hash}`;
+  const hashedInput = hash(input);
+  return `bazel-parser-${hashedInput}`;
 }
 
 const starlark = lang.createLang('starlark');

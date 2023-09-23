@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { REPOSITORY_CHANGED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
@@ -9,15 +9,18 @@ export async function prAlreadyExisted(
 ): Promise<Pr | null> {
   logger.trace({ config }, 'prAlreadyExisted');
   if (config.recreateClosed) {
-    logger.debug('recreateClosed is true');
+    logger.debug('recreateClosed is true. No need to check for closed PR.');
     return null;
   }
-  logger.debug('recreateClosed is false');
+  logger.debug(
+    'Check for closed PR because recreating closed PRs is disabled.'
+  );
   // Return if same PR already existed
   let pr = await platform.findPr({
     branchName: config.branchName,
     prTitle: config.prTitle,
     state: '!open',
+    targetBranch: config.baseBranch,
   });
 
   if (!pr && config.branchPrefix !== config.branchPrefixOld) {
@@ -28,6 +31,7 @@ export async function prAlreadyExisted(
       ),
       prTitle: config.prTitle,
       state: '!open',
+      targetBranch: config.baseBranch,
     });
     if (pr) {
       logger.debug('Found closed PR with branchPrefixOld');

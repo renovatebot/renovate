@@ -1,10 +1,4 @@
-import {
-  getConfig,
-  git,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';
@@ -19,8 +13,9 @@ describe('workers/repository/update/branch/automerge', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = getConfig();
+      config = partial<RenovateConfig>();
       GlobalConfig.reset();
+      isScheduledSpy.mockReturnValue(true);
     });
 
     it('returns false if not configured for automerge', async () => {
@@ -70,7 +65,7 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automergeType = 'branch';
       config.baseBranch = 'test-branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
-      git.mergeBranch.mockImplementationOnce(() => {
+      scm.mergeAndPush.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
 

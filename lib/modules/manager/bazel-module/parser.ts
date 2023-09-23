@@ -10,6 +10,7 @@ const supportedRules = [
   'bazel_dep',
   'git_override',
   'local_path_override',
+  'single_version_override',
 ];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 

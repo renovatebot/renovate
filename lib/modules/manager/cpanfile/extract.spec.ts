@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/cpanfile/extract', () => {
   describe('extractPackageFile()', () => {

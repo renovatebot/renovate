@@ -2,20 +2,18 @@ import { bootstrap } from '../../proxy';
 import * as hostRules from '../host-rules';
 import { dnsLookup } from './dns';
 import { applyHostRules } from './host-rules';
+import type { GotOptions } from './types';
 
 const url = 'https://github.com';
 
 jest.mock('global-agent');
 
 describe('util/http/host-rules', () => {
-  const options = {
+  const options: GotOptions = {
     hostType: 'github',
   };
 
   beforeEach(() => {
-    // reset module
-    jest.resetAllMocks();
-
     delete process.env.HTTP_PROXY;
 
     // clean up hostRules
@@ -143,6 +141,71 @@ describe('util/http/host-rules', () => {
       {
         "hostType": "github",
         "noAuth": true,
+      }
+    `);
+  });
+
+  it('certificateAuthority', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.ca',
+      httpsCertificateAuthority: 'ca-cert',
+    });
+
+    expect(
+      applyHostRules('https://custom.datasource.ca/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "certificateAuthority": "ca-cert",
+        },
+      }
+    `);
+  });
+
+  it('privateKey', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.key',
+      httpsPrivateKey: 'key',
+    });
+    expect(
+      applyHostRules('https://custom.datasource.key/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "key": "key",
+        },
+      }
+    `);
+  });
+
+  it('certificate', () => {
+    hostRules.add({
+      hostType: 'maven',
+      matchHost: 'https://custom.datasource.cert',
+      httpsCertificate: 'cert',
+    });
+
+    expect(
+      applyHostRules('https://custom.datasource.cert/data/path', {
+        ...options,
+        hostType: 'maven',
+      })
+    ).toMatchInlineSnapshot(`
+      {
+        "hostType": "maven",
+        "https": {
+          "certificate": "cert",
+        },
       }
     `);
   });
@@ -332,5 +395,31 @@ describe('util/http/host-rules', () => {
       hostType: 'bitbucket-tags',
       token: 'cdef',
     });
+  });
+
+  it('no fallback to gitea', () => {
+    hostRules.add({
+      hostType: 'gitea-tags',
+      token: 'abc',
+    });
+    expect(applyHostRules(url, { ...options, hostType: 'gitea-tags' })).toEqual(
+      {
+        context: {
+          authType: undefined,
+        },
+        hostType: 'gitea-tags',
+        token: 'abc',
+      }
+    );
+  });
+
+  it('fallback to gitea', () => {
+    expect(applyHostRules(url, { ...options, hostType: 'gitea-tags' })).toEqual(
+      {
+        hostType: 'gitea-tags',
+        password: 'password',
+        username: undefined,
+      }
+    );
   });
 });

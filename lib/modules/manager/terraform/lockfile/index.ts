@@ -28,7 +28,6 @@ async function updateAllLocks(
         packageName: lock.packageName,
       };
       const { releases } = (await getPkgReleases(updateConfig)) ?? {};
-      // istanbul ignore if: needs test
       if (!releases) {
         return null;
       }
@@ -95,7 +94,7 @@ export async function updateArtifacts({
       updates.push(...maintenanceUpdates);
     } else {
       const providerDeps = updatedDeps.filter((dep) =>
-        // TODO #7154
+        // TODO #22198
         ['provider', 'required_provider'].includes(dep.depType!)
       );
       for (const dep of providerDeps) {
@@ -114,7 +113,7 @@ export async function updateArtifacts({
           continue;
         }
         const update: ProviderLockUpdate = {
-          // TODO #7154
+          // TODO #22198
           newVersion: newVersion!,
           newConstraint: newConstraint!,
           newHashes:

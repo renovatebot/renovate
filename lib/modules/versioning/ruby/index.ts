@@ -141,7 +141,7 @@ const getNewValue = ({
         break;
       // istanbul ignore next
       default:
-        logger.warn(`Unsupported strategy ${rangeStrategy}`);
+        logger.warn({ rangeStrategy }, 'Unsupported range strategy');
     }
   }
   if (newValue && regEx(/^('|")/).exec(currentValue)) {

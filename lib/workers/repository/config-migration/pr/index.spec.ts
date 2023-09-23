@@ -4,11 +4,11 @@ import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   partial,
   platform,
   scm,
 } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -37,7 +37,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     GlobalConfig.set({
       dryRun: null,
     });
-    jest.resetAllMocks();
+
     config = {
       ...getConfig(),
       configMigration: true,
@@ -251,7 +251,6 @@ describe('workers/repository/config-migration/pr/index', () => {
     const err = partial<RequestError>({ response });
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       scm.deleteBranch.mockResolvedValue();
     });

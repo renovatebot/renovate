@@ -10,10 +10,6 @@ describe('workers/repository/update/pr/body/config-description', () => {
       upgrades: [],
     };
 
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('renders stopUpdating=true', () => {
       const res = getPrConfigDescription({
         ...config,
@@ -67,12 +63,25 @@ describe('workers/repository/update/pr/body/config-description', () => {
       expect(res).toContain(`At any time (no schedule defined).`);
     });
 
-    it('renders recreateClosed', () => {
+    it('renders recreateClosed=true', () => {
       const res = getPrConfigDescription({
         ...config,
         recreateClosed: true,
       });
       expect(res).toContain(`**Immortal**`);
+    });
+
+    it('does not render recreateClosed=false', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        recreateClosed: false,
+      });
+      expect(res).not.toContain(`**Immortal**`);
+    });
+
+    it('does not render recreateClosed=undefined', () => {
+      const res = getPrConfigDescription(config);
+      expect(res).not.toContain(`**Immortal**`);
     });
 
     it('renders singular', () => {

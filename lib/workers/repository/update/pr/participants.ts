@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
-import { sampleSize } from '../../../../util';
+import { sampleSize } from '../../../../util/sample';
 import { codeOwnersForPr } from './code-owners';
 
 async function addCodeOwners(

@@ -84,13 +84,19 @@ async function getFileHash(filePath) {
 /**
  *
  * @param {string} managerName
+ * @param {boolean} isCustomManager
  * @returns {Promise<string>}
  */
-export async function getManagerHash(managerName) {
+export async function getManagerHash(managerName, isCustomManager) {
   /** @type {string[]} */
   let hashes = [];
-  const files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
-    (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+  let folderPattern = `lib/modules/manager/${managerName}/**`;
+  if (isCustomManager) {
+    folderPattern = `lib/modules/manager/custom/${managerName}/**`;
+  }
+
+  const files = (await glob(folderPattern)).filter((fileName) =>
+    minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
   );
 
   // sort files in case glob order changes
@@ -142,29 +148,41 @@ async function generateHash() {
   console.log('generating hashes');
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
-    /** @type {string[]} */
+    /** @type {Record<string, string>[]} */
     let hashes = [];
     // get managers list
     const managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })
     )
       .filter((file) => file.isDirectory())
+      .map((file) => file.name)
+      .filter((mgr) => mgr !== 'custom');
+
+    const customManagers = (
+      await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
+    )
+      .filter((file) => file.isDirectory())
       .map((file) => file.name);
 
     for (const manager of managers) {
-      const hash = await getManagerHash(manager);
-      hashes.push(hash);
+      const hash = await getManagerHash(manager, false);
+      hashes.push({ manager, hash });
+    }
+
+    for (const manager of customManagers) {
+      const hash = await getManagerHash(manager, true);
+      hashes.push({ manager, hash });
     }
 
     //add manager hashes to hashMap {key->manager, value->hash}
-    hashes = (await Promise.all(hashes)).map(
-      (hash, index) => `hashMap.set('${managers[index]}','${hash}');`
+    const hashStrings = (await Promise.all(hashes)).map(
+      ({ manager, hash }) => `hashMap.set('${manager}','${hash}');`
     );
 
     //write hashMap to fingerprint.generated.ts
     await updateFile(
       'lib/modules/manager/fingerprint.generated.ts',
-      [hashMap, hashes.join('\n')].join('\n\n')
+      [hashMap, hashStrings.join('\n')].join('\n\n')
     );
   } catch (err) {
     console.log('ERROR:', err.message);

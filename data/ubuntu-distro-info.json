@@ -279,5 +279,12 @@
     "created": "2022-10-20",
     "release": "2023-04-20",
     "eol": "2024-01-25"
+  },
+  "v23.10": {
+    "codename": "Mantic Minotaur",
+    "series": "mantic",
+    "created": "2023-04-20",
+    "release": "2023-10-12",
+    "eol": "2024-07-11"
   }
 }

@@ -128,7 +128,7 @@ And worse still, npm package versions that are less than 24 hours [can be unpubl
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
-- Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
+- Update daily, but between midnight and 5am? This way developers aren't bothered by notifications when they're working, _and_ you're keeping the build machines free for the developers
 
 To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 
@@ -194,7 +194,7 @@ e.g. are you interested in a Renovate feature where you get a lockfile-only PR a
 
 A good argument made by [@LinusU](https://github.com/LinusU) is:
 
-> pinning will only protect you against breakage in a, in many cases, small percentage of your packages. If you for example have installed express and pinned it, you will only protect yourself against a bad express release, it will not help with the 30 dependencies that express has.
+> Pinning will only protect you against breakage in a, in many cases, small percentage of your packages. If you for example have installed Express and pinned it, you will only protect yourself against a bad Express release, it will not help with the 30 dependencies that Express has.
 >
 > Because of this, I personally think that pinning dependencies just creates a false sense of security, and that using a lock file is superior in every way.
 

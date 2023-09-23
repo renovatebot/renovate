@@ -111,7 +111,7 @@ Renovate will use those credentials for all requests to `org/repo`.
 
 #### Example for gomod
 
-Here's an example for `gomod` with private github.com repos.
+Here's an example for `gomod` with private `github.com` repos.
 Assume this config is used on the `github.com/some-other-org` repo:
 
 ```json
@@ -150,7 +150,7 @@ When Renovate creates Pull Requests, its default behavior is to locate and embed
 These release notes are fetched from the source repository of packages and not from the registries themselves, so if they are private then they will require different credentials.
 
 When it comes to open source, most packages host their source on `github.com` in public repositories.
-GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for github.com or the bot will get rate limited quickly.
+GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
 It can be confusing for people who host their own source code privately to be asked to configure a `github.com` token but without it Release Notes for most open source packages will be blocked.
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
@@ -230,8 +230,8 @@ If you need to configure per-repository credentials then you can also configure 
 The recommended approaches in order of preference are:
 
 1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
-1. **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
-1. **Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
+1. **The Mend Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
+1. **The Mend Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
 
 These approaches are described in full below.
 
@@ -476,9 +476,9 @@ module.exports = {
 };
 ```
 
-## Mend Renovate Hosted App Encryption
+## Encryption and the Mend Renovate App
 
-The popular [Renovate App on GitHub](https://github.com/apps/renovate) is hosted by Mend.
+Many users use [the Mend Renovate App](https://github.com/apps/renovate), which is hosted by Mend.
 If you are a user of this app, and have private modules, then the following is applicable.
 
 ### Private presets with public repositories
@@ -494,7 +494,7 @@ The solution to this is that you should break your presets into public and priva
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
 The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
-If you need to provide credentials to the hosted Renovate App, please do this:
+If you need to provide credentials to the Mend Renovate App, please do this:
 
 - Encrypt each secret string using <https://app.renovatebot.com/encrypt>. Note: this encrypts using the app's public key fully in the browser and does not send the original secret to any server. You can download this file and perform the encryption fully offline if you like.
 - Wrap each secret field in an [encrypted](../configuration-options.md#encrypted) object and paste in the encrypted secret value instead. An example is shown below:

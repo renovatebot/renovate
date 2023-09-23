@@ -16,7 +16,12 @@ import type { StatusResult } from '../../../util/git/types';
 import { Http } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
 import { replaceAt } from '../../../util/string';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 import {
   extraEnv,
   getJavaConstraint,
@@ -107,6 +112,24 @@ export async function updateBuildFile(
   return buildFileName;
 }
 
+export async function updateLockFiles(
+  buildFileName: string,
+  config: UpdateArtifactsConfig
+): Promise<UpdateArtifactsResult[] | null> {
+  const buildFileContent = await readLocalFile(buildFileName, 'utf8');
+  if (!buildFileContent) {
+    logger.debug('build.gradle or build.gradle.kts not found');
+    return null;
+  }
+
+  return await gradleUpdateArtifacts({
+    packageFileName: buildFileName,
+    updatedDeps: [],
+    newPackageFileContent: buildFileContent,
+    config,
+  });
+}
+
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -175,6 +198,7 @@ export async function updateArtifacts({
       distributionSha256Sum: checksum,
       distributionUrl,
     });
+    const lockFiles = await updateLockFiles(buildFileName, config);
 
     const status = await getRepoStatus();
     const artifactFileNames = [
@@ -191,6 +215,10 @@ export async function updateArtifacts({
         )
       )
     ).filter(is.truthy);
+    if (lockFiles) {
+      updateArtifactsResult.push(...lockFiles);
+    }
+
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
       `Returning updated gradle-wrapper files`

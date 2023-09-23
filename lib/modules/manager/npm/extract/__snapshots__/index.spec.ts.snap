@@ -131,7 +131,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
     "npm": "^8.0.0",
     "pnpm": "^1.2.0",
     "vscode": ">=1.49.3",
-    "yarn": "disabled",
   },
   "managerData": {
     "hasPackageManager": false,
@@ -453,8 +452,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
       "prettyDepType": "volta",
     },
     {
+      "commitMessageTopic": "pnpm",
       "currentValue": "6.11.2",
+      "datasource": "npm",
       "depName": "pnpm",
+      "depType": "volta",
+      "prettyDepType": "volta",
+    },
+    {
+      "currentValue": "1.0.0",
+      "depName": "invalid",
       "depType": "volta",
       "prettyDepType": "volta",
       "skipReason": "unknown-volta",

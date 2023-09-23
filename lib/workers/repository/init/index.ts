@@ -3,6 +3,7 @@ import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
+import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
@@ -14,7 +15,7 @@ import { detectVulnerabilityAlerts } from './vulnerability';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
   return {
-    ...structuredClone(config),
+    ...clone(config),
     errors: [],
     warnings: [],
     branchList: [],
@@ -23,7 +24,7 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     logger.warn(
       `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`

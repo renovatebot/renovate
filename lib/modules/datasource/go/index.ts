@@ -3,6 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
+import { id as semverId } from '../../versioning/semver';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
@@ -16,9 +17,15 @@ import { GoProxyDatasource } from './releases-goproxy';
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
 
+  override readonly defaultVersioning = semverId;
+
   constructor() {
     super(GoDatasource.id);
   }
+
+  override readonly defaultConfig = {
+    commitMessageTopic: 'module {{depName}}',
+  };
 
   override readonly customRegistrySupport = false;
 
@@ -31,8 +38,7 @@ export class GoDatasource extends Datasource {
   );
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -71,16 +77,16 @@ export class GoDatasource extends Datasource {
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {
-        return this.direct.git.getDigest?.(source, tag) ?? null;
+        return this.direct.git.getDigest(source, tag);
       }
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
       case BitbucketTagsDatasource.id: {
-        return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
+        return this.direct.bitbucket.getDigest(source, tag);
       }
       case GitlabTagsDatasource.id: {
-        return this.direct.gitlab.getDigest?.(source, tag) ?? null;
+        return this.direct.gitlab.getDigest(source, tag);
       }
       /* istanbul ignore next: can never happen, makes lint happy */
       default: {

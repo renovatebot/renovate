@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../test/util';
+import { RenovateConfig, partial } from '../../../test/util';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -36,8 +36,7 @@ jest.mock('./error-config');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  config = getConfig();
+  config = partial<RenovateConfig>({ branchList: [] });
 });
 
 describe('workers/repository/error', () => {

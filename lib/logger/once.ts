@@ -8,7 +8,7 @@ type OmitFn = (...args: any[]) => any;
  *
  * @example getCallSite() // => 'Object.<anonymous> (/path/to/file.js:10:15)'
  */
-function getCallSite(omitFn: OmitFn = getCallSite): string | null {
+function getCallSite(omitFn: OmitFn): string | null {
   const stackTraceLimitOrig = Error.stackTraceLimit;
   const prepareStackTraceOrig = Error.prepareStackTrace;
 

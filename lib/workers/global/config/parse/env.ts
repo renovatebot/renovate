@@ -53,10 +53,41 @@ function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
+const migratedKeysWithValues = [
+  {
+    oldName: 'recreateClosed',
+    newName: 'recreateWhen',
+    from: 'true',
+    to: 'always',
+  },
+  {
+    oldName: 'recreateClosed',
+    newName: 'recreateWhen',
+    from: 'false',
+    to: 'auto',
+  },
+];
+
+function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const { oldName, newName, from, to } of migratedKeysWithValues) {
+    const key = getEnvName({ name: oldName });
+    if (env[key] !== undefined) {
+      if (result[key] === from) {
+        delete result[key];
+        result[getEnvName({ name: newName })] = to;
+      }
+    }
+  }
+  return result;
+}
+
 export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
   env = renameEnvKeys(env);
+  // massage the values of migrated configuration keys
+  env = massageEnvKeyValues(env);
 
   const options = getOptions();
 
@@ -133,18 +164,12 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   });
 
   if (env.GITHUB_COM_TOKEN) {
-    if (env.GITHUB_COM_TOKEN.startsWith('github_pat_')) {
-      logger.warn(
-        'GITHUB_COM_TOKEN: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API. Use a classic PAT instead.'
-      );
-    } else {
-      logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
-      config.hostRules.push({
-        hostType: 'github',
-        matchHost: 'github.com',
-        token: env.GITHUB_COM_TOKEN,
-      });
-    }
+    logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
+    config.hostRules.push({
+      hostType: 'github',
+      matchHost: 'github.com',
+      token: env.GITHUB_COM_TOKEN,
+    });
   }
 
   // These env vars are deprecated and deleted to make sure they're not used
