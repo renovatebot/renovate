@@ -1,5 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -17,14 +18,16 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateBuildFile } from './artifacts';
+import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
+import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
+import { updateBuildFile, updateLockFiles } from './artifacts';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
+jest.mock('../gradle');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -179,7 +182,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           modified: ['gradle/wrapper/gradle-wrapper.properties'],
         })
       );
-      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+      });
 
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -198,7 +205,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull containerbase/sidecar' },
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
@@ -206,10 +213,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e GRADLE_OPTS ' +
-            '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
-            'containerbase/sidecar' +
+            'ghcr.io/containerbase/sidecar' +
             ' bash -l -c "' +
             'install-tool java 11.0.1' +
             ' && ' +
@@ -409,6 +415,52 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         'build.gradle or build.gradle.kts not found'
       );
       expect(res).toBe('build.gradle.kts');
+    });
+  });
+
+  describe('updateLockFiles()', () => {
+    it('returns early if build script file not found', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const res = await updateLockFiles('', {});
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'build.gradle or build.gradle.kts not found'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('includes gradle lockfile in result', async () => {
+      const execSnapshots = mockExecAll();
+      const updatedArtifacts: UpdateArtifactsResult[] = [
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle.lockfile',
+            contents: 'test',
+          },
+        },
+      ];
+      mockedFunction(gradleUpdateArtifacts).mockResolvedValue(updatedArtifacts);
+
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['gradle.lockfile'],
+        })
+      );
+
+      const res = await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: { ...config, newValue: '8.2' },
+      });
+
+      expect(res).toStrictEqual(updatedArtifacts);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew wrapper --gradle-version 8.2',
+        },
+      ]);
     });
   });
 });

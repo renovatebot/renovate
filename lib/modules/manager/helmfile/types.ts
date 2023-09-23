@@ -1,19 +1,16 @@
-export interface Release {
-  name: string;
-  chart: string;
-  version: string;
-  strategicMergePatches?: unknown;
-  jsonPatches?: unknown;
-  transformers?: unknown;
-}
+import type { z } from 'zod';
 
-interface Repository {
-  name: string;
-  url: string;
-  oci?: boolean;
-}
+import type {
+  DocSchema,
+  LockSchema,
+  ReleaseSchema,
+  RepositorySchema,
+} from './schema';
 
-export interface Doc {
-  releases?: Release[];
-  repositories?: Repository[];
-}
+export type Release = z.infer<typeof ReleaseSchema>;
+
+export type Repository = z.infer<typeof RepositorySchema>;
+
+export type Doc = z.infer<typeof DocSchema>;
+
+export type Lock = z.infer<typeof LockSchema>;

@@ -1,9 +1,10 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import * as allVersioning from '../../../../../modules/versioning';
 import { detectPlatform } from '../../../../../util/common';
 import type { BranchUpgradeConfig } from '../../../../types';
-import * as sourceGithub from './source-github';
-import * as sourceGitlab from './source-gitlab';
+import api from './api';
+import type { ChangeLogSource } from './source';
 import type { ChangeLogResult } from './types';
 
 export * from './types';
@@ -26,29 +27,35 @@ export async function getChangeLogJSON(
       `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${newVersion})`
     );
 
-    let res: ChangeLogResult | null = null;
-
     const platform = detectPlatform(sourceUrl);
 
-    switch (platform) {
-      case 'gitlab':
-        res = await sourceGitlab.getChangeLogJSON(config);
-        break;
-      case 'github':
-        res = await sourceGithub.getChangeLogJSON(config);
-        break;
-
-      default:
-        logger.info(
-          { sourceUrl, hostType: platform },
-          'Unknown platform, skipping changelog fetching.'
-        );
-        break;
+    if (is.nullOrUndefined(platform)) {
+      logger.info(
+        { sourceUrl, hostType: platform },
+        'Unknown platform, skipping changelog fetching.'
+      );
+      return null;
     }
 
-    return res;
+    const changeLogSource = getChangeLogSourceFor(platform);
+
+    if (is.nullOrUndefined(changeLogSource)) {
+      logger.info(
+        { sourceUrl, hostType: platform },
+        'Unknown changelog source, skipping changelog fetching.'
+      );
+      return null;
+    }
+
+    return await changeLogSource.getChangeLogJSON(config);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ config, err }, 'getChangeLogJSON error');
     return null;
   }
+}
+
+export function getChangeLogSourceFor(
+  platform: string
+): ChangeLogSource | null {
+  return api.get(platform) ?? null;
 }

@@ -11,6 +11,7 @@ export function defaultConfigFile(config: RenovateConfig): string {
 
 export class OnboardingState {
   private static readonly cacheKey = 'OnboardingState';
+  private static readonly skipKey = 'OnboardingStateValid';
 
   static get prUpdateRequested(): boolean {
     const updateRequested = !!memCache.get<boolean | undefined>(
@@ -26,5 +27,21 @@ export class OnboardingState {
   static set prUpdateRequested(value: boolean) {
     logger.trace({ value }, 'Set OnboardingState.prUpdateRequested');
     memCache.set(OnboardingState.cacheKey, value);
+  }
+
+  static get onboardingCacheValid(): boolean {
+    const cacheValid = !!memCache.get<boolean | undefined>(
+      OnboardingState.skipKey
+    );
+    logger.trace(
+      { value: cacheValid },
+      'Get OnboardingState.onboardingCacheValid'
+    );
+    return cacheValid;
+  }
+
+  static set onboardingCacheValid(value: boolean) {
+    logger.trace({ value }, 'Set OnboardingState.onboardingCacheValid');
+    memCache.set(OnboardingState.skipKey, value);
   }
 }

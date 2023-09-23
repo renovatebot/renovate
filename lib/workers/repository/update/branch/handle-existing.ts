@@ -16,7 +16,7 @@ export async function handleClosedPr(
 ): Promise<void> {
   if (pr.state === 'closed') {
     let content;
-    // TODO #7154
+    // TODO #22198
     const userStrings = config.userStrings!;
     if (config.updateType === 'major') {
       content = template.compile(userStrings.ignoreMajor, config);
@@ -67,7 +67,7 @@ export async function handleModifiedPr(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
 
-  if (dependencyDashboardCheck || config.rebaseRequested) {
+  if (!!dependencyDashboardCheck || config.rebaseRequested) {
     logger.debug('Manual rebase has been requested for PR');
     if (GlobalConfig.get('dryRun')) {
       logger.info(

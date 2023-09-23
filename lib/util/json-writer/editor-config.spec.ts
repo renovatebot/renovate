@@ -5,16 +5,18 @@ import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 
 // use real fs to read wasm files for `@one-ini/wasm`
-jest.mock('fs', () => ({
-  ...memfs,
-  readFileSync: (file: string, ...args: any[]) => {
-    if (file.endsWith('.wasm')) {
-      const realFs = jest.requireActual<typeof import('fs')>('fs');
-      return realFs.readFileSync(file, ...args);
-    }
-    return memfs.readFileSync(file, ...args);
-  },
-}));
+jest.mock('fs', () => {
+  const realFs = jest.requireActual<typeof import('fs')>('fs');
+  return {
+    ...memfs,
+    readFileSync: (file: string, ...args: any[]) => {
+      if (file.endsWith('.wasm')) {
+        return realFs.readFileSync(file, ...args);
+      }
+      return memfs.readFileSync(file, ...args);
+    },
+  };
+});
 
 const defaultConfigFile = configFileNames[0];
 
@@ -26,6 +28,7 @@ describe('util/json-writer/editor-config', () => {
   });
 
   beforeEach(() => {
+    jest.restoreAllMocks();
     Fixtures.reset();
   });
 

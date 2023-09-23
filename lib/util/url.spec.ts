@@ -90,6 +90,7 @@ describe('util/url', () => {
     ${'http://foo.io'}      | ${'aaa/?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
   `('replaceUrlPath("$baseUrl", "$x") => $result', ({ baseUrl, x, result }) => {
     expect(replaceUrlPath(baseUrl, x)).toBe(result);
+    expect(replaceUrlPath(new URL(baseUrl), x)).toBe(result);
   });
 
   it('getQueryString', () => {

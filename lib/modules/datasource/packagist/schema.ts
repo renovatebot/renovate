@@ -189,8 +189,9 @@ export const PackagistFile = PackagesResponse.merge(
 export type PackagistFile = z.infer<typeof PackagistFile>;
 
 export const RegistryMeta = z
-  .preprocess(
-    (x) => (is.plainObject(x) ? x : {}),
+  .record(z.unknown())
+  .catch({})
+  .pipe(
     PackagistFile.merge(
       z.object({
         ['includes']: LooseRecord(HashSpec)
@@ -206,6 +207,7 @@ export const RegistryMeta = z
         ['providers-lazy-url']: z.string().nullable().catch(null),
         ['providers-url']: z.string().nullable().catch(null),
         ['metadata-url']: z.string().nullable().catch(null),
+        ['available-packages']: z.array(z.string()).nullable().catch(null),
       })
     )
   )
@@ -218,6 +220,7 @@ export const RegistryMeta = z
       ['providers-lazy-url']: providersLazyUrl,
       ['providers-url']: providersUrl,
       ['metadata-url']: metadataUrl,
+      ['available-packages']: availablePackages,
     }) => ({
       packages,
       includesFiles,
@@ -227,6 +230,7 @@ export const RegistryMeta = z
       providersLazyUrl,
       metadataUrl,
       includesPackages: {} as Record<string, ReleaseResult | null>,
+      availablePackages,
     })
   );
 export type RegistryMeta = z.infer<typeof RegistryMeta>;

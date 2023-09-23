@@ -1,4 +1,5 @@
 import { lexer, parser, query as q } from 'good-enough-parser';
+import { clone } from '../../../../util/clone';
 import { regEx } from '../../../../util/regex';
 import type {
   Ctx,
@@ -51,7 +52,7 @@ export function reduceNestingDepth(ctx: Ctx): Ctx {
 }
 
 export function prependNestingDepth(ctx: Ctx): Ctx {
-  ctx.varTokens = [...structuredClone(ctx.tmpNestingDepth), ...ctx.varTokens];
+  ctx.varTokens = [...clone(ctx.tmpNestingDepth), ...ctx.varTokens];
   return ctx;
 }
 

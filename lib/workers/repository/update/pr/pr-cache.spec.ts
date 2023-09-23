@@ -57,11 +57,39 @@ describe('workers/repository/update/pr/pr-cache', () => {
       );
     });
 
-    it('set prCache', () => {
+    it('updates cache', () => {
       cache.getCache.mockReturnValue(dummyCache);
       jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
       setPrCache('branch_name', 'fingerprint_hash', true);
       expect(dummyCache).toStrictEqual({
+        branches: [
+          {
+            ...branchCache,
+            prCache: {
+              bodyFingerprint: 'fingerprint_hash',
+              lastEdited: new Date('2020-01-01').toISOString(),
+            },
+          },
+        ],
+      });
+    });
+
+    it('does not update details if pr not modified', () => {
+      const dummyCache2 = {
+        branches: [
+          {
+            ...branchCache,
+            prCache: {
+              bodyFingerprint: 'fingerprint_hash',
+              lastEdited: new Date('2020-01-01').toISOString(),
+            },
+          },
+        ],
+      };
+      cache.getCache.mockReturnValue(dummyCache);
+      jest.useFakeTimers().setSystemTime(new Date('2020-01-02'));
+      setPrCache('branch_name', 'fingerprint_hash', false);
+      expect(dummyCache2).toStrictEqual({
         branches: [
           {
             ...branchCache,

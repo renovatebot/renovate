@@ -1,8 +1,6 @@
-import { afterAll } from '@jest/globals';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';
-import { MultiSpanProcessor } from '@opentelemetry/sdk-trace-base/build/src/MultiSpanProcessor';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import {
   disableInstrumentations,
@@ -43,9 +41,9 @@ describe('instrumentation/index', () => {
     const delegateProvider = proxyProvider.getDelegate();
     expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
     const nodeProvider = delegateProvider as NodeTracerProvider;
-    const provider = nodeProvider.getActiveSpanProcessor();
-    expect(provider).toBeInstanceOf(MultiSpanProcessor);
-    expect(provider).toMatchSnapshot();
+    expect(nodeProvider).toMatchObject({
+      _registeredSpanProcessors: [{ _exporter: {} }],
+    });
   });
 
   it('activate remote logger', () => {
@@ -58,9 +56,15 @@ describe('instrumentation/index', () => {
     const delegateProvider = proxyProvider.getDelegate();
     expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
     const nodeProvider = delegateProvider as NodeTracerProvider;
-    const provider = nodeProvider.getActiveSpanProcessor();
-    expect(provider).toBeInstanceOf(MultiSpanProcessor);
-    expect(provider).toMatchSnapshot();
+    expect(nodeProvider).toMatchObject({
+      _registeredSpanProcessors: [
+        {
+          _exporter: {
+            url: 'https://collector.example.com/v1/traces',
+          },
+        },
+      ],
+    });
   });
 
   it('activate console logger and remote logger', () => {
@@ -74,9 +78,16 @@ describe('instrumentation/index', () => {
     const delegateProvider = proxyProvider.getDelegate();
     expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
     const nodeProvider = delegateProvider as NodeTracerProvider;
-    const provider = nodeProvider.getActiveSpanProcessor();
-    expect(provider).toBeInstanceOf(MultiSpanProcessor);
-    expect(provider).toMatchSnapshot();
+    expect(nodeProvider).toMatchObject({
+      _registeredSpanProcessors: [
+        { _exporter: {} },
+        {
+          _exporter: {
+            url: 'https://collector.example.com/v1/traces',
+          },
+        },
+      ],
+    });
   });
 
   describe('instrument', () => {

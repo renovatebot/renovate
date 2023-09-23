@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { regexMatches } from '../../../../test/util';
-import { extractPackageFile } from '../../../modules/manager/regex';
+import { extractPackageFile } from '../../../modules/manager/custom/regex';
 import { presets } from './regex-managers';
 
 describe('config/presets/internal/regex-managers', () => {
@@ -19,6 +19,9 @@ describe('config/presets/internal/regex-managers', () => {
 
         # renovate: datasource=npm depName=yarn
         ENV YARN_VERSION 3.3.1
+
+        # renovate: datasource=custom.hashicorp depName=consul
+        ENV CONSUL_VERSION 1.3.1
 
         RUN echo "FOO"
       `;
@@ -51,6 +54,13 @@ describe('config/presets/internal/regex-managers', () => {
           depName: 'yarn',
           replaceString:
             '# renovate: datasource=npm depName=yarn\nENV YARN_VERSION 3.3.1\n',
+        },
+        {
+          currentValue: '1.3.1',
+          datasource: 'custom.hashicorp',
+          depName: 'consul',
+          replaceString:
+            '# renovate: datasource=custom.hashicorp depName=consul\nENV CONSUL_VERSION 1.3.1\n',
         },
       ]);
     });
@@ -88,6 +98,8 @@ describe('config/presets/internal/regex-managers', () => {
           PNPM_VERSION: "7.25.1"
           # renovate: datasource=npm depName=yarn
           YARN_VERSION: '3.3.1'
+          # renovate: datasource=custom.hashicorp depName=consul
+          CONSUL_VERSION: 1.3.1
 
         jobs:
           lint:
@@ -129,6 +141,13 @@ describe('config/presets/internal/regex-managers', () => {
           depName: 'yarn',
           replaceString:
             "# renovate: datasource=npm depName=yarn\n  YARN_VERSION: '3.3.1'\n",
+        },
+        {
+          currentValue: '1.3.1',
+          datasource: 'custom.hashicorp',
+          depName: 'consul',
+          replaceString:
+            '# renovate: datasource=custom.hashicorp depName=consul\n  CONSUL_VERSION: 1.3.1\n',
         },
       ]);
     });
@@ -211,6 +230,54 @@ describe('config/presets/internal/regex-managers', () => {
       `('$path', ({ path, expected }) => {
         expect(regexMatches(path, regexManager!.fileMatch)).toBe(expected);
       });
+    });
+  });
+
+  describe('finds dependencies in pom.xml properties', () => {
+    const regexManager = presets['mavenPropertyVersions'].regexManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        <!-- renovate: depName=org.ow2.asm:asm -->
+        <asm.version>9.3</asm.version>
+
+        <!--renovate: depName=org.codehaus.groovy:groovy versioning=semver -->
+        <groovy.version>4.0.10</groovy.version>
+
+        <!-- renovate: datasource=docker depName=mongo -->
+        <mongo.container.version>4.4.6</mongo.container.version>        
+      `;
+
+      const res = await extractPackageFile(
+        fileContent,
+        'pom.xml',
+        regexManager!
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '9.3',
+          datasource: 'maven',
+          depName: 'org.ow2.asm:asm',
+          replaceString:
+            '<!-- renovate: depName=org.ow2.asm:asm -->\n<asm.version>9.3</asm.version>',
+        },
+        {
+          currentValue: '4.0.10',
+          datasource: 'maven',
+          depName: 'org.codehaus.groovy:groovy',
+          replaceString:
+            '<!--renovate: depName=org.codehaus.groovy:groovy versioning=semver -->\n<groovy.version>4.0.10</groovy.version>',
+          versioning: 'semver',
+        },
+        {
+          currentValue: '4.4.6',
+          datasource: 'docker',
+          depName: 'mongo',
+          replaceString:
+            '<!-- renovate: datasource=docker depName=mongo -->\n<mongo.container.version>4.4.6</mongo.container.version>',
+        },
+      ]);
     });
   });
 });

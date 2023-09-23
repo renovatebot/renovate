@@ -2,11 +2,11 @@ import { mocked, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';
-import * as _util from '../../../../util';
+import * as _util from '../../../../util/sample';
 import * as _codeOwners from './code-owners';
 import { addParticipants } from './participants';
 
-jest.mock('../../../../util');
+jest.mock('../../../../util/sample');
 const util = mocked(_util);
 
 jest.mock('./code-owners');
@@ -25,10 +25,14 @@ describe('workers/repository/update/pr/participants', () => {
 
   beforeEach(() => {
     GlobalConfig.reset();
-    jest.resetAllMocks();
   });
 
   describe('assignees', () => {
+    it('does not assignees when there are none', async () => {
+      await addParticipants({ ...config, assignees: undefined }, pr);
+      expect(platform.addAssignees).not.toHaveBeenCalled();
+    });
+
     it('adds assignees', async () => {
       await addParticipants(config, pr);
       expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b', 'c']);
@@ -54,7 +58,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('supports dry run assignee adding', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await addParticipants(config, pr);
       expect(platform.addAssignees).not.toHaveBeenCalled();
     });
@@ -74,6 +78,11 @@ describe('workers/repository/update/pr/participants', () => {
   });
 
   describe('reviewers', () => {
+    it('does not assignees when there are none', async () => {
+      await addParticipants({ ...config, reviewers: undefined }, pr);
+      expect(platform.addReviewers).not.toHaveBeenCalled();
+    });
+
     it('adds reviewers', async () => {
       await addParticipants(config, pr);
       expect(platform.addReviewers).toHaveBeenCalledWith(123, ['x', 'y', 'z']);
@@ -91,7 +100,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('supports dry run assignee adding', async () => {
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       await addParticipants(config, pr);
       expect(platform.addReviewers).not.toHaveBeenCalled();
     });

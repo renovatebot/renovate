@@ -11,9 +11,6 @@ describe('util/http/bitbucket', () => {
   beforeEach(() => {
     api = new BitbucketHttp();
 
-    // reset module
-    jest.resetAllMocks();
-
     // clean up hostRules
     hostRules.clear();
     hostRules.add({

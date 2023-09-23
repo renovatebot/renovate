@@ -9,15 +9,18 @@ on:
       - reopened
       - ready_for_review
 
+permissions:
+  contents: read
+
 jobs:
   devcontainer-test:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Build and run dev container task
         uses: devcontainers/ci@57eaf0c9b518a76872bc429cdceefd65a912309b # v0.3.1900000329
         with:
-          runCmd: yarn build
+          runCmd: pnpm build

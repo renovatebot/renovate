@@ -1,4 +1,5 @@
 import { logger } from '../../../../logger';
+import { coerceString } from '../../../../util/string';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../../types';
 import { extractLocks } from './util';
 
@@ -7,13 +8,15 @@ export function updateLockedDependency(
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
-  // TODO: fix types (#7154)
+  // TODO: fix types (#22198)
   logger.debug(
     `terraform.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = extractLocks(lockFileContent ?? '');
-    const lockedDep = locked?.find((dep) => dep.packageName === depName ?? '');
+    const locked = extractLocks(coerceString(lockFileContent));
+    const lockedDep = locked?.find(
+      (dep) => dep.packageName === coerceString(depName)
+    );
     if (lockedDep?.version === newVersion) {
       return { status: 'already-updated' };
     }

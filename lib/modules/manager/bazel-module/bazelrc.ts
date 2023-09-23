@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import * as fs from '../../../util/fs';
 import { regEx } from '../../../util/regex';
@@ -124,8 +125,12 @@ async function readFile(
     const importFile = upath.normalize(
       entry.path.replace('%workspace%', workspaceDir)
     );
-    const importEntries = await readFile(importFile, workspaceDir, readFiles);
-    results.push(...importEntries);
+    if (fs.isValidLocalPath(importFile)) {
+      const importEntries = await readFile(importFile, workspaceDir, readFiles);
+      results.push(...importEntries);
+    } else {
+      logger.debug(`Skipping non-local .bazelrc import ${importFile}`);
+    }
   }
   return results;
 }

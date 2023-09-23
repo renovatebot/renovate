@@ -77,7 +77,6 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
     });
@@ -102,7 +101,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
-        config.fetchReleaseNotes = true;
+        config.fetchReleaseNotes = 'pr';
 
         const res = await ensurePr(config);
 
@@ -356,7 +355,7 @@ describe('workers/repository/update/pr/index', () => {
 
     describe('dry-run', () => {
       beforeEach(() => {
-        GlobalConfig.set({ dryRun: true });
+        GlobalConfig.set({ dryRun: 'full' });
       });
 
       it('dry-runs PR creation', async () => {
@@ -871,13 +870,13 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: true,
+              fetchReleaseNotes: 'pr',
             })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: true });
+        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: existingPr,
@@ -904,13 +903,13 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: true,
+              fetchReleaseNotes: 'pr',
             })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: true });
+        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: {

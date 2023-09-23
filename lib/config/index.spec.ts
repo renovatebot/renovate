@@ -2,11 +2,7 @@ import { getConfig } from './defaults';
 import { filterConfig, getManagerConfig, mergeChildConfig } from './index';
 
 jest.mock('../modules/datasource/npm');
-try {
-  jest.mock('../../config.js');
-} catch (err) {
-  // file does not exist
-}
+jest.mock('../../config.js', () => ({}), { virtual: true });
 
 const defaultConfig = getConfig();
 
@@ -91,7 +87,6 @@ describe('config/index', () => {
       const config = getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
         ['fileMatch', ['(^|/)package\\.json$']],
-        ['rollbackPrs', true],
       ]);
       expect(getManagerConfig(parentConfig, 'html')).toContainEntries([
         ['fileMatch', ['\\.html?$']],

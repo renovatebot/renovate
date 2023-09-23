@@ -32,7 +32,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
         if (splitEnv.length === 0) {
           // host-less rule
         } else if (splitEnv.length === 1) {
-          logger.warn(`Cannot parse ${envName} env`);
+          logger.warn({ env: envName }, 'Cannot parse env');
           continue;
         } else {
           matchHost = splitEnv.join('.');

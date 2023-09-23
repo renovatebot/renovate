@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ToolConstraint } from '../../../util/exec/types';
 import {
@@ -10,7 +11,15 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
+import { regEx } from '../../../util/regex';
+import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import {
+  generateRegistryLoginCmd,
+  isOCIRegistry,
+  parseDoc,
+  parseLock,
+} from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -47,7 +56,9 @@ export async function updateArtifacts({
       },
       {
         toolName: 'helmfile',
-        constraint: config.constraints?.helmfile,
+        constraint:
+          config.constraints?.helmfile ??
+          parseLock(existingLockFileContent).version,
       },
     ];
     const needKustomize = updatedDeps.some(
@@ -59,9 +70,27 @@ export async function updateArtifacts({
         constraint: config.constraints?.kustomize,
       });
     }
-    await exec(`helmfile deps -f ${quote(packageFileName)}`, {
+
+    const cmd: string[] = [];
+    const doc = parseDoc(newPackageFileContent);
+
+    for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
+      const loginCmd = await generateRegistryLoginCmd(
+        value.name,
+        `https://${value.url}`,
+        // this extracts the hostname from url like format ghcr.ip/helm-charts
+        value.url.replace(regEx(/\/.*/), '')
+      );
+
+      if (loginCmd) {
+        cmd.push(loginCmd);
+      }
+    }
+
+    cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
+    await exec(cmd, {
       docker: {},
-      extraEnv: {},
+      extraEnv: generateHelmEnvs(),
       toolConstraints,
     });
 

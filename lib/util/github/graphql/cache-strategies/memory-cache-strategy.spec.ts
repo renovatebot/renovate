@@ -1,5 +1,6 @@
 import { DateTime, Settings } from 'luxon';
 import * as memCache from '../../../cache/memory';
+import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy';
 
@@ -32,7 +33,6 @@ type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 
 describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     memCache.init();
   });
 
@@ -44,7 +44,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items,
       createdAt: isoTs('2022-10-01 15:30'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     // At this moment, cache is valid
     let now = '2022-10-31 15:29:59';
@@ -68,10 +68,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual([]);
     expect(isPaginationDone).toBe(false);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
-      items: {},
-      createdAt: isoTs(now),
-    });
+    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual(cacheRecord);
   });
 
   it('reconciles old cache record with new items', async () => {
@@ -84,7 +81,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-10-31 15:30';
     mockTime(now);
@@ -120,7 +117,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-10-31 15:30';
     mockTime(now);
@@ -136,7 +133,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     expect(isPaginationDone).toBe(true);
   });
 
-  it('reconciles entire page', async () => {
+  it('reconciles only not stabilized items in page', async () => {
     const oldItems = {
       '1': { releaseTimestamp: isoTs('2020-01-01 00:00'), version: '1' },
       '2': { releaseTimestamp: isoTs('2020-01-01 01:00'), version: '2' },
@@ -146,7 +143,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-12-31 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-12-31 23:59';
     mockTime(now);
@@ -164,9 +161,9 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     expect(isPaginationDone).toBe(true);
     expect(memCache.get('github-graphql-cache:foo:bar')).toMatchObject({
       items: {
-        '1': { releaseTimestamp: isoTs('2022-12-31 10:00') },
-        '2': { releaseTimestamp: isoTs('2022-12-31 11:00') },
-        '3': { releaseTimestamp: isoTs('2022-12-31 12:00') },
+        '1': { releaseTimestamp: isoTs('2020-01-01 00:00') },
+        '2': { releaseTimestamp: isoTs('2020-01-01 01:00') },
+        '3': { releaseTimestamp: isoTs('2020-01-01 02:00') },
         '4': { releaseTimestamp: isoTs('2022-12-31 13:00') },
       },
     });
@@ -190,7 +187,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', structuredClone(cacheRecord));
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
     const now = '2022-10-31 15:30';
     mockTime(now);

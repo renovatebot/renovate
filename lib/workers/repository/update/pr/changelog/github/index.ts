@@ -5,10 +5,7 @@ import type {
   GithubGitTree,
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github';
-import {
-  queryReleases,
-  queryTags,
-} from '../../../../../../util/github/graphql';
+import { queryReleases } from '../../../../../../util/github/graphql';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
@@ -21,40 +18,6 @@ import type {
 
 export const id = 'github-changelog';
 const http = new GithubHttp(id);
-
-export async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
-  logger.trace('github.getTags()');
-  try {
-    const tags = await queryTags(
-      {
-        registryUrl: endpoint,
-        packageName: repository,
-      },
-      http
-    );
-
-    // istanbul ignore if
-    if (!tags.length) {
-      logger.debug(`No Github tags found for repository:${repository}`);
-    }
-
-    return tags.map(({ version }) => version);
-  } catch (err) {
-    logger.debug(
-      { sourceRepo: repository, err },
-      'Failed to fetch Github tags'
-    );
-    // istanbul ignore if
-    if (err.message?.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
-  }
-}
 
 export async function getReleaseNotesMd(
   repository: string,
@@ -119,7 +82,7 @@ export async function getReleaseList(
   _release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const apiBaseUrl = project.apiBaseUrl!; // TODO #7154
+  const apiBaseUrl = project.apiBaseUrl!; // TODO #22198
   const repository = project.repository;
   const notesSourceUrl = joinUrlParts(
     apiBaseUrl,

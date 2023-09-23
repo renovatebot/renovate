@@ -167,14 +167,10 @@ exports[`config/validation validateConfig(config) errors if invalid combinations
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if language or manager objects are nested 1`] = `
+exports[`config/validation validateConfig(config) errors if manager objects are nested 1`] = `
 [
   {
-    "message": "The "docker" object can only be configured at the top level of a config but was found inside "major.minor"",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "The "gradle" object can only be configured at the top level of a config but was found inside "java"",
+    "message": "The "gradle" object can only be configured at the top level of a config but was found inside "maven"",
     "topic": "Configuration Error",
   },
 ]
@@ -233,11 +229,11 @@ exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 exports[`config/validation validateConfig(config) selectors outside packageRules array trigger errors 1`] = `
 [
   {
-    "message": "docker.minor.matchDepNames: matchDepNames should be inside a \`packageRule\` only",
+    "message": "ansible.minor.matchDepNames: matchDepNames should be inside a \`packageRule\` only",
     "topic": "Configuration Error",
   },
   {
-    "message": "docker.minor.matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
+    "message": "ansible.minor.matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
     "topic": "Configuration Error",
   },
   {

@@ -10,12 +10,10 @@ jest.mock('../../../../util/exec/env');
 jest.mock('../../../../util/fs');
 jest.mock('./node-version');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
     mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
@@ -26,6 +24,8 @@ describe('modules/manager/npm/post-update/npm', () => {
 
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const postUpdateOptions = ['npmDedupe'];
@@ -39,8 +39,8 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls, postUpdateOptions },
       updates
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -56,11 +56,11 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls },
+      { skipInstalls, constraints: { npm: '^6.0.0' } },
       updates
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -85,11 +85,11 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls },
+      { skipInstalls, constraints: { npm: '^6.0.0' } },
       updates
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -103,7 +103,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls }
+      { skipInstalls, constraints: { npm: '^6.0.0' } }
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.renameLocalFile).toHaveBeenCalledWith(
@@ -115,7 +115,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir/npm-shrinkwrap.json',
       'utf8'
     );
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
@@ -130,7 +130,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls }
+      { skipInstalls, constraints: { npm: '^6.0.0' } }
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -138,7 +138,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir/npm-shrinkwrap.json',
       'utf8'
     );
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
@@ -153,10 +153,10 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, binarySource }
+      { skipInstalls, binarySource, constraints: { npm: '^6.0.0' } }
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
@@ -170,11 +170,11 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource },
+      { binarySource, constraints: { npm: '^6.0.0' } },
       [{ isRemediation: true }]
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
+    expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toHaveLength(2);
   });
@@ -197,13 +197,15 @@ describe('modules/manager/npm/post-update/npm', () => {
 
   it('finds npm globally', async () => {
     const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValue('{}');
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'package-lock.json'
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
@@ -226,6 +228,8 @@ describe('modules/manager/npm/post-update/npm', () => {
 
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValue('{}');
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -234,7 +238,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       [{ isLockFileMaintenance: true }]
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -246,6 +250,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       cacheDir: '/tmp',
       binarySource: 'docker',
       allowScripts: true,
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -259,16 +264,15 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull containerbase/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'containerbase/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& ' +
@@ -403,6 +407,8 @@ describe('modules/manager/npm/post-update/npm', () => {
 
     it('workspace in sub-folder', async () => {
       const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
       fs.readLocalFile.mockResolvedValueOnce('package-lock content');
       const skipInstalls = true;
       const res = await npmHelper.generateLockFile(
@@ -412,8 +418,8 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls },
         updates
       );
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-      expect(res.error).toBeUndefined();
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
@@ -436,6 +442,8 @@ describe('modules/manager/npm/post-update/npm', () => {
         };
       });
       const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
       fs.readLocalFile.mockResolvedValueOnce('package-lock content');
       const skipInstalls = true;
       const res = await npmHelper.generateLockFile(
@@ -445,8 +453,8 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls },
         modifiedUpdates
       );
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-      expect(res.error).toBeUndefined();
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+      expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',

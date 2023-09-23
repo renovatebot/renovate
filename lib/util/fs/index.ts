@@ -206,7 +206,7 @@ export async function findUpLocal(
   fileName: string | string[],
   cwd: string
 ): Promise<string | null> {
-  const { localDir } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const absoluteCwd = upath.join(localDir, cwd);
   const normalizedAbsoluteCwd = upath.normalizeSafe(absoluteCwd);
   const res = await findUp(fileName, {

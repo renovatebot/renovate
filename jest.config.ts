@@ -211,11 +211,10 @@ const config: JestConfig = {
     '<rootDir>/tools/',
   ],
   cacheDirectory: '.cache/jest',
-  clearMocks: true,
   collectCoverage: true,
   coverageReporters: ci
-    ? ['lcovonly', 'json', 'text-summary']
-    : ['html', 'text-summary'],
+    ? ['lcovonly', 'json']
+    : ['html', 'text-summary', 'json'],
   transform: {
     '\\.ts$': [
       'ts-jest',
@@ -232,6 +231,7 @@ const config: JestConfig = {
     '/__mocks__/',
   ],
   reporters: ci ? ['default', 'github-actions'] : ['default'],
+  resetMocks: true,
   setupFilesAfterEnv: [
     'jest-extended/all',
     'expect-more-jest',

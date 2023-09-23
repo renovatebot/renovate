@@ -10,9 +10,12 @@ import {
 import { getConfig } from '../../../config/defaults';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
+import * as memCache from '../../../util/cache/memory';
 import * as repoCache from '../../../util/cache/repository';
 import { initRepoCache } from '../../../util/cache/repository/init';
 import type { RepoCacheData } from '../../../util/cache/repository/types';
+import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache';
+import { OnboardingState } from '../onboarding/common';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -21,14 +24,16 @@ import {
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
+jest.mock('../onboarding/branch/onboarding-branch-cache');
 
 const migrate = mocked(_migrate);
 const migrateAndValidate = mocked(_migrateAndValidate);
+const onboardingCache = mocked(_onboardingCache);
 
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  memCache.init();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -41,6 +46,7 @@ describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
+      jest.restoreAllMocks();
     });
 
     it('returns config if not found', async () => {
@@ -62,6 +68,64 @@ describe('workers/repository/init/merge', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists'
       );
+    });
+
+    it('returns cache config from onboarding cache - package.json', async () => {
+      const pJson = JSON.stringify({
+        schema: 'https://docs.renovate.com',
+      });
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'package.json'
+      );
+      onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { schema: 'https://docs.renovate.com' },
+      });
+    });
+
+    it('clones, if onboarding cache is valid but parsed config is undefined', async () => {
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'package.json'
+      );
+      onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
+        undefined as never
+      );
+      scm.getFileList.mockResolvedValueOnce(['package.json']);
+      const pJson = JSON.stringify({
+        name: 'something',
+        renovate: {
+          prHourlyLimit: 10,
+        },
+      });
+      fs.readLocalFile.mockResolvedValueOnce(pJson);
+      platform.getRawFile.mockResolvedValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { prHourlyLimit: 10 },
+      });
+    });
+
+    it('returns cache config from onboarding cache - renovate.json', async () => {
+      const configParsed = JSON.stringify({
+        schema: 'https://docs.renovate.com',
+      });
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'renovate.json'
+      );
+      onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
+        configParsed
+      );
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json',
+        configFileParsed: {
+          schema: 'https://docs.renovate.com',
+        },
+        configFileRaw: undefined,
+      });
     });
 
     it('uses package.json config if found', async () => {
@@ -274,7 +338,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['renovate.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       migrateAndValidate.migrateAndValidate.mockResolvedValue({
-        extends: ['config:base'],
+        extends: ['config:recommended'],
         warnings: [],
         errors: [],
       });
@@ -282,7 +346,7 @@ describe('workers/repository/init/merge', () => {
         isMigrated: true,
         migratedConfig: c,
       }));
-      config.extends = ['config:base'];
+      config.extends = ['config:recommended'];
       config.ignorePresets = [':ignoreModulesAndTests'];
       config.ignorePaths = ['**/examples/**'];
       const res = await mergeRenovateConfig(config);
@@ -298,6 +362,24 @@ describe('workers/repository/init/merge', () => {
       });
       config.extends = [':automergeDisabled'];
       expect(await mergeRenovateConfig(config)).toBeDefined();
+    });
+
+    it('continues if no errors-2', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      expect(
+        await mergeRenovateConfig({
+          ...config,
+          requireConfig: 'ignored',
+          configFileParsed: undefined,
+          warnings: undefined,
+          secrets: undefined,
+        })
+      ).toBeDefined();
     });
   });
 });

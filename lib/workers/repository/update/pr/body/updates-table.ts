@@ -48,10 +48,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     .filter((upgrade) => upgrade !== undefined)
     .map((upgrade) => {
       const res: Record<string, string> = {};
-      const rowDefinition = getRowDefinition(
-        config.prBodyColumns ?? [],
-        upgrade
-      );
+      const rowDefinition = getRowDefinition(config.prBodyColumns!, upgrade);
       for (const column of rowDefinition) {
         const { header, value } = column;
         try {

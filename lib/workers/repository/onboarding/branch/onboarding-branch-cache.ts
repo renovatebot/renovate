@@ -80,6 +80,27 @@ export async function isOnboardingBranchModified(
   return isModified;
 }
 
+export function getOnboardingFileNameFromCache(): string | undefined {
+  const cache = getCache();
+  return cache.onboardingBranchCache?.configFileName;
+}
+
+export function getOnboardingConfigFromCache(): string | undefined {
+  const cache = getCache();
+  return cache.onboardingBranchCache?.configFileParsed;
+}
+
+export function setOnboardingConfigDetails(
+  configFileName: string,
+  configFileParsed: string
+): void {
+  const cache = getCache();
+  if (cache.onboardingBranchCache) {
+    cache.onboardingBranchCache.configFileName = configFileName;
+    cache.onboardingBranchCache.configFileParsed = configFileParsed;
+  }
+}
+
 export async function isOnboardingBranchConflicted(
   defaultBranch: string,
   onboardingBranch: string

@@ -68,7 +68,8 @@ export function extractPackageFile(
   packageFile?: string
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
-  const { platform, endpoint } = GlobalConfig.get();
+  const platform = GlobalConfig.get('platform');
+  const endpoint = GlobalConfig.get('endpoint');
   try {
     const doc = load(replaceReferenceTags(content), {
       json: true,
