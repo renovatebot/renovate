@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import JSON5 from 'json5';
 import semver from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -11,6 +10,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { parseJsonWithFallback } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
@@ -257,7 +257,7 @@ const platform: Platform = {
   ): Promise<any> {
     // TODO #22198
     const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
-    return JSON5.parse(raw);
+    return parseJsonWithFallback(raw);
   },
 
   async initRepo({

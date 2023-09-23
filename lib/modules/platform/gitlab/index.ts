@@ -1,7 +1,6 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import JSON5 from 'json5';
 import pMap from 'p-map';
 import semver from 'semver';
 import {
@@ -19,6 +18,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
+import { parseJsonWithFallback } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -232,7 +232,7 @@ export async function getJsonFile(
 ): Promise<any> {
   // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return JSON5.parse(raw);
+  return parseJsonWithFallback(raw);
 }
 
 function getRepoUrl(

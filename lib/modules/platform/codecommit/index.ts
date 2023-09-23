@@ -4,8 +4,6 @@ import {
   ListRepositoriesOutput,
   PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
-import JSON5 from 'json5';
-
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
@@ -14,6 +12,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
+import { parseJsonWithFallback } from '../../../util/common';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -330,7 +329,7 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return raw ? JSON5.parse(raw) : null;
+  return raw ? parseJsonWithFallback(raw) : null;
 }
 
 export async function getRawFile(

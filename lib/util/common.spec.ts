@@ -1,5 +1,32 @@
-import { detectPlatform } from './common';
+import { logger } from '../../test/util';
+import { detectPlatform, parseJsonWithFallback } from './common';
 import * as hostRules from './host-rules';
+
+const validJsonString = `
+{
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York"
+}
+`;
+const invalidJsonString = `
+{
+  "name": "Alice",
+  "age": 25,
+  "city": "Los Angeles",
+  "hobbies": ["Reading", "Running", "Cooking"]
+  "isStudent": true
+}
+`;
+const onlyJson5parsableString = `
+{
+  name: "Bob",
+  age: 35,
+  city: 'San Francisco',
+  // This is a comment
+  "isMarried": false,
+}
+`;
 
 describe('util/common', () => {
   beforeEach(() => hostRules.clear());
@@ -58,6 +85,32 @@ describe('util/common', () => {
         'gitlab'
       );
       expect(detectPlatform('https://f.example.com/chalk/chalk')).toBeNull();
+    });
+  });
+
+  describe('parseJsonWithFallback', () => {
+    it('returns parsed json', () => {
+      expect(parseJsonWithFallback(validJsonString)).toEqual({
+        name: 'John Doe',
+        age: 30,
+        city: 'New York',
+      });
+    });
+
+    it('throws error for invalid json', () => {
+      expect(() => parseJsonWithFallback(invalidJsonString)).toThrow();
+    });
+
+    it('catches and warns if content parsing faield with JSON.parse but not with JSON5.parse', () => {
+      expect(parseJsonWithFallback(onlyJson5parsableString)).toEqual({
+        name: 'Bob',
+        age: 35,
+        city: 'San Francisco',
+        isMarried: false,
+      });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'JSON5.parse was used to parse the JSON data. Please check your json file'
+      );
     });
   });
 });

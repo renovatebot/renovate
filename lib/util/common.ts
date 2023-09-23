@@ -1,9 +1,11 @@
+import JSON5 from 'json5';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../constants';
+import { logger } from '../logger';
 import * as hostRules from './host-rules';
 import { parseUrl } from './url';
 
@@ -58,4 +60,19 @@ export function detectPlatform(
   }
 
   return null;
+}
+
+export function parseJsonWithFallback(content: string): any {
+  let parsedJson: any;
+
+  try {
+    parsedJson = JSON.parse(content);
+  } catch (err) {
+    parsedJson = JSON5.parse(content);
+    logger.warn(
+      'JSON5.parse was used to parse the JSON data. Please check your json file'
+    );
+  }
+
+  return parsedJson;
 }
