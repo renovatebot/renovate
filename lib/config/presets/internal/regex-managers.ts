@@ -4,8 +4,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
-    description: 'Update `_VERSION` variables in Dockerfiles.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: [
@@ -17,11 +16,10 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description: 'Update `_VERSION` variables in Dockerfiles.',
   },
   githubActionsVersions: {
-    description:
-      'Update `_VERSION` environment variables in GitHub Action files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: ['^.github/(?:workflows|actions)/.+\\.ya?ml$'],
@@ -30,10 +28,11 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description:
+      'Update `_VERSION` environment variables in GitHub Action files.',
   },
   helmChartYamlAppVersions: {
-    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         datasourceTemplate: 'docker',
@@ -43,10 +42,10 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
   },
   mavenPropertyVersions: {
-    description: 'Update `*.version` properties in `pom.xml` files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         datasourceTemplate:
@@ -58,10 +57,10 @@ export const presets: Record<string, Preset> = {
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
     ],
+    description: 'Update `*.version` properties in `pom.xml` files.',
   },
   tfvarsVersions: {
-    description: 'Update `*_version` variables in `.tfvars` files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: ['.+\\.tfvars$'],
@@ -71,5 +70,6 @@ export const presets: Record<string, Preset> = {
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
     ],
+    description: 'Update `*_version` variables in `.tfvars` files.',
   },
 };
