@@ -46,7 +46,7 @@ export const presets: Record<string, Preset> = {
   },
   mavenPropertyVersions: {
     description: 'Update `*.version` properties in `pom.xml` files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         datasourceTemplate:
