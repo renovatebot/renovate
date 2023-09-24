@@ -563,8 +563,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       markdownlint-cli2:
-        specifier: 0.9.2
-        version: 0.9.2
+        specifier: 0.10.0
+        version: 0.10.0
       memfs:
         specifier: 4.4.0
         version: 4.4.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
@@ -8216,25 +8216,25 @@ packages:
       repeat-string: 1.6.1
     dev: false
 
-  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.9.2):
+  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.10.0):
     resolution: {integrity: sha512-xm2rM0E+sWgjpPn1EesPXx5hIyrN2ddUnUwnbCsD/ONxYtw3PX6LydvdH6dciWAoFDpwzbHM1TO7uHfcMd6IYg==}
     peerDependencies:
       markdownlint-cli2: '>=0.0.4'
     dependencies:
-      markdownlint-cli2: 0.9.2
+      markdownlint-cli2: 0.10.0
     dev: true
 
-  /markdownlint-cli2@0.9.2:
-    resolution: {integrity: sha512-ndijEHIOikcs29W8068exHXlfkFviGFT/mPhREia7zSfQzHvTDkL2s+tWizvELjLHiKRO4KGTkkJyR3oeR8A5g==}
+  /markdownlint-cli2@0.10.0:
+    resolution: {integrity: sha512-kVxjPyKFC+eW7iqcxiNI50RDzwugpXkEX5eQlDso/0IUs9M73jXYguLFHDzgi5KatcxU/57Fu8KoGtkFft9lfA==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
       globby: 13.2.2
-      markdownlint: 0.30.0
-      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.9.2)
+      markdownlint: 0.31.1
+      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.10.0)
       micromatch: 4.0.5
       strip-json-comments: 5.0.1
-      yaml: 2.3.1
+      yaml: 2.3.2
     dev: true
 
   /markdownlint-micromark@0.1.7:
@@ -8242,8 +8242,8 @@ packages:
     engines: {node: '>=16'}
     dev: true
 
-  /markdownlint@0.30.0:
-    resolution: {integrity: sha512-nInuFvI/rEzanAOArW5490Ez4EYpB5ODqVM0mcDYCPx9DKJWCQqCgejjiCvbSeE7sjbDscVtZmwr665qpF5xGA==}
+  /markdownlint@0.31.1:
+    resolution: {integrity: sha512-CKMR2hgcIBrYlIUccDCOvi966PZ0kJExDrUi1R+oF9PvqQmCrTqjOsgIvf2403OmJ+CWomuzDoylr6KbuMyvHA==}
     engines: {node: '>=16'}
     dependencies:
       markdown-it: 13.0.1
@@ -11045,8 +11045,8 @@ packages:
   /yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
-  /yaml@2.3.1:
-    resolution: {integrity: sha512-2eHWfjaoXgTBC2jNM1LRef62VQa0umtvRiDSk6HSzW7RvS5YtkabJrwYLLEKWBc8a5U2PTSCs+dJjUTJdlHsWQ==}
+  /yaml@2.3.2:
+    resolution: {integrity: sha512-N/lyzTPaJasoDmfV7YTrYCI0G/3ivm/9wdG0aHuheKowWQwGTsK0Eoiw6utmzAnI6pkJa0DUVygvp3spqqEKXg==}
     engines: {node: '>= 14'}
     dev: true
 
