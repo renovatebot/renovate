@@ -235,7 +235,7 @@ describe('config/presets/internal/regex-managers', () => {
   });
 
   describe('finds dependencies in pom.xml properties', () => {
-    const regexManager = presets['mavenPropertyVersions'].regexManagers?.[0];
+    const customManager = presets['mavenPropertyVersions'].customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -252,7 +252,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'pom.xml',
-        regexManager!
+        customManager!
       );
 
       expect(res?.deps).toMatchObject([
