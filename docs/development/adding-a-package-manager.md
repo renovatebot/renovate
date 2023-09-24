@@ -57,7 +57,7 @@ Make sure the `skipReason` message is helpful to someone reading the logs.
 If `extractPackageFile` is passed a file which is a "false match", so not a package file, or a file with no dependencies then it can return `null`.
 Downstream this results in the file being ignored and removed from the list of package files.
 
-### `extractAllPackageFiles(packageFiles)` (async, optional)
+### `extractAllPackageFiles(config, fileMatches)` (async, optional)
 
 Normally a package manager parses or extracts all package files in _parallel_, and can thus use the `extractPackageFile` function.
 If the package manager you're adding works in _serial_, use this function instead.

@@ -126,10 +126,10 @@ export function extractPackageFile(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  fileMatches: string[]
 ): Promise<PackageFile[] | null> {
-  const filesToExamine = [...packageFiles];
-  const seen = new Set<string>(packageFiles);
+  const filesToExamine = [...fileMatches];
+  const seen = new Set<string>(fileMatches);
   const results: PackageFile[] = [];
 
   // extract all includes from the files
@@ -183,7 +183,7 @@ export async function extractAllPackageFiles(
   }
 
   logger.trace(
-    { packageFiles, files: filesToExamine.entries() },
+    { packageFiles: fileMatches, files: filesToExamine.entries() },
     'extracted all GitLab CI files'
   );
 

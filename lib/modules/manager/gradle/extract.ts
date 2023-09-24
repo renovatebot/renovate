@@ -128,14 +128,14 @@ async function parsePackageFiles(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  fileMatches: string[]
 ): Promise<PackageFile[] | null> {
   const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
-  const kotlinSourceFiles = packageFiles.filter(isKotlinSourceFile);
+  const kotlinSourceFiles = fileMatches.filter(isKotlinSourceFile);
   const gradleFiles = reorderFiles(
-    packageFiles.filter((e) => !kotlinSourceFiles.includes(e))
+    fileMatches.filter((e) => !kotlinSourceFiles.includes(e))
   );
 
   await parsePackageFiles(

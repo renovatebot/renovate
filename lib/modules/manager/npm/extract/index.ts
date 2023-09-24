@@ -234,10 +234,10 @@ export async function extractPackageFile(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  fileMatches: string[]
 ): Promise<PackageFile<NpmManagerData>[]> {
   const npmFiles: PackageFile<NpmManagerData>[] = [];
-  for (const packageFile of packageFiles) {
+  for (const packageFile of fileMatches) {
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {

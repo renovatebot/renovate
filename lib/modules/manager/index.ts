@@ -43,14 +43,14 @@ export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
 export async function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
-  files: string[]
+  fileMatches: string[]
 ): Promise<PackageFile[] | null> {
   if (!managers.has(manager)) {
     return null;
   }
   const m = managers.get(manager)!;
   if (m.extractAllPackageFiles) {
-    const res = await m.extractAllPackageFiles(config, files);
+    const res = await m.extractAllPackageFiles(config, fileMatches);
     // istanbul ignore if
     if (!res) {
       return null;

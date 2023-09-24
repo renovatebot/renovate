@@ -13,11 +13,11 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
-  matchedFiles: string[]
+  _config: ExtractConfig,
+  fileMatches: string[]
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
-  for (const matchedFile of matchedFiles) {
+  for (const matchedFile of fileMatches) {
     if (!matchesFileName(matchedFile, 'bun.lockb')) {
       logger.warn({ matchedFile }, 'Invalid bun lockfile match');
       continue;

@@ -293,12 +293,12 @@ export function extractPackageFile(
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
-  packageFiles: string[]
+  fileMatches: string[]
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
   const results: PackageFile<FluxManagerData>[] = [];
 
-  for (const file of packageFiles) {
+  for (const file of fileMatches) {
     const content = await readLocalFile(file, 'utf8');
     // TODO #22198
     const manifest = readManifest(content!, file);

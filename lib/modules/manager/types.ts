@@ -241,7 +241,7 @@ export interface ManagerApi extends ModuleApi {
 
   extractAllPackageFiles?(
     config: ExtractConfig,
-    files: string[]
+    fileMatches: string[]
   ): Result<PackageFile[] | null>;
 
   extractPackageFile?(

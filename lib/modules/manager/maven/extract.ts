@@ -471,12 +471,12 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
-  packageFiles: string[]
+  fileMatches: string[]
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
 
-  for (const packageFile of packageFiles) {
+  for (const packageFile of fileMatches) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       logger.debug({ packageFile }, 'packageFile has no content');

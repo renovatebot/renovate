@@ -147,10 +147,10 @@ export function extractPackageFile(
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
-  packageFiles: string[]
+  _config: ExtractConfig,
+  fileMatches: string[]
 ): Promise<PackageFile[] | null> {
-  const filesToExamine = new Set<string>(packageFiles);
+  const filesToExamine = new Set<string>(fileMatches);
   const filesAlreadyExamined = new Set<string>();
   const results: PackageFile[] = [];
 
