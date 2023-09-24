@@ -156,7 +156,7 @@ export interface BranchSummary {
 
 export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
-  fileList: string[];
+  fileMatches: string[];
   fileMatch?: string[];
   includePaths?: string[];
   ignorePaths?: string[];

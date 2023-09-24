@@ -12,18 +12,18 @@ import type { WorkerExtractConfig } from '../../types';
 export async function getManagerPackageFiles(
   config: WorkerExtractConfig
 ): Promise<PackageFile[] | null> {
-  const { enabled, manager, fileList } = config;
+  const { enabled, manager, fileMatches } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
     return [];
   }
   // istanbul ignore else
-  if (is.nonEmptyArray(fileList)) {
+  if (is.nonEmptyArray(fileMatches)) {
     logger.debug(
       `Matched ${
-        fileList.length
-      } file(s) for manager ${manager}: ${fileList.join(', ')}`
+        fileMatches.length
+      } file(s) for manager ${manager}: ${fileMatches.join(', ')}`
     );
   } else {
     return [];
@@ -33,12 +33,12 @@ export async function getManagerPackageFiles(
     const allPackageFiles = await extractAllPackageFiles(
       manager,
       config,
-      fileList
+      fileMatches
     );
     return allPackageFiles;
   }
   const packageFiles: PackageFile[] = [];
-  for (const packageFile of fileList) {
+  for (const packageFile of fileMatches) {
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {

@@ -47,7 +47,7 @@ function getFilteredManagerConfig(
     includePaths: config.includePaths ?? [],
     skipInstalls: config.skipInstalls,
     registryAliases: config.registryAliases,
-    fileList: [],
+    fileMatches: [],
   };
 }
 
@@ -72,11 +72,11 @@ export function generateFingerprintConfig(
       for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
           ...mergeChildConfig(managerConfig, customManager),
-          fileList: [],
+          fileMatches: [],
         });
       }
     } else {
-      managerExtractConfigs.push({ ...managerConfig, fileList: [] });
+      managerExtractConfigs.push({ ...managerConfig, fileMatches: [] });
     }
   }
 

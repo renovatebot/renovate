@@ -27,7 +27,7 @@ export async function extractAllDependencies(
   const tryConfig = (managerConfig: ManagerConfig): void => {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
-      extractList.push({ ...managerConfig, fileList: matchingFileList });
+      extractList.push({ ...managerConfig, fileMatches: matchingFileList });
     }
   };
 

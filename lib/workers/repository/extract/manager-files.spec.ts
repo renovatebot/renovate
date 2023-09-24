@@ -20,14 +20,22 @@ describe('workers/repository/extract/manager-files', () => {
     });
 
     it('returns empty of manager is disabled', async () => {
-      const managerConfig = { manager: 'travis', enabled: false, fileList: [] };
+      const managerConfig = {
+        manager: 'travis',
+        enabled: false,
+        fileMatches: [],
+      };
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
 
     it('returns empty of manager is not enabled', async () => {
       config.enabledManagers = ['npm'];
-      const managerConfig = { manager: 'docker', enabled: true, fileList: [] };
+      const managerConfig = {
+        manager: 'docker',
+        enabled: true,
+        fileMatches: [],
+      };
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
@@ -35,7 +43,7 @@ describe('workers/repository/extract/manager-files', () => {
     it('skips files if null content returned', async () => {
       const managerConfig = {
         manager: 'npm',
-        fileList: [],
+        fileMatches: [],
         enabled: true,
       };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
@@ -47,7 +55,7 @@ describe('workers/repository/extract/manager-files', () => {
       const managerConfig = {
         manager: 'html',
         enabled: true,
-        fileList: ['Dockerfile'],
+        fileMatches: ['Dockerfile'],
       };
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       fs.readLocalFile.mockResolvedValueOnce('some content');
@@ -67,7 +75,7 @@ describe('workers/repository/extract/manager-files', () => {
       const managerConfig = {
         manager: 'npm',
         enabled: true,
-        fileList: ['package.json'],
+        fileMatches: ['package.json'],
       };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce(
