@@ -45,7 +45,6 @@ export const presets: Record<string, Preset> = {
     description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
   },
   mavenPropertyVersions: {
-    description: 'Update `*.version` properties in `pom.xml` files.',
     customManagers: [
       {
         customType: 'regex',
@@ -58,6 +57,7 @@ export const presets: Record<string, Preset> = {
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
     ],
+    description: 'Update `*.version` properties in `pom.xml` files.',
   },
   tfvarsVersions: {
     customManagers: [
