@@ -875,7 +875,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
     });
 
-    it('validates valid customEnvVariables objects', async () => {
+    it('validates valid customEnvVariables objects in file config', async () => {
       const config = {
         customEnvVariables: {
           example1: 'abc',
@@ -883,7 +883,10 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config,
+        undefined,
+        undefined,
+        true
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -897,7 +900,10 @@ describe('config/validation', () => {
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config,
+        undefined,
+        undefined,
+        true
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
