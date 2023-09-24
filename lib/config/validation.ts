@@ -31,15 +31,6 @@ let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
-// allow these global options in repo config
-const allowedGlobalOptions = [
-  'customEnvVariables',
-  'migratePresets',
-  'productLinks',
-  'secrets',
-  'customizeDashboard',
-];
-
 const topLevelObjects = managerList;
 
 const ignoredNodes = [
@@ -152,20 +143,27 @@ export async function validateConfig(
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
     }
-    if (
-      optionGlobals.has(key) &&
-      !isGlobalConfig &&
-      !allowedGlobalOptions.includes(key)
-    ) {
-      // token is a global config option
-      // and a field of repo config option hostRules.encrypted
-      if (key === 'token' && parentPath?.includes('hostRules')) {
+    if (optionGlobals.has(key)) {
+      if (!isGlobalConfig) {
+        // token is a global config option and a field of repo config option hostRules.encrypted
+        if (key === 'token' && parentPath?.includes('hostRules')) {
+          continue;
+        }
+        errors.push({
+          topic: 'Configuration Error',
+          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        });
+      } else {
+        validateGlobalConfig(
+          key,
+          val,
+          optionTypes[key],
+          errors,
+          currentPath,
+          parentPath
+        );
         continue;
       }
-      errors.push({
-        topic: 'Configuration Error',
-        message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
-      });
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -638,14 +636,6 @@ export async function validateConfig(
                   }
                 }
               }
-            } else if (allowedGlobalOptions.includes(key)) {
-              const res = validatePlainObject(val);
-              if (res !== true) {
-                errors.push({
-                  topic: 'Configuration Error',
-                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
-                });
-              }
             } else {
               const ignoredObjects = options
                 .filter((option) => option.freeChoice)
@@ -720,6 +710,65 @@ function validateRegexManagerFields(
       errors.push({
         topic: 'Configuration Error',
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+      });
+    }
+  }
+}
+
+// basic validation for global config options
+function validateGlobalConfig(
+  key: string,
+  val: unknown,
+  type: string,
+  errors: ValidationMessage[],
+  currentPath: string | undefined,
+  parentPath: string | undefined
+) {
+  if (type === 'string') {
+    if (!is.string(val)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be a string`,
+      });
+    }
+  } else if (type === 'integer') {
+    if (!is.number(val)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
+          val
+        )} (${typeof val})`,
+      });
+    }
+  } else if (type === 'boolean') {
+    if (val !== true && val !== false) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
+          val
+        )} (${typeof val})`,
+      });
+    }
+  } else if (type === 'array' && val) {
+    if (is.array(val)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be a list (Array)`,
+      });
+    }
+  } else if (type === 'object') {
+    if (is.plainObject(val)) {
+      const res = validatePlainObject(val);
+      if (res !== true) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
+        });
+      }
+    } else {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be a json object`,
       });
     }
   }
