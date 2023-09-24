@@ -91,7 +91,7 @@ Debugging faulty versions of your tools is easier, because you can use Git to ch
 ### Why updating often is easier, faster and safer
 
 You may think that updating takes too much time.
-But updating regulary actually _saves_ you time, because:
+But updating regularly actually _saves_ you time, because:
 
 - Regular updates tend to be small
 - Applying `major` updates is easier
