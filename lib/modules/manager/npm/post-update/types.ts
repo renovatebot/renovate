@@ -23,10 +23,7 @@ export interface GetAdditionalFilesResult {
   updatedArtifacts: FileChange[];
 }
 
-export type WriteExistingFilesResult = Record<
-  string,
-  string | null
->;
+export type WriteExistingFilesResult = Record<string, string | null>;
 
 export interface GenerateLockFileResult {
   error?: boolean;
