@@ -16,7 +16,7 @@
     "create-json-schema": "ts-node tools/generate-schema.ts && prettier --write --cache 'renovate-schema.json'",
     "debug": "NODE_OPTIONS=--inspect-brk ts-node lib/renovate.ts",
     "doc-fix": "run-s markdown-lint-fix prettier-fix",
-    "doc-fix-everything": "run-s doc-fix doc-fence-check lint-documentation ",
+    "doc-fix-everything": "run-s doc-fix doc-fence-check lint-documentation",
     "doc-fence-check": "node tools/check-fenced-code.mjs",
     "lint-documentation": "jest --coverage false test/documentation.spec.ts",
     "eslint": "eslint . --cache --cache-location .cache/eslint --report-unused-disable-directives",
