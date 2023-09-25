@@ -233,10 +233,11 @@
     Hi there,
 
 
-    This discusion is being closed because it's missing some details, or something else about it has made it difficult or impossible for us to help resolve the issue.
+    We're closing this discussion because it's missing some details, or because something else about it made it hard or impossible for us to help resolve the issue.
 
 
-    We choose to close and later delete such discussions in order to keep a high quality of discussions in this repository for users who search for answers.
+    We want high quality discussions, so users can search them for answers.
+    This means we'll close (and later delete) low quality discussions.
 
 
     You are welcome to create a new discussion with more details in future.
@@ -253,13 +254,15 @@
     A maintainer has flagged this discussion as giving off some bad vibes. **Maintainers will no longer participate in this discussion unless/until such "vibes" are resolved.**
 
 
-    This is typically when someone is overly critical of the product or the assistance they're receiving, or being unreasonably demanding or lazy, such as refusing to provide logs or other information which they're asked.
+    This is typically when someone is overly critical of the product or the assistance they're receiving.
+    Or being unreasonably demanding or lazy, such as refusing to provide logs, or other information, when asked.
 
 
-    Open Source means you're welcome to use the software with few limits applied, but it does not mean you are welcome to give maintainers a bad day or contribute to Open Source burnout.
+    Open Source means you're welcome to use the software with few limits applied.
+    But you should _not_ give maintainers a bad day or contribute to Open Source burnout.
 
 
-    If you feel this is in error or a misunderstanding, please let us know. If you see this message but don't take it as a sign to cool off or back off, we may close the discussion and block you from the repository.
+    If you feel this message is wrong or due to a misunderstanding, please let us know. If you see this message but don't take it as a sign to cool off or back off, we may close the discussion and block you from the repository.
 
 
     If you see this message and want to get the discussion back on track, it would be appreciated if you can:
@@ -267,7 +270,7 @@
     - Acknowledge that you understand the problem (no lengthy apology is needed, we just want to know it won't continue)
 
 
-    If you're unhappy with this, we suggest simply stop using the repository discussions or the product altogether.
+    If you're unhappy with this, we suggest you stop using the repository discussions or the product altogether.
 
 
     Thanks, the Renovate team
