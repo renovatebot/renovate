@@ -26,8 +26,9 @@ import {
   trimTrailingSlash,
 } from '../../../util/url';
 import { api as dockerVersioning } from '../../versioning/docker';
+import {getGoogleAccessToken} from "../util";
 import { ecrRegex, getECRAuthToken } from './ecr';
-import { getGoogleAccessToken, googleRegex } from './google';
+import { googleRegex } from './google';
 import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
