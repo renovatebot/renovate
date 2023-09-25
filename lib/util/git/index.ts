@@ -661,6 +661,9 @@ export async function isBranchModified(
             .split('\n')
         ),
       ];
+      if (branchAuthors.length > 1) {
+        logger.debug(`Found multiple git authors in branch: ${branchAuthors.join(", ")}`);
+      }
     } else {
       logger.debug(
         `branch.isModified(): checking last author of ${branchName}`
@@ -695,6 +698,7 @@ export async function isBranchModified(
   let branchIsModified = false;
   for (const author of branchAuthors) {
     if (author !== gitAuthorEmail && !config.ignoredAuthors.includes(author)) {
+      logger.debug(`branch.isModified=true due to this git author: ${author}`);
       branchIsModified = true;
     }
   }
