@@ -662,7 +662,9 @@ export async function isBranchModified(
         ),
       ];
       if (branchAuthors.length > 1) {
-        logger.debug(`Found multiple git authors in branch: ${branchAuthors.join(", ")}`);
+        logger.debug(
+          `Found multiple git authors in branch: ${branchAuthors.join(', ')}`
+        );
       }
     } else {
       logger.debug(
