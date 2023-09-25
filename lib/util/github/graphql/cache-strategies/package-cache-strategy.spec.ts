@@ -36,21 +36,17 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
     const now = '2022-10-30 12:00';
     mockTime(now);
 
-    const updatedItem = {
-      ...item3,
-      releaseTimestamp: isoTs('2020-01-01 12:30'),
-    };
     const newItem = {
       version: '4',
       releaseTimestamp: isoTs('2022-10-15 18:00'),
     };
-    const page = [newItem, updatedItem];
+    const page = [newItem, item3, item2, item1];
 
     const strategy = new GithubGraphqlPackageCacheStrategy('foo', 'bar');
     const isPaginationDone = await strategy.reconcile(page);
     const res = await strategy.finalize();
 
-    expect(res).toEqual([item1, item2, updatedItem, newItem]);
+    expect(res).toEqual([item1, item2, item3, newItem]);
     expect(isPaginationDone).toBe(true);
     expect(cacheSet.mock.calls).toEqual([
       [
@@ -60,7 +56,7 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
           items: {
             '1': item1,
             '2': item2,
-            '3': updatedItem,
+            '3': item3,
             '4': newItem,
           },
           createdAt: isoTs('2022-10-15 12:00'),

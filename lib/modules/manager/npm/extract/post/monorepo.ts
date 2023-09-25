@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { logger } from '../../../../logger';
-import { getParentDir, getSiblingFileName } from '../../../../util/fs';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
-import { detectPnpmWorkspaces } from './pnpm';
-import { matchesAnyPattern } from './utils';
+import { logger } from '../../../../../logger';
+import { getParentDir, getSiblingFileName } from '../../../../../util/fs';
+import type { PackageFile } from '../../../types';
+import type { NpmManagerData } from '../../types';
+import { detectPnpmWorkspaces } from '../pnpm';
+import { matchesAnyPattern } from '../utils';
 
 export async function detectMonorepos(
   packageFiles: Partial<PackageFile<NpmManagerData>>[]

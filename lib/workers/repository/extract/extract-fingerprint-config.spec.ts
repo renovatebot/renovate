@@ -20,7 +20,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
         },
       },
       enabledManagers: ['npm', 'regex'],
-      regexManagers: [
+      customManagers: [
         {
           customType: 'regex',
           fileMatch: ['js', '***$}{]]['],

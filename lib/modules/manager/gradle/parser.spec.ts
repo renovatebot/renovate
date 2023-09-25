@@ -940,6 +940,11 @@ describe('modules/manager/gradle/parser', () => {
 
         object Libraries {
           val deps = mapOf("api" to "org.slf4j:slf4j-api:\${Versions.baz}")
+          val deps2 = listOf(
+            "androidx.appcompat:appcompat:4.5.6",
+            "androidx.core:core-ktx:\${Versions.baz}",
+            listOf("androidx.webkit:webkit:\${Versions.baz}")
+          )
           val dep: String = "foo:bar:" + Versions.baz
         }
       `;
@@ -955,6 +960,20 @@ describe('modules/manager/gradle/parser', () => {
         deps: [
           {
             depName: 'org.slf4j:slf4j-api',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+          {
+            depName: 'androidx.appcompat:appcompat',
+            currentValue: '4.5.6',
+          },
+          {
+            depName: 'androidx.core:core-ktx',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+          {
+            depName: 'androidx.webkit:webkit',
             groupName: 'Versions.baz',
             currentValue: '1.2.3',
           },

@@ -109,7 +109,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       httpMock
         .scope(matchHost)
         .get('/api/v1/repos/meno/dropzone/tags')
-        .times(8)
         .reply(200, [
           {
             name: 'v5.2.0',
@@ -223,7 +222,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       httpMock
         .scope(matchHost)
         .get('/api/v1/repos/meno/dropzone/tags')
-        .times(8)
         .reply(200, [])
         .get('/api/v1/repos/meno/dropzone/contents')
         .times(4)
@@ -259,7 +257,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       httpMock
         .scope(matchHost)
         .get('/api/v1/repos/meno/dropzone/tags')
-        .times(8)
         .replyWithError('Unknown gitea Repo')
         .get('/api/v1/repos/meno/dropzone/contents')
         .times(4)

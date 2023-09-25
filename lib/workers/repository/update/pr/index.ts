@@ -99,7 +99,7 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
       0
     );
   }
-  return pr.reviewers ? pr.reviewers.length > 0 : false;
+  return is.nonEmptyArray(pr.reviewers);
 }
 
 // Ensures that PR exists with matching title/body

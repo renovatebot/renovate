@@ -24,7 +24,10 @@ export function azureObj(): azure.WebApi {
     throw new Error(`No config found for azure`);
   }
   const authHandler = getAuthenticationHandler(config);
-  return new azure.WebApi(endpoint, authHandler);
+  return new azure.WebApi(endpoint, authHandler, {
+    allowRetries: true,
+    maxRetries: 2,
+  });
 }
 
 export function gitApi(): Promise<IGitApi> {

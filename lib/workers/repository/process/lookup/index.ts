@@ -171,6 +171,12 @@ export async function lookupUpdates(
           unconstrainedValue ||
           versioning.matches(v.version, config.currentValue!)
       );
+      if (!allSatisfyingVersions.length) {
+        logger.debug(
+          `Found no satisfying versions with '${config.versioning}' versioning`
+        );
+      }
+
       if (config.rollbackPrs && !allSatisfyingVersions.length) {
         const rollback = getRollbackUpdate(config, allVersions, versioning);
         // istanbul ignore if
