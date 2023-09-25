@@ -1,13 +1,15 @@
-This datasource can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
+You can use this datasource plus [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to update git-based dependencies that are not natively supported by Renovate.
 
-This datasource returns a reference from a Git repository.
+The `git-refs` datasource returns a reference from a Git repository.
+
 The `packageName` must be a fully qualified domain name.
-To fetch the latest digest of a reference instead of the named reference, specify the reference as the `currentValue` and match on the `currentDigest`.
+
+To fetch the latest _digest_ of a reference instead of the named reference: put the named reference in `currentValue` and match on the `currentDigest`.
 
 **Usage example**
 
-The following is an example where you would maintain the HEAD digest of the `master` branch of a repository.
-You would configure a custom manager in `renovate.json` for files named `versions.ini`:
+Say you want to maintain the `HEAD` digest of the `master` branch of a repository.
+You would configure a custom manager in your Renovate config file for files named `versions.ini`:
 
 ```json
 {
