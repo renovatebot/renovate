@@ -25,9 +25,7 @@ export interface GetAdditionalFilesResult {
 
 export type WriteExistingFilesResult = Record<
   string,
-  {
-    npmrc?: string | null;
-  }
+  string | null
 >;
 
 export interface GenerateLockFileResult {

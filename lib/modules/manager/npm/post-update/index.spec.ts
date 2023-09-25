@@ -206,7 +206,7 @@ describe('modules/manager/npm/post-update/index', () => {
       );
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
+      ).resolves.toStrictEqual({ 'packages/core/.npmrc': null });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
@@ -220,7 +220,7 @@ describe('modules/manager/npm/post-update/index', () => {
           { ...updateConfig, reuseLockFiles: false },
           additionalFiles
         )
-      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
+      ).resolves.toStrictEqual({ 'packages/core/.npmrc': null });
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.deleteLocalFile.mock.calls).toEqual([
@@ -246,7 +246,7 @@ describe('modules/manager/npm/post-update/index', () => {
             { packageFile: 'packages/core/package.json', managerData: {} },
           ],
         })
-      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
+      ).resolves.toStrictEqual({ 'packages/core/.npmrc': null });
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.writeLocalFile).toHaveBeenCalledWith(
@@ -276,7 +276,7 @@ describe('modules/manager/npm/post-update/index', () => {
           ],
         })
       ).resolves.toStrictEqual({
-        'packages/core': { npmrc: '# original npmrc' },
+        'packages/core/.npmrc': '# original npmrc',
       });
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
@@ -304,7 +304,7 @@ describe('modules/manager/npm/post-update/index', () => {
             ],
           }
         )
-      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
+      ).resolves.toStrictEqual({ 'packages/core/.npmrc': null });
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.writeLocalFile).toHaveBeenCalledWith(
@@ -320,7 +320,7 @@ describe('modules/manager/npm/post-update/index', () => {
       );
       await expect(
         writeExistingFiles(updateConfig, additionalFiles)
-      ).resolves.toStrictEqual({ 'packages/core': { npmrc: null } });
+      ).resolves.toStrictEqual({ 'packages/core/.npmrc': null });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
@@ -353,9 +353,8 @@ describe('modules/manager/npm/post-update/index', () => {
     it('works', async () => {
       await expect(
         resetExistingFiles({
-          'packages/none': {},
-          'packages/restore': { npmrc: '# original npmrc' },
-          'packages/delete': { npmrc: null },
+          'packages/restore/.npmrc': '# original npmrc',
+          'packages/delete/.npmrc': null,
         })
       ).resolves.toBeUndefined();
 

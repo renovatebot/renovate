@@ -160,10 +160,7 @@ export async function writeExistingFiles(
     const npmrc = packageFile.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
-      result[basedir] ??= {};
-      if (result[basedir].npmrc === undefined) {
-        result[basedir].npmrc = await getNpmrcContent(basedir);
-      }
+      result[npmrcFilename] = await getNpmrcContent(basedir);
       try {
         await writeLocalFile(npmrcFilename, `${npmrc}\n`);
       } catch (err) /* istanbul ignore next */ {
@@ -304,9 +301,19 @@ export async function resetExistingFiles(
   filesToReset: WriteExistingFilesResult
 ): Promise<void> {
   logger.debug({ filesToReset }, 'Resetting package.json files');
-  for (const [dir, files] of Object.entries(filesToReset)) {
-    if (files.npmrc !== undefined) {
-      await resetNpmrcContent(dir, files.npmrc);
+  for (const [filePath, originalContent] of Object.entries(filesToReset)) {
+    if (originalContent) {
+      try {
+        await writeLocalFile(filePath, originalContent);
+      } catch /* istanbul ignore next */ {
+        logger.warn(`Unable to reset ${filePath} to original contents`);
+      }
+    } else {
+      try {
+        await deleteLocalFile(filePath);
+      } catch /* istanbul ignore next */ {
+        logger.warn(`Unable to delete custom ${filePath}`);
+      }
     }
   }
 }
