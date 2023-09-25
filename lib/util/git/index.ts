@@ -661,11 +661,7 @@ export async function isBranchModified(
             .split('\n')
         ),
       ];
-      if (branchAuthors.length > 1) {
-        logger.debug(
-          `Found multiple git authors in branch: ${branchAuthors.join(', ')}`
-        );
-      }
+      logger.debug(`Git authors in branch: ${branchAuthors.join(', ')}`);
     } else {
       logger.debug(
         `branch.isModified(): checking last author of ${branchName}`
