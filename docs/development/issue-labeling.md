@@ -204,7 +204,7 @@ Add a label `auto:needs-details` to discussions which need more details to move 
 
 Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by istanbul ignoring code with the `// istanbul ignore` comment.
 
-Add a label `auto:no-done-comments` if PR authors add comments like "Done" to review comments instead of requesting a new review through GitHub's UI.
+Add a label `auto:no-done-comments` if PR authors unnecessary "Done" comments, or type comments to ask for a review instead of requesting a new review through GitHub's UI.
 
 Add a label `auto:reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 
