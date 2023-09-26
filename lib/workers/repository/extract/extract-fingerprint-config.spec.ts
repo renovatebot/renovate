@@ -38,8 +38,8 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
       enabled: true,
-      fileList: [],
       fileMatch: ['(^|/)package\\.json$', 'hero.json'],
+      fileMatches: [],
       ignorePaths: ['ignore-path-2'],
       includePaths: ['include-path-2'],
       manager: 'npm',
@@ -56,7 +56,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       fileMatch: ['js', '***$}{]]['],
       ignorePaths: ['ignore-path-1'],
       includePaths: ['include-path-1'],
-      fileList: [],
+      fileMatches: [],
       matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
       datasourceTemplate: 'maven',
       versioningTemplate: 'gradle',
@@ -83,8 +83,8 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
       enabled: true,
-      fileList: [],
       fileMatch: ['(^|/)package\\.json$', 'hero.json'],
+      fileMatches: [],
       ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
       includePaths: [],
       manager: 'npm',
@@ -99,11 +99,11 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       )
     ).toEqual({
       enabled: true,
-      fileList: [],
       fileMatch: [
         '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
         '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
       ],
+      fileMatches: [],
       ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
       includePaths: [],
       manager: 'dockerfile',
