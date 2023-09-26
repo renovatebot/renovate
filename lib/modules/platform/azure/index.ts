@@ -9,6 +9,8 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import JSON5 from 'json5';
+import upath from 'upath';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -182,7 +184,12 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return raw ? parseJsonWithFallback(raw) : null;
+  const fileType = upath.extname(fileName);
+  if (!raw) {
+    return null;
+  }
+
+  return fileType === '.json5' ? JSON5.parse(raw) : parseJsonWithFallback(raw);
 }
 
 export async function initRepo({

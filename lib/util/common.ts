@@ -68,15 +68,15 @@ export function parseJsonWithFallback(content: string): any {
   try {
     parsedJson = JSON.parse(content);
   } catch (err) {
-try {
-    parsedJson = JSON5.parse(content);
-    logger.warn(
-      'JSON5.parse was used to parse the JSON data. Please check your json file'
-    );
- } catch (err) {
-      logger.warn('Invalid JSON format')
+    try {
+      parsedJson = JSON5.parse(content);
+      logger.warn(
+        'JSON5.parse was used to parse the JSON data. Please check your json file'
+      );
+    } catch (err) {
+      logger.warn('Invalid JSON format');
       throw err;
- }
+    }
   }
 
   return parsedJson;

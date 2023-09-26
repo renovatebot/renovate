@@ -1,4 +1,5 @@
 import JSON5 from 'json5';
+import upath from 'upath';
 import { logger } from '../../logger';
 import { parseJsonWithFallback } from '../../util/common';
 import { regEx } from '../../util/regex';
@@ -88,9 +89,12 @@ export async function fetchPreset({
   return jsonContent;
 }
 
-export function parsePreset(content: string, isJson5: boolean): Preset {
+export function parsePreset(content: string, fileName: string): Preset {
+  const fileType = upath.extname(fileName);
   try {
-    return isJson5 ? JSON5.parse(content) : parseJsonWithFallback(content);
+    return fileType === '.json5'
+      ? JSON5.parse(content)
+      : parseJsonWithFallback(content);
   } catch (err) {
     throw new Error(PRESET_INVALID_JSON);
   }
