@@ -103,13 +103,7 @@ You can request a review from one of the maintainers, in case this is needed to 
 ### Lock and unlock discussions
 
 Sometimes a discussion can go sour, like when people call each other names, or post spam, or veer off-topic.
-In those cases you can lock the discussion to prevent further escalation.
-
-### Individually convert issues to discussions
-
-Sometimes an issue that's raised at the Renovate repository is not really a bug or a feature request.
-This happens most often because a user files a bug for things that are really a mistake in the Renovate configuration.
-Those "configuration help" issues are then moved to the discussions board for further help.
+Ideally warn the user with an `auto:bad-vibes` label first, and then use `auto:discussion-closed` if problems persist.
 
 ### Moving issues from `status:requirements` to `status:ready`
 
