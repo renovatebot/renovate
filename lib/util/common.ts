@@ -75,6 +75,7 @@ try {
     );
  } catch (err) {
       logger.warn('Invalid JSON format')
+      throw err;
  }
   }
 
