@@ -184,7 +184,7 @@ This label is sometimes picked up by tools or websites that try to encourage peo
 
 Add the label `help wanted` to indicate that we need the original poster or someone else to do some work or it is unlikely to get done.
 
-Add a label `auto:bad-vibes` to any discussion containing disrespectful comments such as excessive criticism or ungratefulness.
+Add a label `auto:bad-vibes` to any discussion containing rude comments such as excessive criticism or ungratefulness.
 
 Add a label `auto:discussion-closed` to close a discussion which had persistent or very bad vibes.
 
@@ -200,9 +200,9 @@ Add a label `auto:logs` to indicate that there's a problem with the logs, and th
 
 Add a label `auto:needs-code-formatting` to discussions with logs/code that needs to be formatted.
 
-Add a label `auto:needs-details` to discussions which are lacking sufficient details to move forward.
+Add a label `auto:needs-details` to discussions which need more details to move forward.
 
-Add a label `auto:no-coverage-ignore` if PR authors have unnecessarily avoided unit tests by istanbul ignoring code.
+Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by istanbul ignoring code with the `// istanbul ignore` comment.
 
 Add a label `auto:no-done-comments` if PR authors add comments like "Done" to review comments instead of requesting a new review through GitHub's UI.
 
