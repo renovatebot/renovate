@@ -21,7 +21,7 @@ async function validate(
   config: RenovateConfig,
   strict: boolean,
   isPreset = false,
-  isFileConfig = false
+  isGlobalConfig = false
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -41,7 +41,7 @@ async function validate(
     massagedConfig,
     isPreset,
     undefined,
-    isFileConfig
+    isGlobalConfig
   );
   if (res.errors.length) {
     logger.error(
