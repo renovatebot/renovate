@@ -186,6 +186,14 @@ describe('modules/manager/kustomize/extract', () => {
       expect(pkg).toBeNull();
     });
 
+    it('should return null on invalid input', () => {
+      const pkg = extractImage({
+        name: 3,
+        newTag: '',
+      });
+      expect(pkg).toBeNull();
+    });
+
     it('should correctly extract a default image', () => {
       const sample = {
         currentDigest: undefined,
