@@ -99,6 +99,7 @@ describe('util/common', () => {
 
     it('throws error for invalid json', () => {
       expect(() => parseJsonWithFallback(invalidJsonString)).toThrow();
+      expect(logger.logger.warn).toHaveBeenCalledWith('Invalid JSON format');
     });
 
     it('catches and warns if content parsing faield with JSON.parse but not with JSON5.parse', () => {
