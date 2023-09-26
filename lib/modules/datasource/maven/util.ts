@@ -6,7 +6,7 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
-import type { HttpResponse } from '../../../util/http/types';
+import type { HttpOptions, HttpRequestOptions, HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
