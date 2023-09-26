@@ -30,6 +30,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
@@ -349,7 +350,7 @@ export async function processBranch(
           upgrade.releaseTimestamp
         ) {
           const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-          if (timeElapsed < (toMs(upgrade.minimumReleaseAge) ?? 0)) {
+          if (timeElapsed < coerceNumber(toMs(upgrade.minimumReleaseAge))) {
             logger.debug(
               {
                 depName: upgrade.depName,
@@ -855,7 +856,7 @@ export async function processBranch(
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
         // skip automerge if there is a new commit since status checks aren't done yet
-        if (!commitSha || config.ignoreTests) {
+        if (config.ignoreTests === true || !commitSha) {
           logger.debug('checking auto-merge');
           const prAutomergeResult = await checkAutoMerge(pr, config);
           if (prAutomergeResult?.automerged) {

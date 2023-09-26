@@ -4,6 +4,7 @@ import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
+import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
@@ -45,7 +46,7 @@ export async function postUpgradeCommandsExecutor(
       },
       `Checking for post-upgrade tasks`
     );
-    const commands = upgrade.postUpgradeTasks?.commands ?? [];
+    const commands = upgrade.postUpgradeTasks?.commands;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
@@ -136,7 +137,7 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
-      for (const relativePath of status.deleted || []) {
+      for (const relativePath of coerceArray(status.deleted)) {
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(
