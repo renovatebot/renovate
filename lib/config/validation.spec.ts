@@ -28,19 +28,6 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
-    it('catches global options in repo config', async () => {
-      const config = {
-        binarySource: 'something',
-      };
-      const { errors } = await configValidation.validateConfig(config);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchObject([
-        {
-          message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
-        },
-      ]);
-    });
-
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
@@ -930,6 +917,125 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    describe('globalOptions()', () => {
+      it('validates options of string type', async () => {
+        const config = {
+          binarySource: 'docker',
+          gitUrl: false as never,
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          undefined,
+          undefined,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toMatchObject([
+          {
+            message: 'Configuration option `gitUrl` should be a string',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('validates options of boolean type', async () => {
+        const config = {
+          unicodeEmoji: false,
+          detectGlobalManagerConfig: 'invalid-type' as never,
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          undefined,
+          undefined,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toMatchObject([
+          {
+            message: `Configuration option \`detectGlobalManagerConfig\` should be boolean. Found: ${JSON.stringify(
+              'invalid-type'
+            )} (string)`,
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('validates options of integer type', async () => {
+        const config = {
+          prCommitsPerRunLimit: 2,
+          gitTimeout: 'invalid-type' as never,
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          undefined,
+          undefined,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toMatchObject([
+          {
+            message: `Configuration option \`gitTimeout\` should be an integer. Found: ${JSON.stringify(
+              'invalid-type'
+            )} (string)`,
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('validates options of array type', async () => {
+        const config = {
+          allowedPostUpgradeCommands: ['cmd'],
+          checkedBranches: 'invalid-type' as never,
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          undefined,
+          undefined,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Configuration option `checkedBranches` should be a list (Array)',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('validates options of object type', async () => {
+        const config = {
+          productLinks: {
+            documentation: 'https://docs.renovatebot.com/',
+            help: 'https://github.com/renovatebot/renovate/discussions',
+            homepage: 'https://github.com/renovatebot/renovate',
+          },
+          secrets: 'invalid-type' as never,
+          cacheTtlOverride: {
+            someField: false as never,
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          undefined,
+          undefined,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toMatchObject([
+          {
+            message: 'Configuration option `secrets` should be a json object',
+            topic: 'Configuration Error',
+          },
+          {
+            topic: 'Configuration Error',
+            message:
+              'Invalid `cacheTtlOverride.cacheTtlOverride.someField` configuration: value is not a string',
+          },
+        ]);
+      });
     });
   });
 });

@@ -145,14 +145,7 @@ export async function validateConfig(
     }
     if (optionGlobals.has(key)) {
       if (isGlobalConfig) {
-        validateGlobalConfig(
-          key,
-          val,
-          optionTypes[key],
-          errors,
-          currentPath,
-          parentPath
-        );
+        validateGlobalConfig(key, val, optionTypes[key], errors, currentPath);
         continue;
       } else {
         // token is a global config option and a field of repo config option hostRules.encrypted
@@ -720,8 +713,7 @@ function validateGlobalConfig(
   val: unknown,
   type: string,
   errors: ValidationMessage[],
-  currentPath: string | undefined,
-  parentPath: string | undefined
+  currentPath: string | undefined
 ): void {
   if (type === 'string') {
     if (!is.string(val)) {
@@ -748,8 +740,8 @@ function validateGlobalConfig(
         )} (${typeof val})`,
       });
     }
-  } else if (type === 'array' && val) {
-    if (is.array(val)) {
+  } else if (type === 'array') {
+    if (!is.array(val)) {
       errors.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a list (Array)`,
