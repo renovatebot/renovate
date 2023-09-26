@@ -25,7 +25,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
-      delete config.regexManagers; // for coverage
+      delete config.customManagers; // for coverage
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('ansible');
     });
@@ -58,7 +58,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
-      config.regexManagers = [
+      config.customManagers = [
         { customType: 'regex', fileMatch: ['README'], matchStrings: [''] },
       ];
       const res = await extractAllDependencies(config);

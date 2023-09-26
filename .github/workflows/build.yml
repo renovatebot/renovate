@@ -94,7 +94,7 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
@@ -150,7 +150,7 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
@@ -172,7 +172,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -215,7 +215,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -255,7 +255,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -264,13 +264,16 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@8f3516061301755c97ff833a8e933f09282cc5b5 # v11.0.0
+        uses: DavidAnson/markdownlint-cli2-action@ed4dec634fd2ef689c7061d5647371d8248064f1 # v13.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
 
       - name: Lint documentation
         run: pnpm lint-documentation
+
+      - name: Markdown lint
+        run: pnpm markdown-lint
 
   lint-other:
     needs: [setup]
@@ -279,13 +282,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - name: Type check
+        run: pnpm type-check
 
       - name: Lint project file structure
         run: pnpm ls-lint
@@ -313,7 +319,7 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -374,7 +380,7 @@ jobs:
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
@@ -404,7 +410,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 99.61 \
+            --branches 100 \
             --functions 100 \
             --lines 100 \
             --statements 100
@@ -449,7 +455,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -476,7 +482,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -502,7 +508,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Setup Node.js
         uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
@@ -545,7 +551,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
 

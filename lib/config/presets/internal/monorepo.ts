@@ -35,6 +35,8 @@ const repoGroups = {
   'aspnet aspnetwebstack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet extensions': 'https://github.com/aspnet/Extensions',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
+  'aspnet-health-checks':
+    'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
@@ -323,6 +325,7 @@ const repoGroups = {
   'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
+  'mongo-csharp-driver': 'https://github.com/mongodb/mongo-csharp-driver',
   mstest: 'https://github.com/microsoft/testfx',
   'mutation-testing-elements':
     'https://github.com/stryker-mutator/mutation-testing-elements',
@@ -369,6 +372,8 @@ const repoGroups = {
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
+  'prometheus-net': 'https://github.com/prometheus-net/prometheus-net',
+  promster: 'https://github.com/tdeekens/promster',
   quartznet: 'https://github.com/quartznet/quartznet',
   'reach-ui': 'https://github.com/reach/reach-ui',
   react: 'https://github.com/facebook/react',
@@ -384,6 +389,7 @@ const repoGroups = {
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   reakit: 'https://github.com/reakit/reakit',
   redwood: 'https://github.com/redwoodjs/redwood',
+  refit: 'https://github.com/reactiveui/refit',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   remark: 'https://github.com/remarkjs/remark',
   remix: 'https://github.com/remix-run/remix',
@@ -445,7 +451,12 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   xstate: 'https://github.com/statelyai/xstate',
   xterm: 'https://github.com/xtermjs/xterm.js',
-  'xunit-dotnet': 'https://github.com/xunit/xunit',
+  'xunit-dotnet': [
+    'https://github.com/xunit/assert.xunit',
+    'https://github.com/xunit/visualstudio.xunit',
+    'https://github.com/xunit/xunit',
+    'https://github.com/xunit/xunit.analyzers',
+  ],
   yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
@@ -472,8 +483,10 @@ const patternGroups = {
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
+  forge: '^@forge/',
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
+  'prometheus-simpleclient': '^io.prometheus:simpleclient',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
