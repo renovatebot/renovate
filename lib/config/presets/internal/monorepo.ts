@@ -454,7 +454,7 @@ const repoGroups = {
     'https://github.com/xunit/assert.xunit',
     'https://github.com/xunit/visualstudio.xunit',
     'https://github.com/xunit/xunit',
-    'https://github.com/xunit/xunit.analyzers'
+    'https://github.com/xunit/xunit.analyzers',
   ],
   yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
