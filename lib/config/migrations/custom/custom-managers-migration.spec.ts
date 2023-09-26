@@ -1,12 +1,12 @@
 import { partial } from '../../../../test/util';
 import type { CustomManager } from '../../../modules/manager/custom/types';
-import { RegexManagersMigration } from './regex-managers-migration';
+import { CustomManagersMigration } from './custom-managers-migration';
 
-describe('config/migrations/custom/regex-managers-migration', () => {
+describe('config/migrations/custom/custom-managers-migration', () => {
   it('migrates', () => {
-    expect(RegexManagersMigration).toMigrate(
+    expect(CustomManagersMigration).toMigrate(
       {
-        regexManagers: partial<CustomManager>([
+        customManagers: partial<CustomManager>([
           {
             fileMatch: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
@@ -23,7 +23,7 @@ describe('config/migrations/custom/regex-managers-migration', () => {
         ]),
       },
       {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['js', '***$}{]]['],

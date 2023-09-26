@@ -3,7 +3,7 @@ import { getLockedDependencies } from './get-locked';
 
 jest.mock('../../../../../../util/fs');
 
-const packageLockJson = Fixtures.getJson('package-lock.json');
+const packageLockJson = Fixtures.getJson('package-lock-v1.json');
 const bundledPackageLockJson = Fixtures.getJson('bundled.package-lock.json');
 
 describe('modules/manager/npm/update/locked-dependency/package-lock/get-locked', () => {
