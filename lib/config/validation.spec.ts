@@ -28,6 +28,19 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
+    it('catches global options in repo config', async () => {
+      const config = {
+        binarySource: 'something',
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchObject([
+        {
+          message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        },
+      ]);
+    });
+
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
