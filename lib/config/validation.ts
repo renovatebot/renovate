@@ -144,16 +144,7 @@ export async function validateConfig(
       });
     }
     if (optionGlobals.has(key)) {
-      if (!isGlobalConfig) {
-        // token is a global config option and a field of repo config option hostRules.encrypted
-        if (key === 'token' && parentPath?.includes('hostRules')) {
-          continue;
-        }
-        errors.push({
-          topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
-        });
-      } else {
+      if (isGlobalConfig) {
         validateGlobalConfig(
           key,
           val,
@@ -163,6 +154,14 @@ export async function validateConfig(
           parentPath
         );
         continue;
+      } else {
+        // token is a global config option and a field of repo config option hostRules.encrypted
+        if (!(key === 'token' && parentPath?.includes('hostRules'))) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+          });
+        }
       }
     }
     if (key === 'enabledManagers' && val) {
@@ -723,7 +722,7 @@ function validateGlobalConfig(
   errors: ValidationMessage[],
   currentPath: string | undefined,
   parentPath: string | undefined
-) {
+): void {
   if (type === 'string') {
     if (!is.string(val)) {
       errors.push({
