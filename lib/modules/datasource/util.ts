@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import {GoogleAuth} from "google-auth-library";
-import {logger} from "../../logger";
+import { GoogleAuth } from 'google-auth-library';
+import { logger } from '../../logger';
 import type { HttpResponse } from '../../util/http/types';
-import {addSecretForSanitizing} from "../../util/sanitize";
+import { addSecretForSanitizing } from '../../util/sanitize';
 
 const JFROG_ARTIFACTORY_RES_HEADER = 'x-jfrog-version';
 

@@ -6,14 +6,18 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
-import type { HttpOptions, HttpRequestOptions, HttpResponse } from '../../../util/http/types';
+import type {
+  HttpOptions,
+  HttpRequestOptions,
+  HttpResponse,
+} from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
-import {getGoogleAccessToken} from "../util";
+import { getGoogleAccessToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
   HttpResourceCheckResult,
@@ -65,7 +69,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
-  opts: HttpOptions & HttpRequestOptions<string> = {},
+  opts: HttpOptions & HttpRequestOptions<string> = {}
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
@@ -141,19 +145,22 @@ export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
   return null;
 }
 
-export async function downloadArtifactRegistryProtocol(http: Http, pkgUrl: URL): Promise<Partial<HttpResponse>> {
-  const opts: HttpOptions = {}
+export async function downloadArtifactRegistryProtocol(
+  http: Http,
+  pkgUrl: URL
+): Promise<Partial<HttpResponse>> {
+  const opts: HttpOptions = {};
 
   const accessToken = await getGoogleAccessToken();
   if (accessToken) {
-    const auth = Buffer.from(
-      `${'oauth2accesstoken'}:${accessToken}`
-    ).toString('base64');
-    opts.headers = {authorization: `Basic ${auth}`};
+    const auth = Buffer.from(`${'oauth2accesstoken'}:${accessToken}`).toString(
+      'base64'
+    );
+    opts.headers = { authorization: `Basic ${auth}` };
   }
-  const url = pkgUrl.toString().replace("artifactregistry:", "https:")
+  const url = pkgUrl.toString().replace('artifactregistry:', 'https:');
 
-  return downloadHttpProtocol(http, url, opts)
+  return downloadHttpProtocol(http, url, opts);
 }
 
 async function checkHttpResource(
@@ -282,7 +289,7 @@ export async function downloadMavenXml(
         body: rawContent,
         statusCode,
       } = await downloadArtifactRegistryProtocol(http, pkgUrl));
-      break
+      break;
     default:
       logger.debug(`Unsupported Maven protocol url:${pkgUrl.toString()}`);
       return {};
