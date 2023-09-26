@@ -70,9 +70,9 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       configFileRaw = null;
     }
     if (configFileRaw) {
-      let configFileParsed = configFileName.endsWith('json')
-        ? parseJsonWithFallback(configFileRaw)
-        : JSON5.parse(configFileRaw);
+      let configFileParsed = configFileName.endsWith('.json5')
+        ? JSON5.parse(configFileRaw);
+        : parseJsonWithFallback(configFileRaw);
       if (configFileName !== 'package.json') {
         return { configFileName, configFileRaw, configFileParsed };
       }
