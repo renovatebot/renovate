@@ -4,7 +4,6 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import pMap from 'p-map';
 import semver from 'semver';
-import { z } from 'zod';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -64,6 +63,7 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
+import { LastPipelineId } from './schema';
 
 let config: {
   repository: string;
@@ -920,13 +920,6 @@ export async function setBranchStatus({
 
   if (branchSha) {
     const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
-    const LastPipelineId = z
-      .object({
-        last_pipeline: z.object({
-          id: z.number(),
-        }),
-      })
-      .transform(({ last_pipeline }) => last_pipeline.id);
     await gitlabApi
       .getJsonSafe(commitUrl, LastPipelineId)
       .onValue((pipelineId) => {
