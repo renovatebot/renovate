@@ -11,7 +11,7 @@ export function assignKeys<
   for (const key of keys) {
     const val = right[key];
     if (!is.nullOrUndefined(val)) {
-      left[key] = val;
+      left[key] = val as unknown as Left[typeof key];
     }
   }
   return left;

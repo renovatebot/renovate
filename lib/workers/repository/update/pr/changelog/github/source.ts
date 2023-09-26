@@ -11,9 +11,10 @@ export class GitHubChangeLogSource extends ChangeLogSource {
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return config.sourceUrl!.startsWith('https://github.com/')
+    const baseUrl = this.getBaseUrl(config);
+    return baseUrl.startsWith('https://github.com/')
       ? 'https://api.github.com/'
-      : this.getBaseUrl(config) + 'api/v3/';
+      : baseUrl + 'api/v3/';
   }
 
   getCompareURL(

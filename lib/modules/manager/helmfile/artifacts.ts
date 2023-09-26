@@ -75,7 +75,7 @@ export async function updateArtifacts({
     const doc = parseDoc(newPackageFileContent);
 
     for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
-      const loginCmd = generateRegistryLoginCmd(
+      const loginCmd = await generateRegistryLoginCmd(
         value.name,
         `https://${value.url}`,
         // this extracts the hostname from url like format ghcr.ip/helm-charts
