@@ -13,12 +13,15 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
+import { find as _find } from '../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import * as pipenv from '.';
+import * as _pipenv from '.';
 
 const datasource = mocked(_datasource);
+const pipenv = mocked(_pipenv);
+const find = mocked(_find);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
@@ -26,6 +29,7 @@ jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http');
 jest.mock('../../datasource', () => mockDeep());
+jest.mock('../pipenv/extract');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -327,5 +331,80 @@ describe('modules/manager/pipenv/artifacts', () => {
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('passes private credential environment vars', async () => {
+    const pipfile = {
+      source: [
+        {
+          name: 'private',
+          url: 'https://$USERNAME:${PASSWORD}@mypypi.example.com/simple',
+        },
+      ],
+    };
+    pipenv.extractPackageFile.mockResolvedValueOnce(pipfile);
+    find.mockReturnValueOnce({
+      username: 'usernameOne',
+      password: 'passwordTwo',
+    });
+
+    fs.ensureCacheDir.mockResolvedValueOnce(
+      '/tmp/renovate/cache/others/pipenv'
+    );
+    fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
+
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: { ...config, constraints: { python: '== 3.8.*' } },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+
+    // // poetry.lock
+    // fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+    // fs.readLocalFile.mockResolvedValueOnce(null);
+    // // pyproject.lock
+    // fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+    // fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+    // const execSnapshots = mockExecAll();
+    // fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+    // hostRules.find.mockReturnValueOnce({
+    //   username: 'usernameOne',
+    //   password: 'passwordOne',
+    // });
+    // hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
+    // hostRules.find.mockReturnValueOnce({});
+    // hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
+    // const updatedDeps = [{ depName: 'dep1' }];
+    // expect(
+    //   await updateArtifacts({
+    //     packageFileName: 'pyproject.toml',
+    //     updatedDeps,
+    //     newPackageFileContent: pyproject10toml,
+    //     config,
+    //   })
+    // ).toEqual([
+    //   {
+    //     file: {
+    //       type: 'addition',
+    //       path: 'pyproject.lock',
+    //       contents: 'New poetry.lock',
+    //     },
+    //   },
+    // ]);
+    // expect(hostRules.find.mock.calls).toHaveLength(4);
+    // expect(execSnapshots).toMatchObject([
+    //   { cmd: 'poetry update --lock --no-interaction dep1' },
+    // ]);
   });
 });
