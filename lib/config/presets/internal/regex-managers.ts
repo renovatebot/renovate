@@ -50,7 +50,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         datasourceTemplate:
           '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
-        fileMatch: ['^pom\\.xml$'],
+        fileMatch: ['(^|/)pom\\.xml$'],
         matchStrings: [
           '<!--\\s?renovate:( datasource=(?<datasource>[a-z-.]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
         ],
