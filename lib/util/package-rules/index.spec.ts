@@ -521,9 +521,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchPackagePrefixes: [
-            'foo'
-          ],
+          matchPackagePrefixes: ['foo'],
           matchUpdateTypes: ['minor', 'patch'],
           enabled: true,
         },
@@ -535,7 +533,7 @@ describe('util/package-rules/index', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.enabled).toBeTrue();
-  })
+  });
 
   it('matches matchSourceUrlPrefixes', () => {
     const config: TestConfig = {
