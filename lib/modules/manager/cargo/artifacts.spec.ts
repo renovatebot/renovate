@@ -221,7 +221,7 @@ describe('modules/manager/cargo/artifacts', () => {
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +
-          'cargo update --manifest-path Cargo.toml --workspace' +
+          'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
@@ -273,7 +273,7 @@ describe('modules/manager/cargo/artifacts', () => {
         },
       },
       {
-        cmd: 'cargo update --manifest-path Cargo.toml --workspace',
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
