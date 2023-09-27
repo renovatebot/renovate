@@ -117,7 +117,6 @@ export function generateBranchName(update: RenovateConfig): void {
   if (update.updateType === 'minor' && update.separateMultipleMinor) {
     const newMinor = String(update.newMinor);
     update.branchName = update.branchName.replace('.x', `.${newMinor}.x`);
-    logger.info(update.branchName);
   }
   update.branchName = cleanBranchName(
     update.branchName,
