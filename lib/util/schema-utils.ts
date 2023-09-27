@@ -226,15 +226,6 @@ export const UtcDate = z
     return date;
   });
 
-export const Url = z.string().transform((str, ctx): URL => {
-  try {
-    return new URL(str);
-  } catch (e) {
-    ctx.addIssue({ code: 'custom', message: 'Invalid URL' });
-    return z.NEVER;
-  }
-});
-
 export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
     return load(str, { json: true }) as JsonValue;
