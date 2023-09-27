@@ -1449,6 +1449,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'boolean',
     default: false,
+    experimental: true,
   },
   {
     name: 'separateMinorPatch',
