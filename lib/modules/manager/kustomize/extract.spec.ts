@@ -188,7 +188,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should return null on invalid input', () => {
       const pkg = extractImage({
-        // @ts-expect-error
+        // @ts-expect-error: for testing
         name: 3,
         newTag: '',
       });
