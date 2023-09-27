@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { configRegexPredicate, isConfigRegex } from '../../util/regex';
+import { filterBlobOrRegexArray } from '../../util/pattern-match';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -49,7 +48,7 @@ export async function autodiscoverRepositories(
   }
 
   if (config.autodiscoverFilter) {
-    discovered = applyFilters(
+    discovered = filterBlobOrRegexArray(
       discovered,
       is.string(config.autodiscoverFilter)
         ? [config.autodiscoverFilter]
@@ -93,25 +92,4 @@ export async function autodiscoverRepositories(
     }
   }
   return { ...config, repositories: discovered };
-}
-
-export function applyFilters(repos: string[], filters: string[]): string[] {
-  const matched = new Set<string>();
-
-  for (const filter of filters) {
-    let res: string[];
-    if (isConfigRegex(filter)) {
-      const autodiscoveryPred = configRegexPredicate(filter);
-      if (!autodiscoveryPred) {
-        throw new Error(`Failed to parse regex pattern "${filter}"`);
-      }
-      res = repos.filter(autodiscoveryPred);
-    } else {
-      res = repos.filter(minimatch.filter(filter, { nocase: true }));
-    }
-    for (const repository of res) {
-      matched.add(repository);
-    }
-  }
-  return [...matched];
 }
