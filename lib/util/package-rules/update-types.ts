@@ -7,7 +7,7 @@ export class UpdateTypesMatcher extends Matcher {
     { updateType, isBump }: PackageRuleInputConfig,
     { matchUpdateTypes }: PackageRule
   ): boolean | null {
-    if (is.undefined(matchUpdateTypes)) {
+    if (is.undefined(updateType) || is.undefined(matchUpdateTypes)) {
       return null;
     }
     return (

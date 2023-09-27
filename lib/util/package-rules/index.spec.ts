@@ -517,6 +517,26 @@ describe('util/package-rules/index', () => {
     expect(res.y).toBeUndefined();
   });
 
+  it('skip matchUpdateType if updateType has not been specified', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchPackagePrefixes: [
+            'foo'
+          ],
+          matchUpdateTypes: ['minor', 'patch'],
+          enabled: true,
+        },
+      ],
+    };
+    const dep = {
+      depName: 'foo.bar',
+      enabled: false,
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.enabled).toBeTrue();
+  })
+
   it('matches matchSourceUrlPrefixes', () => {
     const config: TestConfig = {
       packageRules: [
