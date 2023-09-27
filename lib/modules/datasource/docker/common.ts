@@ -27,6 +27,7 @@ import {
 } from '../../../util/url';
 import { api as dockerVersioning } from '../../versioning/docker';
 import { ecrRegex, getECRAuthToken } from './ecr';
+import { getGoogleAccessToken, googleRegex } from './google';
 import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
@@ -98,6 +99,34 @@ export async function getAuthHeaders(
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
+      }
+    } else if (
+      googleRegex.test(registryHost) &&
+      typeof opts.username === 'undefined' &&
+      typeof opts.password === 'undefined' &&
+      typeof opts.token === 'undefined'
+    ) {
+      logger.trace(
+        { registryHost, dockerRepository },
+        `Using google auth for Docker registry`
+      );
+      try {
+        const accessToken = await getGoogleAccessToken();
+        if (accessToken) {
+          const auth = Buffer.from(
+            `${'oauth2accesstoken'}:${accessToken}`
+          ).toString('base64');
+          opts.headers = { authorization: `Basic ${auth}` };
+        }
+      } catch (err) /* istanbul ignore next */ {
+        if (err.message?.includes('Could not load the default credentials')) {
+          logger.once.debug(
+            { registryHost, dockerRepository },
+            'Could not get Google access token, using no auth'
+          );
+        } else {
+          throw err;
+        }
       }
     } else if (opts.username && opts.password) {
       logger.trace(
