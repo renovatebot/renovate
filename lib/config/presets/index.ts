@@ -148,6 +148,7 @@ export function parsePreset(input: string): ParsedPreset {
     'regexManagers',
     'replacements',
     'schedule',
+    'security',
     'workarounds',
   ];
   if (
@@ -183,9 +184,9 @@ export function parsePreset(input: string): ParsedPreset {
       throw new Error(PRESET_INVALID);
     }
     ({ repo, presetPath, presetName, tag } =
-      nonScopedPresetWithSubdirRegex.exec(str)?.groups ?? {});
+      nonScopedPresetWithSubdirRegex.exec(str)!.groups!);
   } else {
-    ({ repo, presetName, tag } = gitPresetRegex.exec(str)?.groups ?? {});
+    ({ repo, presetName, tag } = gitPresetRegex.exec(str)!.groups!);
 
     if (presetSource === 'npm' && !repo.startsWith('renovate-config-')) {
       repo = `renovate-config-${repo}`;

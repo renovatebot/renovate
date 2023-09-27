@@ -64,7 +64,9 @@ export async function getResourceUrl(
         ({ type, version }) => type === resourceType && semver.valid(version)
       )
       .sort((x, y) =>
-        x.version && y.version ? semver.compare(x.version, y.version) : 0
+        x.version && y.version
+          ? semver.compare(x.version, y.version)
+          : /* istanbul ignore next: hard to test */ 0
       );
     const { serviceId, version } = services.pop()!;
 
@@ -169,7 +171,7 @@ export async function getReleases(
     return null;
   }
 
-  // istanbul ignore if: only happens when no stable version exists
+  // istanbul ignore next: only happens when no stable version exists
   if (latestStable === null && catalogPages.length) {
     const last = catalogEntries.pop()!;
     latestStable = removeBuildMeta(last.version);

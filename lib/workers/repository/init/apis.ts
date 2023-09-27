@@ -34,6 +34,29 @@ async function validateOptimizeForDisabled(
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
+    /*
+     * The following is to support a use case within Mend customers where:
+     *  - Bot admins configure install the bot into every repo
+     *  - Bot admins configure `extends: [':disableRenovate'] in order to skip repos by default
+     *  - Repo users can push a `renovate.json` containing `extends: [':enableRenovate']` to re-enable Renovate
+     */
+    if (config.extends?.includes(':disableRenovate')) {
+      logger.debug(
+        'Global config disables Renovate - checking renovate.json to see if it is re-enabled'
+      );
+      if (
+        renovateConfig?.extends?.includes(':enableRenovate') ??
+        renovateConfig?.ignorePresets?.includes(':disableRenovate') ??
+        renovateConfig?.enabled
+      ) {
+        logger.debug('Repository config re-enables Renovate - continuing');
+      } else {
+        logger.debug(
+          'Repository config does not re-enable Renovate - skipping'
+        );
+        throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
+      }
+    }
   }
 }
 

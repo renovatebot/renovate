@@ -77,7 +77,6 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
     });

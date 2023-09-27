@@ -298,12 +298,12 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   let originalNpmrcContent: string | null = null;
   try {
     originalNpmrcContent = await readLocalFile(npmrcFilePath, 'utf8');
-    logger.debug('npmrc file found in repository');
   } catch /* istanbul ignore next */ {
-    logger.debug('No npmrc file found in repository');
     originalNpmrcContent = null;
   }
-
+  if (originalNpmrcContent) {
+    logger.debug(`npmrc file ${npmrcFilePath} found in repository`);
+  }
   return originalNpmrcContent;
 }
 
@@ -560,7 +560,7 @@ export async function getAdditionalFiles(
         lockFile: npmLock,
         stderr: res.stderr,
       });
-    } else {
+    } else if (res.lockFile) {
       const existingContent = await getFile(
         npmLock,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
@@ -574,7 +574,7 @@ export async function getAdditionalFiles(
           path: npmLock,
           // TODO: can this be undefined? (#22198)
 
-          contents: res.lockFile!.replace(tokenRe, ''),
+          contents: res.lockFile.replace(tokenRe, ''),
         });
       }
     }

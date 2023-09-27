@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked, partial } from '../../../../test/util';
@@ -24,7 +25,7 @@ const githubApiHost = 'https://api.github.com';
 
 jest.mock('timers/promises');
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http/queue');
 const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
 
@@ -33,7 +34,6 @@ const git: jest.Mocked<typeof _git> = mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -159,6 +159,67 @@ describe('modules/platform/github/index', () => {
           },
         ]);
       expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+    });
+
+    it('should autodetect email/user on default endpoint with GitHub App', async () => {
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({ token: 'x-access-token:ghs_123test' })
+      ).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+      expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
+    it('should throw error when cant request App information on default endpoint with GitHub App', async () => {
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' })
+      ).rejects.toThrowWithMessage(Error, 'Init: Authentication failure');
+    });
+
+    it('should autodetect email/user on custom endpoint with GitHub App', async () => {
+      httpMock
+        .scope('https://ghe.renovatebot.com', {
+          reqheaders: {
+            authorization: 'token ghs_123test',
+          },
+        })
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'x-access-token:ghs_123test',
+        })
+      ).toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor:
+          'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
     });
 
     it('should support custom endpoint', async () => {
@@ -1344,6 +1405,23 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatusCheck('somebranch', 'context-4');
       expect(res).toBeNull();
+    });
+
+    it('returns yellow if state not present in context object', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [
+          {
+            context: 'context-1',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatusCheck('somebranch', 'context-1');
+      expect(res).toBe('yellow');
     });
   });
 

@@ -1,5 +1,6 @@
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../constants';
@@ -14,13 +15,21 @@ import { parseUrl } from './url';
  */
 export function detectPlatform(
   url: string
-): 'azure' | 'bitbucket' | 'github' | 'gitlab' | null {
+): 'azure' | 'bitbucket' | 'gitea' | 'github' | 'gitlab' | null {
   const { hostname } = parseUrl(url) ?? {};
   if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
     return 'azure';
   }
   if (hostname === 'bitbucket.org' || hostname?.includes('bitbucket')) {
     return 'bitbucket';
+  }
+  if (
+    hostname &&
+    (['gitea.com', 'codeberg.org'].includes(hostname) ||
+      hostname.includes('gitea') ||
+      hostname.includes('forgejo'))
+  ) {
+    return 'gitea';
   }
   if (hostname === 'github.com' || hostname?.includes('github')) {
     return 'github';
@@ -37,6 +46,9 @@ export function detectPlatform(
 
   if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
     return 'bitbucket';
+  }
+  if (GITEA_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'gitea';
   }
   if (GITHUB_API_USING_HOST_TYPES.includes(hostType)) {
     return 'github';
