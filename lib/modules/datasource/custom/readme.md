@@ -3,7 +3,7 @@ This `custom` datasource allows requesting version data from generic HTTP(S) end
 ## Usage
 
 The `customDatasources` option takes a record of `customDatasource` configs.
-This example shows how to update the `k3s.version` file with a custom datasource and a [regexManagers](../../manager/regex/index.md):
+This example shows how to update the `k3s.version` file with a custom datasource and a [regex](../../manager/regex/index.md) custom manager:
 
 Options:
 
@@ -19,8 +19,9 @@ Available template variables:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["k3s.version"],
       "matchStrings": ["(?<currentValue>\\S+)"],
       "depNameTemplate": "k3s",
@@ -179,8 +180,9 @@ You can use this configuration to request the newest versions of the Hashicorp p
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.hashicorp",
       "matchStrings": [
@@ -213,8 +215,9 @@ You can use the following configuration to upgrade the Grafana Dashboards versio
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "matchStrings": [
         "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
@@ -286,7 +289,7 @@ This example uses Nexus as the webserver.
 }
 ```
 
-This could be used to update Ansible YAML files with the latest version through a regex manager.
+This could be used to update Ansible YAML files with the latest version through a custom manager.
 For example, with the following Ansible content:
 
 ```yaml
@@ -294,12 +297,13 @@ For example, with the following Ansible content:
 something_version: '77'
 ```
 
-And the following regex manager:
+And the following custom manager:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.nexus_generic",
       "matchStrings": [

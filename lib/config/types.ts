@@ -247,7 +247,7 @@ export interface RenovateConfig
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
-  regexManagers?: CustomManager[];
+  customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
@@ -382,7 +382,7 @@ export interface RenovateOptionBase {
     | 'hostRules'
     | 'packageRules'
     | 'postUpgradeTasks'
-    | 'regexManagers';
+    | 'customManagers';
 
   stage?: RenovateConfigStage;
 

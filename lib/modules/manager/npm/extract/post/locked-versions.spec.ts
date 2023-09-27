@@ -1,23 +1,23 @@
-import { logger, mocked } from '../../../../../test/util';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import { logger, mocked } from '../../../../../../test/util';
+import type { PackageFile } from '../../../types';
+import type { NpmManagerData } from '../../types';
+import * as _npm from '../npm';
+import * as _pnpm from '../pnpm';
+import * as _yarn from '../yarn';
 import { getLockedVersions } from './locked-versions';
-import * as _npm from './npm';
-import * as _pnpm from './pnpm';
-import * as _yarn from './yarn';
 
 const npm = mocked(_npm);
 const pnpm = mocked(_pnpm);
 const yarn = mocked(_yarn);
 
-jest.mock('./npm');
-jest.mock('./yarn', () => ({
-  ...jest.requireActual<typeof import('./yarn')>('./yarn'),
+jest.mock('../npm');
+jest.mock('../yarn', () => ({
+  ...jest.requireActual<typeof import('../yarn')>('../yarn'),
   getYarnLock: jest.fn(),
 }));
-jest.mock('./pnpm');
+jest.mock('../pnpm');
 
-describe('modules/manager/npm/extract/locked-versions', () => {
+describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     function getPackageFiles(
       yarnVersion: string
@@ -290,6 +290,34 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           ],
           lockFiles: ['package-lock.json'],
           managerData: { npmLock: 'package-lock.json' },
+          packageFile: 'some-file',
+        },
+      ]);
+    });
+
+    it('does nothing if managerData is not present', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
+        lockfileVersion: 1,
+      });
+      const packageFiles = [
+        {
+          extractedConstraints: {},
+          deps: [
+            { depName: 'a', currentValue: '1.0.0' },
+            { depName: 'b', currentValue: '2.0.0' },
+          ],
+          packageFile: 'some-file',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          extractedConstraints: {},
+          deps: [
+            { currentValue: '1.0.0', depName: 'a' },
+            { currentValue: '2.0.0', depName: 'b' },
+          ],
           packageFile: 'some-file',
         },
       ]);

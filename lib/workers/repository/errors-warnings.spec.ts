@@ -275,6 +275,7 @@ describe('workers/repository/errors-warnings', () => {
               {},
             ],
           },
+          partial<PackageFile>(), // for coverage
           {
             packageFile: 'backend/package.json',
             deps: [
@@ -293,6 +294,10 @@ describe('workers/repository/errors-warnings', () => {
               },
             ],
           },
+          // coverage
+          partial<PackageFile>({
+            packageFile: 'Dockerfile',
+          }),
         ],
       };
       const res = getDepWarningsOnboardingPR(packageFiles, config);
@@ -311,6 +316,17 @@ describe('workers/repository/errors-warnings', () => {
 
         "
       `);
+    });
+
+    it('handle empty package files', () => {
+      const config: RenovateConfig = {};
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: undefined as never,
+      };
+      let res = getDepWarningsOnboardingPR(packageFiles, config);
+      expect(res).toBe('');
+      res = getDepWarningsOnboardingPR(undefined as never, config);
+      expect(res).toBe('');
     });
 
     it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {

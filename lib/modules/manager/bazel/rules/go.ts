@@ -3,7 +3,7 @@ import { regEx } from '../../../../util/regex';
 import { GoDatasource } from '../../../datasource/go';
 import type { PackageDependency } from '../../types';
 
-export const goRules = ['go_repository'] as const;
+export const goRules = ['go_repository', '_go_repository'] as const;
 
 export const GoTarget = z
   .object({
