@@ -119,7 +119,12 @@ export function parseArchiveUrl(
   return null;
 }
 
-export const httpRules = ['http_archive', 'http_file'] as const;
+export const httpRules = [
+  'http_archive',
+  '_http_archive',
+  'http_file',
+  '_http_file',
+] as const;
 
 export const HttpTarget = z
   .object({

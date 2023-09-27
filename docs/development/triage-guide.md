@@ -17,7 +17,6 @@ Take the following steps on an incoming bug report:
 1. Check what version of Renovate is used, if not on current major version then ask the reporter to retry with the latest version of Renovate and report their findings.
 1. Determine if this is a duplicate of an open issue, if duplicate: link to earlier issue, apply `duplicate` label and close the issue.
 1. Check if the _relevant_ logs are provided. If not apply the `logs:problem` label.
-1. If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
 1. If it's an easy issue for somebody new to Renovate to help us with: apply the `good first issue` label.
 1. If the issue is hard to fix without outside help apply the `help wanted` label.
 
@@ -30,7 +29,6 @@ Take the following steps on an incoming feature request:
 1. Determine if this is a duplicate of an open issue, if duplicate: link to earlier issue, apply `duplicate` label and close the issue.
 1. Make a best-effort judgement if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
 1. Make an initial judgement of the priority, and add the correct priority label.
-1. If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
 1. If it's an easy feature for somebody new to Renovate to help us with: apply the `good first issue` label.
 1. If the feature is hard to start work on without outside help apply the `help wanted` label.
 
@@ -103,13 +101,7 @@ You can request a review from one of the maintainers, in case this is needed to 
 ### Lock and unlock discussions
 
 Sometimes a discussion can go sour, like when people call each other names, or post spam, or veer off-topic.
-In those cases you can lock the discussion to prevent further escalation.
-
-### Individually convert issues to discussions
-
-Sometimes an issue that's raised at the Renovate repository is not really a bug or a feature request.
-This happens most often because a user files a bug for things that are really a mistake in the Renovate configuration.
-Those "configuration help" issues are then moved to the discussions board for further help.
+Ideally warn the user with an `auto:bad-vibes` label first, and then use `auto:discussion-closed` if problems persist.
 
 ### Moving issues from `status:requirements` to `status:ready`
 

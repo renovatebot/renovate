@@ -1,4 +1,4 @@
-'reproduction:needed':
+'auto:reproduction':
   comment: >
     Hi there,
 
@@ -23,7 +23,7 @@
 
     The Renovate team
 
-'needs-logs':
+'auto:logs':
   comment: >
     Hi there,
 
@@ -119,7 +119,7 @@
 
     The Renovate team
 
-'retry latest version':
+'auto:retry-latest':
   comment: >
     Hi there,
 
@@ -133,7 +133,7 @@
 
     The Renovate team
 
-'pr:no-coverage-ignore':
+'auto:no-coverage-ignore':
   comment: >
     Hi there,
 
@@ -163,7 +163,7 @@
 
     The Renovate team
 
-'pr:no-done-comments':
+'auto:no-done-comments':
   comment: >
     Hi there,
 
@@ -178,7 +178,7 @@
 
     The Renovate team
 
-'pr:discussion-first':
+'auto:discussion-first':
   comment: >
     **Please create a GitHub Discussion before continuing with this PR.**
 
@@ -190,7 +190,7 @@
     Thanks, the Renovate team
   close: true
 
-'needs-details':
+'auto:more-details':
   comment: >
     Hi there,
 
@@ -217,15 +217,61 @@
     Thanks, the Renovate team
   close: true
   close-reason: 'not planned'
-  lock: true
-  lock-reason: 'resolved'
 
-'format-code-comments':
+'auto:format-code':
   comment: >
     Hi, please format any copy/pasted code or logs so they're readable.
 
 
     You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+
+
+    Thanks, the Renovate team
+
+'auto:discussion-closed':
+  comment: >
+    Hi there,
+
+
+    We're closing this discussion because it's missing some details, or because something else about it made it hard or impossible for us to help resolve the issue.
+
+
+    We want high quality discussions, so users can search them for answers.
+    This means we'll close (and later delete) low quality discussions.
+
+
+    You are welcome to create a new discussion with more details in future.
+
+
+    Thanks, the Renovate team.
+  close: true
+  close-reason: 'not planned'
+
+'auto:bad-vibes':
+  comment: >
+    Hi there,
+
+    A maintainer has flagged this discussion as giving off some bad vibes. **Maintainers will no longer participate in this discussion unless/until such "vibes" are resolved.**
+
+
+    This is typically when someone is overly critical of the product or the assistance they're receiving.
+    Or being unreasonably demanding or lazy, such as refusing to provide logs, or other information, when asked.
+
+
+    Open Source means you're welcome to use the software with few limits applied.
+    But you should _not_ give maintainers a bad day or contribute to Open Source burnout.
+
+
+    If you feel this message is wrong or due to a misunderstanding, please let us know. If you see this message but don't take it as a sign to cool off or back off, we may close the discussion and block you from the repository.
+
+
+    If you want to get the discussion back on track, we would like you to:
+    - Remove, or edit, the bad vibes parts of your comments
+    - Say that you understand the problem (we don't need a lengthy apology)
+    - Stop giving off more bad vibes
+
+
+    If you're unhappy with this, we suggest you stop using the repository discussions or the product altogether.
 
 
     Thanks, the Renovate team
