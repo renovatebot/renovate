@@ -103,7 +103,7 @@ RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
 }
 ```
 
-The search for repositories is case-insensitive.
+The minimatch search for repositories is case-insensitive, while regex is case-sensitive.
 
 **Regex**:
 
@@ -116,7 +116,6 @@ All text inside the start and end `/` will be treated as a regular expression.
 ```
 
 You can negate the regex by putting an `!` in front.
-Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
@@ -124,6 +123,12 @@ If using negations, all repositories except those who match the regex are added 
   "autodiscoverFilter": ["!/project/.*/"]
 }
 ```
+
+**Negation logic**
+
+- All "positive match" filters (not starting with `!`) are ORed together so that only one needs to match
+- All "negative match" filters (those starting with `!`) are ANDed together so that all need to match
+- The aggregate results of the negative and positive matches are ANDed together
 
 ## autodiscoverNamespaces
 
