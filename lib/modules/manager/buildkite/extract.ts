@@ -24,7 +24,7 @@ export function extractPackageFile(
         logger.trace('depLineMatch');
         let skipReason: SkipReason | undefined;
         let repo: string | undefined;
-        logger.trace(`Found BuildKite plugin ${depName}`);
+        logger.trace(`Found Buildkite plugin ${depName}`);
         // Plugins may simply be git repos. If so, we need to parse out the registry.
         const gitPluginMatch = regEx(
           /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/
@@ -50,13 +50,13 @@ export function extractPackageFile(
           } else {
             logger.warn(
               { dependency: depName },
-              'Something is wrong with BuildKite plugin name'
+              'Something is wrong with Buildkite plugin name'
             );
             skipReason = 'invalid-dependency-specification';
           }
         } else {
           logger.debug(
-            `Skipping non-pinned buildkite current version ${currentValue}`
+            `Skipping non-pinned Buildkite current version ${currentValue}`
           );
           skipReason = 'invalid-version';
         }
@@ -73,7 +73,7 @@ export function extractPackageFile(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Error extracting BuildKite plugins');
+    logger.debug({ err, packageFile }, 'Error extracting Buildkite plugins');
   }
 
   if (!deps.length) {
