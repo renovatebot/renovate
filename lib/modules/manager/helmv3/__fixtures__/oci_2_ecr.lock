@@ -1,0 +1,6 @@
+dependencies:
+- name: some-ecr-chart
+  repository: oci://123456789.dkr.ecr.us-east-1.amazonaws.com
+  version: 1.3.4
+digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
+generated: "2022-01-20T17:48:47.610371241+01:00"

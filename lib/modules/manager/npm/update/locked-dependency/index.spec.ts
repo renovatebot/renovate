@@ -5,7 +5,7 @@ import { clone } from '../../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
 
 const packageFileContent = Fixtures.get('package.json', './package-lock');
-const lockFileContent = Fixtures.get('package-lock.json', './package-lock');
+const lockFileContent = Fixtures.get('package-lock-v1.json', './package-lock');
 const lockFileV2Content = Fixtures.get(
   'package-lock-v2.json',
   './package-lock'
