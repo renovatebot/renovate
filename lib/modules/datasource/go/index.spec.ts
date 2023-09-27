@@ -1,10 +1,11 @@
+import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { GoDatasource } from '.';
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 
 const getReleasesDirectMock = jest.fn();
@@ -70,13 +71,8 @@ describe('modules/datasource/go/index', () => {
 
   describe('getDigest', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('returns null for no go-source tag', async () => {

@@ -261,7 +261,7 @@ function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
 /**
  * Matches regular rules:
  * - `git_repository(...)`
- * - `go_repository(...)`
+ * - `_go_repository(...)`
  */
 const regularRule = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) =>
@@ -272,7 +272,7 @@ const regularRule = q
 /**
  * Matches "maybe"-form rules:
  * - `maybe(git_repository, ...)`
- * - `maybe(go_repository, ...)`
+ * - `maybe(_go_repository, ...)`
  */
 const maybeRule = q
   .sym<Ctx>('maybe', recordStartHandler)

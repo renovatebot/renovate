@@ -64,7 +64,7 @@ export async function getReleaseList(
   _release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitlab.getReleaseNotesMd()');
-  // TODO #7154
+  // TODO #22198
   const apiBaseUrl = project.apiBaseUrl!;
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const repository = project.repository!;

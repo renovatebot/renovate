@@ -1,6 +1,10 @@
 import type { RenovateConfig } from '../../lib/config/types';
 import type { Category } from '../../lib/constants';
 import { getManagers } from '../../lib/modules/manager';
+import {
+  getCustomManagers,
+  isCustomManager,
+} from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import {
@@ -14,8 +18,8 @@ const noCategoryID = 'no-category';
 const noCategoryDisplayName = 'No Category';
 
 function getTitle(manager: string, displayName: string): string {
-  if (manager === 'regex') {
-    return `Custom Manager Support using Regex`;
+  if (isCustomManager(manager)) {
+    return `Custom Manager Support using ${displayName}`;
   }
   return `Automated Dependency Updates for ${displayName}`;
 }
@@ -42,6 +46,7 @@ export const CategoryNames: Record<Category, string> = {
   js: 'JavaScript',
   kubernetes: 'Kubernetes',
   node: 'Node.js',
+  perl: 'Perl',
   php: 'PHP',
   python: 'Python',
   ruby: 'Ruby',
@@ -54,11 +59,11 @@ export async function generateManagers(
   dist: string,
   managerIssuesMap: OpenItems
 ): Promise<void> {
-  const managers = getManagers();
+  const allManagers = [...getManagers(), ...getCustomManagers()];
 
   const allCategories: Record<string, string[]> = {};
 
-  for (const [manager, definition] of managers) {
+  for (const [manager, definition] of allManagers) {
     const { defaultConfig, supportedDatasources, urls } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
@@ -87,7 +92,7 @@ sidebar_label: ${displayName}
     }
     md += '\n\n';
 
-    if (manager !== 'regex') {
+    if (!isCustomManager(manager)) {
       const nameWithUrl = getNameWithUrl(manager, definition);
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {
@@ -133,9 +138,11 @@ sidebar_label: ${displayName}
       md += '```\n\n';
     }
     const managerReadmeContent = await readFile(
-      `lib/modules/manager/${manager}/readme.md`
+      `lib/modules/manager/${
+        isCustomManager(manager) ? 'custom/' + manager : manager
+      }/readme.md`
     );
-    if (manager !== 'regex') {
+    if (!isCustomManager(manager)) {
       md += '\n## Additional Information\n\n';
     }
     md += managerReadmeContent;

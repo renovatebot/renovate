@@ -1,3 +1,5 @@
+import { codeBlock } from 'common-tags';
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, mocked } from '../../../../test/util';
@@ -12,14 +14,16 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/http');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
 const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
-const depName = 'depName';
+const depNames = ['dep1', 'dep2', 'dep3'];
+const depNamesWithSdks = [...depNames, ...['dart', 'flutter']];
+const depNamesWithSpace = depNames.join(' ');
 
 const datasource = mocked(_datasource);
 
@@ -33,16 +37,15 @@ const config: UpdateArtifactsConfig = {};
 
 const updateArtifact: UpdateArtifact = {
   packageFileName: 'pubspec.yaml',
-  updatedDeps: [{ depName }],
+  updatedDeps: depNamesWithSdks.map((depName) => {
+    return { depName };
+  }),
   newPackageFileContent: '',
   config,
 };
 
 describe('modules/manager/pub/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
@@ -66,6 +69,37 @@ describe('modules/manager/pub/artifacts', () => {
     ).toBeNull();
   });
 
+  it(`runs flutter pub get if only dart and flutter sdks are updated`, async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+    expect(
+      await pub.updateArtifacts({
+        ...updateArtifact,
+        newPackageFileContent: codeBlock`
+          environment:
+            sdk: ^3.0.0
+            flutter: 2.0.0
+        `,
+        updatedDeps: [{ depName: 'dart' }, { depName: 'flutter' }],
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: lockFile,
+          contents: newLockFileContent,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'flutter pub get --no-precompile',
+      },
+    ]);
+  });
+
   describe.each([
     { sdk: 'dart', packageFileContent: '' },
     { sdk: 'flutter', packageFileContent: 'sdk: flutter' },
@@ -82,7 +116,7 @@ describe('modules/manager/pub/artifacts', () => {
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `${params.sdk} pub upgrade ${depName}`,
+          cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
         },
       ]);
     });
@@ -108,7 +142,34 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `${params.sdk} pub upgrade ${depName}`,
+          cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
+        },
+      ]);
+    });
+
+    it(`runs ${params.sdk} pub get if only the sdk is updated`, async () => {
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+      expect(
+        await pub.updateArtifacts({
+          ...updateArtifact,
+          newPackageFileContent: params.packageFileContent,
+          updatedDeps: [{ depName: params.sdk }],
+        })
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: lockFile,
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `${params.sdk} pub get --no-precompile`,
         },
       ]);
     });
@@ -182,7 +243,7 @@ describe('modules/manager/pub/artifacts', () => {
             'bash -l -c "' +
             `install-tool ${params.sdk} 3.3.9` +
             ' && ' +
-            `${params.sdk} pub upgrade ${depName}` +
+            `${params.sdk} pub upgrade ${depNamesWithSpace}` +
             '"',
         },
       ]);
@@ -211,7 +272,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         { cmd: `install-tool ${params.sdk} 3.3.9` },
-        { cmd: `${params.sdk} pub upgrade ${depName}` },
+        { cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}` },
       ]);
     });
 

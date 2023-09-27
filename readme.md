@@ -8,8 +8,9 @@ Multi-platform and multi-language.
 [![License: AGPL-3.0-only](https://img.shields.io/badge/license-%20%09AGPL--3.0--only-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/main/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
-[![Build status](https://github.com/renovatebot/renovate/workflows/build/badge.svg)](https://github.com/renovatebot/renovate/actions)
+[![Build](https://github.com/renovatebot/renovate/actions/workflows/build.yml/badge.svg)](https://github.com/renovatebot/renovate/actions/workflows/build.yml)
 ![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/renovatebot/renovate/badge)](https://securityscorecards.dev/viewer/?uri=github.com/renovatebot/renovate)
 
 ## Why Use Renovate?
 
@@ -20,11 +21,11 @@ Multi-platform and multi-language.
   - each week
   - each month
 - Relevant package files are discovered automatically
-- Supports monorepo architectures like Lerna or Yarn workspaces with no extra configuration
+- Supports monorepo architectures with workspaces with no extra configuration
 - Bot behavior is customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
 - Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
+- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement, works with _most_ managers, see [issue 14149](https://github.com/renovatebot/renovate/issues/14149) for exceptions
 - Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
 
 ## Supported Platforms
@@ -85,7 +86,7 @@ There are two ways to run Renovate on Azure DevOps:
 Go to the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
 From there you can create a pipeline with the `RenovateMe` task.
 
-> **Note**
+> [!NOTE]
 > This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
 
 #### Custom pipeline

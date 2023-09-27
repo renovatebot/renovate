@@ -47,7 +47,7 @@ function replaceAsString(
   } else if (depType === 'dependenciesMeta') {
     if (oldValue !== newValue) {
       parsedContents.dependenciesMeta = renameObjKey(
-        // TODO #7154
+        // TODO #22198
         parsedContents.dependenciesMeta!,
         oldValue,
         newValue
@@ -117,7 +117,7 @@ export function updateDependency({
       logger.debug('Updating package.json git digest');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentDigest,
-        // TODO #7154
+        // TODO #22198
 
         upgrade.newDigest!.substring(0, upgrade.currentDigest.length)
       );
@@ -130,12 +130,10 @@ export function updateDependency({
     }
   }
   if (upgrade.npmPackageAlias) {
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     newValue = `npm:${upgrade.packageName}@${newValue}`;
   }
-  // TODO: types (#7154)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  // TODO: types (#22198)
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
     const parsedContents: NpmPackage = JSON.parse(fileContent);
@@ -144,8 +142,7 @@ export function updateDependency({
     let oldVersion: string | undefined;
     if (depType === 'packageManager') {
       oldVersion = parsedContents[depType];
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       newValue = `${depName}@${newValue}`;
     } else if (isOverrideObject(upgrade)) {
       overrideDepParents = managerData?.parents;
@@ -169,7 +166,7 @@ export function updateDependency({
       return fileContent;
     }
 
-    // TODO #7154
+    // TODO #22198
     let newFileContent = replaceAsString(
       parsedContents,
       fileContent,
@@ -224,9 +221,9 @@ export function updateDependency({
           newFileContent,
           'resolutions',
           depKey,
-          // TODO #7154
+          // TODO #22198
           parsedContents.resolutions[depKey]!,
-          // TODO #7154
+          // TODO #22198
           newValue!
         );
         if (upgrade.newName) {
@@ -254,8 +251,7 @@ export function updateDependency({
             'dependenciesMeta',
             depName,
             depKey,
-            // TODO: types (#7154)
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            // TODO: types (#22198)
             `${depName}@${newValue}`
           );
         }

@@ -40,7 +40,10 @@ describe('util/result', () => {
       });
 
       it('wraps nullable callback', () => {
-        const res = Result.wrapNullable(() => 42, 'oops');
+        const res: Result<number, 'oops'> = Result.wrapNullable(
+          (): number | null => 42,
+          'oops'
+        );
         expect(res).toEqual(Result.ok(42));
       });
 
@@ -67,6 +70,21 @@ describe('util/result', () => {
         const res = Result.wrapNullable(() => {
           throw 'oops';
         }, 'nullable');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps pure nullable value', () => {
+        const res = Result.wrapNullable(42, 'oops');
+        expect(res).toEqual(Result.ok(42));
+      });
+
+      it('wraps nullable value null', () => {
+        const res = Result.wrapNullable(null, 'oops');
+        expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps nullable value undefined', () => {
+        const res = Result.wrapNullable(undefined, 'oops');
         expect(res).toEqual(Result.err('oops'));
       });
 
@@ -102,15 +120,26 @@ describe('util/result', () => {
 
       it('skips fallback for successful value', () => {
         const res: Result<number> = Result.ok(42);
-        expect(res.unwrap(-1)).toBe(42);
+        expect(res.unwrapOrElse(-1)).toBe(42);
       });
 
       it('uses fallback for error value', () => {
         const res: Result<number, string> = Result.err('oops');
-        expect(res.unwrap(42)).toBe(42);
+        expect(res.unwrapOrElse(42)).toBe(42);
       });
 
-      it('throws error uncaught in the failed transform', () => {
+      it('unwrapOrElse throws uncaught transform error', () => {
+        const res = Result.ok(42);
+        expect(() =>
+          res
+            .transform(() => {
+              throw 'oops';
+            })
+            .unwrapOrElse(0)
+        ).toThrow('oops');
+      });
+
+      it('unwrap throws uncaught transform error', () => {
         const res = Result.ok(42);
         expect(() =>
           res
@@ -129,6 +158,27 @@ describe('util/result', () => {
       it('throws error for unwrapOrThrow on error result', () => {
         const res = Result.err('oops');
         expect(() => res.unwrapOrThrow()).toThrow('oops');
+      });
+
+      it('unwrapOrNull returns value for ok-result', () => {
+        const res = Result.ok(42);
+        expect(res.unwrapOrNull()).toBe(42);
+      });
+
+      it('unwrapOrNull returns null for error result', () => {
+        const res = Result.err('oops');
+        expect(res.unwrapOrNull()).toBeNull();
+      });
+
+      it('unwrapOrNull throws uncaught transform error', () => {
+        const res = Result.ok(42);
+        expect(() =>
+          res
+            .transform(() => {
+              throw 'oops';
+            })
+            .unwrapOrNull()
+        ).toThrow('oops');
       });
     });
 
@@ -199,6 +249,84 @@ describe('util/result', () => {
         expect(result).toEqual(Result._uncaught('oops'));
       });
     });
+
+    describe('Parsing', () => {
+      it('parses Zod schema', () => {
+        const schema = z
+          .string()
+          .transform((x) => x.toUpperCase())
+          .nullish();
+
+        expect(Result.parse('foo', schema)).toEqual(Result.ok('FOO'));
+
+        expect(Result.parse(42, schema).unwrap()).toMatchObject({
+          err: { issues: [{ message: 'Expected string, received number' }] },
+        });
+
+        expect(Result.parse(undefined, schema).unwrap()).toMatchObject({
+          err: {
+            issues: [
+              {
+                message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
+              },
+            ],
+          },
+        });
+
+        expect(Result.parse(null, schema).unwrap()).toMatchObject({
+          err: {
+            issues: [
+              {
+                message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
+              },
+            ],
+          },
+        });
+      });
+
+      it('parses Zod schema by piping from Result', () => {
+        const schema = z
+          .string()
+          .transform((x) => x.toUpperCase())
+          .nullish();
+
+        expect(Result.ok('foo').parse(schema)).toEqual(Result.ok('FOO'));
+
+        expect(Result.ok(42).parse(schema).unwrap()).toMatchObject({
+          err: { issues: [{ message: 'Expected string, received number' }] },
+        });
+
+        expect(Result.err('oops').parse(schema)).toEqual(Result.err('oops'));
+      });
+    });
+
+    describe('Handlers', () => {
+      it('supports value handlers', () => {
+        const cb = jest.fn();
+        Result.ok(42).onValue(cb);
+        expect(cb).toHaveBeenCalledWith(42);
+      });
+
+      it('supports error handlers', () => {
+        const cb = jest.fn();
+        Result.err('oops').onError(cb);
+        expect(cb).toHaveBeenCalledWith('oops');
+      });
+
+      it('handles error thrown in value handler', () => {
+        const res = Result.ok(42).onValue(() => {
+          throw 'oops';
+        });
+        expect(res).toEqual(Result._uncaught('oops'));
+      });
+
+      it('handles error thrown in error handler', () => {
+        const res = Result.err('oops').onError(() => {
+          throw 'oops';
+        });
+        expect(res).toEqual(Result._uncaught('oops'));
+      });
+    });
   });
 
   describe('AsyncResult', () => {
@@ -225,7 +353,10 @@ describe('util/result', () => {
       });
 
       it('wraps nullable promise', async () => {
-        const res = Result.wrapNullable(Promise.resolve(42), 'oops');
+        const res: AsyncResult<number, 'oops'> = Result.wrapNullable(
+          Promise.resolve<number | null>(42),
+          'oops'
+        );
         await expect(res).resolves.toEqual(Result.ok(42));
       });
 
@@ -274,12 +405,12 @@ describe('util/result', () => {
 
       it('skips fallback for successful AsyncResult', async () => {
         const res = Result.wrap(Promise.resolve(42));
-        await expect(res.unwrap(0)).resolves.toBe(42);
+        await expect(res.unwrapOrElse(0)).resolves.toBe(42);
       });
 
       it('uses fallback for error AsyncResult', async () => {
         const res = Result.wrap(Promise.reject('oops'));
-        await expect(res.unwrap(42)).resolves.toBe(42);
+        await expect(res.unwrapOrElse(42)).resolves.toBe(42);
       });
 
       it('returns ok-value for unwrapOrThrow', async () => {
@@ -290,6 +421,16 @@ describe('util/result', () => {
       it('rejects for error for unwrapOrThrow', async () => {
         const res = Result.wrap(Promise.reject('oops'));
         await expect(res.unwrapOrThrow()).rejects.toBe('oops');
+      });
+
+      it('unwrapOrNull returns value for ok-result', async () => {
+        const res = AsyncResult.ok(42);
+        await expect(res.unwrapOrNull()).resolves.toBe(42);
+      });
+
+      it('unwrapOrNull returns null for error result', async () => {
+        const res = AsyncResult.err('oops');
+        await expect(res.unwrapOrNull()).resolves.toBeNull();
       });
     });
 
@@ -479,6 +620,61 @@ describe('util/result', () => {
         );
         expect(result).toEqual(Result.ok(42));
       });
+    });
+  });
+
+  describe('Parsing', () => {
+    it('parses Zod schema by piping from AsyncResult', async () => {
+      const schema = z
+        .string()
+        .transform((x) => x.toUpperCase())
+        .nullish();
+
+      expect(await AsyncResult.ok('foo').parse(schema)).toEqual(
+        Result.ok('FOO')
+      );
+
+      expect(await AsyncResult.ok(42).parse(schema).unwrap()).toMatchObject({
+        err: { issues: [{ message: 'Expected string, received number' }] },
+      });
+    });
+
+    it('handles uncaught error thrown in the steps before parsing', async () => {
+      const res = await AsyncResult.ok(42)
+        .transform(async (): Promise<number> => {
+          await Promise.resolve();
+          throw 'oops';
+        })
+        .parse(z.number().transform((x) => x + 1));
+      expect(res).toEqual(Result._uncaught('oops'));
+    });
+  });
+
+  describe('Handlers', () => {
+    it('supports value handlers', async () => {
+      const cb = jest.fn();
+      await AsyncResult.ok(42).onValue(cb);
+      expect(cb).toHaveBeenCalledWith(42);
+    });
+
+    it('supports error handlers', async () => {
+      const cb = jest.fn();
+      await AsyncResult.err('oops').onError(cb);
+      expect(cb).toHaveBeenCalledWith('oops');
+    });
+
+    it('handles error thrown in value handler', async () => {
+      const res = await AsyncResult.ok(42).onValue(() => {
+        throw 'oops';
+      });
+      expect(res).toEqual(Result._uncaught('oops'));
+    });
+
+    it('handles error thrown in error handler', async () => {
+      const res = await AsyncResult.err('oops').onError(() => {
+        throw 'oops';
+      });
+      expect(res).toEqual(Result._uncaught('oops'));
     });
   });
 });

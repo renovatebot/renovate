@@ -7,9 +7,11 @@ import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
+import { coerceString } from '../../../../../util/string';
 import { validateUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -33,6 +35,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseList(project, release);
       case 'gitlab':
         return await gitlab.getReleaseList(project, release);
       case 'github':
@@ -60,10 +64,9 @@ export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
-  // TODO: types (#7154)
-  const cacheKey = `getReleaseList-${project.apiBaseUrl!}-${
-    project.repository
-  }`;
+  const { repository, apiBaseUrl } = project;
+  // TODO: types (#22198)
+  const cacheKey = `getReleaseList-${apiBaseUrl!}-${repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -78,7 +81,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string
 ): string {
-  let body = input ?? '';
+  let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
   // semantic-release cleanup
@@ -130,7 +133,7 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   const { packageName, repository } = project;
   const { version, gitRef } = release;
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
@@ -242,6 +245,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'gitea':
+        return await gitea.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       case 'gitlab':
         return await gitlab.getReleaseNotesMd(
           repository,
@@ -283,10 +292,11 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
-  // TODO: types (#7154)
-  const cacheKey = `getReleaseNotesMdFile@v2-${project.repository}${
-    project.sourceDirectory ? `-${project.sourceDirectory}` : ''
-  }-${project.apiBaseUrl!}`;
+  const { sourceDirectory, repository, apiBaseUrl } = project;
+  // TODO: types (#22198)
+  const cacheKey = sourceDirectory
+    ? `getReleaseNotesMdFile@v2-${repository}-${sourceDirectory}-${apiBaseUrl!}`
+    : `getReleaseNotesMdFile@v2-${repository}-${apiBaseUrl!}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -408,42 +418,45 @@ export async function addReleaseNotes(
     logger.debug('Missing project or versions');
     return input ?? null;
   }
-  const output: ChangeLogResult = { ...input, versions: [] };
-  const { repository, sourceDirectory } = input.project;
-  const cacheNamespace = `changelog-${input.project.type}-notes@v2`;
-  function getCacheKey(version: string): string {
-    return `${repository}:${
-      sourceDirectory ? `${sourceDirectory}:` : ''
-    }${version}`;
-  }
+  const output: ChangeLogResult = {
+    ...input,
+    versions: [],
+    hasReleaseNotes: false,
+  };
+
+  const { repository, sourceDirectory, type: projectType } = input.project;
+  const cacheNamespace = `changelog-${projectType}-notes@v2`;
+  const cacheKeyPrefix = sourceDirectory
+    ? `${repository}:${sourceDirectory}`
+    : `${repository}`;
+
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = getCacheKey(v.version);
+    const cacheKey = `${cacheKeyPrefix}:${v.version}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
-    // istanbul ignore else: no cache tests
-    if (!releaseNotes) {
-      releaseNotes = await getReleaseNotesMd(input.project, v);
-      // istanbul ignore else: should be tested
-      if (!releaseNotes) {
-        releaseNotes = await getReleaseNotes(input.project, v, config);
-      }
-      // Small hack to force display of release notes when there is a compare url
-      if (!releaseNotes && v.compare.url) {
-        releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
-      }
-      const cacheMinutes = releaseNotesCacheMinutes(v.date);
-      await packageCache.set(
-        cacheNamespace,
-        cacheKey,
-        releaseNotes,
-        cacheMinutes
-      );
+    releaseNotes ??= await getReleaseNotesMd(input.project, v);
+    releaseNotes ??= await getReleaseNotes(input.project, v, config);
+
+    // If there is no release notes, at least try to show the compare URL
+    if (!releaseNotes && v.compare.url) {
+      releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
     }
+
+    const cacheMinutes = releaseNotesCacheMinutes(v.date);
+    await packageCache.set(
+      cacheNamespace,
+      cacheKey,
+      releaseNotes,
+      cacheMinutes
+    );
     output.versions!.push({
       ...v,
       releaseNotes: releaseNotes!,
     });
-    output.hasReleaseNotes = !!output.hasReleaseNotes || !!releaseNotes;
+
+    if (releaseNotes) {
+      output.hasReleaseNotes = true;
+    }
   }
   return output;
 }

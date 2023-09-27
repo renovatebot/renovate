@@ -154,14 +154,18 @@ Renovate ignores [`multiple_version_override`](https://bazel.build/rules/lib/glo
 
 ## Legacy `WORKSPACE` files
 
-Renovate extracts dependencies from:
+Renovate extracts dependencies from the following repository rules:
 
 - `container_pull`
 - `oci_pull`
 - `git_repository`
 - `go_repository`
 - `maven_install`
-- `http_archive` or `http_file` declarations
+- `http_archive`
+- `http_file`
+
+It also recognizes when these repository rule names are prefixed with an
+underscore. For example, `_http_archive` is treated the same as `http_archive`.
 
 ### `git_repository`
 
@@ -222,4 +226,4 @@ To change it, configure `packageRules` like this:
 
 ## Future work
 
-Contributions and/or feature requests are welcome to support more patterns or additional use cases.
+We welcome contributions or feature requests to support more patterns or use cases.

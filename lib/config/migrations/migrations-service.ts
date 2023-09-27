@@ -15,6 +15,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { CustomManagersMigration } from './custom/custom-managers-migration';
 import { DatasourceMigration } from './custom/datasource-migration';
 import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
@@ -95,6 +96,7 @@ export class MigrationsService {
     ['masterIssueFooter', 'dependencyDashboardFooter'],
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
+    ['regexManagers', 'customManagers'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
@@ -150,6 +152,7 @@ export class MigrationsService {
     RecreateClosedMigration,
     StabilityDaysMigration,
     FetchReleaseNotesMigration,
+    CustomManagersMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {

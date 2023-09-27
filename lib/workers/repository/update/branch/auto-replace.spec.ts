@@ -12,7 +12,7 @@ const sampleHtml = Fixtures.get(
   `../../../../modules/manager/html`
 );
 
-jest.mock('fs-extra', () => Fixtures.fsExtra());
+jest.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -26,7 +26,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     beforeEach(() => {
-      // TODO: fix types (#7154)
+      // TODO: fix types (#22198)
       upgrade = getConfig() as BranchUpgradeConfig;
       upgrade.packageFile = 'test';
       upgrade.manager = 'html';
@@ -47,6 +47,29 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('rebases if the deps to update has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
       upgrade.baseDeps![0].currentValue = '1.0.0';
+      reuseExistingBranch = true;
+      const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
+      expect(res).toBeNull();
+    });
+
+    // for coverage
+    it('uses depName or packageName', async () => {
+      upgrade.baseDeps = [
+        {
+          datasource: 'cdnjs',
+          packageName: 'react-router/react-router-test.min.js',
+          currentValue: '4.2.1',
+          replaceString:
+            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
+        },
+        {
+          datasource: 'cdnjs',
+          depName: 'react-router-test',
+          currentValue: '4.1.1',
+          replaceString:
+            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
+        },
+      ];
       reuseExistingBranch = true;
       const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
       expect(res).toBeNull();

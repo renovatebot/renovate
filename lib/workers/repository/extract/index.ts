@@ -2,16 +2,18 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getManagerList, hashMap } from '../../../modules/manager';
+import { allManagersList, hashMap } from '../../../modules/manager';
+import { isCustomManager } from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
+import { processSupersedesManagers } from './supersedes';
 
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
-  let managerList = getManagerList();
+  let managerList = allManagersList;
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
@@ -32,9 +34,12 @@ export async function extractAllDependencies(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
-    if (manager === 'regex') {
-      for (const regexManager of config.regexManagers ?? []) {
-        tryConfig(mergeChildConfig(managerConfig, regexManager));
+    if (isCustomManager(manager)) {
+      const filteredCustomManagers = (config.customManagers ?? []).filter(
+        (mgr) => mgr.customType === manager
+      );
+      for (const customManager of filteredCustomManagers) {
+        tryConfig(mergeChildConfig(managerConfig, customManager));
       }
     } else {
       tryConfig(managerConfig);
@@ -62,6 +67,10 @@ export async function extractAllDependencies(
       return { manager: managerConfig.manager, packageFiles };
     })
   );
+
+  // De-duplicate results using supersedesManagers
+  processSupersedesManagers(extractResults);
+
   logger.debug(
     { managers: extractDurations },
     'manager extract durations (ms)'

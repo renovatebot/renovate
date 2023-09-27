@@ -2,9 +2,9 @@ import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateType } from '../../../config/types';
 import { updateDependency } from '.';
 
-const gomod1 = Fixtures.get('1/go.mod');
-const gomod2 = Fixtures.get('2/go.mod');
-const gomod3 = Fixtures.get('3/go.mod');
+const gomod1 = Fixtures.get('1/go-mod');
+const gomod2 = Fixtures.get('2/go-mod');
+const gomod3 = Fixtures.get('3/go-mod');
 
 describe('modules/manager/gomod/update', () => {
   describe('updateDependency', () => {
@@ -144,7 +144,7 @@ describe('modules/manager/gomod/update', () => {
     });
 
     it('returns null if error', () => {
-      // TODO: #7154 bad test, uses invalid null to throwing nullref error
+      // TODO: #22198 bad test, uses invalid null to throwing nullref error
       const res = updateDependency({
         fileContent: null as never,
         upgrade: null as never,

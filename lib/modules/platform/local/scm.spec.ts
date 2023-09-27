@@ -2,6 +2,9 @@ import { execSync as _execSync } from 'node:child_process';
 import { mockedFunction } from '../../../../test/util';
 import { LocalFs } from './scm';
 
+jest.mock('glob', () => ({
+  glob: jest.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
+}));
 jest.mock('node:child_process');
 const execSync = mockedFunction(_execSync);
 
@@ -56,13 +59,16 @@ describe('modules/platform/local/scm', () => {
       execSync.mockImplementationOnce(() => {
         throw new Error();
       });
-      jest.mock('glob', () => ({
-        glob: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve(['file1', 'file2'])),
-      }));
 
       expect(await localFs.getFileList()).toHaveLength(2);
     });
+  });
+
+  it('mergeAndPush', async () => {
+    await expect(localFs.mergeAndPush('branchName')).resolves.toBeUndefined();
+  });
+
+  it('mergeBranch', async () => {
+    await expect(localFs.mergeToLocal('branchName')).resolves.toBeUndefined();
   });
 });

@@ -49,7 +49,7 @@ export function add(params: HostRule): void {
     confidentialFields.forEach((field) => {
       if (rule[field]) {
         logger.debug(
-          // TODO: types (#7154)
+          // TODO: types (#22198)
           `Adding ${field} authentication for ${rule.matchHost!} to hostRules`
         );
       }
@@ -122,7 +122,7 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
 }
 
 export function find(search: HostRuleSearch): HostRuleSearchResult {
-  if (!(search.hostType || search.url)) {
+  if (!(!!search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }

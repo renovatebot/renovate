@@ -6,6 +6,7 @@ import type { GetDigestInputConfig, GetPkgReleasesConfig } from '../types';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
+const mixedCaseJson = Fixtures.get('mixed_case.json');
 const pocoJson = Fixtures.get('poco.json');
 const pocoRevisions = Fixtures.getJson('poco_revisions.json');
 const pocoYamlGitHubContent = Fixtures.get('poco.yaml');
@@ -50,6 +51,17 @@ describe('modules/datasource/conan/index', () => {
       expect(await getDigest(digestConfig, version)).toBe(
         '3a9b47caee2e2c1d3fb7d97788339aa8'
       );
+    });
+
+    it('returns null for missing revision', async () => {
+      const version = '1.8.1';
+      httpMock
+        .scope(nonDefaultRegistryUrl)
+        .get(`/v2/conans/poco/${version}/_/_/revisions`)
+        .reply(200, []);
+      digestConfig.packageName = `poco/${version}@_/_`;
+      digestConfig.currentDigest = '4fc13d60fd91ba44fefe808ad719a5af';
+      expect(await getDigest(digestConfig, version)).toBeNull();
     });
   });
 
@@ -139,6 +151,32 @@ describe('modules/datasource/conan/index', () => {
       });
     });
 
+    it('processes mixed case names', async () => {
+      httpMock
+        .scope(nonDefaultRegistryUrl)
+        .get('/v2/conans/search?q=FooBar')
+        .reply(200, mixedCaseJson);
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'FooBar/1.0.0@_/_',
+        })
+      ).toEqual({
+        registryUrl: 'https://not.conan.io',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.1.0',
+          },
+          {
+            version: '2.2.0',
+          },
+        ],
+      });
+    });
+
     it('uses github instead of conan center', async () => {
       httpMock
         .scope('https://api.github.com')
@@ -178,6 +216,22 @@ describe('modules/datasource/conan/index', () => {
           },
         ],
       });
+    });
+
+    it('works with empty releases', async () => {
+      httpMock
+        .scope('https://api.github.com')
+        .get(
+          '/repos/conan-io/conan-center-index/contents/recipes/poco/config.yml'
+        )
+        .reply(200, '');
+      expect(
+        await getPkgReleases({
+          ...config,
+          registryUrls: [defaultRegistryUrl],
+          packageName: 'poco/1.2@_/_',
+        })
+      ).toBeNull();
     });
 
     it('rejects userAndChannel for Conan Center', async () => {

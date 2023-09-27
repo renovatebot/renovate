@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import {
   envMock,
@@ -16,7 +17,6 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import { buildArgs } from './artifacts';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
 
@@ -24,10 +24,10 @@ const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
@@ -51,41 +51,8 @@ const updatedGemfileLock = {
 };
 
 describe('modules/manager/bundler/artifacts', () => {
-  describe('buildArgs', () => {
-    it('returns only --update arg when no config is specified', () => {
-      const config: UpdateArtifactsConfig = {};
-      expect(buildArgs(config)).toStrictEqual(['--update']);
-    });
-
-    it('adds --conservative when bundlerConservative is set as postUpdateOption', () => {
-      const config: UpdateArtifactsConfig = {
-        postUpdateOptions: ['bundlerConservative'],
-      };
-      expect(buildArgs(config)).toStrictEqual(['--conservative', '--update']);
-    });
-
-    it('adds --patch and --strict when update type is patch', () => {
-      const config: UpdateArtifactsConfig = { updateType: 'patch' };
-      expect(buildArgs(config)).toStrictEqual([
-        '--patch',
-        '--strict',
-        '--update',
-      ]);
-    });
-
-    it('adds --minor and --strict when update type is minor', () => {
-      const config: UpdateArtifactsConfig = { updateType: 'minor' };
-      expect(buildArgs(config)).toStrictEqual([
-        '--minor',
-        '--strict',
-        '--update',
-      ]);
-    });
-  });
-
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       jest.resetModules();
 
       delete process.env.GEM_HOME;
@@ -133,6 +100,29 @@ describe('modules/manager/bundler/artifacts', () => {
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
+      ]);
+    });
+
+    it('executes commands from lockFile path', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce();
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        })
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'teamA/Gemfile',
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+          newPackageFileContent: 'Updated Gemfile content',
+          config,
+        })
+      ).toBeNull();
+      expect(execSnapshots).toMatchObject([
+        { options: { cwd: '/tmp/github/some/repo' } },
       ]);
     });
 
@@ -196,7 +186,10 @@ describe('modules/manager/bundler/artifacts', () => {
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
-          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+          updatedDeps: [
+            { depName: 'foo', updateType: 'minor' },
+            { depName: 'bar', updateType: 'patch' },
+          ],
           newPackageFileContent: 'Updated Gemfile content',
           config: {
             ...config,
@@ -210,7 +203,10 @@ describe('modules/manager/bundler/artifacts', () => {
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         expect.objectContaining({
-          cmd: 'bundler lock --patch --strict --conservative --update foo bar',
+          cmd: 'bundler lock --patch --conservative --update bar',
+        }),
+        expect.objectContaining({
+          cmd: 'bundler lock --minor --conservative --update foo',
         }),
       ]);
     });

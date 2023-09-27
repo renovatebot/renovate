@@ -16,7 +16,6 @@ describe('workers/global/autodiscover', () => {
   let config: RenovateConfig;
 
   beforeEach(async () => {
-    jest.resetAllMocks();
     config = {};
     await platform.initPlatform({
       platform: 'github',

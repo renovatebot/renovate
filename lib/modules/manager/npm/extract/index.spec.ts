@@ -1,12 +1,11 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
+import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
+import { postExtract } from './post';
 import * as npmExtract from '.';
 
 jest.mock('../../../../util/fs');
-const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
-  '../../../../util/fs'
-);
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -26,7 +25,7 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      const realFs = jest.requireActual<typeof fs>('../../../../util/fs');
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
@@ -159,6 +158,32 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         managerData: {
+          yarnLock: 'yarn.lock',
+        },
+      });
+    });
+
+    it('warns when multiple lock files found', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'yarn.lock') {
+          return Promise.resolve('# yarn.lock');
+        }
+        if (fileName === 'package-lock.json') {
+          return Promise.resolve('# package-lock.json');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultExtractConfig
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+      );
+      expect(res).toMatchObject({
+        managerData: {
+          npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
         },
       });
@@ -420,7 +445,6 @@ describe('modules/manager/npm/extract/index', () => {
           npm: '^8.0.0',
           pnpm: '^1.2.0',
           vscode: '>=1.49.3',
-          yarn: 'disabled',
         },
         deps: [
           { depName: 'angular', currentValue: '1.6.0' },
@@ -737,7 +761,11 @@ describe('modules/manager/npm/extract/index', () => {
         dependencies: {
           a: 'npm:foo@1',
           b: 'npm:@foo/bar@1.2.3',
-          c: 'npm:foo',
+          c: 'npm:^1.2.3',
+          d: 'npm:1.2.3',
+          e: 'npm:1.x.x',
+          f: 'npm:foo',
+          g: 'npm:@foo/@bar/@1.2.3',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -746,11 +774,28 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig
       );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"'
+      );
       expect(res).toMatchSnapshot({
         deps: [
           { packageName: 'foo' },
           { packageName: '@foo/bar' },
-          { depName: 'c' },
+          { packageName: 'c', currentValue: '^1.2.3' },
+          { packageName: 'd', currentValue: '1.2.3' },
+          { packageName: 'e', currentValue: '1.x.x' },
+          {
+            packageName: 'f',
+            currentValue: 'foo',
+            npmPackageAlias: true,
+            skipReason: 'unspecified-version',
+          },
+          {
+            depName: 'g',
+            currentValue: 'npm:@foo/@bar/@1.2.3',
+            npmPackageAlias: true,
+            skipReason: 'unspecified-version',
+          },
         ],
       });
     });
@@ -929,7 +974,7 @@ describe('modules/manager/npm/extract/index', () => {
 
   describe('.postExtract()', () => {
     it('runs', async () => {
-      await expect(npmExtract.postExtract([])).resolves.not.toThrow();
+      await expect(postExtract([])).resolves.not.toThrow();
     });
   });
 });

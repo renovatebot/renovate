@@ -1,11 +1,10 @@
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  RegexManagerTemplates,
-  RenovateConfig,
-} from '../../../config/types';
-import { getManagerList } from '../../../modules/manager';
-import { validMatchFields } from '../../../modules/manager/regex/utils';
-import type { CustomExtractConfig } from '../../../modules/manager/types';
+import type { RenovateConfig } from '../../../config/types';
+import { allManagersList } from '../../../modules/manager';
+import { isCustomManager } from '../../../modules/manager/custom';
+import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
+import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
+import type { CustomExtractConfig } from '../../../modules/manager/custom/types';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
@@ -13,7 +12,8 @@ export interface FingerprintExtractConfig {
   managers: WorkerExtractConfig[];
 }
 
-function getRegexManagerFields(
+// checks for regex manager fields
+function getCustomManagerFields(
   config: WorkerExtractConfig
 ): CustomExtractConfig {
   const regexFields = {} as CustomExtractConfig;
@@ -37,7 +37,7 @@ function getFilteredManagerConfig(
   config: WorkerExtractConfig
 ): WorkerExtractConfig {
   return {
-    ...(config.manager === 'regex' && getRegexManagerFields(config)),
+    ...(isCustomManager(config.manager) && getCustomManagerFields(config)),
     manager: config.manager,
     fileMatch: config.fileMatch,
     npmrc: config.npmrc,
@@ -60,15 +60,18 @@ export function generateFingerprintConfig(
   if (enabledManagers?.length) {
     managerList = new Set(enabledManagers);
   } else {
-    managerList = new Set(getManagerList());
+    managerList = new Set(allManagersList);
   }
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
-    if (manager === 'regex') {
-      for (const regexManager of config.regexManagers ?? []) {
+    if (isCustomManager(manager)) {
+      const filteredCustomManagers = (config.customManagers ?? []).filter(
+        (mgr) => mgr.customType === manager
+      );
+      for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
-          ...mergeChildConfig(managerConfig, regexManager),
+          ...mergeChildConfig(managerConfig, customManager),
           fileList: [],
         });
       }

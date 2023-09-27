@@ -105,7 +105,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(false);
       prWorker.ensurePr = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
-      // TODO: incompatible types (#7154)
+      // TODO: incompatible types (#22198)
       config = {
         ...getConfig(),
         branchName: 'renovate/some-branch',
@@ -130,7 +130,7 @@ describe('workers/repository/update/branch/index', () => {
         }),
       });
       GlobalConfig.set(adminConfig);
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       sanitize.sanitize.mockImplementation((input) => input!);
       repoCache.getCache.mockReturnValue({});
     });
@@ -139,7 +139,6 @@ describe('workers/repository/update/branch/index', () => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
-      jest.resetAllMocks();
       GlobalConfig.reset();
     });
 
@@ -608,6 +607,29 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pending',
       });
+    });
+
+    // automerge should respect only automergeSchedule
+    // mock a case where branchPr does not exist, pr-creation is off-schedule, and the branch is configured for automerge
+    it('automerges when there is no pr and, pr-creation is off-schedule', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        })
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      config.automerge = true;
+      config.automergeType = 'branch';
+      await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
     it('returns if branch automerged', async () => {
@@ -1370,7 +1392,7 @@ describe('workers/repository/update/branch/index', () => {
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>()],
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
