@@ -55,7 +55,9 @@ Dependabot does not update common monorepo packages at once.
 
 Platform means the Git-hosting site or program, for example GitHub, GitLab or Azure.
 
-Dependabot only works on GitHub.
+The _official_ Dependabot program only works on GitHub.
+
+If you're an advanced user, you may use the [`dependabot-core` repository](https://github.com/dependabot/dependabot-core) as a base to build your own Dependabot, which you can run on other platforms.
 
 Renovate works on multiple platforms, including GitHub.
 Read the [list of Renovate platforms](https://docs.renovatebot.com/modules/platform/) to learn more.
