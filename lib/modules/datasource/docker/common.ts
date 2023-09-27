@@ -110,12 +110,23 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using google auth for Docker registry`
       );
-      const accessToken = await getGoogleAccessToken();
-      if (accessToken) {
-        const auth = Buffer.from(
-          `${'oauth2accesstoken'}:${accessToken}`
-        ).toString('base64');
-        opts.headers = { authorization: `Basic ${auth}` };
+      try {
+        const accessToken = await getGoogleAccessToken();
+        if (accessToken) {
+          const auth = Buffer.from(
+            `${'oauth2accesstoken'}:${accessToken}`
+          ).toString('base64');
+          opts.headers = { authorization: `Basic ${auth}` };
+        }
+      } catch (err) /* istanbul ignore next */ {
+        if (err.message?.includes('Could not load the default credentials')) {
+          logger.once.debug(
+            { registryHost, dockerRepository },
+            'Could not get Google access token, using no auth'
+          );
+        } else {
+          throw err;
+        }
       }
     } else if (opts.username && opts.password) {
       logger.trace(
