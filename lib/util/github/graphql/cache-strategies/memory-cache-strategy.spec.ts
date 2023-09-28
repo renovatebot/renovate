@@ -68,10 +68,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual([]);
     expect(isPaginationDone).toBe(false);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
-      items: {},
-      createdAt: isoTs(now),
-    });
+    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual(cacheRecord);
   });
 
   it('reconciles old cache record with new items', async () => {
@@ -136,7 +133,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     expect(isPaginationDone).toBe(true);
   });
 
-  it('reconciles entire page', async () => {
+  it('reconciles only not stabilized items in page', async () => {
     const oldItems = {
       '1': { releaseTimestamp: isoTs('2020-01-01 00:00'), version: '1' },
       '2': { releaseTimestamp: isoTs('2020-01-01 01:00'), version: '2' },
@@ -164,9 +161,9 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     expect(isPaginationDone).toBe(true);
     expect(memCache.get('github-graphql-cache:foo:bar')).toMatchObject({
       items: {
-        '1': { releaseTimestamp: isoTs('2022-12-31 10:00') },
-        '2': { releaseTimestamp: isoTs('2022-12-31 11:00') },
-        '3': { releaseTimestamp: isoTs('2022-12-31 12:00') },
+        '1': { releaseTimestamp: isoTs('2020-01-01 00:00') },
+        '2': { releaseTimestamp: isoTs('2020-01-01 01:00') },
+        '3': { releaseTimestamp: isoTs('2020-01-01 02:00') },
         '4': { releaseTimestamp: isoTs('2022-12-31 13:00') },
       },
     });
