@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/pipenv/artifacts does not pass private credential environment vars if variable names differ from allowed 1`] = `
+[
+  {
+    "cmd": "pipenv lock",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`modules/manager/pipenv/artifacts handles no constraint 1`] = `
 [
   {
@@ -38,10 +62,10 @@ exports[`modules/manager/pipenv/artifacts passes private credential environment 
         "LANG": "en_US.UTF-8",
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
+        "PASSWORD": "passwordTwo",
         "PATH": "/tmp/path",
         "PIPENV_CACHE_DIR": "/tmp/renovate/cache/others/pipenv",
         "USERNAME": "usernameOne",
-        "PASSWORD": "passwordTwo",
       },
       "maxBuffer": 10485760,
       "timeout": 900000,

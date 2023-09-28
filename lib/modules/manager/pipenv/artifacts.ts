@@ -103,10 +103,10 @@ async function findPipfileSourceUrlWithCredentials(
   }
 
   const credentialTokens = [
-    '$USERNAME',
+    '$USERNAME:',
     // eslint-disable-next-line no-template-curly-in-string
     '${USERNAME}',
-    '$PASSWORD',
+    '$PASSWORD@',
     // eslint-disable-next-line no-template-curly-in-string
     '${PASSWORD}',
   ];
