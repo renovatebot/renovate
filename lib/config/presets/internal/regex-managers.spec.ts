@@ -197,7 +197,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'gitlab-ci.yml',
-        regexManager!
+        regexManager
       );
 
       expect(res?.deps).toMatchObject([
@@ -243,7 +243,7 @@ describe('config/presets/internal/regex-managers', () => {
         ${'.gitlab/ci.yml'}         | ${false}
         ${'includes/gitlab-ci.yml'} | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, regexManager!.fileMatch)).toBe(expected);
+        expect(regexMatches(path, regexManager.fileMatch)).toBe(expected);
       });
     });
   });
