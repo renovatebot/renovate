@@ -59,7 +59,10 @@ export async function lookupUpdates(
       },
       'lookupUpdates'
     );
-    // istanbul ignore if
+    if (config.currentValue && !is.string(config.currentValue)) {
+      res.skipReason = 'invalid-value';
+      return res;
+    }
     if (
       !isGetPkgReleasesConfig(config) ||
       !getDatasourceFor(config.datasource)
