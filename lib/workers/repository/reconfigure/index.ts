@@ -38,8 +38,10 @@ export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
 
   // only use cached information if it is valid
   if (branchCache?.reconfigureBranchSha === branchSha) {
-    configFileName = branchCache?.configFileName ?? null;
+    logger.debug('Cache is valid. Skipping validation check');
+    return;
   }
+  logger.debug('Cache is outdated. Performing validation check');
 
   if (!configFileName) {
     try {
@@ -53,13 +55,6 @@ export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
     }
   }
 
-  // return to base branch
-  try {
-    await scm.checkoutBranch(config.baseBranch!);
-  } catch (err) {
-    logger.debug({ err }, 'Error checking out base branch');
-  }
-
   if (!configFileName) {
     logger.warn('No config file found in reconfigure branch');
     await platform.setBranchStatus({
@@ -68,6 +63,7 @@ export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
       description: 'Validation Failed - No config file found',
       state: 'red',
     });
+    await scm.checkoutBranch(config.baseBranch!);
     return;
   }
 
@@ -86,6 +82,8 @@ export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
       description: 'Validation Failed - Empty config file',
       state: 'red',
     });
+    setReconfigureBranchCache(branchSha!, configFileName, false);
+    await scm.checkoutBranch(config.baseBranch!);
     return;
   }
 
@@ -108,38 +106,33 @@ export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
     }
   } catch (err) {
     logger.debug({ err }, 'Error while reading config file');
+    await scm.checkoutBranch(config.baseBranch!);
     return;
   }
 
-  // perform validation
+  // perform validation and provide a passing or failing check run based on result
   const validationResult = await validateConfig(configFileParsed);
-  const existingState = await platform.getBranchStatusCheck(
-    branchName,
-    context
-  );
 
-  // Provide a passing or failing check run based on result
   // failing check
   if (validationResult.errors.length > 0) {
-    if (existingState !== 'red') {
-      await platform.setBranchStatus({
-        branchName,
-        context,
-        description: 'Validation Failed',
-        state: 'red',
-      });
-      setReconfigureBranchCache(branchSha!, configFileName, false);
-    }
-  }
-
-  // passing check
-  if (existingState !== 'green') {
     await platform.setBranchStatus({
       branchName,
       context,
-      description: 'Validation Successfull',
-      state: 'green',
+      description: 'Validation Failed',
+      state: 'red',
     });
-    setReconfigureBranchCache(branchSha!, configFileName, true);
+    setReconfigureBranchCache(branchSha!, configFileName, false);
+    return;
   }
+
+  // passing check
+  await platform.setBranchStatus({
+    branchName,
+    context,
+    description: 'Validation Successfull',
+    state: 'green',
+  });
+  setReconfigureBranchCache(branchSha!, configFileName, true);
+
+  await scm.checkoutBranch(config.baseBranch!);
 }
