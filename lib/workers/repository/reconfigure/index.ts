@@ -24,7 +24,7 @@ export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
   // this is something, the user initiates so skip if no branch exists
   if (!branchExists) {
     logger.debug('No reconfigure branch found');
-    deleteReconfigureBranchCache();
+    deleteReconfigureBranchCache(); // inorder to remove cache when the branch deleted
     return;
   }
 
@@ -122,6 +122,7 @@ export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
       state: 'red',
     });
     setReconfigureBranchCache(branchSha!, configFileName, false);
+    await scm.checkoutBranch(config.baseBranch!);
     return;
   }
 
