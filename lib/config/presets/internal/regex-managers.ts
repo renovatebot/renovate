@@ -32,9 +32,7 @@ export const presets: Record<string, Preset> = {
       'Update `_VERSION` environment variables in GitHub Action files.',
   },
   gitlabPipelineVersions: {
-    description:
-      'Update `_VERSION` environment variables in GitLab pipeline file.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
@@ -43,6 +41,8 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description:
+      'Update `_VERSION` environment variables in GitLab pipeline file.',
   },
   helmChartYamlAppVersions: {
     customManagers: [

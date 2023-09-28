@@ -174,7 +174,7 @@ describe('config/presets/internal/regex-managers', () => {
   });
 
   describe('Update `_VERSION` environment variables in GitLab pipeline file', () => {
-    const regexManager = presets['gitlabPipelineVersions'].regexManagers?.[0];
+    const customManager = presets['gitlabPipelineVersions'].customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -197,7 +197,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'gitlab-ci.yml',
-        regexManager
+        customManager!
       );
 
       expect(res?.deps).toMatchObject([
@@ -243,7 +243,7 @@ describe('config/presets/internal/regex-managers', () => {
         ${'.gitlab/ci.yml'}         | ${false}
         ${'includes/gitlab-ci.yml'} | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, regexManager.fileMatch)).toBe(expected);
+        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
       });
     });
   });
@@ -321,7 +321,7 @@ describe('config/presets/internal/regex-managers', () => {
         <groovy.version>4.0.10</groovy.version>
 
         <!-- renovate: datasource=docker depName=mongo -->
-        <mongo.container.version>4.4.6</mongo.container.version>        
+        <mongo.container.version>4.4.6</mongo.container.version>
       `;
 
       const res = await extractPackageFile(
