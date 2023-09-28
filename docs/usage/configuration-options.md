@@ -3541,9 +3541,10 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## separateMultipleMinor
 
-Configure this to `true` if you wish to get one PR for every separate minor version upgrade of a dependency.
-e.g. if you are on webpack@v3.0.0 currently then default behavior is a PR for upgrading to webpack@v3.4.0 and not for webpack@v3.3.0, webpack@v3.2.0 and webpack@v3.1.0
-If this setting is true then you would get one PR for webpack@v3.4.0, webpack@v3.3.0, webpack@v3.2.0 and webpack@v3.1.0
+Enable this for dependencies when it's important to split updates into separate PRs per minor release stream (e.g. `python`).
+
+e.g. if you are on python@v3.9.0 currently then default behavior is a PR for upgrading to python@v3.11.0 and not for python@v3.10.0.
+If this setting is true then you would get separate PRs for python@3.9.x, python@v3.10.x,  python@v3.11.x
 
 ## stopUpdatingLabel
 
