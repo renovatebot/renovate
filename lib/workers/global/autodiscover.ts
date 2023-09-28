@@ -38,6 +38,7 @@ export async function autodiscoverRepositories(
   let discovered = await platform.getRepos({
     topics: config.autodiscoverTopics,
     includeMirrors: config.includeMirrors,
+    namespaces: config.autodiscoverNamespaces,
   });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories

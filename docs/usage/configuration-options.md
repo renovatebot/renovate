@@ -646,13 +646,312 @@ When using with `npm`, we recommend you:
 ## customDatasources
 
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
-These datasources can be referred by RegexManagers or can be used to overwrite default datasources.
+These datasources can be referred by `customManagers` or can be used to overwrite default datasources.
 
 For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
 
+## customManagers
+
+Use `customManagers`(previously `regexManagers`) entries to configure the custom managers in Renovate.
+
+You can define custom managers to handle:
+
+- Proprietary file formats or conventions
+- Popular file formats not yet supported as a manager by Renovate
+
+Currently we only have one custom manager.
+The `regex` manager which is based on using Regular Expression named capture groups.
+
+You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
+
+- `datasource`
+- `depName`
+- `currentValue`
+
+Use named capture group matching _or_ set a corresponding template.
+We recommend you use only _one_ of these methods, or you'll get confused.
+
+We recommend that you also tell Renovate what `versioning` to use.
+If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
+
+For more details and examples about it, see our [documentation for the `regex` manager](/modules/manager/regex/).
+For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+<!-- prettier-ignore -->
+!!! tip
+    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
+
+### customType
+
+Example:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "matchStrings": [
+        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+      ]
+    }
+  ]
+}
+```
+
+### matchStrings
+
+Each `matchStrings` must be a valid regular expression, optionally with named capture groups.
+
+Example:
+
+```json
+{
+  "matchStrings": [
+    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+  ]
+}
+```
+
+### matchStringsStrategy
+
+`matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
+Three options are available:
+
+- `any` (default)
+- `recursive`
+- `combination`
+
+#### any
+
+Each provided `matchString` will be matched individually to the content of the `packageFile`.
+If a `matchString` has multiple matches in a file each will be interpreted as an independent dependency.
+
+As example the following configuration will update all three lines in the Dockerfile.
+renovate.json:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^Dockerfile$"],
+      "matchStringsStrategy": "any",
+      "matchStrings": [
+        "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+        "FROM (?<depName>\\S*):(?<currentValue>\\S*)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+A Dockerfile:
+
+```dockerfile
+FROM amd64/ubuntu:18.04
+ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+```
+
+#### recursive
+
+If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
+This can be used to narrow down the search area to prevent multiple matches.
+But the `recursive` strategy still allows the matching of multiple dependencies as described below.
+All matches of the first `matchStrings` pattern are detected, then each of these matches will be used as basis for the input for the next `matchStrings` pattern, and so on.
+If the next `matchStrings` pattern has multiple matches then it will split again.
+This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
+
+Matched groups will be available in subsequent matching layers.
+
+This is an example how this can work.
+The first custom manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
+But the second custom manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
+
+renovate.json:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^example.json$"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "\"backup\":\\s*{[^}]*}",
+        "\"test\":\\s*\\{[^}]*}",
+        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^example.json$"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "\"test\":\\s*\\{[^}]*}",
+        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+example.json:
+
+```json
+{
+  "backup": {
+    "test": {
+      "name": "grafana/loki",
+      "type": "docker",
+      "value": "1.6.1"
+    }
+  },
+  "setup": {
+    "test": {
+      "name": "python",
+      "type": "docker",
+      "value": "3.9.0"
+    }
+  }
+}
+```
+
+#### combination
+
+You may use this option to combine the values of multiple lines inside a file.
+You can combine multiple lines with `matchStringStrategy` values, but the `combination` approach is less susceptible to white space or line breaks stopping a match.
+
+`combination` can only match _one_ dependency per file.
+To update multiple dependencies with `combination` you must define multiple custom managers.
+
+Matched group values will be merged to form a single dependency.
+
+renovate.json:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^main.yml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
+        "prometheus_version:\\s*\"(?<currentValue>.*)\"\\s*//"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^main.yml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
+        "thanos_version:\\s*\"(?<currentValue>.*)\"\\s*//"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+Ansible variable file (YAML):
+
+```yaml
+prometheus_image: "prom/prometheus"  // a comment
+prometheus_version: "v2.21.0" // a comment
+------
+thanos_image: "prom/prometheus"  // a comment
+thanos_version: "0.15.0" // a comment
+```
+
+In the above example, each custom manager will match a single dependency each.
+
+### depNameTemplate
+
+If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### extractVersionTemplate
+
+If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### packageNameTemplate
+
+`packageName` is used for looking up dependency versions.
+It will be compiled using Handlebars and the regex `groups` result.
+It will default to the value of `depName` if left unconfigured/undefined.
+
+### currentValueTemplate
+
+If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### datasourceTemplate
+
+If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### depTypeTemplate
+
+If `depType` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### versioningTemplate
+
+If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### registryUrlTemplate
+
+If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### autoReplaceStringTemplate
+
+Allows overwriting how the matched string is replaced.
+This allows for some migration strategies.
+E.g. moving from one Docker image repository to another one.
+
+`helm-values.yaml`:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.old.registry/aRepository/andImage:1.18-alpine
+```
+
+The regex definition:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["values.yaml$"],
+      "matchStrings": [
+        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
+      ],
+      "depNameTemplate": "my.new.registry/aRepository/andImage",
+      "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+This will lead to following update where `1.21-alpine` is the newest version of `my.new.registry/aRepository/andImage`:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.new.registry/aRepository/andImage:1.21-alpine
+```
+
 ## customizeDashboard
 
-You can use the `customizeDashboard` object to customize dependency dashboard.
+You may use the `customizeDashboard` object to customize the Dependency Dashboard.
 
 Supported fields:
 
@@ -660,8 +959,13 @@ Supported fields:
 
 ### defaultRegistryUrlTemplate
 
-`registryUrl` which is used, if none is return by extraction.
-As this is a template it can be dynamically set. E.g. add the `packageName` as part of the URL:
+This field is used to build a `registryUrl` for the dependency.
+It is not needed if either:
+
+- The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
+- The matching groups you specified as part of the matching already include a `registryUrl` group
+  As this is a template it can be dynamically set.
+  E.g. add the `packageName` as part of the URL:
 
 ```json5
 {
@@ -1555,6 +1859,24 @@ To adjust it down to 10s for all queries, do this:
   ]
 }
 ```
+
+### httpsCertificateAuthority
+
+By default, Renovate uses the curated list of well-known [CA](https://en.wikipedia.org/wiki/Certificate_authority)s by Mozilla.
+You may use another Certificate Authority instead, by setting it in the `httpsCertificateAuthority` config option.
+
+### httpsPrivateKey
+
+Specifies the private key in [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) for mTLS authentication.
+
+<!-- prettier-ignore -->
+!!! warning
+    Do _not_ put your private key into this field, to avoid losing confidentiality completely.
+    You must use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.
+
+### httpsCertificate
+
+Specifies the [Certificate chains](https://en.wikipedia.org/wiki/X.509#Certificate_chains_and_cross-certification) in [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) for mTLS authentication.
 
 ## ignoreDeprecated
 
@@ -2999,299 +3321,6 @@ You can select which behavior you want from Renovate:
 
 We recommend that you stick with the default setting for this option.
 Only change this setting if you really need to.
-
-## regexManagers
-
-Use `regexManagers` entries to configure the `regex` manager in Renovate.
-
-You can define custom managers to handle:
-
-- Proprietary file formats or conventions
-- Popular file formats not yet supported as a manager by Renovate
-
-The custom manager concept is based on using Regular Expression named capture groups.
-
-You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
-
-- `datasource`
-- `depName`
-- `currentValue`
-
-Use named capture group matching _or_ set a corresponding template.
-We recommend you use only one of these methods, or you'll get confused.
-
-We recommend that you also tell Renovate what `versioning` to use.
-If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
-
-For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/index.md).
-For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
-
-<!-- prettier-ignore -->
-!!! tip
-    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
-
-### customType
-
-Example:
-
-```json
-{
-  "regexManagers": [
-    {
-      "customType": "regex",
-      "matchStrings": [
-        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
-      ]
-    }
-  ]
-}
-```
-
-### matchStrings
-
-`matchStrings` should each be a valid regular expression, optionally with named capture groups.
-
-Example:
-
-```json
-{
-  "matchStrings": [
-    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
-  ]
-}
-```
-
-### matchStringsStrategy
-
-`matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
-Three options are available:
-
-- `any` (default)
-- `recursive`
-- `combination`
-
-#### any
-
-Each provided `matchString` will be matched individually to the content of the `packageFile`.
-If a `matchString` has multiple matches in a file each will be interpreted as an independent dependency.
-
-As example the following configuration will update all 3 lines in the Dockerfile.
-renovate.json:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStringsStrategy": "any",
-      "matchStrings": [
-        "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
-        "FROM (?<depName>\\S*):(?<currentValue>\\S*)"
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-a Dockerfile:
-
-```dockerfile
-FROM amd64/ubuntu:18.04
-ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
-ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
-```
-
-#### recursive
-
-If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
-This can be used to narrow down the search area to prevent multiple matches.
-But the `recursive` strategy still allows the matching of multiple dependencies as described below.
-All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
-If the next `matchStrings` pattern has multiple matches then it will split again.
-This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
-
-Matched groups will be available in subsequent matching layers.
-
-This is an example how this can work.
-The first regex manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
-But the second regex manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
-
-renovate.json:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["^example.json$"],
-      "matchStringsStrategy": "recursive",
-      "matchStrings": [
-        "\"backup\":\\s*{[^}]*}",
-        "\"test\":\\s*\\{[^}]*}",
-        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
-      ],
-      "datasourceTemplate": "docker"
-    },
-    {
-      "fileMatch": ["^example.json$"],
-      "matchStringsStrategy": "recursive",
-      "matchStrings": [
-        "\"test\":\\s*\\{[^}]*}",
-        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-example.json:
-
-```json
-{
-  "backup": {
-    "test": {
-      "name": "grafana/loki",
-      "type": "docker",
-      "value": "1.6.1"
-    }
-  },
-  "setup": {
-    "test": {
-      "name": "python",
-      "type": "docker",
-      "value": "3.9.0"
-    }
-  }
-}
-```
-
-#### combination
-
-This option allows the possibility to combine the values of multiple lines inside a file.
-While using multiple lines is also possible using both other `matchStringStrategy` values, the `combination` approach is less susceptible to white space or line breaks stopping a match.
-
-`combination` will only match at most one dependency per file, so if you want to update multiple dependencies using `combination` you have to define multiple regex managers.
-
-Matched group values will be merged to form a single dependency.
-
-renovate.json:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["^main.yml$"],
-      "matchStringsStrategy": "combination",
-      "matchStrings": [
-        "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
-        "prometheus_version:\\s*\"(?<currentValue>.*)\"\\s*//"
-      ],
-      "datasourceTemplate": "docker"
-    },
-    {
-      "fileMatch": ["^main.yml$"],
-      "matchStringsStrategy": "combination",
-      "matchStrings": [
-        "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
-        "thanos_version:\\s*\"(?<currentValue>.*)\"\\s*//"
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-Ansible variable file ( yaml ):
-
-```yaml
-prometheus_image: "prom/prometheus"  // a comment
-prometheus_version: "v2.21.0" // a comment
-------
-thanos_image: "prom/prometheus"  // a comment
-thanos_version: "0.15.0" // a comment
-```
-
-In the above example, each regex manager will match a single dependency each.
-
-### depNameTemplate
-
-If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### extractVersionTemplate
-
-If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### packageNameTemplate
-
-`packageName` is used for looking up dependency versions.
-It will be compiled using Handlebars and the regex `groups` result.
-It will default to the value of `depName` if left unconfigured/undefined.
-
-### currentValueTemplate
-
-If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### datasourceTemplate
-
-If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### depTypeTemplate
-
-If `depType` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### versioningTemplate
-
-If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### registryUrlTemplate
-
-If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### autoReplaceStringTemplate
-
-Allows overwriting how the matched string is replaced.
-This allows for some migration strategies.
-E.g. moving from one Docker image repository to another one.
-
-helm-values.yaml:
-
-```yaml
-# The image of the service <registry>/<repo>/<image>:<tag>
-image: my.old.registry/aRepository/andImage:1.18-alpine
-```
-
-regex definition:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["values.yaml$"],
-      "matchStrings": [
-        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
-      ],
-      "depNameTemplate": "my.new.registry/aRepository/andImage",
-      "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-This will lead to following update where `1.21-alpine` is the newest version of `my.new.registry/aRepository/andImage`:
-
-```yaml
-# The image of the service <registry>/<repo>/<image>:<tag>
-image: my.new.registry/aRepository/andImage:1.21-alpine
-```
 
 ## registryAliases
 

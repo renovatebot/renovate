@@ -1,5 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
@@ -25,7 +26,7 @@ import { updateArtifacts } from '.';
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 jest.mock('../gradle');
 
 process.env.CONTAINERBASE = 'true';

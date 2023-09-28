@@ -210,7 +210,7 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr };
   }
-  return { lockFile };
+  return { error: !lockFile, lockFile };
 }
 
 export function divideWorkspaceAndRootDeps(
@@ -251,7 +251,7 @@ export function divideWorkspaceAndRootDeps(
         // compare workspaceDir to workspace patterns
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
-        for (const workspacePattern of workspacePatterns ?? []) {
+        for (const workspacePattern of workspacePatterns) {
           if (minimatch(workspacePattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;

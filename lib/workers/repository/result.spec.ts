@@ -4,7 +4,6 @@ import { processResult } from './result';
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({
     repoIsActivated: true,
     repoIsOnboarded: true,

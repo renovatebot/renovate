@@ -11,6 +11,7 @@ describe('modules/manager/woodpecker/extract', () => {
 
     it('returns null for non-object YAML', () => {
       expect(extractPackageFile('nothing here', '', {})).toBeNull();
+      expect(extractPackageFile('clone: null', '', {})).toBeNull();
     });
 
     it('returns null for malformed YAML', () => {

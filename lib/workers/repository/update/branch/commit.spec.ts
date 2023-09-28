@@ -20,7 +20,6 @@ describe('workers/repository/update/branch/commit', () => {
         updatedArtifacts: [],
         upgrades: [],
       } satisfies BranchConfig;
-      jest.resetAllMocks();
       scm.commitAndPush.mockResolvedValueOnce('123test');
       GlobalConfig.reset();
     });

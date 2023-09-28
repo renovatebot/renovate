@@ -1,5 +1,5 @@
 import type { Category } from '../../../constants';
-import { DockerDatasource } from '../../datasource/docker';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
@@ -10,7 +10,7 @@ export { updateLockedDependency } from './update-locked';
 export const supportedDatasources = [
   PypiDatasource.id,
   GithubTagsDatasource.id,
-  DockerDatasource.id,
+  GithubReleasesDatasource.id,
 ];
 
 export const supportsLockFileMaintenance = true;

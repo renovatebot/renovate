@@ -58,8 +58,6 @@ describe('workers/repository/process/lookup/index', () => {
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
 
   beforeEach(() => {
-    // TODO: fix wrong tests
-    jest.resetAllMocks();
     // TODO: fix types #22198
     config = partial<LookupUpdateConfig>(getConfig() as never);
     config.manager = 'npm';
@@ -82,6 +80,14 @@ describe('workers/repository/process/lookup/index', () => {
   });
 
   describe('.lookupUpdates()', () => {
+    it('returns null if invalid currentValue', async () => {
+      // @ts-expect-error: testing invalid currentValue
+      config.currentValue = 3;
+      expect((await lookup.lookupUpdates(config)).skipReason).toBe(
+        'invalid-value'
+      );
+    });
+
     it('returns null if unknown datasource', async () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';

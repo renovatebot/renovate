@@ -34,7 +34,6 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   memCache.init();
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -363,6 +362,24 @@ describe('workers/repository/init/merge', () => {
       });
       config.extends = [':automergeDisabled'];
       expect(await mergeRenovateConfig(config)).toBeDefined();
+    });
+
+    it('continues if no errors-2', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      expect(
+        await mergeRenovateConfig({
+          ...config,
+          requireConfig: 'ignored',
+          configFileParsed: undefined,
+          warnings: undefined,
+          secrets: undefined,
+        })
+      ).toBeDefined();
     });
   });
 });
