@@ -4,7 +4,7 @@ import {
   matchBlobOrRegexArray,
 } from './pattern-match';
 
-describe('util/matcher', () => {
+describe('util/pattern-match', () => {
   describe('filterBlobOrRegexArray', () => {
     it('returns empty array if no matches', () => {
       expect(filterBlobOrRegexArray(['abc'], [])).toEqual([]);
