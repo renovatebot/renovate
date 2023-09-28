@@ -42,6 +42,12 @@ export interface OnboardingBranchCache {
   configFileParsed?: string;
 }
 
+export interface ReconfigureBranchCache {
+  reconfigureBranchSha?: string;
+  configFileName?: string;
+  isConfigValid?: boolean;
+}
+
 export interface PrCache {
   /**
    * Fingerprint of the PR body
@@ -129,6 +135,7 @@ export interface RepoCacheData {
   };
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;
+  reconfigureBranchCache?: ReconfigureBranchCache;
 }
 
 export interface RepoCache {

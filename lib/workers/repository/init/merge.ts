@@ -32,7 +32,7 @@ import {
 import { OnboardingState } from '../onboarding/common';
 import type { RepoFileConfig } from './types';
 
-async function detectConfigFile(): Promise<string | null> {
+export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
   for (const fileName of configFileNames) {
     if (fileName === 'package.json') {
