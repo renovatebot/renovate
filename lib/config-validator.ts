@@ -20,8 +20,8 @@ async function validate(
   desc: string,
   config: RenovateConfig,
   strict: boolean,
-  isPreset = false,
-  isGlobalConfig = false
+  isGlobalConfig: boolean,
+  isPreset = false
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -81,7 +81,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict);
+          await validate(file, parsedContent, strict, false);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -102,7 +102,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict);
+          await validate(file, parsedContent, strict, false);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -118,7 +118,12 @@ type PackageJson = {
       ) as PackageJson;
       if (pkgJson.renovate) {
         logger.info(`Validating package.json > renovate`);
-        await validate('package.json > renovate', pkgJson.renovate, strict);
+        await validate(
+          'package.json > renovate',
+          pkgJson.renovate,
+          strict,
+          false
+        );
       }
       if (pkgJson['renovate-config']) {
         logger.info(`Validating package.json > renovate-config`);
