@@ -101,7 +101,6 @@ describe('util/common', () => {
       expect(() =>
         parseJsonWithFallback(invalidJsonString, 'renovate.json')
       ).toThrow();
-      expect(logger.logger.warn).toHaveBeenCalledWith('Invalid JSON format');
     });
 
     it('catches and warns if content parsing faield with JSON.parse but not with JSON5.parse', () => {
@@ -114,7 +113,8 @@ describe('util/common', () => {
         isMarried: false,
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'JSON5.parse was used to parse the JSON data. Please check your json file'
+        { context: 'renovate.json' },
+        'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.'
       );
     });
   });
