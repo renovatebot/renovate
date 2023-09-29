@@ -22,7 +22,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
     case '.json5':
       return JSON5.parse(await readSystemFile(file, 'utf8'));
     case '.json':
-      return parseJsonWithFallback(await readSystemFile(file, 'utf8'));
+      return parseJsonWithFallback(await readSystemFile(file, 'utf8'), file);
     case '.js': {
       const tmpConfig = await import(file);
       let config = tmpConfig.default

@@ -72,7 +72,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     if (configFileRaw) {
       let configFileParsed = configFileName.endsWith('.json5')
         ? JSON5.parse(configFileRaw)
-        : parseJsonWithFallback(configFileRaw);
+        : parseJsonWithFallback(configFileRaw, configFileName);
       if (configFileName !== 'package.json') {
         return { configFileName, configFileRaw, configFileParsed };
       }
@@ -177,7 +177,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         };
       }
       try {
-        configFileParsed = parseJsonWithFallback(configFileRaw);
+        configFileParsed = parseJsonWithFallback(configFileRaw, configFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { renovateConfig: configFileRaw },

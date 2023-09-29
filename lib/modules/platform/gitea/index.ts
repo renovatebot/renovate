@@ -257,7 +257,7 @@ const platform: Platform = {
   ): Promise<any> {
     // TODO #22198
     const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
-    return parseJsonWithFallback(raw);
+    return parseJsonWithFallback(raw, fileName);
   },
 
   async initRepo({

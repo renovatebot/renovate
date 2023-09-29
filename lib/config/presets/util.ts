@@ -94,7 +94,7 @@ export function parsePreset(content: string, fileName: string): Preset {
   try {
     return fileType === '.json5'
       ? JSON5.parse(content)
-      : parseJsonWithFallback(content);
+      : parseJsonWithFallback(content, fileName);
   } catch (err) {
     throw new Error(PRESET_INVALID_JSON);
   }

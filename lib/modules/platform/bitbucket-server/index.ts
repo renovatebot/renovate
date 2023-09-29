@@ -147,7 +147,7 @@ export async function getJsonFile(
 ): Promise<any> {
   // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return parseJsonWithFallback(raw);
+  return parseJsonWithFallback(raw, fileName);
 }
 
 // Initialize Bitbucket Server by getting base branch

@@ -90,7 +90,7 @@ describe('util/common', () => {
 
   describe('parseJsonWithFallback', () => {
     it('returns parsed json', () => {
-      expect(parseJsonWithFallback(validJsonString)).toEqual({
+      expect(parseJsonWithFallback(validJsonString, 'renovate.json')).toEqual({
         name: 'John Doe',
         age: 30,
         city: 'New York',
@@ -98,12 +98,16 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid json', () => {
-      expect(() => parseJsonWithFallback(invalidJsonString)).toThrow();
+      expect(() =>
+        parseJsonWithFallback(invalidJsonString, 'renovate.json')
+      ).toThrow();
       expect(logger.logger.warn).toHaveBeenCalledWith('Invalid JSON format');
     });
 
     it('catches and warns if content parsing faield with JSON.parse but not with JSON5.parse', () => {
-      expect(parseJsonWithFallback(onlyJson5parsableString)).toEqual({
+      expect(
+        parseJsonWithFallback(onlyJson5parsableString, 'renovate.json')
+      ).toEqual({
         name: 'Bob',
         age: 35,
         city: 'San Francisco',

@@ -189,7 +189,9 @@ export async function getJsonFile(
     return null;
   }
 
-  return fileType === '.json5' ? JSON5.parse(raw) : parseJsonWithFallback(raw);
+  return fileType === '.json5'
+    ? JSON5.parse(raw)
+    : parseJsonWithFallback(raw, fileName);
 }
 
 export async function initRepo({
