@@ -62,7 +62,7 @@ export function detectPlatform(
   return null;
 }
 
-export function parseJsonWithFallback(content: string): any {
+export function parseJsonWithFallback(content: string, context: string): any {
   let parsedJson: any;
 
   try {
@@ -71,10 +71,9 @@ export function parseJsonWithFallback(content: string): any {
     try {
       parsedJson = JSON5.parse(content);
       logger.warn(
-        'JSON5.parse was used to parse the JSON data. Please check your json file'
-      );
+        { context },
+        'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.'      );
     } catch (err) {
-      logger.warn('Invalid JSON format');
       throw err;
     }
   }
