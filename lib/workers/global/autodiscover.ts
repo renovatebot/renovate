@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { filterBlobOrRegexArray } from '../../util/pattern-match';
+import { filterGlobOrRegexArray } from '../../util/pattern-match';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -48,7 +48,7 @@ export async function autodiscoverRepositories(
   }
 
   if (config.autodiscoverFilter) {
-    discovered = filterBlobOrRegexArray(
+    discovered = filterGlobOrRegexArray(
       discovered,
       is.string(config.autodiscoverFilter)
         ? [config.autodiscoverFilter]

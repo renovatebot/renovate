@@ -1,41 +1,41 @@
 import {
-  filterBlobOrRegexArray,
-  matchBlobOrRegex,
-  matchBlobOrRegexArray,
+  filterGlobOrRegexArray,
+  matchGlobOrRegex,
+  matchGlobOrRegexArray,
 } from './pattern-match';
 
 describe('util/pattern-match', () => {
-  describe('filterBlobOrRegexArray', () => {
+  describe('filterGlobOrRegexArray', () => {
     it('returns empty array if no matches', () => {
-      expect(filterBlobOrRegexArray(['abc'], [])).toEqual([]);
+      expect(filterGlobOrRegexArray(['abc'], [])).toEqual([]);
     });
 
     it('returns empty array if negative match', () => {
-      expect(filterBlobOrRegexArray(['abc'], ['!abc'])).toEqual([]);
+      expect(filterGlobOrRegexArray(['abc'], ['!abc'])).toEqual([]);
     });
 
     it('returns empty array if no positive match', () => {
-      expect(filterBlobOrRegexArray(['abc'], ['def'])).toEqual([]);
+      expect(filterGlobOrRegexArray(['abc'], ['def'])).toEqual([]);
     });
 
     it('returns empty array if some negative matches fail', () => {
-      expect(filterBlobOrRegexArray(['def'], ['!abc', '!def'])).toEqual([]);
+      expect(filterGlobOrRegexArray(['def'], ['!abc', '!def'])).toEqual([]);
     });
 
     it('returns input if positive match', () => {
-      expect(filterBlobOrRegexArray(['abc'], ['/^abc/'])).toEqual(['abc']);
+      expect(filterGlobOrRegexArray(['abc'], ['/^abc/'])).toEqual(['abc']);
     });
   });
 
-  describe('matchBlobOrRegex', () => {
+  describe('matchGlobOrRegex', () => {
     it('throws if given invalid regex', () => {
-      expect(() => matchBlobOrRegex('abc', '/project/re**./')).toThrow();
+      expect(() => matchGlobOrRegex('abc', '/project/re**./')).toThrow();
     });
   });
 
-  describe('matchBlobOrRegexArray', () => {
+  describe('matchGlobOrRegexArray', () => {
     it('returns false if no matches', () => {
-      expect(matchBlobOrRegexArray('abc', [])).toBe(false);
+      expect(matchGlobOrRegexArray('abc', [])).toBe(false);
     });
   });
 });
