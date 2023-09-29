@@ -109,8 +109,10 @@ export async function pruneStaleBranches(
     return;
   }
   // TODO: types (#22198)
-  let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix!)
+  let renovateBranches = getBranchList().filter(
+    (branchName) =>
+      branchName.startsWith(config.branchPrefix!) &&
+      branchName !== `${config.branchPrefix!}reconfigure`
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
