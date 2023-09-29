@@ -14,8 +14,10 @@ import {
   setReconfigureBranchCache,
 } from './reconfigure-cache';
 
-export async function reconfigureLogic(config: RenovateConfig): Promise<void> {
-  logger.debug('reconfigureLogic()');
+export async function validateReconfigureBranch(
+  config: RenovateConfig
+): Promise<void> {
+  logger.debug('validateReconfigureBranch()');
   const context = `renovate/config-validation`;
 
   const branchName = `${config.branchPrefix}reconfigure`;
