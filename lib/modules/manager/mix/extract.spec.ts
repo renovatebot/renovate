@@ -80,6 +80,12 @@ describe('modules/manager/mix/extract', () => {
           packageName: 'jason',
         },
         {
+          currentValue: '~> 6.1',
+          datasource: 'hex',
+          depName: 'hammer_backend_redis',
+          packageName: 'hammer_backend_redis',
+        },
+        {
           currentValue: '== 1.6.14',
           currentVersion: '1.6.14',
           datasource: 'hex',

@@ -36,7 +36,7 @@ export async function getECRAuthToken(
     );
   } catch (err) {
     logger.trace({ err }, 'err');
-    logger.debug('ECR getAuthorizationToken error');
+    logger.warn('ECR getAuthorizationToken error');
   }
   return null;
 }

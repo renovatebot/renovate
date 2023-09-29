@@ -1014,7 +1014,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('PackageFiles.getDashboardMarkdown()', () => {
         const note =
-          '> **Note**\n> Detected dependencies section has been truncated\n';
+          '> **Note**\n\n> Detected dependencies section has been truncated\n';
         const title = `## Detected dependencies\n\n`;
 
         beforeEach(() => {
