@@ -1,7 +1,7 @@
 import { minimatch } from './minimatch';
 import { configRegexPredicate, isConfigRegex } from './regex';
 
-export function matchBlobOrRegex(input: string, matcher: string): boolean {
+export function matchGlobOrRegex(input: string, matcher: string): boolean {
   // Check if pattern is regex
   if (isConfigRegex(matcher)) {
     const autodiscoveryPred = configRegexPredicate(matcher);
@@ -14,14 +14,14 @@ export function matchBlobOrRegex(input: string, matcher: string): boolean {
   return minimatch(matcher, { nocase: true }).match(input);
 }
 
-export function matchBlobOrRegexArray(
+export function matchGlobOrRegexArray(
   input: string,
   matches: string[]
 ): boolean {
-  return filterBlobOrRegexArray([input], matches).length > 0;
+  return filterGlobOrRegexArray([input], matches).length > 0;
 }
 
-export function filterBlobOrRegexArray(
+export function filterGlobOrRegexArray(
   inputs: string[],
   matches: string[]
 ): string[] {
@@ -33,7 +33,7 @@ export function filterBlobOrRegexArray(
   return inputs.filter(
     (input) =>
       (positiveMatches.length === 0 ||
-        positiveMatches.some((m) => matchBlobOrRegex(input, m))) &&
-      negativeMatches.every((m) => matchBlobOrRegex(input, m))
+        positiveMatches.some((m) => matchGlobOrRegex(input, m))) &&
+      negativeMatches.every((m) => matchGlobOrRegex(input, m))
   );
 }
