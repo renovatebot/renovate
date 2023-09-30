@@ -46,10 +46,10 @@ describe('workers/repository/process/limits', () => {
       expect(res).toBe(5);
     });
 
-    it('returns 99 if no hourly limit', async () => {
+    it('returns MAX_SAFE_INTEGER if no hourly limit', async () => {
       config.prHourlyLimit = 0;
       const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toBe(99);
+      expect(res).toBe(Number.MAX_SAFE_INTEGER);
     });
   });
 
@@ -74,10 +74,10 @@ describe('workers/repository/process/limits', () => {
       expect(res).toBe(19);
     });
 
-    it('returns 99 if no concurrent limit', async () => {
+    it('returns MAX_SAFE_INTEGER if no concurrent limit', async () => {
       config.prConcurrentLimit = 0;
       const res = await limits.getConcurrentPrsRemaining(config, []);
-      expect(res).toBe(99);
+      expect(res).toBe(Number.MAX_SAFE_INTEGER);
     });
   });
 
@@ -120,7 +120,7 @@ describe('workers/repository/process/limits', () => {
       config.branchConcurrentLimit = 0;
       config.prConcurrentLimit = 20;
       const res = await limits.getConcurrentBranchesRemaining(config, []);
-      expect(res).toBe(99);
+      expect(res).toBe(Number.MAX_SAFE_INTEGER);
     });
 
     it('returns 10 if no limits are set', async () => {

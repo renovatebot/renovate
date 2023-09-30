@@ -36,7 +36,7 @@ export async function getPrHourlyRemaining(
       return config.prHourlyLimit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getConcurrentPrsRemaining(
@@ -78,7 +78,7 @@ export async function getConcurrentPrsRemaining(
       return config.prConcurrentLimit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getPrsRemaining(
@@ -124,7 +124,7 @@ export async function getConcurrentBranchesRemaining(
       return limit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getBranchesRemaining(
