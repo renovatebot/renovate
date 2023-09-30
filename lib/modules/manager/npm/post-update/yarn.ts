@@ -254,10 +254,20 @@ export async function generateLockFile(
           commands.push(`yarn install${cmdOptions}`);
         } else if (isYarnDedupeAvailable && s === 'highest') {
           commands.push(`yarn dedupe --strategy ${s}${cmdOptions}`);
-        } else {
-          commands.push(`yarn dlx yarn-berry-deduplicate --strategy ${s}`);
-          // Run yarn again in case any changes are necessary
-          commands.push(`yarn install${cmdOptions}`);
+        } else if (s === 'fewer') {
+          const hasBothStrategies =
+            config.postUpdateOptions.includes('yarnDedupeHighest');
+
+          commands.push(
+            `yarn dlx yarn-berry-deduplicate${
+              hasBothStrategies ? '' : ` --strategy ${s}`
+            }`
+          );
+
+          if (!hasBothStrategies || !isYarnDedupeAvailable) {
+            // Run yarn again in case any changes are necessary
+            commands.push(`yarn install${cmdOptions}`);
+          }
         }
       }
     });
