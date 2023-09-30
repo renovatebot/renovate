@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import semver from 'semver';
@@ -41,12 +40,14 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const pnpmVersionFromPackageJson = getPackageManagerVersion('pnpm', await lazyPgkJson.getValue());
+
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
         getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
         config.constraints?.pnpm ?? // from user config or extraction
-        getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in package.json > packageManager or engines
+        pnpmVersionFromPackageJson ?? // look in package.json > packageManager or engines
         (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 
@@ -79,10 +80,9 @@ export async function generateLockFile(
     logger.trace({ cmd, args }, 'pnpm command');
     commands.push(`${cmd} ${args}`);
 
-    const pnpmVersion = execSync('pnpm --version').toString().trim();
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      if (pnpmVersion && semver.gte(pnpmVersion, '8.8.0')) {
+      if (pnpmVersionFromPackageJson && semver.gte(pnpmVersionFromPackageJson, '8.8.0')) {
         commands.push('pnpm dedupe --ignore-scripts');
       } else {
         commands.push('pnpm dedupe');
