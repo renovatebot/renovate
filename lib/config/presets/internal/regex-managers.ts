@@ -31,6 +31,19 @@ export const presets: Record<string, Preset> = {
     description:
       'Update `_VERSION` environment variables in GitHub Action files.',
   },
+  gitlabPipelineVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+        ],
+      },
+    ],
+    description:
+      'Update `_VERSION` environment variables in GitLab pipeline file.',
+  },
   helmChartYamlAppVersions: {
     customManagers: [
       {
@@ -50,7 +63,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         datasourceTemplate:
           '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
-        fileMatch: ['^pom\\.xml$'],
+        fileMatch: ['(^|/)pom\\.xml$'],
         matchStrings: [
           '<!--\\s?renovate:( datasource=(?<datasource>[a-z-.]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
         ],
