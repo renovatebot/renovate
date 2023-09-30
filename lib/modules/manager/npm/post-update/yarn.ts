@@ -252,11 +252,29 @@ export async function generateLockFile(
           commands.push(`npx yarn-deduplicate --strategy ${s}`);
           // Run yarn again in case any changes are necessary
           commands.push(`yarn install${cmdOptions}`);
-        } else if (isYarnDedupeAvailable && s === 'highest') {
-          commands.push(`yarn dedupe --strategy ${s}${cmdOptions}`);
+        } else if (s === 'highest') {
+          if (isYarnDedupeAvailable) {
+            commands.push(`yarn dedupe --strategy ${s}${cmdOptions}`);
+          } else {
+            const hasBothStrategies =
+              config.postUpdateOptions.includes('yarnDedupeFewer');
+            commands.push(
+              `yarn dlx yarn-berry-deduplicate${
+                hasBothStrategies ? '' : ` --strategy ${s}`
+              }`
+            );
+
+            // Run yarn again in case any changes are necessary
+            commands.push(`yarn install${cmdOptions}`);
+          }
         } else if (s === 'fewer') {
           const hasBothStrategies =
             config.postUpdateOptions.includes('yarnDedupeHighest');
+
+          if (hasBothStrategies && !isYarnDedupeAvailable) {
+            // Skip this strategy as it will be run with "highest"
+            return;
+          }
 
           commands.push(
             `yarn dlx yarn-berry-deduplicate${
