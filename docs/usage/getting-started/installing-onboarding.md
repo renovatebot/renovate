@@ -79,6 +79,8 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `.github/renovate.json5`
 - `.gitlab/renovate.json`
 - `.gitlab/renovate.json5`
+- `.gitea/renovate.json`
+- `.gitea/renovate.json5`
 - `.renovaterc`
 - `.renovaterc.json`
 - `.renovaterc.json5`

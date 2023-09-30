@@ -229,6 +229,19 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('finds .gitea/renovate.json', async () => {
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.gitea/renovate.json',
+      ]);
+      fs.readLocalFile.mockResolvedValue('{}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.gitea/renovate.json',
+        configFileParsed: {},
+        configFileRaw: '{}',
+      });
+    });
+
     it('finds .renovaterc.json', async () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
