@@ -1,5 +1,7 @@
+import { execSync } from 'node:child_process';
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
+import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
@@ -77,10 +79,14 @@ export async function generateLockFile(
     logger.trace({ cmd, args }, 'pnpm command');
     commands.push(`${cmd} ${args}`);
 
+    const pnpmVersion = execSync('pnpm --version').toString().trim();
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      logger.debug('Performing pnpm dedupe --ignore-scripts');
-      commands.push('pnpm dedupe --ignore-scripts');
+      if (pnpmVersion && semver.gte(pnpmVersion, '8.8.0')) {
+        commands.push('pnpm dedupe --ignore-scripts');
+      } else {
+        commands.push('pnpm dedupe');
+      }
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
