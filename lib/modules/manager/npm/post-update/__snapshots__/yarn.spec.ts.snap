@@ -54,6 +54,66 @@ exports[`modules/manager/npm/post-update/yarn does not use global cache if zero 
       "timeout": 900000,
     },
   },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy highest",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
 ]
 `;
 
@@ -146,11 +206,113 @@ exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2
       "timeout": 900000,
     },
   },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy highest",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
 ]
 `;
 
 exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v2.2.0 1`] = `
 [
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   {
     "cmd": "yarn install",
     "options": {
@@ -207,6 +369,38 @@ exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v3
     },
   },
   {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install --mode=update-lockfile",
+    "options": {
+      "cwd": "/some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_GLOBAL_FOLDER": "/tmp/renovate/cache/berry",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
     "cmd": "yarn dedupe --strategy highest --mode=update-lockfile",
     "options": {
       "cwd": "/some-dir",
@@ -227,6 +421,36 @@ exports[`modules/manager/npm/post-update/yarn generates lock files using yarn v3
 
 exports[`modules/manager/npm/post-update/yarn only skips build if skipInstalls is false 1`] = `
 [
+  {
+    "cmd": "yarn install --mode=skip-build",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   {
     "cmd": "yarn install --mode=skip-build",
     "options": {
@@ -343,11 +567,107 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in 
       "timeout": 900000,
     },
   },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy highest",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
 ]
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v2.2.0 1`] = `
 [
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   {
     "cmd": "yarn install",
     "options": {
@@ -385,6 +705,36 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in 
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance in subdirectory independent workspaces using yarn v3.0.0 1`] = `
 [
+  {
+    "cmd": "yarn install --mode=update-lockfile",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "some-dir/sub_workspace",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   {
     "cmd": "yarn install --mode=update-lockfile",
     "options": {
@@ -501,11 +851,107 @@ exports[`modules/manager/npm/post-update/yarn performs lock file maintenance usi
       "timeout": 900000,
     },
   },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy highest",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
 ]
 `;
 
 exports[`modules/manager/npm/post-update/yarn performs lock file maintenance using yarn v2.2.0 1`] = `
 [
+  {
+    "cmd": "yarn install",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  {
+    "cmd": "yarn dlx yarn-berry-deduplicate --strategy fewer",
+    "options": {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": {
+        "CI": "true",
+        "YARN_ENABLE_GLOBAL_CACHE": "1",
+        "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+        "YARN_ENABLE_SCRIPTS": "0",
+        "YARN_HTTP_TIMEOUT": "100000",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
   {
     "cmd": "yarn install",
     "options": {
