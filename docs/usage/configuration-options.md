@@ -114,7 +114,7 @@ Must be valid usernames on the platform in use.
 
 If enabled Renovate tries to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
-See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners), [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) or [Gitea](https://docs.gitea.com/next/usage/code-owners) documentation for details on syntax and possible file locations.
 
 ## assigneesSampleSize
 
@@ -3398,7 +3398,7 @@ For example: if the username or team name is `bar` then you would set the config
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
 
-See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners), [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) or [Gitea](https://docs.gitea.com/next/usage/code-owners) documentation for details on syntax and possible file locations.
 
 ## reviewersSampleSize
 

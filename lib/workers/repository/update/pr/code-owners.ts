@@ -83,6 +83,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       (await readLocalFile('CODEOWNERS', 'utf8')) ??
       (await readLocalFile('.github/CODEOWNERS', 'utf8')) ??
       (await readLocalFile('.gitlab/CODEOWNERS', 'utf8')) ??
+      (await readLocalFile('.gitea/CODEOWNERS', 'utf8')) ??
       (await readLocalFile('docs/CODEOWNERS', 'utf8'));
 
     if (!codeOwnersFile) {

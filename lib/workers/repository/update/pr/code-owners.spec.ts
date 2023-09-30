@@ -254,6 +254,7 @@ describe('workers/repository/update/pr/code-owners', () => {
       'CODEOWNERS',
       '.github/CODEOWNERS',
       '.gitlab/CODEOWNERS',
+      '.gitea/CODEOWNERS',
       'docs/CODEOWNERS',
     ];
     codeOwnerFilePaths.forEach((codeOwnerFilePath) => {
