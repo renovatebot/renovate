@@ -297,8 +297,8 @@ importers:
         specifier: 2.1.2
         version: 2.1.2
       simple-git:
-        specifier: 3.19.1
-        version: 3.19.1
+        specifier: 3.20.0
+        version: 3.20.0
       slugify:
         specifier: 1.6.6
         version: 1.6.6
@@ -9980,8 +9980,8 @@ packages:
       pkg-conf: 2.1.0
     dev: true
 
-  /simple-git@3.19.1:
-    resolution: {integrity: sha512-Ck+rcjVaE1HotraRAS8u/+xgTvToTuoMkT9/l9lvuP5jftwnYUp6DwuJzsKErHgfyRk8IB8pqGHWEbM3tLgV1w==}
+  /simple-git@3.20.0:
+    resolution: {integrity: sha512-ozK8tl2hvLts8ijTs18iFruE+RoqmC/mqZhjs/+V7gS5W68JpJ3+FCTmLVqmR59MaUQ52MfGQuWsIqfsTbbJ0Q==}
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
