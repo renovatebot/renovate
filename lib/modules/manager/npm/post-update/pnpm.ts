@@ -40,17 +40,13 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
-    const pnpmVersionFromPackageJson = getPackageManagerVersion(
-      'pnpm',
-      await lazyPgkJson.getValue()
-    );
 
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
         getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
         config.constraints?.pnpm ?? // from user config or extraction
-        pnpmVersionFromPackageJson ?? // look in package.json > packageManager or engines
+        getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in package.json > packageManager or engines
         (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 
@@ -85,6 +81,11 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
+      const pnpmVersionFromPackageJson = getPackageManagerVersion(
+        'pnpm',
+        await lazyPgkJson.getValue()
+      );
+
       if (
         pnpmVersionFromPackageJson &&
         semver.gte(pnpmVersionFromPackageJson, '8.8.0')

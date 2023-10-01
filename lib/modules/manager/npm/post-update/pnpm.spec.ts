@@ -68,7 +68,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('performs dedupe --ignore-scripts', async () => {
+  it('performs dedupe', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const postUpdateOptions = ['pnpmDedupe'];
@@ -77,7 +77,31 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       {},
       { ...config, postUpdateOptions }
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm dedupe',
+      },
+    ]);
+  });
+
+  it('performs dedupe --ignore-scripts for pnpm >= 8.8.0', async () => {
+    const execSnapshots = mockExecAll();
+    const fileContent = Fixtures.get('dedupe-ignore-scripts/package.json');
+    fs.readLocalFile
+      .mockResolvedValueOnce(fileContent)
+      .mockResolvedValue('package-lock-contents');
+    const postUpdateOptions = ['pnpmDedupe'];
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, postUpdateOptions }
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
