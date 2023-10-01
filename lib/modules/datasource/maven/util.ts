@@ -150,13 +150,10 @@ export async function downloadArtifactRegistryProtocol(
   pkgUrl: URL
 ): Promise<Partial<HttpResponse>> {
   const opts: HttpOptions = {};
-  const host = pkgUrl.host
-  const path = pkgUrl.pathname
+  const host = pkgUrl.host;
+  const path = pkgUrl.pathname;
 
-  logger.trace(
-    { host, path },
-    `Using google auth for Maven repository`
-  );
+  logger.trace({ host, path }, `Using google auth for Maven repository`);
   const auth = await getGoogleAuthToken();
   if (auth) {
     opts.headers = { authorization: `Basic ${auth}` };

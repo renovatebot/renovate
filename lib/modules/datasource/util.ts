@@ -27,9 +27,9 @@ export async function getGoogleAuthToken(): Promise<string | undefined> {
       );
       return;
     }
-    return Buffer.from(
-      `${'oauth2accesstoken'}:${accessToken}`
-    ).toString('base64');
+    return Buffer.from(`${'oauth2accesstoken'}:${accessToken}`).toString(
+      'base64'
+    );
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('Could not load the default credentials')) {
       return;

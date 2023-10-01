@@ -493,7 +493,7 @@ describe('modules/datasource/maven/index', () => {
     const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
     hostRules.clear();
 
-    for(const path of metadataPaths) {
+    for (const path of metadataPaths) {
       httpMock
         .scope(baseUrlARHttps)
         .get(path)
