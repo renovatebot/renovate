@@ -190,3 +190,75 @@ exports[`modules/datasource/maven/index skips registry with invalid metadata str
   ],
 }
 `;
+
+exports[`modules/datasource/maven/index supports artifactregistry urls with auth 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "artifactregistry://maven.pkg.dev/some-project/some-repository",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "version": "1.0.0",
+    },
+    {
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/maven/index supports artifactregistry urls without auth 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "artifactregistry://maven.pkg.dev/some-project/some-repository",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "version": "1.0.0",
+    },
+    {
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
