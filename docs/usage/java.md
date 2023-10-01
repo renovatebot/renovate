@@ -192,10 +192,7 @@ To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON servic
 
    ```json
    {
-     "matchManagers": [
-       "maven",
-       "gradle"
-     ],
+     "matchManagers": ["maven", "gradle"],
      "registryUrls": [
        "https://europe-maven.pkg.dev/<my-gcp-project>/<my-repository>"
      ]
