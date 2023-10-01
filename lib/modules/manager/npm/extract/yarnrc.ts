@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
-import { Yaml } from '../../../../util/schema-utils';
 import { Result } from '../../../../util/result';
+import { Yaml } from '../../../../util/schema-utils';
 
 const YarnrcYmlSchema = Yaml.pipe(
   z.object({
