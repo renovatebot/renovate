@@ -30,7 +30,7 @@ const supportedRules = [
   ...httpRules,
   ...mavenRules,
 ];
-export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
+export const supportedRulesRegex = regEx(`^(?:${supportedRules.join('|')})$`);
 
 export function extractDepsFromFragmentData(
   fragmentData: FragmentData

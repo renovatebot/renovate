@@ -1,8 +1,8 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const gomod1 = Fixtures.get('1/go.mod');
-const gomod2 = Fixtures.get('2/go.mod');
+const gomod1 = Fixtures.get('1/go-mod');
+const gomod2 = Fixtures.get('2/go-mod');
 
 describe('modules/manager/gomod/extract', () => {
   describe('extractPackageFile()', () => {
