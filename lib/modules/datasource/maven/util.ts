@@ -17,7 +17,7 @@ import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { normalizeDate } from '../metadata';
 import type { ReleaseResult } from '../types';
-import { getGoogleAccessToken } from '../util';
+import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
   HttpResourceCheckResult,
@@ -150,14 +150,23 @@ export async function downloadArtifactRegistryProtocol(
   pkgUrl: URL
 ): Promise<Partial<HttpResponse>> {
   const opts: HttpOptions = {};
+  const host = pkgUrl.host
+  const path = pkgUrl.pathname
 
-  const accessToken = await getGoogleAccessToken();
-  if (accessToken) {
-    const auth = Buffer.from(`${'oauth2accesstoken'}:${accessToken}`).toString(
-      'base64'
-    );
+  logger.trace(
+    { host, path },
+    `Using google auth for Maven repository`
+  );
+  const auth = await getGoogleAuthToken();
+  if (auth) {
     opts.headers = { authorization: `Basic ${auth}` };
+  } else {
+    logger.once.debug(
+      { host, path },
+      'Could not get Google access token, using no auth'
+    );
   }
+
   const url = pkgUrl.toString().replace('artifactregistry:', 'https:');
 
   return downloadHttpProtocol(http, url, opts);

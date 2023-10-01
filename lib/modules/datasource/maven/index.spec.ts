@@ -451,7 +451,7 @@ describe('modules/datasource/maven/index', () => {
     const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
     hostRules.clear();
 
-    metadataPaths.forEach((path) => {
+    for (const path of metadataPaths) {
       httpMock
         .scope(baseUrlARHttps)
         .get(path)
@@ -460,7 +460,7 @@ describe('modules/datasource/maven/index', () => {
           'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
         )
         .reply(200, Fixtures.get('metadata.xml'));
-    });
+    }
 
     httpMock
       .scope(baseUrlARHttps)
@@ -493,12 +493,12 @@ describe('modules/datasource/maven/index', () => {
     const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
     hostRules.clear();
 
-    metadataPaths.forEach((path) => {
+    for(const path of metadataPaths) {
       httpMock
         .scope(baseUrlARHttps)
         .get(path)
         .reply(200, Fixtures.get('metadata.xml'));
-    });
+    }
 
     httpMock
       .scope(baseUrlARHttps)
