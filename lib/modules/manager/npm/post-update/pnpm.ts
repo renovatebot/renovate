@@ -40,7 +40,10 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
-    const pnpmVersionFromPackageJson = getPackageManagerVersion('pnpm', await lazyPgkJson.getValue());
+    const pnpmVersionFromPackageJson = getPackageManagerVersion(
+      'pnpm',
+      await lazyPgkJson.getValue()
+    );
 
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
@@ -82,7 +85,10 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      if (pnpmVersionFromPackageJson && semver.gte(pnpmVersionFromPackageJson, '8.8.0')) {
+      if (
+        pnpmVersionFromPackageJson &&
+        semver.gte(pnpmVersionFromPackageJson, '8.8.0')
+      ) {
         commands.push('pnpm dedupe --ignore-scripts');
       } else {
         commands.push('pnpm dedupe');
