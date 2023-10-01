@@ -134,7 +134,7 @@ module.exports = {
 };
 ```
 
-### Artifact Registry
+### Google Artifact Registry
 
 There are multiple ways to configure Renovate to access Artifact Registry.
 
