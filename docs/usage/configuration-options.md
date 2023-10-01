@@ -3644,7 +3644,7 @@ It's typically used with docker and tags datasources.
 Here are two examples:
 
 - The image tag `ghcr.io/umami-software/umami:postgresql-v1.37.0` embeds text like `postgresql-` as a prefix to the actual version to differentiate different DB types.
-- Docker image tags like `nginx:1.21.3-alpine` embed the base image as a suffix to the version.
+- Docker image tags like `node:18.10.0-alpine` embed the base image as a suffix to the version.
 
 Here is an example of solving these types of cases:
 
