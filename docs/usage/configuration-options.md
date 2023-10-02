@@ -3128,7 +3128,7 @@ This setting tells Renovate when you would like it to raise PRs:
 - `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
 - `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
 - `status-success`: Renovate won't raise PRs unless tests pass
-- `approval`: Renovate waits until getting approval for the update via the Dependency Dashboard
+- `approval`: Renovate creates branches for updates, but only creates the PR _after_ Dependency Dashboard approval
 
 Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
 
