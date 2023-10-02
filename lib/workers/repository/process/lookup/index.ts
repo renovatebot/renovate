@@ -381,10 +381,9 @@ export async function lookupUpdates(
           }
           res.isSingleVersion = true;
         }
-        res.isSingleVersion =
-          !!res.isSingleVersion ||
-          !!versioning.isSingleVersion(update.newValue);
-
+        res.isSingleVersion ??=
+          is.string(update.newValue) &&
+          versioning.isSingleVersion(update.newValue);
         res.updates.push(update);
       }
     } else if (compareValue) {
@@ -455,7 +454,7 @@ export async function lookupUpdates(
       ) {
         for (const update of res.updates) {
           logger.debug({ update });
-          if (is.string(config.currentValue)) {
+          if (is.string(config.currentValue) && is.string(update.newValue)) {
             update.newValue = config.currentValue.replace(
               compareValue,
               update.newValue
