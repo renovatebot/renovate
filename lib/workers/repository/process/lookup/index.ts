@@ -93,7 +93,7 @@ export async function lookupUpdates(
         logger.debug(
           {
             versionCompatibility: config.versionCompatibility,
-            currentValue: config.currentValue,
+            currentValue: compareValue,
             packageName: config.packageName,
           },
           'version compatibility regex mismatch'
@@ -346,6 +346,7 @@ export async function lookupUpdates(
         const newVersion = release.version;
         const update = await generateUpdate(
           config,
+          compareValue,
           versioning,
           // TODO #22198
 
@@ -381,10 +382,9 @@ export async function lookupUpdates(
           }
           res.isSingleVersion = true;
         }
-        res.isSingleVersion =
-          !!res.isSingleVersion ||
-          !!versioning.isSingleVersion(update.newValue);
-
+        res.isSingleVersion ??=
+          is.string(update.newValue) &&
+          versioning.isSingleVersion(update.newValue);
         res.updates.push(update);
       }
     } else if (compareValue) {
@@ -455,7 +455,7 @@ export async function lookupUpdates(
       ) {
         for (const update of res.updates) {
           logger.debug({ update });
-          if (is.string(config.currentValue)) {
+          if (is.string(config.currentValue) && is.string(update.newValue)) {
             update.newValue = config.currentValue.replace(
               compareValue,
               update.newValue
