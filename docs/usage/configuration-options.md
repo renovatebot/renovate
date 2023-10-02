@@ -3660,7 +3660,7 @@ Here is an example of solving these types of cases:
     {
       "matchDatasources": ["docker"],
       "matchPackageNames": ["node"],
-      "versionCompatibility": "^(?<version>.*)(?<compatibility>-.*)?$",
+      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
       "versioning": "node"
     }
   ]
