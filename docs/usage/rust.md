@@ -31,9 +31,23 @@ Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/refer
 
 ## Private crate registries and private Git dependencies
 
-If any dependencies are hosted in private Git repositories, [Git Authentication for cargo](https://doc.rust-lang.org/cargo/appendix/git-authentication.html) must be set up.
+This example shows how you can use a `hostRules` configuration to configure Renovate for use with a custom private Crate using Git to pull the modules when updating `Cargo.lock`.
+All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, ... ) and host rules without a `hostType` are setup for authentication.
+It's also possible to setup a hostRules which will be used only for Cargo authentication (e.g. `hostType: 'cargo'`).
 
-If any dependencies are hosted on private crate registries (i.e., not on `crates.io`), then credentials should be set up in such a way that the Git command-line is able to clone the registry index.
-Third-party crate registries usually provide instructions to achieve this.
-
-Both of these are currently only possible when running Renovate self-hosted.
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'github.enterprise.com',
+      token: process.env.GITHUB_TOKEN,
+      hostType: 'github',
+    },
+    {
+      matchHost: 'someGitHost.enterprise.com',
+      token: process.env.CARGO_GIT_TOKEN,
+      hostType: 'cargo',
+    },
+  ],
+};
+```
