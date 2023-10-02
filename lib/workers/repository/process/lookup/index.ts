@@ -346,6 +346,7 @@ export async function lookupUpdates(
         const newVersion = release.version;
         const update = await generateUpdate(
           config,
+          compareValue,
           versioning,
           // TODO #22198
 

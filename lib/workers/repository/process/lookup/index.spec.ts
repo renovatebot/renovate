@@ -11,6 +11,7 @@ import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
+import { id as debianVersioningId } from '../../../../modules/versioning/debian';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node';
@@ -1779,6 +1780,26 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchObject({
         updates: [],
+      });
+    });
+
+    it('applies versionCompatibility for debian codenames with suffix', async () => {
+      config.currentValue = 'bullseye-slim';
+      config.packageName = 'debian';
+      config.versioning = debianVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'bullseye' },
+          { version: 'bullseye-slim' },
+          { version: 'bookworm' },
+          { version: 'bookworm-slim' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [{ newValue: 'bookworm-slim', updateType: 'major' }],
       });
     });
 
