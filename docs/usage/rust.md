@@ -33,7 +33,7 @@ Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/refer
 
 This example shows how you can use a `hostRules` configuration to configure Renovate for use with a custom private Crate using Git to pull the modules when updating `Cargo.lock`.
 All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, ... ) and host rules without a `hostType` are setup for authentication.
-It's also possible to setup a hostRules which will be used only for Cargo authentication (e.g. `hostType: 'cargo'`).
+You can configure a `hostRules` that's only for Cargo authentication (e.g. `hostType: 'cargo'`).
 
 ```js
 module.exports = {
