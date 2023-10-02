@@ -143,7 +143,7 @@ Just configure [ADC](https://cloud.google.com/docs/authentication/provide-creden
 provide a username, password or token. Renovate will automatically retrieve the credentials using the
 google-auth-library.
 
-##### Using long-lived service account credentials
+#### Using long-lived service account credentials
 
 To access the Google Artifact Registry, use the JSON service account with `Basic` authentication, and use the:
 
