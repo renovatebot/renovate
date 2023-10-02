@@ -93,7 +93,7 @@ export async function lookupUpdates(
         logger.debug(
           {
             versionCompatibility: config.versionCompatibility,
-            currentValue: compareValue,
+            currentValue: config.currentValue,
             packageName: config.packageName,
           },
           'version compatibility regex mismatch'
