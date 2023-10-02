@@ -991,6 +991,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'versionCompatibility',
+    description:
+      'A regex (`re2`) with named capture groups to show how version and compatibility are split from a raw version string.',
+    type: 'string',
+    format: 'regex',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioning',
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',

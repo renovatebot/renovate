@@ -1744,6 +1744,44 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('applies versionCompatibility for 18.10.0', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [{ newValue: '18.19.0-alpine', updateType: 'minor' }],
+      });
+    });
+
+    it('handles versionCompatibility mismatch', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)-slim$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [],
+      });
+    });
+
     it('handles digest pin for up to date version', async () => {
       config.currentValue = '8.1.0';
       config.packageName = 'node';
