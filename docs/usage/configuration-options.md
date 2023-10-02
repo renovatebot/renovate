@@ -3142,6 +3142,7 @@ If there are no checks associated, Renovate will create the PR once 24 hrs have 
 With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
 
 With prCreation set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
+It does not prevent the creation of the _branch_.
 
 For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
 Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
