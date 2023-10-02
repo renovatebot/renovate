@@ -66,7 +66,7 @@ export async function generateUpdate(
       update.newValue = currentValue;
     }
   } else {
-    update.newValue = currentValue!;
+    update.newValue = currentValue;
   }
   update.newMajor = versioning.getMajor(newVersion)!;
   update.newMinor = versioning.getMinor(newVersion)!;
