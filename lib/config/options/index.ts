@@ -2213,11 +2213,6 @@ const options: RenovateOptions[] = [
     description: 'Host rules/configuration including credentials.',
     type: 'array',
     subType: 'object',
-    default: [
-      {
-        timeout: 60000,
-      },
-    ],
     stage: 'repository',
     cli: true,
     mergeable: true,
