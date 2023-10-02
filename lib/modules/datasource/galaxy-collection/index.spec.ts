@@ -25,7 +25,7 @@ const datasource = GalaxyCollectionDatasource.id;
 describe('modules/datasource/galaxy-collection/index', () => {
   describe('getReleases', () => {
     it('returns null for 404 result', async () => {
-      httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(404);
+      httpMock.scope(baseUrl).get('/api/v3/plugin/ansible/content/published/collections/index/foo/bar/').reply(404);
       expect(
         await getPkgReleases({
           datasource,
@@ -35,7 +35,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
     });
 
     it('throws for remote host error', async () => {
-      httpMock.scope(baseUrl).get('/api/v2/collections/foo/bar/').reply(500);
+      httpMock.scope(baseUrl).get('/api/v3/plugin/ansible/content/published/collections/index/foo/bar/').reply(500);
       await expect(
         getPkgReleases({
           datasource,
@@ -47,7 +47,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('returns null for unexpected data at base', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v2/collections/community/kubernetes/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/')
         .reply(200, '');
       expect(
         await getPkgReleases({
@@ -60,9 +60,9 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('returns null for unexpected data at versions', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v2/collections/community/kubernetes/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/')
         .reply(200, communityKubernetesBase)
-        .get('/api/v2/collections/community/kubernetes/versions/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/kubernetes/versions/')
         .reply(200, '');
       expect(
         await getPkgReleases({
@@ -75,9 +75,9 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('throws error for remote host versions error', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v2/collections/community/kubernetes/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/')
         .reply(200, communityKubernetesBase)
-        .get('/api/v2/collections/community/kubernetes/versions/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/')
         .reply(500);
       await expect(
         getPkgReleases({
@@ -90,15 +90,15 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('returns only valid versions if a version detail fails', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v2/collections/community/kubernetes/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/')
         .reply(200, communityKubernetesBase)
-        .get('/api/v2/collections/community/kubernetes/versions/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/')
         .reply(200, communityKubernetesVersions)
-        .get('/api/v2/collections/community/kubernetes/versions/1.2.1/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/1.2.1/')
         .reply(200, '')
-        .get('/api/v2/collections/community/kubernetes/versions/1.2.0/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/1.2.0/')
         .reply(200, communityKubernetesDetails120)
-        .get('/api/v2/collections/community/kubernetes/versions/0.11.1/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/0.11.1/')
         .reply(200, communityKubernetesDetails0111);
 
       const res = await getPkgReleases({
@@ -132,7 +132,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('returns null for unknown error', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v2/collections/foo/bar/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/foo/bar/')
         .replyWithError('some unknown error');
       expect(
         await getPkgReleases({
@@ -145,15 +145,15 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v2/collections/community/kubernetes/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/')
         .reply(200, communityKubernetesBase)
-        .get('/api/v2/collections/community/kubernetes/versions/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/')
         .reply(200, communityKubernetesVersions)
-        .get('/api/v2/collections/community/kubernetes/versions/1.2.1/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/1.2.1/')
         .reply(200, communityKubernetesDetails121)
-        .get('/api/v2/collections/community/kubernetes/versions/1.2.0/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/1.2.0/')
         .reply(200, communityKubernetesDetails120)
-        .get('/api/v2/collections/community/kubernetes/versions/0.11.1/')
+        .get('/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/0.11.1/')
         .reply(200, communityKubernetesDetails0111);
       const res = await getPkgReleases({
         datasource,

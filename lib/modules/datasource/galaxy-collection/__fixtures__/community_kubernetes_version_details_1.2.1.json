@@ -1,7 +1,7 @@
 
 {
   "id": 8039,
-  "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/versions/1.2.1/",
+  "href": "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/versions/1.2.1/",
   "download_url": "https://galaxy.ansible.com/download/community-kubernetes-1.2.1.tar.gz",
   "artifact": {
     "filename": "community-kubernetes-1.2.1.tar.gz",
@@ -10,12 +10,12 @@
   },
   "namespace": {
     "id": 17693,
-    "href": "https://galaxy.ansible.com/api/v1/namespaces/17693/",
+    "href": "https://galaxy.ansible.com/api/v3/namespaces/17693/",
     "name": "community"
   },
   "collection": {
     "id": 201,
-    "href": "https://galaxy.ansible.com/api/v2/collections/community/kubernetes/",
+    "href": "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/index/community/kubernetes/",
     "name": "kubernetes"
   },
   "version": "1.2.1",

@@ -36,7 +36,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     const [namespace, projectName] = packageName.split('.');
 
     // TODO: types (#22198)
-    const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
+    const baseUrl = `${registryUrl}api/v3/plugin/ansible/content/published/collections/index/${namespace}/${projectName}/`;
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;
     try {
