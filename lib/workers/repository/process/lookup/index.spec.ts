@@ -11,6 +11,7 @@ import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
+import { id as debianVersioningId } from '../../../../modules/versioning/debian';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node';
@@ -1741,6 +1742,64 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [{ newValue: '9', updateType: 'major' }],
+      });
+    });
+
+    it('applies versionCompatibility for 18.10.0', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [{ newValue: '18.19.0-alpine', updateType: 'minor' }],
+      });
+    });
+
+    it('handles versionCompatibility mismatch', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)-slim$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [],
+      });
+    });
+
+    it('applies versionCompatibility for debian codenames with suffix', async () => {
+      config.currentValue = 'bullseye-slim';
+      config.packageName = 'debian';
+      config.versioning = debianVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'bullseye' },
+          { version: 'bullseye-slim' },
+          { version: 'bookworm' },
+          { version: 'bookworm-slim' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [{ newValue: 'bookworm-slim', updateType: 'major' }],
       });
     });
 

@@ -70,14 +70,43 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-config';
       return res;
     }
-    const isValid =
-      is.string(config.currentValue) && versioning.isValid(config.currentValue);
+    let compareValue = config.currentValue;
+    if (
+      is.string(config.currentValue) &&
+      is.string(config.versionCompatibility)
+    ) {
+      const versionCompatbilityRegEx = regEx(config.versionCompatibility);
+      const regexMatch = versionCompatbilityRegEx.exec(config.currentValue);
+      if (regexMatch?.groups) {
+        logger.debug(
+          {
+            versionCompatibility: config.versionCompatibility,
+            currentValue: config.currentValue,
+            packageName: config.packageName,
+            groups: regexMatch.groups,
+          },
+          'version compatibility regex match'
+        );
+        config.currentCompatibility = regexMatch.groups.compatibility;
+        compareValue = regexMatch.groups.version;
+      } else {
+        logger.debug(
+          {
+            versionCompatibility: config.versionCompatibility,
+            currentValue: config.currentValue,
+            packageName: config.packageName,
+          },
+          'version compatibility regex mismatch'
+        );
+      }
+    }
+    const isValid = is.string(compareValue) && versioning.isValid(compareValue);
 
     if (unconstrainedValue || isValid) {
       if (
         !config.updatePinnedDependencies &&
         // TODO #22198
-        versioning.isSingleVersion(config.currentValue!)
+        versioning.isSingleVersion(compareValue!)
       ) {
         res.skipReason = 'is-pinned';
         return res;
@@ -163,16 +192,15 @@ export async function lookupUpdates(
         allVersions = allVersions.filter(
           (v) =>
             v.version === taggedVersion ||
-            (v.version === config.currentValue &&
-              versioning.isGreaterThan(taggedVersion, config.currentValue))
+            (v.version === compareValue &&
+              versioning.isGreaterThan(taggedVersion, compareValue))
         );
       }
       // Check that existing constraint can be satisfied
       const allSatisfyingVersions = allVersions.filter(
         (v) =>
           // TODO #22198
-          unconstrainedValue ||
-          versioning.matches(v.version, config.currentValue!)
+          unconstrainedValue || versioning.matches(v.version, compareValue!)
       );
       if (!allSatisfyingVersions.length) {
         logger.debug(
@@ -187,7 +215,7 @@ export async function lookupUpdates(
           res.warnings.push({
             topic: config.packageName,
             // TODO: types (#22198)
-            message: `Can't find version matching ${config.currentValue!} for ${
+            message: `Can't find version matching ${compareValue!} for ${
               config.datasource
             } package ${config.packageName}`,
           });
@@ -215,7 +243,7 @@ export async function lookupUpdates(
       // TODO #22198
       currentVersion ??=
         getCurrentVersion(
-          config.currentValue!,
+          compareValue!,
           config.lockedVersion!,
           versioning,
           rangeStrategy!,
@@ -223,7 +251,7 @@ export async function lookupUpdates(
           nonDeprecatedVersions
         ) ??
         getCurrentVersion(
-          config.currentValue!,
+          compareValue!,
           config.lockedVersion!,
           versioning,
           rangeStrategy!,
@@ -236,17 +264,17 @@ export async function lookupUpdates(
       }
       res.currentVersion = currentVersion!;
       if (
-        config.currentValue &&
+        compareValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
-        !versioning.isSingleVersion(config.currentValue)
+        !versioning.isSingleVersion(compareValue)
       ) {
         res.updates.push({
           updateType: 'pin',
           isPin: true,
           // TODO: newValue can be null! (#22198)
           newValue: versioning.getNewValue({
-            currentValue: config.currentValue,
+            currentValue: compareValue,
             rangeStrategy,
             currentVersion,
             newVersion: currentVersion,
@@ -277,8 +305,7 @@ export async function lookupUpdates(
       ).filter(
         (v) =>
           // Leave only compatible versions
-          unconstrainedValue ||
-          versioning.isCompatible(v.version, config.currentValue)
+          unconstrainedValue || versioning.isCompatible(v.version, compareValue)
       );
       if (config.isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
         filteredReleases = filteredReleases.slice(0, 1);
@@ -319,6 +346,7 @@ export async function lookupUpdates(
         const newVersion = release.version;
         const update = await generateUpdate(
           config,
+          compareValue,
           versioning,
           // TODO #22198
 
@@ -335,7 +363,7 @@ export async function lookupUpdates(
         if (pendingReleases!.length) {
           update.pendingVersions = pendingReleases!.map((r) => r.version);
         }
-        if (!update.newValue || update.newValue === config.currentValue) {
+        if (!update.newValue || update.newValue === compareValue) {
           if (!config.lockedVersion) {
             continue;
           }
@@ -354,15 +382,14 @@ export async function lookupUpdates(
           }
           res.isSingleVersion = true;
         }
-        res.isSingleVersion =
-          !!res.isSingleVersion ||
-          !!versioning.isSingleVersion(update.newValue);
-
+        res.isSingleVersion ??=
+          is.string(update.newValue) &&
+          versioning.isSingleVersion(update.newValue);
         res.updates.push(update);
       }
-    } else if (config.currentValue) {
+    } else if (compareValue) {
       logger.debug(
-        `Dependency ${config.packageName} has unsupported/unversioned value ${config.currentValue} (versioning=${config.versioning})`
+        `Dependency ${config.packageName} has unsupported/unversioned value ${compareValue} (versioning=${config.versioning})`
       );
 
       if (!config.pinDigests && !config.currentDigest) {
@@ -382,11 +409,8 @@ export async function lookupUpdates(
     if (config.lockedVersion) {
       res.currentVersion = config.lockedVersion;
       res.fixedVersion = config.lockedVersion;
-    } else if (
-      config.currentValue &&
-      versioning.isSingleVersion(config.currentValue)
-    ) {
-      res.fixedVersion = config.currentValue.replace(regEx(/^=+/), '');
+    } else if (compareValue && versioning.isSingleVersion(compareValue)) {
+      res.fixedVersion = compareValue.replace(regEx(/^=+/), '');
     }
     // Add digests if necessary
     if (supportsDigests(config.datasource)) {
@@ -421,6 +445,23 @@ export async function lookupUpdates(
       }
       if (res.registryUrl) {
         config.registryUrls = [res.registryUrl];
+      }
+
+      // massage versionCompatibility
+      if (
+        is.string(config.currentValue) &&
+        is.string(compareValue) &&
+        is.string(config.versionCompatibility)
+      ) {
+        for (const update of res.updates) {
+          logger.debug({ update });
+          if (is.string(config.currentValue) && is.string(update.newValue)) {
+            update.newValue = config.currentValue.replace(
+              compareValue,
+              update.newValue
+            );
+          }
+        }
       }
 
       // update digest for all
