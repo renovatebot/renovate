@@ -1,21 +1,21 @@
+import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import upath from 'upath';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
+import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getBranchCommit } from '../../../util/git';
+import { regEx } from '../../../util/regex';
 import { detectConfigFile } from '../init/merge';
 import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
 } from './reconfigure-cache';
-import { ensureComment } from '../../../modules/platform/comment';
-import { regEx } from '../../../util/regex';
-import is from '@sindresorhus/is';
 
 export async function validateReconfigureBranch(
   config: RenovateConfig
@@ -92,23 +92,19 @@ export async function validateReconfigureBranch(
     return;
   }
 
-  // eslint-disable-next-line
-  console.log('configFileRaw', configFileRaw);
   let configFileParsed: any;
   try {
     const fileType = upath.extname(configFileName);
     // eslint-disable-next-line
     console.log('fileType', fileType);
     if (fileType === '.json') {
-      configFileParsed = JSON.parse(configFileRaw!);
-      // eslint-disable-next-line
-      console.log('configFileParsed', configFileParsed);
+      configFileParsed = JSON.parse(configFileRaw);
       // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
       if (configFileName === 'package.json') {
         configFileParsed = configFileParsed.renovate;
       }
     } else {
-      configFileParsed = JSON5.parse(configFileRaw!);
+      configFileParsed = JSON5.parse(configFileRaw);
     }
   } catch (err) {
     logger.error({ err }, 'Error while reading config file');
