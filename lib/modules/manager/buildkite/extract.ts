@@ -36,7 +36,7 @@ export function extractPackageFile(
           const gitDepName = gitPluginName.replace(regEx('\\.git$'), '');
 
           let datasource: string = GithubTagsDatasource.id;
-          if (registry.startsWith('bitbucket.org')) {
+          if (registry === 'bitbucket.org') {
             datasource = BitbucketTagsDatasource.id;
           }
           const dep: PackageDependency = {
