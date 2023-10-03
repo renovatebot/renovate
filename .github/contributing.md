@@ -9,7 +9,7 @@ Thank you for considering contributing to our Renovate App. Your help is greatly
 
 Before you start contributing, ensure you have the following:
 
-- **Node.js**: You need Node.js (v14 or higher) installed. [Download Node.js](https://nodejs.org/).
+- **Node.js**: You need Node.js (v18 or higher) installed. [Download Node.js](https://nodejs.org/).
 
 - **Git**: Make sure you have Git installed. [Download Git](https://git-scm.com/).
 
