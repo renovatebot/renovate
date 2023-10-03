@@ -16,13 +16,25 @@ const di = new DistroInfo('data/ubuntu-distro-info.json');
 // validation
 
 function isValid(input: string): boolean {
-  return (
-    (typeof input === 'string' &&
-      regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(
-        input
-      )) ||
-    di.isCodename(input)
-  );
+  if (typeof input !== 'string') {
+    return false;
+  }
+
+  if (
+    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
+  ) {
+    return true;
+  }
+
+  if (di.isCodename(input)) {
+    return true;
+  }
+
+  return isContainerImageTag(input);
+}
+
+function isContainerImageTag(input: string): boolean {
+  return typeof input === 'string' && regEx(/^(\w+)-(\d{8})$/).test(input);
 }
 
 function isVersion(input: string): boolean {
@@ -54,8 +66,36 @@ function isStable(version: string): boolean {
 
 // digestion of version
 
+function getContainerImageCodename(version: string): null | string {
+  const groups = /^(\w+)-(\d{8})$/.exec(version);
+  if (groups === null) {
+    return null;
+  }
+  return groups[1];
+}
+
+function getContainerImageVersion(version: string): null | number {
+  const groups = /^(\w+)-(\d{8})$/.exec(version);
+  if (groups === null) {
+    return null;
+  }
+
+  return parseInt(groups[2]);
+}
+
+function getVersionByCodename(version: string): string {
+  let rVer = version;
+  if (isContainerImageTag(version)) {
+    const ver = getContainerImageCodename(version);
+    if (ver !== null) {
+      rVer = ver;
+    }
+  }
+  return di.getVersionByCodename(rVer);
+}
+
 function getMajor(version: string): null | number {
-  const ver = di.getVersionByCodename(version);
+  const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [major] = ver.split('.');
     return parseInt(major, 10);
@@ -64,7 +104,7 @@ function getMajor(version: string): null | number {
 }
 
 function getMinor(version: string): null | number {
-  const ver = di.getVersionByCodename(version);
+  const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, minor] = ver.split('.');
     return parseInt(minor, 10);
@@ -73,7 +113,7 @@ function getMinor(version: string): null | number {
 }
 
 function getPatch(version: string): null | number {
-  const ver = di.getVersionByCodename(version);
+  const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, , patch] = ver.split('.');
     return patch ? parseInt(patch, 10) : null;
@@ -84,8 +124,17 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  const ver = di.getVersionByCodename(version);
-  const otherVer = di.getVersionByCodename(other);
+  const ver = getVersionByCodename(version);
+  const otherVer = getVersionByCodename(other);
+
+  if (isContainerImageTag(version)) {
+    const verImage = getContainerImageVersion(version);
+    const otherImageVer = getContainerImageVersion(other);
+    if (verImage !== otherImageVer) {
+      return false;
+    }
+  }
+
   return isVersion(ver) && isVersion(otherVer) && ver === otherVer;
 }
 
@@ -106,6 +155,18 @@ function isGreaterThan(version: string, other: string): boolean {
   }
   if (xMinor < yMinor) {
     return false;
+  }
+
+  if (isContainerImageTag(version)) {
+    const xImageVersion = getContainerImageVersion(version) ?? 0;
+    const yImageVersion = getContainerImageVersion(other) ?? 0;
+
+    if (xImageVersion > yImageVersion) {
+      return true;
+    }
+    if (xImageVersion < yImageVersion) {
+      return false;
+    }
   }
 
   const xPatch = getPatch(version) ?? 0;
