@@ -36,15 +36,15 @@ export function extractPackageFile(
           const { registry, gitPluginName } = gitPluginMatch.groups;
           const gitDepName = gitPluginName.replace(regEx('\\.git$'), '');
 
-          let dataSource: string = GithubTagsDatasource.id;
+          let datasource: string = GithubTagsDatasource.id;
           if (registry.includes('bitbucket.org')) {
-            dataSource = BitbucketTagsDatasource.id;
+            datasource = BitbucketTagsDatasource.id;
           }
           const dep: PackageDependency = {
             depName: gitDepName,
             currentValue,
             registryUrls: ['https://' + registry],
-            datasource: dataSource,
+            datasource,
           };
           deps.push(dep);
           continue;
