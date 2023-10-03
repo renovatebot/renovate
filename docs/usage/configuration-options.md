@@ -3127,7 +3127,7 @@ This setting tells Renovate _when_ to create PRs:
 
 - `immediate` (default): Renovate creates PRs immediately after creating the corresponding branch
 - `not-pending`: Renovate waits until status checks have completed (passed or failed) before raising the PR
-- `status-success`: Renovate only creates PRs when the the test pass
+- `status-success`: Renovate only creates PRs if/when the the test pass
 - `approval`: Renovate creates branches for updates immediately, but creates the PR _after_ getting Dependency Dashboard approval
 
 When prCreation is set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
