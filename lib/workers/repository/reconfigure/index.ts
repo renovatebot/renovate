@@ -13,6 +13,9 @@ import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
 } from './reconfigure-cache';
+import { ensureComment } from '../../../modules/platform/comment';
+import { regEx } from '../../../util/regex';
+import is from '@sindresorhus/is';
 
 export async function validateReconfigureBranch(
   config: RenovateConfig
@@ -36,28 +39,27 @@ export async function validateReconfigureBranch(
   const branchSha = getBranchCommit(branchName);
   const cache = getCache();
   let configFileName: string | null = null;
-  const branchCache = cache.reconfigureBranchCache;
+  const reconfigureCache = cache.reconfigureBranchCache;
 
   // only use cached information if it is valid
-  if (branchCache?.reconfigureBranchSha === branchSha) {
+  if (reconfigureCache?.reconfigureBranchSha === branchSha) {
     logger.debug('Cache is valid. Skipping validation check');
     return;
   }
-  logger.debug('Cache is outdated. Performing validation check');
 
-  if (!configFileName) {
-    try {
-      await scm.checkoutBranch(branchName);
-      configFileName = await detectConfigFile();
-    } catch (err) {
-      logger.debug(
-        { err },
-        'Error while searching for config file in reconfigure branch'
-      );
-    }
+  try {
+    await scm.checkoutBranch(branchName);
+    configFileName = await detectConfigFile();
+  } catch (err) {
+    /*istanbul ignore next - should never happen*/
+    logger.error(
+      { err },
+      'Error while searching for config file in reconfigure branch'
+    );
+    return;
   }
 
-  if (!configFileName) {
+  if (!is.nonEmptyString(configFileName)) {
     logger.warn('No config file found in reconfigure branch');
     await platform.setBranchStatus({
       branchName,
@@ -73,15 +75,16 @@ export async function validateReconfigureBranch(
   try {
     configFileRaw = await readLocalFile(configFileName, 'utf8');
   } catch (err) {
-    logger.debug('Error while reading config file');
+    /*istanbul ignore next - should never happen*/
+    logger.error('Error while reading config file');
   }
 
-  if (!configFileRaw) {
-    logger.debug('Empty config file');
+  if (!is.nonEmptyString(configFileRaw)) {
+    logger.warn('Empty or invalid config file');
     await platform.setBranchStatus({
       branchName,
       context,
-      description: 'Validation Failed - Empty config file',
+      description: 'Validation Failed - Empty/Invalid config file',
       state: 'red',
     });
     setReconfigureBranchCache(branchSha!, configFileName, false);
@@ -89,25 +92,26 @@ export async function validateReconfigureBranch(
     return;
   }
 
+  // eslint-disable-next-line
+  console.log('configFileRaw', configFileRaw);
   let configFileParsed: any;
   try {
     const fileType = upath.extname(configFileName);
+    // eslint-disable-next-line
+    console.log('fileType', fileType);
     if (fileType === '.json') {
-      configFileParsed = JSON.parse(
-        (await readLocalFile(configFileName, 'utf8'))!
-      );
-      // ? should we allow package.json
+      configFileParsed = JSON.parse(configFileRaw!);
+      // eslint-disable-next-line
+      console.log('configFileParsed', configFileParsed);
       // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
       if (configFileName === 'package.json') {
         configFileParsed = configFileParsed.renovate;
       }
     } else {
-      configFileParsed = JSON5.parse(
-        (await readLocalFile(configFileName, 'utf8'))!
-      );
+      configFileParsed = JSON5.parse(configFileRaw!);
     }
   } catch (err) {
-    logger.debug({ err }, 'Error while reading config file');
+    logger.error({ err }, 'Error while reading config file');
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -117,6 +121,28 @@ export async function validateReconfigureBranch(
 
   // failing check
   if (validationResult.errors.length > 0) {
+    // add code to post a PR comment after checking pr exists
+
+    const branchPr = await platform.getBranchPr(branchName, config.baseBranch);
+    if (branchPr) {
+      let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
+      body += `Location: \`${configFileName}\`\n`;
+      body += `Message: \`${validationResult.errors
+        .map((e) => e.message)
+        .join(', ')
+        .replace(regEx(/`/g), "'")}\`\n`;
+
+      await ensureComment({
+        number: branchPr.number,
+        topic: 'Action Required: Fix Renovate Configuration',
+        content: body,
+      });
+    }
+    // log the erros in all cases too
+    logger.debug(
+      { errors: validationResult.errors.join(', ') },
+      'Validation Errors'
+    );
     await platform.setBranchStatus({
       branchName,
       context,
