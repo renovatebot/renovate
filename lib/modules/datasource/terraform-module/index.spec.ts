@@ -180,13 +180,13 @@ describe('modules/datasource/terraform-module/index', () => {
     it('processes real data from third party including source url', async () => {
       httpMock
         .scope('https://terraform.company.com')
-        .get('/v1/modules/renovate-issue-14602/mymodule/local/versions')
+        .get('/v1/modules/renovate-issue-25003/mymodule/local/versions')
         .reply(200, versionsDataWithSourceUrl)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
-        packageName: 'renovate-issue-14602/mymodule/local',
+        packageName: 'renovate-issue-25003/mymodule/local',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toEqual({
@@ -199,7 +199,7 @@ describe('modules/datasource/terraform-module/index', () => {
             version: '0.0.2',
           },
         ],
-        sourceUrl: 'https://gitlab.com/renovate-issue-14602/mymodule',
+        sourceUrl: 'https://gitlab.com/renovate-issue-25003/mymodule',
       });
     });
 
