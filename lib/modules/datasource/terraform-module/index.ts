@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { coerceString } from '../../../util/string';
-import { validateUrl } from "../../../util/url";
+import { validateUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';

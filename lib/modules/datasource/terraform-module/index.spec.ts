@@ -5,7 +5,9 @@ import { TerraformModuleDatasource } from '.';
 
 const consulData = Fixtures.get('registry-consul.json');
 const consulVersionsData = Fixtures.get('registry-consul-versions.json');
-const versionsDataWithSourceUrl = Fixtures.get('registry-versions-with-source.json');
+const versionsDataWithSourceUrl = Fixtures.get(
+  'registry-versions-with-source.json'
+);
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const serviceDiscoveryCustomResult = Fixtures.get(
   'service-custom-discovery.json'
