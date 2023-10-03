@@ -42,7 +42,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';
       OnboardingState.prUpdateRequested = false;
@@ -94,7 +93,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           .files[0] as FileAddition;
         const contents = file.contents?.toString();
         expect(contents).toBeJsonString();
-        // TODO #7154
+        // TODO #22198
         expect(JSON.parse(contents!)).toEqual({
           $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         });
@@ -130,7 +129,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
-      // TODO #7154
+      // TODO #22198
       expect(JSON.parse(contents!)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['some/renovate-config'],
@@ -388,7 +387,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       });
 
       it('detects missing rebase checkbox', async () => {
-        const pr = { bodyStruct: { rebaseRequested: undefined } };
+        const pr = { bodyStruct: undefined };
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
 
         await checkOnboardingBranch(config);

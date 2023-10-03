@@ -310,7 +310,7 @@ export class GoProxyDatasource extends Datasource {
   static getCacheKey({ packageName }: GetReleasesConfig): string {
     const goproxy = process.env.GOPROXY;
     const noproxy = GoProxyDatasource.parseNoproxy();
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

@@ -1,9 +1,10 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
+import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
@@ -45,20 +46,20 @@ export async function postUpgradeCommandsExecutor(
       },
       `Checking for post-upgrade tasks`
     );
-    const commands = upgrade.postUpgradeTasks?.commands ?? [];
+    const commands = upgrade.postUpgradeTasks?.commands;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
         const canWriteFile = await localPathIsFile(file.path);
-        if (file.type === 'addition' && canWriteFile) {
+        if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
           }
-          // TODO #7154
+          // TODO #22198
           await writeLocalFile(file.path, contents!);
         }
       }
@@ -136,7 +137,7 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
-      for (const relativePath of status.deleted || []) {
+      for (const relativePath of coerceArray(status.deleted)) {
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(

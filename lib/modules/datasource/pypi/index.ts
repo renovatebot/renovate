@@ -1,6 +1,7 @@
 import url from 'node:url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { parse } from '../../../util/html';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -34,7 +35,7 @@ export class PypiDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult | null = null;
-    // TODO: null check (#7154)
+    // TODO: null check (#22198)
     const hostUrl = ensureTrailingSlash(
       registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi')
     );
@@ -148,7 +149,7 @@ export class PypiDatasource extends Datasource {
     if (dep.releases) {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
-        const releases = dep.releases?.[version] ?? [];
+        const releases = coerceArray(dep.releases?.[version]);
         const { upload_time: releaseTimestamp } = releases[0] || {};
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
@@ -262,7 +263,7 @@ export class PypiDatasource extends Datasource {
     }
     const versions = Object.keys(releases);
     dependency.releases = versions.map((version) => {
-      const versionReleases = releases[version] ?? [];
+      const versionReleases = coerceArray(releases[version]);
       const isDeprecated = versionReleases.some(({ yanked }) => yanked);
       const result: Release = { version };
       if (isDeprecated) {

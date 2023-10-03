@@ -52,7 +52,7 @@ export function determineNewReplacementValue(
 
   if (!is.nullOrUndefined(config.replacementVersion)) {
     return versioning.getNewValue({
-      // TODO #7154
+      // TODO #22198
       currentValue: config.currentValue!,
       newVersion: config.replacementVersion,
       rangeStrategy: rangeStrategy!,

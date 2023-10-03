@@ -23,6 +23,8 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
+import { coerceToNull } from '../../../util/coerce';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
@@ -34,9 +36,10 @@ import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
 import type { HttpResponse } from '../../../util/http/types';
+import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { fromBase64, looseEquals } from '../../../util/string';
+import { coerceString, fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
@@ -82,7 +85,7 @@ import type {
   LocalRepoConfig,
   PlatformConfig,
 } from './types';
-import { getUserDetails, getUserEmail } from './user';
+import { getAppDetails, getUserDetails, getUserEmail } from './user';
 
 export const id = 'github';
 
@@ -111,7 +114,7 @@ export async function detectGhe(token: string): Promise<void> {
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders = gheQueryRes?.headers || {};
+    const gheHeaders = coerceObject(gheQueryRes?.headers);
     const [, gheVersion] =
       Object.entries(gheHeaders).find(
         ([k]) => k.toLowerCase() === gheHeaderKey
@@ -133,11 +136,6 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-  if (token.startsWith('github_pat_')) {
-    throw new Error(
-      'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
-    );
-  }
   token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
@@ -149,10 +147,27 @@ export async function initPlatform({
   }
 
   await detectGhe(token);
+  /**
+   * GHE requires version >=3.10 to support fine-grained access tokens
+   * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
+   */
+  if (
+    isGithubFineGrainedPersonalAccessToken(token) &&
+    platformConfig.isGhe &&
+    (!platformConfig.gheVersion ||
+      semver.lt(platformConfig.gheVersion, '3.10.0'))
+  ) {
+    throw new Error(
+      'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.'
+    );
+  }
 
   let renovateUsername: string;
   if (username) {
     renovateUsername = username;
+  } else if (platformConfig.isGHApp) {
+    platformConfig.userDetails ??= await getAppDetails(token);
+    renovateUsername = platformConfig.userDetails.username;
   } else {
     platformConfig.userDetails ??= await getUserDetails(
       platformConfig.endpoint,
@@ -162,16 +177,24 @@ export async function initPlatform({
   }
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
-    platformConfig.userDetails ??= await getUserDetails(
-      platformConfig.endpoint,
-      token
-    );
-    platformConfig.userEmail ??= await getUserEmail(
-      platformConfig.endpoint,
-      token
-    );
-    if (platformConfig.userEmail) {
-      discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
+    if (platformConfig.isGHApp) {
+      platformConfig.userDetails ??= await getAppDetails(token);
+      const ghHostname = platformConfig.isGhe
+        ? URL.parse(platformConfig.endpoint).hostname
+        : 'github.com';
+      discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
+    } else {
+      platformConfig.userDetails ??= await getUserDetails(
+        platformConfig.endpoint,
+        token
+      );
+      platformConfig.userEmail ??= await getUserEmail(
+        platformConfig.endpoint,
+        token
+      );
+      if (platformConfig.userEmail) {
+        discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
+      }
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
@@ -258,7 +281,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any> {
-  // TODO #7154
+  // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -383,7 +406,7 @@ export async function initRepo({
     let infoQuery = repoInfoQuery;
 
     // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
-    // TODO #7154
+    // TODO #22198
     if (
       platformConfig.isGhe &&
       // semver not null safe, accepts null and undefined
@@ -559,7 +582,7 @@ export async function initRepo({
             sha,
             force: true,
           },
-          token: forkToken ?? opts.token,
+          token: coerceString(forkToken, opts.token),
         });
       } catch (err) /* istanbul ignore next */ {
         logger.warn(
@@ -582,7 +605,7 @@ export async function initRepo({
   // istanbul ignore else
   if (forkToken) {
     logger.debug('Using forkToken for git init');
-    parsedEndpoint.auth = config.forkToken ?? null;
+    parsedEndpoint.auth = coerceToNull(config.forkToken);
   } else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
@@ -590,7 +613,7 @@ export async function initRepo({
     logger.debug(`Using ${tokenType} token for git init`);
     parsedEndpoint.auth = opts.token ?? null;
   }
-  // TODO: null checks (#7154)
+  // TODO: null checks (#22198)
   parsedEndpoint.host = parsedEndpoint.host!.replace(
     'api.github.com',
     'github.com'
@@ -712,10 +735,10 @@ export async function getPrList(): Promise<GhPr[]> {
       !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
         ? config.renovateUsername
         : null;
-    // TODO: check null `repo` (#7154)
+    // TODO: check null `repo` (#22198)
     const prCache = await getPrCache(githubApi, repo!, username);
     config.prList = Object.values(prCache).sort(
-      ({ number: a }, { number: b }) => (a > b ? -1 : 1)
+      ({ number: a }, { number: b }) => b - a
     );
   }
 
@@ -1136,7 +1159,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  // TODO: can number be required? (#7154)
+  // TODO: can number be required? (#22198)
   return getIssue(issue.number!);
 }
 
@@ -1191,7 +1214,7 @@ export async function ensureIssue({
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
           logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
-          // TODO #7154
+          // TODO #22198
           await closeIssue(i.number!);
         }
       }
@@ -1264,7 +1287,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
-      // TODO #7154
+      // TODO #22198
       await closeIssue(issue.number!);
       logger.debug(`Issue closed, issueNo: ${issue.number}`);
     }
@@ -1498,7 +1521,7 @@ async function tryPrAutomerge(
   }
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
-  // TODO #7154
+  // TODO #22198
   if (platformConfig.isGhe) {
     // semver not null safe, accepts null and undefined
     if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
@@ -1537,7 +1560,7 @@ async function tryPrAutomerge(
     }
 
     logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
-  } catch (err) /* istanbul ignore next: missing test #7154 */ {
+  } catch (err) /* istanbul ignore next: missing test #22198 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
@@ -1555,7 +1578,7 @@ export async function createPr({
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkToken and regular mode
-  // TODO: can `repository` be null? (#7154)
+  // TODO: can `repository` be null? (#22198)
 
   const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
   const options: any = {
@@ -1770,7 +1793,7 @@ export function massageMarkdown(input: string): string {
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
 
-  // TODO #7154
+  // TODO #22198
   const gheSupportsStateFilter = semver.satisfies(
     // semver not null safe, accepts null and undefined
 
@@ -1821,7 +1844,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           const key = `${ecosystem.toLowerCase()}/${name}`;
           const range = vulnerableVersionRange;
           const elem = shortAlerts[key] || {};
-          elem[range] = patch ?? null;
+          elem[range] = coerceToNull(patch);
           shortAlerts[key] = elem;
         }
         logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');

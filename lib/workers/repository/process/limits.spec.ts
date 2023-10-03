@@ -7,7 +7,6 @@ import * as limits from './limits';
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({
     branchPrefix: 'foo/',
     onboardingBranch: 'bar/configure',
@@ -131,7 +130,7 @@ describe('workers/repository/process/limits', () => {
 
     it('returns prConcurrentLimit if errored', async () => {
       config.branchConcurrentLimit = 2;
-      // TODO: #7154
+      // TODO: #22198
       const res = await limits.getConcurrentBranchesRemaining(
         config,
         null as never

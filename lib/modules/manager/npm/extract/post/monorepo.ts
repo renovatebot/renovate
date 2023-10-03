@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { logger } from '../../../../logger';
-import { getParentDir, getSiblingFileName } from '../../../../util/fs';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
-import { detectPnpmWorkspaces } from './pnpm';
-import { matchesAnyPattern } from './utils';
+import { logger } from '../../../../../logger';
+import { getParentDir, getSiblingFileName } from '../../../../../util/fs';
+import type { PackageFile } from '../../../types';
+import type { NpmManagerData } from '../../types';
+import { detectPnpmWorkspaces } from '../pnpm';
+import { matchesAnyPattern } from '../utils';
 
 export async function detectMonorepos(
   packageFiles: Partial<PackageFile<NpmManagerData>>[]
@@ -28,7 +28,9 @@ export async function detectMonorepos(
         delete p.managerData.lernaPackages;
         delete p.managerData.lernaClient;
       } else {
-        logger.debug('Detected lerna <7');
+        logger.warn(
+          'Support for lerna <7 is now deprecated, please prioritize updating to v7'
+        );
       }
     }
   }

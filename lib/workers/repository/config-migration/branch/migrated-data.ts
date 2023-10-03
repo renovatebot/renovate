@@ -125,7 +125,7 @@ export class MigratedDataFactory {
       delete migratedConfig.warnings;
 
       // indent defaults to 2 spaces
-      // TODO #7154
+      // TODO #22198
       const indent = detectIndent(raw!);
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;

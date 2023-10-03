@@ -145,7 +145,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any> {
-  // TODO #7154
+  // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
   return JSON5.parse(raw);
 }
@@ -193,7 +193,7 @@ export async function initRepo({
 
     const url = utils.getRepoGitUrl(
       config.repositorySlug,
-      // TODO #7154
+      // TODO #22198
       defaults.endpoint!,
       gitUrl,
       info,
@@ -265,7 +265,7 @@ export async function getPr(
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
-  // TODO #7154
+  // TODO #22198
   pr.version = updatePrVersion(pr.number, pr.version!);
 
   return pr;
@@ -362,7 +362,7 @@ async function getStatus(
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       { memCache }
     )
@@ -407,7 +407,7 @@ function getStatusCheck(
   const branchCommit = git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
     { memCache }
@@ -481,7 +481,7 @@ export async function setBranchStatus({
     }
 
     await bitbucketServerHttp.postJson(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/build-status/1.0/commits/${branchCommit!}`,
       { body }
     );
@@ -564,7 +564,7 @@ export async function addReviewers(
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    // TODO: can `reviewers` be undefined? (#7154)
+    // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
@@ -834,7 +834,7 @@ export async function createPr({
     ...utils.prInfo(prInfoRes.body),
   };
 
-  // TODO #7154
+  // TODO #22198
   updatePrVersion(pr.number, pr.version!);
 
   // istanbul ignore if
@@ -889,7 +889,7 @@ export async function updatePr({
     updatePrVersion(prNo, updatedPr.version);
 
     const currentState = updatedPr.state;
-    // TODO #7154
+    // TODO #22198
     const newState = {
       ['open']: 'OPEN',
       ['closed']: 'DECLINED',
@@ -946,7 +946,7 @@ export async function mergePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/api/1.0/projects/${config.projectKey}/repos/${
         config.repositorySlug
       }/pull-requests/${prNo}/merge?version=${pr.version!}`

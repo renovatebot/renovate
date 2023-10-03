@@ -1,17 +1,23 @@
-import { logger } from '../../../../../test/util';
-import type { PackageFile } from '../../types';
-import type { NpmManagerData } from '../types';
+import { logger, mocked } from '../../../../../../test/util';
+import type { PackageFile } from '../../../types';
+import type { NpmManagerData } from '../../types';
+import * as _npm from '../npm';
+import * as _pnpm from '../pnpm';
+import * as _yarn from '../yarn';
 import { getLockedVersions } from './locked-versions';
 
-const npm = require('./npm');
-const pnpm = require('./pnpm');
-const yarn = require('./yarn');
+const npm = mocked(_npm);
+const pnpm = mocked(_pnpm);
+const yarn = mocked(_yarn);
 
-jest.mock('./npm');
-jest.mock('./yarn');
-jest.mock('./pnpm');
+jest.mock('../npm');
+jest.mock('../yarn', () => ({
+  ...jest.requireActual<typeof import('../yarn')>('../yarn'),
+  getYarnLock: jest.fn(),
+}));
+jest.mock('../pnpm');
 
-describe('modules/manager/npm/extract/locked-versions', () => {
+describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     function getPackageFiles(
       yarnVersion: string
@@ -52,7 +58,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       const yarnVersion = '1.22.0';
       const lockfileVersion = undefined;
       const isYarn1 = true;
-      yarn.getYarnLock.mockReturnValue({
+      yarn.getYarnLock.mockResolvedValue({
         isYarn1,
         lockfileVersion,
         lockedVersions,
@@ -89,7 +95,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       const yarnVersion = '2.1.0';
       const lockfileVersion = undefined;
       const isYarn1 = false;
-      yarn.getYarnLock.mockReturnValue({
+      yarn.getYarnLock.mockResolvedValue({
         isYarn1,
         lockfileVersion,
         lockedVersions,
@@ -136,7 +142,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       const yarnVersion = '2.2.0';
       const lockfileVersion = 6;
       const isYarn1 = false;
-      yarn.getYarnLock.mockReturnValue({
+      yarn.getYarnLock.mockResolvedValue({
         isYarn1,
         lockfileVersion,
         lockedVersions,
@@ -183,7 +189,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       const yarnVersion = '3.0.0';
       const lockfileVersion = 8;
       const isYarn1 = false;
-      yarn.getYarnLock.mockReturnValue({
+      yarn.getYarnLock.mockResolvedValue({
         isYarn1,
         lockfileVersion,
         lockedVersions,
@@ -222,7 +228,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       const yarnVersion = '3.2.0';
       const lockfileVersion = 8;
       const isYarn1 = false;
-      yarn.getYarnLock.mockReturnValue({
+      yarn.getYarnLock.mockResolvedValue({
         isYarn1,
         lockfileVersion,
         lockedVersions,
@@ -259,7 +265,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
     });
 
     it('uses package-lock.json with npm v6.0.0', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 1,
       });
@@ -289,8 +295,36 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       ]);
     });
 
+    it('does nothing if managerData is not present', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
+        lockfileVersion: 1,
+      });
+      const packageFiles = [
+        {
+          extractedConstraints: {},
+          deps: [
+            { depName: 'a', currentValue: '1.0.0' },
+            { depName: 'b', currentValue: '2.0.0' },
+          ],
+          packageFile: 'some-file',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          extractedConstraints: {},
+          deps: [
+            { currentValue: '1.0.0', depName: 'a' },
+            { currentValue: '2.0.0', depName: 'b' },
+          ],
+          packageFile: 'some-file',
+        },
+      ]);
+    });
+
     it('uses package-lock.json with npm v7.0.0', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 2,
       });
@@ -327,7 +361,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
     });
 
     it('augments v2 lock file constraint', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 2,
       });
@@ -364,7 +398,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
     });
 
     it('skips augmenting v2 lock file constraint', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 2,
       });
@@ -401,7 +435,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
     });
 
     it('appends <7 to npm extractedConstraints', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
           a: '1.0.0',
           b: '2.0.0',
@@ -446,7 +480,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
     });
 
     it('skips appending <7 to npm extractedConstraints', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
           a: '1.0.0',
           b: '2.0.0',
@@ -492,7 +526,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
   });
 
   it('uses pnpm-lock', async () => {
-    pnpm.getPnpmLock.mockReturnValue({
+    pnpm.getPnpmLock.mockResolvedValue({
       lockedVersionsWithPath: {
         '.': {
           dependencies: {
@@ -553,7 +587,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
   });
 
   it('uses pnpm-lock in subfolder', async () => {
-    pnpm.getPnpmLock.mockReturnValue({
+    pnpm.getPnpmLock.mockResolvedValue({
       lockedVersionsWithPath: {
         '.': {
           dependencies: {
@@ -614,7 +648,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
   });
 
   it('uses pnpm-lock with workspaces', async () => {
-    pnpm.getPnpmLock.mockReturnValue({
+    pnpm.getPnpmLock.mockResolvedValue({
       lockedVersionsWithPath: {
         'workspace-package': {
           dependencies: {
@@ -692,7 +726,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
   });
 
   it('should log warning if unsupported lockfileVersion is found', async () => {
-    npm.getNpmLock.mockReturnValue({
+    npm.getNpmLock.mockResolvedValue({
       lockedVersions: {},
       lockfileVersion: 99,
     });
@@ -722,7 +756,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
 
   describe('lockfileVersion 3', () => {
     it('uses package-lock.json with npm v9.0.0', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
           a: '1.0.0',
           b: '2.0.0',
@@ -763,7 +797,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
     });
 
     it('uses package-lock.json with npm v7.0.0', async () => {
-      npm.getNpmLock.mockReturnValue({
+      npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
           a: '1.0.0',
           b: '2.0.0',

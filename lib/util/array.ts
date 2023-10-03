@@ -19,3 +19,12 @@ export function isNotNullOrUndefined<T>(
 ): value is T {
   return !is.nullOrUndefined(value);
 }
+
+/**
+ * Converts a single value or an array of values to an array of values.
+ * @param value a single value or an array of values
+ * @returns array of values
+ */
+export function toArray<T>(value: T | T[]): T[] {
+  return is.array(value) ? value : [value];
+}

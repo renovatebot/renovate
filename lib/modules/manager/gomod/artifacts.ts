@@ -5,6 +5,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -97,7 +98,9 @@ function useModcacherw(goVersion: string | undefined): boolean {
     return true;
   }
 
-  const [, majorPart, minorPart] = regEx(/(\d+)\.(\d+)/).exec(goVersion) ?? [];
+  const [, majorPart, minorPart] = coerceArray(
+    regEx(/(\d+)\.(\d+)/).exec(goVersion)
+  );
   const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
 
   return (
@@ -196,7 +199,9 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
+        GOFLAGS: useModcacherw(goConstraints)
+          ? '-modcacherw'
+          : /* istanbul ignore next: hard to test */ null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
       },
@@ -342,7 +347,7 @@ export async function updateArtifacts({
           });
         }
       }
-      for (const f of status.deleted || []) {
+      for (const f of coerceArray(status.deleted)) {
         res.push({
           file: {
             type: 'deletion',
@@ -352,7 +357,7 @@ export async function updateArtifacts({
       }
     }
 
-    // TODO: throws in tests (#7154)
+    // TODO: throws in tests (#22198)
     const finalGoModContent = (await readLocalFile(goModFileName, 'utf8'))!
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');

@@ -68,7 +68,6 @@ function handleError(packageName: string, err: HttpError): void {
   } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
   } else if (err.message === HOST_DISABLED) {
-    // istanbul ignore next
     logger.trace(errorData, 'Host disabled');
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
@@ -77,8 +76,8 @@ function handleError(packageName: string, err: HttpError): void {
 
 function isDefaultRepo(url: string): boolean {
   const match = githubRegex.exec(url);
-  if (match) {
-    const { account, repo } = match.groups ?? {};
+  if (match?.groups) {
+    const { account, repo } = match.groups;
     return (
       account.toLowerCase() === 'cocoapods' && repo.toLowerCase() === 'specs'
     ); // https://github.com/CocoaPods/Specs.git
@@ -207,7 +206,7 @@ export class PodDatasource extends Datasource {
     ttlMinutes: 30,
     namespace: `datasource-${PodDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
@@ -228,9 +227,9 @@ export class PodDatasource extends Datasource {
 
     let result: ReleaseResult | null = null;
     const match = githubRegex.exec(baseUrl);
-    if (match) {
+    if (match?.groups) {
       baseUrl = massageGithubUrl(baseUrl);
-      const { hostURL, account, repo } = match?.groups ?? {};
+      const { hostURL, account, repo } = match.groups;
       const opts = { hostURL, account, repo };
       result = await this.getReleasesFromGithub(podName, opts);
     } else {

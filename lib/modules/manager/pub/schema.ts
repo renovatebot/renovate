@@ -3,7 +3,10 @@ import { LooseRecord, Yaml } from '../../../util/schema-utils';
 
 const PubspecDependencySchema = LooseRecord(
   z.string(),
-  z.union([z.string(), z.object({ version: z.string().optional() })])
+  z.union([
+    z.string(),
+    z.object({ version: z.string().optional(), path: z.string().optional() }),
+  ])
 );
 
 export const PubspecSchema = z.object({

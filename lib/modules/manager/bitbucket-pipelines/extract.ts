@@ -1,6 +1,10 @@
 import { logger } from '../../../logger';
 import { newlineRegex } from '../../../util/regex';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import {
   addDepAsBitbucketTag,
   addDepAsDockerImage,
@@ -12,7 +16,8 @@ import {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
+  config: ExtractConfig
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
@@ -34,7 +39,8 @@ export function extractPackageFile(
           lines,
           lineIdx,
           len,
-          dockerImageObjectGroups.spaces
+          dockerImageObjectGroups.spaces,
+          config.registryAliases
         );
         continue;
       }
@@ -45,7 +51,7 @@ export function extractPackageFile(
 
         if (pipe.startsWith('docker://')) {
           const currentPipe = pipe.replace('docker://', '');
-          addDepAsDockerImage(deps, currentPipe);
+          addDepAsDockerImage(deps, currentPipe, config.registryAliases);
         } else {
           addDepAsBitbucketTag(deps, pipe);
         }
@@ -55,7 +61,7 @@ export function extractPackageFile(
       const dockerImageMatch = dockerImageRegex.exec(line);
       if (dockerImageMatch) {
         const currentFrom = dockerImageMatch[1];
-        addDepAsDockerImage(deps, currentFrom);
+        addDepAsDockerImage(deps, currentFrom, config.registryAliases);
       }
     }
   } catch (err) /* istanbul ignore next */ {

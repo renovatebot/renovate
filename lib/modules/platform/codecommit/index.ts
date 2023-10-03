@@ -13,6 +13,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
+import { coerceArray } from '../../../util/array';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -163,7 +164,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     return fetchedPrs;
   }
 
-  const prIds = listPrsResponse.pullRequestIds ?? [];
+  const prIds = coerceArray(listPrsResponse.pullRequestIds);
 
   for (const prId of prIds) {
     const prRes = await client.getPr(prId);
@@ -291,7 +292,7 @@ export async function getRepos(): Promise<string[]> {
 
   const res: string[] = [];
 
-  const repoNames = reposRes?.repositories ?? [];
+  const repoNames = coerceArray(reposRes?.repositories);
 
   for (const repo of repoNames) {
     if (repo.repositoryName) {

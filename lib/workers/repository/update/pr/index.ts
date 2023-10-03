@@ -101,7 +101,7 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
       0
     );
   }
-  return pr.reviewers ? pr.reviewers.length > 0 : false;
+  return is.nonEmptyArray(pr.reviewers);
 }
 
 // Ensures that PR exists with matching title/body
@@ -126,7 +126,7 @@ export async function ensurePr(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if PR already exists
-  const existingPr = await platform.getBranchPr(branchName);
+  const existingPr = await platform.getBranchPr(branchName, config.baseBranch);
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
@@ -230,7 +230,7 @@ export async function ensurePr(
   function getRepoNameWithSourceDirectory(
     upgrade: BranchUpgradeConfig
   ): string {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     return `${upgrade.repoName!}${
       upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
     }`;
@@ -243,7 +243,7 @@ export async function ensurePr(
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const upgradeKey = `${upgrade.depType!}-${upgrade.depName!}-${
       upgrade.manager
     }-${
@@ -299,7 +299,7 @@ export async function ensurePr(
   for (const upgrade of config.upgrades) {
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
     if (!notesSourceUrl) {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       notesSourceUrl = `${upgrade.sourceUrl!}${
         upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
       }`;

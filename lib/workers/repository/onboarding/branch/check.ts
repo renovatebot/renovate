@@ -30,7 +30,7 @@ async function configFileExists(): Promise<boolean> {
 
 async function packageJsonConfigExists(): Promise<boolean> {
   try {
-    // TODO #7154
+    // TODO #22198
     const pJson = JSON.parse((await readLocalFile('package.json', 'utf8'))!);
     if (pJson.renovate) {
       return true;
@@ -46,6 +46,7 @@ function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
     branchName: config.onboardingBranch!,
     prTitle: config.onboardingPrTitle,
     state: '!open',
+    targetBranch: config.baseBranch,
   });
 }
 
@@ -150,5 +151,8 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 export async function getOnboardingPr(
   config: RenovateConfig
 ): Promise<Pr | null> {
-  return await platform.getBranchPr(config.onboardingBranch!);
+  return await platform.getBranchPr(
+    config.onboardingBranch!,
+    config.baseBranch
+  );
 }

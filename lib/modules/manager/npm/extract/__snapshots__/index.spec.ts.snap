@@ -131,7 +131,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
     "npm": "^8.0.0",
     "pnpm": "^1.2.0",
     "vscode": ">=1.49.3",
-    "yarn": "disabled",
   },
   "managerData": {
     "hasPackageManager": false,

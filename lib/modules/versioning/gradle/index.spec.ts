@@ -76,6 +76,7 @@ describe('modules/versioning/gradle/index', () => {
     ${'Hoxton.SR1'}              | ${'Hoxton.RELEASE'}          | ${1}
     ${'1.0-sp-1'}                | ${'1.0-release'}             | ${1}
     ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
+    ${''}                        | ${''}                        | ${0}
   `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(compare(a, b)).toEqual(expected);
   });

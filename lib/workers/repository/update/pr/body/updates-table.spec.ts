@@ -87,7 +87,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
     });
-    // TODO #7154 allow or filter undefined
+    // TODO #22198 allow or filter undefined
     const upgrade3 = undefined as never;
     const configObj: BranchConfig = {
       manager: 'some-manager',

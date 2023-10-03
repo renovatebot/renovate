@@ -1021,10 +1021,6 @@ describe('workers/repository/dependency-dashboard', () => {
           PackageFiles.clear();
         });
 
-        afterAll(() => {
-          jest.resetAllMocks();
-        });
-
         it('does not truncates as there is enough space to fit', () => {
           PackageFiles.add('main', packageFiles);
           const nonTruncated = PackageFiles.getDashboardMarkdown(Infinity);

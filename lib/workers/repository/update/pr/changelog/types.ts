@@ -23,9 +23,11 @@ export interface ChangeLogRelease {
   gitRef: string;
 }
 
+export type ChangeLogPlatform = 'bitbucket' | 'gitea' | 'github' | 'gitlab';
+
 export interface ChangeLogProject {
   packageName?: string;
-  type: 'bitbucket' | 'github' | 'gitlab';
+  type: ChangeLogPlatform;
   apiBaseUrl?: string;
   baseUrl: string;
   repository: string;
