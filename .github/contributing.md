@@ -29,7 +29,7 @@ Before you start contributing, ensure you have the following:
 
 4. **Install Dependencies: Install the project dependencies:**
    ```bash
-   npm install
+   pnpm install
 
 5. **Start the Local Development Server:**
    tO setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
