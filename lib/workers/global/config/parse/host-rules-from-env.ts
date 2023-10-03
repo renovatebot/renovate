@@ -1,5 +1,6 @@
 import { logger } from '../../../../logger';
 import { getDatasourceList } from '../../../../modules/datasource';
+import { getPlatformList } from '../../../../modules/platform';
 import type { HostRule } from '../../../../types';
 
 type AuthField = 'token' | 'username' | 'password';
@@ -36,6 +37,7 @@ function restoreHttpsArgs(x: HttpsAuthField): string {
 
 export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   const datasources = new Set(getDatasourceList());
+  const platforms = new Set(getPlatformList());
 
   const hostRules: HostRule[] = [];
 
@@ -49,7 +51,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
     const hostType = splitEnv.shift()!;
-    if (datasources.has(hostType)) {
+    if (datasources.has(hostType) || platforms.has(hostType)) {
       let suffix = splitEnv.pop()!;
       if (isAuthField(suffix) || isHttpsAuthField(suffix)) {
         if (isHttpsAuthField(suffix)) {
