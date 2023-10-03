@@ -3123,29 +3123,33 @@ This limit is enforced on a per-repository basis.
 
 ## prCreation
 
-This setting tells Renovate when you would like it to raise PRs:
+This setting tells Renovate _when_ to create PRs:
 
-- `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
-- `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
-- `status-success`: Renovate won't raise PRs unless tests pass
-- `approval`: Renovate creates branches for updates, but only creates the PR _after_ Dependency Dashboard approval
+- `immediate` (default): Renovate creates PRs immediately after creating the corresponding branch
+- `not-pending`: Renovate waits until status checks have completed (passed or failed) before raising the PR
+- `status-success`: Renovate only creates PRs when the the test pass
+- `approval`: Renovate creates branches for updates immediately, but creates the PR _after_ getting Dependency Dashboard approval
 
-Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
+When prCreation is set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
+You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR.
 
-With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
-You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
-
-With prCreation set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
+When prCreation is set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-If there are no checks associated, Renovate will create the PR once 24 hrs have elapsed since creation of the commit.
+If there are no checks associated, Renovate will create the PR once 24 hours have elapsed since creation of the commit.
 
-With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
+When prCreation is set to `status-success`, Renovate creates the PR only if all tests have passed.
 
-With prCreation set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
-It does not prevent the creation of the _branch_.
+When prCreation is set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
+Renovate still creates the _branch_ immediately.
 
-For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
-Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
+<!-- prettier-ignore -->
+!!! note
+    For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+    Instead, Renovate create the PR on its _next_ run after the relevant tests have completed, so there will be some delay.
+
+<!-- prettier-ignore -->
+!!! warning
+    If you set `prCreation=approval` you must _not_ use `dependencyDashboardApproval=true`!
 
 ## prFooter
 
