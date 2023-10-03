@@ -14,7 +14,7 @@ Before you start contributing, ensure you have the following:
 
 - **GitHub Account**: You'll need a GitHub account to make contributions.
 
-### Setting up the Development Environment
+### Setting up the development environment
 
 1. **Fork the Repository**: Click the "Fork" button on the top right of the GitHub repository page. This creates a copy of the repository in your GitHub account.
 
