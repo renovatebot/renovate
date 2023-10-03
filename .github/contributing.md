@@ -1,5 +1,4 @@
-# Contributing to the Renovate
-# Contributing to the TODO List App
+# Contributing to Renovate
 
 Thank you for considering contributing to our Renovate App. Your help is greatly appreciated! This guide will help you get started and ensure that your contributions are effective.
 
