@@ -31,12 +31,12 @@ Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/refer
 
 ## Private crate registries and private Git dependencies
 
-You as user can set authentication for private Crate by adding a `hostRules` configuration to your `renovate.json` file.
+You as user can set authentication for private crates by adding a `hostRules` configuration to your `renovate.json` file.
 
-All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, ... ) and host rules without a `hostType` will be automatically setup for authentication.
+All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, etc.) and host rules without a `hostType` will be automatically setup for authentication.
 You can also configure a `hostRules` that's only for Cargo authentication (e.g. `hostType: 'cargo'`).
 
-Here is an example of authentication for a private GitHub and Cargo registry:
+Here's an example of authentication for a private GitHub and Cargo registry:
 
 ```js
 module.exports = {
