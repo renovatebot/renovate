@@ -3138,6 +3138,7 @@ When you get the PR notification, you can take action immediately, as you have t
 If there are no checks associated, Renovate will create the PR once 24 hours have elapsed since creation of the commit.
 
 When prCreation is set to `status-success`, Renovate creates the PR only if all tests have passed.
+When a branch remains without PR due to a failing test: select the corresponding PR from the Dependency Dashboard, and push your fixes to the branch.
 
 When prCreation is set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
 Renovate still creates the _branch_ immediately.
