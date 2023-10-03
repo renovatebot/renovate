@@ -20,7 +20,7 @@ export class CurrentVersionMatcher extends Matcher {
     }
     const isUnconstrainedValue =
       !!lockedVersion && is.nullOrUndefined(currentValue);
-    const version = allVersioning.get(versioning ? versioning : undefined);
+    const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = configRegexPredicate(
       matchCurrentVersionStr
