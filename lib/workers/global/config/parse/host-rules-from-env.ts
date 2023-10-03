@@ -4,8 +4,34 @@ import type { HostRule } from '../../../../types';
 
 type AuthField = 'token' | 'username' | 'password';
 
+type HttpsAuthField =
+  | 'httpscertificate'
+  | 'httpsprivatekey'
+  | 'httpscertificateauthority';
+
 function isAuthField(x: unknown): x is AuthField {
   return x === 'token' || x === 'username' || x === 'password';
+}
+
+function isHttpsAuthField(x: unknown): x is HttpsAuthField {
+  return (
+    x === 'httpscertificate' ||
+    x === 'httpsprivatekey' ||
+    x === 'httpscertificateauthority'
+  );
+}
+
+function restoreHttpsArgs(x: HttpsAuthField): string {
+  switch (x) {
+    case 'httpsprivatekey':
+      return 'httpsPrivateKey';
+    case 'httpscertificate':
+      return 'httpsCertificate';
+    case 'httpscertificateauthority':
+      return 'httpsCertificateAuthority';
+    default:
+      return x;
+  }
 }
 
 export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
@@ -24,8 +50,12 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
     const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
     const hostType = splitEnv.shift()!;
     if (datasources.has(hostType)) {
-      const suffix = splitEnv.pop()!;
-      if (isAuthField(suffix)) {
+      let suffix = splitEnv.pop()!;
+      if (isAuthField(suffix) || isHttpsAuthField(suffix)) {
+        if (isHttpsAuthField(suffix)) {
+          suffix = restoreHttpsArgs(suffix);
+        }
+
         let matchHost: string | undefined = undefined;
         const rule: HostRule = {};
         rule[suffix] = env[envName];
