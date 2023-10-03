@@ -3,7 +3,6 @@ import type { SkipReason } from '../../../types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFileContent } from '../types';
 
