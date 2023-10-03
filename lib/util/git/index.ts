@@ -325,8 +325,10 @@ export async function writeGitAuthor(): Promise<void> {
 export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
+  gitExtraCloneOpts,
 }: RenovateConfig): void {
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  config.extraCloneOpts = gitExtraCloneOpts ?? undefined;
   setGitAuthor(gitAuthor);
 }
 

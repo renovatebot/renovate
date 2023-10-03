@@ -868,6 +868,13 @@ const options: RenovateOptions[] = [
     stage: 'global',
   },
   {
+    name: 'gitExtraCloneOpts',
+    description:
+      'Configuration that can be used to amend the `git clone` operation',
+    type: 'object',
+    stage: 'repository',
+  },
+  {
     name: 'gitIgnoredAuthors',
     description:
       'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',

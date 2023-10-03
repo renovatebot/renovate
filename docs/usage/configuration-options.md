@@ -1439,6 +1439,30 @@ Development Bot <dev-bot@my-software-company.com>
     We strongly recommend that the Git author email you use is unique to Renovate.
     Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
+## gitExtraCloneOpts
+
+You can specify additional arguments that are passed to `git` when cloning a repository.
+
+For instance:
+
+```json
+{
+  "gitExtraCloneOpts": {
+    "--depth": "1"
+  }
+}
+```
+
+Would amend the `git clone` command like so:
+
+```sh
+git clone --depth 1 ...
+```
+
+<!-- prettier-ignore -->
+!!! danger
+  Mis-configuring this option could lead to your `git clone`s failing.
+
 ## gitIgnoredAuthors
 
 Specify commit authors ignored by Renovate.

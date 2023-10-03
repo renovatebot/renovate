@@ -2,6 +2,7 @@ import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
+import type { GitOptions } from '../types/git';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
 
@@ -87,6 +88,7 @@ export interface RenovateSharedConfig {
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
+  gitExtraCloneOpts?: GitOptions;
   gitIgnoredAuthors?: string[];
   platformCommit?: boolean;
 }

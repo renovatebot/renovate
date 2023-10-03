@@ -803,6 +803,24 @@ describe('util/git/index', () => {
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
     });
+
+    it('should use extra clone configuration, when configured through setUserRepoConfig', async () => {
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({
+        url: origin.path,
+        fullClone: true,
+      });
+      git.setUserRepoConfig({
+        gitExtraCloneOpts: {
+          '-c': 'extra.clone.config=test-extra-config-value',
+        },
+      });
+      git.getBranchCommit(defaultBranch);
+      await git.syncGit();
+      const repo = Git(tmpDir.path);
+      const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
+      expect(res).toBe('test-extra-config-value');
+    });
   });
 
   describe('setGitAuthor()', () => {
