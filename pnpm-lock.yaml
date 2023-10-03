@@ -581,8 +581,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       rimraf:
-        specifier: 5.0.4
-        version: 5.0.4
+        specifier: 5.0.5
+        version: 5.0.5
       semantic-release:
         specifier: 22.0.5
         version: 22.0.5(typescript@5.1.6)
@@ -9754,8 +9754,8 @@ packages:
     dependencies:
       glob: 7.2.3
 
-  /rimraf@5.0.4:
-    resolution: {integrity: sha512-rizQI/o/YAMM1us0Zyax0uRfIK39XR52EAjjOi0fzMolpGp0onj6CWzBAXuOx6+6Xi9Rgi0d9tUZojhJerLUmQ==}
+  /rimraf@5.0.5:
+    resolution: {integrity: sha512-CqDakW+hMe/Bz202FPEymy68P+G50RfMQK+Qo5YUqc9SPipvbGjCGKd0RSKEelbsfQuw3g5NZDSrlZZAJurH1A==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
