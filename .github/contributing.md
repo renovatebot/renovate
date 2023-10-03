@@ -1,4 +1,67 @@
-# Contributing
+# Contributing to the Renovate
+# Contributing to the TODO List App
+
+Thank you for considering contributing to our Renovate App. Your help is greatly appreciated! This guide will help you get started and ensure that your contributions are effective.
+
+## Getting Started
+
+### Prerequisites
+
+Before you start contributing, ensure you have the following:
+
+- **Node.js**: You need Node.js (v14 or higher) installed. [Download Node.js](https://nodejs.org/).
+
+- **Git**: Make sure you have Git installed. [Download Git](https://git-scm.com/).
+
+- **GitHub Account**: You'll need a GitHub account to make contributions.
+
+### Setting up the Development Environment
+
+1. **Fork the Repository**: Click the "Fork" button on the top right of the GitHub repository page. This creates a copy of the repository in your GitHub account.
+
+2. **Clone Your Fork**: Clone the forked repository to your local machine:
+
+   ```bash
+   git clone https://github.com/your-username/renovate.git
+
+3. **Navigate to the Project Directory**:
+   ```bash
+   cd renovate
+
+4. **Install Dependencies: Install the project dependencies:**
+   ```bash
+   npm install
+
+5. **Start the Local Development Server:**
+   tO setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
+
+## Submitting Changes
+
+1. **Create a New Branch: Create a new branch for your changes:**
+   ```bash
+   git checkout -b feature/my-feature
+
+2. **git add :**
+   ```bash
+      git add .
+
+
+3. **Make and Commit Changes:** Make your changes and commit them with descriptive messages.
+   ```bash
+      git commit -m "your-feature-message"
+
+
+4. **Push Changes:** Push your changes to your GitHub fork:
+   ```bash
+   git push origin feature/my-feature
+
+5. **Open a Pull Request:** Open a pull request on the main repository with a clear title and description of your changes.
+
+## Review Process
+
+The maintainers will review your pull request and may request changes or provide feedback.
+
+Once your changes are approved, they will be merged into the main branch.
 
 ## Security / Disclosure
 
