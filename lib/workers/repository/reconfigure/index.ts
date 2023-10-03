@@ -56,7 +56,6 @@ export async function validateReconfigureBranch(
       { err },
       'Error while searching for config file in reconfigure branch'
     );
-    return;
   }
 
   if (!is.nonEmptyString(configFileName)) {
@@ -95,8 +94,6 @@ export async function validateReconfigureBranch(
   let configFileParsed: any;
   try {
     const fileType = upath.extname(configFileName);
-    // eslint-disable-next-line
-    console.log('fileType', fileType);
     if (fileType === '.json') {
       configFileParsed = JSON.parse(configFileRaw);
       // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`

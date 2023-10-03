@@ -108,13 +108,15 @@ describe('workers/repository/reconfigure/index', () => {
   });
 
   it('handles successful validation', async () => {
-    scm.getFileList.mockResolvedValueOnce(['renovate.json']);
-    fs.readLocalFile.mockResolvedValueOnce(`
-        {
-            "enabledManagers": ["npm"]
-        }
-        `);
-    platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
+    const pJson = `
+    {
+       "renovate": {
+        "enabledManagers": ["npm"]
+       } 
+    }
+    `;
+    scm.getFileList.mockResolvedValueOnce(['package.json']);
+    fs.readLocalFile.mockResolvedValueOnce(pJson).mockResolvedValueOnce(pJson);
     await validateReconfigureBranch(config);
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',

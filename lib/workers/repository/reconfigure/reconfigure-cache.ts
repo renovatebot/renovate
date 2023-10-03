@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
 
@@ -7,12 +6,6 @@ export function setReconfigureBranchCache(
   configFileName: string,
   isConfigValid: boolean
 ): void {
-  // do not update cache if commit is null/undefined
-  if (!is.nonEmptyString(reconfigureBranchSha)) {
-    logger.debug('Onboarding cache not updated');
-    return;
-  }
-
   const cache = getCache();
   const reconfigureBranchCache = {
     reconfigureBranchSha,
