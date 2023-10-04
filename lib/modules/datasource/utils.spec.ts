@@ -1,4 +1,3 @@
-import { getGoogleAccessToken } from '../../../dist/modules/datasource/docker/google';
 import { mocked } from '../../../test/util';
 import type { HttpResponse } from '../../util/http/types';
 import { getGoogleAuthToken, isArtifactoryServer } from './util';
