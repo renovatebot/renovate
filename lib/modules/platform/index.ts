@@ -75,7 +75,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       delete returnConfig[field];
     }
   });
-  returnConfig.hostRules ??= [];
+  returnConfig.hostRules = returnConfig.hostRules || [];
   const typedPlatformRule = {
     ...platformRule,
     hostType: returnConfig.platform,
