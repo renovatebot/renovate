@@ -30,8 +30,6 @@ function restoreHttpsAuthField(x: HttpsAuthField): string {
       return 'httpsCertificate';
     case 'httpscertificateauthority':
       return 'httpsCertificateAuthority';
-    default:
-      return x;
   }
 }
 
