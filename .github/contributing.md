@@ -30,25 +30,9 @@ Read the [prerequisites](https://github.com/renovatebot/renovate/blob/main/docs/
 
 ## Submitting Changes
 
-1. **Create a New Branch: Create a new branch for your changes:**
-   ```bash
-   git checkout -b feature/my-feature
+If you've never worked with Git before, please read chapter one, two and three of the [ProGit 2 book](https://git-scm.com/book/en/v2) first.
 
-2. **git add :**
-   ```bash
-      git add .
-
-
-3. **Make and Commit Changes:** Make your changes and commit them with descriptive messages.
-   ```bash
-      git commit -m "your-feature-message"
-
-
-4. **Push Changes:** Push your changes to your GitHub fork:
-   ```bash
-   git push origin feature/my-feature
-
-5. **Open a Pull Request:** Open a pull request on the main repository with a clear title and description of your changes.
+Then read [ProGit 2, chapter 6.2 GitHub - Contributing to a Project].
 
 ## Review Process
 
