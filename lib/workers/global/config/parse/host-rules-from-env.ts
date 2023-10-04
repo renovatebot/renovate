@@ -22,7 +22,7 @@ function isHttpsAuthField(x: unknown): x is HttpsAuthField {
   );
 }
 
-function restoreHttpsArgs(x: HttpsAuthField): string {
+function restoreHttpsAuthField(x: HttpsAuthField): string {
   switch (x) {
     case 'httpsprivatekey':
       return 'httpsPrivateKey';
@@ -55,7 +55,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
       let suffix = splitEnv.pop()!;
       if (isAuthField(suffix) || isHttpsAuthField(suffix)) {
         if (isHttpsAuthField(suffix)) {
-          suffix = restoreHttpsArgs(suffix);
+          suffix = restoreHttpsAuthField(suffix);
         }
 
         let matchHost: string | undefined = undefined;

@@ -1,4 +1,8 @@
+import { mockedFunction } from '../../../../../test/util';
+import { getPlatformList as _getPlatformList } from '../../../../modules/platform';
 import { hostRulesFromEnv } from './host-rules-from-env';
+
+const getPlatformList = mockedFunction(_getPlatformList);
 
 describe('workers/global/config/parse/host-rules-from-env', () => {
   it('supports docker username/password', () => {
@@ -51,12 +55,45 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     ]);
   });
 
+  it('support https authentication options', () => {
+    getPlatformList.mockReturnValue(['github']);
+    const envParam: NodeJS.ProcessEnv = {
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY: 'private-key',
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE: 'certificate',
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY:
+        'certificate-authority',
+    };
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      {
+        hostType: 'github',
+        matchHost: 'some.github-enterprise.host',
+        httpsPrivateKey: 'private-key',
+        httpsCertificate: 'certificate',
+        httpsCertificateAuthority: 'certificate-authority',
+      },
+    ]);
+  });
+
   it('supports datasource env token', () => {
     const envParam: NodeJS.ProcessEnv = {
       PYPI_TOKEN: 'some-token',
     };
     expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'pypi', token: 'some-token' },
+    ]);
+  });
+
+  it('supports platform env token', () => {
+    getPlatformList.mockReturnValue(['github']);
+    const envParam: NodeJS.ProcessEnv = {
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_TOKEN: 'some-token',
+    };
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      {
+        hostType: 'github',
+        matchHost: 'some.github-enterprise.host',
+        token: 'some-token',
+      },
     ]);
   });
 
