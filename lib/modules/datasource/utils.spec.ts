@@ -34,7 +34,7 @@ describe('modules/datasource/utils', () => {
     );
 
     const res = await getGoogleAuthToken();
-    expect(res).toBe('b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg');
+    expect(res).toBe('b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==');
   });
 
   it('no Google Access token results in null', async () => {
