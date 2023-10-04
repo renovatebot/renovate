@@ -204,8 +204,6 @@ Add a label `auto:logs` to indicate that there's a problem with the logs, and th
 1. Provide more logs (in case current logs are insufficient)
 1. Format their logs properly
 
-Add a label `auto:needs-code-formatting` to discussions with logs/code that needs to be formatted.
-
 Add a label `auto:needs-details` to discussions which need more details to move forward.
 
 Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by istanbul ignoring code with the `// istanbul ignore` comment.
