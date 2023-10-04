@@ -29,3 +29,9 @@ export interface ProjectFile {
   readonly isLeaf: boolean;
   readonly name: string;
 }
+
+export interface PackageSourceCredential {
+  readonly name: string;
+  readonly username: string | undefined;
+  readonly password: string | undefined;
+}
