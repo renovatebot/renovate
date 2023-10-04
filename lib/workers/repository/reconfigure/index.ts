@@ -95,14 +95,12 @@ export async function validateReconfigureBranch(
   let configFileParsed: any;
   try {
     const fileType = upath.extname(configFileName);
+    configFileParsed = JSON5.parse(configFileRaw);
     if (fileType === '.json') {
-      configFileParsed = JSON.parse(configFileRaw);
       // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
       if (configFileName === 'package.json') {
         configFileParsed = configFileParsed.renovate;
       }
-    } else {
-      configFileParsed = JSON5.parse(configFileRaw);
     }
   } catch (err) {
     logger.error({ err }, 'Error while reading config file');
