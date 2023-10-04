@@ -266,11 +266,11 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
-- Datasource name (e.g. `NPM`, `PYPI`)
+- Datasource name (e.g. `NPM`, `PYPI`) or Platform name (e.g. `GITHUB`)
 - Underscore (`_`)
 - `matchHost`
 - Underscore (`_`)
-- Field name (`TOKEN`, `USERNAME`, or `PASSWORD`)
+- Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
@@ -325,6 +325,24 @@ You can skip the host part, and use only the datasource and credentials.
       "hostType": "docker",
       "username": "bot",
       "password": "botpass123"
+    }
+  ]
+}
+```
+
+### Platform with https authentication options
+
+`GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE=certificate GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY=private-key GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY=certificate-authority`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "github",
+      "matchHost": "some.github-enterprise.host",
+      "httpsPrivateKey": "private-key",
+      "httpsCertificate": "certificate",
+      "httpsCertificateAuthority": "certificate-authority"
     }
   ]
 }
