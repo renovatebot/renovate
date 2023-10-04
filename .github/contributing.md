@@ -36,11 +36,6 @@ If you've never worked with Git before, please read chapter one, two and three o
 
 Then read [ProGit 2, chapter 6.2 GitHub - Contributing to a Project].
 
-## Review Process
-
-The maintainers will review your pull request and may request changes or provide feedback.
-
-Once your changes are approved, they will be merged into the main branch.
 
 ## Security / Disclosure
 
