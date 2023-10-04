@@ -1,7 +1,7 @@
+import * as _googleAuth from 'google-auth-library';
 import { mocked } from '../../../test/util';
 import type { HttpResponse } from '../../util/http/types';
 import { getGoogleAuthToken, isArtifactoryServer } from './util';
-import * as _googleAuth from 'google-auth-library';
 
 const googleAuth = mocked(_googleAuth);
 jest.mock('google-auth-library');
