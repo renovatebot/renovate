@@ -103,11 +103,9 @@ You can request a review from one of the maintainers, in case this is needed to 
 Sometimes a discussion can go sour, like when people call each other names, or post spam, or veer off-topic.
 Ideally warn the user with an `auto:bad-vibes` label first, and then use `auto:discussion-closed` if problems persist.
 
-### Moving issues from `status:requirements` to `status:ready`
+### Going from `status:requirements` to actionable issue
 
-// Figure out what to do with this section.
-
-One of the most important non-code contributions people can do is help features and fixes go from `status:requirements` to `status:ready`.
+One of the most important non-code contributions people can do is help features and fixes go from `status:requirements` to a actionable issue.
 We use the label `status:requirements` to mean "more information or research is needed before someone could start coding this".
 
 It can sometimes be an oversight of the maintainers, but more often it's because there are requirements or edge cases to consider and the user hasn't got an opinion or time to think about them and contribute enough.
