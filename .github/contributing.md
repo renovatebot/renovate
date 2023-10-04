@@ -6,13 +6,7 @@ Thank you for considering contributing to our Renovate App. Your help is greatly
 
 ### Prerequisites
 
-Before you start contributing, ensure you have the following:
-
-- **Node.js**: You need Node.js (v18 or higher) installed. [Download Node.js](https://nodejs.org/).
-
-- **Git**: Make sure you have Git installed. [Download Git](https://git-scm.com/).
-
-- **GitHub Account**: You'll need a GitHub account to make contributions.
+Read the [prerequisites](https://github.com/renovatebot/renovate/blob/main/docs/development/local-development.md#prerequisites) section of the local development docs.
 
 ### Setting up the development environment
 
