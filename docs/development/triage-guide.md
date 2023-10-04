@@ -14,8 +14,8 @@ Take the following steps on an incoming bug report:
 
 1. Determine if this is a valid bug report at all, close and optionally delete obvious spam.
 1. If poster is asking a configuration question, or has not made a convincing case that it's really a bug, then convert to a "Ask a question" discussion, add either a response or at least a note that it's been converted.
-1. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
 1. Determine if this is a duplicate of an open issue/discussion, if duplicate: link to earlier issue/discussion, apply `duplicate` label and close the issue/discussion.
+1. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
 1. Check if the _relevant_ logs are provided. If not apply the `auto:logs` label.
 
 ### Triaging feature requests workflow
@@ -24,8 +24,8 @@ Take the following steps on an incoming feature request:
 
 1. Determine if this is a valid feature request at all, close and optionally delete obvious spam.
 1. If poster is asking a configuration question, or has not made a convincing case that it's really a feature request, then convert to a "Ask a question" discussion, add either a response or at least a note that it's been converted.
-1. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
 1. Determine if this is a duplicate of an open issue, if duplicate: link to earlier issue/discussion, apply `duplicate` label and close the issue/discussion.
+1. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
 1. Make a best-effort judgement if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
 
 ## Creating new issues from discussions
@@ -97,17 +97,17 @@ You can assign whoever makes sense.
 
 ### Mark duplicate issues and pull requests
 
-If you see an issue that's an obvious duplicate:
+If you see an issue/discussion that's an obvious duplicate:
 
 1. Attach a `duplicate` label
 1. Use the "Duplicate of" functionality [GitHub docs, about duplicate issues and pull requests](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/about-duplicate-issues-and-pull-requests)
-1. Close the issue
+1. Close the issue/discussion
 
 Follow the same workflow to mark duplicate PRs.
 
 ### Request PR reviews
 
-You can request a review from one of the maintainers, if needed, to get the PR review process rolling again.
+You can request a review from one of the maintainers, if needed, to get the PR review process rolling (again).
 
 ### Lock and unlock discussions
 
