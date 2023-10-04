@@ -81,8 +81,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0
       '@types/ms':
-        specifier: 0.7.31
-        version: 0.7.31
+        specifier: 0.7.32
+        version: 0.7.32
       '@types/tmp':
         specifier: 0.2.4
         version: 0.2.4
@@ -3970,8 +3970,8 @@ packages:
     resolution: {integrity: sha512-Q60hZhulhl2Ox4LjbJvhH+HzsKrwzLPjEB8dZw0fK1MH2HyOLe6LDou68yTfsWasxGv7DPZe5VNM5vgpzOa2nw==}
     dev: true
 
-  /@types/ms@0.7.31:
-    resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
+  /@types/ms@0.7.32:
+    resolution: {integrity: sha512-xPSg0jm4mqgEkNhowKgZFBNtwoEwF6gJ4Dhww+GFpm3IgtNseHQZ5IqdNwnquZEoANxyDAKDRAdVo4Z72VvD/g==}
     dev: false
 
   /@types/nock@10.0.3:
