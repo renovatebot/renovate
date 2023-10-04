@@ -2,6 +2,7 @@ export interface VersionDetailResponse {
   name: string;
   version: string;
   builds: TerraformBuild[];
+  shasums: string;
 }
 
 export interface TerraformBuild {
@@ -57,4 +58,13 @@ export interface TerraformRegistryBuildResponse {
   arch: string;
   filename: string;
   download_url: string;
+}
+
+/**
+ * API Docs https://developer.hashicorp.com/terraform/registry/api-docs (only for registry.terraform.io)
+ */
+export interface TerraformCloudRegistryProviderVersion {
+  source: string;
+  name: string;
+  tag: string;
 }

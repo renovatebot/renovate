@@ -90,7 +90,9 @@ export class TerraformProviderHash {
     }
   }
 
-  static async calculateHashes(builds: TerraformBuild[]): Promise<string[]> {
+  static async calculateHashScheme1Hashes(
+    builds: TerraformBuild[]
+  ): Promise<string[]> {
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
@@ -112,9 +114,21 @@ export class TerraformProviderHash {
     if (!builds) {
       return null;
     }
-    const hashes = await TerraformProviderHash.calculateHashes(builds);
+    const zhHashes =
+      await TerraformProviderHash.terraformDatasource.getZipHashes(
+        registryURL,
+        repository,
+        version
+      );
+    const h1Hashes = await TerraformProviderHash.calculateHashScheme1Hashes(
+      builds
+    );
+
+    const hashes = [];
+    hashes.push(...h1Hashes.map((hash) => `h1:${hash}`));
+    hashes.push(...zhHashes.map((hash) => `zh:${hash}`));
 
     // sorting the hash alphabetically as terraform does this as well
-    return hashes.sort().map((hash) => `h1:${hash}`);
+    return hashes.sort();
   }
 }

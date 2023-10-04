@@ -13,6 +13,7 @@ import { createSDBackendURL } from '../terraform-module/utils';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   TerraformBuild,
+  TerraformCloudRegistryProviderVersion,
   TerraformProvider,
   TerraformProviderReleaseBackend,
   TerraformProviderVersions,
@@ -280,6 +281,120 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
     const filteredResult = result.filter(is.truthy);
     return filteredResult.length === result.length ? filteredResult : null;
+  }
+
+  @cache({
+    namespace: `datasource-${TerraformProviderDatasource.id}-zip-hashes`,
+    key: (registryURL: string, repository: string, version: string) =>
+      `${registryURL}/${repository}/${version}`,
+  })
+  async getZipHashes(
+    registryURL: string,
+    repository: string,
+    version: string
+  ): Promise<string[]> {
+    let zipHashUrl: string | null = null;
+    if (registryURL === TerraformProviderDatasource.defaultRegistryUrls[1]) {
+      // On releases.hashicorp.com, the data is built into the version information
+
+      const repositoryRegexResult =
+        TerraformProviderDatasource.repositoryRegex.exec(repository)?.groups;
+      if (!repositoryRegexResult) {
+        logger.trace(
+          `Stopping fetch attempt of zip hashes for non-hashicorp provider on ${registryURL} as they are not supported`
+        );
+        return [];
+      }
+      const packageName = repositoryRegexResult.packageName;
+      const backendLookUpName = `terraform-provider-${packageName}`;
+      let versionReleaseBackend: VersionDetailResponse;
+      try {
+        versionReleaseBackend = await this.getReleaseBackendIndex(
+          backendLookUpName,
+          version
+        );
+      } catch (err) {
+        /* istanbul ignore next */
+        if (err instanceof ExternalHostError) {
+          throw err;
+        }
+        logger.debug(
+          { err, backendLookUpName, version },
+          `Failed to retrieve release manifest for ${backendLookUpName} ${version}`
+        );
+        return [];
+      }
+
+      zipHashUrl = `${registryURL}/${backendLookUpName}/${version}/${versionReleaseBackend.shasums}`;
+    } else {
+      // On registries other than releases.hashicorp.com, the data needs to be fetched from the underlying repository
+      const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+        registryURL
+      );
+      if (!serviceDiscovery) {
+        logger.trace(
+          `Failed to retrieve service discovery from ${registryURL}`
+        );
+        return [];
+      }
+      const backendURL = createSDBackendURL(
+        registryURL,
+        'providers.v1',
+        serviceDiscovery,
+        repository
+      );
+      let versionResponse;
+      try {
+        versionResponse = (
+          await this.http.getJson<TerraformCloudRegistryProviderVersion>(
+            `${backendURL}/${version}`
+          )
+        ).body;
+      } catch (err) {
+        /* istanbul ignore next */
+        if (err instanceof ExternalHostError) {
+          throw err;
+        }
+
+        return [];
+      }
+      if (!versionResponse.tag) {
+        logger.trace(
+          `Failed to retrieve version information for ${backendURL}/${version}`
+        );
+        return [];
+      }
+
+      if (!versionResponse.source.startsWith('https://github.com/')) {
+        logger.trace(
+          `Refusing to fetch hash information from non-github source ${versionResponse.source}`
+        );
+        return [];
+      }
+
+      zipHashUrl = `${versionResponse.source}/releases/download/${versionResponse.tag}/terraform-provider-${versionResponse.name}_${version}_SHA256SUMS`;
+    }
+
+    // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
+    let rawHashData;
+    try {
+      rawHashData = (await this.http.get(zipHashUrl)).body;
+    } catch (err) {
+      /* istanbul ignore next */
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      logger.debug(
+        { err, zipHashUrl },
+        `Failed to retrieve zip hashes from ${zipHashUrl}`
+      );
+      return [];
+    }
+
+    return rawHashData
+      .trimEnd()
+      .split('\n')
+      .map((line) => line.split(/\s/)[0]);
   }
 
   @cache({
