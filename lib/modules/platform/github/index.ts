@@ -206,7 +206,7 @@ export async function initPlatform({
   };
   if (platformResult.endpoint === 'https://api.github.com/') {
     logger.debug('Adding GitHub token as GHCR password');
-    platformResult.additionalHostRules = [
+    platformResult.hostRules = [
       {
         matchHost: 'ghcr.io',
         hostType: 'docker',

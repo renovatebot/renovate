@@ -29,7 +29,9 @@ exports[`modules/platform/github/index initPlatform() should support custom endp
 
 exports[`modules/platform/github/index initPlatform() should support default endpoint no email access 1`] = `
 {
-  "additionalHostRules": [
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
+  "hostRules": [
     {
       "hostType": "docker",
       "matchHost": "ghcr.io",
@@ -37,8 +39,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "username": "USERNAME",
     },
   ],
-  "endpoint": "https://api.github.com/",
-  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -46,7 +46,9 @@ exports[`modules/platform/github/index initPlatform() should support default end
 
 exports[`modules/platform/github/index initPlatform() should support default endpoint no email result 1`] = `
 {
-  "additionalHostRules": [
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": undefined,
+  "hostRules": [
     {
       "hostType": "docker",
       "matchHost": "ghcr.io",
@@ -54,8 +56,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "username": "USERNAME",
     },
   ],
-  "endpoint": "https://api.github.com/",
-  "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -63,7 +63,9 @@ exports[`modules/platform/github/index initPlatform() should support default end
 
 exports[`modules/platform/github/index initPlatform() should support default endpoint with email 1`] = `
 {
-  "additionalHostRules": [
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": "undefined <user@domain.com>",
+  "hostRules": [
     {
       "hostType": "docker",
       "matchHost": "ghcr.io",
@@ -71,8 +73,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "username": "USERNAME",
     },
   ],
-  "endpoint": "https://api.github.com/",
-  "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -80,7 +80,9 @@ exports[`modules/platform/github/index initPlatform() should support default end
 
 exports[`modules/platform/github/index initPlatform() should support gitAuthor and username 1`] = `
 {
-  "additionalHostRules": [
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": "renovate@whitesourcesoftware.com",
+  "hostRules": [
     {
       "hostType": "docker",
       "matchHost": "ghcr.io",
@@ -88,8 +90,6 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
       "username": "USERNAME",
     },
   ],
-  "endpoint": "https://api.github.com/",
-  "gitAuthor": "renovate@whitesourcesoftware.com",
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }

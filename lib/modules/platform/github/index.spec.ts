@@ -175,7 +175,9 @@ describe('modules/platform/github/index', () => {
       expect(
         await github.initPlatform({ token: 'x-access-token:ghs_123test' })
       ).toEqual({
-        additionalHostRules: [
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        hostRules: [
           {
             hostType: 'docker',
             matchHost: 'ghcr.io',
@@ -183,13 +185,13 @@ describe('modules/platform/github/index', () => {
             username: 'USERNAME',
           },
         ],
-        endpoint: 'https://api.github.com/',
-        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
       expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
-        additionalHostRules: [
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        hostRules: [
           {
             hostType: 'docker',
             matchHost: 'ghcr.io',
@@ -197,8 +199,6 @@ describe('modules/platform/github/index', () => {
             username: 'USERNAME',
           },
         ],
-        endpoint: 'https://api.github.com/',
-        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });

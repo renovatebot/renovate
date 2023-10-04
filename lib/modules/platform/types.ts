@@ -23,7 +23,7 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
-  additionalHostRules?: [HostRule];
+  hostRules?: [HostRule];
 }
 
 export interface RepoResult {
