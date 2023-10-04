@@ -34,7 +34,7 @@ Most issues should have a label relating to either a platform, manager, datasour
 
     status:requirements
     status:blocked
-    status:ready
+    status:ready // Before removing this, edit the query below
     status:in-progress
 
 </details>
@@ -59,6 +59,7 @@ Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
 
+// Update the query below too!
 Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can find any which are missing one.
 
 Add the `breaking` label for Issues or PRs which have changes that are not backwards compatible and require a major version bump.

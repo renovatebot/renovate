@@ -105,6 +105,8 @@ Ideally warn the user with an `auto:bad-vibes` label first, and then use `auto:d
 
 ### Moving issues from `status:requirements` to `status:ready`
 
+// Figure out what to do with this section.
+
 One of the most important non-code contributions people can do is help features and fixes go from `status:requirements` to `status:ready`.
 We use the label `status:requirements` to mean "more information or research is needed before someone could start coding this".
 
