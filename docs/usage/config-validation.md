@@ -49,21 +49,21 @@ $ renovate-config-validator first_config.jsonn
 You can create a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
 Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
 
-### Reconfigure Renovate Config
+### Let Renovate check your config file as you're writing it
 
-To enable validation of your Renovate configuration changes, follow these steps:
+After using Renovate for a while you likely want to change Renovate's config.
+Renovate can check your new config as you're writing it, but you must put your work in a branch with a _special_ name.
 
-1. Ensure that the branch name includes the prefix `{{branchPrefix}}reconfigure`.
-   For example, if you're using the default prefix `renovate/`, your branch name should be `renovate/reconfigure`.
+Follow these steps:
 
-2. During each Renovate run, the bot searches for a branch with the reconfigure pattern and validates the associated configuration file.
+1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern.
+   For example, if you're using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
 
-3. Renovate does not assume that the config file has the same name as the default branch.
-   You can also modify the config file name if needed.
+2. Each time Renovate runs, it searches for a branch that matches the reconfigure pattern and validates the Renovate configuration file.
 
-4. If the configuration validation passes, Renovate adds a successful status check to the branch.
-   In the event of validation failure, a failing status check is added.
+3. Renovate will check the config file on the reconfigure branch, even if it has a different name, compared to the config file on the default branch.
+   So feel free to change the Renovate config file name.
 
-5. Additionally, if there is an open pull request with the same branch, Renovate will post a comment on the PR listing all the validation errors for your reference.
+4. Depending on the outcome of the Renovate config validation run, Renovate will add a passing or failing check to the branch.
 
-These steps ensure that your Renovate configuration changes are validated effectively, helping you maintain a reliable and error-free setup.
+5. If there's an open pull request from the _reconfigure_ branch then Renovate will comment in that PR and list all the validation errors. Commit and push your fixes to the branch, and try again. When the config validation passes, you can merge your Renovate config.
