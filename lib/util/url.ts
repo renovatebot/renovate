@@ -85,8 +85,11 @@ export function getQueryString(params: Record<string, any>): string {
   return usp.toString();
 }
 
-export function validateUrl(url?: string, httpOnly = true): boolean {
-  if (!url) {
+export function validateUrl(
+  url: string | null | undefined,
+  httpOnly = true
+): boolean {
+  if (!is.nonEmptyString(url)) {
     return false;
   }
   try {
