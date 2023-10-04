@@ -1,5 +1,5 @@
 import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, VulnerabilityAlert } from '../../types';
+import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
@@ -23,6 +23,7 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
+  additionalHostRules?: [HostRule];
 }
 
 export interface RepoResult {
