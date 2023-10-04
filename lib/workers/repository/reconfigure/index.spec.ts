@@ -67,7 +67,6 @@ describe('workers/repository/reconfigure/index', () => {
     );
   });
 
-
   it('handles failed validation', async () => {
     scm.getFileList.mockResolvedValueOnce(['renovate.json']);
     fs.readLocalFile.mockResolvedValueOnce(`
