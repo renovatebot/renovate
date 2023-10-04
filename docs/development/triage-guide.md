@@ -2,7 +2,7 @@
 
 ## What is triage?
 
-Triage is basically filtering the issues/discussions, and categorizing them with the proper labels.
+Triage means filtering the issues/discussions, and categorizing them with the proper labels.
 
 ## Triage workflows
 
