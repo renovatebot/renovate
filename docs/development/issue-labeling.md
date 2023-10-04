@@ -171,11 +171,15 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     good first issue
     help wanted
     auto:bad-vibes
+    auto:discussion-closed
+    auto:discussion-first
+    auto:format-code
     auto:logs
-    auto:needs-code-formatting
     auto:needs-details
     auto:no-coverage-ignore
+    auto:no-done-comments
     auto:reproduction
+    auto:retry-latest
 
 </details>
 
