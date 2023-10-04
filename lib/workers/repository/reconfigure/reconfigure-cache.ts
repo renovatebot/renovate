@@ -13,9 +13,9 @@ export function setReconfigureBranchCache(
     isConfigValid,
   };
   if (cache.reconfigureBranchCache) {
-    logger.debug({ reconfigureBranchCache }, 'Update Reconfigure Branch Cache');
+    logger.debug({ reconfigureBranchCache }, 'Update reconfigure branch cache');
   } else {
-    logger.debug({ reconfigureBranchCache }, 'Create Reconfigure Branch Cache');
+    logger.debug({ reconfigureBranchCache }, 'Create reconfigure branch cache');
   }
   cache.reconfigureBranchCache = reconfigureBranchCache;
 }
@@ -24,7 +24,7 @@ export function deleteReconfigureBranchCache(): void {
   const cache = getCache();
 
   if (cache?.reconfigureBranchCache) {
-    logger.debug('Delete Reconfigure Branch Cache');
+    logger.debug('Delete reconfigure branch cache');
     delete cache.reconfigureBranchCache;
   }
 }

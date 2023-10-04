@@ -40,7 +40,7 @@ describe('workers/repository/reconfigure/index', () => {
     expect(logger.debug).toHaveBeenCalledWith('No reconfigure branch found');
   });
 
-  it('throws error if config file not found', async () => {
+  it('throws error if config file not found in reconfigure branch', async () => {
     await validateReconfigureBranch(config);
     expect(logger.warn).toHaveBeenCalledWith(
       'No config file found in reconfigure branch'
@@ -67,8 +67,6 @@ describe('workers/repository/reconfigure/index', () => {
     );
   });
 
-  // handles .json5
-  // handles package.json
 
   it('handles failed validation', async () => {
     scm.getFileList.mockResolvedValueOnce(['renovate.json']);

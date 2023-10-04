@@ -34,14 +34,14 @@ export async function validateReconfigureBranch(
   }
 
   // look for config file
-  // 1. check reconfigure branch cache and use the conifgFileName if it exists
-  // 2. checkout reconfigure branch and look for the config file, don't assume default config fileName
+  // 1. check reconfigure branch cache and use the configFileName if it exists
+  // 2. checkout reconfigure branch and look for the config file, don't assume default configFileName
   const branchSha = getBranchCommit(branchName);
   const cache = getCache();
   let configFileName: string | null = null;
   const reconfigureCache = cache.reconfigureBranchCache;
 
-  // only use cached information if it is valid
+  // only use valid cached information
   if (reconfigureCache?.reconfigureBranchSha === branchSha) {
     logger.debug('Cache is valid. Skipping validation check');
     return;
