@@ -115,7 +115,9 @@ Keep in mind that an issue can be both affecting a platform and a self-hosted in
     core:dashboard
     core:git
     core:onboarding
+    core:package-rules
     core:schedule
+    core:vulnerabilities
 
 </details>
 
