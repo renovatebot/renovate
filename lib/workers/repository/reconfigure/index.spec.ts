@@ -127,7 +127,6 @@ describe('workers/repository/reconfigure/index', () => {
     cache.getCache.mockReturnValueOnce({
       reconfigureBranchCache: {
         reconfigureBranchSha: 'sha',
-        configFileName: null,
         isConfigValid: false,
       },
     });

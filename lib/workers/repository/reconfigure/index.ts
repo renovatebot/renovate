@@ -66,7 +66,7 @@ export async function validateReconfigureBranch(
       description: 'Validation Failed - No config file found',
       state: 'red',
     });
-    setReconfigureBranchCache(branchSha!, configFileName, false);
+    setReconfigureBranchCache(branchSha!, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -87,7 +87,7 @@ export async function validateReconfigureBranch(
       description: 'Validation Failed - Empty/Invalid config file',
       state: 'red',
     });
-    setReconfigureBranchCache(branchSha!, configFileName, false);
+    setReconfigureBranchCache(branchSha!, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -140,7 +140,7 @@ export async function validateReconfigureBranch(
       description: 'Validation Failed',
       state: 'red',
     });
-    setReconfigureBranchCache(branchSha!, configFileName, false);
+    setReconfigureBranchCache(branchSha!, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -152,7 +152,7 @@ export async function validateReconfigureBranch(
     description: 'Validation Successful',
     state: 'green',
   });
-  setReconfigureBranchCache(branchSha!, configFileName, true);
 
+  setReconfigureBranchCache(branchSha!, true);
   await scm.checkoutBranch(config.baseBranch!);
 }
