@@ -98,7 +98,8 @@ describe('util/url', () => {
   });
 
   it('validates URLs', () => {
-    expect(validateUrl()).toBeFalse();
+    expect(validateUrl(undefined)).toBeFalse();
+    expect(validateUrl('')).toBeFalse();
     expect(validateUrl(null as never)).toBeFalse();
     expect(validateUrl('foo')).toBeFalse();
     expect(validateUrl('ssh://github.com')).toBeFalse();
