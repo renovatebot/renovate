@@ -25,10 +25,25 @@ describe('workers/repository/reconfigure/reconfigure-cache', () => {
       });
     });
 
+    it('sets cache with null configFileName', () => {
+      const dummyCache = {} satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      setReconfigureBranchCache('reconfigure-sha', null, false);
+      expect(dummyCache).toEqual({
+        reconfigureBranchCache: {
+          reconfigureBranchSha: 'reconfigure-sha',
+          configFileName: null,
+          isConfigValid: false,
+        },
+      });
+    });
+
     it('updates old cache', () => {
       const dummyCache = {
         reconfigureBranchCache: {
           reconfigureBranchSha: 'reconfigure-sha',
+          configFileName: 'renovate.json',
+          isConfigValid: false,
         },
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValue(dummyCache);

@@ -121,7 +121,7 @@ describe('workers/repository/reconfigure/index', () => {
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',
       context: 'renovate/config-validation',
-      description: 'Validation Successfull',
+      description: 'Validation Successful',
       state: 'green',
     });
   });
@@ -130,6 +130,8 @@ describe('workers/repository/reconfigure/index', () => {
     cache.getCache.mockReturnValueOnce({
       reconfigureBranchCache: {
         reconfigureBranchSha: 'sha',
+        configFileName: null,
+        isConfigValid: false,
       },
     });
     await validateReconfigureBranch(config);
@@ -150,7 +152,7 @@ describe('workers/repository/reconfigure/index', () => {
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',
       context: 'renovate/config-validation',
-      description: 'Validation Successfull',
+      description: 'Validation Successful',
       state: 'green',
     });
   });

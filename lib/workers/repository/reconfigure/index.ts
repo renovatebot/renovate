@@ -66,6 +66,7 @@ export async function validateReconfigureBranch(
       description: 'Validation Failed - No config file found',
       state: 'red',
     });
+    setReconfigureBranchCache(branchSha!, configFileName, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -114,8 +115,7 @@ export async function validateReconfigureBranch(
 
   // failing check
   if (validationResult.errors.length > 0) {
-    // add code to post a PR comment after checking pr exists
-
+    // add comment to reconfigure PR if it exists
     const branchPr = await platform.getBranchPr(branchName, config.baseBranch);
     if (branchPr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
@@ -131,7 +131,7 @@ export async function validateReconfigureBranch(
         content: body,
       });
     }
-    // log the erros in all cases too
+    // log the errors
     logger.debug(
       { errors: validationResult.errors.join(', ') },
       'Validation Errors'
@@ -151,7 +151,7 @@ export async function validateReconfigureBranch(
   await platform.setBranchStatus({
     branchName,
     context,
-    description: 'Validation Successfull',
+    description: 'Validation Successful',
     state: 'green',
   });
   setReconfigureBranchCache(branchSha!, configFileName, true);
