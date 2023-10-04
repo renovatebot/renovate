@@ -1,6 +1,8 @@
 # Contributing to Renovate
 
-Thank you for considering contributing to our Renovate App. Your help is greatly appreciated! This guide will help you get started and ensure that your contributions are effective.
+Thank you for considering contributing to Renovate.
+We appreciate your help!
+Read this guide to get started, and to make sure your contributions are effective.
 
 ## Getting Started
 
