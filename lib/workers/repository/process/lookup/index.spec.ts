@@ -1257,7 +1257,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0]).toEqual({
         message:
-          'Could not determine new digest for update (datasource: github-tags)',
+          'Could not determine new digest for update (github-tags package angular/angular)',
         topic: 'angular/angular',
       });
     });
