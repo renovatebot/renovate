@@ -12,23 +12,7 @@ Read the [prerequisites](https://github.com/renovatebot/renovate/blob/main/docs/
 
 ### Setting up the development environment
 
-1. **Fork the Repository**: Click the "Fork" button on the top right of the GitHub repository page. This creates a copy of the repository in your GitHub account.
-
-2. **Clone Your Fork**: Clone the forked repository to your local machine:
-
-   ```bash
-   git clone https://github.com/your-username/renovate.git
-
-3. **Navigate to the Project Directory**:
-   ```bash
-   cd renovate
-
-4. **Install Dependencies: Install the project dependencies:**
-   ```bash
-   pnpm install
-
-5. **Start the Local Development Server:**
-   tO setup your local workstation correctly read [docs/development/local-development.md](../docs/development/local-development.md).
+Read the [Fork and Clone section](https://github.com/renovatebot/renovate/blob/main/docs/development/local-development.md#fork-and-clone) of the local development docs.
 
 ## Submitting Changes
 
