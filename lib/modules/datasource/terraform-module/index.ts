@@ -162,7 +162,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     };
 
     // Add the source URL if given
-    if (res.modules[0].source && validateUrl(res.modules[0].source)) {
+    if (validateUrl(res.modules[0].source)) {
       dep.sourceUrl = res.modules[0].source;
     }
 
