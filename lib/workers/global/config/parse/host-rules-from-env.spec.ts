@@ -74,6 +74,19 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     ]);
   });
 
+  it('make sure {{PLATFORM}}_TOKEN will not be picked up', () => {
+    const unsupportedEnv = ['BITBUCKET_TOKEN', 'GITHUB_TOKEN', 'GITLAB_TOKEN'];
+
+    getPlatformList.mockReturnValue(['github', 'bitbucket', 'gitlab']);
+
+    for (const e of unsupportedEnv) {
+      const envParam: NodeJS.ProcessEnv = {
+        [e]: 'private-key',
+      };
+      expect(hostRulesFromEnv(envParam)).toMatchObject([]);
+    }
+  });
+
   it('supports datasource env token', () => {
     const envParam: NodeJS.ProcessEnv = {
       PYPI_TOKEN: 'some-token',

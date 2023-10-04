@@ -49,7 +49,10 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
     const hostType = splitEnv.shift()!;
-    if (datasources.has(hostType) || platforms.has(hostType)) {
+    if (
+      datasources.has(hostType) ||
+      (platforms.has(hostType) && splitEnv.length > 1)
+    ) {
       let suffix = splitEnv.pop()!;
       if (isAuthField(suffix) || isHttpsAuthField(suffix)) {
         if (isHttpsAuthField(suffix)) {
