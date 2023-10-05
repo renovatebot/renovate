@@ -71,6 +71,17 @@ exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() shoul
 ]
 `;
 
+exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should return any previous version if current version is non-existent 1`] = `
+[
+  {
+    "version": "1.0.1",
+  },
+  {
+    "version": "1.1.0",
+  },
+]
+`;
+
 exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should valueToVersion 1`] = `
 [
   {

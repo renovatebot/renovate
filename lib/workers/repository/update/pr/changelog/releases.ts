@@ -66,6 +66,7 @@ export async function getInRangeReleases(
       const anyPreviousValidRelease = pkgReleases.filter(
         (release) => !version.isGreaterThan(release.version, newVersion)
       )[0];
+      //  TODO: how do we sort these
       if (
         anyPreviousValidRelease &&
         anyPreviousValidRelease.version !== newRelease.version

@@ -102,5 +102,18 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });
+
+    it('should return any previous version if current version is non-existent', async () => {
+      const config = partial<BranchUpgradeConfig>({
+        datasource: 'some-datasource',
+        packageName: 'some-depname',
+        versioning: npmVersioning.id,
+        currentVersion: '1.0.2',
+        newVersion: '1.1.0',
+      });
+      const res = await releases.getInRangeReleases(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
+    });
   });
 });
