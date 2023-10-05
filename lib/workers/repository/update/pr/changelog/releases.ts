@@ -57,6 +57,23 @@ export async function getInRangeReleases(
           matchesUnstable(version, currentVersion, release.version) ||
           matchesUnstable(version, newVersion, release.version)
       );
+
+    // if there is only 1 release it can be one of two things
+    // either there is only 1 release OR the pinned version actually doesn't exist
+    // i.e pinning to 1.2.3 but only 1.2.4, 1.2.2 exists
+    if (releases.length === 1) {
+      const newRelease = releases[0];
+      const anyPreviousValidRelease = pkgReleases.filter(
+        (release) => !version.isGreaterThan(release.version, newVersion)
+      )[0];
+      if (
+        anyPreviousValidRelease &&
+        anyPreviousValidRelease.version !== newRelease.version
+      ) {
+        releases.unshift(anyPreviousValidRelease);
+      }
+    }
+
     if (version.valueToVersion) {
       for (const release of coerceArray(releases)) {
         release.version = version.valueToVersion(release.version);
