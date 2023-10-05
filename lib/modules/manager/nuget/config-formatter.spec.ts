@@ -1,4 +1,3 @@
-import { execUtils } from '@yarnpkg/core';
 import { mockDeep } from 'jest-mock-extended';
 import { XmlDocument } from 'xmldoc';
 import { mocked } from '../../../../test/util';
