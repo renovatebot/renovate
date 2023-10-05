@@ -1,7 +1,9 @@
-import { hash, toSha256 } from './hash';
+import * as crypto from 'crypto';
+import { Readable } from 'stream';
+import { hash, hashStream, toSha256 } from './hash';
 
 describe('util/hash', () => {
-  test('should hash data with sha256', () => {
+  it('hashes data with sha256', () => {
     expect(hash('https://example.com/test.txt', 'sha256')).toBe(
       'd1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020'
     );
@@ -10,9 +12,48 @@ describe('util/hash', () => {
     );
   });
 
-  test('should hash data with sha512', () => {
+  it('hashes data with sha512', () => {
     expect(hash('https://example.com/test.txt')).toBe(
       '368b1e723aecb5d17e0a69d046f8a7b9eb4e2aa2ee78e307d563c57cde45b8c3755990411aa2626c13214a8d571e0478fa9a19d03e295bb28bc453a88206b484'
     );
   });
+
+  it('correctly hashes the content of a readable stream', async () => {
+    const content = 'This is some test content.';
+    const expectedHash = crypto
+      .createHash('sha256')
+      .update(content)
+      .digest('hex');
+
+    // Create a readable stream from the content
+    const readableStream = new Readable();
+    readableStream.push(content);
+    readableStream.push(null);
+
+    const actualHash = await hashStream(readableStream, 'sha256');
+
+    expect(actualHash).toBe(expectedHash);
+  });
+
+  // Need help: this fails with the following msg
+  //     Node.js v18.13.0
+  // C:\Users\LENOVO\Desktop\Whitesource\renovate\lib\util\hash.spec.ts:37
+  //             const error = new Error('Stream error');
+  //                           ^
+
+  // Error: Stream error
+  // Is this what we should expect, the same happends with hasha.fromStream as well
+
+  // it('handles errors', async () => {
+  //   // Create a readable stream with an error
+  //   const readableStreamWithError = new Readable();
+  //   const error = new Error('Stream error');
+  //   readableStreamWithError._read = () => {
+  //     readableStreamWithError.emit('error', error);
+  //   };
+
+  //   expect(
+  //     async () => await hashStream(readableStreamWithError, 'sha256')
+  //   ).toThrow();
+  // });
 });
