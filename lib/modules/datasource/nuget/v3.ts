@@ -35,10 +35,10 @@ export async function getResourceUrl(
   if (cachedResult) {
     return cachedResult;
   }
-
+  let servicesIndexRaw: ServicesIndexRaw | undefined;
   try {
     const responseCacheKey = url;
-    let servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
+    servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
       cacheNamespace,
       responseCacheKey
     );
@@ -91,7 +91,7 @@ export async function getResourceUrl(
     }
     logger.debug(
       { err, url },
-      `nuget registry failure: can't get ${resourceType}`
+      `nuget registry failure: can't get ${resourceType} of servicesIndexRaw ${servicesIndexRaw}`
     );
     return null;
   }
