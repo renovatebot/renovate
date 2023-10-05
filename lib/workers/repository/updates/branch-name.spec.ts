@@ -159,7 +159,7 @@ describe('workers/repository/updates/branch-name', () => {
         isPatch: true,
         newMinor: 17,
         branchTopic:
-          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{else}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}{{/if}}',
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
         depName: 'dep',
         group: {},
       };
