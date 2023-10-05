@@ -1,14 +1,10 @@
-import { quote } from 'shlex';
 import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { findUpLocal, readLocalFile } from '../../../util/fs';
-import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import { NugetDatasource, defaultRegistryUrls } from '../../datasource/nuget';
-import { parseRegistryUrl } from '../../datasource/nuget/common';
-import type { ParsedRegistryUrl } from '../../datasource/nuget/types';
-import type { PackageSourceCredential, Registry } from './types';
+import { defaultRegistryUrls } from '../../datasource/nuget';
+import type { Registry } from './types';
 
 export async function readFileAsXmlDocument(
   file: string
@@ -33,14 +29,14 @@ export function getDefaultRegistries(): Registry[] {
 }
 
 export async function getConfiguredRegistries(
-  packageFile: string
+  packageFileName: string
 ): Promise<Registry[] | undefined> {
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
   const nuGetConfigPath = await findUpLocal(
     nuGetConfigFileNames,
-    upath.dirname(packageFile)
+    upath.dirname(packageFileName)
   );
   if (!nuGetConfigPath) {
     return undefined;
@@ -48,6 +44,7 @@ export async function getConfiguredRegistries(
 
   logger.debug(`Found NuGet.config at ${nuGetConfigPath}`);
   const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
+
   if (!nuGetConfig) {
     return undefined;
   }
@@ -56,6 +53,8 @@ export async function getConfiguredRegistries(
   if (!packageSources) {
     return undefined;
   }
+
+  const packageSourceMapping = nuGetConfig.childNamed('packageSourceMapping');
 
   const registries = getDefaultRegistries();
   for (const child of packageSources.children) {
@@ -70,10 +69,15 @@ export async function getConfiguredRegistries(
           if (child.attr.protocolVersion) {
             registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
           }
+          const sourceMappedPackagePatterns = packageSourceMapping
+            ?.childWithAttribute('key', child.attr.key)
+            ?.childrenNamed('package')
+            .map((packagePattern) => packagePattern.attr['pattern']);
           logger.debug(`Adding registry URL ${registryUrl}`);
           registries.push({
             name: child.attr.key,
             url: registryUrl,
+            sourceMappedPackagePatterns,
           });
         } else {
           logger.debug(
@@ -97,101 +101,4 @@ export function findVersion(parsedXml: XmlDocument): XmlElement | null {
     }
   }
   return null;
-}
-
-export async function formatNuGetConfigXmlContents(
-  packageFileName: string
-): Promise<string> {
-  let contents = `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n<packageSources>\n`;
-
-  const registries =
-    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
-
-  let unnamedRegistryCount = 0;
-
-  const credentials: PackageSourceCredential[] = [];
-
-  for (const registry of registries) {
-    const registryName =
-      registry.name ?? `Package source ${++unnamedRegistryCount}`;
-    const registryInfo = parseRegistryUrl(registry.url);
-
-    contents += formatPackageSourceElement(registryInfo, registryName);
-
-    const { password, username } = hostRules.find({
-      hostType: NugetDatasource.id,
-      url: registry.url,
-    });
-
-    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-    if (password || username) {
-      const credential: PackageSourceCredential = {
-        name: registryName,
-        password,
-        username,
-      };
-      credentials.push(credential);
-    }
-  }
-
-  contents += '</packageSources>\n';
-
-  if (credentials.length > 0) {
-    contents += '<packageSourceCredentials>\n';
-
-    for (const credential of credentials) {
-      contents += formatPackageSourceCredentialElement(credential);
-    }
-
-    contents += '</packageSourceCredentials>\n';
-  }
-
-  contents += '</configuration>\n';
-
-  return contents;
-}
-
-function formatPackageSourceElement(
-  registryInfo: ParsedRegistryUrl,
-  name: string
-): string {
-  let element = `<add key=${quote(name)} value=${quote(registryInfo.feedUrl)} `;
-
-  if (registryInfo.protocolVersion) {
-    element += `protocolVersion=${quote(
-      registryInfo.protocolVersion.toString()
-    )} `;
-  }
-
-  return (element += '/>\n');
-}
-
-const escapeXmlElementNameRegExp = regEx(/(?!(\d|\w|-|\.))./g);
-function formatPackageSourceCredentialElement(
-  credential: PackageSourceCredential
-): string {
-  const escapedName = credential.name.replace(
-    escapeXmlElementNameRegExp,
-    function (match) {
-      return '__x' + match.charCodeAt(0) + '__';
-    }
-  );
-
-  let packageSourceCredential = `<${escapedName}>\n`;
-
-  if (credential.username) {
-    packageSourceCredential += `<add key="Username" value=${quote(
-      credential.username
-    )} />\n`;
-  }
-
-  if (credential.password) {
-    packageSourceCredential += `<add key="ClearTextPassword" value=${quote(
-      credential.password
-    )} />\n`;
-  }
-
-  packageSourceCredential += `</${escapedName}>\n`;
-
-  return packageSourceCredential;
 }

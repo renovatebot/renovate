@@ -19,23 +19,28 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { createNuGetConfigXml } from './config-formatter';
 import {
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
 } from './package-tree';
-import { formatNuGetConfigXmlContents } from './util';
+import { getConfiguredRegistries, getDefaultRegistries } from './util';
 
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string
 ): Promise<string> {
-  const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
-  await ensureDir(nugetCacheDir);
-  const contents = await formatNuGetConfigXmlContents(packageFileName);
-  await outputCacheFile(nugetConfigFile, contents);
+  const registries =
+    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  return nugetConfigFile;
+  const contents = createNuGetConfigXml(registries);
+
+  const cachedNugetConfigFile = join(nugetCacheDir, `nuget.config`);
+  await ensureDir(nugetCacheDir);
+  await outputCacheFile(cachedNugetConfigFile, contents);
+
+  return cachedNugetConfigFile;
 }
 
 async function runDotnetRestore(
