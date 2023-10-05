@@ -119,17 +119,14 @@ function getPatch(version: string): null | number {
 // comparison
 
 function equals(version: string, other: string): boolean {
-  const ver = getVersionByCodename(version);
-  const otherVer = getVersionByCodename(other);
-
-  if (isDatedCodeName(version)) {
-    const verImage = getDatedContainerImageVersion(version);
-    const otherImageVer = getDatedContainerImageVersion(other);
-    if (verImage !== otherImageVer) {
-      return false;
-    }
+  const verImage = getDatedContainerImageVersion(version);
+  const otherImageVer = getDatedContainerImageVersion(other);
+  if (verImage !== otherImageVer) {
+    return false;
   }
 
+  const ver = getVersionByCodename(version);
+  const otherVer = getVersionByCodename(other);
   return isVersion(ver) && isVersion(otherVer) && ver === otherVer;
 }
 

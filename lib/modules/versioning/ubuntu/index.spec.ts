@@ -282,7 +282,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'focal'}          | ${'20.04'}          | ${true}
     ${'20.04'}          | ${'focal'}          | ${true}
     ${'19.10'}          | ${'19.10'}          | ${true}
-    ${'jammy'}          | ${'jammy-20230816'} | ${true}
+    ${'jammy'}          | ${'jammy-20230816'} | ${false}
     ${'jammy-20230816'} | ${'jammy-20230816'} | ${true}
     ${'jammy-20230716'} | ${'jammy-20230816'} | ${false}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
