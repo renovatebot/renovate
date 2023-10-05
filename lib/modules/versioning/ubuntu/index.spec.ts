@@ -315,6 +315,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'jammy'}          | ${'focal'}          | ${true}
     ${'jammy-20230816'} | ${'focal'}          | ${true}
     ${'jammy-20230816'} | ${'jammy-20230716'} | ${true}
+    ${'jammy-20230716'} | ${'jammy-20230816'} | ${false}
     ${'focal-20230816'} | ${'jammy-20230716'} | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(ubuntu.isGreaterThan(a, b)).toBe(expected);

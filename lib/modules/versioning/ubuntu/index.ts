@@ -84,14 +84,9 @@ function getDatedContainerImageVersion(version: string): null | number {
 }
 
 function getVersionByCodename(version: string): string {
-  let rVer = version;
-  if (isDatedCodeName(version)) {
-    const ver = getDatedContainerImageCodename(version);
-    if (ver !== null) {
-      rVer = ver;
-    }
-  }
-  return di.getVersionByCodename(rVer);
+  const datedImgVersion = getDatedContainerImageCodename(version);
+  const getVersion = datedImgVersion ? datedImgVersion : version;
+  return di.getVersionByCodename(getVersion);
 }
 
 function getMajor(version: string): null | number {
@@ -157,16 +152,13 @@ function isGreaterThan(version: string, other: string): boolean {
     return false;
   }
 
-  if (isDatedCodeName(version)) {
-    const xImageVersion = getDatedContainerImageVersion(version) ?? 0;
-    const yImageVersion = getDatedContainerImageVersion(other) ?? 0;
-
-    if (xImageVersion > yImageVersion) {
-      return true;
-    }
-    if (xImageVersion < yImageVersion) {
-      return false;
-    }
+  const xImageVersion = getDatedContainerImageVersion(version) ?? 0;
+  const yImageVersion = getDatedContainerImageVersion(other) ?? 0;
+  if (xImageVersion > yImageVersion) {
+    return true;
+  }
+  if (xImageVersion < yImageVersion) {
+    return false;
   }
 
   const xPatch = getPatch(version) ?? 0;
