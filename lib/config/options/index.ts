@@ -71,7 +71,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'format',
-    description: 'Format of the custom datasource',
+    description: 'Format of the custom datasource.',
     type: 'string',
     parent: 'customDatasources',
     default: 'json',
@@ -345,7 +345,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'customDatasources',
-    description: 'Defines custom datasources for usage by managers',
+    description: 'Defines custom datasources for usage by managers.',
     type: 'object',
     experimental: true,
     experimentalIssues: [23286],
@@ -371,7 +371,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.20.7',
+    default: 'ghcr.io/containerbase/sidecar:9.20.8',
     globalOnly: true,
   },
   {
@@ -391,7 +391,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'goGetDirs',
-    description: 'Directory pattern to run `go get` on',
+    description: 'Directory pattern to run `go get` on.',
     type: 'array',
     subType: 'string',
     default: ['./...'],
@@ -622,7 +622,7 @@ const options: RenovateOptions[] = [
   {
     name: 'timezone',
     description:
-      '[IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)',
+      'Must conform to [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format.',
     type: 'string',
   },
   {
@@ -963,7 +963,7 @@ const options: RenovateOptions[] = [
   {
     name: 'defaultRegistryUrlTemplate',
     description:
-      'Template for generating a defaultRegistryUrl for custom datasource',
+      'Template for generating a `defaultRegistryUrl` for custom datasource.',
     type: 'string',
     default: '',
     parent: 'customDatasources',
@@ -985,6 +985,15 @@ const options: RenovateOptions[] = [
     name: 'extractVersion',
     description:
       "A regex (`re2`) to extract a version from a datasource's raw version string.",
+    type: 'string',
+    format: 'regex',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'versionCompatibility',
+    description:
+      'A regex (`re2`) with named capture groups to show how version and compatibility are split from a raw version string.',
     type: 'string',
     format: 'regex',
     cli: false,
@@ -1280,7 +1289,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchCurrentVersion',
     description:
-      'A version or range of versions to match against the current version of a package. Valid only within a `packageRules` object.',
+      'A version, or range of versions, to match against the current version of a package. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parent: 'packageRules',
@@ -1814,7 +1823,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'transformTemplates',
-    description: 'List of jsonata transformation rules',
+    description: 'List of jsonata transformation rules.',
     type: 'array',
     subType: 'string',
     parent: 'customDatasources',
@@ -1989,7 +1998,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'customizeDashboard',
-    description: 'Customize sections in the dependency dashboard issue.',
+    description: 'Customize sections in the Dependency Dashboard issue.',
     type: 'object',
     default: {},
     additionalProperties: {
@@ -2348,7 +2357,7 @@ const options: RenovateOptions[] = [
   {
     name: 'artifactAuth',
     description:
-      'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`',
+      'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`.',
     experimental: true,
     type: 'array',
     subType: 'string',
@@ -2400,7 +2409,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'cacheTtlOverride',
-    description: 'An object that contains cache namespace TTL override values',
+    description: 'An object that contains cache namespace TTL override values.',
     type: 'object',
     stage: 'repository',
     default: {},

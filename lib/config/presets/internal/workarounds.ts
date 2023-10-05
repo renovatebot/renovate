@@ -24,7 +24,7 @@ export const presets: Record<string, Preset> = {
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
   containerbase: {
-    description: 'Add some containerbase overrides',
+    description: 'Add some containerbase overrides.',
     packageRules: [
       {
         description:

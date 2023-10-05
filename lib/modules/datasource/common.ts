@@ -53,6 +53,31 @@ export function isGetPkgReleasesConfig(
   );
 }
 
+export function applyVersionCompatibility(
+  releaseResult: ReleaseResult,
+  versionCompatibility: string | undefined,
+  currentCompatibility: string | undefined
+): ReleaseResult {
+  if (!versionCompatibility) {
+    return releaseResult;
+  }
+
+  const versionCompatibilityRegEx = regEx(versionCompatibility);
+  releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    const regexResult = versionCompatibilityRegEx.exec(release.version);
+    if (!regexResult?.groups?.version) {
+      return null;
+    }
+    if (regexResult?.groups?.compatibility !== currentCompatibility) {
+      return null;
+    }
+    release.version = regexResult.groups.version;
+    return release;
+  });
+
+  return releaseResult;
+}
+
 export function applyExtractVersion(
   releaseResult: ReleaseResult,
   extractVersion: string | undefined
