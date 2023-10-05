@@ -66,7 +66,7 @@ function isStable(version: string): boolean {
 
 // digestion of version
 
-function getContainerImageCodename(version: string): null | string {
+function getDatedContainerImageCodename(version: string): null | string {
   const groups = /^(\w+)-(\d{8})$/.exec(version);
   if (groups === null) {
     return null;
@@ -74,7 +74,7 @@ function getContainerImageCodename(version: string): null | string {
   return groups[1];
 }
 
-function getContainerImageVersion(version: string): null | number {
+function getDatedContainerImageVersion(version: string): null | number {
   const groups = /^(\w+)-(\d{8})$/.exec(version);
   if (groups === null) {
     return null;
@@ -86,7 +86,7 @@ function getContainerImageVersion(version: string): null | number {
 function getVersionByCodename(version: string): string {
   let rVer = version;
   if (isDatedCodeName(version)) {
-    const ver = getContainerImageCodename(version);
+    const ver = getDatedContainerImageCodename(version);
     if (ver !== null) {
       rVer = ver;
     }
@@ -128,8 +128,8 @@ function equals(version: string, other: string): boolean {
   const otherVer = getVersionByCodename(other);
 
   if (isDatedCodeName(version)) {
-    const verImage = getContainerImageVersion(version);
-    const otherImageVer = getContainerImageVersion(other);
+    const verImage = getDatedContainerImageVersion(version);
+    const otherImageVer = getDatedContainerImageVersion(other);
     if (verImage !== otherImageVer) {
       return false;
     }
@@ -158,8 +158,8 @@ function isGreaterThan(version: string, other: string): boolean {
   }
 
   if (isDatedCodeName(version)) {
-    const xImageVersion = getContainerImageVersion(version) ?? 0;
-    const yImageVersion = getContainerImageVersion(other) ?? 0;
+    const xImageVersion = getDatedContainerImageVersion(version) ?? 0;
+    const yImageVersion = getDatedContainerImageVersion(other) ?? 0;
 
     if (xImageVersion > yImageVersion) {
       return true;
