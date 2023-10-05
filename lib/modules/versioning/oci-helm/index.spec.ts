@@ -111,13 +111,12 @@ describe('modules/versioning/oci-helm/index', () => {
     ${['2.2.2', '2.3.3', '2.3.4', '2.4.5', '2.5.1', '3.0.0']}                              | ${'>=2.3.*'}      | ${'2.3.4'}                    | ${'2.3.3'}
     ${['1.0.0', '1.3.4', '1.3.5-beta', '1.3.5-alpha', '2.5.1', '3.0.0']}                   | ${'~1.3.5-alpha'} | ${'1.3.5-beta'}               | ${'1.3.5-beta'}
     ${['0.0.1', '0.1.1-1686130589+7aebcdf', '0.4.1', '1.0.0-1686130637+ld3fn0s', '2.0.0']} | ${'*-0'}          | ${'1.0.0-1686130637+ld3fn0s'} | ${'0.1.1-1686130589+7aebcdf'}
+    ${['0.0.1', '0.1.1-1686130589_7aebcdf', '0.4.1', '1.0.0-1686130637_ld3fn0s', '2.0.0']} | ${'*-0'}          | ${'1.0.0-1686130637_ld3fn0s'} | ${'0.1.1-1686130589_7aebcdf'}
   `(
-    'Satisfying versions ("$versions","$range") === $maxSatisfying',
-    ({ versions, range, expectedMaxSatisfying, expectedMinSatisfying }) => {
-      const maxSatisfying = ociHelm.getSatisfyingVersion(versions, range);
-      const minSatisfying = ociHelm.minSatisfyingVersion(versions, range);
-      expect(maxSatisfying).toBe(expectedMaxSatisfying);
-      expect(minSatisfying).toBe(expectedMinSatisfying);
+    'Satisfying versions ("$versions","$range") === [max: $maxSatisfying | min: $minSatisfying]',
+    ({ versions, range, maxSatisfying, minSatisfying }) => {
+      expect(ociHelm.getSatisfyingVersion(versions, range)).toBe(maxSatisfying);
+      expect(ociHelm.minSatisfyingVersion(versions, range)).toBe(minSatisfying);
     }
   );
 
@@ -140,6 +139,7 @@ describe('modules/versioning/oci-helm/index', () => {
   it.each`
     currentValue              | rangeStrategy | currentVersion            | newVersion                 | expected
     ${null}                   | ${null}       | ${null}                   | ${'1.2.3'}                 | ${'1.2.3'}
+    ${null}                   | ${null}       | ${null}                   | ${null}                    | ${null}
     ${'1.2.3-alpha.1+build1'} | ${'*'}        | ${'1.2.3-alpha.1_build1'} | ${'1.2.4-alpha.3_build42'} | ${'1.2.4-alpha.3+build42'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
