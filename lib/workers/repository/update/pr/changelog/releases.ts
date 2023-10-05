@@ -41,14 +41,9 @@ export async function getInRangeReleases(
     const pkgReleases = (await getPkgReleases(config))!.releases;
     const version = get(versioning);
 
-    const releases = pkgReleases
+    const previousReleases = pkgReleases
       .filter((release) =>
         version.isCompatible(release.version, currentVersion)
-      )
-      .filter(
-        (release) =>
-          version.equals(release.version, currentVersion) ||
-          version.isGreaterThan(release.version, currentVersion)
       )
       .filter((release) => !version.isGreaterThan(release.version, newVersion))
       .filter(
@@ -58,20 +53,26 @@ export async function getInRangeReleases(
           matchesUnstable(version, newVersion, release.version)
       );
 
+    const releases = previousReleases.filter(
+      (release) =>
+        version.equals(release.version, currentVersion) ||
+        version.isGreaterThan(release.version, currentVersion)
+    );
+
     // if there is only 1 release it can be one of two things
-    // either there is only 1 release OR the pinned version actually doesn't exist
-    // i.e pinning to 1.2.3 but only 1.2.4, 1.2.2 exists
+    // either there really is only 1 release OR
+    // the pinned version actually doesn't exist i.e pinning to 1.2.3 but only 1.2.4, 1.2.2 exists
     if (releases.length === 1) {
       const newRelease = releases[0];
-      const anyPreviousValidRelease = pkgReleases.filter(
-        (release) => !version.isGreaterThan(release.version, newVersion)
-      )[0];
-      //  TODO: how do we sort these
+      const closestPreviousRelease = previousReleases
+        .filter((release) => !version.equals(release.version, newVersion))
+        .sort((b, a) => version.sortVersions(a.version, b.version))[0];
+
       if (
-        anyPreviousValidRelease &&
-        anyPreviousValidRelease.version !== newRelease.version
+        closestPreviousRelease &&
+        closestPreviousRelease.version !== newRelease.version
       ) {
-        releases.unshift(anyPreviousValidRelease);
+        releases.unshift(closestPreviousRelease);
       }
     }
 
