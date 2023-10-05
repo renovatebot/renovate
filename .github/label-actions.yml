@@ -202,7 +202,6 @@
   unlabel:
     - 'type:bug'
     - 'type:feature'
-    - 'priority-5-triage'
     - 'status:requirements'
   comment: >
     **Please create a GitHub Discussion instead of this issue.**
