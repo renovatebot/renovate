@@ -378,6 +378,21 @@ describe('modules/datasource/go/base', () => {
           packageName: 'ssh://git.example.com/uncommon',
         });
       });
+
+      it('returns null for mod imports', async () => {
+        const meta =
+          '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go mod https://buf.build/gen/go">';
+        httpMock
+          .scope('https://buf.build')
+          .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go'
+        );
+
+        expect(res).toBeNull();
+      });
     });
   });
 });

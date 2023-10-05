@@ -81,8 +81,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0
       '@types/ms':
-        specifier: 0.7.31
-        version: 0.7.31
+        specifier: 0.7.32
+        version: 0.7.32
       '@types/tmp':
         specifier: 0.2.4
         version: 0.2.4
@@ -443,11 +443,11 @@ importers:
         specifier: 0.5.1
         version: 0.5.1
       '@types/mdast':
-        specifier: 3.0.12
-        version: 3.0.12
+        specifier: 3.0.13
+        version: 3.0.13
       '@types/moo':
-        specifier: 0.5.6
-        version: 0.5.6
+        specifier: 0.5.7
+        version: 0.5.7
       '@types/nock':
         specifier: 10.0.3
         version: 10.0.3
@@ -3949,8 +3949,8 @@ packages:
       '@types/node': 18.17.5
     dev: true
 
-  /@types/mdast@3.0.12:
-    resolution: {integrity: sha512-DT+iNIRNX884cx0/Q1ja7NyUPpZuv0KPyL5rGNxm1WC1OtHstl7n4Jb7nk+xacNShQMbczJjt8uFzznpp6kYBg==}
+  /@types/mdast@3.0.13:
+    resolution: {integrity: sha512-HjiGiWedR0DVFkeNljpa6Lv4/IZU1+30VY5d747K7lBudFc3R0Ibr6yJ9lN3BE28VnZyDfLF/VB1Ql1ZIbKrmg==}
     dependencies:
       '@types/unist': 2.0.8
 
@@ -3966,12 +3966,12 @@ packages:
     resolution: {integrity: sha512-eXQpwnkI4Ntw5uJg6i2PINdRFWLr55dqjuYQaLHNjvqTzF14QdNWbCbml9sza0byyXNA0hZlHtcdN+VNDcgVHA==}
     dev: false
 
-  /@types/moo@0.5.6:
-    resolution: {integrity: sha512-Q60hZhulhl2Ox4LjbJvhH+HzsKrwzLPjEB8dZw0fK1MH2HyOLe6LDou68yTfsWasxGv7DPZe5VNM5vgpzOa2nw==}
+  /@types/moo@0.5.7:
+    resolution: {integrity: sha512-P7vrZaxja4ne72cKKx3C4ixuNftUIJllGHDHUfUJDqImIihnHzBkz28DDaPOQE3XQODo+k3NDCziP8f0V6yphQ==}
     dev: true
 
-  /@types/ms@0.7.31:
-    resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
+  /@types/ms@0.7.32:
+    resolution: {integrity: sha512-xPSg0jm4mqgEkNhowKgZFBNtwoEwF6gJ4Dhww+GFpm3IgtNseHQZ5IqdNwnquZEoANxyDAKDRAdVo4Z72VvD/g==}
     dev: false
 
   /@types/nock@10.0.3:
@@ -8290,7 +8290,7 @@ packages:
   /mdast-util-from-markdown@0.8.5:
     resolution: {integrity: sha512-2hkTXtYYnr+NubD/g6KGBS/0mFmBcifAsI0yIWRiRo0PjVs6SSOSOdtzbp6kSGnShDN6G5aWZpKQ2lWRy27mWQ==}
     dependencies:
-      '@types/mdast': 3.0.12
+      '@types/mdast': 3.0.13
       mdast-util-to-string: 2.0.0
       micromark: 2.11.4
       parse-entities: 2.0.0

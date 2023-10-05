@@ -159,7 +159,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalFiles
         )
       ).toStrictEqual({
-        npmLockDirs: ['package-lock.json'],
+        npmLockDirs: ['package-lock.json', 'randomFolder/package-lock.json'],
         pnpmShrinkwrapDirs: ['packages/pnpm/pnpm-lock.yaml'],
         yarnLockDirs: ['yarn.lock'],
       });
@@ -440,6 +440,7 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
       expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       expect(fs.deleteLocalFile.mock.calls).toMatchObject([
+        ['randomFolder/.npmrc'],
         ['packages/pnpm/.npmrc'],
       ]);
     });
