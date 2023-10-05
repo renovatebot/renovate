@@ -1,3 +1,4 @@
+import { execUtils } from '@yarnpkg/core';
 import { mockDeep } from 'jest-mock-extended';
 import { XmlDocument } from 'xmldoc';
 import { mocked } from '../../../../test/util';
@@ -39,6 +40,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry'
       );
       expect(myRegistry).toBeDefined();
+      expect(myRegistry?.name).toBe('packageSource');
       expect(myRegistry?.attr['value']).toBe(
         'https://my-registry.example.org/'
       );
@@ -49,6 +51,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry2'
       );
       expect(myRegistry2).toBeDefined();
+      expect(myRegistry2?.name).toBe('packageSource');
       expect(myRegistry2?.attr['value']).toBe(
         'https://my-registry2.example.org/index.json'
       );
@@ -93,11 +96,13 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry'
       );
       expect(myRegistry).toBeDefined();
+      expect(myRegistry?.name).toBe('packageSource');
 
       const myRegistry2 = packageSources?.childWithAttribute(
         'key',
         'myRegistry2'
       );
+      expect(myRegistry2?.name).toBe('packageSource');
       expect(myRegistry2).toBeDefined();
 
       const myRegistryCredentials = xmlDocument.descendantWithPath(
@@ -228,6 +233,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry'
       );
       expect(myRegistryMaps).toBeDefined();
+      expect(myRegistryMaps?.name).toBe('packageSource');
       expect(myRegistryMaps?.childNamed('package')?.attr['pattern']).toBe('*');
 
       const myRegistry2Maps = packageSourceMapping?.childWithAttribute(
@@ -235,6 +241,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry2'
       );
       expect(myRegistry2Maps).toBeDefined();
+      expect(myRegistry2Maps?.name).toBe('packageSource');
       expect(
         myRegistry2Maps
           ?.childrenNamed('package')

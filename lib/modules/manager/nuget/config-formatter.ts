@@ -59,7 +59,7 @@ export function createNuGetConfigXml(registries: Registry[]): string {
   if (packageSourceMaps.length > 0) {
     contents += '<packageSourceMapping>\n';
     for (const packageSourceMap of packageSourceMaps) {
-      contents += formatPackageSourceMap(packageSourceMap);
+      contents += formatPackageSource(packageSourceMap);
     }
     contents += '</packageSourceMapping>';
   }
@@ -107,13 +107,13 @@ function formatPackageSourceCredentialElement(
   return packageSourceCredential;
 }
 
-function formatPackageSourceMap(map: PackageSourceMap): string {
-  let packageSourceMap = `<packageSourceMap key="${map.name}">\n`;
+function formatPackageSource(packageSourceMap: PackageSourceMap): string {
+  let packageSource = `<packageSource key="${packageSourceMap.name}">\n`;
 
-  for (const pattern of map.patterns) {
-    packageSourceMap += `<package pattern="${pattern}" />\n`;
+  for (const pattern of packageSourceMap.patterns) {
+    packageSource += `<package pattern="${pattern}" />\n`;
   }
 
-  packageSourceMap += '</packageSourceMap>\n';
-  return packageSourceMap;
+  packageSource += '</packageSource>\n';
+  return packageSource;
 }
