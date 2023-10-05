@@ -68,7 +68,15 @@ If you're an advanced user, you may use the [`dependabot-core` repository](https
 
 ### Show changelogs
 
-Renovate and Dependabot show changelogs in their PRs.
+| Feature                               | Renovate                     | Dependabot                      |
+| ------------------------------------- | ---------------------------- | ------------------------------- |
+| Link to GitHub release                | Yes, to specific release tag | Yes, to "releases landing page" |
+| Link to GitHub's comparing changes UI | Yes                          | Yes                             |
+| Release notes                         | Yes                          | Yes                             |
+| Links to issues                       | Yes                          | Yes                             |
+| Upstream `CHANGELOG` file             | No                           | Yes                             |
+| Recent commits                        | No                           | Yes                             |
+| Link to individual commits            | No                           | Yes                             |
 
 ### Compatibility score badges
 
