@@ -490,7 +490,7 @@ export async function lookupUpdates(
             // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
             if (config.currentDigest) {
               res.warnings.push({
-                message: `Could not determine new digest for update (datasource: ${config.datasource})`,
+                message: `Could not determine new digest for update (${config.datasource} package ${config.packageName})`,
                 topic: config.packageName,
               });
             }
