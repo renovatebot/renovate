@@ -90,8 +90,8 @@ export async function getResourceUrl(
       throw err;
     }
     logger.debug(
-      { err, url },
-      `nuget registry failure: can't get ${resourceType} of servicesIndexRaw ${servicesIndexRaw}`
+      { err, url, servicesIndexRaw },
+      `nuget registry failure: can't get ${resourceType}`
     );
     return null;
   }
