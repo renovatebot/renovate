@@ -24,7 +24,7 @@ describe('modules/versioning/oci-helm/index', () => {
     ${''}                                | ${false}
     ${'1.2.3'}                           | ${true}
     ${'v1.2.3'}                          | ${true}
-    ${'3'}                               | ${false}
+    ${'3'}                               | ${true}
     ${'0.1.1-1686130589_build1-7aebcdf'} | ${true}
     ${'0.1.1-1686130589+build1-7aebcdf'} | ${true}
     ${'1.2.3-1686130589'}                | ${true}
@@ -38,12 +38,12 @@ describe('modules/versioning/oci-helm/index', () => {
   it.each`
     version                               | major   | minor   | patch
     ${'1.2.3'}                            | ${1}    | ${2}    | ${3}
-    ${'18.04'}                            | ${18}   | ${4}    | ${null}
-    ${'10.1'}                             | ${10}   | ${1}    | ${null}
-    ${'3'}                                | ${3}    | ${null} | ${null}
+    ${'18.04'}                            | ${18}   | ${4}    | ${0}
+    ${'10.1'}                             | ${10}   | ${1}    | ${0}
+    ${'3'}                                | ${3}    | ${0}    | ${0}
     ${'foo'}                              | ${null} | ${null} | ${null}
     ${'0.1.2-1686130589_build1-7aebcdf'}  | ${0}    | ${1}    | ${2}
-    ${'1-1686130589_build1-7aebcdf'}      | ${0}    | ${null} | ${null}
+    ${'1-1686130589_build1-7aebcdf'}      | ${1}    | ${0}    | ${0}
     ${'0.1.2-1686130589+build1-7aebcdf'}  | ${0}    | ${1}    | ${2}
     ${'v0.1.2-1686130589+build1-7aebcdf'} | ${0}    | ${1}    | ${2}
   `(
