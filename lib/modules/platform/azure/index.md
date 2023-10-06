@@ -161,4 +161,4 @@ If the tag does not exist in the DevOps project, it will be created automaticall
 
 - Create tag definition
 
-Otherwise, when a tag does not exist and the user do not have permission to create it, Renovate will output an error during creation of the Pull Request.
+Otherwise, when a tag does not exist and the user does not have permission to create it, Renovate will output an error during creation of the Pull Request.
