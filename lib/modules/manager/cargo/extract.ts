@@ -2,7 +2,7 @@ import { parse } from '@iarna/toml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
-import { CrateDatasource } from '../../datasource/crate';
+import { CratesIoDatasource } from '../../datasource/crates-io';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -92,7 +92,7 @@ function extractFromSection(
       depType: section,
       currentValue: currentValue as any,
       managerData: { nestedVersion },
-      datasource: CrateDatasource.id,
+      datasource: CratesIoDatasource.id,
     };
     if (registryUrls) {
       dep.registryUrls = registryUrls;

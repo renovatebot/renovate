@@ -19,11 +19,11 @@ import type {
   RegistryInfo,
 } from './types';
 
-export class CrateDatasource extends Datasource {
-  static readonly id = 'crate';
+export class CratesIoDatasource extends Datasource {
+  static readonly id = 'crates-io';
 
   constructor() {
-    super(CrateDatasource.id);
+    super(CratesIoDatasource.id);
   }
 
   override defaultRegistryUrls = ['https://crates.io'];
@@ -36,12 +36,12 @@ export class CrateDatasource extends Datasource {
   static readonly CRATES_IO_API_BASE_URL = 'https://crates.io/api/v1/';
 
   @cache({
-    namespace: `datasource-${CrateDatasource.id}`,
+    namespace: `datasource-${CratesIoDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
       `${registryUrl}/${packageName}`,
     cacheable: ({ registryUrl }: GetReleasesConfig) =>
-      CrateDatasource.areReleasesCacheable(registryUrl),
+      CratesIoDatasource.areReleasesCacheable(registryUrl),
   })
   async getReleases({
     packageName,
@@ -50,12 +50,12 @@ export class CrateDatasource extends Datasource {
     // istanbul ignore if
     if (!registryUrl) {
       logger.warn(
-        'crate datasource: No registryUrl specified, cannot perform getReleases'
+        'crates-io datasource: No registryUrl specified, cannot perform getReleases'
       );
       return null;
     }
 
-    const registryInfo = await CrateDatasource.fetchRegistryInfo({
+    const registryInfo = await CratesIoDatasource.fetchRegistryInfo({
       packageName,
       registryUrl,
     });
@@ -64,7 +64,7 @@ export class CrateDatasource extends Datasource {
       return null;
     }
 
-    const dependencyUrl = CrateDatasource.getDependencyUrl(
+    const dependencyUrl = CratesIoDatasource.getDependencyUrl(
       registryInfo,
       packageName
     );
@@ -113,11 +113,11 @@ export class CrateDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CrateDatasource.id}-metadata`,
+    namespace: `datasource-${CratesIoDatasource.id}-metadata`,
     key: (info: RegistryInfo, packageName: string) =>
       `${info.rawUrl}/${packageName}`,
     cacheable: (info: RegistryInfo) =>
-      CrateDatasource.areReleasesCacheable(info.rawUrl),
+      CratesIoDatasource.areReleasesCacheable(info.rawUrl),
     ttlMinutes: 24 * 60, // 24 hours
   })
   public async getCrateMetadata(
@@ -131,7 +131,7 @@ export class CrateDatasource extends Datasource {
     // The `?include=` suffix is required to avoid unnecessary database queries
     // on the crates.io server. This lets us work around the regular request
     // throttling of one request per second.
-    const crateUrl = `${CrateDatasource.CRATES_IO_API_BASE_URL}crates/${packageName}?include=`;
+    const crateUrl = `${CratesIoDatasource.CRATES_IO_API_BASE_URL}crates/${packageName}?include=`;
 
     logger.debug(
       { crateUrl, packageName, registryUrl: info.rawUrl },
@@ -159,18 +159,18 @@ export class CrateDatasource extends Datasource {
     if (info.clonePath) {
       const path = upath.join(
         info.clonePath,
-        ...CrateDatasource.getIndexSuffix(packageName)
+        ...CratesIoDatasource.getIndexSuffix(packageName)
       );
       return readCacheFile(path, 'utf8');
     }
 
     const baseUrl =
       info.flavor === 'crates.io'
-        ? CrateDatasource.CRATES_IO_BASE_URL
+        ? CratesIoDatasource.CRATES_IO_BASE_URL
         : info.rawUrl;
 
     if (info.flavor === 'crates.io' || info.isSparse) {
-      const packageSuffix = CrateDatasource.getIndexSuffix(
+      const packageSuffix = CratesIoDatasource.getIndexSuffix(
         packageName.toLowerCase()
       );
       const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
@@ -215,7 +215,7 @@ export class CrateDatasource extends Datasource {
     const host = url.hostname;
     const hash = toSha256(url.pathname).substring(0, 7);
 
-    return `crate-registry-${proto}-${host}-${hash}`;
+    return `crates-io-registry-${proto}-${host}-${hash}`;
   }
 
   private static isSparseRegistry(url: string): boolean {
@@ -241,7 +241,7 @@ export class CrateDatasource extends Datasource {
       return null;
     }
 
-    const isSparseRegistry = CrateDatasource.isSparseRegistry(registryUrl);
+    const isSparseRegistry = CratesIoDatasource.isSparseRegistry(registryUrl);
     const registryFetchUrl = isSparseRegistry
       ? registryUrl.replace(/^sparse\+/, '')
       : registryUrl;
@@ -273,13 +273,13 @@ export class CrateDatasource extends Datasource {
       !GlobalConfig.get('allowCustomCrateRegistries')
     ) {
       logger.warn(
-        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
+        'crates.io datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
       );
       return null;
     }
     if (registry.flavor !== 'crates.io' && !registry.isSparse) {
-      const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
-      const cacheKeyForError = `crate-datasource/registry-clone-path/${registryFetchUrl}/error`;
+      const cacheKey = `crates-io-datasource/registry-clone-path/${registryFetchUrl}`;
+      const cacheKeyForError = `crates-io-datasource/registry-clone-path/${registryFetchUrl}/error`;
 
       // We need to ensure we don't run `git clone` in parallel. Therefore we store
       // a promise of the running operation in the mem cache, which in the end resolves
@@ -293,7 +293,7 @@ export class CrateDatasource extends Datasource {
       } else {
         clonePath = upath.join(
           privateCacheDir(),
-          CrateDatasource.cacheDirFromUrl(url)
+          CratesIoDatasource.cacheDirFromUrl(url)
         );
         logger.info(
           { clonePath, registryFetchUrl },

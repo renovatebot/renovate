@@ -16,6 +16,8 @@ export function migrateDatasource(value: string): string {
   switch (value) {
     case 'adoptium-java':
       return 'java-version';
+    case 'crate':
+      return 'crates-io';
     case 'dotnet':
       return 'dotnet-version';
     case 'node':

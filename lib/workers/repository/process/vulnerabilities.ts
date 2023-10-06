@@ -32,7 +32,7 @@ export class Vulnerabilities {
     string,
     Ecosystem | undefined
   > = {
-    crate: 'crates.io',
+    'crates-io': 'crates.io',
     go: 'Go',
     hex: 'Hex',
     maven: 'Maven',

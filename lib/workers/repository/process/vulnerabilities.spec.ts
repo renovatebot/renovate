@@ -684,7 +684,7 @@ describe('workers/repository/process/vulnerabilities', () => {
               {
                 depName: 'tiny_http',
                 currentValue: '0.1.2',
-                datasource: 'crate',
+                datasource: 'crates-io',
               },
             ],
             packageFile: 'some-file',
@@ -741,7 +741,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([
         {
-          matchDatasources: ['crate'],
+          matchDatasources: ['crates-io'],
           matchPackageNames: ['tiny_http'],
           matchCurrentVersion: '0.1.2',
           allowedVersions: '0.6.3',
@@ -1110,7 +1110,7 @@ describe('workers/repository/process/vulnerabilities', () => {
               {
                 depName: 'sys-info',
                 currentValue: '0.6.0',
-                datasource: 'crate',
+                datasource: 'crates-io',
               },
             ],
             packageFile: 'some-file',
@@ -1155,7 +1155,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([
         {
-          matchDatasources: ['crate'],
+          matchDatasources: ['crates-io'],
           matchPackageNames: ['sys-info'],
           matchCurrentVersion: '0.6.0',
           allowedVersions: '0.8.0',

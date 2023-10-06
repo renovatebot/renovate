@@ -1,5 +1,5 @@
 import type { Category } from '../../../constants';
-import { CrateDatasource } from '../../datasource/crate';
+import { CratesIoDatasource } from '../../datasource/crates-io';
 import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
@@ -17,4 +17,4 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['rust'];
 
-export const supportedDatasources = [CrateDatasource.id];
+export const supportedDatasources = [CratesIoDatasource.id];

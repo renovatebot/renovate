@@ -51,7 +51,7 @@ describe('modules/datasource/common', () => {
     });
 
     it('returns datasource-defined default versioning', () => {
-      expect(getDefaultVersioning('crate')).toBe('cargo');
+      expect(getDefaultVersioning('crates-io')).toBe('cargo');
     });
   });
 

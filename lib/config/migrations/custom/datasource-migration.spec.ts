@@ -12,6 +12,17 @@ describe('config/migrations/custom/datasource-migration', () => {
     );
   });
 
+  it('should migrate crate', () => {
+    expect(DatasourceMigration).toMigrate(
+      {
+        datasource: 'crate',
+      },
+      {
+        datasource: 'crates-io',
+      }
+    );
+  });
+
   it('should migrate donet', () => {
     expect(DatasourceMigration).toMigrate(
       {

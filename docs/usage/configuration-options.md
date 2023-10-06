@@ -2177,7 +2177,7 @@ Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability f
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
 Renovate only queries the OSV database for dependencies that use one of these datasources:
 
-- [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
+- [`crates-io`](https://docs.renovatebot.com/modules/datasource/crates-io/)
 - [`go`](https://docs.renovatebot.com/modules/datasource/go/)
 - [`hex`](https://docs.renovatebot.com/modules/datasource/hex/)
 - [`maven`](https://docs.renovatebot.com/modules/datasource/maven/)

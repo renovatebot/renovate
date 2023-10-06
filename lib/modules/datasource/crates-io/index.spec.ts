@@ -11,17 +11,17 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as memCache from '../../../util/cache/memory';
 import type { RegistryInfo } from './types';
-import { CrateDatasource } from '.';
+import { CratesIoDatasource } from '.';
 
 jest.mock('simple-git');
 const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
 
-const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;
+const API_BASE_URL = CratesIoDatasource.CRATES_IO_API_BASE_URL;
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
-const datasource = CrateDatasource.id;
+const datasource = CratesIoDatasource.id;
 
 function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
   const mockClone = jest
@@ -68,28 +68,31 @@ function mockCratesApiCallFor(crateName: string, response?: httpMock.Body) {
     .reply(response ? 200 : 404, response);
 }
 
-describe('modules/datasource/crate/index', () => {
+describe('modules/datasource/crates-io/index', () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
-      expect(CrateDatasource.getIndexSuffix('a')).toStrictEqual(['1', 'a']);
-      expect(CrateDatasource.getIndexSuffix('1')).toStrictEqual(['1', '1']);
-      expect(CrateDatasource.getIndexSuffix('1234567')).toStrictEqual([
+      expect(CratesIoDatasource.getIndexSuffix('a')).toStrictEqual(['1', 'a']);
+      expect(CratesIoDatasource.getIndexSuffix('1')).toStrictEqual(['1', '1']);
+      expect(CratesIoDatasource.getIndexSuffix('1234567')).toStrictEqual([
         '12',
         '34',
         '1234567',
       ]);
-      expect(CrateDatasource.getIndexSuffix('ab')).toStrictEqual(['2', 'ab']);
-      expect(CrateDatasource.getIndexSuffix('abc')).toStrictEqual([
+      expect(CratesIoDatasource.getIndexSuffix('ab')).toStrictEqual([
+        '2',
+        'ab',
+      ]);
+      expect(CratesIoDatasource.getIndexSuffix('abc')).toStrictEqual([
         '3',
         'a',
         'abc',
       ]);
-      expect(CrateDatasource.getIndexSuffix('abcd')).toStrictEqual([
+      expect(CratesIoDatasource.getIndexSuffix('abcd')).toStrictEqual([
         'ab',
         'cd',
         'abcd',
       ]);
-      expect(CrateDatasource.getIndexSuffix('abcde')).toStrictEqual([
+      expect(CratesIoDatasource.getIndexSuffix('abcde')).toStrictEqual([
         'ab',
         'cd',
         'abcde',
@@ -381,7 +384,7 @@ describe('modules/datasource/crate/index', () => {
         flavor: 'cloudsmith',
         isSparse: false,
       };
-      const crateDatasource = new CrateDatasource();
+      const crateDatasource = new CratesIoDatasource();
       await expect(
         crateDatasource.fetchCrateRecordsPayload(info, 'benedict')
       ).toReject();

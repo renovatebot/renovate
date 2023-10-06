@@ -136,7 +136,7 @@ replace-with = "private-crates"`
       expect(res?.deps).toEqual([
         {
           currentValue: '0.1.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'proprietary-crate',
           depType: 'dependencies',
           managerData: {
@@ -148,7 +148,7 @@ replace-with = "private-crates"`
         },
         {
           currentValue: '3.0.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'mcorbin-test',
           depType: 'dependencies',
           managerData: {
@@ -160,7 +160,7 @@ replace-with = "private-crates"`
         },
         {
           currentValue: '0.2',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'tokio',
           depType: 'dependencies',
           managerData: {
@@ -188,7 +188,7 @@ replace-with = "mcorbin"`
       expect(res?.deps).toEqual([
         {
           currentValue: '0.1.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'proprietary-crate',
           depType: 'dependencies',
           managerData: {
@@ -197,7 +197,7 @@ replace-with = "mcorbin"`
         },
         {
           currentValue: '3.0.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'mcorbin-test',
           depType: 'dependencies',
           managerData: {
@@ -206,7 +206,7 @@ replace-with = "mcorbin"`
         },
         {
           currentValue: '0.2',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'tokio',
           depType: 'dependencies',
           managerData: {
@@ -224,7 +224,7 @@ replace-with = "mcorbin"`
       expect(res?.deps).toEqual([
         {
           currentValue: '0.2.37',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'wasm-bindgen',
           depType: 'dependencies',
           managerData: {
@@ -234,7 +234,7 @@ replace-with = "mcorbin"`
         },
         {
           currentValue: '0.3.14',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'js-sys',
           depType: 'dependencies',
           managerData: {
@@ -244,7 +244,7 @@ replace-with = "mcorbin"`
         },
         {
           currentValue: '',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'js_relative_import',
           depType: 'dependencies',
           managerData: {
@@ -255,7 +255,7 @@ replace-with = "mcorbin"`
         },
         {
           currentValue: '0.3.14',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'web-sys',
           depType: 'dependencies',
           managerData: {
@@ -278,7 +278,7 @@ replace-with = "mcorbin"`
       expect(res?.deps).toEqual([
         {
           currentValue: '0.1.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'proprietary-crate',
           depType: 'dependencies',
           managerData: {
@@ -290,7 +290,7 @@ replace-with = "mcorbin"`
         },
         {
           currentValue: '3.0.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'mcorbin-test',
           depType: 'dependencies',
           managerData: {
@@ -300,7 +300,7 @@ replace-with = "mcorbin"`
         },
         {
           currentValue: '0.2',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'tokio',
           depType: 'dependencies',
           managerData: {
@@ -331,21 +331,21 @@ tokio = { version = "1.21.1" }`;
       expect(res?.deps).toEqual([
         {
           currentValue: '0.14.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'git2',
           depType: 'dependencies',
           managerData: { nestedVersion: false },
         },
         {
           currentValue: '1.0.146',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'serde',
           depType: 'workspace.dependencies',
           managerData: { nestedVersion: false },
         },
         {
           currentValue: '1.21.1',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'tokio',
           depType: 'workspace.dependencies',
           managerData: {
@@ -361,7 +361,7 @@ tokio = { version = "1.21.1" }`;
       expect(res?.deps).toEqual([
         {
           currentValue: '',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'foobar',
           depType: 'dependencies',
           managerData: {
@@ -416,7 +416,7 @@ replace-with = "mine"`
       expect(res?.deps).toEqual([
         {
           currentValue: '0.1.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'proprietary-crate',
           depType: 'dependencies',
           managerData: {
@@ -426,7 +426,7 @@ replace-with = "mine"`
         },
         {
           currentValue: '3.0.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'mcorbin-test',
           depType: 'dependencies',
           managerData: {
@@ -436,7 +436,7 @@ replace-with = "mine"`
         },
         {
           currentValue: '0.2',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'tokio',
           depType: 'dependencies',
           managerData: {
@@ -473,7 +473,7 @@ replace-with = "mcorbin"
       expect(res?.deps).toEqual([
         {
           currentValue: '0.1.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'proprietary-crate',
           depType: 'dependencies',
           managerData: {
@@ -483,7 +483,7 @@ replace-with = "mcorbin"
         },
         {
           currentValue: '3.0.0',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'mcorbin-test',
           depType: 'dependencies',
           managerData: {
@@ -493,7 +493,7 @@ replace-with = "mcorbin"
         },
         {
           currentValue: '0.2',
-          datasource: 'crate',
+          datasource: 'crates-io',
           depName: 'tokio',
           depType: 'dependencies',
           managerData: {

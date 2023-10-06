@@ -4,7 +4,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
 [
   {
     "currentValue": "0.2.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_animation",
     "depType": "dependencies",
     "managerData": {
@@ -14,7 +14,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.3.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_assets",
     "depType": "dependencies",
     "managerData": {
@@ -24,7 +24,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.2.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_audio",
     "depType": "dependencies",
     "managerData": {
@@ -34,7 +34,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.6.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_config",
     "depType": "dependencies",
     "managerData": {
@@ -44,7 +44,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.2.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_core",
     "depType": "dependencies",
     "managerData": {
@@ -54,7 +54,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_controls",
     "depType": "dependencies",
     "managerData": {
@@ -64,7 +64,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_locale",
     "depType": "dependencies",
     "managerData": {
@@ -74,7 +74,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.7",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_renderer",
     "depType": "dependencies",
     "managerData": {
@@ -84,7 +84,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.3",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_input",
     "depType": "dependencies",
     "managerData": {
@@ -94,7 +94,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_ui",
     "depType": "dependencies",
     "managerData": {
@@ -104,7 +104,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_utils",
     "depType": "dependencies",
     "managerData": {
@@ -114,7 +114,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "derivative",
     "depType": "dependencies",
     "managerData": {
@@ -123,7 +123,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.5",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "fern",
     "depType": "dependencies",
     "managerData": {
@@ -132,7 +132,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.4",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "log",
     "depType": "dependencies",
     "managerData": {
@@ -141,7 +141,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "1.0.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "rayon",
     "depType": "dependencies",
     "managerData": {
@@ -150,7 +150,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "rustc_version_runtime",
     "depType": "dependencies",
     "managerData": {
@@ -159,7 +159,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.15",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "winit",
     "depType": "dependencies",
     "managerData": {
@@ -168,7 +168,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "thread_profiler",
     "depType": "dependencies",
     "managerData": {
@@ -177,7 +177,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "amethyst_gltf",
     "depType": "dev-dependencies",
     "managerData": {
@@ -187,7 +187,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.5.10",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "env_logger",
     "depType": "dev-dependencies",
     "managerData": {
@@ -196,7 +196,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.6",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "genmesh",
     "depType": "dev-dependencies",
     "managerData": {
@@ -205,7 +205,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "ron",
     "depType": "dev-dependencies",
     "managerData": {
@@ -214,7 +214,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "serde",
     "depType": "dev-dependencies",
     "managerData": {
@@ -223,7 +223,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "serde_derive",
     "depType": "dev-dependencies",
     "managerData": {
@@ -232,7 +232,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "vergen",
     "depType": "build-dependencies",
     "managerData": {
@@ -246,7 +246,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
 [
   {
     "currentValue": "=0.2.43",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "libc",
     "depType": "dependencies",
     "managerData": {
@@ -255,7 +255,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "1.0.4",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "bitflags",
     "depType": "dependencies",
     "managerData": {
@@ -264,7 +264,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "=0.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "pcap-sys",
     "depType": "dependencies",
     "managerData": {
@@ -274,7 +274,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.21.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "pnet",
     "depType": "dependencies",
     "managerData": {
@@ -283,7 +283,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "git_dep_with_version",
     "depType": "dependencies",
     "managerData": {
@@ -293,7 +293,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "git_dep",
     "depType": "dependencies",
     "managerData": {
@@ -303,7 +303,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.0.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "same_version_1__",
     "depType": "dependencies",
     "managerData": {
@@ -312,7 +312,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.0.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "same_version_1_",
     "depType": "dependencies",
     "managerData": {
@@ -321,7 +321,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.0.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "same_version_1",
     "depType": "dependencies",
     "managerData": {
@@ -330,7 +330,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.4.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep1",
     "depType": "dependencies",
     "managerData": {
@@ -339,7 +339,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "=0.3.6",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "winapi",
     "depType": "dependencies",
     "managerData": {
@@ -349,7 +349,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.2.37",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "managerData": {
@@ -359,7 +359,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.3.14",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "js-sys",
     "depType": "dependencies",
     "managerData": {
@@ -369,7 +369,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "js_relative_import",
     "depType": "dependencies",
     "managerData": {
@@ -380,7 +380,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
   },
   {
     "currentValue": "0.3.14",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "web-sys",
     "depType": "dependencies",
     "managerData": {
@@ -395,7 +395,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts original pa
 [
   {
     "currentValue": "0.4.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "boolector-solver",
     "depType": "dependencies",
     "managerData": {
@@ -410,7 +410,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts platform sp
 [
   {
     "currentValue": "0.2.37",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "managerData": {
@@ -420,7 +420,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts platform sp
   },
   {
     "currentValue": "0.3.14",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "js-sys",
     "depType": "dependencies",
     "managerData": {
@@ -430,7 +430,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts platform sp
   },
   {
     "currentValue": "",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "js_relative_import",
     "depType": "dependencies",
     "managerData": {
@@ -441,7 +441,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts platform sp
   },
   {
     "currentValue": "0.3.14",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "web-sys",
     "depType": "dependencies",
     "managerData": {
@@ -456,7 +456,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
 [
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "proprietary-crate",
     "depType": "dependencies",
     "managerData": {
@@ -468,7 +468,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
   },
   {
     "currentValue": "3.0.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "mcorbin-test",
     "depType": "dependencies",
     "managerData": {
@@ -480,7 +480,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "tokio",
     "depType": "dependencies",
     "managerData": {
@@ -494,7 +494,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
 [
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "proprietary-crate",
     "depType": "dependencies",
     "managerData": {
@@ -506,7 +506,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
   },
   {
     "currentValue": "3.0.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "mcorbin-test",
     "depType": "dependencies",
     "managerData": {
@@ -518,7 +518,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "tokio",
     "depType": "dependencies",
     "managerData": {
@@ -532,7 +532,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
 [
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "proprietary-crate",
     "depType": "dependencies",
     "managerData": {
@@ -542,7 +542,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
   },
   {
     "currentValue": "3.0.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "mcorbin-test",
     "depType": "dependencies",
     "managerData": {
@@ -552,7 +552,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "tokio",
     "depType": "dependencies",
     "managerData": {
@@ -566,7 +566,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
 [
   {
     "currentValue": "0.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "pcap-sys",
     "depType": "dependencies",
     "managerData": {
@@ -576,7 +576,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
   },
   {
     "currentValue": "0.21.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "pnet",
     "depType": "dependencies",
     "managerData": {
@@ -585,7 +585,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
   },
   {
     "currentValue": "1.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep1",
     "depType": "dependencies",
     "managerData": {
@@ -595,7 +595,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
   },
   {
     "currentValue": "3.4",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep2",
     "depType": "dependencies",
     "managerData": {
@@ -605,7 +605,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
   },
   {
     "currentValue": "~12.3.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep3",
     "depType": "dependencies",
     "managerData": {
@@ -615,7 +615,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
   },
   {
     "currentValue": "INVALID 3.3.1 VERSION",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep4",
     "depType": "dependencies",
     "managerData": {
@@ -624,7 +624,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
   },
   {
     "currentValue": "3.2.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep5",
     "depType": "dependencies",
     "managerData": {
@@ -633,7 +633,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
   },
   {
     "currentValue": "",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep6",
     "depType": "dependencies",
     "managerData": {
@@ -648,7 +648,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
 [
   {
     "currentValue": "1.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep1",
     "depType": "dependencies",
     "managerData": {
@@ -658,7 +658,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
   },
   {
     "currentValue": "3.4",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep2",
     "depType": "dependencies",
     "managerData": {
@@ -668,7 +668,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
   },
   {
     "currentValue": "~12.3.1",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep3",
     "depType": "dependencies",
     "managerData": {
@@ -678,7 +678,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
   },
   {
     "currentValue": "INVALID 1.3.1 VERSION",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep4",
     "depType": "dependencies",
     "managerData": {
@@ -688,7 +688,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
   },
   {
     "currentValue": "",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep5",
     "depType": "dependencies",
     "managerData": {
@@ -698,7 +698,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
   },
   {
     "currentValue": "",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "dep7",
     "depType": "dependencies",
     "managerData": {
@@ -713,7 +713,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
 [
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "proprietary-crate",
     "depType": "dependencies",
     "managerData": {
@@ -723,7 +723,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
   },
   {
     "currentValue": "3.0.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "mcorbin-test",
     "depType": "dependencies",
     "managerData": {
@@ -733,7 +733,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
   },
   {
     "currentValue": "0.2",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "tokio",
     "depType": "dependencies",
     "managerData": {
@@ -747,7 +747,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() skips unknown regist
 [
   {
     "currentValue": "0.1.0",
-    "datasource": "crate",
+    "datasource": "crates-io",
     "depName": "foobar",
     "depType": "dependencies",
     "managerData": {
