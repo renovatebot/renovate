@@ -152,7 +152,7 @@ Make sure the user has the following permissions on the work item's *area path*:
 - Edit work items in this node
 - View work items in this node
 
-If the user do not have the permissions, pull request creation will succeed but without a link to the work item.
+If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
 
 ### Adding tags to Pull Requests
 
