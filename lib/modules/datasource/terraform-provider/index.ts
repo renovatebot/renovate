@@ -13,7 +13,6 @@ import { createSDBackendURL } from '../terraform-module/utils';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   TerraformBuild,
-  TerraformCloudRegistryProviderVersion,
   TerraformProvider,
   TerraformProviderReleaseBackend,
   TerraformProviderVersions,

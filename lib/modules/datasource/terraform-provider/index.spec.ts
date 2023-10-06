@@ -5,9 +5,6 @@ import { TerraformProviderDatasource } from '.';
 
 const azurermData = Fixtures.get('azurerm-provider.json');
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
-const azurerm2560VersionData = Fixtures.get(
-  'azurerm-provider-2.56.0-version.json'
-);
 const azurerm2560Sha256Sums = Fixtures.get(
   'azurerm-provider-2.56.0-sha256sums'
 );
@@ -18,7 +15,6 @@ const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const telmateProxmoxVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json'
 );
-const proxmox261Sha256Sums = Fixtures.get('telmate-proxmox-2.6.1-sha256sums');
 
 const terraformProviderDatasource = new TerraformProviderDatasource();
 const primaryUrl = terraformProviderDatasource.defaultRegistryUrls[0];
@@ -420,21 +416,26 @@ describe('modules/datasource/terraform-provider/index', () => {
   });
 
   describe('getZipHashes', () => {
-    it('can fetch zip hashes from official endpoint', async () => {
+    it('can fetch zip hashes', async () => {
       httpMock
         .scope(secondaryUrl)
-        .get('/terraform-provider-azurerm/2.56.0/index.json')
-        .reply(200, azurerm2560VersionData)
         .get(
           '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
         )
         .reply(200, azurerm2560Sha256Sums);
 
-      const res = await terraformProviderDatasource.getZipHashes(
-        secondaryUrl,
-        'hashicorp/azurerm',
-        '2.56.0'
-      );
+      const res = await terraformProviderDatasource.getZipHashes([
+        {
+          name: 'azurerm',
+          version: '2.56.0',
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          shasums_url:
+            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+        },
+      ]);
 
       expect(res).not.toBeNull();
       expect(res).toBeArray();
@@ -453,145 +454,18 @@ describe('modules/datasource/terraform-provider/index', () => {
       ]);
     });
 
-    it('can fetch zip hashes from community endpoint', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult)
-        .get('/v1/providers/Telmate/proxmox/2.6.1')
-        .reply(200, {
-          name: 'proxmox',
-          source: 'https://github.com/Telmate/terraform-provider-proxmox',
-          tag: 'v2.6.1',
-        });
-
-      httpMock
-        .scope('https://github.com')
-        .get(
-          '/Telmate/terraform-provider-proxmox/releases/download/v2.6.1/terraform-provider-proxmox_2.6.1_SHA256SUMS'
-        )
-        .reply(200, proxmox261Sha256Sums);
-
-      const res = await terraformProviderDatasource.getZipHashes(
-        primaryUrl,
-        'Telmate/proxmox',
-        '2.6.1'
-      );
-
-      expect(res).not.toBeNull();
-      expect(res).toBeArray();
-      expect(res).toMatchObject([
-        '0837e6a52120caa538330278c13086f7a7d8c15be2000afdf73fcb2f0d30daa1',
-        '2964c02fd3eeff4f19aead79c91087e7375eca1bb582036ea1105cd4d5949e2f',
-        '4540f5fd9db1d2d07466e00a09b610d64ac86ff72ba6f7cbfa8161b07e5c9d04',
-        '660d6b9b931cc0a2dc8c3c47058448d5cdfcccc38f371441c23e8e5de1a77ba8',
-        '6e01766d94883a77c1883a71784d6cdc1f04f862fa8087043ce06a4b9d8c9ea6',
-        '80d8fb293008b9d226996acd158b1a69208b67df15cc15b23a5a24957356400d',
-        '8cd7def49251517bf65dd8a345ae047dc4dd2e1e6178e4c20e4d473f507b3004',
-        'a51bd83d57fe718bb5b86d8c464dcd152558ea7bc04bdeb6202690722e5288b5',
-        'a70f60a5ce57a40857226d8728684bc6a752e1a0003fac0e5cbc87428a87364a',
-        'b7b27e276c0bb79acb262564db151988d676c96d6384debdf4b7c21bd0967cea',
-        'c215f5f6a4a34238307294f4900c12c704f99e0e69e9d2a265d40f92b6ccb759',
+    it('does not fetch anything when there is no shasums_url defined', async () => {
+      const res = await terraformProviderDatasource.getZipHashes([
+        {
+          name: 'azurerm',
+          version: '2.56.0',
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          shasums_url: null,
+        },
       ]);
-    });
-
-    it('does not download non-hasicorp providers from the official releases endpoint', async () => {
-      const res = await terraformProviderDatasource.getZipHashes(
-        secondaryUrl,
-        'Telmate/proxmox',
-        '2.6.1'
-      );
-
-      expect(res).not.toBeNull();
-      expect(res).toBeEmptyArray();
-    });
-
-    it('does not hard fail on official endpoint when there is no manifest available', async () => {
-      httpMock
-        .scope(secondaryUrl)
-        .get('/terraform-provider-azurerm/2.56.0/index.json')
-        .reply(404);
-
-      const res = await terraformProviderDatasource.getZipHashes(
-        secondaryUrl,
-        'hashicorp/azurerm',
-        '2.56.0'
-      );
-
-      expect(res).not.toBeNull();
-      expect(res).toBeEmptyArray();
-    });
-
-    it('does not hard fail on community endpoint when service discovery is empty', async () => {
-      httpMock.scope(primaryUrl).get('/.well-known/terraform.json').reply(200);
-
-      const res = await terraformProviderDatasource.getZipHashes(
-        primaryUrl,
-        'Telmate/proxmox',
-        '2.6.1'
-      );
-
-      expect(res).not.toBeNull();
-      expect(res).toBeEmptyArray();
-    });
-
-    it('does not hard fail on community endpoint when there is no manifest available', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult)
-        .get('/v1/providers/Telmate/proxmox/2.6.1')
-        .reply(404);
-
-      const res = await terraformProviderDatasource.getZipHashes(
-        primaryUrl,
-        'Telmate/proxmox',
-        '2.6.1'
-      );
-
-      expect(res).not.toBeNull();
-      expect(res).toBeEmptyArray();
-    });
-
-    it('does not hard fail on community endpoint when no tag is known', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult)
-        .get('/v1/providers/Telmate/proxmox/2.6.1')
-        .reply(200, {
-          name: 'proxmox',
-          source: 'https://github.com/Telmate/terraform-provider-proxmox',
-        });
-
-      const res = await terraformProviderDatasource.getZipHashes(
-        primaryUrl,
-        'Telmate/proxmox',
-        '2.6.1'
-      );
-
-      expect(res).not.toBeNull();
-      expect(res).toBeEmptyArray();
-    });
-
-    it('stops when the source repository is not supported', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult)
-        .get('/v1/providers/Telmate/proxmox/2.6.1')
-        .reply(200, {
-          name: 'proxmox',
-          source:
-            'https://notgithub.example.com/Telmate/terraform-provider-proxmox',
-          tag: 'v2.6.0',
-        });
-
-      const res = await terraformProviderDatasource.getZipHashes(
-        primaryUrl,
-        'Telmate/proxmox',
-        '2.6.1'
-      );
 
       expect(res).not.toBeNull();
       expect(res).toBeEmptyArray();
@@ -600,18 +474,23 @@ describe('modules/datasource/terraform-provider/index', () => {
     it('does not hard fail when the ziphashes endpoint is not available', async () => {
       httpMock
         .scope(secondaryUrl)
-        .get('/terraform-provider-azurerm/2.56.0/index.json')
-        .reply(200, azurerm2560VersionData)
         .get(
           '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
         )
         .reply(404);
 
-      const res = await terraformProviderDatasource.getZipHashes(
-        secondaryUrl,
-        'hashicorp/azurerm',
-        '2.56.0'
-      );
+      const res = await terraformProviderDatasource.getZipHashes([
+        {
+          name: 'azurerm',
+          version: '2.56.0',
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          shasums_url:
+            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+        },
+      ]);
 
       expect(res).not.toBeNull();
       expect(res).toBeEmptyArray();

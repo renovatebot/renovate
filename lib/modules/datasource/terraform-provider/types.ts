@@ -59,14 +59,5 @@ export interface TerraformRegistryBuildResponse {
   arch: string;
   filename: string;
   download_url: string;
-  shasum: string | null;
-}
-
-/**
- * API Docs https://developer.hashicorp.com/terraform/registry/api-docs (only for registry.terraform.io)
- */
-export interface TerraformCloudRegistryProviderVersion {
-  source: string;
-  name: string;
-  tag: string;
+  shasums_url: string | null;
 }
