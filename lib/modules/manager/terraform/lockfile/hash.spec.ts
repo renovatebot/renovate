@@ -19,10 +19,10 @@ const releaseBackendGoogleSha256 = Fixtures.get(
 );
 const terraformCloudSDCJson = Fixtures.get('terraformCloudSDC.json');
 const terraformCloudBackendAzurermVersions = Fixtures.get(
-  'terraforCloudBackendAzurermVersions.json'
+  'terraformCloudBackendAzurermVersions.json'
 );
 const terraformCloudBackendGoogleVersions = Fixtures.get(
-  'terraforCloudBackendGoogleVersions.json'
+  'terraformCloudBackendGoogleVersions.json'
 );
 
 const log = logger.logger;
