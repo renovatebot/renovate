@@ -90,12 +90,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .reply(200, releaseBackendAzurerm)
       .get(
-        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
-      )
-      .reply(200, releaseBackendAzurermSha256)
-      .get('/terraform-provider-azurerm/2.56.0/index.json')
-      .reply(200, releaseBackendAzurerm)
-      .get(
         '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
       )
       .reply(200, readStreamLinux)
@@ -125,12 +119,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .reply(200, releaseBackendAzurerm)
       .get(
-        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
-      )
-      .reply(200, releaseBackendAzurermSha256)
-      .get('/terraform-provider-azurerm/2.56.0/index.json')
-      .reply(200, releaseBackendAzurerm)
-      .get(
         '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
       )
       .reply(200, readStreamLinux)
@@ -146,21 +134,10 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     );
     expect(log.error.mock.calls).toMatchSnapshot();
     expect(result).not.toBeNull();
-    expect(result).toBeArrayOfSize(13);
+    expect(result).toBeArrayOfSize(2);
     expect(result).toMatchObject([
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
-      'zh:1994185185046df38eb1d1ad3c3b07e4f964224e4ab756957473b754f6aec75c',
-      'zh:202556c142f001830dd4514d475dc747f863ad588382c43daa604d53761f59f5',
-      'zh:3010bcf9ebe33e1195f0a7507183959918c6b88bbdc84c8cc96919654e0abcb0',
-      'zh:39ff556080515b170b10f365a0f95abf2590e9ca3d79261defea1e3133e79088',
-      'zh:500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628',
-      'zh:766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71',
-      'zh:8a7a6548a383a12aa137b0441c15fc7243a1d3e4fd8a9292946ef423d2d8bcff',
-      'zh:bb9f5e9289df17a7a07bdd3add79e41a195e3d129c2ab974b5bb6272c9812068',
-      'zh:ce72eaaecccb50f52f50c69ed3261b0a4050b846f2e664d120d30dfeb65067bc',
-      'zh:d10b33dd19316ef10965ad0fb8ca6f2743bceaf5167bd8e6e25815e20786f190',
-      'zh:fe5aba92430104238f66aaaf02acf323d457d387cd33d6b3d8c6fdd9e449b834',
     ]);
   });
 
@@ -182,6 +159,8 @@ describe('modules/manager/terraform/lockfile/hash', () => {
         os: 'linux',
         arch: 'amd64',
         filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+        shasums_url:
+          'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
         download_url:
           'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
       })
@@ -190,16 +169,11 @@ describe('modules/manager/terraform/lockfile/hash', () => {
         os: 'darwin',
         arch: 'amd64',
         filename: 'terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
+        shasums_url:
+          'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
         download_url:
           'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
-      })
-      .get('/v1/providers/hashicorp/azurerm/2.56.0')
-      .reply(
-        200,
-        '{"name": "azurerm", "source": "https://github.com/hashicorp/terraform-provider-azurerm", "tag": "v2.56.0"}'
-      )
-      .get('/.well-known/terraform.json')
-      .reply(200, terraformCloudSDCJson);
+      });
 
     httpMock
       .scope('https://github.com')
@@ -269,21 +243,10 @@ describe('modules/manager/terraform/lockfile/hash', () => {
         filename: 'terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
         download_url:
           'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
-      })
-      .get('/v1/providers/hashicorp/azurerm/2.56.0')
-      .reply(
-        200,
-        '{"name": "azurerm", "source": "https://github.com/hashicorp/terraform-provider-azurerm", "tag": "v2.56.0"}'
-      )
-      .get('/.well-known/terraform.json')
-      .reply(200, terraformCloudSDCJson);
+      });
 
     httpMock
       .scope('https://github.com')
-      .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
-      )
-      .reply(404, 'Not found')
       .get(
         '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
       )

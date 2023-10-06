@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import is from '@sindresorhus/is';
 import extract from 'extract-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger';
@@ -114,12 +115,9 @@ export class TerraformProviderHash {
     if (!builds) {
       return null;
     }
+
     const zhHashes =
-      await TerraformProviderHash.terraformDatasource.getZipHashes(
-        registryURL,
-        repository,
-        version
-      );
+      await TerraformProviderHash.terraformDatasource.getZipHashes(builds);
     const h1Hashes = await TerraformProviderHash.calculateHashScheme1Hashes(
       builds
     );

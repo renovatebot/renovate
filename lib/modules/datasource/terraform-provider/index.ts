@@ -288,91 +288,15 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     key: (registryURL: string, repository: string, version: string) =>
       `${registryURL}/${repository}/${version}`,
   })
-  async getZipHashes(
-    registryURL: string,
-    repository: string,
-    version: string
-  ): Promise<string[]> {
-    let zipHashUrl: string | null = null;
-    if (registryURL === TerraformProviderDatasource.defaultRegistryUrls[1]) {
-      // On releases.hashicorp.com, the data is built into the version information
+  async getZipHashes(builds: TerraformBuild[]): Promise<string[]> {
+    // Each build might have a shasums_url field, use the first field found, if non is available, do not return any ziphashes
+    const zipHashUrl = builds.reduce<string | null>(
+      (previousUrl, build) => previousUrl ?? build.shasums_url,
+      null
+    );
 
-      const repositoryRegexResult =
-        TerraformProviderDatasource.repositoryRegex.exec(repository)?.groups;
-      if (!repositoryRegexResult) {
-        logger.trace(
-          `Stopping fetch attempt of zip hashes for non-hashicorp provider on ${registryURL} as they are not supported`
-        );
-        return [];
-      }
-      const packageName = repositoryRegexResult.packageName;
-      const backendLookUpName = `terraform-provider-${packageName}`;
-      let versionReleaseBackend: VersionDetailResponse;
-      try {
-        versionReleaseBackend = await this.getReleaseBackendIndex(
-          backendLookUpName,
-          version
-        );
-      } catch (err) {
-        /* istanbul ignore next */
-        if (err instanceof ExternalHostError) {
-          throw err;
-        }
-        logger.debug(
-          { err, backendLookUpName, version },
-          `Failed to retrieve release manifest for ${backendLookUpName} ${version}`
-        );
-        return [];
-      }
-
-      zipHashUrl = `${registryURL}/${backendLookUpName}/${version}/${versionReleaseBackend.shasums}`;
-    } else {
-      // On registries other than releases.hashicorp.com, the data needs to be fetched from the underlying repository
-      const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-        registryURL
-      );
-      if (!serviceDiscovery) {
-        logger.trace(
-          `Failed to retrieve service discovery from ${registryURL}`
-        );
-        return [];
-      }
-      const backendURL = createSDBackendURL(
-        registryURL,
-        'providers.v1',
-        serviceDiscovery,
-        repository
-      );
-      let versionResponse;
-      try {
-        versionResponse = (
-          await this.http.getJson<TerraformCloudRegistryProviderVersion>(
-            `${backendURL}/${version}`
-          )
-        ).body;
-      } catch (err) {
-        /* istanbul ignore next */
-        if (err instanceof ExternalHostError) {
-          throw err;
-        }
-
-        return [];
-      }
-      if (!versionResponse.tag) {
-        logger.trace(
-          `Failed to retrieve version information for ${backendURL}/${version}`
-        );
-        return [];
-      }
-
-      if (!versionResponse.source.startsWith('https://github.com/')) {
-        logger.trace(
-          `Refusing to fetch hash information from non-github source ${versionResponse.source}`
-        );
-        return [];
-      }
-
-      zipHashUrl = `${versionResponse.source}/releases/download/${versionResponse.tag}/terraform-provider-${versionResponse.name}_${version}_SHA256SUMS`;
+    if (!zipHashUrl) {
+      return [];
     }
 
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
