@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/terraform/lockfile/hash contains a ziphash for manifest files not directly used 1`] = `[]`;
+
 exports[`modules/manager/terraform/lockfile/hash full walkthrough 1`] = `[]`;
 
 exports[`modules/manager/terraform/lockfile/hash full walkthrough on terraform cloud 1`] = `[]`;
