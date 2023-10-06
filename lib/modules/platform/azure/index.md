@@ -140,7 +140,7 @@ Make sure that the "Project Collection Build Service (YOUR-PROJECT)" user has th
 - Create branch
 - Read
 
-Make sure that the the user has has the following permission at Project-level:
+The user must have the following permission at Project-level:
 
 - View project-level information
 
