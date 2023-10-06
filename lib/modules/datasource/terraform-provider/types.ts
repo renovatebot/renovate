@@ -2,7 +2,6 @@ export interface VersionDetailResponse {
   name: string;
   version: string;
   builds: TerraformBuild[];
-  shasums: string;
 }
 
 export interface TerraformBuild {
