@@ -146,7 +146,8 @@ Make sure that the the user has has the following permission at Project-level:
 
 ### Linking a work item to the Pull Requests
 
-If you want Renovate to automatically link an existing work item to the Pull Requests, you can set the `azureWorkItemId` configuration. Make sure the user has the following permissions on the work item's *area path*:
+If you want Renovate to automatically link an existing work item to the Pull Requests, you can set the `azureWorkItemId` configuration.
+Make sure the user has the following permissions on the work item's *area path*:
 
 - Edit work items in this node
 - View work items in this node
