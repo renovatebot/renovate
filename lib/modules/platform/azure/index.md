@@ -156,7 +156,8 @@ If the user do not have the permissions, pull request creation will succeed but 
 
 ### Adding tags to Pull Requests
 
-Tags can be added to Pull Requests using the `addLabels` configuration. If the tag does not exist in the DevOps project, it will be created automatically during creation of the Pull Request as long as the user has the permissions at Project-level:
+Tags can be added to Pull Requests using the `labels` or `addLabels` configurations.
+If the tag does not exist in the DevOps project, it will be created automatically during creation of the Pull Request as long as the user has the permissions at Project-level:
 
 - Create tag definition
 
