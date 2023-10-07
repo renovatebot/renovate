@@ -446,6 +446,12 @@ describe('modules/datasource/terraform-provider/index', () => {
       ]);
     });
 
+    it('does not fetch anything when there are no builds passed in', async () => {
+      const res = await terraformProviderDatasource.getZipHashes([]);
+
+      expect(res).toBeEmptyArray();
+    });
+
     it('does not fetch anything when there is no shasums_url defined', async () => {
       const res = await terraformProviderDatasource.getZipHashes([
         {
