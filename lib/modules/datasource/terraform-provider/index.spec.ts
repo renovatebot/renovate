@@ -437,8 +437,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         },
       ]);
 
-      expect(res).not.toBeNull();
-      expect(res).toBeArray();
       expect(res).toMatchObject([
         '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628',
         '8a7a6548a383a12aa137b0441c15fc7243a1d3e4fd8a9292946ef423d2d8bcff',
@@ -467,7 +465,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         },
       ]);
 
-      expect(res).not.toBeNull();
       expect(res).toBeEmptyArray();
     });
 
@@ -492,7 +489,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         },
       ]);
 
-      expect(res).not.toBeNull();
       expect(res).toBeEmptyArray();
     });
   });
