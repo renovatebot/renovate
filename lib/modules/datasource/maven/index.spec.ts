@@ -1,4 +1,4 @@
-import * as _googleAuth from 'google-auth-library';
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { ReleaseResult, getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -471,7 +471,7 @@ describe('modules/datasource/maven/index', () => {
       )
       .reply(200, Fixtures.get('pom.xml'));
 
-    googleAuth.GoogleAuth.mockImplementation(
+    googleAuth.mockImplementation(
       jest.fn().mockImplementation(() => ({
         getAccessToken: jest.fn().mockResolvedValue('some-token'),
       }))
@@ -480,7 +480,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', baseUrlAR);
 
     expect(res).toMatchSnapshot();
-    expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(5);
+    expect(googleAuth).toHaveBeenCalledTimes(5);
   });
 
   it('supports artifactregistry urls without auth', async () => {
@@ -505,7 +505,7 @@ describe('modules/datasource/maven/index', () => {
       .get(pomfilePath)
       .reply(200, Fixtures.get('pom.xml'));
 
-    googleAuth.GoogleAuth.mockImplementation(
+    googleAuth.mockImplementation(
       jest.fn().mockImplementation(() => ({
         getAccessToken: jest.fn().mockResolvedValue(undefined),
       }))
@@ -514,7 +514,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', baseUrlAR);
 
     expect(res).toMatchSnapshot();
-    expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(5);
+    expect(googleAuth).toHaveBeenCalledTimes(5);
   });
 
   describe('fetching parent info', () => {

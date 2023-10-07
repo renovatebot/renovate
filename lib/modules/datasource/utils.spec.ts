@@ -1,4 +1,4 @@
-import * as _googleAuth from 'google-auth-library';
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { mocked } from '../../../test/util';
 import type { HttpResponse } from '../../util/http/types';
 import { getGoogleAuthToken, isArtifactoryServer } from './util';
@@ -25,8 +25,8 @@ describe('modules/datasource/utils', () => {
     expect(isArtifactoryServer(response)).toBeTrue();
   });
 
-  it('retrieves an Google Access token', async () => {
-    googleAuth.GoogleAuth.mockImplementationOnce(
+  it('retrieves a Google Access token', async () => {
+    googleAuth.mockImplementationOnce(
       jest.fn().mockImplementationOnce(() => ({
         getAccessToken: jest.fn().mockResolvedValue('some-token'),
       }))
@@ -37,7 +37,7 @@ describe('modules/datasource/utils', () => {
   });
 
   it('no Google Access token results in null', async () => {
-    googleAuth.GoogleAuth.mockImplementationOnce(
+    googleAuth.mockImplementationOnce(
       jest.fn().mockImplementationOnce(() => ({
         getAccessToken: jest.fn().mockReturnValue(''),
       }))
@@ -47,9 +47,9 @@ describe('modules/datasource/utils', () => {
     expect(res).toBeNull();
   });
 
-  it('Google Access token error throws an error', async () => {
+  it('Google Access token error throws an exception', async () => {
     const err = 'some-error';
-    googleAuth.GoogleAuth.mockImplementationOnce(
+    googleAuth.mockImplementationOnce(
       jest.fn().mockImplementationOnce(() => ({
         getAccessToken: jest.fn().mockRejectedValue(new Error(err)),
       }))
@@ -59,7 +59,7 @@ describe('modules/datasource/utils', () => {
   });
 
   it('Google Access token could not load default credentials', async () => {
-    googleAuth.GoogleAuth.mockImplementationOnce(
+    googleAuth.mockImplementationOnce(
       jest.fn().mockImplementationOnce(() => ({
         getAccessToken: jest.fn().mockRejectedValue({
           message: 'Could not load the default credentials',
