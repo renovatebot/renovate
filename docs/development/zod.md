@@ -14,6 +14,7 @@
       - [Use `.catch()` to force default values](#use-catch-to-force-default-values)
       - [Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections](#use-loosearray-and-looserecord-to-filter-out-incorrect-values-from-collections)
     - [Combining with `Result` class](#combining-with-result-class)
+    - [Combining with `Http` class](#combining-with-http-class)
 
 # Zod schema guideline
 
@@ -38,7 +39,11 @@ We should use Zod for validating:
 
 ### Use `schema.ts` files for Zod schemas
 
-Try to locate/isolate Zod schemas in their own `schema.ts` files to keep them organized and reusable. [TODO: do our examples follow that?]
+Following well-known refactoring principles, we should locate schemas accordingly.
+Generally, we keep them in the `schema.ts` files, and even better if we test them in the `schema.spec.ts` files.
+However, for small usage areas, it's fine to keep them in the same file for reader's convenience.
+
+Sometimes, we create or extend schemas on the fly, but it should be avoided as it has performance implications.
 
 ### Name schemas without any `Schema` suffix
 
@@ -72,8 +77,8 @@ export type User = z.infer<typeof User>;
 
 ### Specify only necessary fields
 
-External data being queried by Renovate can be very complex while we may only need a subset of fields for our use cases.
-Avoid overspecifying schemas and instead extract only the minimum necessary fields.
+External data being queried by Renovate can be very complex, while we may only need a subset of fields for our use cases.
+Avoid over-specifying schemas, and instead extract only the minimum necessary fields.
 If we don't include them, the surface of the contract between external data source is minimal, meaning less errors to fix in the future.
 
 Example of **incorrect** usage if we only care about width, height and length of a box:
@@ -221,11 +226,11 @@ const xs = OnlyNumbers.parse([1, 2, null, 3, 'foobar', 4]);
 
 ### Combining with `Result` class
 
-Class `Result` (and also `AsyncResult`) represents result of an operation, e.g. `Result.ok(200)` or `Result.err(404)`.
+Class `Result` (and also `AsyncResult`) represents the result of an operation, e.g. `Result.ok(200)` or `Result.err(404)`.
 
 It supports `.transform()` method, which is similar to `zod`'s one.
 
-Also it supports `.onResult()` and `.onError()` methods for side-effectful result inspection.
+It also supports `.onResult()` and `.onError()` methods for side-effectful result inspection.
 
 Once all result manipulations are done, you may call `.unwrap()`, `.unwrapOrElse()` or `.unwrapOrThrow()` methods to obtain the underlying result value.
 
@@ -234,6 +239,9 @@ You can wrap schema parsing result into the `Result` class:
 ```ts
 const { val, err } = Result.parse(url, z.string().url())
   .transform((url) => http.get(url))
+  .onError((err) => {
+    logger.warn({ err }, 'Failed to fetch something important');
+  })
   .transform((res) => res.body);
 ```
 
@@ -247,4 +255,37 @@ const UserConfig = z.object({
 const config = await Result.wrap(readLocalFile('config.json'))
   .transform((content) => Json.pipe(UserConfig).safeParse(content))
   .unwrapOrThrow();
+```
+
+### Combining with `Http` class
+
+`Http` class supports schema validation for the results of JSON family of methods, e.g. `.getJson()`, `.postJson()`, etc.
+Under the hood, `.parseAsync()` method is used (**important consequence**: in case of invalid data, it will throw).
+
+Place schema as the last argument of the method:
+
+```ts
+const Users = z.object({
+  users: z.object({
+    id: z.number(),
+    firstName: z.string(),
+    lastName: z.string(),
+  }),
+});
+
+const { body: users } = await http.getJson(
+  'https://dummyjson.com/users',
+  LooseArray(User)
+);
+```
+
+For GET requests, use `.getJsonSafe()` method which returns `Result` instance:
+
+```ts
+const users = await http
+  .getJsonSafe('https://dummyjson.com/users', LooseArray(User))
+  .onError((err) => {
+    logger.warn({ err }, 'Failed to fetch users');
+  })
+  .unwrapOrElse([]);
 ```
