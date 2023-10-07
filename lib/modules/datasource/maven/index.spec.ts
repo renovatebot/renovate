@@ -479,7 +479,24 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', baseUrlAR);
 
-    expect(res).toMatchSnapshot();
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl:
+        'artifactregistry://maven.pkg.dev/some-project/some-repository',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
     expect(googleAuth).toHaveBeenCalledTimes(5);
   });
 
@@ -513,7 +530,24 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', baseUrlAR);
 
-    expect(res).toMatchSnapshot();
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl:
+        'artifactregistry://maven.pkg.dev/some-project/some-repository',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
     expect(googleAuth).toHaveBeenCalledTimes(5);
   });
 
