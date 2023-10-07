@@ -21,9 +21,7 @@ export async function getGoogleAuthToken(): Promise<string | null> {
     if (accessToken) {
       // sanitize token
       addSecretForSanitizing(accessToken);
-      return Buffer.from(`oauth2accesstoken:${accessToken}`).toString(
-        'base64'
-      );
+      return Buffer.from(`oauth2accesstoken:${accessToken}`).toString('base64');
     } else {
       logger.warn(
         'Could not retrieve access token using google-auth-library getAccessToken'
