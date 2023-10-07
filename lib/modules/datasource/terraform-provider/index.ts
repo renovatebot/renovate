@@ -287,12 +287,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     key: (registryURL: string, repository: string, version: string) =>
       `${registryURL}/${repository}/${version}`,
   })
-  async getZipHashes(builds: TerraformBuild[]): Promise<string[]> {
-    // Each build might have a shasums_url field, use the first field found, if non is available, do not return any ziphashes
-    const zipHashUrl = builds.reduce<string | null>(
-      (previousUrl, build) => previousUrl ?? build.shasums_url,
-      null
-    );
+  async getZipHashes(builds: TerraformBuild[]): Promise<string[] | undefined> {
+    if (builds.length === 0) {
+      return [];
+    }
+
+    const zipHashUrl = builds[0].shasums_url;
 
     if (!zipHashUrl) {
       return [];
