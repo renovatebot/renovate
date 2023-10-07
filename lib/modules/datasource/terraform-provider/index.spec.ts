@@ -5,9 +5,6 @@ import { TerraformProviderDatasource } from '.';
 
 const azurermData = Fixtures.get('azurerm-provider.json');
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
-const azurerm2560Sha256Sums = Fixtures.get(
-  'azurerm-provider-2.56.0-sha256sums'
-);
 const hashicorpGoogleBetaReleases = Fixtures.get(
   'releaseBackendIndexGoogleBeta.json'
 );
@@ -422,7 +419,12 @@ describe('modules/datasource/terraform-provider/index', () => {
         .get(
           '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
         )
-        .reply(200, azurerm2560Sha256Sums);
+        .reply(
+          200,
+          '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628 terraform-provider-azurerm_2.56.0_darwin_amd64.zip\n' +
+            '766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71 terraform-provider-azurerm_2.56.0_linux_amd64.zip\n' +
+            'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f terraform-provider-azurerm_2.56.0_manifest.json'
+        );
 
       const res = await terraformProviderDatasource.getZipHashes([
         {
@@ -439,16 +441,8 @@ describe('modules/datasource/terraform-provider/index', () => {
 
       expect(res).toMatchObject([
         '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628',
-        '8a7a6548a383a12aa137b0441c15fc7243a1d3e4fd8a9292946ef423d2d8bcff',
-        'd10b33dd19316ef10965ad0fb8ca6f2743bceaf5167bd8e6e25815e20786f190',
-        '39ff556080515b170b10f365a0f95abf2590e9ca3d79261defea1e3133e79088',
-        'ce72eaaecccb50f52f50c69ed3261b0a4050b846f2e664d120d30dfeb65067bc',
-        '1994185185046df38eb1d1ad3c3b07e4f964224e4ab756957473b754f6aec75c',
         '766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71',
-        'bb9f5e9289df17a7a07bdd3add79e41a195e3d129c2ab974b5bb6272c9812068',
-        '202556c142f001830dd4514d475dc747f863ad588382c43daa604d53761f59f5',
-        '3010bcf9ebe33e1195f0a7507183959918c6b88bbdc84c8cc96919654e0abcb0',
-        'fe5aba92430104238f66aaaf02acf323d457d387cd33d6b3d8c6fdd9e449b834',
+        'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f',
       ]);
     });
 
