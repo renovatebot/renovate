@@ -1,8 +1,29 @@
 # Zod schema guideline
 
-The basic idea behind schema validation is to find the right balance between strictness of contracts between separately developed systems and the permissiveness of the Renovate itself.
+Renovate has adopted Zod for schema validation and it is desirable that any new manager or datasource work uses this approach.
+This document describes some guides as to how and why to use Zod features.
 
-## Don't use `Schema` suffix for naming
+The key concept of schema validation is to find the right balance between strictness of contracts between separately developed systems and the permissiveness of the Renovate itself.
+We want Renovate to be only as strict as it needs to be (e.g. about optional fields which a public registry might always have but self-hosted implementations may leave off) but not to make _assumptions_ about the presence of fields which could lead to run-time errors when they are missing.
+
+## When/where to use Zod
+
+We should use Zod for validating:
+
+- Data received from external APIs and data sources, particularly the `lib/modules/datasource/*` section of Renovate
+- Data parsed from files in the repository, particularly the `lib/modules/manager/*` section of Renovate
+
+The `cdnjs` datasource is a good example of using Zod schema validations on API responses from external sources.
+
+The `composer` manager is a good example of using Zod schema validation in a manager to validate parsed files in a repository.
+
+## Technical guide
+
+### Use schema.ts files for Zod schemas
+
+Try to locate/isolate Zod schemas in their own schema.ts files to keep them organized and reusable. [TODO: do our examples follow that?]
+
+### Name schemas without any `Schema` suffix
 
 Schemas are distinguished by being named with capital letter:
 
@@ -15,10 +36,10 @@ const ComplexNumber = z.object({
 
 Don't use names like `ComplexNumberSchema` for that.
 
-## Inferred types
+### Inferred types
 
-Create inferred types only when they're used somewhere in the code.
-Place inferred types just after the schema definition using the same name.
+Create inferred types after schemas if they're needed somewhere in the code.
+Place such inferred types just after the schema definition using the same name.
 
 While text editors may confuse schema and type name sometimes, it's obvious which is which from the syntactic context.
 
@@ -32,15 +53,13 @@ export const User = z.object({
 export type User = z.infer<typeof User>;
 ```
 
-## Avoid specifying unused fields
+### Specify only necessary fields
 
-External data being queried by Renovate can be very complex.
-However, often we need just a couple fields.
-
-If we include unrelated fields in our schemas, we're responsible for them to always be correct.
+External data being queried by Renovate can be very complex while we may only need a subset of fields for our use cases.
+Avoid overspecifying schemas and instead extract only the minimum necessary fields.
 If we don't include them, the surface of the contract between external data source is minimal, meaning less errors to fix in the future.
 
-Example of **incorrect** usage:
+Example of **incorrect** usage if we only care about width, height and length of a box:
 
 ```ts
 const Box = z.object({
@@ -72,11 +91,10 @@ const { width, height, length } = Box.parse(input);
 const volume = width * height * length;
 ```
 
-## Use `Json`, `Yaml` and `Toml` for string parsing
+### Use `Json`, `Yaml` and `Toml` for string parsing
 
 Sometimes we need to perform additional step such as `JSON.parse()` before validation of the data structure.
-
-Instead, helpers from `schema-utils.ts` should be used.
+Use helpers from `schema-utils.ts` for this purpose.
 
 Here is an **incorrect** way to parse from string:
 
@@ -95,7 +113,7 @@ The **correct** way to parse from string:
 Json.pipe(ApiResult).parse(input);
 ```
 
-## Use `.transform()` method to process parsed data
+### Use `.transform()` method to process parsed data
 
 Schema validation helps to be more confident with types during downstream data transformation.
 
@@ -132,14 +150,25 @@ Volume.parse({
 });
 ```
 
-## Stick to permissive behavior when possible
+### Separate validation from transformation
+
+When parsing third party data, we are typically doing the following:
+
+- Validating that the data is correct/sufficient to use
+- Transforming it into a standardized format for internal usage
+
+Although it's not a strict requirement, your code will be cleaner if you perform the validation step first and then follow with transformation.
+
+### Stick to permissive behavior when possible
 
 Zod schemas are strict, and even some insufficient field is incorrect, the whole data will be treated like malformed.
 This could lead to cases when Renovate could've continued processing, but didn't.
 
+Remember: our goal is not to validate that data corresponds to any official specifications, but rather to ensure that the data is enough for Renovate to use.
+
 There are some techniques to make it more permissive to the input data.
 
-### Use `.catch()` to force default values
+#### Use `.catch()` to force default values
 
 ```ts
 const Box = z.object({
@@ -151,7 +180,7 @@ const box = Box.parse({ width: 10, height: null });
 // => { width: 10, height: 10 }
 ```
 
-### Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections
+#### Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections
 
 Suppose you want to validate an array and retain only number values in it.
 By using only methods provided by `zod` library, you'll have to write something like this:
@@ -170,7 +199,9 @@ Instead, you should use `LooseArray` and `LooseRecord` helpers provided in `sche
 const OnlyNumbers = LooseArray(z.number());
 ```
 
-## Combining with `Result` class
+[TODO: more details on how the above would be used]
+
+### Combining with `Result` class
 
 Class `Result` (and also `AsyncResult`) represents result of an operation, e.g. `Result.ok(200)` or `Result.err(404)`.
 
