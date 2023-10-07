@@ -106,9 +106,7 @@ export const presets: Record<string, Preset> = {
       'phpspec/phpspec',
       'phpunit/phpunit',
     ],
-    matchPackagePrefixes: [
-      'pestphp/',
-    ],
+    matchPackagePrefixes: ['pestphp/'],
   },
   postcss: {
     description: 'All PostCSS packages.',
@@ -135,9 +133,6 @@ export const presets: Record<string, Preset> = {
   },
   unitTest: {
     description: 'All unit test packages.',
-    extends: [
-      'packages:jsUnitTest',
-      'packages:phpUnitTest',
-    ],
+    extends: ['packages:jsUnitTest', 'packages:phpUnitTest'],
   },
 };
