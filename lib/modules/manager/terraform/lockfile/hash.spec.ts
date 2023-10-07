@@ -19,8 +19,7 @@ const terraformCloudSDCJson = Fixtures.get(
   '../../../../modules/datasource/terraform-provider/'
 );
 const terraformCloudBackendAzurermVersions = Fixtures.get(
-  'azurerm-provider-versions.json',
-  '../../../../modules/datasource/terraform-provider/'
+  'terraformCloudBackendAzurermVersions.json'
 );
 const terraformCloudBackendGoogleVersions = Fixtures.get(
   'terraformCloudBackendGoogleVersions.json'
