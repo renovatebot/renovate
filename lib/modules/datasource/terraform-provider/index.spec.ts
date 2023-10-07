@@ -483,7 +483,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         },
       ]);
 
-      expect(res).toBeEmptyArray();
+      expect(res).toBeUndefined();
     });
   });
 });

@@ -116,7 +116,8 @@ export class TerraformProviderHash {
     }
 
     const zhHashes =
-      await TerraformProviderHash.terraformDatasource.getZipHashes(builds);
+      (await TerraformProviderHash.terraformDatasource.getZipHashes(builds)) ??
+      [];
     const h1Hashes = await TerraformProviderHash.calculateHashScheme1Hashes(
       builds
     );

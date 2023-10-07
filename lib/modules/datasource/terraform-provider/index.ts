@@ -311,7 +311,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         { err, zipHashUrl },
         `Failed to retrieve zip hashes from ${zipHashUrl}`
       );
-      return [];
+      return undefined;
     }
 
     return rawHashData
