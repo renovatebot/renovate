@@ -34,14 +34,12 @@ Most issues should have a label relating to either a platform, manager, datasour
 
     status:requirements
     status:blocked
-    status:ready
     status:in-progress
 
 </details>
 
 Use these to label the status of an issue.
 For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
-All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can find any which are missing a status label.
 
 ### Type of issue
 
@@ -59,7 +57,8 @@ Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
 
-Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can find any which are missing one.
+All issues should have a `type:*` label.
+Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) to find issues without a `type:*` label.
 
 Add the `breaking` label for Issues or PRs which have changes that are not backwards compatible and require a major version bump.
 
@@ -113,7 +112,9 @@ Keep in mind that an issue can be both affecting a platform and a self-hosted in
     core:dashboard
     core:git
     core:onboarding
+    core:package-rules
     core:schedule
+    core:vulnerabilities
 
 </details>
 
@@ -167,11 +168,15 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     good first issue
     help wanted
     auto:bad-vibes
+    auto:discussion-closed
+    auto:discussion-first
+    auto:format-code
     auto:logs
-    auto:needs-code-formatting
     auto:needs-details
     auto:no-coverage-ignore
+    auto:no-done-comments
     auto:reproduction
+    auto:retry-latest
 
 </details>
 
@@ -195,8 +200,6 @@ Add a label `auto:logs` to indicate that there's a problem with the logs, and th
 1. Provide logs (if there are none yet)
 1. Provide more logs (in case current logs are insufficient)
 1. Format their logs properly
-
-Add a label `auto:needs-code-formatting` to discussions with logs/code that needs to be formatted.
 
 Add a label `auto:needs-details` to discussions which need more details to move forward.
 
