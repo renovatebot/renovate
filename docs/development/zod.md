@@ -30,15 +30,15 @@ We should use Zod for validating:
 - Data received from external APIs and data sources, particularly the `lib/modules/datasource/*` section of Renovate
 - Data parsed from files in the repository, particularly the `lib/modules/manager/*` section of Renovate
 
-The `cdnjs` datasource is a good example of using Zod schema validations on API responses from external sources.
+[The `cdnjs` datasource](https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/cdnjs/index.ts) is a good example of using Zod schema validations on API responses from external sources.
 
-The `composer` manager is a good example of using Zod schema validation in a manager to validate parsed files in a repository.
+[The `composer` manager](https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/schema.ts) is a good example of using Zod schema validation in a manager to validate parsed files in a repository.
 
 ## Technical guide
 
 ### Use `schema.ts` files for Zod schemas
 
-Try to locate/isolate Zod schemas in their own schema.ts files to keep them organized and reusable. [TODO: do our examples follow that?]
+Try to locate/isolate Zod schemas in their own `schema.ts` files to keep them organized and reusable. [TODO: do our examples follow that?]
 
 ### Name schemas without any `Schema` suffix
 
@@ -214,9 +214,10 @@ Instead, you should use `LooseArray` and `LooseRecord` helpers provided in `sche
 
 ```ts
 const OnlyNumbers = LooseArray(z.number());
-```
 
-[TODO: more details on how the above would be used]
+const xs = OnlyNumbers.parse([1, 2, null, 3, 'foobar', 4]);
+// => [1, 2, 3, 4]
+```
 
 ### Combining with `Result` class
 
