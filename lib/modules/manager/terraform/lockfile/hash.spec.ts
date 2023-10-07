@@ -11,15 +11,16 @@ const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
   TerraformProviderDatasource.defaultRegistryUrls[0];
 const releaseBackendAzurerm = Fixtures.get('releaseBackendAzurerm_2_56_0.json');
-const releaseBackendAzurermSha256 = Fixtures.get(
-  'releaseBackendAzurerm_2_56_0_SHA256SUMS'
-);
 const releaseBackendGoogleSha256 = Fixtures.get(
   'releaseBackendGoogle_4_84_0_SHA256SUMS'
 );
-const terraformCloudSDCJson = Fixtures.get('terraformCloudSDC.json');
+const terraformCloudSDCJson = Fixtures.get(
+  'service-discovery.json',
+  '../../../../modules/datasource/terraform-provider/'
+);
 const terraformCloudBackendAzurermVersions = Fixtures.get(
-  'terraformCloudBackendAzurermVersions.json'
+  'azurerm-provider-versions.json',
+  '../../../../modules/datasource/terraform-provider/'
 );
 const terraformCloudBackendGoogleVersions = Fixtures.get(
   'terraformCloudBackendGoogleVersions.json'
@@ -152,66 +153,65 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       .scope(terraformCloudReleaseBackendUrl)
       .get('/.well-known/terraform.json')
       .reply(200, terraformCloudSDCJson)
-      .get('/v1/providers/hashicorp/azurerm/versions')
-      .reply(200, terraformCloudBackendAzurermVersions)
-      .get('/v1/providers/hashicorp/azurerm/2.56.0/download/linux/amd64')
+      .get('/v1/providers/hashicorp/google/versions')
+      .reply(200, terraformCloudBackendGoogleVersions)
+      .get('/v1/providers/hashicorp/google/4.84.0/download/linux/amd64')
       .reply(200, {
         os: 'linux',
         arch: 'amd64',
-        filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+        filename: 'terraform-provider-google_4.84.0_linux_amd64.zip',
         shasums_url:
-          'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+          'https://github.com/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_SHA256SUMS',
         download_url:
-          'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          'https://github.com/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_linux_amd64.zip',
       })
-      .get('/v1/providers/hashicorp/azurerm/2.56.0/download/darwin/amd64')
+      .get('/v1/providers/hashicorp/google/4.84.0/download/darwin/amd64')
       .reply(200, {
         os: 'darwin',
         arch: 'amd64',
-        filename: 'terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
+        filename: 'terraform-provider-google_4.84.0_darwin_amd64.zip',
         shasums_url:
-          'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+          'https://github.com/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_SHA256SUMS',
         download_url:
-          'https://github.com/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
+          'https://github.com/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_darwin_amd64.zip',
       });
 
     httpMock
       .scope('https://github.com')
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_SHA256SUMS'
       )
-      .reply(200, releaseBackendAzurermSha256)
+      .reply(200, releaseBackendGoogleSha256)
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
+        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_linux_amd64.zip'
       )
       .reply(200, readStreamLinux)
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip'
+        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_darwin_amd64.zip'
       )
       .reply(200, readStreamDarwin);
 
     const result = await TerraformProviderHash.createHashes(
       'https://registry.terraform.io',
-      'hashicorp/azurerm',
-      '2.56.0'
+      'hashicorp/google',
+      '4.84.0'
     );
     expect(log.error.mock.calls).toMatchSnapshot();
-    expect(result).not.toBeNull();
-    expect(result).toBeArrayOfSize(13);
     expect(result).toMatchObject([
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
-      'zh:1994185185046df38eb1d1ad3c3b07e4f964224e4ab756957473b754f6aec75c',
-      'zh:202556c142f001830dd4514d475dc747f863ad588382c43daa604d53761f59f5',
-      'zh:3010bcf9ebe33e1195f0a7507183959918c6b88bbdc84c8cc96919654e0abcb0',
-      'zh:39ff556080515b170b10f365a0f95abf2590e9ca3d79261defea1e3133e79088',
-      'zh:500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628',
-      'zh:766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71',
-      'zh:8a7a6548a383a12aa137b0441c15fc7243a1d3e4fd8a9292946ef423d2d8bcff',
-      'zh:bb9f5e9289df17a7a07bdd3add79e41a195e3d129c2ab974b5bb6272c9812068',
-      'zh:ce72eaaecccb50f52f50c69ed3261b0a4050b846f2e664d120d30dfeb65067bc',
-      'zh:d10b33dd19316ef10965ad0fb8ca6f2743bceaf5167bd8e6e25815e20786f190',
-      'zh:fe5aba92430104238f66aaaf02acf323d457d387cd33d6b3d8c6fdd9e449b834',
+      'zh:0b3e945fa76876c312bdddca7b18c93b734998febb616b2ebb84a0a299ae97c2',
+      'zh:1d47d00730fab764bddb6d548fed7e124739b0bcebb9f3b3c6aa247de55fb804',
+      'zh:29bff92b4375a35a7729248b3bc5db8991ca1b9ba640fc25b13700e12f99c195',
+      'zh:382353516e7d408a81f1a09a36f9015429be73ca3665367119aad88713209d9a',
+      'zh:78afa20e25a690d076eeaafd7879993ef9763a8a1b6762e2cbe42330464cc1fa',
+      'zh:8f6422e94de865669b33a2d9fb95a3e392e841988e890f7379a206e9d47e3415',
+      'zh:be5c7b52c893b971c860146aec643f7007f34430106f101eab686ed81eccbd26',
+      'zh:bfc37b641bf3378183eb3b8735554c3949a5cfaa8f76403d7eff38de1474b6d9',
+      'zh:c834f88dc8eb21af992871ed13a221015ae3b051aeca7386662071026f1546b4',
+      'zh:f3296c8c0d57dc28e23cf91717484264531655ac478d994584ebc73f70679471',
+      'zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c',
+      'zh:f8efe114ff4891776f48f7d2620b8d6963d3ddac6e42ce25bc761343da964c24',
     ]);
   });
 
