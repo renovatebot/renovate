@@ -1,3 +1,22 @@
+### Table of Contents
+
+- [Zod schema guideline](#introduction)
+  - [When/where to use Zod](#when-and-where-to-use)
+  - [Technical guide](#technical-guide)
+    - [Use `schema.ts` files for Zod schemas](#use-schema-ts)
+    - [Name schemas without any `Schema` suffix](#avoid-schema-suffix)
+    - [Inferred types](#inferred-types)
+    - [Specify only necessary fields](#specify-only-necessary-fields)
+    - [Use `Json`, `Yaml` and `Toml` for string parsing](#use-string-parsing-helpers)
+    - [Use `.transform()` method to process parsed data](#use-transform-method)
+    - [Separate validation from transformation](#separator-validation-from-transformation)
+    - [Try to be permissive](#try-to-be-permissive)
+      - [Use `.catch()` to force default values](#use-catch-method)
+      - [Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections](#use-loose-collection-helpers)
+    - [Combining with `Result` class](#combining-with-result-class)
+
+<a id="#introduction"></a>
+
 # Zod schema guideline
 
 Renovate has adopted Zod for schema validation and it is desirable that any new manager or datasource work uses this approach.
@@ -5,6 +24,8 @@ This document describes some guides as to how and why to use Zod features.
 
 The key concept of schema validation is to find the right balance between strictness of contracts between separately developed systems and the permissiveness of the Renovate itself.
 We want Renovate to be only as strict as it needs to be (e.g. about optional fields which a public registry might always have but self-hosted implementations may leave off) but not to make _assumptions_ about the presence of fields which could lead to run-time errors when they are missing.
+
+<a id="#when-and-where-to-use"></a>
 
 ## When/where to use Zod
 
@@ -17,11 +38,17 @@ The `cdnjs` datasource is a good example of using Zod schema validations on API 
 
 The `composer` manager is a good example of using Zod schema validation in a manager to validate parsed files in a repository.
 
+<a id="#technical-guide"></a>
+
 ## Technical guide
 
-### Use schema.ts files for Zod schemas
+<a id="#use-schema-ts"></a>
+
+### Use `schema.ts` files for Zod schemas
 
 Try to locate/isolate Zod schemas in their own schema.ts files to keep them organized and reusable. [TODO: do our examples follow that?]
+
+<a id="#avoid-schema-suffix"></a>
 
 ### Name schemas without any `Schema` suffix
 
@@ -35,6 +62,8 @@ const ComplexNumber = z.object({
 ```
 
 Don't use names like `ComplexNumberSchema` for that.
+
+<a id="#inferred-types"></a>
 
 ### Inferred types
 
@@ -52,6 +81,8 @@ export const User = z.object({
 });
 export type User = z.infer<typeof User>;
 ```
+
+<a id="#specify-only-necessary-fields"></a>
 
 ### Specify only necessary fields
 
@@ -91,6 +122,8 @@ const { width, height, length } = Box.parse(input);
 const volume = width * height * length;
 ```
 
+<a id="#use-string-parsing-helpers"></a>
+
 ### Use `Json`, `Yaml` and `Toml` for string parsing
 
 Sometimes we need to perform additional step such as `JSON.parse()` before validation of the data structure.
@@ -112,6 +145,8 @@ The **correct** way to parse from string:
 ```ts
 Json.pipe(ApiResult).parse(input);
 ```
+
+<a id="#use-transform-method"></a>
 
 ### Use `.transform()` method to process parsed data
 
@@ -150,6 +185,8 @@ Volume.parse({
 });
 ```
 
+<a id="#separator-validation-from-transformation"></a>
+
 ### Separate validation from transformation
 
 When parsing third party data, we are typically doing the following:
@@ -159,6 +196,8 @@ When parsing third party data, we are typically doing the following:
 
 Although it's not a strict requirement, your code will be cleaner if you perform the validation step first and then follow with transformation.
 
+<a id="#try-to-be-permissive"></a>
+
 ### Stick to permissive behavior when possible
 
 Zod schemas are strict, and even some insufficient field is incorrect, the whole data will be treated like malformed.
@@ -167,6 +206,8 @@ This could lead to cases when Renovate could've continued processing, but didn't
 Remember: our goal is not to validate that data corresponds to any official specifications, but rather to ensure that the data is enough for Renovate to use.
 
 There are some techniques to make it more permissive to the input data.
+
+<a id="#use-catch-method"></a>
 
 #### Use `.catch()` to force default values
 
@@ -179,6 +220,8 @@ const Box = z.object({
 const box = Box.parse({ width: 10, height: null });
 // => { width: 10, height: 10 }
 ```
+
+<a id="#use-loose-collection-helpers"></a>
 
 #### Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections
 
@@ -200,6 +243,8 @@ const OnlyNumbers = LooseArray(z.number());
 ```
 
 [TODO: more details on how the above would be used]
+
+<a id="#combining-with-result-class"></a>
 
 ### Combining with `Result` class
 
