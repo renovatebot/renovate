@@ -98,7 +98,7 @@ export const presets: Record<string, Preset> = {
   phpLinters: {
     description: 'All PHP lint-related packages.',
     matchPackageNames: ['friendsofphp/php-cs-fixer', 'squizlabs/php_codesniffer', 'symplify/easy-coding-standard'],
-  }
+  },
   postcss: {
     description: 'All PostCSS packages.',
     matchPackageNames: ['postcss'],
