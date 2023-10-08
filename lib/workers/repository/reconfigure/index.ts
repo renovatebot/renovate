@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import upath from 'upath';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
@@ -26,7 +25,7 @@ export async function validateReconfigureBranch(
   logger.debug('validateReconfigureBranch()');
   const context = `renovate/config-validation`;
 
-  const branchName = getReconfgiureBranchName(config.branchPrefix!);
+  const branchName = getReconfgiureBranchName(config.branchPrefix);
   const branchExists = await scm.branchExists(branchName);
 
   // this is something the user initiates, so skip if no branch exists
@@ -77,9 +76,9 @@ export async function validateReconfigureBranch(
   let configFileRaw: string | null = null;
   try {
     configFileRaw = await readLocalFile(configFileName, 'utf8');
-  } catch (err) {
+  } catch (error) {
     /*istanbul ignore next - should never happen*/
-    logger.error({error},'Error while reading config file');
+    logger.error({ error }, 'Error while reading config file');
   }
 
   if (!is.nonEmptyString(configFileRaw)) {
@@ -97,12 +96,11 @@ export async function validateReconfigureBranch(
 
   let configFileParsed: any;
   try {
-    const fileType = upath.extname(configFileName);
     configFileParsed = JSON5.parse(configFileRaw);
-      // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
-      if (configFileName === 'package.json') {
-        configFileParsed = configFileParsed.renovate;
-      }
+    // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
+    if (configFileName === 'package.json') {
+      configFileParsed = configFileParsed.renovate;
+    }
   } catch (err) {
     logger.error({ err }, 'Error while reading config file');
     await scm.checkoutBranch(config.baseBranch!);
