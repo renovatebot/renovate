@@ -26,10 +26,10 @@ export async function validateReconfigureBranch(
   const branchName = `${config.branchPrefix}reconfigure`;
   const branchExists = await scm.branchExists(branchName);
 
-  // this is something, the user initiates so skip if no branch exists
+  // this is something the user initiates, so skip if no branch exists
   if (!branchExists) {
     logger.debug('No reconfigure branch found');
-    deleteReconfigureBranchCache(); // inorder to remove cache when the branch deleted
+    deleteReconfigureBranchCache(); // in order to remove cache when the branch has been deleted
     return;
   }
 
@@ -76,7 +76,7 @@ export async function validateReconfigureBranch(
     configFileRaw = await readLocalFile(configFileName, 'utf8');
   } catch (err) {
     /*istanbul ignore next - should never happen*/
-    logger.error('Error while reading config file');
+    logger.error({error},'Error while reading config file');
   }
 
   if (!is.nonEmptyString(configFileRaw)) {
@@ -96,12 +96,10 @@ export async function validateReconfigureBranch(
   try {
     const fileType = upath.extname(configFileName);
     configFileParsed = JSON5.parse(configFileRaw);
-    if (fileType === '.json') {
       // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
       if (configFileName === 'package.json') {
         configFileParsed = configFileParsed.renovate;
       }
-    }
   } catch (err) {
     logger.error({ err }, 'Error while reading config file');
     await scm.checkoutBranch(config.baseBranch!);
