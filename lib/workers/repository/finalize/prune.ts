@@ -6,7 +6,7 @@ import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
 import { getBranchList, setUserRepoConfig } from '../../../util/git';
-import { getReconfgiureBranchName } from '../reconfigure';
+import { getReconfigureBranchName } from '../reconfigure';
 
 async function cleanUpBranches(
   config: RenovateConfig,
@@ -113,7 +113,7 @@ export async function pruneStaleBranches(
   let renovateBranches = getBranchList().filter(
     (branchName) =>
       branchName.startsWith(config.branchPrefix!) &&
-      branchName !== getReconfgiureBranchName(config.branchPrefix)
+      branchName !== getReconfigureBranchName(config.branchPrefix!)
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');

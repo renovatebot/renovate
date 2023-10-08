@@ -16,7 +16,7 @@ import {
   setReconfigureBranchCache,
 } from './reconfigure-cache';
 
-export function getReconfgiureBranchName(prefix = 'renovate/'): string {
+export function getReconfigureBranchName(prefix: string): string {
   return `${prefix}reconfigure`;
 }
 export async function validateReconfigureBranch(
@@ -25,7 +25,7 @@ export async function validateReconfigureBranch(
   logger.debug('validateReconfigureBranch()');
   const context = `renovate/config-validation`;
 
-  const branchName = getReconfgiureBranchName(config.branchPrefix);
+  const branchName = getReconfigureBranchName(config.branchPrefix!);
   const branchExists = await scm.branchExists(branchName);
 
   // this is something the user initiates, so skip if no branch exists
