@@ -209,8 +209,8 @@ const Box = z.object({
   height: z.number().catch(10),
 });
 
-const box = Box.parse({ width: 10, height: null });
-// => { width: 10, height: 10 }
+const box = Box.parse({ width: 20, height: null });
+// => { width: 20, height: 10 }
 ```
 
 #### Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections
