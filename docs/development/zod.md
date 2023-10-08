@@ -8,7 +8,8 @@
     - [Inferred types](#inferred-types)
     - [Specify only necessary fields](#specify-only-necessary-fields)
     - [Use `Json`, `Yaml` and `Toml` for string parsing](#use-json-yaml-and-toml-for-string-parsing)
-    - [Use `.transform()` method to process parsed data](#use-transform-method-to-process-parsed-data)
+    - [Use `.transform()` method to process parsed data](#use-transform-method-to-process-validated-data)
+      - [Rename and move fields at the top level transform](#rename-and-move-fields-at-the-top-level-transform)
     - [Separate validation from transformation](#separate-validation-from-transformation)
     - [Stick to permissive behavior when possible](#stick-to-permissive-behavior-when-possible)
       - [Use `.catch()` to force default values](#use-catch-to-force-default-values)
@@ -27,7 +28,7 @@ We want Renovate to be only as strict as it _needs_ to be.
 
 Renovate should _not_ assume a field is always present.
 Such assumptions may lead to run-time errors when a field turns out to be missing.
-For example: if Renovate assumes a _optional_ field from a public registry will always be used, it may run into trouble when a self-hosted implementation does not use this field.
+For example: if Renovate assumes an _optional_ field from a public registry will always be used, it may run into trouble when a self-hosted implementation does not use this field.
 
 ## When and where to use Zod
 
@@ -163,11 +164,11 @@ const ApiResults = Json.pipe(
 const results = ApiResults.parse(input);
 ```
 
-### Use `.transform()` method to process parsed data
+### Use `.transform()` method to process validated data
 
 Schema validation helps to be more confident with types during downstream data transformation.
 
-You can go even further and perform some transformations as the part of schema itself.
+If the validated data contains everything you need to transform it, you can apply transformations as the part of the schema itself.
 
 This is an example of **undesired** data transformation:
 
@@ -185,7 +186,7 @@ const volume = width * height * length;
 Instead, use the idiomatic `.tranform()` method:
 
 ```ts
-const Volume = z
+const BoxVolume = z
   .object({
     width: z.number(),
     height: z.number(),
@@ -193,21 +194,46 @@ const Volume = z
   })
   .transform(({ width, height, length }) => width * height * length);
 
-Volume.parse({
+const volume = BoxVolume.parse({
   width: 10,
   height: 20,
   length: 125,
-});
+}); // => 25000
 ```
 
-### Separate validation from transformation
+#### Rename and move fields at the top level transform
 
-When parsing third-party data, we are typically doing the following:
+When you need to rename or move object fields, place the code to the top-level transform.
 
-1. Validating the third-party data is correct/sufficient
-1. Transforming the third-party data into a format for internal use
+The **wrong** way is to make cascading transformations:
 
-Although it's not a strict requirement, your code will be cleaner if you perform the validation step first and then follow with transformation.
+```ts
+const SourceUrl = z
+  .object({
+    meta: z
+      .object({
+        links: z.object({
+          Github: z.string().url(),
+        }),
+      })
+      .transform(({ links }) => links.Github),
+  })
+  .transform(({ meta: sourceUrl }) => sourceUrl);
+```
+
+The **correct** way is to rename at the top-level:
+
+```ts
+const SourceUrl = z
+  .object({
+    meta: z.object({
+      links: z.object({
+        Github: z.string().url(),
+      }),
+    }),
+  })
+  .transform(({ meta }) => meta.links.Github);
+```
 
 ### Stick to permissive behavior when possible
 
