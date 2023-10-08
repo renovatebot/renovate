@@ -1,7 +1,7 @@
 ### Table of Contents
 
 - [Zod schema guideline](#zod-schema-guideline)
-  - [When/where to use Zod](#whenwhere-to-use-zod)
+  - [When and where to use Zod](#when-and-where-to-use-zod)
   - [Technical guide](#technical-guide)
     - [Use `schema.ts` files for Zod schemas](#use-schemats-files-for-zod-schemas)
     - [Name schemas without any `Schema` suffix](#name-schemas-without-any-schema-suffix)
@@ -18,18 +18,18 @@
 
 # Zod schema guideline
 
-We decided that Renovate should use Zod for schema validation.
+We decided that Renovate should use [Zod](https://github.com/colinhacks/zod) for schema validation.
 This means that any new manager or datasource should use Zod as well.
 This document explains _how_ and _why_ you should use Zod features.
 
-When writing schema validation you're aiming for a balance between strictness of contracts between separately developed systems, and the permissiveness of Renovate.
+When writing schema validation you're aiming for a balance between strictness of explicit contracts between separately developed systems, and the permissiveness of Renovate.
 We want Renovate to be only as strict as it _needs_ to be.
 
 Renovate should _not_ assume a field is always present.
 Such assumptions may lead to run-time errors when a field turns out to be missing.
 For example: if Renovate assumes a _optional_ field from a public registry will always be used, it may run into trouble when a self-hosted implementation does not use this field.
 
-## When/where to use Zod
+## When and where to use Zod
 
 You should use Zod to validate:
 
@@ -87,7 +87,7 @@ export type User = z.infer<typeof User>;
 
 The external data that Renovate queries can be very complex, but Renovate may only need some of those fields.
 Avoid over-specifying schemas, only extract fields Renovate really needs.
-This reduces the "surface of the contract" between the external data source and Renovate, which means less errors to fix in the future.
+This reduces the surface of the contract between the external data source and Renovate, which means less errors to fix in the future.
 
 For example, say you want Renovate to know about the width, height and length of a box.
 You should _avoid_ code like this:
@@ -131,18 +131,36 @@ Use the helpers in `schema-utils.ts` for this purpose.
 The **wrong** to parse from string:
 
 ```ts
+const ApiResults = z.array(
+  z.object({
+    id: z.number(),
+    value: z.string(),
+  })
+);
+type ApiResults = z.infer<typeof ApiResults>;
+
+let results: ApiResults | null = null;
 try {
   const json = JSON.parse(input);
-  return ApiResult.parse(json);
+  results = ApiResults.parse(json);
 } catch (e) {
-  return null;
+  results = null;
 }
 ```
 
 The **correct** way to parse from string:
 
 ```ts
-Json.pipe(ApiResult).parse(input);
+const ApiResults = Json.pipe(
+  z.array(
+    z.object({
+      id: z.number(),
+      value: z.string(),
+    })
+  )
+);
+
+const results = ApiResults.parse(input);
 ```
 
 ### Use `.transform()` method to process parsed data
