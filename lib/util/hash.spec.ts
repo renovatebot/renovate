@@ -35,6 +35,22 @@ describe('util/hash', () => {
     expect(actualHash).toBe(expectedHash);
   });
 
+  it('uses sha512 if no algorithm is specified', async () => {
+    const content = 'This is some test content.';
+    const expectedHash = crypto
+      .createHash('sha512')
+      .update(content)
+      .digest('hex');
+    // Create a readable stream from the content
+    const readableStream = new Readable();
+    readableStream.push(content);
+    readableStream.push(null);
+
+    const actualHash = await hashStream(readableStream);
+
+    expect(actualHash).toBe(expectedHash);
+  });
+
   // Need help: this fails with the following msg
   //     Node.js v18.13.0
   // C:\Users\LENOVO\Desktop\Whitesource\renovate\lib\util\hash.spec.ts:37
