@@ -10,7 +10,6 @@
     - [Use `Json`, `Yaml` and `Toml` for string parsing](#use-json-yaml-and-toml-for-string-parsing)
     - [Use `.transform()` method to process parsed data](#use-transform-method-to-process-validated-data)
       - [Rename and move fields at the top level transform](#rename-and-move-fields-at-the-top-level-transform)
-    - [Separate validation from transformation](#separate-validation-from-transformation)
     - [Stick to permissive behavior when possible](#stick-to-permissive-behavior-when-possible)
       - [Use `.catch()` to force default values](#use-catch-to-force-default-values)
       - [Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections](#use-loosearray-and-looserecord-to-filter-out-incorrect-values-from-collections)
