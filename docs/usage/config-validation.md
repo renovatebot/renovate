@@ -64,4 +64,4 @@ Follow these steps:
 
 4. Depending on the outcome of the Renovate config validation run, Renovate will add a passing or failing check to the branch.
 
-5. If there's an open pull request from the _reconfigure_ branch then Renovate will comment in that PR with details in case there are validation errors. Each commit will be revalidated the next time Renovate runs on the repository.
+5. If there's an open pull request from the _reconfigure_ branch then Renovate will comment in that PR with details in case there are validation errors. Each commit will be validated again the next time Renovate runs on the repository.
