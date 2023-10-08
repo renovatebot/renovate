@@ -233,24 +233,35 @@ const box = Box.parse({ width: 20, height: null });
 
 #### Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections
 
-Suppose you want to validate an array and retain only number values in it.
+Suppose you want to parse a list of package releases, with elements that may or may not contain `version` field.
+In case of missing `version` field, you want to filter out such elements.
 If you only use methods from the `zod` library, you would need to write something like this:
 
 ```ts
-const OnlyNumbers = z
-  .array(z.union([z.number(), z.null()]).catch(null))
-  .transform((xs) => xs.filter((x): x is number => x !== null));
+const Versions = z
+  .array(
+    z
+      .object({
+        version: z.string(),
+      })
+      .nullable()
+      .catch(null)
+  )
+  .transform((releases) =>
+    releases.filter((x): x is { version: string } => x !== null)
+  );
 ```
 
-While the problem is common, the code is quite complicated.
+When trying to achieve permissive behavior, this pattern will emerge quite frequently, but filtering part of the code is not very readable.
 
 Instead, you should use the `LooseArray` and `LooseRecord` helpers from `schema-utils.ts` to write simpler code:
 
 ```ts
-const OnlyNumbers = LooseArray(z.number());
-
-const xs = OnlyNumbers.parse([1, 2, null, 3, 'foobar', 4]);
-// => [1, 2, 3, 4]
+const Versions = LooseArray(
+  z.object({
+    version: z.string(),
+  })
+);
 ```
 
 ### Combining with `Result` class
