@@ -17,13 +17,16 @@ import {
   setReconfigureBranchCache,
 } from './reconfigure-cache';
 
+export function getReconfgiureBranchName(prefix = 'renovate/'): string {
+  return `${prefix}reconfigure`;
+}
 export async function validateReconfigureBranch(
   config: RenovateConfig
 ): Promise<void> {
   logger.debug('validateReconfigureBranch()');
   const context = `renovate/config-validation`;
 
-  const branchName = `${config.branchPrefix}reconfigure`;
+  const branchName = getReconfgiureBranchName(config.branchPrefix!);
   const branchExists = await scm.branchExists(branchName);
 
   // this is something the user initiates, so skip if no branch exists
@@ -111,6 +114,11 @@ export async function validateReconfigureBranch(
 
   // failing check
   if (validationResult.errors.length > 0) {
+    logger.debug(
+      { errors: validationResult.errors.join(', ') },
+      'Validation Errors'
+    );
+
     // add comment to reconfigure PR if it exists
     const branchPr = await platform.getBranchPr(branchName, config.baseBranch);
     if (branchPr) {
@@ -127,11 +135,6 @@ export async function validateReconfigureBranch(
         content: body,
       });
     }
-    // log the errors
-    logger.debug(
-      { errors: validationResult.errors.join(', ') },
-      'Validation Errors'
-    );
     await platform.setBranchStatus({
       branchName,
       context,
