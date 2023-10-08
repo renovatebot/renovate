@@ -270,7 +270,7 @@ const config = await Result.wrap(readLocalFile('config.json'))
 
 ### Combining with `Http` class
 
-`Http` class supports schema validation for the results of JSON family of methods, e.g. `.getJson()`, `.postJson()`, etc.
+`Http` class supports schema validation for the JSON results of methods like `.getJson()`, `.postJson()`, etc.
 Under the hood, `.parseAsync()` method is used (**important consequence**: in case of invalid data, it will throw).
 
 Provide schema in the last argument of the method:
