@@ -114,7 +114,9 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Azure DevOps repositories');
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
-  return repos.map((repo) => `${repo.project?.name}/${repo.name}`);
+  return repos
+    .filter((repo) => repo.isDisabled === false)
+    .map((repo) => `${repo.project?.name}/${repo.name}`);
 }
 
 export async function getRawFile(
