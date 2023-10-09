@@ -115,7 +115,7 @@ export async function getRepos(): Promise<string[]> {
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   return repos
-    .filter((repo) => repo.isDisabled === false)
+    .filter((repo) => repo.isDisabled !== true)
     .map((repo) => `${repo.project?.name}/${repo.name}`);
 }
 
