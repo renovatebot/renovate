@@ -446,8 +446,8 @@ importers:
         specifier: 3.0.13
         version: 3.0.13
       '@types/moo':
-        specifier: 0.5.6
-        version: 0.5.6
+        specifier: 0.5.7
+        version: 0.5.7
       '@types/nock':
         specifier: 10.0.3
         version: 10.0.3
@@ -3966,8 +3966,8 @@ packages:
     resolution: {integrity: sha512-eXQpwnkI4Ntw5uJg6i2PINdRFWLr55dqjuYQaLHNjvqTzF14QdNWbCbml9sza0byyXNA0hZlHtcdN+VNDcgVHA==}
     dev: false
 
-  /@types/moo@0.5.6:
-    resolution: {integrity: sha512-Q60hZhulhl2Ox4LjbJvhH+HzsKrwzLPjEB8dZw0fK1MH2HyOLe6LDou68yTfsWasxGv7DPZe5VNM5vgpzOa2nw==}
+  /@types/moo@0.5.7:
+    resolution: {integrity: sha512-P7vrZaxja4ne72cKKx3C4ixuNftUIJllGHDHUfUJDqImIihnHzBkz28DDaPOQE3XQODo+k3NDCziP8f0V6yphQ==}
     dev: true
 
   /@types/ms@0.7.32:
