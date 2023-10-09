@@ -84,6 +84,7 @@ import * as tflintPlugin from './tflint-plugin';
 import * as travis from './travis';
 import type { ManagerApi } from './types';
 import * as velaci from './velaci';
+import * as vendir from './vendir';
 import * as woodpecker from './woodpecker';
 
 const api = new Map<string, ManagerApi>();
@@ -174,4 +175,5 @@ api.set('terragrunt-version', terragruntVersion);
 api.set('tflint-plugin', tflintPlugin);
 api.set('travis', travis);
 api.set('velaci', velaci);
+api.set('vendir', vendir);
 api.set('woodpecker', woodpecker);
