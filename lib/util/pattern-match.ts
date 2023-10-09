@@ -25,7 +25,7 @@ export function filterGlobOrRegexArray(
   inputs: string[],
   matches: string[]
 ): string[] {
-  if (!matches.length) {
+  if (!matches.length || !inputs.length) {
     return [];
   }
   const positiveMatches = matches.filter((m) => !m.startsWith('!'));
