@@ -71,5 +71,22 @@ describe('modules/manager/buildkite/extract', () => {
       };
       expect(res).toEqual([expectedPackageDependency]);
     });
+
+    it('extracts plugin tags from bitbucket', () => {
+      const res = extractPackageFile(Fixtures.get('pipeline9.yml'))?.deps;
+      const githubDependency: PackageDependency = {
+        currentValue: 'v1.3.2',
+        datasource: 'github-tags',
+        depName: 'docker-compose',
+        packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+      };
+      const bitbucketDependency: PackageDependency = {
+        currentValue: 'v3.2.7',
+        datasource: 'bitbucket-tags',
+        depName: 'some-org/some-plugin',
+        registryUrls: ['https://bitbucket.org'],
+      };
+      expect(res).toEqual([bitbucketDependency, githubDependency]);
+    });
   });
 });

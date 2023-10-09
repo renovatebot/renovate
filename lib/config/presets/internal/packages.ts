@@ -85,6 +85,7 @@ export const presets: Record<string, Preset> = {
     extends: [
       'packages:emberTemplateLint',
       'packages:eslint',
+      'packages:phpLinters',
       'packages:stylelint',
       'packages:tslint',
     ],
@@ -93,6 +94,14 @@ export const presets: Record<string, Preset> = {
   mapbox: {
     description: 'All Mapbox-related packages.',
     matchPackagePrefixes: ['leaflet', 'mapbox'],
+  },
+  phpLinters: {
+    description: 'All PHP lint-related packages.',
+    matchPackageNames: [
+      'friendsofphp/php-cs-fixer',
+      'squizlabs/php_codesniffer',
+      'symplify/easy-coding-standard',
+    ],
   },
   postcss: {
     description: 'All PostCSS packages.',
