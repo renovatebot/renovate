@@ -1,4 +1,5 @@
 nav:
+  - 'How it works ?': 'how-it-works.md'
   - 'Presets': 'presets.md'
   - 'Dependency Dashboard': 'dashboard.md'
   - 'Pull Requests': 'pull-requests.md'
