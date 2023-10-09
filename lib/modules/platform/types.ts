@@ -23,7 +23,10 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
-  hostRules?: HostRule[]; // return these only if _additional_ rules/hosts are required
+  /*
+   * return these only if _additional_ rules/hosts are required
+   */
+  hostRules?: HostRule[];
 }
 
 export interface RepoResult {
