@@ -204,7 +204,17 @@ export async function initPlatform({
     renovateUsername,
     token,
   };
-
+  if (platformResult.endpoint === 'https://api.github.com/') {
+    logger.debug('Adding GitHub token as GHCR password');
+    platformResult.hostRules = [
+      {
+        matchHost: 'ghcr.io',
+        hostType: 'docker',
+        username: 'USERNAME',
+        password: token.replace(/^x-access-token:/, ''),
+      },
+    ];
+  }
   return platformResult;
 }
 

@@ -118,4 +118,35 @@ describe('modules/platform/index', () => {
       renovateUsername: 'abc',
     });
   });
+
+  it('merges platform hostRules with additionalHostRules', async () => {
+    const config = {
+      platform: 'github' as PlatformId,
+      endpoint: 'https://api.github.com',
+      gitAuthor: 'user@domain.com',
+      username: 'abc',
+      token: '123',
+    };
+
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint: 'https://api.github.com/',
+      gitAuthor: 'user@domain.com',
+      hostRules: [
+        {
+          hostType: 'docker',
+          matchHost: 'ghcr.io',
+          password: '123',
+          username: 'USERNAME',
+        },
+        {
+          hostType: 'github',
+          matchHost: 'api.github.com',
+          token: '123',
+          username: 'abc',
+        },
+      ],
+      platform: 'github',
+      renovateUsername: 'abc',
+    });
+  });
 });
