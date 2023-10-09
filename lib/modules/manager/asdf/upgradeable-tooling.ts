@@ -272,7 +272,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         };
       }
       const semeruJreMatches = version.match(
-        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/
+        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/
       )?.groups;
       if (semeruJreMatches) {
         return {
