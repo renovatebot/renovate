@@ -47,7 +47,6 @@ You should use Zod to validate:
 Following well-known refactoring principles, we should locate schemas accordingly.
 The Zod schema usually goes in the `schema.ts` files, and the tests go in the `schema.spec.ts` files.
 You should write tests for Zod schemas.
-However, for small usage areas, it's fine to keep them in the same file for reader's convenience.
 
 Creating or extending Zod schemas on the fly reduces Renovate's performance.
 Only create or extend Zod schemas in this way if you _really_ need to.
