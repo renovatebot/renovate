@@ -120,7 +120,6 @@ describe('modules/platform/index', () => {
   });
 
   it('merges platform hostRules with additionalHostRules', async () => {
-
     const config = {
       platform: 'github' as PlatformId,
       endpoint: 'https://api.github.com',
