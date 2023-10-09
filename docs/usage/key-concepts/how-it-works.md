@@ -30,14 +30,10 @@ Example
 
 ```mermaid
 flowchart TD
-
   FEM[[For each manager]]
-  FEM -->|managerB| UFEF[[For each file]]
-  
-  UFEF -->|file1| FED[[For each dependency]]
-  
-  FED -->|dep2| DS[use datasources to get update list]
+  FEM --> FEF[[For each file]]
+  FEF --> FED[[For each dependency]]
+  FED --> DS[use datasources to get update list]
   DS --> VR[use versionning find next valid update]
-  
   VR --> PR[Collect updates and setup the needed PRs]
 ```
