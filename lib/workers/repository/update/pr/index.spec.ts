@@ -685,6 +685,7 @@ describe('workers/repository/update/pr/index', () => {
             type: 'github',
             repository: 'some/repo',
             baseUrl: 'https://github.com',
+            apiBaseUrl: 'https://api.github.com/',
             sourceUrl: 'https://github.com/some/repo',
           },
           versions: [
