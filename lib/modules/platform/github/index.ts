@@ -1780,7 +1780,9 @@ export function massageMarkdown(input: string): string {
       'href="https://togithub.com/'
     )
     .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
-    .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/');
+    .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/')
+    .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
+    .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }
 
