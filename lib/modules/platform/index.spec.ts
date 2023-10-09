@@ -120,7 +120,6 @@ describe('modules/platform/index', () => {
   });
 
   it('merges platform hostRules with additionalHostRules', async () => {
-    // httpMock.scope('https://api.github.com').head('/').reply(200);
 
     const config = {
       platform: 'github' as PlatformId,
