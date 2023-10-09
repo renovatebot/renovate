@@ -50,7 +50,9 @@ export function add(params: HostRule): void {
       if (rule[field]) {
         logger.debug(
           // TODO: types (#22198)
-          `Adding ${field} authentication for ${rule.matchHost!} to hostRules`
+          `Adding ${field} authentication for ${rule.matchHost!} (hostType=${
+            rule.hostType
+          }) to hostRules`
         );
       }
     });
