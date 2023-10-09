@@ -44,7 +44,7 @@ You should use Zod to validate:
 
 ### Use `schema.ts` files for Zod schemas
 
-Following well-known refactoring principles, we should locate schemas accordingly.
+Following well-known refactoring principles, you should put Zod schema code in the correct place.
 The Zod schema usually goes in the `schema.ts` files, and the tests go in the `schema.spec.ts` files.
 You should write tests for Zod schemas.
 
