@@ -1,6 +1,6 @@
- clone:
-   git:
-     image: woodpeckerci/plugin-git:2.0.3
+clone:
+  git:
+    image: woodpeckerci/plugin-git:2.0.3
 
 steps:
   redis:
@@ -29,4 +29,4 @@ steps:
 
 services:
   service-postgres:
-    image: "postgres:9.5.0"
+    image: postgres:9.5.0
