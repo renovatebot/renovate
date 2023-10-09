@@ -74,15 +74,13 @@ export function getDepWarningsOnboardingPR(
   if (!warnings.length) {
     return '';
   }
-  warningText = emojify(
-    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
-  );
-  warningText += `Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.\n\n`;
+  warningText = emojify(`\n---\n> \n> :warning: **Warning**\n> \n`);
+  warningText += `> Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.\n> \n`;
   for (const w of warnings) {
-    warningText += `-   \`${w}\`\n`;
+    warningText += `> -   \`${w}\`\n`;
   }
   warningText +=
-    '\nFiles affected: ' +
+    '> \n> Files affected: ' +
     warningFiles.map((f) => '`' + f + '`').join(', ') +
     '\n\n';
   return warningText;
@@ -101,14 +99,12 @@ export function getDepWarningsPR(
   if (!warnings.length) {
     return '';
   }
-  warningText = emojify(
-    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
-  );
-  warningText += 'Warnings were logged while processing this repo. ';
+  warningText = emojify(`\n---\n\n> :warning: **Warning**\n> \n`);
+  warningText += '> Some dependencies could not be looked up. ';
   if (dependencyDashboard) {
-    warningText += `Please check the Dependency Dashboard for more information.\n\n`;
+    warningText += `Check the Dependency Dashboard for more information.\n\n`;
   } else {
-    warningText += `Please check the logs for more information.\n\n`;
+    warningText += `Check the warning logs for more information.\n\n`;
   }
   return warningText;
 }
@@ -133,11 +129,10 @@ export function getDepWarningsDashboard(
     .join(', ');
 
   let warningText = emojify(
-    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+    `\n---\n\n> :warning: **Warning**\n> \n> Renovate failed to look up the following dependencies: `
   );
-  warningText += `-   Renovate failed to look up the following dependencies: `;
   warningText += depWarnings;
-  warningText += '.\n\nFiles affected: ';
+  warningText += '.\n> \n> Files affected: ';
   warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
   warningText += '\n\n---\n\n';
   return warningText;
