@@ -625,7 +625,7 @@ awscli    2.8.6
       expect(semeruJdkRes).toEqual({
         deps: [
           {
-            currentValue: '16.0.0+36',
+            currentValue: '17.0.8.1+1',
             datasource: 'java-version',
             depName: 'java',
             packageName: 'java-jdk',
