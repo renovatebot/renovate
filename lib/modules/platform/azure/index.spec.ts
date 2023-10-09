@@ -67,7 +67,6 @@ describe('modules/platform/azure/index', () => {
               project: {
                 name: 'prj1',
               },
-              isDisabled: false,
             },
             {
               name: 'repo2',
