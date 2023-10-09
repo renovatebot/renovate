@@ -1,4 +1,4 @@
-pipeline:
+steps:
   redis:
     image: quay.io/something/redis:alpine
 
@@ -22,3 +22,7 @@ pipeline:
 
   debugapp:
     image: app-local-debug
+
+services:
+  service-postgres:
+    image: "postgres:9.4.0"
