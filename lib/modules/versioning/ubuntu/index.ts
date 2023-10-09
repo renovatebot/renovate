@@ -34,7 +34,7 @@ function isValid(input: string): boolean {
 }
 
 function isDatedCodeName(input: string): boolean {
-  return typeof input === 'string' && regEx(/^(\w+)-(\d{8})$/).test(input);
+  return regEx(/^(?<codename>\w+)-(?<date>\d{8})$/).test(input);
 }
 
 function isVersion(input: string): boolean {
@@ -67,20 +67,20 @@ function isStable(version: string): boolean {
 // digestion of version
 
 function getDatedContainerImageCodename(version: string): null | string {
-  const groups = /^(\w+)-(\d{8})$/.exec(version);
-  if (groups === null) {
+  const groups = /^(?<codename>\w+)-(?<date>\d{8})$/.exec(version);
+  if (!groups?.groups) {
     return null;
   }
-  return groups[1];
+  return groups.groups.codename;
 }
 
 function getDatedContainerImageVersion(version: string): null | number {
-  const groups = /^(\w+)-(\d{8})$/.exec(version);
-  if (groups === null) {
+  const groups = /^(?<codename>\w+)-(?<date>\d{8})$/.exec(version);
+  if (!groups?.groups) {
     return null;
   }
 
-  return parseInt(groups[2]);
+  return parseInt(groups.groups.date, 10);
 }
 
 function getVersionByCodename(version: string): string {
