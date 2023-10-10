@@ -1,11 +1,13 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import is from '@sindresorhus/is';
 import * as openpgp from 'openpgp';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
+import { ensureTrailingSlash } from '../util/url';
 import { GlobalConfig } from './global';
+import { DecryptedObject } from './schema';
 import type { RenovateConfig } from './types';
 
 export async function tryDecryptPgp(
@@ -92,37 +94,55 @@ export async function tryDecrypt(
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       try {
-        const decryptedObj = JSON.parse(decryptedObjStr);
-        const { o: org, r: repo, v: value } = decryptedObj;
+        const decryptedObj = DecryptedObject.safeParse(decryptedObjStr);
+        // istanbul ignore if
+        if (!decryptedObj.success) {
+          const error = new Error('config-validation');
+          error.validationError = `Could not parse decrypted config.`;
+          throw error;
+        }
+
+        const { o: org, r: repo, v: value } = decryptedObj.data;
         if (is.nonEmptyString(value)) {
           if (is.nonEmptyString(org)) {
-            const orgName = org.replace(regEx(/\/$/), ''); // Strip trailing slash
+            const orgPrefixes = org
+              .split(',')
+              .map((o) => o.trim())
+              .map((o) => o.toUpperCase())
+              .map((o) => ensureTrailingSlash(o));
             if (is.nonEmptyString(repo)) {
-              const scopedRepository = `${orgName}/${repo}`;
-              if (scopedRepository.toLowerCase() === repository.toLowerCase()) {
+              const scopedRepos = orgPrefixes.map((orgPrefix) =>
+                `${orgPrefix}${repo}`.toUpperCase()
+              );
+              if (scopedRepos.some((r) => r === repository.toUpperCase())) {
                 decryptedStr = value;
               } else {
                 logger.debug(
-                  { scopedRepository },
+                  { scopedRepos },
                   'Secret is scoped to a different repository'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepository}".`;
+                error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepos.join(
+                  ','
+                )}".`;
                 throw error;
               }
             } else {
-              const scopedOrg = `${orgName}/`;
               if (
-                repository.toLowerCase().startsWith(scopedOrg.toLowerCase())
+                orgPrefixes.some((orgPrefix) =>
+                  repository.toUpperCase().startsWith(orgPrefix)
+                )
               ) {
                 decryptedStr = value;
               } else {
                 logger.debug(
-                  { scopedOrg },
+                  { orgPrefixes },
                   'Secret is scoped to a different org'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different org: "${scopedOrg}".`;
+                error.validationError = `Encrypted secret is scoped to a different org: "${orgPrefixes.join(
+                  ','
+                )}".`;
                 throw error;
               }
             }
@@ -155,7 +175,8 @@ export async function decryptConfig(
 ): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
-  const { privateKey, privateKeyOld } = GlobalConfig.get();
+  const privateKey = GlobalConfig.get('privateKey');
+  const privateKeyOld = GlobalConfig.get('privateKeyOld');
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       logger.debug({ config: val }, 'Found encrypted config');

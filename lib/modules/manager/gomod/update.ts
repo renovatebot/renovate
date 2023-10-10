@@ -1,5 +1,4 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+// TODO: types (#22198)
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
@@ -29,6 +28,11 @@ export function updateDependency({
     }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split(newlineRegex);
+    // istanbul ignore if: hard to test
+    if (lines.length <= upgrade.managerData.lineNumber) {
+      logger.warn('go.mod current line no longer exists after update');
+      return null;
+    }
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
@@ -55,7 +59,7 @@ export function updateDependency({
           /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
         );
       }
-    } else if (depType === 'require') {
+    } else if (depType === 'require' || depType === 'indirect') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
@@ -82,13 +86,13 @@ export function updateDependency({
         'gomod: need to update digest'
       );
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
         `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
         `$<depPart>$<divider>${upgrade.newValue}`
       );
@@ -105,7 +109,8 @@ export function updateDependency({
         );
       } else if (
         upgrade.newMajor! > 1 &&
-        !newLine.includes(`/v${upgrade.newMajor}`)
+        !newLine.includes(`/v${upgrade.newMajor}`) &&
+        !upgrade.newValue!.endsWith('+incompatible')
       ) {
         if (depName === depNameNoVersion) {
           // If package currently has no version, pin to latest one.
@@ -135,6 +140,14 @@ export function updateDependency({
       logger.debug('No changes necessary');
       return fileContent;
     }
+
+    if (depType === 'indirect') {
+      newLine = newLine.replace(
+        regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
+        ' // indirect'
+      );
+    }
+
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {

@@ -39,7 +39,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
       const res = await getPkgReleases({
         datasource,
         registryUrls: ['https://gitlab.com'],
-        depName: 'user/project1:mypkg',
+        packageName: 'user/project1:mypkg',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(3);
@@ -58,7 +58,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
         await getPkgReleases({
           datasource,
           registryUrls: ['https://gitlab.com'],
-          depName: 'user/project1:mypkg',
+          packageName: 'user/project1:mypkg',
         })
       ).toBeNull();
     });
@@ -76,7 +76,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
         await getPkgReleases({
           datasource,
           registryUrls: ['https://gitlab.com'],
-          depName: 'user/project1:mypkg',
+          packageName: 'user/project1:mypkg',
         })
       ).toBeNull();
     });
@@ -94,7 +94,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
         getPkgReleases({
           datasource,
           registryUrls: ['https://gitlab.com'],
-          depName: 'user/project1:mypkg',
+          packageName: 'user/project1:mypkg',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });

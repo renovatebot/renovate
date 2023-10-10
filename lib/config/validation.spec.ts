@@ -117,6 +117,61 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid customDatasources content', async () => {
+      const config = {
+        customDatasources: {
+          foo: {
+            randomKey: '',
+            defaultRegistryUrlTemplate: [],
+            transformTemplates: [{}],
+          },
+        },
+      } as any;
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+        },
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.randomKey` configuration: key is not allowed',
+        },
+        {
+          message:
+            'Invalid `customDatasources.customDatasources.transformTemplates` configuration: is not an array of string',
+        },
+      ]);
+    });
+
+    it('catches invalid customDatasources record type', async () => {
+      const config = {
+        customDatasources: {
+          randomKey: '',
+        },
+      } as any;
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customDatasources.randomKey` configuration: customDatasource is not an object',
+        },
+      ]);
+    });
+
+    it('catches invalid baseBranches regex', async () => {
+      const config = {
+        baseBranches: ['/***$}{]][/'],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid regExp for baseBranches: `/***$}{]][/`',
+        },
+      ]);
+    });
+
     it('returns nested errors', async () => {
       const config: RenovateConfig = {
         foo: 1,
@@ -169,7 +224,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config as any
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
@@ -182,7 +237,9 @@ describe('config/validation', () => {
       ['single enabled manager', { enabledManagers: ['npm'] }],
       [
         'multiple enabled managers',
-        { enabledManagers: ['npm', 'gradle', 'maven'] },
+        {
+          enabledManagers: ['npm', 'gradle', 'maven', 'regex'],
+        },
       ],
     ])('validates enabled managers for %s', async (_case, config) => {
       const { warnings, errors } = await configValidation.validateConfig(
@@ -233,7 +290,9 @@ describe('config/validation', () => {
           },
           'what?' as any,
           {
+            matchDepPatterns: 'abc ([a-z]+) ([a-z]+))',
             matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
+            excludeDepPatterns: ['abc ([a-z]+) ([a-z]+))'],
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
@@ -245,22 +304,25 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(13);
+      expect(errors).toHaveLength(15);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
+        matchDepNames: ['angular'],
         matchPackageNames: ['angular'],
         meteor: {
           packageRules: [
             {
+              matchDepNames: ['meteor'],
               matchPackageNames: ['meteor'],
               enabled: true,
             },
           ],
         },
-        docker: {
+        ansible: {
           minor: {
+            matchDepNames: ['meteor'],
             matchPackageNames: ['testPackage'],
           },
         },
@@ -268,9 +330,9 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(2);
+      expect(warnings).toHaveLength(4);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(4);
     });
 
     it('ignore packageRule nesting validation for presets', async () => {
@@ -310,9 +372,10 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each fileMatch', async () => {
-      const config = {
-        regexManagers: [
+      const config: RenovateConfig = {
+        customManagers: [
           {
+            customType: 'regex',
             fileMatch: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -329,10 +392,11 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('errors if no regexManager matchStrings', async () => {
+    it('errors if customManager has empty fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
+            customType: 'regex',
             fileMatch: [],
           },
         ],
@@ -346,22 +410,85 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty fileMatch array",
+            "message": "Each Custom Manager must contain a non-empty fileMatch array",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if empty regexManager matchStrings', async () => {
+    it('errors if no customManager customType', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
+            fileMatch: ['some-file'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        [
+          {
+            "message": "Each Custom Manager must contain a non-empty customType string",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
+    it('errors if invalid customManager customType', async () => {
+      const config = {
+        customManagers: [
+          {
+            customType: 'unknown',
+            fileMatch: ['some-file'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        [
+          {
+            "message": "Invalid customType: unknown. Key is not a custom manager",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
+    it('errors if empty customManager matchStrings', async () => {
+      const config = {
+        customManagers: [
+          {
+            customType: 'regex',
             fileMatch: ['foo'],
             matchStrings: [],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
           {
+            customType: 'regex',
             fileMatch: ['foo'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
@@ -374,20 +501,20 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if no regexManager fileMatch', async () => {
+    it('errors if no customManager fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -404,11 +531,15 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each matchStrings', async () => {
-      const config = {
-        regexManagers: [
+      const config: RenovateConfig = {
+        customManagers: [
           {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
@@ -420,10 +551,31 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
-    it('passes if regexManager fields are present', async () => {
-      const config = {
-        regexManagers: [
+    // testing if we get all errors at once or not (possible), this does not include customType or fileMatch
+    // since they are common to all custom managers
+    it('validates all possible regex manager options', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
           {
+            customType: 'regex',
+            fileMatch: ['Dockerfile'],
+            matchStrings: ['***$}{]]['], // invalid matchStrings regex, no depName, datasource and currentValue
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(4);
+    });
+
+    it('passes if customManager fields are present', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
@@ -442,10 +594,11 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if extra regexManager fields are present', async () => {
+    it('errors if extra customManager fields are present', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
@@ -456,17 +609,18 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config,
+        config as any,
         true
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
 
-    it('errors if regexManager fields are missing', async () => {
-      const config = {
-        regexManagers: [
+    it('errors if customManager fields are missing', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
           {
+            customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (.*?)\\s'],
             depNameTemplate: 'foo',
@@ -662,7 +816,7 @@ describe('config/validation', () => {
         registryAliases: {
           sample: {
             example1: 'http://www.example.com',
-          },
+          } as unknown as string, // intentional incorrect config to check error message
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -672,16 +826,16 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `registryAliases.registryAliases.sample` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.sample` configuration: value is not a string',
           topic: 'Configuration Error',
         },
       ]);
     });
 
-    it('errors if registryAliases have invalid url', async () => {
+    it('errors if registryAliases have invalid value', async () => {
       const config = {
         registryAliases: {
-          example1: 'noturl',
+          example1: 123 as never,
           example2: 'http://www.example.com',
         },
       };
@@ -692,14 +846,14 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `registryAliases.registryAliases.example1` configuration: value is not a url',
+            'Invalid `registryAliases.registryAliases.example1` configuration: value is not a string',
           topic: 'Configuration Error',
         },
       ]);
     });
 
     it('errors if fileMatch has wrong parent', async () => {
-      const config = {
+      const config: RenovateConfig = {
         fileMatch: ['foo'],
         npm: {
           fileMatch: ['package\\.json'],
@@ -707,8 +861,9 @@ describe('config/validation', () => {
             fileMatch: ['bar'],
           },
         },
-        regexManagers: [
+        customManagers: [
           {
+            customType: 'regex',
             fileMatch: ['build.gradle'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -725,28 +880,21 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
-    it('errors if language or manager objects are nested', async () => {
+    it('errors if manager objects are nested', async () => {
       const config = {
-        python: {
+        pyenv: {
           enabled: false,
         },
-        java: {
+        maven: {
           gradle: {
             enabled: false,
-          },
-        },
-        major: {
-          minor: {
-            docker: {
-              automerge: true,
-            },
           },
         },
       } as never;
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
     });

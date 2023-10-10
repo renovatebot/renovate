@@ -2,8 +2,10 @@ import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { getChildEnv } from '../exec/utils';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
+handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2)
@@ -21,6 +23,8 @@ handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
+
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
 
 handlebars.registerHelper({
   and(...args) {
@@ -68,6 +72,7 @@ export const exposedConfigOptions = [
 export const allowedFields = {
   baseBranch: 'The baseBranch for this branch/PR',
   body: 'The body of the release notes',
+  category: 'The category of the manager of the dependency being updated',
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
@@ -85,6 +90,8 @@ export const allowedFields = {
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
+  indentation: 'The indentation of the dependency being updated',
+  isGroup: 'true if the upgrade is part of a group',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
@@ -95,6 +102,7 @@ export const allowedFields = {
   isRange: 'true if the new value is a range',
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
+  isVulnerabilityAlert: 'true if the upgrade is a vulnerability alert',
   logJSON: 'ChangeLogResult object for the upgrade',
   manager: 'The (package) manager which detected the dependency',
   newDigest: 'The new digest value',
@@ -138,6 +146,8 @@ export const allowedFields = {
   version: 'The version number of the changelog',
   versioning: 'The versioning scheme in use',
   versions: 'An array of ChangeLogRelease objects in the upgrade',
+  vulnerabilitySeverity:
+    'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
 const prBodyFields = [
@@ -169,6 +179,10 @@ const allowedTemplateFields = new Set([
 
 const compileInputProxyHandler: ProxyHandler<CompileInput> = {
   get(target: CompileInput, prop: keyof CompileInput): unknown {
+    if (prop === 'env') {
+      return target[prop];
+    }
+
     if (!allowedTemplateFields.has(prop)) {
       return undefined;
     }
@@ -176,9 +190,11 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
     const value = target[prop];
 
     if (is.array(value)) {
-      return value
-        .filter(is.plainObject)
-        .map((element) => proxyCompileInput(element as CompileInput));
+      return value.map((element) =>
+        is.primitive(element)
+          ? element
+          : proxyCompileInput(element as CompileInput)
+      );
     }
 
     if (is.plainObject(value)) {
@@ -201,13 +217,17 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...GlobalConfig.get(), ...input };
+  const env = getChildEnv({});
+  const data = { ...GlobalConfig.get(), ...input, env };
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
     for (const match of matches) {
       const varNames = match[1].split('.');
+      if (varNames[0] === 'env') {
+        continue;
+      }
       for (const varName of varNames) {
         if (!allowedFieldsList.includes(varName)) {
           logger.info(
@@ -219,6 +239,19 @@ export function compile(
     }
   }
   return handlebars.compile(template)(filteredInput);
+}
+
+export function safeCompile(
+  template: string,
+  input: CompileInput,
+  filterFields = true
+): string {
+  try {
+    return compile(template, input, filterFields);
+  } catch (err) {
+    logger.warn({ err, template }, 'Error compiling template');
+    return '';
+  }
 }
 
 export function containsTemplates(

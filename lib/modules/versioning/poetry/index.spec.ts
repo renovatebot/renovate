@@ -2,7 +2,7 @@ import { api as versioning } from '.';
 
 describe('modules/versioning/poetry/index', () => {
   describe('equals', () => {
-    test.each`
+    it.each`
       a               | b                 | expected
       ${'1'}          | ${'1'}            | ${true}
       ${'1.0'}        | ${'1'}            | ${true}
@@ -21,7 +21,7 @@ describe('modules/versioning/poetry/index', () => {
     });
   });
 
-  test.each`
+  it.each`
     version          | major   | minor   | patch
     ${'1'}           | ${1}    | ${0}    | ${0}
     ${'1.9'}         | ${1}    | ${9}    | ${0}
@@ -40,7 +40,7 @@ describe('modules/versioning/poetry/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a           | b             | expected
     ${'2'}      | ${'1'}        | ${true}
     ${'2.0'}    | ${'1'}        | ${true}
@@ -56,7 +56,7 @@ describe('modules/versioning/poetry/index', () => {
     expect(versioning.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version         | expected
     ${'1'}          | ${true}
     ${'1.9'}        | ${true}
@@ -69,7 +69,7 @@ describe('modules/versioning/poetry/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version        | expected
     ${'1.2.3a0'}   | ${true}
     ${'1.2.3b1'}   | ${true}
@@ -81,7 +81,7 @@ describe('modules/versioning/poetry/index', () => {
     expect(!!versioning.isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                                          | expected
     ${'17.04.00'}                                    | ${true}
     ${'17.b4.0'}                                     | ${false}
@@ -105,7 +105,7 @@ describe('modules/versioning/poetry/index', () => {
     expect(!!versioning.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version            | expected
     ${'1.2.3'}         | ${true}
     ${'1.2.3-alpha.1'} | ${true}
@@ -116,7 +116,7 @@ describe('modules/versioning/poetry/index', () => {
     expect(!!versioning.isSingleVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version      | range                     | expected
     ${'4.2.0'}   | ${'4.2, >= 3.0, < 5.0.0'} | ${true}
     ${'4.2.0'}   | ${'2.0, >= 3.0, < 5.0.0'} | ${false}
@@ -138,7 +138,7 @@ describe('modules/versioning/poetry/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | range                  | expected
     ${'0.9.0'} | ${'>= 1.0.0 <= 2.0.0'} | ${true}
     ${'1.9.0'} | ${'>= 1.0.0 <= 2.0.0'} | ${false}
@@ -149,7 +149,7 @@ describe('modules/versioning/poetry/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                         | range                          | expected
     ${['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0']} | ${'4.*, > 4.2'}                | ${'4.3.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']}          | ${'^4.0.0'}                    | ${'4.2.0'}
@@ -165,7 +165,7 @@ describe('modules/versioning/poetry/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                                  | range               | expected
     ${['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'4.*.0, < 4.2.5'} | ${'4.2.1'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3']} | ${'5.0, > 5.0.0'}   | ${'5.0.3'}
@@ -178,7 +178,7 @@ describe('modules/versioning/poetry/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue        | rangeStrategy | currentVersion     | newVersion         | expected
     ${'1.0.0'}          | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'1.1.0'}
     ${'   1.0.0'}       | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'1.1.0'}
@@ -189,15 +189,15 @@ describe('modules/versioning/poetry/index', () => {
     ${'  = 1.0.0'}      | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'=1.1.0'}
     ${'  =   1.0.0'}    | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'=1.1.0'}
     ${'=    1.0.0'}     | ${'bump'}     | ${'1.0.0'}         | ${'1.1.0'}         | ${'=1.1.0'}
-    ${'^1.0'}           | ${'bump'}     | ${'1.0.0'}         | ${'1.0.7'}         | ${'^1.0'}
+    ${'^1.0'}           | ${'bump'}     | ${'1.0.0'}         | ${'1.0.7'}         | ${'^1.0.7'}
     ${'^1.0.0'}         | ${'replace'}  | ${'1.0.0'}         | ${'2.0.7'}         | ${'^2.0.0'}
     ${'^5.0.3'}         | ${'replace'}  | ${'5.3.1'}         | ${'5.5'}           | ${'^5.0.3'}
     ${'1.0.0'}          | ${'replace'}  | ${'1.0.0'}         | ${'2.0.7'}         | ${'2.0.7'}
     ${'^1.0.0'}         | ${'replace'}  | ${'1.0.0'}         | ${'2.0.7'}         | ${'^2.0.0'}
     ${'^0.5.15'}        | ${'replace'}  | ${'0.5.15'}        | ${'0.6'}           | ${'^0.5.15'}
     ${'^0.5.15'}        | ${'replace'}  | ${'0.5.15'}        | ${'0.6b.4'}        | ${'^0.5.15'}
-    ${'^1'}             | ${'bump'}     | ${'1.0.0'}         | ${'2.1.7'}         | ${'^2'}
-    ${'~1'}             | ${'bump'}     | ${'1.0.0'}         | ${'1.1.7'}         | ${'~1'}
+    ${'^1'}             | ${'bump'}     | ${'1.0.0'}         | ${'2.1.7'}         | ${'^2.1.7'}
+    ${'~1'}             | ${'bump'}     | ${'1.0.0'}         | ${'1.1.7'}         | ${'~1.1.7'}
     ${'5'}              | ${'bump'}     | ${'5.0.0'}         | ${'5.1.7'}         | ${'5'}
     ${'5'}              | ${'bump'}     | ${'5.0.0'}         | ${'6.1.7'}         | ${'6'}
     ${'5.0'}            | ${'bump'}     | ${'5.0.0'}         | ${'5.0.7'}         | ${'5.0'}
@@ -211,7 +211,7 @@ describe('modules/versioning/poetry/index', () => {
     ${'^0.8.0-alpha.0'} | ${'bump'}     | ${'0.8.0-alpha.0'} | ${'0.8.0-alpha.1'} | ${'^0.8.0-alpha.1'}
     ${'^0.8.0-alpha.0'} | ${'bump'}     | ${'0.8.0-alpha.0'} | ${'0.8.0a1'}       | ${'^0.8.0-alpha.1'}
     ${'^1.0.0'}         | ${'replace'}  | ${'1.0.0'}         | ${'1.2.3'}         | ${'^1.0.0'}
-    ${'~1.0'}           | ${'bump'}     | ${'1.0.0'}         | ${'1.1.7'}         | ${'~1.1'}
+    ${'~1.0'}           | ${'bump'}     | ${'1.0.0'}         | ${'1.1.7'}         | ${'~1.1.7'}
     ${'1.0.*'}          | ${'replace'}  | ${'1.0.0'}         | ${'1.1.0'}         | ${'1.1.*'}
     ${'1.*'}            | ${'replace'}  | ${'1.0.0'}         | ${'2.1.0'}         | ${'2.*'}
     ${'~0.6.1'}         | ${'replace'}  | ${'0.6.8'}         | ${'0.7.0-rc.2'}    | ${'~0.7.0-rc'}
@@ -226,6 +226,8 @@ describe('modules/versioning/poetry/index', () => {
     ${'~1.2'}           | ${'replace'}  | ${'1.2.3'}         | ${'2.0.0'}         | ${'~2.0'}
     ${'~1'}             | ${'replace'}  | ${'1.2.3'}         | ${'2.0.0'}         | ${'~2'}
     ${'^2.2'}           | ${'widen'}    | ${'2.2.0'}         | ${'3.0.0'}         | ${'^2.2 || ^3.0.0'}
+    ${'^2.2 || ^3.0.0'} | ${'widen'}    | ${'3.0.0'}         | ${'4.0.0'}         | ${'^2.2 || ^3.0.0 || ^4.0.0'}
+    ${'^3.5'}           | ${'pin'}      | ${'3.5'}           | ${'3.5'}           | ${'3.5'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -239,7 +241,7 @@ describe('modules/versioning/poetry/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a           | b             | expected
     ${'2'}      | ${'1'}        | ${1}
     ${'2.0'}    | ${'1'}        | ${1}
@@ -255,4 +257,24 @@ describe('modules/versioning/poetry/index', () => {
   `('sortVersions("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(versioning.sortVersions(a, b)).toEqual(expected);
   });
+});
+
+it.each`
+  a                     | b                     | expected
+  ${'1.0.0'}            | ${'1.0.0'}            | ${true}
+  ${'1.0.0'}            | ${'>=1.0.0'}          | ${true}
+  ${'1.1.0'}            | ${'^1.0.0'}           | ${true}
+  ${'>=1.0.0'}          | ${'>=1.0.0'}          | ${true}
+  ${'~1.0.0'}           | ${'~1.0.0'}           | ${true}
+  ${'^1.0.0'}           | ${'^1.0.0'}           | ${true}
+  ${'>=1.0.0'}          | ${'>=1.1.0'}          | ${false}
+  ${'~1.0.0'}           | ${'~1.1.0'}           | ${false}
+  ${'^1.0.0'}           | ${'^1.1.0'}           | ${false}
+  ${'>=1.0.0'}          | ${'<1.0.0'}           | ${false}
+  ${'~1.0.0'}           | ${'~0.9.0'}           | ${false}
+  ${'^1.0.0'}           | ${'^0.9.0'}           | ${false}
+  ${'^1.1.0 || ^2.0.0'} | ${'^1.0.0 || ^2.0.0'} | ${true}
+  ${'^1.0.0 || ^2.0.0'} | ${'^1.1.0 || ^2.0.0'} | ${false}
+`('subset("$a", "$b") === $expected', ({ a, b, expected }) => {
+  expect(versioning.subset!(a, b)).toBe(expected);
 });

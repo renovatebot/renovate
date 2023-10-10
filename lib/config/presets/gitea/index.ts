@@ -28,7 +28,7 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  // TODO: null check #7154
+  // TODO: null check #22198
   return parsePreset(fromBase64(res.content!));
 }
 
@@ -37,7 +37,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string
+  tag?: string | undefined
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

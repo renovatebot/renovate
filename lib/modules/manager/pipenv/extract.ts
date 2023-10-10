@@ -6,7 +6,7 @@ import type { SkipReason } from '../../../types';
 import { localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
@@ -44,12 +44,12 @@ function extractFromSection(
         currentValue = requirements.version;
         nestedVersion = true;
       } else if (is.object(requirements)) {
-        skipReason = 'any-version';
+        skipReason = 'unspecified-version';
       } else {
         currentValue = requirements;
       }
       if (currentValue === '*') {
-        skipReason = 'any-version';
+        skipReason = 'unspecified-version';
       }
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);
@@ -82,7 +82,7 @@ function extractFromSection(
         dep.datasource = PypiDatasource.id;
       }
       if (nestedVersion) {
-        // TODO #7154
+        // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
       if (requirements.index) {
@@ -103,19 +103,19 @@ function extractFromSection(
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
-): Promise<PackageFile | null> {
-  logger.debug('pipenv.extractPackageFile()');
+  packageFile: string
+): Promise<PackageFileContent | null> {
+  logger.trace(`pipenv.extractPackageFile(${packageFile})`);
 
   let pipfile: PipFile;
   try {
     // TODO: fix type (#9610)
     pipfile = toml.parse(content) as any;
   } catch (err) {
-    logger.debug({ err }, 'Error parsing Pipfile');
+    logger.debug({ err, packageFile }, 'Error parsing Pipfile');
     return null;
   }
-  const res: PackageFile = { deps: [] };
+  const res: PackageFileContent = { deps: [] };
   if (pipfile.source) {
     res.registryUrls = pipfile.source.map((source) => source.url);
   }
@@ -128,25 +128,25 @@ export async function extractPackageFile(
     return null;
   }
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pipfile.requires?.python_version)) {
-    constraints.python = `== ${pipfile.requires!.python_version}.*`;
+    extractedConstraints.python = `== ${pipfile.requires!.python_version}.*`;
   } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
-    constraints.python = `== ${pipfile.requires!.python_full_version}`;
+    extractedConstraints.python = `== ${pipfile.requires!.python_full_version}`;
   }
 
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
-    constraints.pipenv = pipfile.packages!.pipenv;
+    extractedConstraints.pipenv = pipfile.packages!.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    constraints.pipenv = pipfile['dev-packages']!.pipenv;
+    extractedConstraints.pipenv = pipfile['dev-packages']!.pipenv;
   }
 
-  const lockFileName = fileName + '.lock';
+  const lockFileName = `${packageFile}.lock`;
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];
   }
 
-  res.constraints = constraints;
+  res.extractedConstraints = extractedConstraints;
   return res;
 }

@@ -67,7 +67,7 @@ export class GolangVersionDatasource extends Datasource {
     lines.splice(0, startOfReleases + 1);
 
     // Parse the release list
-    let release: Omit<Release, 'version'> & { version?: string } = {
+    let release: Omit<Release, 'version'> & { version?: string | undefined } = {
       version: undefined,
     };
     let skipFutureRelease = false;

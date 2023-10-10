@@ -16,7 +16,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
         })
       ).toBeNull();
     });
@@ -29,7 +29,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
         })
       ).toBeNull();
     });
@@ -42,7 +42,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
         })
       ).toBeNull();
     });
@@ -55,7 +55,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
-          depName: 'some_crate',
+          packageName: 'some_crate',
         })
       ).toBeNull();
     });
@@ -68,7 +68,7 @@ describe('modules/datasource/galaxy/index', () => {
       expect(
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
-          depName: 'some_crate',
+          packageName: 'some_crate',
         })
       ).toBeNull();
     });
@@ -80,7 +80,7 @@ describe('modules/datasource/galaxy/index', () => {
         .reply(200, Fixtures.get('timezone'));
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
-        depName: 'yatesr.timezone',
+        packageName: 'yatesr.timezone',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -94,7 +94,7 @@ describe('modules/datasource/galaxy/index', () => {
         .reply(200, Fixtures.get('empty'));
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
-        depName: 'foo.bar',
+        packageName: 'foo.bar',
       });
       expect(res).toBeNull();
     });
@@ -107,7 +107,7 @@ describe('modules/datasource/galaxy/index', () => {
       await expect(
         getPkgReleases({
           datasource: GalaxyDatasource.id,
-          depName: 'some_crate',
+          packageName: 'some_crate',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -119,7 +119,7 @@ describe('modules/datasource/galaxy/index', () => {
         .reply(404);
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
-        depName: 'foo.bar',
+        packageName: 'foo.bar',
       });
       expect(res).toBeNull();
     });

@@ -70,15 +70,18 @@ export class JenkinsPluginsDatasource extends Datasource {
 
     const versions: Record<string, Release[]> = {};
     for (const name of Object.keys(plugins ?? [])) {
-      versions[name] = Object.keys(plugins[name]).map((version) => ({
-        version,
-        downloadUrl: plugins[name][version]?.url,
-        releaseTimestamp: plugins[name][version]?.buildDate
-          ? // TODO: types (#7154)
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            new Date(`${plugins[name][version].buildDate} UTC`)
-          : null,
-      }));
+      versions[name] = Object.keys(plugins[name]).map((version) => {
+        const downloadUrl = plugins[name][version]?.url;
+        const buildDate = plugins[name][version]?.buildDate;
+        const releaseTimestamp = buildDate
+          ? new Date(`${buildDate} UTC`).toISOString()
+          : null;
+        return {
+          version,
+          downloadUrl,
+          releaseTimestamp,
+        };
+      });
     }
     return versions;
   }

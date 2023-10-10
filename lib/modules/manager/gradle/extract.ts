@@ -1,126 +1,184 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { getFileContentMap } from '../../../util/fs';
+import { getLocalFiles } from '../../../util/fs';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
-import { parseGradle, parseProps } from './parser';
+import {
+  isGcvPropsFile,
+  parseGcv,
+  usesGcv,
+} from './extract/consistent-versions-plugin';
+import { parseGradle, parseKotlinSource, parseProps } from './parser';
+import { REGISTRY_URLS } from './parser/common';
 import type {
   GradleManagerData,
-  PackageVariables,
+  PackageRegistry,
   VariableRegistry,
 } from './types';
 import {
   getVars,
   isGradleScriptFile,
+  isKotlinSourceFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
   toAbsolutePath,
+  updateVars,
 } from './utils';
 
-const datasource = MavenDatasource.id;
+const mavenDatasource = MavenDatasource.id;
 
-// Enables reverse sorting in generateBranchConfig()
-//
-// Required for grouped dependencies to be upgraded
-// correctly in single branch.
-//
-// https://github.com/renovatebot/renovate/issues/8224
-function elevateFileReplacePositionField(
-  deps: PackageDependency<GradleManagerData>[]
-): PackageDependency<GradleManagerData>[] {
-  return deps.map((dep) => ({
-    ...dep,
-    fileReplacePosition: dep?.managerData?.fileReplacePosition,
-  }));
+function updatePackageRegistries(
+  packageRegistries: PackageRegistry[],
+  urls: PackageRegistry[]
+): void {
+  for (const url of urls) {
+    const registryAlreadyKnown = packageRegistries.some(
+      (item) => item.registryUrl === url.registryUrl && item.scope === url.scope
+    );
+    if (!registryAlreadyKnown) {
+      packageRegistries.push(url);
+    }
+  }
 }
 
-export async function extractAllPackageFiles(
-  config: ExtractConfig,
-  packageFiles: string[]
-): Promise<PackageFile[] | null> {
-  const extractedDeps: PackageDependency<GradleManagerData>[] = [];
-  const registry: VariableRegistry = {};
-  const packageFilesByName: Record<string, PackageFile> = {};
-  const registryUrls: string[] = [];
-  const reorderedFiles = reorderFiles(packageFiles);
-  const fileContents = await getFileContentMap(packageFiles, true);
+function getRegistryUrlsForDep(
+  packageRegistries: PackageRegistry[],
+  dep: PackageDependency<GradleManagerData>
+): string[] {
+  const scope = dep.depType === 'plugin' ? 'plugin' : 'dep';
 
-  for (const packageFile of reorderedFiles) {
+  const registryUrls = packageRegistries
+    .filter((item) => item.scope === scope)
+    .map((item) => item.registryUrl);
+
+  if (!registryUrls.length && scope === 'plugin') {
+    registryUrls.push(REGISTRY_URLS.gradlePluginPortal);
+  }
+
+  return [...new Set(registryUrls)];
+}
+
+async function parsePackageFiles(
+  config: ExtractConfig,
+  packageFiles: string[],
+  extractedDeps: PackageDependency<GradleManagerData>[],
+  packageFilesByName: Record<string, PackageFile>,
+  packageRegistries: PackageRegistry[]
+): Promise<PackageDependency<GradleManagerData>[]> {
+  const varRegistry: VariableRegistry = {};
+  const fileContents = await getLocalFiles(packageFiles);
+
+  for (const packageFile of packageFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
-      datasource,
+      datasource: mavenDatasource,
       deps: [],
     };
 
     try {
-      // TODO #7154
+      // TODO #22198
       const content = fileContents[packageFile]!;
-      const dir = upath.dirname(toAbsolutePath(packageFile));
-
-      const updateVars = (newVars: PackageVariables): void => {
-        const oldVars = registry[dir] || {};
-        registry[dir] = { ...oldVars, ...newVars };
-      };
+      const packageFileDir = upath.dirname(toAbsolutePath(packageFile));
 
       if (isPropsFile(packageFile)) {
         const { vars, deps } = parseProps(content, packageFile);
-        updateVars(vars);
+        updateVars(varRegistry, packageFileDir, vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const updatesFromCatalog = parseCatalog(packageFile, content);
-        extractedDeps.push(...updatesFromCatalog);
+        const deps = parseCatalog(packageFile, content);
+        extractedDeps.push(...deps);
+      } else if (
+        isGcvPropsFile(packageFile) &&
+        usesGcv(packageFile, fileContents)
+      ) {
+        const deps = parseGcv(packageFile, fileContents);
+        extractedDeps.push(...deps);
+      } else if (isKotlinSourceFile(packageFile)) {
+        const vars = getVars(varRegistry, packageFileDir);
+        const { vars: gradleVars, deps } = parseKotlinSource(
+          content,
+          vars,
+          packageFile
+        );
+        updateVars(varRegistry, '/', gradleVars);
+        extractedDeps.push(...deps);
       } else if (isGradleScriptFile(packageFile)) {
-        const vars = getVars(registry, dir);
+        const vars = getVars(varRegistry, packageFileDir);
         const {
           deps,
           urls,
           vars: gradleVars,
         } = parseGradle(content, vars, packageFile, fileContents);
-        urls.forEach((url) => {
-          if (!registryUrls.includes(url)) {
-            registryUrls.push(url);
-          }
-        });
-        registry[dir] = { ...registry[dir], ...gradleVars };
-        updateVars(gradleVars);
+        updatePackageRegistries(packageRegistries, urls);
+        updateVars(varRegistry, packageFileDir, gradleVars);
         extractedDeps.push(...deps);
       }
     } catch (err) {
-      logger.warn(
+      logger.debug(
         { err, config, packageFile },
         `Failed to process Gradle file`
       );
     }
   }
 
+  return extractedDeps;
+}
+
+export async function extractAllPackageFiles(
+  config: ExtractConfig,
+  packageFiles: string[]
+): Promise<PackageFile[] | null> {
+  const packageFilesByName: Record<string, PackageFile> = {};
+  const packageRegistries: PackageRegistry[] = [];
+  const extractedDeps: PackageDependency<GradleManagerData>[] = [];
+  const kotlinSourceFiles = packageFiles.filter(isKotlinSourceFile);
+  const gradleFiles = reorderFiles(
+    packageFiles.filter((e) => !kotlinSourceFiles.includes(e))
+  );
+
+  await parsePackageFiles(
+    config,
+    [...kotlinSourceFiles, ...kotlinSourceFiles, ...gradleFiles],
+    extractedDeps,
+    packageFilesByName,
+    packageRegistries
+  );
+
   if (!extractedDeps.length) {
     return null;
   }
 
-  elevateFileReplacePositionField(extractedDeps).forEach((dep) => {
+  for (const dep of extractedDeps) {
+    dep.fileReplacePosition = dep?.managerData?.fileReplacePosition; // #8224
+
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      let pkgFile = packageFilesByName[key];
+      let pkgFile: PackageFile = packageFilesByName[key];
       // istanbul ignore if: won't happen if "apply from" processes only initially known files
       if (!pkgFile) {
         pkgFile = {
           packageFile: key,
-          datasource,
+          datasource: mavenDatasource,
           deps: [],
-        } as PackageFile;
+        };
       }
 
-      dep.registryUrls = [
-        ...new Set([...registryUrls, ...(dep.registryUrls ?? [])]),
-      ];
+      if (!dep.datasource) {
+        dep.datasource = mavenDatasource;
+      }
 
-      if (!dep.depType) {
-        dep.depType = key.startsWith('buildSrc')
-          ? 'devDependencies'
-          : 'dependencies';
+      if (dep.datasource === mavenDatasource) {
+        dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
+
+        if (!dep.depType) {
+          dep.depType =
+            key.startsWith('buildSrc') && !kotlinSourceFiles.length
+              ? 'devDependencies'
+              : 'dependencies';
+        }
       }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(
@@ -135,10 +193,9 @@ export async function extractAllPackageFiles(
 
       packageFilesByName[key] = pkgFile;
     } else {
-      logger.warn({ dep }, `Failed to process Gradle dependency`);
+      logger.debug({ dep }, `Failed to process Gradle dependency`);
     }
-  });
+  }
 
-  const result = Object.values(packageFilesByName);
-  return result;
+  return Object.values(packageFilesByName);
 }

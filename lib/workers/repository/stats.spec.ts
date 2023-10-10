@@ -1,8 +1,9 @@
 import { logger, mocked } from '../../../test/util';
 import type { Logger } from '../../logger/types';
 import * as _memCache from '../../util/cache/memory';
+import type { LookupStats } from '../../util/cache/memory/types';
 import type { RequestStats } from '../../util/http/types';
-import { printRequestStats } from './stats';
+import { printLookupStats, printRequestStats } from './stats';
 
 jest.mock('../../util/cache/memory');
 
@@ -10,13 +11,51 @@ const memCache = mocked(_memCache);
 const log = logger.logger as jest.Mocked<Logger>;
 
 describe('workers/repository/stats', () => {
+  describe('printLookupStats()', () => {
+    it('runs', () => {
+      const stats: LookupStats[] = [
+        {
+          datasource: 'npm',
+          duration: 100,
+        },
+        {
+          datasource: 'npm',
+          duration: 200,
+        },
+        {
+          datasource: 'docker',
+          duration: 1000,
+        },
+      ];
+      memCache.get.mockImplementationOnce(() => stats as any);
+      expect(printLookupStats()).toBeUndefined();
+      expect(log.debug).toHaveBeenCalledTimes(1);
+      expect(log.debug.mock.calls[0][0]).toMatchInlineSnapshot(`
+        {
+          "docker": {
+            "averageMs": 1000,
+            "count": 1,
+            "maximumMs": 1000,
+            "totalMs": 1000,
+          },
+          "npm": {
+            "averageMs": 150,
+            "count": 2,
+            "maximumMs": 200,
+            "totalMs": 300,
+          },
+        }
+      `);
+    });
+  });
+
   describe('printRequestStats()', () => {
     it('runs', () => {
       const getStats: number[] = [30, 100, 10, 20];
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       memCache.get.mockImplementationOnce(() => getStats as any);
       const setStats: number[] = [110, 80, 20];
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       memCache.get.mockImplementationOnce(() => setStats as any);
       const httpStats: RequestStats[] = [
         {
@@ -62,7 +101,7 @@ describe('workers/repository/stats', () => {
           statusCode: 401,
         },
       ];
-      // TODO: fix types, jest is using wrong overload (#7154)
+      // TODO: fix types, jest is using wrong overload (#22198)
       memCache.get.mockImplementationOnce(() => httpStats as any);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();

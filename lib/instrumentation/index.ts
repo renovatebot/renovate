@@ -1,4 +1,4 @@
-import { ClientRequest } from 'http';
+import { ClientRequest } from 'node:http';
 import type {
   Context,
   Span,

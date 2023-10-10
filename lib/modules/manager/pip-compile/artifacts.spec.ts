@@ -1,21 +1,26 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git } from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { constructPipCompileCmd, extractResolver } from './artifacts';
 import { updateArtifacts } from '.';
 
+const datasource = mocked(_datasource);
+
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http');
+jest.mock('../../datasource', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -23,16 +28,19 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: join('/tmp/renovate/cache'),
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
-const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
+const dockerAdminConfig = {
+  ...adminConfig,
+  binarySource: 'docker',
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+};
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('modules/manager/pip-compile/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -75,9 +83,11 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('returns updated requirements.txt', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current requirements.txt');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
@@ -94,10 +104,16 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
+    // pip-tools
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '6.13.0' }],
+    });
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
@@ -110,7 +126,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -118,14 +134,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'pip install --user pip-tools ' +
+          'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
           '"',
@@ -135,10 +150,16 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    // pip-tools
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '6.13.0' }],
+    });
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await updateArtifacts({
@@ -151,7 +172,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
-      { cmd: 'pip install --user pip-tools' },
+      { cmd: 'install-tool pip-tools 6.13.0' },
       {
         cmd: 'pip-compile requirements.in',
         options: { cwd: '/tmp/github/some/repo' },
@@ -183,9 +204,11 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
@@ -202,10 +225,16 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('uses pip-compile version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
+    // pip-tools
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '6.13.0' }],
+    });
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
@@ -215,13 +244,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
         newPackageFileContent: 'some new content',
         config: {
           ...config,
-          constraints: { python: '3.10.2', pipTools: '==1.2.3' },
+          constraints: { python: '3.10.2', pipTools: '6.13.0' },
         },
       })
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -229,14 +258,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'pip install --user pip-tools==1.2.3 ' +
+          'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
           '"',

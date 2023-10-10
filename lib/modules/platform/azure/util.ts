@@ -19,7 +19,7 @@ export function getGitStatusContextCombinedName(
     return undefined;
   }
   const combinedName = `${context.genre ? `${context.genre}/` : ''}${
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     context.name!
   }`;
   logger.trace(`Got combined context name of ${combinedName}`);
@@ -84,8 +84,6 @@ const stateMap = {
 
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
-  // TODO: types (#7154)
-  const displayNumber = `Pull Request #${number!}`;
 
   const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.sourceRefName
@@ -97,7 +95,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   const createdAt = azurePr.creationDate?.toISOString();
 
-  // TODO #7154
+  // TODO #22198
   const state = stateMap[azurePr.status!] ?? 'open';
 
   const sourceRefName = azurePr.sourceRefName;
@@ -107,7 +105,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     sourceBranch,
     state,
     number,
-    displayNumber,
     bodyStruct,
     sourceRefName,
     targetBranch,

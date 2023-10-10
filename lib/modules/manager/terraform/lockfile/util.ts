@@ -1,4 +1,4 @@
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
@@ -10,7 +10,7 @@ import type {
 } from './types';
 
 const providerStartLineRegex = regEx(
-  `^provider "(?<registryUrl>[^/]*)\\/(?<namespace>[^/]*)\\/(?<depName>[^/]*)"`
+  `^provider "(?<registryUrl>[^/]*)/(?<namespace>[^/]*)/(?<depName>[^/]*)"`
 );
 const versionLineRegex = regEx(
   `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`
@@ -22,8 +22,8 @@ const hashLineRegex = regEx(`^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`);
 
 const lockFile = '.terraform.lock.hcl';
 
-export function findLockFile(packageFilePath: string): string {
-  return getSiblingFileName(packageFilePath, lockFile);
+export function findLockFile(packageFilePath: string): Promise<string | null> {
+  return findLocalSiblingOrParent(packageFilePath, lockFile);
 }
 
 export function readLockFile(lockFilePath: string): Promise<string | null> {
@@ -139,7 +139,7 @@ export function writeLockUpdates(
   const sections: string[][] = [];
 
   // sort updates in order of appearance in the lockfile
-  // TODO #7154
+  // TODO #22198
   updates.sort(
     (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start
   );
@@ -148,18 +148,18 @@ export function writeLockUpdates(
     let startWhitespace: number | undefined;
     if (index > 0) {
       // get end of the
-      // TODO #7154
+      // TODO #22198
       startWhitespace = array[index - 1].lineNumbers.block!.end;
     }
     const leadingNonRelevantLines = lines.slice(
       startWhitespace,
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.block!.start
     );
     sections.push(leadingNonRelevantLines);
 
     const providerBlockLines = lines.slice(
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.block!.start,
       update.lineNumbers.block!.end
     );
@@ -199,7 +199,7 @@ export function writeLockUpdates(
       (value) => `${hashLinePrefix}${value}${hashLineSuffix}`
     );
     newProviderBlockLines.splice(
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.hashes.start!,
       0,
       ...hashesWithWhitespace

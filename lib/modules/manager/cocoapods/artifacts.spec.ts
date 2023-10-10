@@ -1,6 +1,7 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked } from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -12,12 +13,12 @@ import { updateArtifacts } from '.';
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
-jest.mock('../../platform');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 const datasource = mocked(_datasource);
 
 delete process.env.CP_HOME_DIR;
+process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 
@@ -25,11 +26,11 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 describe('modules/manager/cocoapods/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
     // can't be mocked
@@ -37,6 +38,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
 
     GlobalConfig.set(adminConfig);
 
+    // ruby
     datasource.getPkgReleases.mockResolvedValue({
       releases: [
         { version: '2.7.4' },
@@ -110,9 +112,11 @@ describe('modules/manager/cocoapods/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: [] as string[],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+      })
+    );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
     expect(
@@ -132,9 +136,11 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile');
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['Podfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['Podfile.lock'],
+      })
+    );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
     expect(
@@ -158,11 +164,13 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Pods/Manifest.lock');
     fs.readLocalFile.mockResolvedValueOnce('Pods manifest');
-    git.getRepoStatus.mockResolvedValueOnce({
-      not_added: ['Pods/New'],
-      modified: ['Podfile.lock', 'Pods/Manifest.lock'],
-      deleted: ['Pods/Deleted'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['Pods/New'],
+        modified: ['Podfile.lock', 'Pods/Manifest.lock'],
+        deleted: ['Pods/Deleted'],
+      })
+    );
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -231,9 +239,11 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
 
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['Podfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['Podfile.lock'],
+      })
+    );
 
     await updateArtifacts({
       packageFileName: 'Podfile',
@@ -242,17 +252,18 @@ describe('modules/manager/cocoapods/artifacts', () => {
       config,
     });
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/ruby:2.7.4' },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {
         cmd:
-          'docker run --rm --name=renovate_ruby --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/ruby:2.7.4' +
+          'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
+          'install-tool ruby 3.1.0' +
+          ' && ' +
           'install-tool cocoapods 1.2.4' +
           ' && ' +
           'pod install' +
@@ -261,23 +272,21 @@ describe('modules/manager/cocoapods/artifacts', () => {
     ]);
   });
 
-  it('falls back to the `latest` Docker image tag', async () => {
+  it('supports install mode', async () => {
     const execSnapshots = mockExecAll();
 
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [],
-    });
-
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
 
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['Podfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['Podfile.lock'],
+      })
+    );
 
     await updateArtifacts({
       packageFileName: 'Podfile',
@@ -286,22 +295,9 @@ describe('modules/manager/cocoapods/artifacts', () => {
       config,
     });
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/ruby:latest' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_ruby --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'renovate/ruby:latest' +
-          ' bash -l -c "' +
-          'install-tool cocoapods 1.2.4' +
-          ' && ' +
-          'pod install' +
-          '"',
-      },
+      { cmd: 'install-tool ruby 3.1.0' },
+      { cmd: 'install-tool cocoapods 1.2.4' },
+      { cmd: 'pod install' },
     ]);
   });
 });

@@ -207,7 +207,7 @@ const staticGroups = {
       },
     ],
   },
-  jsTestMonMajor: {
+  jsTestNonMajor: {
     description: 'Group non-major JS test package updates together.',
     packageRules: [
       {
@@ -303,7 +303,7 @@ const staticGroups = {
         commitMessageTopic: 'Node.js',
         excludePackageNames: ['calico/node', 'kindest/node'],
         matchDatasources: ['docker'],
-        matchPackageNames: ['node'],
+        matchDepNames: ['node'],
         matchPackagePatterns: ['/node$'],
       },
     ],
@@ -314,7 +314,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan\\/phpstan$', '\\/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
       },
     ],
   },
@@ -333,6 +333,55 @@ const staticGroups = {
       {
         extends: 'packages:postcss',
         groupName: 'postcss packages',
+      },
+    ],
+  },
+  pulumi: {
+    description: 'Group Pulumi packages together.',
+    packageRules: [
+      {
+        description: 'Group Pulumi Node.JS packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-node',
+        matchDatasources: ['npm'],
+        matchPackagePrefixes: ['@pulumi/'],
+      },
+      {
+        description: 'Group Pulumi Python packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-python',
+        matchDatasources: ['pypi'],
+        matchPackagePrefixes: ['pulumi-'],
+      },
+      {
+        description: 'Group Pulumi Go packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-go',
+        matchDatasources: ['go'],
+        matchPackagePrefixes: ['github.com/pulumi/'],
+      },
+      {
+        description: 'Group Pulumi Java packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-java',
+        matchDatasources: ['maven'],
+        matchPackagePrefixes: ['com.pulumi'],
+      },
+      {
+        description: 'Group Pulumi .NET packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-dotnet',
+        matchDatasources: ['nuget'],
+        matchPackagePrefixes: ['Pulumi'],
+      },
+    ],
+  },
+  react: {
+    description: 'Group React and corresponding `@types` packages together.',
+    packageRules: [
+      {
+        groupName: 'react monorepo',
+        matchPackageNames: ['@types/react', '@types/react-dom'],
       },
     ],
   },
@@ -359,6 +408,7 @@ const staticGroups = {
       'group:kubernetes',
       'group:phpstan',
       'group:polymer',
+      'group:react',
       'group:resilience4j',
       'group:rubyOnRails',
       'group:rubyOmniauth',
@@ -388,7 +438,7 @@ const staticGroups = {
       'group:springWs',
       'group:symfony',
     ],
-    ignoreDeps: [],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
@@ -474,7 +524,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'spring boot',
-        matchPackageNames: ['org.springframework.boot'],
+        matchDepNames: ['org.springframework.boot'],
         matchPackagePrefixes: ['org.springframework.boot:'],
       },
     ],
@@ -720,7 +770,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
 config.monorepos = {
   description: 'Group known monorepo packages together.',
   extends: monorepoNames,
-  ignoreDeps: [],
+  ignoreDeps: [], // Hack to improve onboarding PR description
 };
 
 export const presets: Record<string, Preset> = config;

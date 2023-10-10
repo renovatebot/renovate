@@ -18,5 +18,6 @@ export async function initializeCaches(
   memCache.init();
   await initRepoCache(config);
   await fs.ensureDir(privateCacheDir());
+  npmApi.setNpmrc();
   npmApi.setNpmrc(config.npmrc);
 }

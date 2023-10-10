@@ -15,14 +15,19 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { CustomManagersMigration } from './custom/custom-managers-migration';
+import { DatasourceMigration } from './custom/datasource-migration';
 import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
+import { FetchReleaseNotesMigration } from './custom/fetch-release-notes-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
+import { IncludeForksMigration } from './custom/include-forks-migration';
+import { MatchDatasourcesMigration } from './custom/match-datasources-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
 import { NodeMigration } from './custom/node-migration';
 import { PackageFilesMigration } from './custom/package-files-migration';
@@ -36,6 +41,7 @@ import { PostUpdateOptionsMigration } from './custom/post-update-options-migrati
 import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
+import { RecreateClosedMigration } from './custom/recreate-closed-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
@@ -44,6 +50,7 @@ import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { SemanticPrefixMigration } from './custom/semantic-prefix-migration';
 import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
 import { SeparateMultipleMajorMigration } from './custom/separate-multiple-major-migration';
+import { StabilityDaysMigration } from './custom/stability-days-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
@@ -71,6 +78,8 @@ export class MigrationsService {
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
+    ['adoptium-java', 'java-version'],
+    ['azureAutoApprove', 'autoApprove'],
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
@@ -87,6 +96,7 @@ export class MigrationsService {
     ['masterIssueFooter', 'dependencyDashboardFooter'],
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
+    ['regexManagers', 'customManagers'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
@@ -108,6 +118,7 @@ export class MigrationsService {
     HostRulesMigration,
     IgnoreNodeModulesMigration,
     IgnoreNpmrcFileMigration,
+    IncludeForksMigration,
     MatchStringsMigration,
     PackageNameMigration,
     PackagePatternMigration,
@@ -136,6 +147,12 @@ export class MigrationsService {
     PackageRulesMigration,
     NodeMigration,
     SemanticPrefixMigration,
+    MatchDatasourcesMigration,
+    DatasourceMigration,
+    RecreateClosedMigration,
+    StabilityDaysMigration,
+    FetchReleaseNotesMigration,
+    CustomManagersMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
@@ -144,7 +161,7 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = MigrationsService.#getMigration(migrations, key);
+      const migration = MigrationsService.getMigration(migrations, key);
 
       if (migration) {
         migration.run(value, key);
@@ -165,7 +182,7 @@ export class MigrationsService {
     return !dequal(originalConfig, migratedConfig);
   }
 
-  protected static getMigrations(
+  public static getMigrations(
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig
   ): ReadonlyArray<Migration> {
@@ -202,7 +219,7 @@ export class MigrationsService {
     return migrations;
   }
 
-  static #getMigration(
+  private static getMigration(
     migrations: ReadonlyArray<Migration>,
     key: string
   ): Migration | undefined {

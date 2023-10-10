@@ -1,8 +1,7 @@
-import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
-import { commitFiles } from '../../../../util/git';
+import { RenovateConfig, scm } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { createOnboardingBranch } from './create';
 
-jest.mock('../../../../util/git');
 jest.mock('./config', () => ({
   getOnboardingConfigContents: () =>
     JSON.stringify({
@@ -20,7 +19,7 @@ describe('workers/repository/onboarding/branch/create', () => {
   describe('createOnboardingBranch', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
-      expect(commitFiles).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -29,29 +28,9 @@ describe('workers/repository/onboarding/branch/create', () => {
             contents: '{"foo":"bar"}',
           },
         ],
+        force: true,
         message: 'Add renovate.json',
         platformCommit: false,
-      });
-    });
-
-    it('commits via platform', async () => {
-      platform.commitFiles = jest.fn();
-
-      config.platformCommit = true;
-
-      await createOnboardingBranch(config);
-
-      expect(platform.commitFiles).toHaveBeenCalledWith({
-        branchName: 'renovate/configure',
-        files: [
-          {
-            type: 'addition',
-            path: 'renovate.json',
-            contents: '{"foo":"bar"}',
-          },
-        ],
-        message: 'Add renovate.json',
-        platformCommit: true,
       });
     });
 
@@ -63,7 +42,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
       await createOnboardingBranch(config);
 
-      expect(commitFiles).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -72,6 +51,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             contents: '{"foo":"bar"}',
           },
         ],
+        force: true,
         message,
         platformCommit: false,
       });
@@ -86,7 +66,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -95,6 +75,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -113,7 +94,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -122,6 +103,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -137,7 +119,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -146,6 +128,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -164,7 +147,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -173,6 +156,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -189,7 +173,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -198,6 +182,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -212,7 +197,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -221,6 +206,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -236,7 +222,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -245,6 +231,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -260,10 +247,11 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,
+          force: true,
           platformCommit: false,
         });
       });

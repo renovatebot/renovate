@@ -3,6 +3,10 @@ import { extractPackageFile } from '.';
 
 describe('modules/manager/mint/extract', () => {
   describe('extractPackageFile()', () => {
+    it('returns null for empty', () => {
+      expect(extractPackageFile('')).toBeNull();
+    });
+
     it('Mintfile With Version Description', () => {
       const res = extractPackageFile(codeBlock`
         SwiftGen/SwiftGen@6.6.1
@@ -43,11 +47,11 @@ describe('modules/manager/mint/extract', () => {
         deps: [
           {
             depName: 'yonaskolb/xcodegen',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'realm/SwiftLint',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
         ],
       });
@@ -69,7 +73,7 @@ describe('modules/manager/mint/extract', () => {
           },
           {
             depName: 'yonaskolb/xcodegen',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'realm/SwiftLint',
@@ -99,7 +103,7 @@ describe('modules/manager/mint/extract', () => {
           },
           {
             depName: 'yonaskolb/xcodegen',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'realm/SwiftLint',

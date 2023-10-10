@@ -5,35 +5,41 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 16
+  NODE_VERSION: 18
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+
+      - name: Enable corepack
+        shell: bash
+        run: corepack enable
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3.5.1
+        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: yarn
+          cache: pnpm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install
 
       - name: Update static data
-        run: yarn run update-static-data
+        run: pnpm run update-static-data
 
       - name: Run Prettier
-        run: yarn prettier-fix
+        run: pnpm prettier-fix
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@2b011faafdcbc9ceb11414d64d0573f37c774b04 # v4.2.3
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # v5.0.2
         with:
           author: 'Renovate Bot <renovate@whitesourcesoftware.com>'
           branch: 'chore/update-static-data'

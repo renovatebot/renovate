@@ -17,10 +17,13 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { getBundlerConstraint, getRubyConstraint } from './common';
+import {
+  getBundlerConstraint,
+  getLockFilePath,
+  getRubyConstraint,
+} from './common';
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,
@@ -74,18 +77,12 @@ export async function updateArtifacts(
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(existingError);
   }
-  const lockFileName = `${packageFileName}.lock`;
+  const lockFileName = await getLockFilePath(packageFileName);
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
   }
-
-  const args = [
-    config.postUpdateOptions?.includes('bundlerConservative') &&
-      '--conservative',
-    '--update',
-  ].filter(is.nonEmptyString);
 
   const updatedDepNames = updatedDeps
     .map(({ depName }) => depName)
@@ -94,15 +91,36 @@ export async function updateArtifacts(
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    let cmd: string;
+    const commands: string[] = [];
 
     if (config.isLockFileMaintenance) {
-      cmd = 'bundler lock --update';
+      commands.push('bundler lock --update');
     } else {
-      cmd = `bundler lock ${args.join(' ')} ${updatedDepNames
-        .filter((dep) => dep !== 'ruby')
-        .map(quote)
-        .join(' ')}`;
+      const updateTypes = {
+        patch: '--patch --strict ',
+        minor: '--minor --strict ',
+        major: '',
+      };
+      for (const [updateType, updateArg] of Object.entries(updateTypes)) {
+        const deps = updatedDeps
+          .filter((dep) => (dep.updateType ?? 'major') === updateType)
+          .map((dep) => dep.depName)
+          .filter(is.string)
+          .filter((dep) => dep !== 'ruby');
+        let additionalArgs = '';
+        if (config.postUpdateOptions?.includes('bundlerConservative')) {
+          additionalArgs = '--conservative ';
+        }
+        if (deps.length) {
+          let cmd = `bundler lock ${updateArg}${additionalArgs}--update ${deps
+            .map(quote)
+            .join(' ')}`;
+          if (cmd.includes(' --conservative ')) {
+            cmd = cmd.replace(' --strict', '');
+          }
+          commands.push(cmd);
+        }
+      }
     }
 
     const bundlerHostRules = findAllAuthenticatable({
@@ -126,8 +144,6 @@ export async function updateArtifacts(
           // TODO: fix me, hostrules can missing all auth
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
-          // sanitize the authentication
-          addSecretForSanitizing(creds);
         }
         return authCommands;
       },
@@ -161,17 +177,17 @@ export async function updateArtifacts(
     }
 
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile: lockFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
         GEM_HOME: await ensureCacheDir('bundler'),
       },
-      docker: {
-        image: 'ruby',
-        tagScheme: 'ruby',
-        tagConstraint: await getRubyConstraint(updateArtifact),
-      },
+      docker: {},
       toolConstraints: [
+        {
+          toolName: 'ruby',
+          constraint: await getRubyConstraint(updateArtifact),
+        },
         {
           toolName: 'bundler',
           constraint: bundler,
@@ -179,7 +195,7 @@ export async function updateArtifacts(
       ],
       preCommands,
     };
-    await exec(cmd, execOptions);
+    await exec(commands, execOptions);
 
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {

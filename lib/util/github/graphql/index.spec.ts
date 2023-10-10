@@ -52,12 +52,14 @@ describe('util/github/graphql/index', () => {
             payload: {
               nodes: [
                 {
+                  version: '1.2.3',
+                  releaseTimestamp: '2024-09-24',
+                  isDraft: false,
+                  isPrerelease: false,
+                  url: 'https://example.com',
                   id: 123,
                   name: 'name',
                   description: 'description',
-                  version: '1.2.3',
-                  releaseTimestamp: '2024-09-24',
-                  url: 'https://example.com',
                 },
               ],
             },
@@ -69,12 +71,12 @@ describe('util/github/graphql/index', () => {
 
     expect(res).toEqual([
       {
-        id: 123,
-        name: 'name',
-        description: 'description',
         version: '1.2.3',
         releaseTimestamp: '2024-09-24',
         url: 'https://example.com',
+        id: 123,
+        name: 'name',
+        description: 'description',
       },
     ]);
   });

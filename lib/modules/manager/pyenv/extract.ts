@@ -1,9 +1,10 @@
 import { DockerDatasource } from '../../datasource/docker';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFileContent {
   const dep: PackageDependency = {
     depName: 'python',
+    commitMessageTopic: 'Python',
     currentValue: content.trim(),
     datasource: DockerDatasource.id,
   };

@@ -8,8 +8,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
-      "packageName": "php/php-src",
+      "packageName": "containerbase/php-prebuild",
     },
     {
       "currentValue": "*",
@@ -205,6 +204,9 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "depType": "require-dev",
     },
   ],
+  "extractedConstraints": {
+    "php": ">=5.3.2",
+  },
   "lockFiles": [
     "composer.lock",
   ],
@@ -219,8 +221,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
-      "packageName": "php/php-src",
+      "packageName": "containerbase/php-prebuild",
     },
     {
       "currentValue": "*",
@@ -416,5 +417,8 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "depType": "require-dev",
     },
   ],
+  "extractedConstraints": {
+    "php": ">=5.3.2",
+  },
 }
 `;

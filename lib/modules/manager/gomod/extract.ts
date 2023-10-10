@@ -4,7 +4,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { MultiLineParseResult } from './types';
 
 function getDep(
@@ -45,12 +45,14 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
     depType: 'golang',
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    versioning: 'npm',
-    rangeStrategy: 'replace',
+    versioning: 'go-mod-directive',
   };
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
   try {
@@ -70,10 +72,17 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
       const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line);
-      if (requireMatch && !line.endsWith('// indirect')) {
-        logger.trace({ lineNumber }, `require line: "${line}"`);
-        const dep = getDep(lineNumber, requireMatch, 'require');
-        deps.push(dep);
+      if (requireMatch) {
+        if (line.endsWith('// indirect')) {
+          logger.trace({ lineNumber }, `indirect line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'indirect');
+          dep.enabled = false;
+          deps.push(dep);
+        } else {
+          logger.trace({ lineNumber }, `require line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'require');
+          deps.push(dep);
+        }
       }
       if (line.trim() === 'require (') {
         logger.trace(`Matched multi-line require on line ${lineNumber}`);
@@ -100,7 +109,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting go modules');
+    logger.warn({ err, packageFile }, 'Error extracting go modules');
   }
   if (!deps.length) {
     return null;
@@ -126,6 +135,12 @@ function parseMultiLine(
       logger.trace({ lineNumber }, `${blockType} line: "${line}"`);
       const dep = getDep(lineNumber, multiMatch, blockType);
       dep.managerData!.multiLine = true;
+      deps.push(dep);
+    } else if (multiMatch && line.endsWith('// indirect')) {
+      logger.trace({ lineNumber }, `${blockType} indirect line: "${line}"`);
+      const dep = getDep(lineNumber, multiMatch, 'indirect');
+      dep.managerData!.multiLine = true;
+      dep.enabled = false;
       deps.push(dep);
     } else if (line.trim() !== ')') {
       logger.trace(`No multi-line match: ${line}`);

@@ -52,12 +52,12 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .reply(200, "<a href='1.2.3/'>4.5.6/</a>");
 
       httpMock
-        .scope('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/com.github.gseitz/')
+        .scope('https://repo.scala-sbt.org')
+        .get('/scalasbt/sbt-plugin-releases/com.github.gseitz/')
         .reply(200, '');
       httpMock
-        .scope('https://dl.bintray.com')
-        .get('/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
+        .scope('https://repo.scala-sbt.org')
+        .get('/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/')
         .reply(
           200,
           '<html>\n' +
@@ -69,9 +69,9 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '</html>'
         );
       httpMock
-        .scope('https://dl.bintray.com')
+        .scope('https://repo.scala-sbt.org')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/'
+          '/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/'
         )
         .reply(
           200,
@@ -85,9 +85,9 @@ describe('modules/datasource/sbt-plugin/index', () => {
             '</html>\n'
         );
       httpMock
-        .scope('https://dl.bintray.com')
+        .scope('https://repo.scala-sbt.org')
         .get(
-          '/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/'
+          '/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray/scala_2.12/sbt_1.0/'
         )
         .reply(
           200,
@@ -145,7 +145,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.scalatest:scalatest',
+          packageName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
       ).toBeNull();
@@ -153,7 +153,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.scalatest:scalaz',
+          packageName: 'org.scalatest:scalaz',
           registryUrls: [],
         })
       ).toBeNull();
@@ -164,13 +164,13 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.foundweekends:sbt-bintray',
+          packageName: 'org.foundweekends:sbt-bintray',
           registryUrls: [],
         })
       ).toEqual({
         dependencyUrl:
-          'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://dl.bintray.com/sbt/sbt-plugin-releases',
+          'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
         releases: [{ version: '0.5.5' }],
       });
     });
@@ -180,13 +180,13 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'org.foundweekends:sbt-bintray_2.12',
+          packageName: 'org.foundweekends:sbt-bintray_2.12',
           registryUrls: [],
         })
       ).toEqual({
         dependencyUrl:
-          'https://dl.bintray.com/sbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
-        registryUrl: 'https://dl.bintray.com/sbt/sbt-plugin-releases',
+          'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.foundweekends/sbt-bintray',
+        registryUrl: 'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
         releases: [{ version: '0.5.5' }],
       });
     });
@@ -196,7 +196,7 @@ describe('modules/datasource/sbt-plugin/index', () => {
         await getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
-          depName: 'io.get-coursier:sbt-coursier',
+          packageName: 'io.get-coursier:sbt-coursier',
           registryUrls: [MAVEN_REPO],
         })
       ).toEqual({

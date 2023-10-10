@@ -1,5 +1,5 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
-import url from 'url';
+import url, { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -61,7 +61,9 @@ function callApi<T>(
     case 'patch':
       return bitbucketServerHttp.patchJson<T>(apiUrl, options);
     case 'head':
-      return bitbucketServerHttp.headJson<T>(apiUrl, options);
+      return bitbucketServerHttp.headJson(apiUrl, options) as Promise<
+        HttpResponse<T>
+      >;
     case 'delete':
       return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
     case 'get':
@@ -155,12 +157,10 @@ function generateUrlFromEndpoint(
   const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      url.pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
     }scm`,
     repository,
   });
@@ -174,7 +174,7 @@ function injectAuth(url: string, opts: HostRule): string {
     logger.debug(`Invalid url: ${url}`);
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  // TODO: null checks (#7154)
+  // TODO: null checks (#22198)
   repoUrl.username = opts.username!;
   repoUrl.password = opts.password!;
   return repoUrl.toString();

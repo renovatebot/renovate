@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
@@ -8,7 +7,9 @@ import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
+import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
 
@@ -83,6 +84,8 @@ export function generateBranchConfig(
   const toVersions: string[] = [];
   const toValues = new Set<string>();
   for (const upg of branchUpgrades) {
+    upg.recreateClosed = upg.recreateWhen === 'always';
+
     if (upg.currentDigest) {
       upg.currentDigestShort =
         upg.currentDigestShort ??
@@ -102,6 +105,10 @@ export function generateBranchConfig(
     } else if (!upg.isLockFileMaintenance) {
       upg.displayFrom = upg.currentValue;
       upg.displayTo = upg.newValue;
+    }
+
+    if (upg.isLockFileMaintenance) {
+      upg.recreateClosed = upg.recreateWhen !== 'never';
     }
     upg.displayFrom ??= '';
     upg.displayTo ??= '';
@@ -178,11 +185,14 @@ export function generateBranchConfig(
       logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
-    } else if (newValue.length > 1 && upgrade.isDigest) {
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
+    } else if (
+      newValue.length > 1 &&
+      (upgrade.isDigest || upgrade.isPinDigest)
+    ) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
@@ -223,7 +233,7 @@ export function generateBranchConfig(
       regEx(/to vv(\d)/),
       'to v$1'
     );
-    if (upgrade.toLowerCase) {
+    if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
       // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split(newlineRegex);
       splitMessage[0] = splitMessage[0].toLowerCase();
@@ -246,26 +256,28 @@ export function generateBranchConfig(
         );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
-      if (upgrade.toLowerCase) {
+      if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
       [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
     }
-    upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
-    if (upgrade.isGroup) {
-      upgrade.prTitle +=
-        upgrade.updateType === 'major' && upgrade.separateMajorMinor
-          ? ' (major)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'minor' && upgrade.separateMinorPatch
-          ? ' (minor)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'patch' && upgrade.separateMinorPatch
-          ? ' (patch)'
-          : '';
+    if (!upgrade.prTitleStrict) {
+      upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
+      if (upgrade.isGroup) {
+        upgrade.prTitle +=
+          upgrade.updateType === 'major' && upgrade.separateMajorMinor
+            ? ' (major)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'minor' && upgrade.separateMinorPatch
+            ? ' (minor)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'patch' && upgrade.separateMinorPatch
+            ? ' (patch)'
+            : '';
+      }
     }
     // Compile again to allow for nested templates
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
@@ -354,7 +366,7 @@ export function generateBranchConfig(
         }
 
         return acc;
-      }, {} as Record<string, boolean>)
+      }, {})
     );
   }
 
@@ -387,11 +399,31 @@ export function generateBranchConfig(
   const tableRows = config.upgrades
     .map(getTableValues)
     .filter((x): x is string[] => is.array(x, is.string));
+
   if (tableRows.length) {
-    let table: string[][] = [];
+    const table: string[][] = [];
     table.push(['datasource', 'package', 'from', 'to']);
-    table = table.concat(tableRows!);
+
+    const seenRows = new Set<string>();
+
+    for (const row of tableRows) {
+      const key = safeStringify(row);
+      if (seenRows.has(key)) {
+        continue;
+      }
+      seenRows.add(key);
+      table.push(row);
+    }
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
+  }
+  const additionalReviewers = uniq(
+    config.upgrades
+      .map((upgrade) => upgrade.additionalReviewers)
+      .flat()
+      .filter(is.nonEmptyString)
+  );
+  if (additionalReviewers.length > 0) {
+    config.additionalReviewers = additionalReviewers;
   }
   return config;
 }

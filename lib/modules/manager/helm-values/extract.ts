@@ -1,8 +1,8 @@
-import { load } from 'js-yaml';
+import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmDockerImageDependency } from './types';
 import {
   matchesHelmValuesDockerHeuristic,
@@ -57,24 +57,35 @@ function findDependencies(
   return packageDependencies;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
-  let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
+  let parsedContent: Record<string, unknown>[] | HelmDockerImageDependency[];
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
     // TODO: fix me (#9610)
-    parsedContent = load(content, { json: true }) as any;
+    parsedContent = loadAll(content, null, { json: true }) as any;
   } catch (err) {
-    logger.debug({ err }, 'Failed to parse helm-values YAML');
+    logger.debug({ err, packageFile }, 'Failed to parse helm-values YAML');
     return null;
   }
   try {
-    const deps = findDependencies(parsedContent, []);
+    const deps: PackageDependency<Record<string, any>>[] = [];
+
+    for (const con of parsedContent) {
+      deps.push(...findDependencies(con, []));
+    }
+
     if (deps.length) {
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error parsing helm-values parsed content');
+    logger.debug(
+      { err, packageFile },
+      'Error parsing helm-values parsed content'
+    );
   }
   return null;
 }

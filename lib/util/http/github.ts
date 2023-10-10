@@ -19,6 +19,7 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
+  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -94,7 +95,7 @@ function handleGotError(
     err.statusCode === 403 &&
     message.startsWith('You have exceeded a secondary rate limit')
   ) {
-    logger.debug({ err }, 'GitHub failure: secondary rate limit');
+    logger.warn({ err }, 'GitHub failure: secondary rate limit');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
@@ -210,7 +211,7 @@ function getGraphqlPageSize(
     if (now > expiry) {
       const newPageSize = Math.min(oldPageSize * 2, MAX_GRAPHQL_PAGE_SIZE);
       if (newPageSize < MAX_GRAPHQL_PAGE_SIZE) {
-        const timestamp = now.toISO();
+        const timestamp = now.toISO()!;
 
         logger.debug(
           { fieldName, oldPageSize, newPageSize, timestamp },
@@ -241,7 +242,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   const oldPageSize = getGraphqlPageSize(fieldName);
   if (newPageSize !== oldPageSize) {
     const now = DateTime.local();
-    const pageLastResizedAt = now.toISO();
+    const pageLastResizedAt = now.toISO()!;
     logger.debug(
       { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
       'GraphQL page size: shrinking'
@@ -259,6 +260,11 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
+function replaceUrlBase(url: URL, baseUrl: string): URL {
+  const relativeUrl = `${url.pathname}${url.search}`;
+  return new URL(relativeUrl, baseUrl);
+}
+
 export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(hostType = 'github', options?: GithubHttpOptions) {
     super(hostType, options);
@@ -266,7 +272,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GithubHttpOptions,
+    options?: InternalHttpOptions & GithubHttpOptions & HttpRequestOptions<T>,
     okToRetry = true
   ): Promise<HttpResponse<T>> {
     const opts: GithubHttpOptions = {
@@ -309,15 +315,27 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
         const linkHeader = parseLinkHeader(result?.headers?.link);
-        if (linkHeader?.next && linkHeader?.last) {
+        const next = linkHeader?.next;
+        if (next?.url && linkHeader?.last?.page) {
           let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
+          const baseUrl = opts.baseUrl;
+          const parsedUrl = new URL(next.url, baseUrl);
+          const rebasePagination =
+            !!baseUrl &&
+            !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+            // Preserve github.com URLs for use cases like release notes
+            parsedUrl.origin !== 'https://api.github.com';
+          const firstPageUrl = rebasePagination
+            ? replaceUrlBase(parsedUrl, baseUrl)
+            : parsedUrl;
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
-              const nextUrl = new URL(linkHeader.next.url, opts.baseUrl);
+              // copy before modifying searchParams
+              const nextUrl = new URL(firstPageUrl);
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
@@ -376,14 +394,13 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       body,
       headers: { accept: options?.acceptHeader },
     };
-
+    if (options.token) {
+      opts.token = options.token;
+    }
     logger.trace(`Performing Github GraphQL request`);
 
     try {
-      const res = await this.postJson<GithubGraphqlResponse<T>>(
-        'graphql',
-        opts
-      );
+      const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
       return res?.body;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');

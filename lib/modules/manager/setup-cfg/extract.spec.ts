@@ -24,6 +24,7 @@ describe('modules/manager/setup-cfg/extract', () => {
           { depName: 'nmspc.pkg', currentValue: '==1.0' },
           { depName: 'requests', currentValue: '~=2.18' },
           { depName: 'compact', currentValue: '~=1.2.3' },
+          { depName: 'responses', currentValue: '>=2.27.0' },
           { depName: 'six', currentValue: '~=1.4' },
           { depName: 'tqdm', currentValue: '~=4.19' },
           { depName: 'tenacity', currentValue: '~=6.0' },

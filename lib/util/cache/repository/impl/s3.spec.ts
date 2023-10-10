@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import {
   GetObjectCommand,
   GetObjectCommandInput,
@@ -12,7 +12,7 @@ import { partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { parseS3Url } from '../../../s3';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
 
@@ -72,7 +72,7 @@ describe('util/cache/repository/impl/s3', () => {
     const json = '{}';
     s3Mock
       .on(GetObjectCommand, getObjectCommandInput)
-      .resolvesOnce({ Body: Readable.from([json]) });
+      .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
@@ -91,7 +91,7 @@ describe('util/cache/repository/impl/s3', () => {
         GetObjectCommand,
         createGetObjectCommandInput(repository, url, folder)
       )
-      .resolvesOnce({ Body: Readable.from([json]) });
+      .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.error).toHaveBeenCalledTimes(0);
@@ -111,7 +111,7 @@ describe('util/cache/repository/impl/s3', () => {
         GetObjectCommand,
         createGetObjectCommandInput(repository, url, pathname + '/')
       )
-      .resolvesOnce({ Body: Readable.from([json]) });
+      .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
     expect(logger.warn).toHaveBeenCalledTimes(1);

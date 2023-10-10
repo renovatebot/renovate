@@ -1,6 +1,6 @@
 import type { PackageRule } from '../../../config/types';
 import type { HostRule } from '../../../types';
-import type { Release, ReleaseResult } from '../types';
+import type { ReleaseResult } from '../types';
 
 export interface NpmrcRules {
   hostRules: HostRule[];
@@ -17,6 +17,7 @@ export interface NpmResponseVersion {
   gitHead?: string;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  engines?: Record<string, string>;
 }
 
 export interface NpmResponse {
@@ -32,18 +33,11 @@ export interface NpmResponse {
   'dist-tags'?: Record<string, string>;
 }
 
-export interface NpmRelease extends Release {
-  gitRef?: string;
-}
-export interface NpmDependency extends ReleaseResult {
-  releases: NpmRelease[];
-  deprecationSource?: string;
-  name: string;
-  homepage?: string;
-  sourceUrl?: string;
-  versions: Record<string, any>;
-  'dist-tags'?: Record<string, string>;
-  sourceDirectory?: string;
+export interface CachedReleaseResult extends ReleaseResult {
+  cacheData?: {
+    etag: string | undefined;
+    softExpireAt: string;
+  };
 }
 
 export type Npmrc = Record<string, any>;

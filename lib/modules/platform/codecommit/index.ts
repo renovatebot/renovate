@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { Buffer } from 'node:buffer';
 import {
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
@@ -12,7 +12,8 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, PrState } from '../../../types';
+import { coerceArray } from '../../../util/array';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -39,6 +40,8 @@ import * as client from './codecommit-client';
 
 export interface CodeCommitPr extends Pr {
   body: string;
+  destinationCommit: string;
+  sourceCommit: string;
 }
 
 interface Config {
@@ -47,6 +50,8 @@ interface Config {
   region?: string;
   prList?: CodeCommitPr[];
 }
+
+export const id = 'codecommit';
 
 export const config: Config = {};
 
@@ -159,7 +164,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     return fetchedPrs;
   }
 
-  const prIds = listPrsResponse.pullRequestIds ?? [];
+  const prIds = coerceArray(listPrsResponse.pullRequestIds);
 
   for (const prId of prIds) {
     const prRes = await client.getPr(prId);
@@ -171,6 +176,8 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     const pr: CodeCommitPr = {
       targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
       sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
+      destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
+      sourceCommit: prInfo.pullRequestTargets![0].sourceCommit!,
       state:
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
           ? 'open'
@@ -202,7 +209,9 @@ export async function findPr({
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+      );
     }
 
     switch (state) {
@@ -258,10 +267,12 @@ export async function getPr(
 
   return {
     sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
+    sourceCommit: prInfo.pullRequestTargets![0].sourceCommit!,
     state: prState,
     number: pullRequestId,
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
+    destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
     sha: prInfo.revisionId,
     body: prInfo.description!,
   };
@@ -281,7 +292,7 @@ export async function getRepos(): Promise<string[]> {
 
   const res: string[] = [];
 
-  const repoNames = reposRes?.repositories ?? [];
+  const repoNames = coerceArray(reposRes?.repositories);
 
   for (const repo of repoNames) {
     if (repo.repositoryName) {
@@ -299,6 +310,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
+    )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
@@ -313,7 +328,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string
-): Promise<any | null> {
+): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? JSON5.parse(raw) : null;
 }
@@ -361,7 +376,8 @@ export async function createPr({
   if (
     !prCreateRes.pullRequest?.title ||
     !prCreateRes.pullRequest?.pullRequestId ||
-    !prCreateRes.pullRequest?.description
+    !prCreateRes.pullRequest?.description ||
+    !prCreateRes.pullRequest?.pullRequestTargets?.length
   ) {
     throw new Error('Could not create pr, missing PR info');
   }
@@ -372,6 +388,9 @@ export async function createPr({
     title: prCreateRes.pullRequest.title,
     sourceBranch,
     targetBranch,
+    sourceCommit: prCreateRes.pullRequest.pullRequestTargets[0].sourceCommit!,
+    destinationCommit:
+      prCreateRes.pullRequest.pullRequestTargets[0].destinationCommit!,
     sourceRepo: config.repository,
     body: prCreateRes.pullRequest.description,
   };
@@ -551,11 +570,6 @@ export function deleteLabel(prNumber: number, label: string): Promise<void> {
   return Promise.resolve();
 }
 
-/* istanbul ignore next */
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
-}
-
 // Returns the combined status for a branch.
 /* istanbul ignore next */
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
@@ -599,10 +613,7 @@ export async function ensureComment({
   const body = `${header}${sanitize(content)}`;
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
-    prCommentsResponse = await client.getPrComments(
-      config.repository!,
-      `${number}`
-    );
+    prCommentsResponse = await client.getPrComments(`${number}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
     return false;
@@ -621,7 +632,7 @@ export async function ensureComment({
     }
     const firstCommentContent = commentObj.comments[0].content;
     if (
-      (topic && firstCommentContent?.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) === true ||
       (!topic && firstCommentContent === body)
     ) {
       commentId = commentObj.comments[0].commentId;
@@ -631,17 +642,10 @@ export async function ensureComment({
   }
 
   if (!commentId) {
-    const prEvent = await client.getPrEvents(`${number}`);
+    const prs = await getPrList();
+    const thisPr = prs.filter((item) => item.number === number);
 
-    if (!prEvent?.pullRequestEvents) {
-      return false;
-    }
-
-    const event =
-      prEvent.pullRequestEvents[0]
-        .pullRequestSourceReferenceUpdatedEventMetadata;
-
-    if (!event?.beforeCommitId || !event?.afterCommitId) {
+    if (!thisPr[0].sourceCommit || !thisPr[0].destinationCommit) {
       return false;
     }
 
@@ -649,8 +653,8 @@ export async function ensureComment({
       `${number}`,
       config.repository,
       body,
-      event.beforeCommitId,
-      event.afterCommitId
+      thisPr[0].destinationCommit,
+      thisPr[0].sourceCommit
     );
     logger.info(
       { repository: config.repository, prNo: number, topic },
@@ -685,10 +689,7 @@ export async function ensureCommentRemoval(
 
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
-    prCommentsResponse = await client.getPrComments(
-      config.repository!,
-      `${prNo}`
-    );
+    prCommentsResponse = await client.getPrComments(`${prNo}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
     return;
@@ -711,7 +712,8 @@ export async function ensureCommentRemoval(
     for (const comment of commentObj.comments) {
       if (
         (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ||
+          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
+          true ||
         (removeConfig.type === 'by-content' &&
           removeConfig.content === comment.content?.trim())
       ) {

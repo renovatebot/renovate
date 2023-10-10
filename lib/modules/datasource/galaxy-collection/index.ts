@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
+import * as pep440Versioning from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -22,6 +23,8 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
 
+  override readonly defaultVersioning = pep440Versioning.id;
+
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
@@ -32,8 +35,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, projectName] = packageName.split('.');
 
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
 
     let baseUrlResponse: HttpResponse<BaseProjectResult>;
@@ -90,7 +92,7 @@ export class GalaxyCollectionDatasource extends Datasource {
             try {
               const release: Release = {
                 version: basicRelease.version,
-                isDeprecated: basicRelease.isDeprecated,
+                isDeprecated: !!basicRelease.isDeprecated,
                 downloadUrl: versionDetails.download_url,
                 newDigest: versionDetails.artifact.sha256,
                 dependencies: versionDetails.metadata.dependencies,
@@ -115,7 +117,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     // extract base information which are only provided on the release from the newest release
     const result: ReleaseResult = {
       releases: filteredReleases,
-      sourceUrl: newestVersionDetails?.metadata.repository,
+      sourceUrl: newestVersionDetails?.metadata.repository ?? null,
       homepage: newestVersionDetails?.metadata.homepage,
       tags: newestVersionDetails?.metadata.tags,
     };

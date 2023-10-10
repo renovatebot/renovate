@@ -1,7 +1,24 @@
+import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
+import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
+jest.mock('../exec/utils');
+
+const execUtils = mocked(_execUtils);
+
 describe('util/template/index', () => {
+  beforeEach(() => {
+    execUtils.getChildEnv.mockReturnValue({
+      CUSTOM_FOO: 'foo',
+      HOME: '/root',
+    });
+  });
+
+  it('returns empty string if cannot compile', () => {
+    expect(template.safeCompile('{{abc', {})).toBe('');
+  });
+
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
@@ -85,24 +102,39 @@ describe('util/template/index', () => {
     expect(output).toBe('foo');
   });
 
+  it('has access to basic environment variables (basicEnvVars)', () => {
+    const userTemplate = 'HOME is {{env.HOME}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('HOME is /root');
+  });
+
+  it('and has access to custom variables (customEnvVariables)', () => {
+    const userTemplate = 'CUSTOM_FOO is {{env.CUSTOM_FOO}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('CUSTOM_FOO is foo');
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
+    const allowedArrayField = 'prBodyNotes';
     const forbiddenField = 'foobar';
 
     type TestCompileInput = Record<
-      typeof allowedField | typeof forbiddenField,
+      typeof allowedField | typeof allowedArrayField | typeof forbiddenField,
       unknown
     >;
 
     const compileInput: TestCompileInput = {
       [allowedField]: 'allowed',
+      [allowedArrayField]: ['allowed'],
       [forbiddenField]: 'forbidden',
     };
 
-    it('accessing allowed files', () => {
+    it('accessing allowed fields', () => {
       const p = template.proxyCompileInput(compileInput);
 
       expect(p[allowedField]).toBe('allowed');
+      expect(p[allowedArrayField]).toStrictEqual(['allowed']);
       expect(p[forbiddenField]).toBeUndefined();
     });
 
@@ -124,6 +156,7 @@ describe('util/template/index', () => {
       const arr = proxy[allowedField] as TestCompileInput[];
       const obj = arr[0];
       expect(obj[allowedField]).toBe('allowed');
+      expect(obj[allowedArrayField]).toStrictEqual(['allowed']);
       expect(obj[forbiddenField]).toBeUndefined();
     });
   });
@@ -156,6 +189,58 @@ describe('util/template/index', () => {
 
     it('does not contain template', () => {
       expect(template.containsTemplates('{{body}}', ['logJSON'])).toBeFalse();
+    });
+  });
+
+  describe('percent encoding', () => {
+    it('encodes values', () => {
+      const output = template.compile(
+        '{{{encodeURIComponent "@fsouza/prettierd"}}}',
+        undefined as never
+      );
+      expect(output).toBe('%40fsouza%2Fprettierd');
+    });
+
+    it('decodes values', () => {
+      const output = template.compile(
+        '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
+        undefined as never
+      );
+      expect(output).toBe('@fsouza/prettierd');
+    });
+  });
+
+  describe('equals', () => {
+    it('equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'git-refs',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('https://github.com/renovatebot/renovate');
+    });
+
+    it('not equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'github-releases',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('renovatebot/renovate');
+    });
+
+    it('not strict equals', () => {
+      const output = template.compile(
+        '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
+        {
+          newMajor: 3,
+        }
+      );
+      expect(output).toBe('not equals');
     });
   });
 });

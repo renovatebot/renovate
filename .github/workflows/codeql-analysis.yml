@@ -1,11 +1,18 @@
-name: 'Code scanning - action'
+name: 'Code scanning'
 
 on:
   push:
     branches: [main]
+
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
   schedule:
     - cron: '0 13 * * 1'
 
@@ -14,15 +21,17 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  security-events: write
+  contents: read
 
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.draft != true
+    permissions:
+      security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Delete fixtures to suppress false positives
         run: |
@@ -30,7 +39,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@b2a92eb56d8cb930006a1c6ed86b0782dd8a4297 # v2.1.35
+        uses: github/codeql-action/init@fdcae64e1484d349b3366718cdfef3d404390e85 # v2.22.1
         with:
           languages: javascript
 
@@ -40,7 +49,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        uses: github/codeql-action/autobuild@b2a92eb56d8cb930006a1c6ed86b0782dd8a4297 # v2.1.35
+        uses: github/codeql-action/autobuild@fdcae64e1484d349b3366718cdfef3d404390e85 # v2.22.1
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
@@ -54,4 +63,4 @@ jobs:
       #   make release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@b2a92eb56d8cb930006a1c6ed86b0782dd8a4297 # v2.1.35
+        uses: github/codeql-action/analyze@fdcae64e1484d349b3366718cdfef3d404390e85 # v2.22.1

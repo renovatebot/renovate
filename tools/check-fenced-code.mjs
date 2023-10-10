@@ -1,10 +1,6 @@
-import { promisify } from 'util';
 import fs from 'fs-extra';
-import g from 'glob';
+import { glob } from 'glob';
 import MarkdownIt from 'markdown-it';
-import shell from 'shelljs';
-
-const glob = promisify(g);
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =
@@ -30,11 +26,11 @@ function checkValidJson(file, token) {
   } catch (err) {
     issues += 1;
     if (process.env.CI) {
-      shell.echo(
+      console.log(
         `::error file=${file},line=${start},endLine=${end},title=${errorTitle}::${err.message}. ${errorBody}`
       );
     } else {
-      shell.echo(
+      console.log(
         `${errorTitle} (${file} lines ${start}-${end}): ${err.message}`
       );
     }
@@ -64,9 +60,9 @@ await (async () => {
   }
 
   if (issues) {
-    shell.echo(
+    console.error(
       `${issues} issues found. ${errorBody} See above for lines affected.`
     );
-    shell.exit(1);
+    process.exit(1);
   }
 })();

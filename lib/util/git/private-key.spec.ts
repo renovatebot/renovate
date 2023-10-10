@@ -3,7 +3,13 @@ import * as exec_ from '../exec';
 import { configSigningKey, writePrivateKey } from './private-key';
 import { setPrivateKey } from '.';
 
-jest.mock('fs-extra');
+jest.mock('fs-extra', () =>
+  jest
+    .requireActual<typeof import('../../../test/fixtures')>(
+      '../../../test/fixtures'
+    )
+    .fsExtra()
+);
 jest.mock('../exec');
 
 const exec = mocked(exec_);

@@ -162,10 +162,10 @@ function mockGenericPackage(opts: MockOpts = {}) {
 }
 
 function get(
-  depName = 'org.example:package',
+  packageName = 'org.example:package',
   ...registryUrls: string[]
 ): Promise<ReleaseResult | null> {
-  const conf = { versioning, datasource, depName };
+  const conf = { versioning, datasource, packageName };
   return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
 }
 
@@ -176,7 +176,6 @@ describe('modules/datasource/maven/index', () => {
       matchHost: 'custom.registry.renovatebot.com',
       token: '123test',
     });
-    jest.resetAllMocks();
   });
 
   afterEach(() => {
@@ -276,27 +275,6 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', baseUrlCustom);
 
     expect(res).toMatchSnapshot();
-  });
-
-  it('collects releases from all registry urls', async () => {
-    mockGenericPackage({ html: null });
-    mockGenericPackage({
-      base: baseUrlCustom,
-      meta: Fixtures.get('metadata-extra.xml'),
-      latest: '3.0.0',
-      jars: { '3.0.0': 200 },
-      snapshots: [],
-    });
-
-    const res = await get('org.example:package', baseUrl, baseUrlCustom);
-
-    expect(res?.releases).toMatchObject([
-      { version: '0.0.1' },
-      { version: '1.0.0' },
-      { version: '1.0.3-SNAPSHOT' },
-      { version: '2.0.0' },
-      { version: '3.0.0' },
-    ]);
   });
 
   it('falls back to next registry url', async () => {

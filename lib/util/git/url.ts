@@ -15,6 +15,7 @@ export function getHttpUrl(url: string, token?: string): string {
     ? parsedUrl.protocol
     : 'https';
 
+  parsedUrl.user = '';
   parsedUrl.token = token ?? '';
 
   if (token) {
@@ -32,7 +33,7 @@ export function getHttpUrl(url: string, token?: string): string {
     }
   }
 
-  return parsedUrl.toString(protocol);
+  return new URL(parsedUrl.toString(protocol)).href;
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {
@@ -41,7 +42,7 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
   try {
     coercedUrl = getHttpUrl(url);
   } catch {
-    logger.warn(`Attempting to use non-git url '${url}' for git operations`);
+    logger.warn({ url }, `Attempting to use non-git url for git operations`);
 
     coercedUrl = url;
   }

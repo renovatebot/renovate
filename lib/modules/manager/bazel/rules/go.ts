@@ -3,7 +3,7 @@ import { regEx } from '../../../../util/regex';
 import { GoDatasource } from '../../../datasource/go';
 import type { PackageDependency } from '../../types';
 
-export const goRules = ['go_repository'] as const;
+export const goRules = ['go_repository', '_go_repository'] as const;
 
 export const GoTarget = z
   .object({
@@ -16,7 +16,7 @@ export const GoTarget = z
   })
   .refine(({ tag, commit }) => !!tag || !!commit)
   .transform(
-    ({ rule, name, tag, commit, importpath, remote }): PackageDependency => {
+    ({ rule, name, tag, commit, importpath, remote }): PackageDependency[] => {
       const dep: PackageDependency = {
         datasource: GoDatasource.id,
         depType: rule,
@@ -29,10 +29,10 @@ export const GoTarget = z
       }
 
       if (commit) {
-        dep.currentValue = 'v0.0.0';
         dep.currentDigest = commit;
-        dep.currentDigestShort = commit.substring(0, 7);
-        dep.digestOneAndOnly = true;
+        if (!tag) {
+          dep.digestOneAndOnly = true;
+        }
       }
 
       if (remote) {
@@ -46,6 +46,6 @@ export const GoTarget = z
         }
       }
 
-      return dep;
+      return [dep];
     }
   );

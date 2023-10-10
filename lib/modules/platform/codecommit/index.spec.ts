@@ -3,7 +3,6 @@ import {
   CreatePullRequestApprovalRuleCommand,
   CreatePullRequestCommand,
   DeleteCommentContentCommand,
-  DescribePullRequestEventsCommand,
   GetCommentsForPullRequestCommand,
   GetFileCommand,
   GetPullRequestCommand,
@@ -16,6 +15,7 @@ import {
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
+import * as aws4 from 'aws4';
 import { logger } from '../../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -43,9 +43,13 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   beforeEach(() => {
+    delete process.env.AWS_REGION;
+    delete process.env.AWS_ACCESS_KEY_ID;
+    delete process.env.AWS_SECRET_ACCESS_KEY;
     codeCommitClient.reset();
     config.prList = undefined;
     config.repository = undefined;
+    jest.useRealTimers();
   });
 
   it('validates massageMarkdown functionality', () => {
@@ -71,7 +75,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init with env vars', async () => {
-      const temp = process.env.AWS_REGION;
       process.env.AWS_REGION = 'REGION';
       await expect(
         codeCommit.initPlatform({
@@ -81,14 +84,19 @@ describe('modules/platform/codecommit/index', () => {
       ).resolves.toEqual({
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
-      process.env.AWS_REGION = temp;
     });
 
-    it('should ', async () => {
+    it('should', async () => {
       await expect(
         codeCommit.initPlatform({ endpoint: 'non://parsable.url' })
       ).resolves.toEqual({
         endpoint: 'non://parsable.url',
+      });
+    });
+
+    it('should as well', async () => {
+      await expect(codeCommit.initPlatform({})).resolves.toEqual({
+        endpoint: 'https://git-codecommit.us-east-1.amazonaws.com/',
       });
     });
   });
@@ -189,6 +197,33 @@ describe('modules/platform/codecommit/index', () => {
           'name'
         )
       ).toBe('https://git-codecommit.eu-central-1.amazonaws.com/v1/repos/name');
+    });
+
+    it('gets url with username and token', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+      process.env.AWS_ACCESS_KEY_ID = 'access-key-id';
+      process.env.AWS_SECRET_ACCESS_KEY = 'secret-access-key';
+      process.env.AWS_REGION = 'eu-central-1';
+      process.env.AWS_SESSION_TOKEN = '';
+      const signer = new aws4.RequestSigner({
+        service: 'codecommit',
+        host: 'git-codecommit.eu-central-1.amazonaws.com',
+        method: 'GIT',
+        path: 'v1/repos/name',
+      });
+      const dateTime = signer.getDateTime();
+      const token = `${dateTime}Z${signer.signature()}`;
+      expect(
+        getCodeCommitUrl(
+          {
+            defaultBranch: 'main',
+            repositoryId: 'id',
+          },
+          'name'
+        )
+      ).toBe(
+        `https://access-key-id:${token}@git-codecommit.eu-central-1.amazonaws.com/v1/repos/name`
+      );
     });
   });
 
@@ -589,6 +624,14 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
     });
+
+    it('returns null', async () => {
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: undefined });
+      const res = await codeCommit.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
   });
 
   describe('getRawFile()', () => {
@@ -639,6 +682,12 @@ describe('modules/platform/codecommit/index', () => {
           pullRequestStatus: 'OPEN',
           title: 'someTitle',
           description: 'mybody',
+          pullRequestTargets: [
+            {
+              sourceCommit: '123',
+              destinationCommit: '321',
+            },
+          ],
         },
       };
 
@@ -705,6 +754,8 @@ describe('modules/platform/codecommit/index', () => {
         title: 'someTitle',
         sourceBranch: 'sourceBranch',
         targetBranch: 'targetBranch',
+        sourceCommit: '123',
+        destinationCommit: '321',
         sourceRepo: undefined,
         body: 'some old description',
       };
@@ -730,6 +781,8 @@ describe('modules/platform/codecommit/index', () => {
         title: 'someTitle',
         sourceBranch: 'sourceBranch',
         targetBranch: 'targetBranch',
+        sourceCommit: '123',
+        destinationCommit: '321',
         sourceRepo: undefined,
         body: 'new description',
       };
@@ -920,7 +973,7 @@ describe('modules/platform/codecommit/index', () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
@@ -936,20 +989,25 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetCommentsForPullRequestCommand)
         .resolvesOnce(commentsRes);
-
-      const eventsRes = {
-        pullRequestEvents: [
-          {
-            pullRequestSourceReferenceUpdatedEventMetadata: {
-              beforeCommitId: 'beforeCid',
-              afterCommitId: 'afterCid',
-            },
-          },
-        ],
-      };
       codeCommitClient
-        .on(DescribePullRequestEventsCommand)
-        .resolvesOnce(eventsRes);
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['42'] });
+      const prRes = {
+        pullRequest: {
+          number: '42',
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+              sourceCommit: '123',
+              destinationCommit: '321',
+            },
+          ],
+        },
+      };
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
       const res = await codeCommit.ensureComment({
         number: 42,
@@ -967,7 +1025,7 @@ describe('modules/platform/codecommit/index', () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
@@ -984,7 +1042,6 @@ describe('modules/platform/codecommit/index', () => {
         .on(GetCommentsForPullRequestCommand)
         .resolvesOnce(commentsRes);
       codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
-
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: 'some-subject',
@@ -1001,7 +1058,7 @@ describe('modules/platform/codecommit/index', () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
@@ -1033,7 +1090,7 @@ describe('modules/platform/codecommit/index', () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
@@ -1064,7 +1121,6 @@ describe('modules/platform/codecommit/index', () => {
     it('throws an exception in case of api failed connection ', async () => {
       const err = new Error('some error');
       codeCommitClient.on(GetCommentsForPullRequestCommand).rejectsOnce(err);
-
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: null,
@@ -1087,11 +1143,11 @@ describe('modules/platform/codecommit/index', () => {
       expect(res).toBeFalse();
     });
 
-    it('doesnt find comments obj', async () => {
+    it('doesnt find comments obj and source or destination commit', async () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
@@ -1101,70 +1157,28 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetCommentsForPullRequestCommand)
         .resolvesOnce(commentsRes);
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['42'] });
+      const prRes = {
+        pullRequest: {
+          number: '42',
+          title: 'someTitle',
+          pullRequestStatus: 'OPEN',
+          pullRequestTargets: [
+            {
+              sourceReference: 'refs/heads/sourceBranch',
+              destinationReference: 'refs/heads/targetBranch',
+            },
+          ],
+        },
+      };
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce(prRes);
       const res = await codeCommit.ensureComment({
         number: 42,
         topic: null,
         content: 'my comment content',
       });
-      expect(res).toBeFalse();
-    });
-
-    it('doesnt find events data', async () => {
-      const commentsRes = {
-        commentsForPullRequestData: [
-          {
-            pullRequestId: '1',
-            repositoryName: 'someRepo',
-            beforeCommitId: 'beforeCommitId',
-            afterCommitId: 'afterCommitId',
-          },
-        ],
-      };
-      codeCommitClient
-        .on(GetCommentsForPullRequestCommand)
-        .resolvesOnce(commentsRes);
-      codeCommitClient.on(DescribePullRequestEventsCommand).resolvesOnce({});
-      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
-      const res = await codeCommit.ensureComment({
-        number: 42,
-        topic: null,
-        content: 'my comment content',
-      });
-
-      expect(res).toBeFalse();
-    });
-
-    it('doesnt find event before/after', async () => {
-      const commentsRes = {
-        commentsForPullRequestData: [
-          {
-            pullRequestId: '1',
-            repositoryName: 'someRepo',
-            beforeCommitId: 'beforeCommitId',
-            afterCommitId: 'afterCommitId',
-          },
-        ],
-      };
-      codeCommitClient
-        .on(GetCommentsForPullRequestCommand)
-        .resolvesOnce(commentsRes);
-      const eventsRes = {
-        pullRequestEvents: [
-          {
-            pullRequestSourceReferenceUpdatedEventMetadata: {},
-          },
-        ],
-      };
-      codeCommitClient
-        .on(DescribePullRequestEventsCommand)
-        .resolvesOnce(eventsRes);
-      codeCommitClient.on(PostCommentForPullRequestCommand).resolvesOnce({});
-      const res = await codeCommit.ensureComment({
-        number: 42,
-        topic: null,
-        content: 'my comment content',
-      });
-
       expect(res).toBeFalse();
     });
   });
@@ -1174,7 +1188,7 @@ describe('modules/platform/codecommit/index', () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
@@ -1218,7 +1232,7 @@ describe('modules/platform/codecommit/index', () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
@@ -1243,7 +1257,7 @@ describe('modules/platform/codecommit/index', () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
-            pullRequestId: '1',
+            pullRequestId: '42',
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',

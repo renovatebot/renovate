@@ -2,7 +2,7 @@ import semver from '../semver';
 import { api as versioning } from '.';
 
 describe('modules/versioning/rez/index', () => {
-  test.each`
+  it.each`
     version       | equal    | expected
     ${'1'}        | ${'1'}   | ${true}
     ${'1.0'}      | ${'1'}   | ${true}
@@ -18,7 +18,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | expected
     ${'1'}     | ${1}
     ${'1.9'}   | ${1}
@@ -27,7 +27,7 @@ describe('modules/versioning/rez/index', () => {
     expect(versioning.getMajor(version)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     version    | expected
     ${'1'}     | ${0}
     ${'1.9'}   | ${9}
@@ -36,7 +36,7 @@ describe('modules/versioning/rez/index', () => {
     expect(versioning.getMinor(version)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     version    | expected
     ${'1'}     | ${0}
     ${'1.9'}   | ${0}
@@ -46,7 +46,7 @@ describe('modules/versioning/rez/index', () => {
     expect(versioning.getPatch(version)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     version     | other         | expected
     ${'2'}      | ${'1'}        | ${true}
     ${'2.0'}    | ${'1'}        | ${true}
@@ -64,7 +64,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version         | expected
     ${'1'}          | ${true}
     ${'1.9'}        | ${true}
@@ -75,7 +75,7 @@ describe('modules/versioning/rez/index', () => {
     expect(versioning.isStable(version)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     input               | expected
     ${'1.2.3..1.2.4'}   | ${true}
     ${'1.2..1.3'}       | ${true}
@@ -97,7 +97,7 @@ describe('modules/versioning/rez/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input      | expected
     ${'1.2.3'} | ${true}
   `('isVersion("$input") === $expected', ({ input, expected }) => {
@@ -105,7 +105,7 @@ describe('modules/versioning/rez/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input              | expected
     ${'1.2.3'}         | ${true}
     ${'1.2.3-alpha.1'} | ${true}
@@ -116,7 +116,7 @@ describe('modules/versioning/rez/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                                | range             | expected
     ${['1.2.3', '1.2.4', '1.2.5']}          | ${'1.2.3..1.2.4'} | ${'1.2.3'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'4'}            | ${'4.2.0'}
@@ -132,7 +132,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                       | range             | expected
     ${['1.2.3', '1.2.4', '1.2.5']} | ${'1.2.3..1.2.4'} | ${'1.2.3'}
   `(
@@ -142,7 +142,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | range             | expected
     ${'1.2.3'} | ${'1.2.3..1.2.4'} | ${false}
     ${'1.2.3'} | ${'1.2.4..1.2.5'} | ${true}
@@ -155,7 +155,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | range             | expected
     ${'1.2.3'} | ${'1.2.3..1.2.4'} | ${true}
     ${'1.2.4'} | ${'1.2.2..1.2.3'} | ${false}
@@ -175,7 +175,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a          | b
     ${'1.1.1'} | ${'1.2.3'}
     ${'1.2.3'} | ${'1.3.4'}
@@ -190,7 +190,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue         | rangeStrategy | currentVersion | newVersion | expected
     ${'==1.2.3'}         | ${'replace'}  | ${'1.2.3'}     | ${'1.2.4'} | ${'==1.2.4'}
     ${'1.2.3'}           | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'} | ${'1.2.4'}
@@ -440,7 +440,7 @@ describe('modules/versioning/rez/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version    | expected
     ${'1.2.0'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {

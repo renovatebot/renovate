@@ -205,9 +205,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   }
 
   const execOptions: ExecOptions = {
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     cwdFile: update.packageFileName,
   };
 

@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { updateDependency } from '.';
@@ -9,11 +9,6 @@ const ibazel = Fixtures.get('ibazel.rb');
 const baseUrl = 'https://github.com';
 
 describe('modules/manager/homebrew/update', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-  });
-
   it('updates "releases" github dependency', async () => {
     const upgrade = {
       currentValue: 'v0.16.1',

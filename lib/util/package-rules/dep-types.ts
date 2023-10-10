@@ -12,7 +12,7 @@ export class DepTypesMatcher extends Matcher {
     }
 
     const result =
-      (depType && matchDepTypes.includes(depType)) ||
+      (is.string(depType) && matchDepTypes.includes(depType)) ||
       depTypes?.some((dt) => matchDepTypes.includes(dt));
     return result ?? false;
   }

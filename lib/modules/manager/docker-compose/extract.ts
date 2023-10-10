@@ -3,7 +3,7 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFileContent } from '../types';
 import type { DockerComposeConfig } from './types';
 
 class LineMapper {
@@ -30,31 +30,33 @@ class LineMapper {
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   extractConfig: ExtractConfig
-): PackageFile | null {
-  logger.debug('docker-compose.extractPackageFile()');
+): PackageFileContent | null {
+  logger.debug(`docker-compose.extractPackageFile(${packageFile})`);
   let config: DockerComposeConfig;
   try {
     // TODO: fix me (#9610)
     config = load(content, { json: true }) as DockerComposeConfig;
     if (!config) {
       logger.debug(
-        { fileName },
+        { packageFile },
         'Null config when parsing Docker Compose content'
       );
       return null;
     }
     if (typeof config !== 'object') {
       logger.debug(
-        { fileName, type: typeof config },
+        { packageFile, type: typeof config },
         'Unexpected type for Docker Compose content'
       );
       return null;
     }
   } catch (err) {
-    logger.debug({ err }, 'err');
-    logger.debug(`Parsing Docker Compose config YAML in ${fileName}`);
+    logger.debug(
+      { err, packageFile },
+      `Parsing Docker Compose config YAML failed`
+    );
     return null;
   }
   try {
@@ -69,7 +71,9 @@ export function extractPackageFile(
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
-    const deps = Object.values(services || {})
+    const deps = Object.values(
+      services || /* istanbul ignore next: can never happen */ {}
+    )
       .filter((service) => is.string(service?.image) && !service?.build)
       .map((service) => {
         const dep = getDep(service.image, true, extractConfig.registryAliases);
@@ -85,10 +89,7 @@ export function extractPackageFile(
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };
   } catch (err) /* istanbul ignore next */ {
-    logger.warn(
-      { fileName, content, err },
-      'Error extracting Docker Compose file'
-    );
+    logger.debug({ packageFile, err }, 'Error extracting Docker Compose file');
     return null;
   }
 }

@@ -5,13 +5,15 @@ import { logger } from '../../../logger';
 import { getPkgReleases } from '../../../modules/datasource';
 import * as versioning from '../../../modules/versioning';
 import { newlineRegex, regEx } from '../../regex';
-import { ensureTrailingSlash } from '../../url';
+import { uniq } from '../../uniq';
 import { rawExec } from '../common';
 import type { DockerOptions, Opt, VolumeOption, VolumesPair } from '../types';
 
 const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');
+
+export const sideCarImage = 'sidecar';
 
 export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (prefetchedImages.has(taggedImage)) {
@@ -56,14 +58,7 @@ function volumesEql(x: VolumesPair, y: VolumesPair): boolean {
   return xFrom === yFrom && xTo === yTo;
 }
 
-function uniq<T = unknown>(
-  array: T[],
-  eql = (x: T, y: T): boolean => x === y
-): T[] {
-  return array.filter((x, idx, arr) => arr.findIndex((y) => eql(x, y)) === idx);
-}
-
-function prepareVolumes(volumes: VolumeOption[] = []): string[] {
+function prepareVolumes(volumes: VolumeOption[]): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter(
     (vol): vol is VolumesPair => vol !== null
@@ -79,7 +74,7 @@ function prepareCommands(commands: Opt<string>[]): string[] {
 }
 
 export async function getDockerTag(
-  depName: string,
+  packageName: string,
   constraint: string,
   scheme: string
 ): Promise<string> {
@@ -94,12 +89,12 @@ export async function getDockerTag(
   }
 
   logger.debug(
-    { depName, scheme, constraint },
+    { packageName, scheme, constraint },
     `Found version constraint - checking for a compatible image to use`
   );
   const imageReleases = await getPkgReleases({
     datasource: 'docker',
-    depName,
+    packageName,
     versioning: scheme,
   });
   if (imageReleases?.releases) {
@@ -115,17 +110,17 @@ export async function getDockerTag(
     const version = versions.sort(ver.sortVersions.bind(ver)).pop();
     if (version) {
       logger.debug(
-        { depName, scheme, constraint, version },
+        { packageName, scheme, constraint, version },
         `Found compatible image version`
       );
       return version;
     }
   } else {
-    logger.error(`No ${depName} releases found`);
+    logger.error({ packageName }, `Docker exec: no releases found`);
     return 'latest';
   }
   logger.warn(
-    { depName, constraint, scheme },
+    { packageName, constraint, scheme },
     'Failed to find a tag satisfying constraint, using "latest" tag instead'
   );
   return 'latest';
@@ -168,13 +163,14 @@ export async function removeDockerContainer(
 }
 
 export async function removeDanglingContainers(): Promise<void> {
-  const { binarySource, dockerChildPrefix } = GlobalConfig.get();
-  if (binarySource !== 'docker') {
+  if (GlobalConfig.get('binarySource') !== 'docker') {
     return;
   }
 
   try {
-    const containerLabel = getContainerLabel(dockerChildPrefix);
+    const containerLabel = getContainerLabel(
+      GlobalConfig.get('dockerChildPrefix')
+    );
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
       {
@@ -211,8 +207,8 @@ export async function generateDockerCommand(
   preCommands: string[],
   options: DockerOptions
 ): Promise<string> {
-  const { envVars, cwd, tagScheme, tagConstraint } = options;
-  let image = options.image;
+  const { envVars, cwd } = options;
+  let image = sideCarImage;
   const volumes = options.volumes ?? [];
   const {
     localDir,
@@ -220,7 +216,8 @@ export async function generateDockerCommand(
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
-    dockerImagePrefix,
+    dockerCliOptions,
+    dockerSidecarImage,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
   const containerName = getContainerName(image, dockerChildPrefix);
@@ -229,6 +226,9 @@ export async function generateDockerCommand(
   result.push(`--label=${containerLabel}`);
   if (dockerUser) {
     result.push(`--user=${dockerUser}`);
+  }
+  if (dockerCliOptions) {
+    result.push(dockerCliOptions);
   }
 
   const volumeDirs: VolumeOption[] = [localDir, cacheDir];
@@ -257,23 +257,16 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  image = `${ensureTrailingSlash(dockerImagePrefix ?? 'renovate')}${image}`;
+  // TODO: #22198
+  image = dockerSidecarImage!;
 
-  let tag: string | null = null;
-  if (options.tag) {
-    tag = options.tag;
-  } else if (tagConstraint) {
-    const tagVersioning = tagScheme ?? 'semver';
-    tag = await getDockerTag(image, tagConstraint, tagVersioning);
-    logger.debug(
-      { image, tagConstraint, tagVersioning, tag },
-      'Resolved tag constraint'
-    );
-  } else {
-    logger.debug(`No tag or tagConstraint specified for image: ${image}`);
-  }
+  // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
+  logger.debug(
+    { image /*, tagConstraint: sideCarImageVersion, tag */ },
+    'Resolved tag constraint'
+  );
 
-  const taggedImage = tag ? `${image}:${tag}` : `${image}`;
+  const taggedImage = image; // TODO: tag ? `${image}:${tag}` : `${image}`;
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 

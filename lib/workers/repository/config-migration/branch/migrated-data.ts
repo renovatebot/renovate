@@ -1,11 +1,12 @@
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
-import prettier, { BuiltInParserName } from 'prettier';
+import type { BuiltInParserName } from 'prettier';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
+import { prettier } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
+import { scm } from '../../../../modules/platform/scm';
 import { readLocalFile } from '../../../../util/fs';
-import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
 
 export interface MigratedData {
@@ -42,7 +43,7 @@ export async function applyPrettierFormatting(
 ): Promise<string> {
   try {
     logger.trace('applyPrettierFormatting - START');
-    const fileList = await getFileList();
+    const fileList = await scm.getFileList();
     let prettierExists = fileList.some((file) =>
       prettierConfigFilenames.has(file)
     );
@@ -68,7 +69,7 @@ export async function applyPrettierFormatting(
       useTabs: indent?.type === 'tab',
     };
 
-    return prettier.format(content, options);
+    return prettier().format(content, options);
   } finally {
     logger.trace('applyPrettierFormatting - END');
   }
@@ -124,7 +125,7 @@ export class MigratedDataFactory {
       delete migratedConfig.warnings;
 
       // indent defaults to 2 spaces
-      // TODO #7154
+      // TODO #22198
       const indent = detectIndent(raw!);
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;

@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "aws_instance": {
+      "example": {
+        "provisioner": [
+          {
+            "local-exec": {
+              "command": "echo 'Hello World' >example.txt"
+            }
+          },
+          {
+            "file": {
+              "source": "example.txt",
+              "destination": "/tmp/example.txt"
+            }
+          },
+          {
+            "remote-exec": {
+              "inline": [
+                "sudo install-something -f /tmp/example.txt"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

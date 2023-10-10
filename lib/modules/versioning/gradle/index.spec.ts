@@ -2,7 +2,7 @@ import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 import { api } from '.';
 
 describe('modules/versioning/gradle/index', () => {
-  test.each`
+  it.each`
     a                            | b                            | expected
     ${'1'}                       | ${'1'}                       | ${0}
     ${'a'}                       | ${'a'}                       | ${0}
@@ -76,11 +76,12 @@ describe('modules/versioning/gradle/index', () => {
     ${'Hoxton.SR1'}              | ${'Hoxton.RELEASE'}          | ${1}
     ${'1.0-sp-1'}                | ${'1.0-release'}             | ${1}
     ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
+    ${''}                        | ${''}                        | ${0}
   `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(compare(a, b)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     rangeStr
     ${''}
     ${'1.2.3-SNAPSHOT'}
@@ -91,7 +92,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(range).toBeNull();
   });
 
-  test.each`
+  it.each`
     rangeStr
     ${''}
     ${'1.2.3-SNAPSHOT'}
@@ -113,7 +114,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(range).toBeNull();
   });
 
-  test.each`
+  it.each`
     input                | expected
     ${'1.0.0'}           | ${true}
     ${'[1.12.6,1.18.6]'} | ${true}
@@ -122,7 +123,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(api.isValid(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                        | expected
     ${''}                        | ${false}
     ${'latest.integration'}      | ${false}
@@ -152,7 +153,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(api.isVersion(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                                   | expected
     ${''}                                   | ${false}
     ${'latest'}                             | ${false}
@@ -186,7 +187,7 @@ describe('modules/versioning/gradle/index', () => {
     expect(api.isStable(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input         | major   | minor   | patch
     ${''}         | ${null} | ${null} | ${null}
     ${'1'}        | ${1}    | ${0}    | ${0}
@@ -207,7 +208,7 @@ describe('modules/versioning/gradle/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version          | range      | expected
     ${'1'}           | ${'[[]]'}  | ${false}
     ${'0'}           | ${'[0,1]'} | ${true}
@@ -235,14 +236,14 @@ describe('modules/versioning/gradle/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a        | b      | expected
     ${'1.1'} | ${'1'} | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(api.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                  | range    | expected
     ${['0', '1.5', '1', '2']} | ${'1.+'} | ${'1'}
   `(
@@ -252,7 +253,7 @@ describe('modules/versioning/gradle/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                  | range    | expected
     ${['0', '1', '1.5', '2']} | ${'1.+'} | ${'1.5'}
   `(
@@ -262,7 +263,7 @@ describe('modules/versioning/gradle/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue             | rangeStrategy | currentVersion | newVersion  | expected
     ${'1'}                   | ${null}       | ${null}        | ${'1.1'}    | ${'1.1'}
     ${'[1.2.3,]'}            | ${null}       | ${null}        | ${'1.2.4'}  | ${null}

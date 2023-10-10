@@ -1,26 +1,30 @@
 {
-  "hostRequirements": {
-    "cpus": 4,
-    "memory": "8gb",
-    "storage": "32gb"
-  },
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
   "name": "Renovate",
   "dockerFile": "Dockerfile",
-  "settings": {
-    "terminal.integrated.profiles.linux": { "bash": { "path": "/bin/bash" } },
-    "terminal.integrated.defaultProfile.linux": "bash"
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
   },
-  "extensions": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "orta.vscode-jest",
-    "EditorConfig.editorconfig"
-  ],
-  "runArgs": [
-    "--cap-add=SYS_PTRACE",
-    "--security-opt",
-    "seccomp=unconfined",
-    "--privileged"
-  ],
-  "postCreateCommand": "yarn install"
+  "capAdd": ["SYS_PTRACE"],
+  "privileged": true,
+  "securityOpt": ["seccomp=unconfined"],
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "7gb",
+    "storage": "32gb"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "orta.vscode-jest",
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions"
+      ]
+    }
+  },
+  "postCreateCommand": [".devcontainer/post-create.sh"],
+  // Otherwise jest watcher fails because deps were not installed yet
+  "waitFor": "postCreateCommand"
 }

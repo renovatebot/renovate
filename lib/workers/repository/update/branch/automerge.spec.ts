@@ -1,6 +1,7 @@
-import { getConfig, git, platform } from '../../../../../test/util';
+import { partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
+import type { Pr } from '../../../../modules/platform/types';
 import * as schedule from '../branch/schedule';
 import { tryBranchAutomerge } from './automerge';
 
@@ -12,8 +13,9 @@ describe('workers/repository/update/branch/automerge', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = getConfig();
+      config = partial<RenovateConfig>();
       GlobalConfig.reset();
+      isScheduledSpy.mockReturnValue(true);
     });
 
     it('returns false if not configured for automerge', async () => {
@@ -49,7 +51,7 @@ describe('workers/repository/update/branch/automerge', () => {
     });
 
     it('returns false if PR exists', async () => {
-      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
@@ -63,14 +65,14 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automergeType = 'branch';
       config.baseBranch = 'test-branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
-      git.mergeBranch.mockImplementationOnce(() => {
+      scm.mergeAndPush.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
 
       const res = await tryBranchAutomerge(config);
 
       expect(res).toBe('failed');
-      expect(git.checkoutBranch).toHaveBeenCalled();
+      expect(scm.checkoutBranch).toHaveBeenCalled();
     });
 
     it('returns true if automerge succeeds', async () => {
@@ -82,7 +84,7 @@ describe('workers/repository/update/branch/automerge', () => {
       const res = await tryBranchAutomerge(config);
 
       expect(res).toBe('automerged');
-      expect(git.checkoutBranch).toHaveBeenCalledWith('test-branch');
+      expect(scm.checkoutBranch).toHaveBeenCalledWith('test-branch');
     });
 
     it('returns true if automerge succeeds (dry-run)', async () => {

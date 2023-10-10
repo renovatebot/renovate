@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
-import { ensureCachePath, ensureLocalPath } from './util';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
 
 describe('util/fs/util', () => {
   const localDir = upath.resolve('/foo');
@@ -11,7 +11,7 @@ describe('util/fs/util', () => {
     GlobalConfig.set({ localDir, cacheDir });
   });
 
-  test.each`
+  it.each`
     path     | fullPath
     ${''}    | ${`${localDir}`}
     ${'baz'} | ${`${localDir}/baz`}
@@ -19,7 +19,7 @@ describe('util/fs/util', () => {
     expect(ensureLocalPath(path)).toBe(fullPath);
   });
 
-  test.each`
+  it.each`
     path
     ${'..'}
     ${'../etc/passwd'}
@@ -30,7 +30,7 @@ describe('util/fs/util', () => {
     expect(() => ensureLocalPath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
   });
 
-  test.each`
+  it.each`
     path     | fullPath
     ${''}    | ${`${cacheDir}`}
     ${'baz'} | ${`${cacheDir}/baz`}
@@ -38,14 +38,43 @@ describe('util/fs/util', () => {
     expect(ensureCachePath(path)).toBe(fullPath);
   });
 
-  test.each`
+  it.each`
     path
     ${'..'}
     ${'../etc/passwd'}
     ${'/bar/../foo'}
     ${'/bar/../../etc/passwd'}
     ${'/baz'}
+    ${'/baz"'}
   `(`ensureCachePath('$path', '${cacheDir}') - throws`, ({ path }) => {
     expect(() => ensureCachePath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
+  });
+
+  it.each`
+    value               | expected
+    ${'.'}              | ${true}
+    ${'./...'}          | ${true}
+    ${'foo'}            | ${true}
+    ${'foo/bar'}        | ${true}
+    ${'./foo/bar'}      | ${true}
+    ${'./foo/bar/...'}  | ${true}
+    ${'..'}             | ${false}
+    ${'....'}           | ${true}
+    ${'./foo/..'}       | ${true}
+    ${'./foo/..../bar'} | ${true}
+    ${'./..'}           | ${false}
+    ${'\\foo'}          | ${false}
+    ${"foo'"}           | ${true}
+    ${'fo"o'}           | ${true}
+    ${'fo&o'}           | ${true}
+    ${'f;oo'}           | ${true}
+    ${'f o o'}          | ${true}
+    ${'/'}              | ${false}
+    ${'/foo'}           | ${false}
+    ${'&&'}             | ${true}
+    ${';'}              | ${true}
+    ${'./[foo]/bar'}    | ${true}
+  `('isValidPath($value) == $expected', ({ value, expected }) => {
+    expect(isValidPath(value, 'cacheDir')).toBe(expected);
   });
 });

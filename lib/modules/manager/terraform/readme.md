@@ -33,7 +33,7 @@ Renovate can update the `required_version` attribute of the Terraform block.
 
 #### helm_release
 
-Renovate can update the version attribute of `helm_release` resources.
+Renovate can update the version attribute of `helm_release` resources. This applies to both helm chart repositories and [charts published in OCI registries](https://helm.sh/docs/topics/registries/).
 
 | Name             | Public hosting | Private hosting |
 | ---------------- | :------------: | :-------------: |

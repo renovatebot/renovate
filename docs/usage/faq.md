@@ -23,28 +23,36 @@ Renovate will:
 Only the latest version of Renovate is supported by the Renovate maintainers.
 The Renovate team only fixes bugs in an older version if:
 
-- the hosted app needs to stay on that older major version for a short time, or
+- the Mend Renovate App needs to stay on that older major version for a short time, or
 - some critical bug needs to be fixed and the new major is blocked
 
-If you're using the hosted app, you don't need to do anything, as the Renovate maintainers update the hosted app regularly.
+If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
 If you're self hosting Renovate, use the latest release if possible.
+
+## When is the Mend Renovate App updated with new Renovate versions?
+
+The Renovate maintainers manually update the app.
+The maintainers don't follow any release schedule or release cadence.
+This means the Mend Renovate App can lag a few hours to a week behind the open source version.
+Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
 ## Renovate core features not supported on all platforms
 
-| Feature              | Platforms which lack feature                      | See Renovate issue(s)                                        |
-| -------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard | BitBucket, BitBucket Server, Azure                | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| Hosted app           | GitLab, BitBucket, BitBucket Server, Azure, Gitea |                                                              |
+| Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
+| --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| The Mend Renovate App | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
 
 ## Major platform features not supported by Renovate
 
 Some major platform features are not supported at all by Renovate.
 
-| Feature name                            | Platform                         | See Renovate issue(s)                                                                                                                                                                        |
-| --------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jira issues                             | BitBucket                        | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                 |
-| Merge trains                            | GitLab                           | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                 |
-| Configurable merge strategy and message | Only BitBucket and Gitea for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
+| Feature name                            | Platform                                  | See Renovate issue(s)                                                                                                                                                                        |
+| --------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jira issues                             | Bitbucket                                 | [#20568](https://github.com/renovatebot/renovate/issues/20568)                                                                                                                               |
+| Jira issues                             | Bitbucket Server                          | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                 |
+| Merge trains                            | GitLab                                    | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                 |
+| Configurable merge strategy and message | Only Bitbucket, Forgejo and Gitea for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
 
 ## What is this `main` branch I see in the documentation?
 
@@ -56,14 +64,14 @@ When you create a new repository on say GitHub or GitLab, you'll get a `main` br
 
 We replaced `master` with `main` in our documentation where possible.
 
-A branch name has no special meaning within the Git program, it's just a name.
+A branch name has no special meaning within the Git program, it's only a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
 ## What if I need to .. ?
 
 ### Troubleshoot Renovate
 
-If you have problems with Renovate, or want to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/troubleshooting/).
+If you have problems with Renovate, or want to know where Renovate keeps the logging output then read our [troubleshooting documentation](./troubleshooting.md).
 
 ### Tell Renovate to ask for approval before creating a Pull Request
 
@@ -110,7 +118,7 @@ The `dependencyDashboardApproval` config option is outside of a `packageRules` a
 }
 ```
 
-Read our documentation on the [dependencyDashboardApproval](https://docs.renovatebot.com/configuration-options/#dependencydashboardapproval) config option.
+Read our documentation on the [dependencyDashboardApproval](./configuration-options.md#dependencydashboardapproval) config option.
 
 ### Use an alternative branch as my Pull Request target
 
@@ -133,7 +141,7 @@ See the dedicated [Private npm module support](./getting-started/private-package
 
 ### Control Renovate's schedule
 
-To learn about controlling Renovate schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
+To learn about controlling Renovate schedule, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 
 ### Disable Renovate for certain dependency types
 
@@ -153,7 +161,7 @@ Set configuration option `rangeStrategy` to `"replace"`.
 
 ### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
 
-By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 5am on monday"]`.
+By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 4am on monday"]`.
 If you want to update the lock file more often, set the `schedule` field inside the `lockFileMaintenance` object.
 
 ### Wait until tests have passed before creating the PR

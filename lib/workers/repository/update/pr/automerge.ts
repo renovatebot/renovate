@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
@@ -6,11 +6,7 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import {
-  deleteBranch,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
 import type { BranchConfig } from '../../../types';
 import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
@@ -54,7 +50,7 @@ export async function checkAutoMerge(
   }
   const isConflicted =
     config.isConflicted ??
-    (await isBranchConflicted(config.baseBranch, config.branchName));
+    (await scm.isBranchConflicted(config.baseBranch, config.branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
@@ -73,6 +69,7 @@ export async function checkAutoMerge(
   }
   const branchStatus = await resolveBranchStatus(
     config.branchName,
+    !!config.internalChecksAsSuccess,
     config.ignoreTests
   );
   if (branchStatus !== 'green') {
@@ -85,7 +82,7 @@ export async function checkAutoMerge(
     };
   }
   // Check if it's been touched
-  if (await isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName)) {
     logger.debug('PR is ready for automerge but has been modified');
     return {
       automerged: false,
@@ -93,7 +90,7 @@ export async function checkAutoMerge(
     };
   }
   if (automergeType === 'pr-comment') {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.debug(`Applying automerge comment: ${automergeComment!}`);
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
@@ -122,7 +119,7 @@ export async function checkAutoMerge(
   // Let's merge this
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     logger.info(
       `DRY-RUN: Would merge PR #${
         pr.number
@@ -133,7 +130,7 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'DryRun',
     };
   }
-  // TODO: types (#7154)
+  // TODO: types (#22198)
   logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
   const res = await platform.mergePr({
     branchName,
@@ -148,7 +145,7 @@ export async function checkAutoMerge(
     }
     let branchRemoved = false;
     try {
-      await deleteBranch(branchName);
+      await scm.deleteBranch(branchName);
       branchRemoved = true;
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ branchName, err }, 'Branch auto-remove failed');

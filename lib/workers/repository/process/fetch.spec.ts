@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
+import { RenovateConfig, mocked } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { MavenDatasource } from '../../../modules/datasource/maven';
 import type { PackageFile } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -14,7 +15,6 @@ describe('workers/repository/process/fetch', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = getConfig();
     });
 
@@ -58,10 +58,12 @@ describe('workers/repository/process/fetch', () => {
 
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
+      config.constraints = { some: 'different' };
       const packageFiles: any = {
         maven: [
           {
             packageFile: 'pom.xml',
+            extractedConstraints: { some: 'constraint', other: 'constraint' },
             deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
           },
         ],

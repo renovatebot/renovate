@@ -72,7 +72,7 @@ For this you use a custom `hostRules` array.
 ### Subchart archives
 
 To get updates for subchart archives put `helmUpdateSubChartArchives` in your `postUpdateOptions` configuration.
-Renovate now updates archives in the `/chart` folder.
+Renovate now updates archives in the `/charts` folder.
 
 ```json
 {

@@ -68,12 +68,10 @@ export async function updateArtifacts({
     }
     const execOptions: ExecOptions = {
       cwdFile: '.',
-      docker: {
-        image: 'sidecar',
-      },
-      preCommands: ['pip install --user hashin'],
+      docker: {},
       toolConstraints: [
         { toolName: 'python', constraint: config.constraints?.python },
+        { toolName: 'hashin' },
       ],
       extraEnv: {
         PIP_CACHE_DIR: await ensureCacheDir('pip'),

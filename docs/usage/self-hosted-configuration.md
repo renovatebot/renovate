@@ -19,15 +19,10 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPostUpgradeCommandTemplating
 
-Set to `true` to allow templating of dependency level post-upgrade commands.
-
 Let's look at an example of configuring packages with existing Angular migrations.
-
-Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`:
 
 ```javascript
 module.exports = {
-  allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
@@ -45,8 +40,7 @@ The command to install dependencies (`npm ci --ignore-scripts`) is needed becaus
         "commands": [
           "npm ci --ignore-scripts",
           "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ],
-        "fileFilters": ["**/**"]
+        ]
       }
     }
   ]
@@ -59,6 +53,9 @@ With this configuration, the executable command for `@angular/core` looks like t
 npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
+
+If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
+But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
 
 ## allowScripts
 
@@ -106,6 +103,8 @@ RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
 }
 ```
 
+The search for repositories is case-insensitive.
+
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
@@ -116,13 +115,40 @@ All text inside the start and end `/` will be treated as a regular expression.
 }
 ```
 
-You can negate the regex by putting a `!` in front.
+You can negate the regex by putting an `!` in front.
 Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
   "autodiscoverFilter": ["!/project/.*/"]
+}
+```
+
+## autodiscoverNamespaces
+
+You can use this option to autodiscover projects in specific namespaces (a.k.a. groups/organizations/workspaces).
+In contrast to `autodiscoverFilter` the filtering is done by the platform and therefore more efficient.
+
+For example:
+
+```json
+{
+  "platform": "gitlab",
+  "autodiscoverNamespaces": ["a-group", "another-group/some-subgroup"]
+}
+```
+
+## autodiscoverTopics
+
+Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
+topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
+
+For example:
+
+```json
+{
+  "autodiscoverTopics": ["managed-by-renovate"]
 }
 ```
 
@@ -139,48 +165,33 @@ For example:
 }
 ```
 
+## bbUseDevelopmentBranch
+
+By default, Renovate will use a repository's "main branch" (typically called `main` or `master`) as the "default branch".
+
+Configuring this to `true` means that Renovate will detect and use the Bitbucket [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as defined by the repository's branching model.
+
+If the "development branch" is configured but the branch itself does not exist (e.g. it was deleted), Renovate will fall back to using the repository's "main branch". This fall back behavior matches that of the Bitbucket Cloud web interface.
+
 ## binarySource
 
-Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
-By default, Renovate uses a child process to run such tools, so they must be:
+Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
 
-- installed before running Renovate
-- available in the path
+Renovate supports four possible ways to access those tools:
 
-But you can tell Renovate to use "sidecar" containers for third-party tools by setting `binarySource=docker`.
+- `global`: Uses pre-installed tools, e.g. `npm` installed via `npm install -g npm`.
+- `install` (default): Downloads and installs tools at runtime if running in a [Containerbase](https://github.com/containerbase/base) environment, otherwise falls back to `global`
+- `docker`: Runs tools inside Docker "sidecar" containers using `docker run`.
+- `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
+
+Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`.
+If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
+
+If you are building your own Renovate image, e.g. by installing Renovate using `npm`, then you will need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
+
+The `binarySource=docker` approach should not be necessary in most cases now and `binarySource=install` is recommended instead.
+If you have a use case where you cannot use `binarySource=install` but can use `binarySource=docker` then please share it in a GitHub Discussion so that the maintainers can understand it.
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
-Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
-
-Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
-This mode means that Renovate will dynamically install the version of tools available, if supported.
-
-Supported tools for dynamic install are:
-
-- `bundler`
-- `cargo`
-- `composer`
-- `dotnet`
-- `flux`
-- `golang`
-- `gradle-wrapper`
-- `jb`
-- `jsonnet-bundler`
-- `lerna`
-- `mix`
-- `node`
-- `npm`
-- `pip_requirements`
-- `pip-compile`
-- `pipenv`
-- `pnpm`
-- `poetry`
-- `python`
-- `rust`
-- `yarn`
-
-If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
-
-Tools not on this list fall back to `binarySource=global`.
 
 ## cacheDir
 
@@ -198,6 +209,39 @@ For example:
   "cacheDir": "/my-own-different-cache-folder"
 }
 ```
+
+## cacheHardTtlMinutes
+
+This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
+It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+
+When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
+Results which are soft expired are reused in the following manner:
+
+- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
+- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+
+## cacheTtlOverride
+
+Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
+For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+```json
+{
+  "cacheTtlOverride": {
+    "datasource-docker-tags": 120
+  }
+}
+```
+
+## checkedBranches
+
+This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
+
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
 
 ## containerbaseDir
 
@@ -270,7 +314,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 ### Datasource and credentials only
 
-You can skip the host part, and use just the datasource and credentials.
+You can skip the host part, and use only the datasource and credentials.
 
 `DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
 
@@ -290,34 +334,42 @@ You can skip the host part, and use just the datasource and credentials.
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `renovate/node` is:
+For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
 
-- called `myprefix_node` instead of `renovate_node`
+- called `myprefix_sidecar` instead of `renovate_sidecar`
 - labeled `myprefix_child` instead of `renovate_child`
 
 <!-- prettier-ignore -->
 !!! note
     Dangling containers are only removed when Renovate runs again with the same prefix.
 
-## dockerImagePrefix
+## dockerCliOptions
 
-By default Renovate pulls the sidecar Docker containers from `docker.io/renovate`.
-You can use the `dockerImagePrefix` option to override this default.
+You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar Docker containers.
 
-Say you want to pull your images from `ghcr.io/renovatebot`.
+For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
+
+Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+
+## dockerSidecarImage
+
+By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+You can use the `dockerSidecarImage` option to override this default.
+
+Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
 ```json
 {
-  "dockerImagePrefix": "ghcr.io/renovatebot"
+  "dockerSidecarImage": "ghcr.io/your_company/sidecar"
 }
 ```
 
-If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
 
 ## dockerUser
 
-Override default user and group used by Docker-based binaries.
+Override default user and group used by Docker-based tools.
 The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
@@ -362,8 +414,15 @@ If this option is not set, Renovate will fallback to 15 minutes.
 ## exposeAllEnv
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
-Confidential data can be leaked if a malicious script enumerates all environment variables.
+If you must expose all environment variables to package managers, you can set this option to `true`.
+
+<!-- prettier-ignore -->
+!!! warning
+    Always consider the security implications of using `exposeAllEnv`!
+    Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
+
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
+Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -379,9 +438,20 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkToken
+## forkOrg
 
-You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
+It must be set to a GitHub Organization name and not a GitHub user account.
+When set, "allow edits by maintainers" will be false for PRs because GitHub does not allow this setting for organizations.
+
+This can be used if you're migrating from user-based forks to organization-based forks.
+
+If you've set a `forkOrg` then Renovate will:
+
+1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
+1. If no fork exists: it will be created in the `forkOrg`, not the user account
+
+## forkToken
 
 If this value is configured then Renovate:
 
@@ -443,6 +513,18 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+<!-- prettier-ignore -->
+!!! warning
+    `globalExtends` presets can't be private.
+    When Renovate resolves `globalExtends` it does not fully process the configuration.
+    This means that Renovate does not have the authentication it needs to fetch private things.
+
+## includeMirrors
+
+By default, Renovate does not autodiscover repositories that are mirrors.
+
+Change this setting to `true` to include repositories that are mirrors as Renovate targets.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -499,7 +581,7 @@ If `commitMessagePrefix` or `semanticCommits` values are set then they will be p
 
 ## onboardingConfigFileName
 
-If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
+If set to one of the valid [config file names](./configuration-options.md), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
 Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
@@ -509,9 +591,35 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 ## onboardingPrTitle
 
-Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+If you have an existing Renovate installation and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
+This is similar to what happens when you change the `onboardingBranch` config option.
+
+## onboardingRebaseCheckbox
 
 ## optimizeForDisabled
+
+When this option is `true`, Renovate will do the following during repository initialization:
+
+1. Try to fetch the default config file (e.g. `renovate.json`)
+1. Check if the file contains `"enabled": false`
+1. If so, skip cloning and skip the repository immediately
+
+If `onboardingConfigFileName` is set, that file name will be used instead of the default.
+
+If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
+Otherwise, it will continue as normal.
+
+`optimizeForDisabled` can make initialization quicker in cases where most repositories are disabled, but it uses an extra API call for enabled repositories.
+
+A second, advanced, use also exists when the bot global config has `extends: [":disableRenovate"]`.
+In that case, Renovate searches the repository config file for any of these configurations:
+
+- `extends: [":enableRenovate"]`
+- `ignorePresets: [":disableRenovate"]`
+- `enabled: true`
+
+If Renovate finds any of the above configurations, it continues initializing the repository.
+If not, then Renovate skips the repository without cloning it.
 
 ## password
 
@@ -535,7 +643,7 @@ Default is no limit.
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a simple UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
+If you want a UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
 To create the key pair with GPG use the following commands:
 
@@ -604,7 +712,9 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 
 <!-- prettier-ignore -->
 !!! note
-    Simple public key encryption was previously used to encrypt secrets, but this approach has been deprecated and is no longer documented.
+    You could use public key encryption with earlier versions of Renovate.
+    We deprecated this approach and removed the documentation for it.
+    If you're _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## privateKeyOld
 
@@ -632,11 +742,11 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
 The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
-Example URL: `redis://localhost`.
+Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define additional settings:
+Elements in the `repositories` array can be an object if you wish to define more settings:
 
 ```js
 {
@@ -662,7 +772,7 @@ Set this to an S3 URI to enable S3 backed repository cache.
 
 <!-- prettier-ignore -->
 !!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running Renovate within an EC2 instance in an ECS cluster. In this case, no extra environment variables are required.
     Otherwise, the following environment variables should be set for the S3 client to work.
 
 ```
@@ -676,6 +786,10 @@ Set this to an S3 URI to enable S3 backed repository cache.
 !!! tip
     If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
     For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+
+<!-- prettier-ignore -->
+!!! note
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 
@@ -743,7 +857,7 @@ Secret names must start with an upper or lower case character and can have only 
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
 If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
+This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 
@@ -757,7 +871,7 @@ For example: `:warning:` will be replaced with `⚠️`.
 You may need to set a `username` if you:
 
 - use the Bitbucket platform, or
-- use the GitHub App with CLI (required)
+- use a self-hosted GitHub App with CLI (required)
 
 If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 

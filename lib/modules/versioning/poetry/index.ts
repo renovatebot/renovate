@@ -150,6 +150,9 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string {
+  if (rangeStrategy === 'pin') {
+    return newVersion;
+  }
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     try {
@@ -187,7 +190,7 @@ function getNewValue({
 
   // Explicitly check whether this is a fully-qualified version
   if (
-    (VERSION_PATTERN.exec(newVersion)?.groups?.release || '').split('.')
+    (VERSION_PATTERN.exec(newVersion)?.groups?.release ?? '').split('.')
       .length !== 3
   ) {
     logger.debug(
@@ -229,6 +232,10 @@ function sortVersions(a: string, b: string): number {
   return npm.sortVersions(poetry2semver(a) ?? '', poetry2semver(b) ?? '');
 }
 
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return npm.subset!(poetry2npm(subRange), poetry2npm(superRange));
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -246,5 +253,6 @@ export const api: VersioningApi = {
   matches,
   minSatisfyingVersion,
   sortVersions,
+  subset,
 };
 export default api;

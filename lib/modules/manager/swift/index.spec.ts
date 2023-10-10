@@ -66,6 +66,16 @@ describe('modules/manager/swift/index', () => {
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", .exact(]`
         )
       ).toBeNull();
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:]`
+        )
+      ).toBeNull();
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:.package()]`
+        )
+      ).toBeNull();
     });
 
     it('parses packages with invalid versions', () => {
@@ -101,32 +111,42 @@ describe('modules/manager/swift/index', () => {
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]`
         )
-      ).toMatchSnapshot({ deps: [{ currentValue: 'from:"1.2.3"' }] });
+      ).toMatchObject({ deps: [{ currentValue: 'from:"1.2.3"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"...)]`
         )
-      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"...' }] });
+      ).toMatchObject({ deps: [{ currentValue: '"1.2.3"...' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..."1.2.4")]`
         )
-      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"..."1.2.4"' }] });
+      ).toMatchObject({ deps: [{ currentValue: '"1.2.3"..."1.2.4"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..<"1.2.4")]`
         )
-      ).toMatchSnapshot({ deps: [{ currentValue: '"1.2.3"..<"1.2.4"' }] });
+      ).toMatchObject({ deps: [{ currentValue: '"1.2.3"..<"1.2.4"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..."1.2.3")]`
         )
-      ).toMatchSnapshot({ deps: [{ currentValue: '..."1.2.3"' }] });
+      ).toMatchObject({ deps: [{ currentValue: '..."1.2.3"' }] });
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..<"1.2.3")]`
         )
-      ).toMatchSnapshot({ deps: [{ currentValue: '..<"1.2.3"' }] });
+      ).toMatchObject({ deps: [{ currentValue: '..<"1.2.3"' }] });
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3"))]`
+        )
+      ).toMatchObject({ deps: [{ currentValue: '1.2.3' }] });
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",exact:"1.2.3"))]`
+        )
+      ).toMatchObject({ deps: [{ currentValue: '1.2.3' }] });
     });
 
     it('parses multiple packages', () => {

@@ -73,9 +73,9 @@ export function checkForPlatformFailure(err: Error): Error | null {
 
 // istanbul ignore next
 export function handleCommitError(
-  files: FileChange[],
+  err: Error,
   branchName: string,
-  err: Error
+  files?: FileChange[]
 ): null {
   checkForPlatformFailure(err);
   if (err.message.includes(`'refs/heads/renovate' exists`)) {
@@ -140,7 +140,5 @@ export function handleCommitError(
 }
 
 export function bulkChangesDisallowed(err: Error): boolean {
-  return err.message.includes(
-    'remote: Repository policies do not allow pushes that update more than'
-  );
+  return err.message.includes('update more than');
 }

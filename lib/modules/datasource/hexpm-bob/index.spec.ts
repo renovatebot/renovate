@@ -14,7 +14,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'elixir',
+          packageName: 'elixir',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -27,7 +27,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'elixir',
+          packageName: 'elixir',
         })
       ).toBeNull();
     });
@@ -40,7 +40,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'elixir',
+          packageName: 'elixir',
         })
       ).toBeNull();
     });
@@ -53,7 +53,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'elixir',
+          packageName: 'elixir',
         })
       ).toBeNull();
     });
@@ -66,7 +66,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'elixir',
+          packageName: 'elixir',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -78,11 +78,11 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .reply(200, Fixtures.get('elixir/builds.txt'));
       const res = await getPkgReleases({
         datasource,
-        depName: 'elixir',
+        packageName: 'elixir',
       });
       expect(res).toEqual({
         homepage: 'https://elixir-lang.org/',
-        registryUrl: 'https://repo.hex.pm',
+        registryUrl: 'https://builds.hex.pm',
         releases: [
           {
             gitRef: '185eeec5ecbc2a0c8d9b8b97cb2d23108615ffdb',
@@ -126,14 +126,14 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .reply(200, Fixtures.get('otp/ubuntu-20.04/builds.txt'));
       const res = await getPkgReleases({
         datasource,
-        depName: 'otp/ubuntu-20.04',
+        packageName: 'otp/ubuntu-20.04',
         versioning:
           'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$',
       });
 
       expect(res).toEqual({
         homepage: 'https://www.erlang.org/',
-        registryUrl: 'https://repo.hex.pm',
+        registryUrl: 'https://builds.hex.pm',
         releases: [
           {
             gitRef: '6efb5e31df6bc512ed6c466584ef15b846dcecab',
@@ -162,7 +162,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName: 'otp/ubuntu-20.04',
+        packageName: 'otp/ubuntu-20.04',
         registryUrls: [registryUrl],
       });
 
@@ -173,7 +173,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'invalid',
+          packageName: 'invalid',
         })
       ).toBeNull();
     });

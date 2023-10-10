@@ -1,6 +1,7 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import { readLocalFile } from '../../../util/fs';
@@ -41,9 +42,7 @@ export async function updateArtifacts(
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     toolConstraints: [jsonnetBundlerToolConstraint],
   };
 
@@ -68,7 +67,7 @@ export async function updateArtifacts(
 
     const res: UpdateArtifactsResult[] = [];
 
-    for (const f of status.modified ?? []) {
+    for (const f of coerceArray(status.modified)) {
       res.push({
         file: {
           type: 'addition',
@@ -77,7 +76,7 @@ export async function updateArtifacts(
         },
       });
     }
-    for (const f of status.not_added ?? []) {
+    for (const f of coerceArray(status.not_added)) {
       res.push({
         file: {
           type: 'addition',
@@ -86,7 +85,7 @@ export async function updateArtifacts(
         },
       });
     }
-    for (const f of status.deleted ?? []) {
+    for (const f of coerceArray(status.deleted)) {
       res.push({
         file: {
           type: 'deletion',

@@ -1,3 +1,4 @@
+import { satisfies } from 'semver';
 import { RegExpVersion, RegExpVersioningApi } from '../regex';
 import type { VersioningApiConstructor } from '../types';
 
@@ -38,7 +39,7 @@ export class HermitVersioning extends RegExpVersioningApi {
       compatibility,
     } = groups;
     const release = [
-      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
+      Number.parseInt(major, 10),
       typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
       typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
       typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement, 10),
@@ -173,7 +174,14 @@ export class HermitVersioning extends RegExpVersioningApi {
   }
 
   override matches(version: string, range: string): boolean {
-    return this.equals(version, range);
+    if (
+      HermitVersioning._isChannel(version) ||
+      HermitVersioning._isChannel(range)
+    ) {
+      return this.equals(version, range);
+    }
+
+    return satisfies(version, range);
   }
 }
 

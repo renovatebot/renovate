@@ -1,19 +1,22 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource';
 import type { LookupUpdate } from '../../../../modules/manager/types';
 import type { VersioningApi } from '../../../../modules/versioning';
 import type { RangeStrategy } from '../../../../types';
+import { getMergeConfidenceLevel } from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
 import { getUpdateType } from './update-type';
 
-export function generateUpdate(
+export async function generateUpdate(
   config: LookupUpdateConfig,
+  currentValue: string | undefined,
   versioning: VersioningApi,
   rangeStrategy: RangeStrategy,
   currentVersion: string,
   bucket: string,
   release: Release
-): LookupUpdate {
+): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {
     bucket,
@@ -37,8 +40,16 @@ export function generateUpdate(
   if (release.releaseTimestamp !== undefined) {
     update.releaseTimestamp = release.releaseTimestamp;
   }
+  // istanbul ignore if
+  if (release.registryUrl !== undefined) {
+    /**
+     * This means:
+     *  - registry strategy is set to merge
+     *  - releases were fetched from multiple registry urls
+     */
+    update.registryUrl = release.registryUrl;
+  }
 
-  const { currentValue } = config;
   if (currentValue) {
     try {
       update.newValue = versioning.getNewValue({
@@ -55,7 +66,7 @@ export function generateUpdate(
       update.newValue = currentValue;
     }
   } else {
-    update.newValue = currentValue!;
+    update.newValue = currentValue;
   }
   update.newMajor = versioning.getMajor(newVersion)!;
   update.newMinor = versioning.getMinor(newVersion)!;
@@ -68,6 +79,16 @@ export function generateUpdate(
   update.updateType =
     update.updateType ??
     getUpdateType(config, versioning, currentVersion, newVersion);
+  const { datasource, packageName, packageRules } = config;
+  if (packageRules?.some((pr) => is.nonEmptyArray(pr.matchConfidence))) {
+    update.mergeConfidenceLevel = await getMergeConfidenceLevel(
+      datasource,
+      packageName,
+      currentVersion,
+      newVersion,
+      update.updateType
+    );
+  }
   if (!versioning.isVersion(update.newValue)) {
     update.isRange = true;
   }
@@ -76,7 +97,7 @@ export function generateUpdate(
   }
   if (
     rangeStrategy === 'bump' &&
-    // TODO #7154
+    // TODO #22198
     versioning.matches(newVersion, currentValue!)
   ) {
     update.isBump = true;

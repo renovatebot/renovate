@@ -1,55 +1,15 @@
-import url from 'url';
 import type { MergeStrategy } from '../../../config/types';
 import type { BranchStatus } from '../../../types';
-import { BitbucketHttp } from '../../../util/http/bitbucket';
-import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
-import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
-
-const bitbucketHttp = new BitbucketHttp();
-
-export interface Config {
-  defaultBranch: string;
-  has_issues: boolean;
-  mergeMethod: string;
-  owner: string;
-  prList: Pr[];
-  repository: string;
-  username: string;
-  userUuid: string;
-  ignorePrAuthor: boolean;
-}
-
-export interface PagedResult<T = any> {
-  pagelen: number;
-  size?: number;
-  next?: string;
-  values: T[];
-}
-
-export interface RepoInfo {
-  isFork: boolean;
-  owner: string;
-  mainbranch: string;
-  mergeMethod: string;
-  has_issues: boolean;
-  uuid: string;
-}
-
-export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
-export interface BitbucketStatus {
-  key: string;
-  state: BitbucketBranchState;
-}
-
-export interface RepoInfoBody {
-  parent?: any;
-  owner: { username: string };
-  mainbranch: { name: string };
-  has_issues: boolean;
-  uuid: string;
-}
+import type {
+  BitbucketBranchState,
+  BitbucketMergeStrategy,
+  MergeRequestBody,
+  PrResponse,
+  RepoInfo,
+  RepoInfoBody,
+} from './types';
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
@@ -59,6 +19,7 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
     uuid: repoInfoBody.uuid,
+    is_private: repoInfoBody.is_private,
   };
 }
 
@@ -98,88 +59,9 @@ export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
   yellow: 'INPROGRESS',
 };
 
-const addMaxLength = (inputUrl: string, pagelen = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true);
-  const maxedUrl = url.format({
-    ...parsedUrl,
-    query: { ...parsedUrl.query, pagelen },
-  });
-  return maxedUrl;
-};
-
-function callApi<T>(
-  apiUrl: string,
-  method: string,
-  options?: HttpOptions
-): Promise<HttpResponse<T>> {
-  /* istanbul ignore next */
-  switch (method.toLowerCase()) {
-    case 'post':
-      return bitbucketHttp.postJson<T>(apiUrl, options);
-    case 'put':
-      return bitbucketHttp.putJson<T>(apiUrl, options);
-    case 'patch':
-      return bitbucketHttp.patchJson<T>(apiUrl, options);
-    case 'head':
-      return bitbucketHttp.headJson<T>(apiUrl, options);
-    case 'delete':
-      return bitbucketHttp.deleteJson<T>(apiUrl, options);
-    case 'get':
-    default:
-      return bitbucketHttp.getJson<T>(apiUrl, options);
-  }
-}
-
-export async function accumulateValues<T = any>(
-  reqUrl: string,
-  method = 'get',
-  options?: HttpOptions,
-  pagelen?: number
-): Promise<T[]> {
-  let accumulator: T[] = [];
-  let nextUrl = addMaxLength(reqUrl, pagelen);
-
-  while (typeof nextUrl !== 'undefined') {
-    const { body } = await callApi<{ values: T[]; next: string }>(
-      nextUrl,
-      method,
-      options
-    );
-    accumulator = [...accumulator, ...body.values];
-    nextUrl = body.next;
-  }
-
-  return accumulator;
-}
-
-export interface PrResponse {
-  id: number;
-  title: string;
-  state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
-  summary?: { raw: string };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  destination: {
-    branch: {
-      name: string;
-    };
-  };
-  reviewers: Array<Account>;
-  created_on: string;
-}
-
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
-    displayNumber: `Pull Request #${pr.id}`,
     bodyStruct: getPrBodyStruct(pr.summary?.raw),
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
@@ -189,17 +71,4 @@ export function prInfo(pr: PrResponse): Pr {
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
-}
-
-export interface Account {
-  display_name?: string;
-  uuid: string;
-  nickname?: string;
-  account_status?: string;
-}
-
-export interface EffectiveReviewer {
-  type: string;
-  reviewer_type: string;
-  user: Account;
 }

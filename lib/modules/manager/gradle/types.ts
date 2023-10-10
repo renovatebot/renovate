@@ -16,7 +16,7 @@ export type VariableRegistry = Record<string, PackageVariables>;
 
 export interface ParseGradleResult {
   deps: PackageDependency<GradleManagerData>[];
-  urls: string[];
+  urls: PackageRegistry[];
   vars: PackageVariables;
 }
 
@@ -67,6 +67,11 @@ export interface RichVersion {
 export type GradleVersionPointerTarget = string | RichVersion;
 export type GradleVersionCatalogVersion = string | VersionPointer | RichVersion;
 
+export interface PackageRegistry {
+  registryUrl: string;
+  scope: 'dep' | 'plugin';
+}
+
 export interface Ctx {
   readonly packageFile: string;
   readonly fileContents: Record<string, string | null>;
@@ -74,9 +79,10 @@ export interface Ctx {
 
   globalVars: PackageVariables;
   deps: PackageDependency<GradleManagerData>[];
-  depRegistryUrls: string[];
+  registryUrls: PackageRegistry[];
 
   varTokens: lexer.Token[];
+  tmpNestingDepth: lexer.Token[];
   tmpTokenStore: Record<string, lexer.Token[]>;
   tokenMap: Record<string, lexer.Token[]>;
 }

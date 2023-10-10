@@ -53,10 +53,41 @@ function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
+const migratedKeysWithValues = [
+  {
+    oldName: 'recreateClosed',
+    newName: 'recreateWhen',
+    from: 'true',
+    to: 'always',
+  },
+  {
+    oldName: 'recreateClosed',
+    newName: 'recreateWhen',
+    from: 'false',
+    to: 'auto',
+  },
+];
+
+function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const { oldName, newName, from, to } of migratedKeysWithValues) {
+    const key = getEnvName({ name: oldName });
+    if (env[key] !== undefined) {
+      if (result[key] === from) {
+        delete result[key];
+        result[getEnvName({ name: newName })] = to;
+      }
+    }
+  }
+  return result;
+}
+
 export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
   env = renameEnvKeys(env);
+  // massage the values of migrated configuration keys
+  env = massageEnvKeyValues(env);
 
   const options = getOptions();
 

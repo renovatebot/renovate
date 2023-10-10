@@ -12,7 +12,6 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
-  'widen',
   'pin',
   'replace',
 ];
@@ -94,7 +93,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
-    return currentValue;
+    return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
   }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
@@ -110,7 +109,9 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  let newCargo = newSemver ? npm2cargo(newSemver) : null;
+  let newCargo = newSemver
+    ? npm2cargo(newSemver)
+    : /* istanbul ignore next: should never happen */ null;
   // istanbul ignore if
   if (!newCargo) {
     logger.info(

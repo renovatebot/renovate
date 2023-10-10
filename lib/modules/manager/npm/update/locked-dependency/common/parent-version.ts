@@ -8,15 +8,17 @@ import { api as semver } from '../../../../../versioning/npm';
 
 const pkgCache = new Map<string, Promise<ReleaseResult | null>>();
 
-function getPkgReleasesCached(depName: string): Promise<ReleaseResult | null> {
-  let cachedResult = pkgCache.get(depName);
+function getPkgReleasesCached(
+  packageName: string
+): Promise<ReleaseResult | null> {
+  let cachedResult = pkgCache.get(packageName);
   if (!cachedResult) {
     const lookupConfig: GetPkgReleasesConfig = {
       datasource: 'npm',
-      depName,
+      packageName,
     };
     cachedResult = getPkgReleases(lookupConfig);
-    pkgCache.set(depName, cachedResult);
+    pkgCache.set(packageName, cachedResult);
   }
   return cachedResult;
 }
@@ -45,7 +47,7 @@ export async function findFirstParentVersion(
     const targetDep = await getPkgReleasesCached(targetDepName);
     // istanbul ignore if
     if (!targetDep) {
-      logger.warn(
+      logger.info(
         { targetDepName },
         'Could not look up target dependency for remediation'
       );

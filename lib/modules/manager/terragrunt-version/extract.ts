@@ -1,8 +1,8 @@
 import { logger } from '../../../logger';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFileContent {
   logger.trace('terragrunt-version.extractPackageFile()');
   const dep: PackageDependency = {
     depName: 'gruntwork-io/terragrunt',

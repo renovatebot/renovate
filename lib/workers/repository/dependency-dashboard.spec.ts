@@ -1,13 +1,14 @@
 import { ERROR, WARN } from 'bunyan';
+import { codeBlock } from 'common-tags';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mockedFunction,
   platform,
 } from '../../../test/util';
+import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
   PackageDependency,
@@ -21,7 +22,20 @@ import {
 import { regEx } from '../../util/regex';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
+import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+
+const createVulnerabilitiesMock = jest.fn();
+jest.mock('./process/vulnerabilities', () => {
+  return {
+    __esModule: true,
+    Vulnerabilities: class {
+      static create() {
+        return createVulnerabilitiesMock();
+      }
+    },
+  };
+});
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -78,6 +92,26 @@ async function dryRun(
 
 describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
+    it('parses invalid dashboard body without throwing error', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: null as never,
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {},
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
@@ -99,6 +133,31 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: true,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
+    it('reads dashboard body and apply checkedBranches', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      conf.checkedBranches = ['branch1', 'branch2'];
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt'),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+          branch2: 'global-config',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
         dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
       });
@@ -161,6 +220,7 @@ describe('workers/repository/dependency-dashboard', () => {
     beforeEach(() => {
       PackageFiles.add('main', null);
       GlobalConfig.reset();
+      logger.getProblems.mockReturnValue([]);
     });
 
     it('do nothing if dependencyDashboard is disabled', async () => {
@@ -581,6 +641,38 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 
+    it('contains logged problems with custom header', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
+          ],
+          result: 'pending',
+          branchName: 'branchName1',
+        },
+      ];
+      logger.getProblems.mockReturnValueOnce([
+        {
+          level: ERROR,
+          msg: 'i am a non-duplicated problem',
+        },
+      ]);
+      config.dependencyDashboard = true;
+      config.customizeDashboard = {
+        repoProblemsHeader: 'platform is {{platform}}',
+      };
+
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
+        'platform is github'
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
+
     it('dependency Dashboard All Pending Approval', async () => {
       const branches: BranchConfig[] = [
         {
@@ -922,15 +1014,11 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('PackageFiles.getDashboardMarkdown()', () => {
         const note =
-          '> **Note**\n> Detected dependencies section has been truncated\n';
+          '> **Note**\n\n> Detected dependencies section has been truncated\n';
         const title = `## Detected dependencies\n\n`;
 
         beforeEach(() => {
           PackageFiles.clear();
-        });
-
-        afterAll(() => {
-          jest.resetAllMocks();
         });
 
         it('does not truncates as there is enough space to fit', () => {
@@ -991,6 +1079,177 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(post.includes('dev')).toBeTrue();
         });
       });
+    });
+  });
+
+  describe('getDashboardMarkdownVulnerabilities()', () => {
+    const packageFiles = Fixtures.getJson<Record<string, PackageFile[]>>(
+      './package-files.json'
+    );
+
+    it('return empty string if summary is empty', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        config,
+        packageFiles
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return empty string if summary is set to none', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'none',
+        },
+        packageFiles
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return no data section if summary is set to all and no vulnerabilities', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+        },
+        {}
+      );
+      expect(result).toBe(
+        `## Vulnerabilities\n\nRenovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n`
+      );
+    });
+
+    it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+          osvVulnerabilityAlerts: true,
+        },
+        packageFiles
+      );
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+\`1\`/\`2\` CVEs have Renovate fixes.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>express</summary>
+<blockquote>
+
+- [GHSA-29mw-wpgm-hmr9](https://osv.dev/vulnerability/GHSA-29mw-wpgm-hmr9) (fixed in 4.18.1)
+</blockquote>
+</details>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
+    });
+
+    it('return unresolved vulnerabilities if set to "unresolved"', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'unresolved',
+        },
+        packageFiles
+      );
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+\`1\`/\`2\` CVEs have possible Renovate fixes.
+See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
     });
   });
 });

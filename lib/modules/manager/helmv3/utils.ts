@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { DockerDatasource } from '../../datasource/docker';
@@ -82,8 +83,14 @@ export function isAlias(repository: string): boolean {
   return repository.startsWith('@') || repository.startsWith('alias:');
 }
 
-export function isOCIRegistry(repository: Repository): boolean {
-  return repository.repository.startsWith('oci://');
+export function isOCIRegistry(
+  repository: Repository | string | null | undefined
+): boolean {
+  if (is.nullOrUndefined(repository)) {
+    return false;
+  }
+  const repo = is.string(repository) ? repository : repository.repository;
+  return repo.startsWith('oci://');
 }
 
 export function aliasRecordToRepositories(

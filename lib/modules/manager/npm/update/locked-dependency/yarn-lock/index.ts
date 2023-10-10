@@ -16,15 +16,11 @@ export function updateLockedDependency(
   );
   let yarnLock: YarnLock;
   try {
-    // TODO #7154
+    // TODO #22198
     yarnLock = parseSyml(lockFileContent!);
   } catch (err) {
     logger.warn({ err }, 'Failed to parse yarn files');
     return { status: 'update-failed' };
-  }
-  if ('__metadata' in yarnLock) {
-    logger.debug('Yarn 2+ unsupported');
-    return { status: 'unsupported' };
   }
   try {
     const lockedDeps = getLockedDependencies(yarnLock, depName, currentVersion);
@@ -45,6 +41,12 @@ export function updateLockedDependency(
       );
       return { status: 'update-failed' };
     }
+    if ('__metadata' in yarnLock) {
+      logger.debug(
+        'Cannot patch Yarn 2+ lock file directly - falling back to using yarn'
+      );
+      return { status: 'unsupported' };
+    }
     logger.debug(
       `Found matching dependencies with length ${lockedDeps.length}`
     );
@@ -62,7 +64,7 @@ export function updateLockedDependency(
       );
       return { status: 'update-failed' };
     }
-    // TODO #7154
+    // TODO #22198
     let newLockFileContent = lockFileContent!;
     for (const dependency of updateLockedDeps) {
       const { depName, constraint, newVersion } = dependency;

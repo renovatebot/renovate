@@ -7,4 +7,11 @@ export interface PackageCache {
     value: T,
     ttlMinutes?: number
   ): Promise<void>;
+
+  cleanup?(): Promise<void>;
+}
+
+export interface DecoratorCachedRecord {
+  value: unknown;
+  cachedAt: string;
 }

@@ -76,9 +76,9 @@ describe('modules/manager/batect/extract', () => {
         `${fixturesDir}/valid/batect.yml`,
       ]);
 
-      // TODO: #7154
+      // TODO: #22198
       expect(
-        result?.sort((a, b) => a.packageFile!.localeCompare(b.packageFile!))
+        result?.sort((a, b) => a.packageFile.localeCompare(b.packageFile))
       ).toEqual([
         {
           packageFile: `${fixturesDir}/valid/another-include.yml`,

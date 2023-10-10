@@ -14,12 +14,13 @@ For example, the `Alpine Linux 3.12` repository has this URL: `https://repology.
 Say you're using system packages in a Dockerfile and want to update them with Repology.
 With the Repology datasource you can "pin" each dependency, and get automatic updates.
 
-First you would set a generic regex manager in your `renovate.json` file for `Dockerfile`:
+First you would set a custom manager in your `renovate.json` file for `Dockerfile`:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=\"(?<currentValue>.*)\"\\s"
@@ -49,5 +50,5 @@ When the operating system package for `gcc` of `Alpine Linux 3.12` is updated, R
 
 <!-- prettier-ignore -->
 !!! tip
-    We recommend you try `loose` versioning for distribution packages first.
-    This is because the version number usually doesn't match Renovate's default `semver` specification.
+    We recommend you try `loose` or `deb` versioning for distribution packages first.
+    This is because the version number usually doesn't match Renovate's default `semver-coerced` specification.

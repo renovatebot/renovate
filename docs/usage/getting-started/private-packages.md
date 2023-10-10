@@ -111,7 +111,7 @@ Renovate will use those credentials for all requests to `org/repo`.
 
 #### Example for gomod
 
-Here's an example for `gomod` with private github.com repos.
+Here's an example for `gomod` with private `github.com` repos.
 Assume this config is used on the `github.com/some-other-org` repo:
 
 ```json
@@ -150,12 +150,12 @@ When Renovate creates Pull Requests, its default behavior is to locate and embed
 These release notes are fetched from the source repository of packages and not from the registries themselves, so if they are private then they will require different credentials.
 
 When it comes to open source, most packages host their source on `github.com` in public repositories.
-GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for github.com or the bot will get rate limited quickly.
+GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
 It can be confusing for people who host their own source code privately to be asked to configure a `github.com` token but without it Release Notes for most open source packages will be blocked.
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
 
-- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, it might be better to create an "empty" account just for this purpose.
+- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, but we recommend you create an "empty" account for this purpose.
 - Add the PAT to Renovate using the environment variable `GITHUB_COM_TOKEN`
 
 ## Package Manager Credentials for Artifact Updating
@@ -179,6 +179,25 @@ The following details the most common/popular manager artifacts updating and how
 
 Any `hostRules` token for `github.com` or `gitlab.com` are found and written out to `COMPOSER_AUTH` in env for Composer to parse.
 Any `hostRules` with `hostType=packagist` are also included.
+For dependencies on `github.com` without a Packagist server: use a Personal Access Token for `hostRule` with `hostType=git-tags`, do not use an application token.
+Avoid adding a `hostRule` with `hostType=github` because:
+
+- it overrides the default Renovate application token for everything else
+- it causes unwanted side effects
+
+The repository in `composer.json` should have the `vcs` type with a `https` URL.
+For example:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/organization/private-repository"
+    }
+  ]
+}
+```
 
 ### gomod
 
@@ -211,8 +230,8 @@ If you need to configure per-repository credentials then you can also configure 
 The recommended approaches in order of preference are:
 
 1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
-1. **Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
-1. **Renovate App with a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
+1. **The Mend Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
+1. **The Mend Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
 
 These approaches are described in full below.
 
@@ -267,7 +286,7 @@ This merge approach is similar to how `npm` itself behaves if `.npmrc` is found 
 
 #### Add npmToken to Renovate config
 
-If you are using the main npmjs registry then you can configure just the `npmToken` instead:
+If you are using the main npmjs registry then you can configure only the `npmToken` instead:
 
 ```json
 {
@@ -277,7 +296,7 @@ If you are using the main npmjs registry then you can configure just the `npmTok
 
 #### Add an encrypted npm token to Renovate config
 
-If you don't want all users of the repository to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
+If you don't want all users of the repository to see the plaintext token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
 Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, select "Encrypt", then copy the encrypted result.
 
@@ -375,6 +394,21 @@ npmRegistries:
     # this will not be overwritten and may conflict
 ```
 
+### maven
+
+GitLab package registry can be authorized using `Authorization: Bearer <token>`.
+In GitLab Pipelines authorization can be achieved using following config:
+
+```js
+hostRules: [
+  {
+    hostType: 'maven',
+    matchHost: 'https://gitlab.host.com/api/v4',
+    token: process.env.CI_JOB_TOKEN,
+  },
+];
+```
+
 ### nuget
 
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.
@@ -389,6 +423,25 @@ hostRules: [
     password: '<PAT>',
   },
 ];
+```
+
+### pip
+
+If a `requirements.txt` file has an index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
+This is because `packageRules` are applied _after_ package file extraction.
+
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["pip_requirements"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
 ```
 
 ### poetry
@@ -423,9 +476,9 @@ module.exports = {
 };
 ```
 
-## Mend Renovate Hosted App Encryption
+## Encryption and the Mend Renovate App
 
-The popular [Renovate App on GitHub](https://github.com/apps/renovate) is hosted by Mend.
+Many users use [the Mend Renovate App](https://github.com/apps/renovate), which is hosted by Mend.
 If you are a user of this app, and have private modules, then the following is applicable.
 
 ### Private presets with public repositories
@@ -441,10 +494,10 @@ The solution to this is that you should break your presets into public and priva
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
 The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
 
-If you need to provide credentials to the hosted Renovate App, please do this:
+If you need to provide credentials to the Mend Renovate App, please do this:
 
 - Encrypt each secret string using <https://app.renovatebot.com/encrypt>. Note: this encrypts using the app's public key fully in the browser and does not send the original secret to any server. You can download this file and perform the encryption fully offline if you like.
-- Wrap each secret field in an [encrypted](https://docs.renovatebot.com/configuration-options/#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
+- Wrap each secret field in an [encrypted](../configuration-options.md#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
 
 ```json
 {
@@ -484,7 +537,7 @@ If per-repository config must be done within the repository, it is still recomme
 For instructions on this, see the above section on encrypting secrets for the Mend Renovate App but instead:
 
 - Save a copy of the <https://app.renovatebot.com/encrypt> HTML file locally, or host it locally
-- Generate a public/private key pair for the app using the instructions in [privateKey](https://docs.renovatebot.com/self-hosted-configuration/#privatekey)
+- Generate a public/private key pair for the app using the instructions in [privateKey](../self-hosted-configuration.md#privatekey)
 - Replace the existing public key in the HTML with the public key you generated in the step prior
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above

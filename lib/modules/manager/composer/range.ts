@@ -6,7 +6,7 @@ import type { ComposerManagerData } from './types';
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const { managerData = {}, currentValue, rangeStrategy } = config;
   const { composerJsonType } = managerData as ComposerManagerData;
-  const isComplexRange = currentValue?.includes(' || ');
+  const isComplexRange = currentValue?.includes(' || ') ?? false;
   if (rangeStrategy === 'bump' && isComplexRange) {
     logger.debug(
       { currentValue },
@@ -23,5 +23,5 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   ) {
     return 'widen';
   }
-  return 'replace';
+  return 'update-lockfile';
 }

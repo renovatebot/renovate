@@ -1,4 +1,3 @@
-import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -15,11 +14,12 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { PipfileLockSchema } from './schema';
 
-function getPythonConstraint(
+export function getPythonConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
-): string | undefined | null {
+): string | undefined {
   const { constraints = {} } = config;
   const { python } = constraints;
 
@@ -28,14 +28,18 @@ function getPythonConstraint(
     return python;
   }
   try {
-    const pipfileLock = JSON.parse(existingLockFileContent);
-    if (pipfileLock?._meta?.requires?.python_version) {
-      const pythonVersion: string = pipfileLock._meta.requires.python_version;
+    const result = PipfileLockSchema.safeParse(existingLockFileContent);
+    // istanbul ignore if: not easily testable
+    if (!result.success) {
+      logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
+      return undefined;
+    }
+    if (result.data._meta?.requires?.python_version) {
+      const pythonVersion = result.data._meta.requires.python_version;
       return `== ${pythonVersion}.*`;
     }
-    if (pipfileLock?._meta?.requires?.python_full_version) {
-      const pythonFullVersion: string =
-        pipfileLock._meta.requires.python_full_version;
+    if (result.data._meta?.requires?.python_full_version) {
+      const pythonFullVersion = result.data._meta.requires.python_full_version;
       return `== ${pythonFullVersion}`;
     }
   } catch (err) {
@@ -44,7 +48,7 @@ function getPythonConstraint(
   return undefined;
 }
 
-function getPipenvConstraint(
+export function getPipenvConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
 ): string {
@@ -56,14 +60,17 @@ function getPipenvConstraint(
     return pipenv;
   }
   try {
-    const pipfileLock = JSON.parse(existingLockFileContent);
-    if (pipfileLock?.default?.pipenv?.version) {
-      const pipenvVersion: string = pipfileLock.default.pipenv.version;
-      return pipenvVersion;
+    const result = PipfileLockSchema.safeParse(existingLockFileContent);
+    // istanbul ignore if: not easily testable
+    if (!result.success) {
+      logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
+      return '';
     }
-    if (pipfileLock?.develop?.pipenv?.version) {
-      const pipenvVersion: string = pipfileLock.develop.pipenv.version;
-      return pipenvVersion;
+    if (result.data.default?.pipenv?.version) {
+      return result.data.default.pipenv.version;
+    }
+    if (result.data.develop?.pipenv?.version) {
+      return result.data.develop.pipenv.version;
     }
   } catch (err) {
     // Do nothing
@@ -101,14 +108,15 @@ export async function updateArtifacts({
         PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
-      docker: {
-        image: 'sidecar',
-      },
-      preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
+      docker: {},
       toolConstraints: [
         {
           toolName: 'python',
           constraint: tagConstraint,
+        },
+        {
+          toolName: 'pipenv',
+          constraint: pipenvConstraint,
         },
       ],
     };

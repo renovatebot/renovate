@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { mockDeep } from 'jest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import {
   REPOSITORY_CHANGED,
@@ -7,6 +8,10 @@ import {
 } from '../../../constants/error-messages';
 import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
+
+jest.mock('timers/promises');
+jest.mock('../../../util/git');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -167,6 +172,8 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
+type HostRules = typeof import('../../../util/host-rules');
+
 describe('modules/platform/bitbucket-server/index', () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
@@ -174,7 +181,8 @@ describe('modules/platform/bitbucket-server/index', () => {
 
     describe(scenarioName, () => {
       let bitbucket: Platform;
-      let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
+
+      let hostRules: jest.Mocked<HostRules>;
       let git: jest.Mocked<typeof _git>;
       const username = 'abc';
       const password = '123';
@@ -201,12 +209,9 @@ describe('modules/platform/bitbucket-server/index', () => {
       beforeEach(async () => {
         // reset module
         jest.resetModules();
-        jest.mock('delay');
-        jest.mock('../../../util/git');
-        jest.mock('../../../util/host-rules');
-        hostRules = require('../../../util/host-rules');
         bitbucket = await import('.');
-        git = require('../../../util/git');
+        hostRules = jest.requireMock('../../../util/host-rules');
+        git = jest.requireMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
         git.isBranchBehindBase.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(
@@ -266,7 +271,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               values: [repoMock(url, 'SOME', 'repo')],
               start: 0,
             });
-          expect(await bitbucket.getRepos()).toEqual(['some/repo']);
+          expect(await bitbucket.getRepos()).toEqual(['SOME/repo']);
         });
       });
 
@@ -1239,9 +1244,23 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
 
           expect(
-            await bitbucket.findPr({
-              branchName: 'userName1/pullRequest1',
-            })
+            await bitbucket.getBranchPr('userName1/pullRequest1')
+          ).toBeNull();
+        });
+
+        it('has no existing pr', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
+          expect(
+            await bitbucket.getBranchPr('userName1/pullRequest1')
           ).toBeNull();
         });
       });
@@ -1417,6 +1436,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
+              targetBranch: 'new_base',
             })
           ).toResolve();
         });
@@ -1729,13 +1749,6 @@ Followed by some information.
         });
       });
 
-      describe('getVulnerabilityAlerts()', () => {
-        it('returns empty array', async () => {
-          expect.assertions(1);
-          expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
-        });
-      });
-
       describe('getBranchStatus()', () => {
         it('should be success', async () => {
           const scope = await initRepo();
@@ -1749,7 +1762,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('green');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'green'
+          );
         });
 
         it('should be pending', async () => {
@@ -1764,7 +1779,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'yellow'
+          );
 
           scope
             .get(
@@ -1776,7 +1793,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'yellow'
+          );
         });
 
         it('should be failed', async () => {
@@ -1791,7 +1810,9 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'red'
+          );
 
           scope
             .get(
@@ -1799,15 +1820,17 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'red'
+          );
         });
 
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
-            REPOSITORY_CHANGED
-          );
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).rejects.toThrow(REPOSITORY_CHANGED);
         });
       });
 

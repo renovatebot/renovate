@@ -1,4 +1,4 @@
-import { fs, getConfig, mocked } from '../../../../test/util';
+import { fs, mocked, partial } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../modules/manager/html';
 import * as _fileMatch from './file-match';
@@ -16,8 +16,7 @@ describe('workers/repository/extract/manager-files', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      config = getConfig();
+      config = partial<RenovateConfig>();
     });
 
     it('returns empty of manager is disabled', async () => {
@@ -59,7 +58,7 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toEqual([
         {
           packageFile: 'Dockerfile',
-          deps: [{ depIndex: 0 }, { depIndex: 1, replaceString: 'abc' }],
+          deps: [{}, { replaceString: 'abc' }],
         },
       ]);
     });

@@ -5,6 +5,20 @@ describe('util/package-rules/current-version', () => {
   const matcher = new CurrentVersionMatcher();
 
   describe('match', () => {
+    it('returns true for null versioning', () => {
+      const result = matcher.matches(
+        {
+          // @ts-expect-error: for testing
+          versioning: null,
+          currentValue: '1.2.3',
+        },
+        {
+          matchCurrentVersion: '1.2.3',
+        }
+      );
+      expect(result).toBeTrue();
+    });
+
     it('return false on version exception', () => {
       const spy = jest.spyOn(pep440, 'matches').mockImplementationOnce(() => {
         throw new Error();

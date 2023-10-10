@@ -1,16 +1,16 @@
-import minimatch from 'minimatch';
-import { regEx } from '../../../util/regex';
+import { regexMatches } from '../../../../test/util';
+import { minimatch } from '../../../util/minimatch';
 import { defaultConfig } from './default-config';
 
 describe('modules/manager/hermit/default-config', () => {
   describe('excludeCommitPaths', () => {
     function miniMatches(target: string, patterns: string[]): boolean {
       return patterns.some((patt: string) => {
-        return minimatch(target, patt, { dot: true });
+        return minimatch(patt, { dot: true }).match(target);
       });
     }
 
-    test.each`
+    it.each`
       path                          | expected
       ${'bin/hermit'}               | ${true}
       ${'gradle/bin/hermit'}        | ${true}
@@ -27,14 +27,7 @@ describe('modules/manager/hermit/default-config', () => {
   });
 
   describe('fileMatch', () => {
-    function regexMatches(target: string, patterns: string[]): boolean {
-      return patterns.some((patt: string) => {
-        const re = regEx(patt);
-        return re.test(target);
-      });
-    }
-
-    test.each`
+    it.each`
       path                          | expected
       ${'bin/hermit'}               | ${true}
       ${'gradle/bin/hermit'}        | ${true}

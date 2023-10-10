@@ -1,10 +1,13 @@
-import { RenovateConfig, getConfig } from '../../../../test/util';
+import is from '@sindresorhus/is';
+import type { RenovateConfig } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { flattenUpdates } from './flatten';
+
+jest.mock('../../../util/git/semantic');
 
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -13,7 +16,7 @@ beforeEach(() => {
 describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
-      // TODO #7154
+      // TODO #22198
       config.lockFileMaintenance!.enabled = true;
       config.packageRules = [
         {
@@ -21,7 +24,7 @@ describe('workers/repository/updates/flatten', () => {
           automerge: true,
         },
         {
-          matchPaths: ['frontend/package.json'],
+          matchFileNames: ['frontend/package.json'],
           lockFileMaintenance: {
             enabled: false,
           },
@@ -142,6 +145,14 @@ describe('workers/repository/updates/flatten', () => {
       };
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(14);
+      expect(
+        res.every(
+          (upgrade) =>
+            upgrade.isLockFileMaintenance ||
+            upgrade.isRemediation ||
+            is.number(upgrade.depIndex)
+        )
+      ).toBeTrue();
       expect(
         res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug
       ).toBe('org-repo');

@@ -18,7 +18,6 @@ describe('modules/datasource/puppet-forge/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName: 'puppetlabs/apache',
         packageName: 'puppetlabs/apache',
       });
       expect(res).toMatchObject({
@@ -41,7 +40,6 @@ describe('modules/datasource/puppet-forge/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName: 'puppetlabs/apache',
         packageName: 'puppetlabs/apache',
         registryUrls: ['https://forgeapi.puppet.com'],
       });
@@ -87,7 +85,6 @@ describe('modules/datasource/puppet-forge/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName: 'puppetlabs/apache',
         packageName: 'puppetlabs/apache',
       });
       expect(res).toEqual({
@@ -116,7 +113,7 @@ describe('modules/datasource/puppet-forge/index', () => {
 
     const res = await getPkgReleases({
       datasource,
-      depName: 'foobar',
+      packageName: 'foobar',
       registryUrls: ['https://forgeapi.puppet.com'],
     });
     expect(res).toBeNull();
@@ -131,7 +128,7 @@ describe('modules/datasource/puppet-forge/index', () => {
       .reply(404);
     const res = await getPkgReleases({
       datasource,
-      depName: 'foobar',
+      packageName: 'foobar',
       registryUrls: ['https://forgeapi.puppet.com'],
     });
     expect(res).toBeNull();
@@ -146,7 +143,7 @@ describe('modules/datasource/puppet-forge/index', () => {
     const registryUrls = ['https://puppet.mycustomregistry.com'];
     const res = await getPkgReleases({
       datasource,
-      depName: 'foobar',
+      packageName: 'foobar',
       registryUrls,
     });
 
@@ -191,7 +188,7 @@ describe('modules/datasource/puppet-forge/index', () => {
 
     const res = await getPkgReleases({
       datasource,
-      depName: 'foobar',
+      packageName: 'foobar',
     });
 
     expect(res).toEqual({
@@ -217,7 +214,7 @@ describe('modules/datasource/puppet-forge/index', () => {
 
     const res = await getPkgReleases({
       datasource,
-      depName: 'foobar',
+      packageName: 'foobar',
     });
 
     expect(res).toBeNull();

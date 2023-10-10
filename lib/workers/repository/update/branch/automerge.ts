@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
-import { checkoutBranch, mergeBranch } from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
@@ -26,23 +26,27 @@ export async function tryBranchAutomerge(
   if (!isScheduledNow(config, 'automergeSchedule')) {
     return 'off schedule';
   }
-  const existingPr = await platform.getBranchPr(config.branchName!);
+  const existingPr = await platform.getBranchPr(
+    config.branchName!,
+    config.baseBranch
+  );
   if (existingPr) {
     return 'automerge aborted - PR exists';
   }
   const branchStatus = await resolveBranchStatus(
     config.branchName!,
+    !!config.internalChecksAsSuccess,
     config.ignoreTests
   );
   if (branchStatus === 'green') {
     logger.debug(`Automerging branch`);
     try {
       if (GlobalConfig.get('dryRun')) {
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
-        await checkoutBranch(config.baseBranch!);
-        await mergeBranch(config.branchName!);
+        await scm.checkoutBranch(config.baseBranch!);
+        await scm.mergeAndPush(config.branchName!);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists

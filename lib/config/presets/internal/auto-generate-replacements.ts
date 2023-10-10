@@ -1,13 +1,14 @@
+import { coerceArray } from '../../../util/array';
 import type { PackageRule } from '../../types';
 import type { Preset } from '../types';
 
 export type Replacement = [string[], string];
 
 export interface ReplacementRule {
-  matchCurrentVersion: string;
+  matchCurrentVersion?: string;
   matchDatasources: string[];
   replacements: Replacement[];
-  replacementVersion: string;
+  replacementVersion?: string;
 }
 
 export interface PresetTemplate {
@@ -45,7 +46,7 @@ export function addPresets(
   presets: Record<string, Preset>,
   ...templates: PresetTemplate[]
 ): void {
-  const ext = presets.all?.extends ?? [];
+  const ext = coerceArray(presets.all?.extends);
   for (const template of templates) {
     const { title, description, packageRules } = template;
     presets[title] = {

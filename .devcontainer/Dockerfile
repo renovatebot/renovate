@@ -1,6 +1,13 @@
-FROM containerbase/node:18.12.1@sha256:ba8317a9099d5c5ae80315520a70ef46a3e5d54c9e2d9a59e0176d8264850f3b
+FROM ghcr.io/containerbase/node:18.18.0
 
 USER root
 
+RUN install-apt make g++
+
+# renovate: datasource=github-releases packageName=containerbase/python-prebuild
+RUN install-tool python 3.12.0
+
 # renovate: datasource=npm
-RUN install-tool yarn 1.22.19
+RUN install-tool corepack 0.20.0
+
+USER ubuntu

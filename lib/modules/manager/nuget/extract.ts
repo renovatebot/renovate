@@ -5,10 +5,14 @@ import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
-import { getConfiguredRegistries } from './util';
+import { findVersion, getConfiguredRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -70,9 +74,9 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
-): Promise<PackageFile | null> {
-  logger.trace({ packageFile }, 'nuget.extractPackageFile()');
+  _config: ExtractConfig
+): Promise<PackageFileContent | null> {
+  logger.trace(`nuget.extractPackageFile(${packageFile})`);
 
   const registries = await getConfiguredRegistries(packageFile);
   const registryUrls = registries
@@ -86,16 +90,16 @@ export async function extractPackageFile(
     try {
       manifest = JSON.parse(content);
     } catch (err) {
-      logger.debug(`Invalid JSON in ${packageFile}`);
+      logger.debug({ packageFile }, `Invalid JSON`);
       return null;
     }
 
     if (manifest.version !== 1) {
-      logger.debug({ contents: manifest }, 'Unsupported dotnet tools version');
+      logger.debug({ packageFile }, 'Unsupported dotnet tools version');
       return null;
     }
 
-    for (const depName of Object.keys(manifest.tools)) {
+    for (const depName of Object.keys(manifest.tools ?? {})) {
       const tool = manifest.tools[depName];
       const currentValue = tool.version;
       const dep: PackageDependency = {
@@ -111,7 +115,7 @@ export async function extractPackageFile(
       deps.push(dep);
     }
 
-    return { deps };
+    return deps.length ? { deps } : null;
   }
 
   if (packageFile.endsWith('global.json')) {
@@ -119,18 +123,23 @@ export async function extractPackageFile(
   }
 
   let deps: PackageDependency[] = [];
-  let packageFileVersion = undefined;
+  let packageFileVersion: string | undefined;
   try {
     const parsedXml = new XmlDocument(content);
     deps = extractDepsFromXml(parsedXml).map((dep) => ({
       ...dep,
       ...(registryUrls && { registryUrls }),
     }));
-    packageFileVersion = parsedXml.valueWithPath('PropertyGroup.Version');
+    packageFileVersion = findVersion(parsedXml)?.val;
   } catch (err) {
-    logger.debug({ err }, `Failed to parse ${packageFile}`);
+    logger.debug({ err, packageFile }, `Failed to parse XML`);
   }
-  const res: PackageFile = { deps, packageFileVersion };
+
+  if (!deps.length) {
+    return null;
+  }
+
+  const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {

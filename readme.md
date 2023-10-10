@@ -8,8 +8,9 @@ Multi-platform and multi-language.
 [![License: AGPL-3.0-only](https://img.shields.io/badge/license-%20%09AGPL--3.0--only-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/main/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/main/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
-[![Build status](https://github.com/renovatebot/renovate/workflows/build/badge.svg)](https://github.com/renovatebot/renovate/actions)
+[![Build](https://github.com/renovatebot/renovate/actions/workflows/build.yml/badge.svg)](https://github.com/renovatebot/renovate/actions/workflows/build.yml)
 ![Docker Pulls](https://img.shields.io/docker/pulls/renovate/renovate?color=turquoise)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/renovatebot/renovate/badge)](https://securityscorecards.dev/viewer/?uri=github.com/renovatebot/renovate)
 
 ## Why Use Renovate?
 
@@ -20,12 +21,12 @@ Multi-platform and multi-language.
   - each week
   - each month
 - Relevant package files are discovered automatically
-- Supports monorepo architectures like Lerna or Yarn workspaces with no extra configuration
+- Supports monorepo architectures with workspaces with no extra configuration
 - Bot behavior is customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration (JSON format only)
 - Lock files are supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement (npm packages only)
-- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
+- Get replacement PRs to migrate from a deprecated dependency to the community suggested replacement, works with _most_ managers, see [issue 14149](https://github.com/renovatebot/renovate/issues/14149) for exceptions
+- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via the Mend Renovate App
 
 ## Supported Platforms
 
@@ -37,7 +38,7 @@ Renovate works on these platforms:
 - [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
 - [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
 - [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
-- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
+- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
 
 ## Who Uses Renovate?
 
@@ -69,10 +70,9 @@ Get started with Renovate by checking out our [tutorial](https://github.com/reno
 
 ### GitHub
 
-It's easiest to use the hosted Renovate app.
-Install the [Renovate app](https://github.com/apps/renovate) now.
-
-[More details on the GitHub App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
+We recommend that you use the Mend Renovate App.
+Install the [the Mend Renovate App](https://github.com/apps/renovate) now.
+[More details on the Mend Renovate App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
 
 ### Azure DevOps
 
@@ -86,16 +86,17 @@ There are two ways to run Renovate on Azure DevOps:
 Go to the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
 From there you can create a pipeline with the `RenovateMe` task.
 
-**Note:** This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
+> [!NOTE]
+> This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
 
 #### Custom pipeline
 
 You can create a custom pipeline with a `yml` definition that triggers `npx renovate`.
 [More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
 
-### Bitbucket Cloud/Server, Gitea, GitLab
+### Bitbucket Cloud/Server, Forgejo, Gitea, GitLab
 
-For Bitbucket Cloud, Bitbucket Server, Gitea and GitLab, use our self-hosting option.
+For Bitbucket Cloud, Bitbucket Server, Forgejo, Gitea and GitLab, use our self-hosting option.
 
 ## Configuration
 
@@ -109,14 +110,14 @@ To get help with your configuration, go to the [discussions tab in the Renovate 
 To run your own instance of Renovate you have several options:
 
 - Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using `cron`)
-- Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
-- Run the `renovate/renovate:slim` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
+- Run the `renovate/renovate:full` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
+- Run the `renovate/renovate:latest` Docker Hub image if you only use package managers that don't need third-party binaries (e.g. JavaScript, Docker, NuGet, pip)
 
 [More details on the self-hosting development](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md).
 
 ## Contributing
 
-If you want to contribute to Renovate or get a local copy running, please read the instructions in [.github/contributing.md](.github/contributing.md).
+If you want to contribute to Renovate or get a local copy running, please read the instructions in [contributing guidelines](.github/contributing.md).
 To get started look at the [list of good first issues](https://github.com/renovatebot/renovate/contribute).
 
 ## Security / Disclosure

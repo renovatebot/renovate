@@ -57,18 +57,17 @@ exports[`modules/manager/cocoapods/artifacts returns pod exec error 1`] = `
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile 1`] = `
 [
   {
-    "cmd": "docker pull renovate/ruby:2.7.4",
+    "cmd": "docker pull ghcr.io/containerbase/sidecar",
     "options": {
       "encoding": "utf-8",
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:2.7.4 bash -l -c "install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -88,18 +87,17 @@ exports[`modules/manager/cocoapods/artifacts returns updated Podfile 1`] = `
 exports[`modules/manager/cocoapods/artifacts returns updated Podfile and Pods files 1`] = `
 [
   {
-    "cmd": "docker pull renovate/ruby:2.7.4",
+    "cmd": "docker pull ghcr.io/containerbase/sidecar",
     "options": {
       "encoding": "utf-8",
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:2.7.4 bash -l -c "install-tool cocoapods 3.1.0 && pod install"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && pod install"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": {
-        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
         "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

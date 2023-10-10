@@ -30,6 +30,16 @@ export function trimLeadingSlash(path: string): string {
   return path.replace(/^\/+/, '');
 }
 
+export function trimSlashes(path: string): string {
+  return trimLeadingSlash(trimTrailingSlash(path));
+}
+
+/**
+ * Resolves an input path against a base URL
+ *
+ * @param baseUrl - base URL to resolve against
+ * @param input - input path (if this is a full URL, it will be returned)
+ */
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   const inputString = input.toString();
 
@@ -44,23 +54,42 @@ export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   return host ? inputString : urlJoin(baseUrl, pathname || '');
 }
 
+/**
+ * Replaces the path of a URL with a new path
+ *
+ * @param baseUrl - source URL
+ * @param path - replacement path (if this is a full URL, it will be returned)
+ */
+export function replaceUrlPath(baseUrl: string | URL, path: string): string {
+  if (parseUrl(path)) {
+    return path;
+  }
+
+  const { origin } = is.string(baseUrl) ? new URL(baseUrl) : baseUrl;
+  return urlJoin(origin, path);
+}
+
 export function getQueryString(params: Record<string, any>): string {
   const usp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
-    if (Array.isArray(v)) {
+    if (is.array<object>(v)) {
       for (const item of v) {
+        // TODO: fix me?
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         usp.append(k, item.toString());
       }
     } else {
       usp.append(k, v.toString());
     }
   }
-  const res = usp.toString();
-  return res;
+  return usp.toString();
 }
 
-export function validateUrl(url?: string, httpOnly = true): boolean {
-  if (!url) {
+export function validateUrl(
+  url: string | null | undefined,
+  httpOnly = true
+): boolean {
+  if (!is.nonEmptyString(url)) {
     return false;
   }
   try {

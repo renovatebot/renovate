@@ -124,7 +124,7 @@ export function applySecretsToConfig(
   // Add all secrets to be sanitized
   if (is.plainObject(secrets)) {
     for (const secret of Object.values(secrets)) {
-      addSecretForSanitizing(String(secret));
+      addSecretForSanitizing(secret);
     }
   }
   // TODO: fix types (#9610)

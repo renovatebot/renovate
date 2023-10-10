@@ -16,6 +16,20 @@ export interface ConanYAML {
 }
 
 export interface ConanPackage {
-  depName: string;
+  conanName: string;
   userAndChannel: string;
+}
+
+export interface ConanRecipeProperties {
+  'conan.package.channel': string[];
+  'conan.package.license': string[];
+  'conan.package.name': string[];
+  'conan.package.url': string[];
+  'conan.package.user': string[];
+  'conan.package.version': string[];
+}
+
+export interface ConanProperties {
+  properties: ConanRecipeProperties;
+  uri: string;
 }

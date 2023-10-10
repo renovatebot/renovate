@@ -3,13 +3,15 @@ import { mergeChildConfig } from '../../../../config';
 import { logger } from '../../../../logger';
 import type { Release } from '../../../../modules/datasource';
 import type { VersioningApi } from '../../../../modules/versioning';
-import { getElapsedDays } from '../../../../util/date';
+import { getElapsedMs } from '../../../../util/date';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { coerceNumber } from '../../../../util/number';
 import { applyPackageRules } from '../../../../util/package-rules';
+import { toMs } from '../../../../util/pretty-time';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
@@ -30,7 +32,7 @@ export async function filterInternalChecks(
   let pendingChecks = false;
   let pendingReleases: Release[] = [];
   if (internalChecksFilter === 'none') {
-    // Don't care if stabilityDays or minimumConfidence are unmet
+    // Don't care if minimumReleaseAge or minimumConfidence are unmet
     release = sortedReleases.pop();
   } else {
     // iterate through releases from highest to lowest, looking for the first which will pass checks if present
@@ -41,7 +43,7 @@ export async function filterInternalChecks(
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
         versioning,
-        // TODO #7154
+        // TODO #22198
         currentVersion!,
         candidateRelease.version
       );
@@ -51,19 +53,22 @@ export async function filterInternalChecks(
       );
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig);
-      // Now check for a stabilityDays config
+      // Now check for a minimumReleaseAge config
       const {
         minimumConfidence,
-        stabilityDays,
+        minimumReleaseAge,
         releaseTimestamp,
         version: newVersion,
         updateType,
       } = releaseConfig;
-      if (is.integer(stabilityDays) && releaseTimestamp) {
-        if (getElapsedDays(releaseTimestamp) < stabilityDays) {
+      if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
+        if (
+          getElapsedMs(releaseTimestamp) <
+          coerceNumber(toMs(minimumReleaseAge), 0)
+        ) {
           // Skip it if it doesn't pass checks
-          logger.debug(
-            { depName, check: 'stabilityDays' },
+          logger.trace(
+            { depName, check: 'minimumReleaseAge' },
             `Release ${candidateRelease.version} is pending status checks`
           );
           pendingReleases.unshift(candidateRelease);
@@ -71,18 +76,19 @@ export async function filterInternalChecks(
         }
       }
 
-      // TODO #7154
+      // TODO #22198
       if (isActiveConfidenceLevel(minimumConfidence!)) {
-        const confidenceLevel = await getMergeConfidenceLevel(
-          datasource!,
-          depName!,
-          currentVersion!,
-          newVersion,
-          updateType!
-        );
-        // TODO #7154
+        const confidenceLevel =
+          (await getMergeConfidenceLevel(
+            datasource!,
+            depName!,
+            currentVersion!,
+            newVersion,
+            updateType!
+          )) ?? 'neutral';
+        // TODO #22198
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
-          logger.debug(
+          logger.trace(
             { depName, check: 'minimumConfidence' },
             `Release ${candidateRelease.version} is pending status checks`
           );
@@ -97,7 +103,7 @@ export async function filterInternalChecks(
     if (!release) {
       if (pendingReleases.length) {
         // If all releases were pending then just take the highest
-        logger.debug(
+        logger.trace(
           { depName, bucket },
           'All releases are pending - using latest'
         );
@@ -111,6 +117,6 @@ export async function filterInternalChecks(
     }
   }
 
-  // TODO #7154
+  // TODO #22198
   return { release: release!, pendingChecks, pendingReleases };
 }

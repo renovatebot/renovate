@@ -1,14 +1,14 @@
 import moo from 'moo';
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
-import type { PackageDependency, PackageFile } from '../types';
-
-export const language: ProgrammingLanguage = 'dotnet';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 export const defaultConfig = {
   fileMatch: ['\\.cake$'],
 };
+
+export const categories: Category[] = ['dotnet'];
 
 const lexer = moo.states({
   main: {
@@ -56,7 +56,7 @@ function parseDependencyLine(line: string): PackageDependency | null {
   }
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFileContent {
   const deps: PackageDependency[] = [];
   lexer.reset(content);
   let token = lexer.next();

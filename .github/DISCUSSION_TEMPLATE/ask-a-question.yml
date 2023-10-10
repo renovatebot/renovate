@@ -1,0 +1,84 @@
+body:
+  - type: dropdown
+    id: how-are-you-running-renovate
+    attributes:
+      label: How are you running Renovate?
+      options:
+        - 'Placeholder value, please select the correct response from the dropdown'
+        - 'Mend Renovate hosted app on github.com'
+        - 'Self-hosted'
+    validations:
+      required: true
+
+  - type: input
+    id: renovate-version-if-selfhosting
+    attributes:
+      label: If you're self-hosting Renovate, tell us what version of Renovate you run.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: platform-select
+    attributes:
+      label: If you're self-hosting Renovate, select which platform you are using.
+      options:
+        - 'AWS CodeCommit'
+        - 'Azure DevOps (dev.azure.com)'
+        - 'Azure DevOps Server'
+        - 'Bitbucket Cloud (bitbucket.org)'
+        - 'Bitbucket Server'
+        - 'Gitea or Forgejo'
+        - 'github.com'
+        - 'GitHub Enterprise Server'
+        - 'gitlab.com'
+        - 'GitLab self-hosted'
+    validations:
+      required: false
+
+  - type: dropdown
+    id: regression-error
+    attributes:
+      label: Was this something which used to work for you, and then stopped?
+      options:
+        - 'Placeholder value, please select the correct response from the dropdown'
+        - 'It used to work, and then stopped'
+        - 'I never saw this working'
+    validations:
+      required: true
+
+  - type: textarea
+    id: wanted-end-result
+    attributes:
+      label: Wanted end result.
+      description: 'Describe the wanted end result. Do not report any security concerns here. Email [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io) instead.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: describe-what-you-tried
+    attributes:
+      label: What you tried so far.
+      description: 'Tell us what you tried so far, what worked, what did not work, and so on.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug-logs
+    attributes:
+      label: Relevant debug logs
+      description: |
+        If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+        If you are using the Renovate App, log into [Renovate's app dashboard](https://app.renovatebot.com/dashboard) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+        Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
+        If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
+        Try to highlight the important logs into the issue itself.
+      value: |
+        <details><summary>Logs</summary>
+
+        ```
+        Copy/paste the relevant log(s) here, between the starting and ending backticks
+        ```
+
+        </details>
+    validations:
+      required: false

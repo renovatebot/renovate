@@ -9,12 +9,15 @@ For real runs, give the PAT these scopes:
 - `read_user`
 - `api`
 - `write_repository`
+- `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
 For dry runs, give the PAT these scopes:
 
 - `read_user`
 - `read_api`
 - `read_repository`
+- `write_repository` (when using autodiscover)
+- `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
 Let Renovate use your PAT by doing _one_ of the following:
 
@@ -23,6 +26,12 @@ Let Renovate use your PAT by doing _one_ of the following:
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
 Remember to set `platform=gitlab` somewhere in your Renovate config file.
+
+If you're using a private [GitLab container registry](https://docs.gitlab.com/ee/user/packages/container_registry/), you must:
+
+- Set the `RENOVATE_HOST_RULES` CI variable to `[{"matchHost": "${CI_REGISTRY}","username": "${GITLAB_USER_NAME}","password": "${RENOVATE_TOKEN}", "hostType": "docker"}]`.
+- Make sure the user that owns the `RENOVATE_TOKEN` PAT is a member of the corresponding GitLab projects/groups with the right permissions.
+- Make sure the `RENOVATE_TOKEN` PAT has the `read_registry` scope.
 
 ## Features awaiting implementation
 

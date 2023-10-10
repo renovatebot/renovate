@@ -3,7 +3,12 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { trimLeadingSlash } from '../../../util/url';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { isGitlabIncludeLocal } from './common';
 import type { GitlabPipeline, Image, Job, Services } from './types';
 import { getGitlabDep, replaceReferenceTags } from './utils';
@@ -73,9 +78,9 @@ export function extractFromJob(
 
 export function extractPackageFile(
   content: string,
-  _fileName: string,
+  packageFile: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   try {
     const doc = load(replaceReferenceTags(content), {
@@ -110,7 +115,10 @@ export function extractPackageFile(
       deps = deps.filter(is.truthy);
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting GitLab CI dependencies');
+    logger.debug(
+      { err, packageFile },
+      'Error extracting GitLab CI dependencies'
+    );
   }
 
   return deps.length ? { deps } : null;
@@ -130,7 +138,10 @@ export async function extractAllPackageFiles(
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
-      logger.debug(`Empty or non existent gitlabci file ${file}`);
+      logger.debug(
+        { packageFile: file },
+        `Empty or non existent gitlabci file`
+      );
       continue;
     }
     let doc: GitlabPipeline;
@@ -139,7 +150,10 @@ export async function extractAllPackageFiles(
         json: true,
       }) as GitlabPipeline;
     } catch (err) {
-      logger.warn({ err, file }, 'Error extracting GitLab CI dependencies');
+      logger.debug(
+        { err, packageFile: file },
+        'Error extracting GitLab CI dependencies'
+      );
       continue;
     }
 

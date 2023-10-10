@@ -1,9 +1,9 @@
-// TODO #7154
+// TODO #22198
 import cleanGitRef from 'clean-git-ref';
-import hasha from 'hasha';
 import slugify from 'slugify';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { hash } from '../../../util/hash';
 import { regEx } from '../../../util/regex';
 import * as template from '../../../util/template';
 
@@ -48,9 +48,9 @@ function cleanBranchName(
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {
-    logger.debug('Using group branchName template');
-    // TODO: types (#7154)
-    logger.debug(
+    logger.trace('Using group branchName template');
+    // TODO: types (#22198)
+    logger.trace(
       `Dependency ${update.depName!} is part of group ${update.groupName}`
     );
     update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
@@ -96,10 +96,13 @@ export function generateBranchName(update: RenovateConfig): void {
     hashInput = template.compile(hashInput, update);
     hashInput = template.compile(hashInput, update);
 
-    const hash = hasha(hashInput);
+    const hashedInput = hash(hashInput);
 
-    // TODO: types (#7154)
-    update.branchName = `${update.branchPrefix!}${hash.slice(0, hashLength)}`;
+    // TODO: types (#22198)
+    update.branchName = `${update.branchPrefix!}${hashedInput.slice(
+      0,
+      hashLength
+    )}`;
   } else {
     update.branchName = template.compile(update.branchName!, update);
 

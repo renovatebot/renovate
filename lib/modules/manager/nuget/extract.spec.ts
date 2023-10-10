@@ -2,7 +2,7 @@ import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { DotnetDatasource } from '../../datasource/dotnet';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
@@ -22,10 +22,10 @@ describe('modules/manager/nuget/extract', () => {
       GlobalConfig.reset();
     });
 
-    it('returns empty for invalid csproj', async () => {
-      expect(await extractPackageFile('nothing here', 'bogus', config)).toEqual(
-        { deps: [] }
-      );
+    it('returns null for invalid csproj', async () => {
+      expect(
+        await extractPackageFile('nothing here', 'bogus', config)
+      ).toBeNull();
     });
 
     it('extracts package version dependency', async () => {
@@ -250,7 +250,7 @@ describe('modules/manager/nuget/extract', () => {
             currentValue: '5.0.302',
             depName: 'dotnet-sdk',
             depType: 'dotnet-sdk',
-            datasource: DotnetDatasource.id,
+            datasource: DotnetVersionDatasource.id,
           },
           {
             currentValue: '0.2.0',
@@ -273,7 +273,7 @@ describe('modules/manager/nuget/extract', () => {
             currentValue: '5.0.302',
             depName: 'dotnet-sdk',
             depType: 'dotnet-sdk',
-            datasource: DotnetDatasource.id,
+            datasource: DotnetVersionDatasource.id,
           },
         ],
       });
@@ -344,6 +344,12 @@ describe('modules/manager/nuget/extract', () => {
             packageFile,
             config
           )
+        ).toBeNull();
+      });
+
+      it('returns null for no deps', async () => {
+        expect(
+          await extractPackageFile('{"version": 1}', packageFile, config)
         ).toBeNull();
       });
 

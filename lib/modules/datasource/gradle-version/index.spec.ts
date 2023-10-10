@@ -18,7 +18,7 @@ describe('modules/datasource/gradle-version/index', () => {
       config = {
         datasource,
         versioning,
-        depName: 'abc',
+        packageName: 'abc',
       };
     });
 

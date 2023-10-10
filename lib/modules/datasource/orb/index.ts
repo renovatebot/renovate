@@ -2,13 +2,14 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { OrbRelease } from './types';
+import type { OrbResponse } from './types';
 
 const query = `
 query($packageName: String!) {
   orb(name: $packageName) {
     name,
     homeUrl,
+    isPrivate,
     versions {
       version,
       createdAt
@@ -45,25 +46,27 @@ export class OrbDatasource extends Datasource {
       query,
       variables: { packageName },
     };
-    const res: OrbRelease = (
-      await this.http.postJson<{ data: { orb: OrbRelease } }>(url, {
+    const res = (
+      await this.http.postJson<OrbResponse>(url, {
         body,
       })
-    ).body.data.orb;
-    if (!res) {
-      logger.debug(`Failed to look up orb ${packageName}`);
+    ).body;
+    if (!res?.data?.orb) {
+      logger.debug({ res }, `Failed to look up orb ${packageName}`);
       return null;
     }
+
+    const { orb } = res.data;
     // Simplify response before caching and returning
-    const homepage = res.homeUrl?.length
-      ? res.homeUrl
+    const homepage = orb.homeUrl?.length
+      ? orb.homeUrl
       : `https://circleci.com/developer/orbs/orb/${packageName}`;
-    const releases = res.versions.map(({ version, createdAt }) => ({
+    const releases = orb.versions.map(({ version, createdAt }) => ({
       version,
       releaseTimestamp: createdAt ?? null,
     }));
 
-    const dep = { homepage, releases };
+    const dep = { homepage, isPrivate: !!orb.isPrivate, releases };
     logger.trace({ dep }, 'dep');
     return dep;
   }

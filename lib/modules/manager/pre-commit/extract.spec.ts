@@ -1,9 +1,10 @@
+import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 const filename = '.pre-commit.yaml';
 
@@ -22,10 +23,6 @@ const enterpriseGitPrecommitConfig = Fixtures.get(
 
 describe('modules/manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [', filename);
       expect(result).toBeNull();
@@ -37,7 +34,7 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('returns null for no file content', () => {
-      // TODO #7154
+      // TODO #22198
       const result = extractPackageFile(null as never, filename);
       expect(result).toBeNull();
     });
@@ -95,7 +92,12 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle private git repos', () => {
-      hostRules.find.mockReturnValue({ token: 'value' });
+      // url only
+      hostRules.find.mockReturnValueOnce({ token: 'value1' });
+      // hostType=github
+      hostRules.find.mockReturnValueOnce({});
+      // hostType=gitlab
+      hostRules.find.mockReturnValueOnce({ token: 'value' });
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [

@@ -1,5 +1,4 @@
 import got from 'got';
-import shell from 'shelljs';
 import { updateJsonFile } from './utils.mjs';
 
 const ubuntuUrl = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
@@ -60,7 +59,7 @@ async function update(url, file) {
 }
 
 await (async () => {
-  shell.echo('Generating distro info');
+  console.log('Generating distro info');
   await update(ubuntuUrl, `./data/ubuntu-distro-info.json`);
   await update(debianUrl, `./data/debian-distro-info.json`);
 })();

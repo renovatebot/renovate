@@ -1,8 +1,11 @@
+import { partial } from '../../../test/util';
+import { HelmDatasource } from './helm';
 import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
   massageUrl,
+  normalizeDate,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -74,6 +77,65 @@ describe('modules/datasource/metadata', () => {
     addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://github.com/carltongibson/django-filter',
+    });
+  });
+
+  it.each`
+    sourceUrl                                                                  | expectedSourceUrl                            | expectedSourceDirectory
+    ${'https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus'} | ${'https://github.com/bitnami/charts'}       | ${'bitnami/kube-prometheus'}
+    ${'https://gitlab.com/group/sub-group/repo/tree/main/some/path'}           | ${'https://gitlab.com/group/sub-group/repo'} | ${'some/path'}
+    ${'https://gitlab.com/group/sub-group/repo/-/tree/main/some/path'}         | ${'https://gitlab.com/group/sub-group/repo'} | ${'some/path'}
+    ${'https://github.example.com/org/repo/tree/main/foo/bar/baz'}             | ${'https://github.example.com/org/repo'}     | ${'foo/bar/baz'}
+  `(
+    'Should split the sourceDirectory out of sourceUrl for known platforms: $sourceUrl -> ($expectedSourceUrl, $expectedSourceDirectory)',
+    ({ sourceUrl, expectedSourceUrl, expectedSourceDirectory }) => {
+      const dep: ReleaseResult = { sourceUrl, releases: [] };
+      const datasource = HelmDatasource.id;
+      const packageName = 'some-chart';
+
+      addMetaData(dep, datasource, packageName);
+      expect(dep).toMatchObject({
+        sourceUrl: expectedSourceUrl,
+      });
+    }
+  );
+
+  it.each`
+    sourceUrl
+    ${'https://github.com/bitnami'}
+    ${'https://github.com/bitnami/charts'}
+    ${'https://gitlab.com/group'}
+    ${'https://gitlab.com/group/repo'}
+    ${'https://gitlab.com/group/sub-group/repo'}
+    ${'https://github.example.com/org/repo'}
+    ${'https://unknown-platform.com/some/repo/files/foo/bar'}
+  `(
+    'Should not split a sourceDirectory when one cannot be detected $sourceUrl',
+    ({ sourceUrl }) => {
+      const dep: ReleaseResult = { sourceUrl, releases: [] };
+      const datasource = HelmDatasource.id;
+      const packageName = 'some-chart';
+
+      addMetaData(dep, datasource, packageName);
+      expect(dep.sourceDirectory).toBeUndefined();
+      expect(dep).toMatchObject({ sourceUrl });
+    }
+  );
+
+  it('Should not overwrite any existing sourceDirectory', () => {
+    const dep: ReleaseResult = {
+      sourceUrl:
+        'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+      sourceDirectory: 'packages/foo',
+      releases: [],
+    };
+    const datasource = NpmDatasource.id;
+    const packageName = '@neutrinojs/react';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://github.com/neutrinojs/neutrino',
+      sourceDirectory: 'packages/foo',
     });
   });
 
@@ -237,7 +299,7 @@ describe('modules/datasource/metadata', () => {
       expect(massageUrl('not a url')).toMatch('');
     });
 
-    test.each`
+    it.each`
       sourceUrl
       ${'git@github.com:user/repo'}
       ${'http://github.com/user/repo'}
@@ -251,7 +313,7 @@ describe('modules/datasource/metadata', () => {
       expect(massageUrl(sourceUrl)).toBe('https://github.com/user/repo');
     });
 
-    test.each`
+    it.each`
       sourceUrl
       ${'http://gitlab.com/user/repo'}
       ${'git://gitlab.com/user/repo'}
@@ -263,7 +325,7 @@ describe('modules/datasource/metadata', () => {
       expect(massageUrl(sourceUrl)).toBe('https://gitlab.com/user/repo');
     });
 
-    test.each`
+    it.each`
       sourceUrl
       ${'git@example.com:user/repo'}
       ${'http://example.com/user/repo'}
@@ -424,7 +486,7 @@ describe('modules/datasource/metadata', () => {
     });
   });
 
-  test.each`
+  it.each`
     sourceUrl                              | homepage                                                                   | expected
     ${'not a url'}                         | ${'https://gitlab.com/org/repo'}                                           | ${false}
     ${'https://gitlab.com/org/repo'}       | ${'not a url'}                                                             | ${false}
@@ -442,4 +504,38 @@ describe('modules/datasource/metadata', () => {
       expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
     }
   );
+
+  // for coverage
+  it('should handle dep with no releases', () => {
+    const dep = partial<ReleaseResult>({});
+
+    const datasource = PypiDatasource.id;
+    const packageName = 'django';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toEqual({
+      changelogUrl:
+        'https://github.com/django/django/tree/master/docs/releases',
+      sourceUrl: 'https://github.com/django/django',
+    });
+  });
+
+  describe('normalizeDate()', () => {
+    it('works for number input', () => {
+      const now = Date.now();
+      expect(normalizeDate(now)).toBe(new Date(now).toISOString());
+    });
+
+    it('works for string input', () => {
+      expect(normalizeDate('2021-01-01')).toBe(
+        new Date('2021-01-01').toISOString()
+      );
+    });
+
+    it('works for Date instance', () => {
+      expect(normalizeDate(new Date('2021-01-01'))).toBe(
+        new Date('2021-01-01').toISOString()
+      );
+    });
+  });
 });

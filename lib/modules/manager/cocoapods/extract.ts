@@ -1,15 +1,16 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PodDatasource } from '../../datasource/pod';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { ParsedLine } from './types';
 
 const regexMappings = [
-  regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(\\/(?<subspec>[^'"]+))?(['"])`),
+  regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(/(?<subspec>[^'"]+))?(['"])`),
   regEx(
     `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?<currentValue>[^'"]+)(['"])\\s*$`
   ),
@@ -54,7 +55,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
   const platformMatch = regEx(
     /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/
-  ).exec(git ?? '');
+  ).exec(coerceString(git));
 
   if (platformMatch?.groups) {
     const { account, repo, platform } = platformMatch.groups;
@@ -82,9 +83,9 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
-): Promise<PackageFile | null> {
-  logger.trace('cocoapods.extractPackageFile()');
+  packageFile: string
+): Promise<PackageFileContent | null> {
+  logger.trace(`cocoapods.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
   const lines: string[] = content.split(newlineRegex);
 
@@ -112,7 +113,7 @@ export async function extractPackageFile(
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: 'unknown-version',
+        skipReason: 'unspecified-version',
       };
 
       if (currentValue) {
@@ -145,8 +146,8 @@ export async function extractPackageFile(
       deps.push(dep);
     }
   }
-  const res: PackageFile = { deps };
-  const lockFile = getSiblingFileName(fileName, 'Podfile.lock');
+  const res: PackageFileContent = { deps };
+  const lockFile = getSiblingFileName(packageFile, 'Podfile.lock');
   // istanbul ignore if
   if (await localPathExists(lockFile)) {
     res.lockFiles = [lockFile];

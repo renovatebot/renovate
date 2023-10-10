@@ -10,6 +10,12 @@ releases:
   - name: "{{ requiredEnv \"RELEASE_NAME\" }}"
     namespace: default
     chart: ./foo
+  - name: "{{ requiredEnv \"RELEASE_NAME\" }}"
+    namespace: default
+    chart: ../repo/bar
+  - name: "{{ requiredEnv \"RELEASE_NAME\" }}"
+    namespace: default
+    chart: /tmp/github/some/repo/baz
   - name: {{ requiredEnv "RELEASE_NAME" }}
     namespace: default
     chart: ./foo

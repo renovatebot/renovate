@@ -26,6 +26,8 @@ export interface GhRestRepo {
   owner: {
     login: string;
   };
+  archived: boolean;
+  topics: string[];
 }
 
 export interface GhRestPr {
@@ -41,6 +43,7 @@ export interface GhRestPr {
     repo: {
       pushed_at?: string;
     };
+    ref: string;
   };
   mergeable_state: string;
   number: number;
@@ -69,6 +72,7 @@ export interface GhPr extends Pr {
 export interface UserDetails {
   username: string;
   name: string;
+  id: number;
 }
 
 export interface PlatformConfig {
@@ -88,6 +92,7 @@ export interface LocalRepoConfig {
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
   parentRepo: string | null;
+  forkOrg?: string;
   forkToken?: string;
   prList: GhPr[] | null;
   issueList: any[] | null;

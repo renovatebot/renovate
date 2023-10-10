@@ -5,7 +5,7 @@ import type { Preset } from '../types';
 export const presets: Record<string, Preset> = {
   all: {
     description: [
-      'A collection of workarounds for known problems with packages.',
+      'Apply crowd-sourced workarounds for known problems with packages.',
     ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
@@ -17,9 +17,35 @@ export const presets: Record<string, Preset> = {
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
+      'workarounds:disableEclipseLifecycleMapping',
       'workarounds:disableMavenParentRoot',
+      'workarounds:containerbase',
     ],
-    ignoreDeps: [],
+    ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  containerbase: {
+    description: 'Add some containerbase overrides.',
+    packageRules: [
+      {
+        description:
+          'Use node versioning for `(containerbase|renovate)/node` images',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        versioning: 'node',
+      },
+    ],
+  },
+  disableEclipseLifecycleMapping: {
+    description: 'Disable Eclipse m2e lifecycle-mapping placeholder package.',
+    packageRules: [
+      {
+        enabled: false,
+        matchDatasources: ['maven'],
+        matchPackageNames: ['org.eclipse.m2e:lifecycle-mapping'],
+      },
+    ],
   },
   disableMavenParentRoot: {
     description:
@@ -37,7 +63,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         allowedVersions: '<20000000',
-        matchCurrentVersion: '<20000000',
+        matchCurrentVersion: '!/^\\d{8}$/',
         matchDatasources: ['docker'],
         matchPackageNames: ['alpine'],
       },
@@ -76,13 +102,13 @@ export const presets: Record<string, Preset> = {
     ],
   },
   javaLTSVersions: {
-    description: 'Limit Java runtime versions to LTS releases',
+    description: 'Limit Java runtime versions to LTS releases.',
     packageRules: [
       {
-        allowedVersions: '/^(?:8|11|17|21|25|29)(?:\\.|$)/',
+        allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
-        matchDatasources: ['docker', 'adoptium-java'],
+        matchDatasources: ['docker', 'java-version'],
         matchPackageNames: [
           'eclipse-temurin',
           'amazoncorretto',
@@ -119,7 +145,7 @@ export const presets: Record<string, Preset> = {
   },
   supportRedHatImageVersion: {
     description:
-      'Use specific versioning for Red Hat-maintained container images',
+      'Use specific versioning for Red Hat-maintained container images.',
     packageRules: [
       {
         matchDatasources: ['docker'],

@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.6
 
 import PackageDescription
 
@@ -41,6 +41,7 @@ let package = Package(
         .package(url: "baz", from: "1.2.3.4"),
         .package(url: "https://github.com/avito-tech/GraphiteClient.git", .exact(   "0.1.0"   )),
         .package(url: "https://github.com/IBM-Swift/BlueSignals.git", .exact("1.0.16")),
+        .package(url: "https://github.com/apple/swift-argument-parser", exact: "1.2.1"),
         .package(url: "https://github.com/beefon/Shout", .branch("UpdateSocket")),
         .package(url: "https://github.com/daltoniam/Starscream.git", .exact("3.0.6")),
         .package(url: "https://github.com/httpswift/swifter.git", .exact("1.4.6")),

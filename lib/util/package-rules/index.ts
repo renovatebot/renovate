@@ -29,18 +29,13 @@ function matchesRule(
     matchApplied = true;
 
     if (!is.truthy(isMatch)) {
-      positiveMatch = false;
+      return false;
     }
   }
 
   // not a single match rule is defined --> assume to match everything
   if (!matchApplied) {
     positiveMatch = true;
-  }
-
-  // nothing has been matched
-  if (!positiveMatch) {
-    return false;
   }
 
   // excludes

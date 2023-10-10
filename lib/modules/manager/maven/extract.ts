@@ -9,11 +9,12 @@ import { MAVEN_REPO } from '../../datasource/maven/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
-export function parsePom(raw: string): XmlDocument | null {
+function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
     project = new XmlDocument(raw);
-  } catch (e) {
+  } catch (err) {
+    logger.debug({ packageFile }, `Failed to parse as XML`);
     return null;
   }
   const { name, attr, children } = project;
@@ -38,7 +39,7 @@ function containsPlaceholder(str: string | null | undefined): boolean {
 
 function depFromNode(
   node: XmlElement,
-  underBuildSettingsElement = false
+  underBuildSettingsElement: boolean
 ): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
@@ -197,7 +198,10 @@ function applyPropsInternal(
           groupName = propKey;
         }
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource = propValue.packageFile ?? undefined;
+        propSource =
+          propValue.packageFile ??
+          // istanbul ignore next
+          undefined;
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
           fatal = true;
@@ -245,20 +249,25 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
   return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
+interface MavenInterimPackageFile extends PackageFile {
+  mavenProps?: Record<string, any>;
+  parent?: string;
+}
+
 export function extractPackage(
   rawContent: string,
-  packageFile: string | null = null
-): PackageFile<Record<string, any>> | null {
+  packageFile: string
+): PackageFile | null {
   if (!rawContent) {
     return null;
   }
 
-  const project = parsePom(rawContent);
+  const project = parsePom(rawContent, packageFile);
   if (!project) {
     return null;
   }
 
-  const result: PackageFile = {
+  const result: MavenInterimPackageFile = {
     datasource: MavenDatasource.id,
     packageFile,
     deps: [],
@@ -366,12 +375,12 @@ export function parseSettings(raw: string): XmlDocument | null {
 
 export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
-  const extractedPackages: Record<string, PackageFile> = {};
+  const extractedPackages: Record<string, MavenInterimPackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile!;
+    const name = pkg.packageFile;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];
@@ -384,7 +393,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages: Set<string> = new Set();
-    let pkg: PackageFile | null = extractedPackages[name];
+    let pkg: MavenInterimPackageFile | null = extractedPackages[name];
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
 
@@ -449,11 +458,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   return packageFiles;
 }
 
-function cleanResult(
-  packageFiles: PackageFile<Record<string, any>>[]
-): PackageFile<Record<string, any>>[] {
+function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
+    delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
     });
@@ -471,7 +479,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
-      logger.trace({ packageFile }, 'packageFile has no content');
+      logger.debug({ packageFile }, 'packageFile has no content');
       continue;
     }
     if (packageFile.endsWith('settings.xml')) {

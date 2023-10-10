@@ -5,6 +5,8 @@ import { logger } from '../../logger';
 import { getPkgReleases } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as gradleVersioningId } from '../../modules/versioning/gradle';
+import { id as mavenVersioningId } from '../../modules/versioning/maven';
 import { id as nodeVersioningId } from '../../modules/versioning/node';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
@@ -15,121 +17,184 @@ import { id as semverCoercedVersioningId } from '../../modules/versioning/semver
 import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
+  bun: {
+    datasource: 'github-releases',
+    packageName: 'oven-sh/bun',
+    extractVersion: '^bun-v(?<version>.*)$',
+    versioning: npmVersioningId,
+  },
   bundler: {
     datasource: 'rubygems',
-    depName: 'bundler',
-    versioning: 'ruby',
+    packageName: 'bundler',
+    versioning: rubyVersioningId,
   },
   cocoapods: {
     datasource: 'rubygems',
-    depName: 'cocoapods',
+    packageName: 'cocoapods',
     versioning: rubyVersioningId,
   },
   composer: {
     datasource: 'github-releases',
-    depName: 'composer/composer',
+    packageName: 'composer/composer',
     versioning: composerVersioningId,
   },
   corepack: {
     datasource: 'npm',
-    depName: 'corepack',
+    packageName: 'corepack',
     versioning: npmVersioningId,
   },
   dotnet: {
-    datasource: 'dotnet',
-    depName: 'dotnet-sdk',
+    datasource: 'dotnet-version',
+    packageName: 'dotnet-sdk',
     versioning: semverVersioningId,
   },
   erlang: {
     datasource: 'github-releases',
-    depName: 'containerbase/erlang-prebuild',
+    packageName: 'containerbase/erlang-prebuild',
     versioning: semverCoercedVersioningId,
   },
   elixir: {
     datasource: 'github-releases',
-    depName: 'elixir-lang/elixir',
+    packageName: 'elixir-lang/elixir',
     versioning: semverVersioningId,
   },
   flux: {
     datasource: 'github-releases',
-    depName: 'fluxcd/flux2',
+    packageName: 'fluxcd/flux2',
     versioning: semverVersioningId,
   },
   golang: {
     datasource: 'golang-version',
-    depName: 'golang',
+    packageName: 'golang',
     versioning: npmVersioningId,
+  },
+  gradle: {
+    datasource: 'gradle-version',
+    packageName: 'gradle',
+    versioning: gradleVersioningId,
+  },
+  hashin: {
+    datasource: 'pypi',
+    packageName: 'hashin',
+    versioning: pep440VersioningId,
   },
   helm: {
     datasource: 'github-releases',
-    depName: 'helm/helm',
+    packageName: 'helm/helm',
+    versioning: semverVersioningId,
+  },
+  helmfile: {
+    datasource: 'github-releases',
+    packageName: 'helmfile/helmfile',
     versioning: semverVersioningId,
   },
   java: {
-    datasource: 'adoptium-java',
-    depName: 'java',
+    datasource: 'java-version',
+    packageName: 'java',
     versioning: npmVersioningId,
+  },
+  /* not used in Renovate */
+  'java-maven': {
+    datasource: 'java-version',
+    packageName: 'java',
+    versioning: mavenVersioningId,
   },
   jb: {
     datasource: 'github-releases',
-    depName: 'jsonnet-bundler/jsonnet-bundler',
+    packageName: 'jsonnet-bundler/jsonnet-bundler',
     versioning: semverVersioningId,
   },
-  lerna: {
-    datasource: 'npm',
-    depName: 'lerna',
-    versioning: npmVersioningId,
+  kustomize: {
+    datasource: 'github-releases',
+    packageName: 'kubernetes-sigs/kustomize',
+    extractVersion: '^kustomize/v(?<version>.*)$',
+    versioning: semverVersioningId,
+  },
+  maven: {
+    datasource: 'maven',
+    packageName: 'org.apache.maven:maven',
+    versioning: mavenVersioningId,
   },
   nix: {
     datasource: 'github-tags',
-    depName: 'NixOS/nix',
+    packageName: 'NixOS/nix',
     versioning: semverVersioningId,
   },
   node: {
-    datasource: 'node',
-    depName: 'node',
+    datasource: 'node-version',
+    packageName: 'node',
     versioning: nodeVersioningId,
   },
   npm: {
     datasource: 'npm',
-    depName: 'npm',
+    packageName: 'npm',
     hash: true,
     versioning: npmVersioningId,
   },
+  pdm: {
+    datasource: 'github-releases',
+    packageName: 'pdm-project/pdm',
+    versioning: semverVersioningId,
+  },
   php: {
     datasource: 'github-releases',
-    depName: 'containerbase/php-prebuild',
+    packageName: 'containerbase/php-prebuild',
     versioning: composerVersioningId,
+  },
+  'pip-tools': {
+    datasource: 'pypi',
+    packageName: 'pip-tools',
+    versioning: pep440VersioningId,
+  },
+  pipenv: {
+    datasource: 'pypi',
+    packageName: 'pipenv',
+    versioning: pep440VersioningId,
   },
   pnpm: {
     datasource: 'npm',
-    depName: 'pnpm',
+    packageName: 'pnpm',
     versioning: npmVersioningId,
   },
   poetry: {
     datasource: 'pypi',
-    depName: 'poetry',
+    packageName: 'poetry',
     versioning: pep440VersioningId,
   },
   python: {
     datasource: 'github-releases',
-    depName: 'containerbase/python-prebuild',
+    packageName: 'containerbase/python-prebuild',
     versioning: pythonVersioningId,
+  },
+  ruby: {
+    datasource: 'github-releases',
+    packageName: 'containerbase/ruby-prebuild',
+    versioning: rubyVersioningId,
   },
   rust: {
     datasource: 'docker',
-    depName: 'rust',
+    packageName: 'rust',
     versioning: semverVersioningId,
   },
   yarn: {
     datasource: 'npm',
-    depName: 'yarn',
+    packageName: 'yarn',
     versioning: npmVersioningId,
   },
   'yarn-slim': {
     datasource: 'npm',
-    depName: 'yarn',
+    packageName: 'yarn',
     versioning: npmVersioningId,
+  },
+  dart: {
+    datasource: 'dart-version',
+    packageName: 'dart',
+    versioning: semverVersioningId,
+  },
+  flutter: {
+    datasource: 'flutter-version',
+    packageName: 'flutter',
+    versioning: semverVersioningId,
   },
 };
 
@@ -138,14 +203,13 @@ export function supportsDynamicInstall(toolName: string): boolean {
 }
 
 export function isContainerbase(): boolean {
-  return !!process.env.CONTAINERBASE || !!process.env.BUILDPACK;
+  return !!process.env.CONTAINERBASE;
 }
 
 export function isDynamicInstall(
   toolConstraints?: Opt<ToolConstraint[]>
 ): boolean {
-  const { binarySource } = GlobalConfig.get();
-  if (binarySource !== 'install') {
+  if (GlobalConfig.get('binarySource') !== 'install') {
     return false;
   }
   if (!isContainerbase()) {
@@ -190,10 +254,13 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint;
+        return constraint.replace(/^=+/, '').trim();
       }
     } else {
-      logger.warn({ toolName, constraint }, 'Invalid tool constraint');
+      logger.warn(
+        { toolName, constraint, versioning: toolConfig.versioning },
+        'Invalid tool constraint'
+      );
       constraint = undefined;
     }
   }
@@ -202,6 +269,7 @@ export async function resolveConstraint(
   const releases = pkgReleases?.releases ?? [];
 
   if (!releases?.length) {
+    logger.warn({ toolConfig }, 'No tool releases found.');
     throw new Error('No tool releases found.');
   }
 

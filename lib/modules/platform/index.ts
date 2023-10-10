@@ -1,11 +1,13 @@
-import URL from 'url';
+import URL from 'node:url';
 import type { AllConfig } from '../../config/types';
+import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { setGitAuthor, setNoVerify, setPrivateKey } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import platforms from './api';
+import { setPlatformScmApi } from './scm';
 import type { Platform } from './types';
 
 export * from './types';
@@ -26,7 +28,7 @@ const handler: ProxyHandler<Platform> = {
 
 export const platform = new Proxy<Platform>({} as any, handler);
 
-export function setPlatformApi(name: string): void {
+export function setPlatformApi(name: PlatformId): void {
   if (!platforms.has(name)) {
     throw new Error(
       `Init: Platform "${name}" not found. Must be one of: ${getPlatformList().join(
@@ -35,12 +37,13 @@ export function setPlatformApi(name: string): void {
     );
   }
   _platform = platforms.get(name);
+  setPlatformScmApi(name);
 }
 
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPrivateKey(config.gitPrivateKey);
   setNoVerify(config.gitNoVerify ?? []);
-  // TODO: `platform` (#7154)
+  // TODO: `platform` (#22198)
   setPlatformApi(config.platform!);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
@@ -56,7 +59,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    // TODO: null check (#7154)
+    // TODO: null check (#22198)
     matchHost: URL.parse(returnConfig.endpoint).hostname!,
   };
   // There might have been platform-specific modifications to the token
@@ -67,7 +70,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
   ).forEach((field) => {
     if (config[field]) {
-      // TODO: types #7154
+      // TODO: types #22198
       platformRule[field] = config[field] as string;
       delete returnConfig[field];
     }

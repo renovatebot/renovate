@@ -14,12 +14,17 @@ import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
-  return { ...clone(config), errors: [], warnings: [], branchList: [] };
+  return {
+    ...clone(config),
+    errors: [],
+    warnings: [],
+    branchList: [],
+  };
 }
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     logger.warn(
       `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`
@@ -33,6 +38,7 @@ export async function initRepo(
   PackageFiles.clear();
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
+  logger.once.reset();
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);

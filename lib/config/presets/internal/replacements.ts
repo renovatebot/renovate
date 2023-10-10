@@ -8,28 +8,36 @@ import {
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {
   all: {
-    description: 'All replacements.',
+    description: 'Apply crowd-sourced package replacement rules.',
     extends: [
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
+      'replacements:containerbase',
       'replacements:cucumber-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
+      'replacements:k8s-registry-move',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:parcel-css-to-lightningcss',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
+      'replacements:react-scripts-ts-to-react-scripts',
       'replacements:renovate-pep440-to-renovatebot-pep440',
+      'replacements:rollup-babel-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rome-to-biome',
+      'replacements:vso-task-lib-to-azure-pipelines-task-lib',
+      'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
     ],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   'apollo-server-to-scoped': {
-    description: '`apollo-server` packages became scoped',
+    description: '`apollo-server` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.10.3',
@@ -98,6 +106,47 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  containerbase: {
+    description: 'Replace containerbase dependencies.',
+    packageRules: [
+      {
+        description:
+          'Replace `containerbase/(buildpack|base)` and `renovate/buildpack` with `ghcr.io/containerbase/base`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?containerbase/(?:buildpack|base)$',
+          '^ghcr\\.io/containerbase/buildpack$',
+          '^(?:docker\\.io/)?renovate/buildpack$',
+        ],
+        replacementName: 'ghcr.io/containerbase/base',
+      },
+      {
+        description:
+          'Replace `containerbase/node` and `renovate/node` with `ghcr.io/containerbase/node`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        replacementName: 'ghcr.io/containerbase/node',
+      },
+      {
+        description:
+          'Replace `containerbase/sidecar` and `renovate/sidecar` with `ghcr.io/containerbase/sidecar`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$',
+        ],
+        replacementName: 'ghcr.io/containerbase/sidecar',
+      },
+      {
+        description:
+          'Replace `renovatebot/internal-tools` with `containerbase/internal-tools`.',
+        matchDatasources: ['github-tags'],
+        matchPackageNames: ['renovatebot/internal-tools'],
+        replacementName: 'containerbase/internal-tools',
+      },
+    ],
+  },
   'cucumber-to-scoped': {
     description: '`cucumber` became scoped.',
     packageRules: [
@@ -110,7 +159,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'fastify-to-scoped': {
-    description: '`fastify` packages became scoped',
+    description: '`fastify` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.3.0 <4.0.0',
@@ -511,6 +560,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'k8s-registry-move': {
+    description:
+      'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
+        replacementNameTemplate:
+          "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}",
+      },
+    ],
+  },
   'middie-to-scoped': {
     description: '`middie` became scoped.',
     packageRules: [
@@ -535,8 +596,19 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'npm-run-all-to-maintenance-fork': {
+    description: 'Maintenance fork of `npm-run-all`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['npm-run-all'],
+        replacementName: 'npm-run-all2',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
   'parcel-css-to-lightningcss': {
-    description: '`@parcel/css` was renamed `lightningcss`.',
+    description: '`@parcel/css` was renamed to `lightningcss`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -572,6 +644,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'react-scripts-ts-to-react-scripts': {
+    description: '`react-scripts` supports TypeScript since version `2.1.0`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['react-scripts-ts'],
+        replacementName: 'react-scripts',
+        replacementVersion: '2.1.8',
+      },
+    ],
+  },
   'redux-devtools-extension-to-scope': {
     description:
       'The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.',
@@ -596,6 +679,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-babel-to-scoped': {
+    description: 'The babel plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-babel'],
+        replacementName: '@rollup/plugin-babel',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
   'rollup-node-resolve-to-scoped': {
     description: 'The node-resolve plugin for rollup became scoped.',
     packageRules: [
@@ -604,6 +698,54 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'rome-to-biome': {
+    description:
+      'The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rome'],
+        replacementName: '@biomejs/biome',
+        replacementVersion: '1.0.0',
+      },
+    ],
+  },
+  'spectre-cli-to-spectre-console-cli': {
+    description:
+      'The `Spectre.Cli` package was renamed to `Spectre.Console.Cli`.',
+    packageRules: [
+      {
+        matchDatasources: ['nuget'],
+        matchPackageNames: ['Spectre.Cli'],
+        replacementName: 'Spectre.Console.Cli',
+        replacementVersion: '0.45.0',
+      },
+    ],
+  },
+  'vso-task-lib-to-azure-pipelines-task-lib': {
+    description:
+      'The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['vso-task-lib'],
+        replacementName: 'azure-pipelines-task-lib',
+        replacementVersion: '3.4.0',
+      },
+    ],
+  },
+  'vsts-task-lib-to-azure-pipelines-task-lib': {
+    description:
+      'The `vsts-task-lib` package is now published as `azure-pipelines-task-lib`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['vsts-task-lib'],
+        replacementName: 'azure-pipelines-task-lib',
+        replacementVersion: '3.4.0',
       },
     ],
   },

@@ -6,7 +6,6 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
-  "displayNumber": "Pull Request #456",
   "number": 456,
   "pullRequestId": 456,
   "sourceBranch": undefined,
@@ -22,41 +21,12 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
-  "displayNumber": "Pull Request #456",
   "number": 456,
   "pullRequestId": 456,
   "sourceBranch": undefined,
   "sourceRefName": undefined,
   "state": "open",
   "targetBranch": undefined,
-}
-`;
-
-exports[`modules/platform/azure/index createPr() should create and return a PR object with auto-complete set 1`] = `
-{
-  "autoCompleteSetBy": {
-    "id": 123,
-  },
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "completionOptions": {
-    "deleteSourceBranch": true,
-    "mergeCommitMessage": "The Title",
-    "squashMerge": true,
-  },
-  "createdAt": undefined,
-  "createdBy": {
-    "id": 123,
-  },
-  "displayNumber": "Pull Request #456",
-  "number": 456,
-  "pullRequestId": 456,
-  "sourceBranch": undefined,
-  "sourceRefName": undefined,
-  "state": "open",
-  "targetBranch": undefined,
-  "title": "The Title",
 }
 `;
 
@@ -70,13 +40,39 @@ exports[`modules/platform/azure/index createPr() should create and return an app
     "id": 123,
     "url": "user-url",
   },
-  "displayNumber": "Pull Request #456",
   "number": 456,
   "pullRequestId": 456,
   "sourceBranch": undefined,
   "sourceRefName": undefined,
   "state": "open",
   "targetBranch": undefined,
+}
+`;
+
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
+{
+  "autoCompleteSetBy": {
+    "id": "123",
+  },
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "completionOptions": {
+    "deleteSourceBranch": true,
+    "mergeCommitMessage": "The Title",
+    "squashMerge": true,
+  },
+  "createdAt": undefined,
+  "createdBy": {
+    "id": "123",
+  },
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+  "title": "The Title",
 }
 `;
 
@@ -139,82 +135,6 @@ content",
 ]
 `;
 
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "displayNumber": "Pull Request #1",
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "closed",
-  "status": 2,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
-`;
-
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "displayNumber": "Pull Request #1",
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "closed",
-  "status": 2,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
-`;
-
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "displayNumber": "Pull Request #1",
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "open",
-  "status": 1,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
-`;
-
-exports[`modules/platform/azure/index findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "displayNumber": "Pull Request #1",
-  "number": 1,
-  "pullRequestId": 1,
-  "sourceBranch": "branch-a",
-  "sourceRefName": "refs/heads/branch-a",
-  "state": "merged",
-  "status": 3,
-  "targetBranch": "branch-b",
-  "targetRefName": "refs/heads/branch-b",
-  "title": "branch a pr",
-}
-`;
-
 exports[`modules/platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
 [
   [
@@ -237,8 +157,6 @@ exports[`modules/platform/azure/index getPr(prNo) should return a pr in the righ
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
-  "displayNumber": "Pull Request #1234",
-  "hasReviewers": false,
   "labels": [
     "renovate",
   ],
@@ -284,7 +202,7 @@ exports[`modules/platform/azure/index initRepo should initialise the config for 
 }
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should close the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should close the PR 1`] = `
 [
   [
     {
@@ -298,7 +216,9 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body) should close t
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should reopen the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should re-approve the PR 1`] = `undefined`;
+
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should reopen the PR 1`] = `
 [
   [
     {
@@ -318,11 +238,12 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body) should reopen 
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should update the PR 1`] = `
 [
   [
     {
       "description": "Hello world again",
+      "targetRefName": "refs/heads/new_base",
       "title": "The New Title",
     },
     "1",
@@ -331,7 +252,7 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body) should update 
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body) should update the PR without description 1`] = `
+exports[`modules/platform/azure/index updatePr(prNo, title, body, platformOptions) should update the PR without description 1`] = `
 [
   [
     {

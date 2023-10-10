@@ -31,7 +31,7 @@ exports[`modules/datasource/go/releases-direct getReleases support git 1`] = `
       "version": "v2.0.0",
     },
   ],
-  "sourceUrl": undefined,
+  "sourceUrl": null,
 }
 `;
 

@@ -20,7 +20,7 @@ function parseLetterTag(letter?: string, number?: string): LetterTag | null {
     };
     return {
       letter: spellings[letter] || letter,
-      number: number === undefined ? '0' : number,
+      number: number ?? '0',
     };
   }
   if (letter === undefined && number !== undefined) {
@@ -144,5 +144,5 @@ export function npm2poetry(range: string): string {
       res.splice(i, 2, newValue);
     }
   }
-  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
+  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/g, ' || ');
 }

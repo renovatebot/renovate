@@ -34,16 +34,12 @@ Most issues should have a label relating to either a platform, manager, datasour
 
     status:requirements
     status:blocked
-    status:ready
     status:in-progress
-    status:waiting-on-response
 
 </details>
 
 Use these to label the status of an issue.
 For example, use `status:requirements` to mean that an issue is not yet ready for development to begin.
-If we need the original poster or somebody else to respond to a query of ours, apply the `status:waiting-on-response` label.
-All open issues should have some `status:*` label applied, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Astatus%3Arequirements+-label%3Astatus%3Aready+-label%3Astatus%3Ain-progress+-label%3Astatus%3Ablocked+-label%3Astatus%3Awaiting-on-response+) can find any which are missing a status label.
 
 ### Type of issue
 
@@ -54,16 +50,15 @@ All open issues should have some `status:*` label applied, and [this search](htt
     type:docs
     type:feature
     type:refactor
-    type:help
 
 </details>
 
 Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
-Use the `type:help` label for issues which should be converted to a discussion post.
 
-Any issue which has the label `status:ready` should also have a `type:*` label, and [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+label%3Astatus%3Aready+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) can find any which are missing one.
+All issues should have a `type:*` label.
+Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) to find issues without a `type:*` label.
 
 Add the `breaking` label for Issues or PRs which have changes that are not backwards compatible and require a major version bump.
 
@@ -76,33 +71,15 @@ Add the `breaking` label for Issues or PRs which have changes that are not backw
     priority-2-high
     priority-3-medium
     priority-4-low
-    priority-5-triage
 
 </details>
 
 Use these to assign a priority level to an issue.
-Incoming issues are labeled `priority-5-triage` by default, this label should be replaced with a proper priority (low/medium/high/critical).
 Try to select the proper priority.
 Nothing bad will happen if you select a "wrong" priority.
 At a high level: critical = needs immediate fix, high = to be prioritized ahead of others, medium = default priority, low = trivial issue, or impacts a very small percentage of the user base.
 
-Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-high+-label%3Apriority-3-medium+-label%3Apriority-4-low++-label%3Apriority-5-triage) to find any issues which are missing a priority label.
-
-### Impact
-
-<details>
-    <summary>Impact</summary>
-
-    impact:small
-    impact:medium
-    impact:large
-
-</details>
-
-Use these to assign a impact level to an issue.
-Impact means risk to the end users or their use cases.
-It's used to identify which changes can be made relatively quickly versus those which require great care before merging, due to their chance of negatively impacting a wide number of users if there's a bug.
-It does _not_ mean "amount of work for the maintainers".
+Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Apriority-1-critical+-label%3Apriority-2-high+-label%3Apriority-3-medium+-label%3Apriority-4-low) to find any issues which are missing a priority label.
 
 ### Platform
 
@@ -112,6 +89,7 @@ It does _not_ mean "amount of work for the maintainers".
     platform:azure
     platform:bitbucket
     platform:bitbucket-server
+    platform:codecommit
     platform:gitea
     platform:github
     platform:gitlab
@@ -127,12 +105,16 @@ Keep in mind that an issue can be both affecting a platform and a self-hosted in
     <summary>Core labels</summary>
 
     core:automerge
+    core:autoreplace
+    core:cache
     core:changelogs
     core:config
     core:dashboard
     core:git
     core:onboarding
+    core:package-rules
     core:schedule
+    core:vulnerabilities
 
 </details>
 
@@ -182,30 +164,52 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 <details>
     <summary>Housekeeping</summary>
 
+    duplicate
     good first issue
     help wanted
-    logs:problem
-    reproduction:needed
-    reproduction:provided
-    duplicate
+    auto:bad-vibes
+    auto:discussion-closed
+    auto:discussion-first
+    auto:format-code
+    auto:logs
+    auto:needs-details
+    auto:no-coverage-ignore
+    auto:no-done-comments
+    auto:reproduction
+    auto:retry-latest
 
 </details>
+
+Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
 
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
 
 Add the label `help wanted` to indicate that we need the original poster or someone else to do some work or it is unlikely to get done.
 
-Add a label `logs:problem` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
+Add a label `auto:bad-vibes` to any discussion containing rude comments such as excessive criticism or ungratefulness.
+
+Add a label `auto:discussion-closed` to close a discussion which had persistent or very bad vibes.
+
+Add a label `auto:discussion-first` to any PR which needs discussing first.
+
+Add a label `auto:format-code` to any Discussion which needs code formatting.
+
+Add a label `auto:logs` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
 
 1. Provide logs (if there are none yet)
 1. Provide more logs (in case current logs are insufficient)
 1. Format their logs properly
 
-Add a label `reproduction:needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
-Add the label `reproduction:provided` once there is a public reproduction.
+Add a label `auto:needs-details` to discussions which need more details to move forward.
 
-Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/PR.
+Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by istanbul ignoring code with the `// istanbul ignore` comment.
+
+Add a label `auto:no-done-comments` if PR authors unnecessary "Done" comments, or type comments to ask for a review instead of requesting a new review through GitHub's UI.
+
+Add a label `auto:reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
+
+Add a label `auto:retry-latest` to any Discussion where the user should retry the latest version of Renovate to see if the problem persists.
 
 ### Self-hosted
 

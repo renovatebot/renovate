@@ -1,11 +1,11 @@
-import { getConfig, git, mocked } from '../../../../../test/util';
+import { git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
+import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
 import * as _bundler from '../../../../modules/manager/bundler';
 import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
-import * as _terraform from '../../../../modules/manager/terraform';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -15,7 +15,7 @@ const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
-const terraform = mocked(_terraform);
+const batectWrapper = mocked(_batectWrapper);
 const autoReplace = mocked(_autoReplace);
 
 jest.mock('../../../../modules/manager/bundler');
@@ -23,7 +23,7 @@ jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
 jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/terraform');
+jest.mock('../../../../modules/manager/batect-wrapper');
 jest.mock('../../../../util/git');
 jest.mock('./auto-replace');
 
@@ -32,11 +32,12 @@ describe('workers/repository/update/branch/get-updated', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      // TODO: incompatible types (#7154)
       config = {
-        ...getConfig(),
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        branchName: 'renovate/pin',
         upgrades: [],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       npm.updateDependency = jest.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
@@ -109,7 +110,8 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'npm',
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
 
@@ -118,7 +120,8 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.upgrades.push({
         packageFile: 'package.json',
         manager: 'npm',
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       npm.updateDependency.mockReturnValue('some new content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
@@ -172,7 +175,8 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -199,7 +203,8 @@ describe('workers/repository/update/branch/get-updated', () => {
         manager: 'npm',
         lockFile: 'package-lock.json',
         isRemediation: true,
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       npm.updateLockedDependency.mockResolvedValueOnce({
         status: 'updated',
         files: { 'package-lock.json': 'new contents' },
@@ -221,7 +226,8 @@ describe('workers/repository/update/branch/get-updated', () => {
         manager: 'npm',
         lockFile: 'package-lock.json',
         isRemediation: true,
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       npm.updateLockedDependency.mockResolvedValueOnce({
         status: 'unsupported',
       });
@@ -240,7 +246,8 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.upgrades.push({
         manager: 'npm',
         isRemediation: true,
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       config.reuseExistingBranch = true;
       git.getFile.mockResolvedValueOnce('existing content');
       npm.updateLockedDependency.mockResolvedValue({
@@ -263,7 +270,8 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
@@ -304,7 +312,8 @@ describe('workers/repository/update/branch/get-updated', () => {
         packageFile: '.gitmodules',
         manager: 'git-submodules',
         datasource: GitRefsDatasource.id,
-      } as never);
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
@@ -359,11 +368,11 @@ describe('workers/repository/update/branch/get-updated', () => {
     it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
       config.upgrades.push({
         packageFile: 'abc.tf',
-        manager: 'terraform',
+        manager: 'batect-wrapper',
         branchName: '',
         isLockfileUpdate: true,
       });
-      terraform.updateArtifacts.mockResolvedValueOnce([
+      batectWrapper.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
             type: 'addition',
@@ -467,6 +476,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: '',
         bumpVersion: 'patch',
         manager: 'npm',
+        packageFileVersion: 'old version',
       });
       npm.updateDependency.mockReturnValue('old version');
       npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
@@ -488,6 +498,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: '',
         bumpVersion: 'patch',
         manager: 'helmv3',
+        packageFileVersion: '0.0.1',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
       helmv3.bumpPackageVersion.mockReturnValue({
@@ -501,6 +512,22 @@ describe('workers/repository/update/branch/get-updated', () => {
             path: 'Chart.yaml',
             contents: 'version: 0.0.2',
           },
+        ],
+      });
+    });
+
+    it('handles replacement', async () => {
+      config.upgrades.push({
+        packageFile: 'index.html',
+        manager: 'html',
+        updateType: 'replacement',
+        branchName: undefined!,
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('my-new-dep:1.0.0');
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchObject({
+        updatedPackageFiles: [
+          { path: 'index.html', contents: 'my-new-dep:1.0.0' },
         ],
       });
     });

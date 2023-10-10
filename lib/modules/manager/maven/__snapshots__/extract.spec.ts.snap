@@ -205,21 +205,22 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
   "mavenProps": {
     "quuxGroup": {
       "fileReplacePosition": 631,
-      "packageFile": null,
+      "packageFile": "some-file",
       "val": "org.example",
     },
     "quuxId": {
       "fileReplacePosition": 667,
-      "packageFile": null,
+      "packageFile": "some-file",
       "val": "quux",
     },
     "quuxVersion": {
       "fileReplacePosition": 698,
-      "packageFile": null,
+      "packageFile": "some-file",
       "val": "1.2.3.4",
     },
   },
-  "packageFile": null,
+  "packageFile": "some-file",
   "packageFileVersion": "0.0.1",
+  "parent": "../pom.xml",
 }
 `;

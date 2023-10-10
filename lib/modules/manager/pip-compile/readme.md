@@ -35,7 +35,7 @@ To get Renovate to use another version of Python, add a constraints` rule to the
 ```json
 {
   "constraints": {
-    "python": "3.7"
+    "python": "==3.7"
   }
 }
 ```

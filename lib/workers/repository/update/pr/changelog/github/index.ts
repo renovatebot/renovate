@@ -5,13 +5,10 @@ import type {
   GithubGitTree,
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github';
-import type {
-  GithubRestRelease,
-  GithubRestTag,
-} from '../../../../../../util/github/types';
+import { queryReleases } from '../../../../../../util/github/graphql';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
-import { ensureTrailingSlash } from '../../../../../../util/url';
+import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -21,38 +18,6 @@ import type {
 
 export const id = 'github-changelog';
 const http = new GithubHttp(id);
-
-export async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
-  logger.trace('github.getTags()');
-  try {
-    const url = `${endpoint}repos/${repository}/tags?per_page=100`;
-    const res = await http.getJson<GithubRestTag[]>(url, {
-      paginate: true,
-    });
-    const tags = res.body;
-
-    // istanbul ignore if
-    if (!tags.length) {
-      logger.debug(`No Github tags found for repository:${repository}`);
-    }
-
-    return tags.map((tag) => tag.name).filter(Boolean);
-  } catch (err) {
-    logger.debug(
-      { sourceRepo: repository, err },
-      'Failed to fetch Github tags'
-    );
-    // istanbul ignore if
-    if (err.message?.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
-  }
-}
 
 export async function getReleaseNotesMd(
   repository: string,
@@ -114,23 +79,34 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  release: ChangeLogRelease
+  _release: ChangeLogRelease
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  // TODO #7154
-  const apiBaseUrl = project.apiBaseUrl!;
+  const apiBaseUrl = project.apiBaseUrl;
   const repository = project.repository;
-  const url = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}/releases`;
-  const res = await http.getJson<GithubRestRelease[]>(`${url}?per_page=100`, {
-    paginate: true,
-  });
+  const notesSourceUrl = joinUrlParts(
+    apiBaseUrl,
+    'repos',
+    repository,
+    'releases'
+  );
+  const releases = await queryReleases(
+    {
+      registryUrl: apiBaseUrl,
+      packageName: repository,
+    },
+    http
+  );
 
-  return res.body.map((release) => ({
-    url: release.html_url,
-    notesSourceUrl: url,
-    id: release.id,
-    tag: release.tag_name,
-    name: release.name,
-    body: release.body,
-  }));
+  const result = releases.map(
+    ({ url, id, version: tag, name, description: body }) => ({
+      url,
+      notesSourceUrl,
+      id,
+      tag,
+      name,
+      body,
+    })
+  );
+  return result;
 }

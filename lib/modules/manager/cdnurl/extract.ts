@@ -1,12 +1,12 @@
 import { regEx } from '../../../util/regex';
 import { CdnJsDatasource } from '../../datasource/cdnjs';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 export const cloudflareUrlRegex = regEx(
   /\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/(?<depName>[^/]+?)\/(?<currentValue>[^/]+?)\/(?<asset>[-/_.a-zA-Z0-9]+)/
 );
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFileContent {
   const deps: PackageDependency[] = [];
 
   let rest = content;

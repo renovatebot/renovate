@@ -2,7 +2,6 @@
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid names 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "depName": "kgabis/parson",
@@ -11,32 +10,24 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid
       "skipReason": "invalid-name",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "packageJsonName": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engines 1`] = `
 {
-  "constraints": {
-    "node": ">= 8.9.2",
-    "npm": "^8.0.0",
-    "vscode": ">=1.49.3",
-    "yarn": "disabled",
-  },
   "deps": [
     {
       "currentValue": "1.6.0",
@@ -79,7 +70,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
       "depName": "other",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": ">=1.7.0 <2.0.0",
@@ -121,7 +112,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
       "depName": "yarn",
       "depType": "engines",
       "prettyDepType": "engine",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": ">=1.49.3",
@@ -132,34 +123,36 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
       "prettyDepType": "engine",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {
+    "node": ">= 8.9.2",
+    "npm": "^8.0.0",
+    "pnpm": "^1.2.0",
+    "vscode": ">=1.49.3",
+  },
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "packageJsonName": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-npmjs 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "currentValue": "github:owner/a",
       "depName": "a",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "github:owner/b#master",
@@ -216,28 +209,28 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "depName": "g",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "github:-hello/world#v1.0.0",
       "depName": "h",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "@foo/bar#v2.0.0",
       "depName": "i",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "github:frank#v0.0.1",
       "depName": "j",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentDigest": "49b5aca",
@@ -312,27 +305,24 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "sourceUrl": "https://github.com/Owner/P",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "packageJsonName": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm package alias 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "currentValue": "1",
@@ -353,37 +343,68 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
       "prettyDepType": "dependency",
     },
     {
-      "currentValue": "npm:foo",
+      "currentValue": "^1.2.3",
+      "datasource": "npm",
       "depName": "c",
       "depType": "dependencies",
       "npmPackageAlias": true,
+      "packageName": "c",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+    },
+    {
+      "currentValue": "1.2.3",
+      "datasource": "npm",
+      "depName": "d",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "packageName": "d",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "1.x.x",
+      "datasource": "npm",
+      "depName": "e",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "packageName": "e",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "foo",
+      "depName": "f",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "packageName": "f",
+      "prettyDepType": "dependency",
+      "skipReason": "unspecified-version",
+    },
+    {
+      "currentValue": "npm:@foo/@bar/@1.2.3",
+      "depName": "g",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "prettyDepType": "dependency",
+      "skipReason": "unspecified-version",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": "package-lock.json",
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": "package-lock.json",
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "packageJsonName": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": false,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packageManager 1`] = `
 {
-  "constraints": {
-    "yarn": "3.0.0",
-  },
   "deps": [
     {
       "commitMessageTopic": "Yarn",
@@ -395,29 +416,26 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packag
       "prettyDepType": "packageManager",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {
+    "yarn": "3.0.0",
+  },
   "managerData": {
     "hasPackageManager": true,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "packageJsonName": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 1`] = `
 {
-  "constraints": {
-    "node": "8.9.2",
-  },
   "deps": [
     {
       "commitMessageTopic": "Node.js",
@@ -455,36 +473,41 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
       "prettyDepType": "volta",
     },
     {
+      "commitMessageTopic": "pnpm",
       "currentValue": "6.11.2",
+      "datasource": "npm",
       "depName": "pnpm",
+      "depType": "volta",
+      "prettyDepType": "volta",
+    },
+    {
+      "currentValue": "1.0.0",
+      "depName": "invalid",
       "depType": "volta",
       "prettyDepType": "volta",
       "skipReason": "unknown-volta",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {
+    "node": "8.9.2",
+  },
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "packageJsonName": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unknown-version 1`] = `
+exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unspecified-version 1`] = `
 {
-  "constraints": {
-    "node": "8.9.2",
-  },
   "deps": [
     {
       "commitMessageTopic": "Node.js",
@@ -513,302 +536,29 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
       "depName": "yarn",
       "depType": "volta",
       "prettyDepType": "volta",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {
+    "node": "8.9.2",
+  },
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "packageJsonName": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
-}
-`;
-
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
-{
-  "constraints": {},
-  "deps": [
-    {
-      "currentValue": "6.5.0",
-      "datasource": "npm",
-      "depName": "autoprefixer",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "~1.6.0",
-      "datasource": "npm",
-      "depName": "bower",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "13.1.0",
-      "datasource": "npm",
-      "depName": "browserify",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "0.9.2",
-      "datasource": "npm",
-      "depName": "browserify-css",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "=0.22.0",
-      "datasource": "npm",
-      "depName": "cheerio",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "depName": "enabled",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-      "skipReason": "invalid-value",
-    },
-    {
-      "currentValue": "^1.5.8",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-touch",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-sanitize",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "4.0.0-beta.1",
-      "datasource": "npm",
-      "depName": "@angular/core",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "resolutions",
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "8.0.0",
-      "datasource": "npm",
-      "depName": "@angular/cli",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/@angular/cli",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.33.0",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/angular",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.0.0",
-      "datasource": "npm",
-      "depName": "glob",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "config/glob",
-      },
-      "prettyDepType": "resolutions",
-    },
-  ],
-  "lernaClient": "npm",
-  "lernaPackages": undefined,
-  "managerData": {
-    "hasPackageManager": false,
-    "lernaJsonFile": "lerna.json",
-    "yarnZeroInstall": false,
-  },
-  "npmLock": undefined,
-  "npmrc": undefined,
-  "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
-}
-`;
-
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
-{
-  "constraints": {},
-  "deps": [
-    {
-      "currentValue": "6.5.0",
-      "datasource": "npm",
-      "depName": "autoprefixer",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "~1.6.0",
-      "datasource": "npm",
-      "depName": "bower",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "13.1.0",
-      "datasource": "npm",
-      "depName": "browserify",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "0.9.2",
-      "datasource": "npm",
-      "depName": "browserify-css",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "=0.22.0",
-      "datasource": "npm",
-      "depName": "cheerio",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "depName": "enabled",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-      "skipReason": "invalid-value",
-    },
-    {
-      "currentValue": "^1.5.8",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-touch",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-sanitize",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "4.0.0-beta.1",
-      "datasource": "npm",
-      "depName": "@angular/core",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "resolutions",
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "8.0.0",
-      "datasource": "npm",
-      "depName": "@angular/cli",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/@angular/cli",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.33.0",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/angular",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.0.0",
-      "datasource": "npm",
-      "depName": "glob",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "config/glob",
-      },
-      "prettyDepType": "resolutions",
-    },
-  ],
-  "lernaClient": "yarn",
-  "lernaPackages": undefined,
-  "managerData": {
-    "hasPackageManager": false,
-    "lernaJsonFile": "lerna.json",
-    "yarnZeroInstall": false,
-  },
-  "npmLock": undefined,
-  "npmrc": undefined,
-  "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock file 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "currentValue": "6.5.0",
@@ -924,235 +674,45 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock fi
       "prettyDepType": "resolutions",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": "yarn.lock",
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": "yarn.lock",
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex yarn workspaces 1`] = `
 {
-  "constraints": {},
   "deps": [],
-  "lernaClient": "npm",
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": "lerna.json",
+    "npmLock": undefined,
+    "packageJsonName": "@a/b",
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": [
+      "packages/*",
+    ],
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "0.0.8",
-  "packageJsonName": "@a/b",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": [
-    "packages/*",
-  ],
-}
-`;
-
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds lerna 1`] = `
-{
-  "constraints": {},
-  "deps": [
-    {
-      "currentValue": "6.5.0",
-      "datasource": "npm",
-      "depName": "autoprefixer",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "~1.6.0",
-      "datasource": "npm",
-      "depName": "bower",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "13.1.0",
-      "datasource": "npm",
-      "depName": "browserify",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "0.9.2",
-      "datasource": "npm",
-      "depName": "browserify-css",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "=0.22.0",
-      "datasource": "npm",
-      "depName": "cheerio",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-    },
-    {
-      "depName": "enabled",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-      "skipReason": "invalid-value",
-    },
-    {
-      "currentValue": "^1.5.8",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-touch",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.5.8",
-      "datasource": "npm",
-      "depName": "angular-sanitize",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "4.0.0-beta.1",
-      "datasource": "npm",
-      "depName": "@angular/core",
-      "depType": "devDependencies",
-      "prettyDepType": "devDependency",
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "resolutions",
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "8.0.0",
-      "datasource": "npm",
-      "depName": "@angular/cli",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/@angular/cli",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.33.0",
-      "datasource": "npm",
-      "depName": "angular",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "**/angular",
-      },
-      "prettyDepType": "resolutions",
-    },
-    {
-      "currentValue": "1.0.0",
-      "datasource": "npm",
-      "depName": "glob",
-      "depType": "resolutions",
-      "managerData": {
-        "key": "config/glob",
-      },
-      "prettyDepType": "resolutions",
-    },
-  ],
-  "lernaClient": "npm",
-  "lernaPackages": undefined,
-  "managerData": {
-    "hasPackageManager": false,
-    "lernaJsonFile": "lerna.json",
-    "yarnZeroInstall": false,
-  },
-  "npmLock": undefined,
-  "npmrc": undefined,
-  "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
-}
-`;
-
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces 1`] = `
-{
-  "constraints": {},
-  "deps": [],
-  "lernaClient": "npm",
-  "lernaPackages": undefined,
-  "managerData": {
-    "hasPackageManager": false,
-    "lernaJsonFile": "lerna.json",
-    "yarnZeroInstall": false,
-  },
-  "npmLock": undefined,
-  "npmrc": undefined,
-  "packageFileVersion": "0.0.8",
-  "packageJsonName": "@a/b",
-  "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": [
-    "packages/*",
-  ],
-}
-`;
-
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
-{
-  "constraints": {},
-  "deps": [],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
-  "managerData": {
-    "hasPackageManager": false,
-    "lernaJsonFile": undefined,
-    "yarnZeroInstall": false,
-  },
-  "npmLock": undefined,
-  "npmrc": undefined,
-  "packageFileVersion": "0.0.8",
-  "packageJsonName": "@a/b",
-  "pnpmShrinkwrap": undefined,
-  "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": [
-    "packages/*",
-  ],
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "currentValue": "6.5.0",
@@ -1268,27 +828,24 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
       "prettyDepType": "resolutions",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies with resolution comments 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "currentValue": "6.5.0",
@@ -1386,27 +943,24 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
       "prettyDepType": "resolutions",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": [],
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": [],
 }
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstalls false if Yarn zero-install is used 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "currentValue": "6.5.0",
@@ -1522,20 +1076,18 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "prettyDepType": "resolutions",
     },
   ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
+  "extractedConstraints": {},
   "managerData": {
     "hasPackageManager": false,
-    "lernaJsonFile": undefined,
+    "npmLock": undefined,
+    "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": "yarn.lock",
     "yarnZeroInstall": true,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": false,
-  "yarnLock": "yarn.lock",
-  "yarnWorkspacesPackages": undefined,
 }
 `;

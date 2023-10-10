@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with empty footer and header 1`] = `
+exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with empty footer and header(onboardingRebaseCheckbox="false") 1`] = `
 "
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
@@ -27,10 +27,49 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
 
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header using templating 1`] = `
+exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with empty footer and header(onboardingRebaseCheckbox="true") 1`] = `
+"
+
+Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
+
+🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+
+
+---
+### Detected Package Files
+
+ * \`package.json\` (npm)
+
+### What to Expect
+
+It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.
+
+---
+
+❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
+
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
+
+
+---
+
+
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
+"
+`;
+
+exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header using templating(onboardingRebaseCheckbox="false") 1`] = `
 "This is a header for platform:github
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
@@ -57,10 +96,49 @@ If you need any further assistance then you can also [request help here](https:/
 ---
 
 And this is a footer for repository:test baseBranch:some-branch
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header with trailing and leading newlines 1`] = `
+exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header using templating(onboardingRebaseCheckbox="true") 1`] = `
+"This is a header for platform:github
+
+Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
+
+🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+
+
+---
+### Detected Package Files
+
+ * \`package.json\` (npm)
+
+### What to Expect
+
+It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.
+
+---
+
+❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
+
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
+
+
+---
+
+And this is a footer for repository:test baseBranch:some-branch
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
+"
+`;
+
+exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="false") 1`] = `
 "
 
 This should not be the first line of the PR
@@ -92,5 +170,49 @@ There should be several empty lines at the end of the PR
 
 
 
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
+"
+`;
+
+exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="true") 1`] = `
+"
+
+This should not be the first line of the PR
+
+Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
+
+🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+
+
+---
+### Detected Package Files
+
+ * \`package.json\` (npm)
+
+### What to Expect
+
+It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.
+
+---
+
+❓ Got questions? Check out Renovate's [Docs](https://docs.renovatebot.com/), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](https://github.com/renovatebot/renovate/discussions).
+
+
+---
+
+ - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.
+
+
+---
+
+There should be several empty lines at the end of the PR
+
+
+
+
+<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->
 "
 `;

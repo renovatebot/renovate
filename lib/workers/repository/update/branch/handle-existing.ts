@@ -5,8 +5,8 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
-import { branchExists, deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 
@@ -16,7 +16,7 @@ export async function handleClosedPr(
 ): Promise<void> {
   if (pr.state === 'closed') {
     let content;
-    // TODO #7154
+    // TODO #22198
     const userStrings = config.userStrings!;
     if (config.updateType === 'major') {
       content = template.compile(userStrings.ignoreMajor, config);
@@ -26,7 +26,7 @@ export async function handleClosedPr(
       content = template.compile(userStrings.ignoreOther, config);
     }
     content +=
-      '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+      '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
     if (!config.suppressNotifications!.includes('prIgnoreNotification')) {
       if (GlobalConfig.get('dryRun')) {
         logger.info(
@@ -40,15 +40,13 @@ export async function handleClosedPr(
         });
       }
     }
-    if (branchExists(config.branchName)) {
+    if (await scm.branchExists(config.branchName)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + config.branchName);
       } else {
-        await deleteBranch(config.branchName);
+        await scm.deleteBranch(config.branchName);
       }
     }
-  } else if (pr.state === 'merged') {
-    logger.debug(`Merged PR with PrNo: ${pr.number} is blocking this branch`);
   }
 }
 
@@ -62,14 +60,14 @@ export async function handleModifiedPr(
 
   const editedPrCommentTopic = 'Edited/Blocked Notification';
   const content =
-    'Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n' +
+    'Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\n' +
     'You can manually request rebase by checking the rebase/retry box above.\n\n' +
     emojify(' :warning: **Warning**: custom changes will be lost.');
 
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
 
-  if (dependencyDashboardCheck || config.rebaseRequested) {
+  if (!!dependencyDashboardCheck || config.rebaseRequested) {
     logger.debug('Manual rebase has been requested for PR');
     if (GlobalConfig.get('dryRun')) {
       logger.info(

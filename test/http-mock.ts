@@ -1,4 +1,4 @@
-import type { Url } from 'url';
+import type { Url } from 'node:url';
 import { afterAll, afterEach, beforeAll } from '@jest/globals';
 // eslint-disable-next-line no-restricted-imports
 import nock from 'nock';

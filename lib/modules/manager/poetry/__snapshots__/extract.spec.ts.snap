@@ -345,7 +345,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts mixed vers
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
@@ -377,20 +376,19 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "datasource": "pypi",
       "depName": "dep3",
       "depType": "dependencies",
-      "managerData": {
-        "nestedVersion": true,
-      },
       "skipReason": "path-dependency",
     },
     {
-      "currentValue": "",
       "datasource": "pypi",
       "depName": "dep4",
       "depType": "dependencies",
-      "managerData": {
-        "nestedVersion": false,
-      },
       "skipReason": "path-dependency",
+    },
+    {
+      "datasource": "pypi",
+      "depName": "dep5",
+      "depType": "dependencies",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "^0.8.3",
@@ -400,6 +398,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
+      "packageName": "extra-dep1",
       "versioning": "poetry",
     },
     {
@@ -410,6 +409,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
+      "packageName": "extra-dep2",
       "versioning": "poetry",
     },
     {
@@ -420,11 +420,11 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
+      "packageName": "extra-dep3",
       "versioning": "poetry",
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
@@ -438,6 +438,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "dep1-",
     "versioning": "pep440",
   },
   {
@@ -471,6 +472,19 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "versioning": "poetry",
   },
   {
+    "commitMessageTopic": "Python",
+    "currentValue": "~2.7 || ^3.4",
+    "datasource": "github-releases",
+    "depName": "python",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "packageName": "containerbase/python-prebuild",
+    "registryUrls": null,
+    "versioning": "poetry",
+  },
+  {
     "currentValue": "^3.0",
     "datasource": "pypi",
     "depName": "dev_dep1",
@@ -478,6 +492,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "dev-dep1",
     "versioning": "poetry",
   },
   {
@@ -488,7 +503,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "skipReason": "unknown-version",
+    "packageName": "dev-dep2",
+    "skipReason": "invalid-version",
   },
   {
     "currentValue": "^0.8.3",
@@ -498,6 +514,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "extra-dep1",
     "versioning": "poetry",
   },
   {
@@ -508,6 +525,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "extra-dep2",
     "versioning": "poetry",
   },
   {
@@ -518,6 +536,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "extra-dep3",
     "versioning": "poetry",
   },
 ]
@@ -535,24 +554,32 @@ exports[`modules/manager/poetry/extract extractPackageFile() handles multiple co
 {
   "deps": [
     {
-      "currentValue": "",
       "datasource": "pypi",
       "depName": "foo",
       "depType": "dependencies",
-      "managerData": {
-        "nestedVersion": false,
-      },
       "skipReason": "multiple-constraint-dep",
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
 exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVersions from the lockfile 1`] = `
 {
   "deps": [
+    {
+      "commitMessageTopic": "Python",
+      "currentValue": "^3.9",
+      "datasource": "github-releases",
+      "depName": "python",
+      "depType": "dependencies",
+      "managerData": {
+        "nestedVersion": false,
+      },
+      "packageName": "containerbase/python-prebuild",
+      "registryUrls": null,
+      "versioning": "poetry",
+    },
     {
       "currentValue": "*",
       "datasource": "pypi",
@@ -568,6 +595,5 @@ exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVers
   "extractedConstraints": {
     "python": "^3.9",
   },
-  "registryUrls": undefined,
 }
 `;

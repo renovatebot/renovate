@@ -1,8 +1,10 @@
+import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -10,8 +12,13 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { isSystemManifest } from './common';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
+import { isSystemManifest, systemManifestHeaderRegex } from './common';
 import type {
   FluxManagerData,
   FluxManifest,
@@ -21,17 +28,18 @@ import type {
   SystemFluxManifest,
 } from './types';
 
-function readManifest(content: string, file: string): FluxManifest | null {
-  if (isSystemManifest(file)) {
-    const versionMatch = regEx(
-      /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*([A-Za-z,-]+))?/
-    ).exec(content);
+function readManifest(
+  content: string,
+  packageFile: string
+): FluxManifest | null {
+  if (isSystemManifest(packageFile)) {
+    const versionMatch = regEx(systemManifestHeaderRegex).exec(content);
     if (!versionMatch) {
       return null;
     }
     return {
       kind: 'system',
-      file,
+      file: packageFile,
       version: versionMatch[1],
       components: versionMatch[2],
     };
@@ -39,14 +47,14 @@ function readManifest(content: string, file: string): FluxManifest | null {
 
   const manifest: FluxManifest = {
     kind: 'resource',
-    file,
+    file: packageFile,
     resources: [],
   };
   let resources: FluxResource[];
   try {
     resources = loadAll(content, null, { json: true }) as FluxResource[];
   } catch (err) {
-    logger.debug({ err }, 'Failed to parse Flux manifest');
+    logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
     return null;
   }
 
@@ -125,7 +133,7 @@ function resolveGitRepositoryPerSourceTag(
 
   const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitUrl)?.groups;
   if (bitbucketMatchGroups) {
-    dep.datasource = BitBucketTagsDatasource.id;
+    dep.datasource = BitbucketTagsDatasource.id;
     dep.packageName = bitbucketMatchGroups.packageName;
     dep.sourceUrl = `https://bitbucket.org/${dep.packageName}`;
     return;
@@ -176,7 +184,29 @@ function resolveResourceManifest(
                 resource.metadata?.namespace)
         );
         if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+          dep.registryUrls = matchingRepositories
+            .map((repo) => {
+              if (
+                repo.spec.type === 'oci' ||
+                repo.spec.url.startsWith('oci://')
+              ) {
+                // Change datasource to Docker
+                dep.datasource = DockerDatasource.id;
+                // Ensure the URL is a valid OCI path
+                dep.packageName = `${repo.spec.url.replace('oci://', '')}/${
+                  resource.spec.chart.spec.chart
+                }`;
+                return null;
+              } else {
+                return repo.spec.url;
+              }
+            })
+            .filter(is.string);
+
+          // if registryUrls is empty, delete it from dep
+          if (!dep.registryUrls?.length) {
+            delete dep.registryUrls;
+          }
         } else {
           dep.skipReason = 'unknown-registry';
         }
@@ -219,7 +249,7 @@ function resolveResourceManifest(
         } else if (resource.spec.ref?.tag) {
           dep = getDep(`${container}:${resource.spec.ref.tag}`, false);
           dep.autoReplaceStringTemplate =
-            '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+            '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
         } else {
           dep.skipReason = 'unversioned-reference';
@@ -235,7 +265,7 @@ function resolveResourceManifest(
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile<FluxManagerData> | null {
+): PackageFileContent<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;
@@ -270,7 +300,7 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    // TODO #7154
+    // TODO #22198
     const manifest = readManifest(content!, file);
     if (manifest) {
       manifests.push(manifest);

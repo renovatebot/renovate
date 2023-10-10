@@ -1,9 +1,9 @@
-'reproduction:needed':
+'auto:reproduction':
   comment: >
     Hi there,
 
 
-    Get your issue fixed faster by creating a minimal reproduction.
+    Get your discussion fixed faster by creating a minimal reproduction.
     This means a repository dedicated to reproducing this issue with the minimal dependencies and config possible.
 
 
@@ -14,7 +14,7 @@
     To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
 
 
-    We may close the issue if you, or someone else, haven't created a minimal reproduction within two weeks.
+    We may close the discussion if you, or someone else, haven't created a minimal reproduction within two weeks.
     If you need more time, or are stuck, please ask for help or more time in a comment.
 
 
@@ -23,12 +23,12 @@
 
     The Renovate team
 
-'logs:problem':
+'auto:logs':
   comment: >
     Hi there,
 
 
-    We have found that there's a problem with the logs.
+    This issue or discussion is missing some logs, making it difficult or impossible to help you.
     Depending on which situation applies follow one, some or all of these instructions.
 
 
@@ -95,6 +95,12 @@
 
     </details>
 
+
+    Good luck,
+
+
+    The Renovate team
+
 'new package manager':
   comment: >
     Hi there,
@@ -113,7 +119,7 @@
 
     The Renovate team
 
-'retry latest version':
+'auto:retry-latest':
   comment: >
     Hi there,
 
@@ -127,17 +133,23 @@
 
     The Renovate team
 
-'pr:no-coverage-ignore':
+'auto:no-coverage-ignore':
   comment: >
     Hi there,
 
 
     You're skipping code tests with `istanbul ignore`.
+
+
     Please only skip tests if:
       - you cannot test the code, or
       - the code is very difficult to test, or
       - the edge case won't usually happen at runtime
-    If you skip a test then always comment why:
+
+
+    If you skip a test, always comment why:
+
+
     ```ts
     // istanbul ignore next: typescript strict null check
     if (!url) {
@@ -151,17 +163,114 @@
 
     The Renovate team
 
-'pr:no-done-comments':
+'auto:no-done-comments':
   comment: >
     Hi there,
 
 
-    You are using simple `done` comments which cause a lot of noise.
+    You are using `done` comments which cause a lot of noise.
     Instead, please use GitHub's web interface to request another review.
-    Please read our [contribution guide](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
+    Please read our [contributing guidelines](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
 
 
     Good luck,
 
 
     The Renovate team
+
+'auto:discussion-first':
+  comment: >
+    **Please create a GitHub Discussion before continuing with this PR.**
+
+
+    Thank you for your PR, but we need to discuss the requirements and implementation first.
+    This PR will be closed, but you can reopen it after the discussion has been resolved.
+
+
+    Thanks, the Renovate team
+  close: true
+
+'auto:more-details':
+  comment: >
+    Hi there,
+
+
+    This discussion is missing some details, making it difficult or impossible to help you.
+    Please try again to provide more details.
+
+'needs-discussion':
+  unlabel:
+    - 'type:bug'
+    - 'type:feature'
+    - 'status:requirements'
+  comment: >
+    **Please create a GitHub Discussion instead of this issue.**
+
+
+    We only want Renovate maintainers to create new Issues. If needed, a Renovate maintainer will create an Issue after your Discussion been triaged and confirmed. As a Renovate user, please create a GitHub Discussion in this repo instead.
+
+
+    This Issue will now be closed and locked. We may later batch-delete this issue. This way we keep Issues actionable, and free of duplicates or wrong bug reports.
+
+
+    Thanks, the Renovate team
+  close: true
+  close-reason: 'not planned'
+
+'auto:format-code':
+  comment: >
+    Hi, please format any copy/pasted code or logs so they're readable.
+
+
+    You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+
+
+    Thanks, the Renovate team
+
+'auto:discussion-closed':
+  comment: >
+    Hi there,
+
+
+    We're closing this discussion because it's missing some details, or because something else about it made it hard or impossible for us to help resolve the issue.
+
+
+    We want high quality discussions, so users can search them for answers.
+    This means we'll close (and later delete) low quality discussions.
+
+
+    You are welcome to create a new discussion with more details in future.
+
+
+    Thanks, the Renovate team.
+  close: true
+  close-reason: 'not planned'
+
+'auto:bad-vibes':
+  comment: >
+    Hi there,
+
+    A maintainer has flagged this discussion as giving off some bad vibes. **Maintainers will no longer participate in this discussion unless/until such "vibes" are resolved.**
+
+
+    This is typically when someone is overly critical of the product or the assistance they're receiving.
+    Or being unreasonably demanding or lazy, such as refusing to provide logs, or other information, when asked.
+
+
+    Open Source means you're welcome to use the software with few limits applied.
+    But you should _not_ give maintainers a bad day or contribute to Open Source burnout.
+
+
+    If you feel this message is wrong or due to a misunderstanding, please let us know. If you see this message but don't take it as a sign to cool off or back off, we may close the discussion and block you from the repository.
+
+
+    If you want to get the discussion back on track, we would like you to:
+    - Remove, or edit, the bad vibes parts of your comments
+    - Say that you understand the problem (we don't need a lengthy apology)
+    - Stop giving off more bad vibes
+
+
+    If you're unhappy with this, we suggest you stop using the repository discussions or the product altogether.
+
+
+    Thanks, the Renovate team

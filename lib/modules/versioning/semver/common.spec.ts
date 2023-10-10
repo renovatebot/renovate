@@ -1,7 +1,7 @@
 import { isSemVerXRange } from './common';
 
 describe('modules/versioning/semver/common', () => {
-  test.each`
+  it.each`
     range      | expected
     ${'*'}     | ${true}
     ${'x'}     | ${true}

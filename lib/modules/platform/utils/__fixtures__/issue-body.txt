@@ -1,3 +1,20 @@
+## Rate-Limited
+
+These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+ - [ ] <!-- unlimit-branch=renovate/ansi-regex-6.x -->Update dependency ansi-regex to v6
+ - [ ] <!-- unlimit-branch=renovate/commander-10.x -->Update dependency commander to v10
+ - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4
+ - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
+
+## Open
+
+These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+
+ - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
+ - [ ] <!-- rebase-branch=branchName2 -->[pr2](../pull/2) (`dep2`, `dep3`)
+ - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
+ - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
+
 ## Edited/Blocked
 
 These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.

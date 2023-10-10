@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';

@@ -1,12 +1,11 @@
-import type fs from 'fs';
-import type { PathLike, Stats } from 'fs';
-import { jest } from '@jest/globals';
+import fs from 'node:fs';
+import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
+import type { TDataOut } from 'memfs/lib/encoding';
 import upath from 'upath';
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const realFs = jest.requireActual('fs') as typeof fs;
+const realFs = fs; //jest.requireActual<typeof fs>('fs');
 
 /**
  * Class to work with in-memory file-system
@@ -85,19 +84,12 @@ export class Fixtures {
    */
   static reset(): void {
     vol.reset();
-  }
-
-  // Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
-  static fsExtra(): any {
-    return {
-      ...memfs,
-      pathExists: jest.fn(pathExists),
-      remove: jest.fn(memfs.promises.rm),
-      readFile: jest.fn(memfs.promises.readFile),
-      writeFile: jest.fn(memfs.promises.writeFile),
-      outputFile: jest.fn(outputFile),
-      stat: jest.fn(stat),
-    };
+    fsExtraMock.pathExists.mockImplementation(pathExists);
+    fsExtraMock.remove.mockImplementation(memfs.promises.rm);
+    fsExtraMock.readFile.mockImplementation(readFile);
+    fsExtraMock.writeFile.mockImplementation(memfs.promises.writeFile);
+    fsExtraMock.outputFile.mockImplementation(outputFile);
+    fsExtraMock.stat.mockImplementation(stat);
   }
 
   private static getPathToFixtures(fixturesRoot = '.'): string {
@@ -105,6 +97,31 @@ export class Fixtures {
     const callerDir = upath.dirname(stack[2].getFileName());
     return upath.resolve(callerDir, fixturesRoot, '__fixtures__');
   }
+}
+
+const fsExtraMock = {
+  pathExists: jest.fn(),
+  remove: jest.fn(),
+  readFile: jest.fn(),
+  writeFile: jest.fn(),
+  outputFile: jest.fn(),
+  stat: jest.fn(),
+};
+
+// Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
+export function fsExtra(): any {
+  return {
+    ...memfs,
+    ...fsExtraMock,
+  };
+}
+
+export function readFile(fileName: string, options: any): Promise<TDataOut> {
+  if (fileName.endsWith('.wasm') || fileName.endsWith('.wasm.gz')) {
+    return fs.promises.readFile(fileName, options);
+  }
+
+  return memfs.promises.readFile(fileName, options);
 }
 
 export async function outputFile(

@@ -11,14 +11,14 @@ const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
 describe('modules/manager/maven/extract', () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
-      expect(extractPackage('')).toBeNull();
-      expect(extractPackage('invalid xml content')).toBeNull();
-      expect(extractPackage('<foobar></foobar>')).toBeNull();
-      expect(extractPackage('<project></project>')).toBeNull();
+      expect(extractPackage('', 'some-file')).toBeNull();
+      expect(extractPackage('invalid xml content', 'some-file')).toBeNull();
+      expect(extractPackage('<foobar></foobar>', 'some-file')).toBeNull();
+      expect(extractPackage('<project></project>', 'some-file')).toBeNull();
     });
 
     it('extract dependencies from any XML position', () => {
-      const res = extractPackage(simpleContent);
+      const res = extractPackage(simpleContent, 'some-file');
       expect(res).toMatchSnapshot({
         deps: [
           {
@@ -113,29 +113,29 @@ describe('modules/manager/maven/extract', () => {
         ],
         mavenProps: {
           quuxGroup: {
-            packageFile: null,
+            packageFile: 'some-file',
             val: 'org.example',
           },
           quuxId: {
-            packageFile: null,
+            packageFile: 'some-file',
             val: 'quux',
           },
           quuxVersion: {
-            packageFile: null,
+            packageFile: 'some-file',
             val: '1.2.3.4',
           },
         },
-        packageFile: null,
+        packageFile: 'some-file',
       });
     });
 
     it('tries minimum manifests', () => {
-      const res = extractPackage(minimumContent);
+      const res = extractPackage(minimumContent, 'some-file');
       expect(res).toEqual({
         datasource: 'maven',
         deps: [],
         mavenProps: {},
-        packageFile: null,
+        packageFile: 'some-file',
         packageFileVersion: '1',
       });
     });

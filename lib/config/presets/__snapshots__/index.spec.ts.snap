@@ -8,11 +8,14 @@ exports[`config/presets/index getPreset gets linters 1`] = `
   "extends": [
     "packages:emberTemplateLint",
     "packages:eslint",
+    "packages:phpLinters",
     "packages:stylelint",
     "packages:tslint",
   ],
   "matchPackageNames": [
+    "prettier",
     "remark-lint",
+    "standard",
   ],
 }
 `;
@@ -29,7 +32,7 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
   "branchPrefix": "renovate/",
   "description": [
     "Prefix \`renovate/\` to all branch names.",
-    "If Renovate detects semantic commits, it will use semantic commit type \`fix\` for dependencies and \`chore\` for all others.",
+    "Use semantic commit type \`fix\` for dependencies and \`chore\` for all others if semantic commits are in use.",
     "Require all status checks to pass before any automerging.",
     "Pin dependency versions for \`devDependencies\` and retain SemVer ranges for others.",
   ],
@@ -132,8 +135,13 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
   "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
+    "friendsofphp/php-cs-fixer",
+    "squizlabs/php_codesniffer",
+    "symplify/easy-coding-standard",
     "codelyzer",
+    "prettier",
     "remark-lint",
+    "standard",
   ],
   "matchPackagePatterns": [
     "\\btslint\\b",
@@ -161,8 +169,13 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
       "matchPackageNames": [
         "@types/eslint",
         "babel-eslint",
+        "friendsofphp/php-cs-fixer",
+        "squizlabs/php_codesniffer",
+        "symplify/easy-coding-standard",
         "codelyzer",
+        "prettier",
         "remark-lint",
+        "standard",
       ],
       "matchPackagePatterns": [
         "\\btslint\\b",

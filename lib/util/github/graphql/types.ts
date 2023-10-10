@@ -55,21 +55,7 @@ export interface GithubPackageConfig {
   /**
    * Default: https://api.github.com
    */
-  registryUrl?: string;
-}
-
-/**
- * GraphQL shape for releases
- */
-export interface GithubGraphqlRelease {
-  version: string;
-  releaseTimestamp: string;
-  isDraft: boolean;
-  isPrerelease: boolean;
-  url: string;
-  id: number;
-  name: string;
-  description: string;
+  registryUrl?: string | undefined;
 }
 
 /**
@@ -78,31 +64,9 @@ export interface GithubGraphqlRelease {
 export interface GithubReleaseItem extends GithubDatasourceItem {
   isStable?: boolean;
   url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
-/**
- * GraphQL shape for tags
- */
-export interface GithubGraphqlTag {
-  version: string;
-  target:
-    | {
-        type: 'Commit';
-        oid: string;
-        releaseTimestamp: string;
-      }
-    | {
-        type: 'Tag';
-        target: {
-          oid: string;
-        };
-        tagger: {
-          releaseTimestamp: string;
-        };
-      };
+  id?: number;
+  name?: string;
+  description?: string;
 }
 
 /**
@@ -121,4 +85,18 @@ export interface GithubGraphqlRepoParams {
   name: string;
   cursor: string | null;
   count: number;
+}
+
+export interface GithubGraphqlCacheRecord<
+  GithubItem extends GithubDatasourceItem
+> {
+  items: Record<string, GithubItem>;
+  createdAt: string;
+}
+
+export interface GithubGraphqlCacheStrategy<
+  GithubItem extends GithubDatasourceItem
+> {
+  reconcile(items: GithubItem[]): Promise<boolean>;
+  finalize(): Promise<GithubItem[]>;
 }

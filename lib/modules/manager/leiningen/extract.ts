@@ -1,6 +1,7 @@
+import { coerceArray } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ClojureDatasource } from '../../datasource/clojure';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { ExtractContext, ExtractedVariables } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
@@ -139,8 +140,9 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    const matches =
-      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) ?? [];
+    const matches = coerceArray(
+      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g))
+    );
     const urls = matches.map((x) =>
       x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
     );
@@ -187,7 +189,7 @@ function collectDeps(
   return result;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFileContent {
   const registryUrls = extractLeinRepos(content);
   const vars = extractVariables(content);
 

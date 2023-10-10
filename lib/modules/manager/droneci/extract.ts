@@ -1,13 +1,17 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  packageFile: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -69,7 +73,7 @@ export function extractPackageFile(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting DroneCI images');
+    logger.debug({ err, packageFile }, 'Error extracting DroneCI images');
   }
   if (!deps.length) {
     return null;

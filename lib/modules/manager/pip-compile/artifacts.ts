@@ -125,16 +125,15 @@ export async function updateArtifacts({
     const pipToolsConstraint = getPipToolsConstraint(config);
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
-      docker: {
-        image: 'sidecar',
-      },
-      preCommands: [
-        `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
-      ],
+      docker: {},
       toolConstraints: [
         {
           toolName: 'python',
           constraint,
+        },
+        {
+          toolName: 'pip-tools',
+          constraint: pipToolsConstraint,
         },
       ],
       extraEnv: {

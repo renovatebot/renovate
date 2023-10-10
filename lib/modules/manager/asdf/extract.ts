@@ -2,14 +2,14 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { upgradeableTooling } from './upgradeable-tooling';
 
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.trace('asdf.extractPackageFile()');
+export function extractPackageFile(content: string): PackageFileContent | null {
+  logger.trace(`asdf.extractPackageFile()`);
 
   const regex = regEx(
-    /^(?<toolName>([\w_-]+)) (?<version>[^\s#]+)(?: [^\s#]+)* *(?: #(?<comment>.*))?$/gm
+    /^(?<toolName>([\w_-]+)) +(?<version>[^\s#]+)(?: +[^\s#]+)* *(?: #(?<comment>.*))?$/gm
   );
 
   const deps: PackageDependency[] = [];

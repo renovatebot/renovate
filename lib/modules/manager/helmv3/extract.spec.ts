@@ -12,11 +12,6 @@ const config = partial<ExtractConfig>({
 
 describe('modules/manager/helmv3/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      fs.readLocalFile = jest.fn();
-    });
-
     it('skips invalid registry urls', async () => {
       const content = `
       apiVersion: v2

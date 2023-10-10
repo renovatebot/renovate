@@ -50,6 +50,10 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
     "topic": "Configuration Error",
   },
   {
+    "message": "Configuration option \`packageRules[3].matchDepPatterns\` should be a list (Array)",
+    "topic": "Configuration Error",
+  },
+  {
     "message": "Configuration option \`packageRules[3].matchPackagePatterns\` should be a list (Array)",
     "topic": "Configuration Error",
   },
@@ -63,6 +67,10 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
   },
   {
     "message": "Invalid configuration option: packageRules[1].foo",
+    "topic": "Configuration Error",
+  },
+  {
+    "message": "Invalid regExp for packageRules[3].excludeDepPatterns: \`abc ([a-z]+) ([a-z]+))\`",
     "topic": "Configuration Error",
   },
   {
@@ -100,6 +108,15 @@ exports[`config/validation validateConfig(config) errors for unsafe fileMatches 
   },
   {
     "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if customManager fields are missing 1`] = `
+[
+  {
+    "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
     "topic": "Configuration Error",
   },
 ]
@@ -159,23 +176,10 @@ exports[`config/validation validateConfig(config) errors if invalid combinations
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if language or manager objects are nested 1`] = `
+exports[`config/validation validateConfig(config) errors if manager objects are nested 1`] = `
 [
   {
-    "message": "The "docker" object can only be configured at the top level of a config but was found inside "major.minor"",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "The "gradle" object can only be configured at the top level of a config but was found inside "java"",
-    "topic": "Configuration Error",
-  },
-]
-`;
-
-exports[`config/validation validateConfig(config) errors if regexManager fields are missing 1`] = `
-[
-  {
-    "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
+    "message": "The "gradle" object can only be configured at the top level of a config but was found inside "maven"",
     "topic": "Configuration Error",
   },
 ]
@@ -225,7 +229,15 @@ exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 exports[`config/validation validateConfig(config) selectors outside packageRules array trigger errors 1`] = `
 [
   {
-    "message": "docker.minor.matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
+    "message": "ansible.minor.matchDepNames: matchDepNames should be inside a \`packageRule\` only",
+    "topic": "Configuration Error",
+  },
+  {
+    "message": "ansible.minor.matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
+    "topic": "Configuration Error",
+  },
+  {
+    "message": "matchDepNames: matchDepNames should be inside a \`packageRule\` only",
     "topic": "Configuration Error",
   },
   {
@@ -238,7 +250,7 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
 [
   {
-    "message": "Invalid regExp for regexManagers[0].fileMatch: \`***$}{]][\`",
+    "message": "Invalid regExp for customManagers[0].fileMatch: \`***$}{]][\`",
     "topic": "Configuration Error",
   },
 ]

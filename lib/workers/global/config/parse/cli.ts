@@ -32,6 +32,11 @@ export function getConfig(input: string[]): AllConfig {
         .replace(/^--dry-run$/, '--dry-run=true')
         .replace(/^--require-config$/, '--require-config=true')
         .replace('--aliases', '--registry-aliases')
+        .replace('--include-forks=true', '--fork-processing=enabled')
+        .replace('--include-forks', '--fork-processing=enabled')
+        .replace('--recreate-closed=false', '--recreate-when=auto')
+        .replace('--recreate-closed=true', '--recreate-when=always')
+        .replace('--recreate-closed', '--recreate-when=always')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -63,7 +68,7 @@ export function getConfig(input: string[]): AllConfig {
     );
     console.log('    $ renovate singapore/lint-condo singapore/package-test');
     console.log(
-      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:base"]}'`
+      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:recommended"]}'`
     );
     /* eslint-enable no-console */
   }

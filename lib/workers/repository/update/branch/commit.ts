@@ -1,10 +1,10 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
+import { scm } from '../../../../modules/platform/scm';
+import { minimatch } from '../../../../util/minimatch';
 import { sanitize } from '../../../../util/sanitize';
 import type { BranchConfig } from '../../../types';
 
@@ -18,7 +18,7 @@ export function commitFilesToBranch(
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
       const matchesExcludePaths = config.excludeCommitPaths!.some(
-        (excludedPath) => minimatch(filePath, excludedPath, { dot: true })
+        (excludedPath) => minimatch(excludedPath, { dot: true }).match(filePath)
       );
       if (matchesExcludePaths) {
         logger.debug(`Excluding ${filePath} from commit`);
@@ -51,7 +51,8 @@ export function commitFilesToBranch(
   }
 
   // API will know whether to create new branch or not
-  return commitAndPush({
+  return scm.commitAndPush({
+    baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage!,

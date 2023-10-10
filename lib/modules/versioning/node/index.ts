@@ -85,6 +85,7 @@ export const api: VersioningApi = {
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
+  allowUnstableMajorUpgrades: true,
 };
 
 export default api;

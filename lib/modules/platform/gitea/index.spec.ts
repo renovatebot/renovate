@@ -35,6 +35,9 @@ import type {
   User,
 } from './types';
 
+jest.mock('./gitea-helper');
+jest.mock('../../../util/git');
+
 /**
  * latest tested gitea version.
  */
@@ -45,7 +48,7 @@ describe('modules/platform/gitea/index', () => {
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
   let gitvcs: jest.Mocked<typeof _git>;
-  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
+  let hostRules: typeof import('../../../util/host-rules');
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -199,17 +202,14 @@ describe('modules/platform/gitea/index', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-    jest.mock('./gitea-helper');
-    jest.mock('../../../util/git');
-    jest.mock('../../../logger');
 
     gitea = await import('.');
-    helper = mocked(await import('./gitea-helper'));
-    logger = mocked((await import('../../../logger')).logger);
-    gitvcs = require('../../../util/git');
+    helper = jest.requireMock('./gitea-helper');
+    logger = mocked(await import('../../../logger')).logger;
+    gitvcs = jest.requireMock('../../../util/git');
     gitvcs.isBranchBehindBase.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
-    hostRules = mocked(await import('../../../util/host-rules'));
+    hostRules = await import('../../../util/host-rules');
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
@@ -504,8 +504,6 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
@@ -531,8 +529,6 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
@@ -632,7 +628,7 @@ describe('modules/platform/gitea/index', () => {
         })
       );
 
-      return gitea.getBranchStatus('some-branch');
+      return gitea.getBranchStatus('some-branch', true);
     };
 
     it('should return yellow for unknown result', async () => {
@@ -654,7 +650,7 @@ describe('modules/platform/gitea/index', () => {
     it('should abort when branch status returns 404', async () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce({ statusCode: 404 });
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         REPOSITORY_CHANGED
       );
     });
@@ -664,9 +660,46 @@ describe('modules/platform/gitea/index', () => {
         new Error('getCombinedCommitStatus()')
       );
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         'getCombinedCommitStatus()'
       );
+    });
+
+    it('should treat internal checks as success', async () => {
+      helper.getCombinedCommitStatus.mockResolvedValueOnce({
+        worstStatus: 'success',
+        statuses: [
+          {
+            id: 1,
+            status: 'success',
+            context: 'renovate/stability-days',
+            description: 'internal check',
+            target_url: '',
+            created_at: '',
+          },
+        ],
+      });
+      expect(await gitea.getBranchStatus('some-branch', true)).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initFakeRepo();
+      helper.getCombinedCommitStatus.mockResolvedValueOnce(
+        partial<CombinedCommitStatus>({
+          worstStatus: 'success',
+          statuses: [
+            {
+              id: 1,
+              status: 'success',
+              context: 'renovate/stability-days',
+              description: 'internal check',
+              target_url: '',
+              created_at: '',
+            },
+          ],
+        })
+      );
+      expect(await gitea.getBranchStatus('some-branch', false)).toBe('yellow');
     });
   });
 
@@ -1075,7 +1108,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should abort when response for created pull request is invalid', async () => {
-      helper.createPR.mockResolvedValueOnce(partial<PR>({}));
+      helper.createPR.mockResolvedValueOnce(partial<PR>());
 
       await initFakeRepo();
       await expect(
@@ -1190,6 +1223,22 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
         title: 'New Title',
+      });
+    });
+
+    it('should update pull target branch', async () => {
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
+      await initFakeRepo();
+      await gitea.updatePr({
+        number: 1,
+        prTitle: 'New Title',
+        targetBranch: 'New Base',
+      });
+
+      expect(helper.updatePR).toHaveBeenCalledTimes(1);
+      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
+        title: 'New Title',
+        base: 'New Base',
       });
     });
 
@@ -1879,18 +1928,13 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
-  describe('getVulnerabilityAlerts', () => {
-    it('should return an empty list - unsupported by platform', async () => {
-      expect(await gitea.getVulnerabilityAlerts()).toEqual([]);
-    });
-  });
-
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -1900,7 +1944,8 @@ describe('modules/platform/gitea/index', () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'different/repo' });
       const res = await gitea.getJsonFile('file.json', 'different/repo');
       expect(res).toEqual(data);
@@ -1910,7 +1955,8 @@ describe('modules/platform/gitea/index', () => {
       const data = { foo: 'bar' };
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: JSON.stringify(data),
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json', 'some/repo', 'dev');
       expect(res).toEqual(data);
@@ -1925,7 +1971,8 @@ describe('modules/platform/gitea/index', () => {
       `;
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: json5Data,
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       const res = await gitea.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1934,13 +1981,14 @@ describe('modules/platform/gitea/index', () => {
     it('throws on malformed JSON', async () => {
       helper.getRepoContents.mockResolvedValueOnce({
         contentString: '!@#',
-      } as never);
+        path: 'path',
+      });
       await initFakeRepo({ full_name: 'some/repo' });
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
     });
 
     it('returns null on missing content', async () => {
-      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>({}));
+      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>());
       await initFakeRepo({ full_name: 'some/repo' });
       expect(await gitea.getJsonFile('file.json')).toBeNull();
     });

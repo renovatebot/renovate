@@ -11,29 +11,26 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.33.0`
-- Node.js `^16.13.0 || >= 18.12.0`
-- Yarn `^1.22.5`
+- Node.js `^18.12.0 || >=20.0.0`
+- pnpm `^8.6.11` (use corepack)
 - C++ compiler
-- Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
-
-You need Java to execute Gradle tests.
-If you don’t have Java installed, the Gradle tests will be skipped.
 
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get update
-sudo apt-get install -y git build-essential nodejs yarn default-jre-headless
+sudo apt-get install -y git build-essential nodejs
+corepack enable
 ```
 
-You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
+#### Nix
+
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `corepack enable`.
 
 #### Windows
 
@@ -43,27 +40,31 @@ If you already installed a part, skip the corresponding step.
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
-- Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
+- Enable corepack: `corepack enable`
 
   You can see what versions you're using like this:
 
   ```powershell
   PS C:\Windows\system32> git --version
   PS C:\Windows\system32> node --version
-  PS C:\Windows\system32> yarn --version
-  PS C:\Windows\system32> java -version
+  PS C:\Windows\system32> pnpm --version
   ```
 
-#### VS Code Remote Development
+#### VS Code Dev Containers
 
-If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
+If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
 
-- Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
+- Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
-The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run more commands.
+
+To build inside the container:
+
+```shell
+pnpm build
+```
 
 #### Local Docker
 
@@ -74,30 +75,32 @@ To build the correct docker image:
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 ```
 
-Then you can run Yarn directly from Docker, for instance:
+Then you can run `pnpm` directly from Docker, for instance:
 
 ```
-docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local yarn install
+docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local pnpm install
 ```
 
 ## Fork and Clone
 
 If you want to contribute to the project, you should first "fork" the main project using the GitHub website and then clone your fork locally.
-The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package management system instead of npm.
+The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
 
-1. Install all dependencies with `yarn install`
-1. Make a build with `yarn build`, which should pass with no errors
-1. Verify all tests pass and have 100% test coverage, by running `yarn test`
-1. Verify the installation by running `yarn start`. You must see this error: `You must configure a GitHub personal access token`
+1. Install all dependencies with `pnpm install`
+1. Make a build with `pnpm build`, which should pass with no errors
+1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
+1. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
+
+Do not worry about the token error for now, as you will be given instructions on how to configure the token a little later down in this document.
 
 You only need to do these steps once.
 
 Before you submit a pull request you should:
 
-1. Install newer dependencies with `yarn install`
-1. Run the tests with `yarn test`
+1. Install newer dependencies with `pnpm install`
+1. Run the tests with `pnpm test`
 
 ## Platform Account Setup
 
@@ -124,30 +127,30 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 
 To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
 Now, add a file called `.nvmrc` with the content `8.13.0`.
-Now run against the test repo you created, e.g. `yarn start r4harry/testrepo1`.
+Now run against the test repo you created, e.g. `pnpm start r4harry/testrepo1`.
 If your token is set up correctly, you should find that Renovate created a "Configure Renovate" PR in the `testrepo1`.
 
 If this is working then in future you can create other test repos to verify your code changes against.
 
 ## Tests
 
-You can run `yarn test` locally to test your code.
+You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 ### Jest
 
-You can run just the Jest unit tests by running `yarn jest`.
-You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/repository/update/branch`.
+Run the Jest unit tests with the `pnpm jest` command.
+You can also run a subset of the Jest tests using file matching, e.g. `pnpm jest composer` or `pnpm jest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
-e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
+e.g. `pnpm jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
+Using `// istanbul ignore` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
@@ -158,10 +161,10 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 ## Linting and formatting
 
 We use [Prettier](https://github.com/prettier/prettier) to format our code.
-If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
+If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most `eslint` errors automatically before running `pnpm test` again.
 You usually don't need to fix any Prettier errors by hand.
 
-If you're only working on the documentation files, you can use the `yarn doc-fix` command to format your work.
+If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
 ## Keeping your Renovate fork up to date
 
@@ -176,17 +179,6 @@ To do this, see these GitHub guides:
 
 ## Tips and tricks
 
-### Running Renovate against forked repositories
-
-Quite often, the quickest way for you to test or fix something is to fork an existing repository.
-But by default Renovate skips over repositories that are forked.
-To override this default, you need to specify the setting `includeForks` as `true`.
-
-Tell Renovate to run on your forked repository by doing one of the following:
-
-1. Add `"includeForks": true` to the `renovate.json` file in your forked repository
-1. Run Renovate with the CLI flag `--renovate-fork=true`
-
 ### Log files
 
 Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
@@ -194,8 +186,8 @@ Usually, `debug` is good enough to troubleshoot most problems or verify function
 It's usually easier to have the logs in a file that you can open with a text editor.
 You can use a command like this to put the log messages in a file:
 
-```
-LOG_LEVEL=debug yarn start myaccount/therepo > debug.log
+```sh
+LOG_LEVEL=debug pnpm start myaccount/therepo > debug.log
 ```
 
 The example command will redirect/save Renovate's output to the `debug.log` file (and overwrite `debug.log` if it already exists).
@@ -212,17 +204,17 @@ Also create documentation for the option in the `docs/usage/configuration-option
 
 ### Chrome's inspect tool
 
-It's really easy to debug Renovate with the help of Chrome's inspect tool.
+You can debug Renovate with Chrome's inspect tool.
 Here's an example:
 
 1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
 1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
-1. Run Renovate using `yarn debug ...` instead of `yarn start ...`
+1. Run Renovate using `pnpm debug ...` instead of `pnpm start ...`
 1. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
 
 ### VS Code
 
-You can also debug with VS Code.
+You can also debug Renovate with VS Code.
 Here's an example:
 
 1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token

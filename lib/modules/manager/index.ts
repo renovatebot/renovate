@@ -1,33 +1,37 @@
-import { programmingLanguages } from '../../constants';
 import type { RangeStrategy } from '../../types';
 import managers from './api';
+import { customManagerList, isCustomManager } from './custom';
+import customManagers from './custom/api';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
   ManagerApi,
   PackageFile,
+  PackageFileContent,
   RangeConfig,
   Result,
 } from './types';
 export { hashMap } from './fingerprint.generated';
-const managerList = Array.from(managers.keys());
 
-const languageList = programmingLanguages.concat();
+const managerList = Array.from(managers.keys()); // does not include custom managers
+export const getManagerList = (): string[] => managerList;
+export const getManagers = (): Map<string, ManagerApi> => managers;
+export const allManagersList = [...managerList, ...customManagerList];
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
   name: T
 ): ManagerApi[T] | undefined {
-  return managers.get(manager)?.[name];
+  return isCustomManager(manager)
+    ? customManagers.get(manager)?.[name]
+    : managers.get(manager)?.[name];
 }
-export const getLanguageList = (): string[] => languageList;
-export const getManagerList = (): string[] => managerList;
-export const getManagers = (): Map<string, ManagerApi> => managers;
 
 export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
   let config: GlobalManagerConfig = {};
-  for (const managerName of managerList) {
-    const manager = managers.get(managerName)!;
+  for (const managerName of allManagersList) {
+    const manager =
+      managers.get(managerName)! ?? customManagers.get(managerName)!;
     if (manager.detectGlobalConfig) {
       // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
       config = { ...config, ...(await manager.detectGlobalConfig()) };
@@ -61,11 +65,12 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Result<PackageFile | null> {
-  if (!managers.has(manager)) {
+): Result<PackageFileContent | null> {
+  const m = managers.get(manager)! ?? customManagers.get(manager)!;
+  if (!m) {
     return null;
   }
-  const m = managers.get(manager)!;
+
   return m.extractPackageFile
     ? m.extractPackageFile(content, fileName, config)
     : null;
@@ -86,6 +91,9 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return managerRangeStrategy;
   }
   if (rangeStrategy === 'auto') {
+    if (m.updateLockedDependency) {
+      return 'update-lockfile';
+    }
     // default to 'replace' for auto
     return 'replace';
   }

@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
 import { GlobalConfig } from '../../../config/global';
@@ -131,12 +131,12 @@ export function setNpmrc(input?: string): void {
     npmrcRaw = input;
     logger.debug('Setting npmrc');
     npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
-    const { exposeAllEnv } = GlobalConfig.get();
+    const exposeAllEnv = GlobalConfig.get('exposeAllEnv');
     for (const [key, val] of Object.entries(npmrc)) {
       if (
         !exposeAllEnv &&
         key.endsWith('registry') &&
-        val &&
+        is.string(val) &&
         val.includes('localhost')
       ) {
         logger.debug(
@@ -173,7 +173,7 @@ export function resolveRegistryUrl(packageName: string): string {
       !matchPackagePrefixes ||
       packageName.startsWith(matchPackagePrefixes[0])
     ) {
-      // TODO: fix types #7154
+      // TODO: fix types #22198
       registryUrl = registryUrls![0];
     }
   }
