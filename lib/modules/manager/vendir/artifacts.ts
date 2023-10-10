@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
@@ -51,14 +52,12 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Vendir artifacts');
-    const vendirToolConstraint: ToolConstraint = {
-      toolName: 'vendir',
-      constraint: config.constraints?.helm,
-    };
-
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
-      toolConstraints: [vendirToolConstraint],
+      toolConstraints: [
+        { toolName: 'vendir', constraint: config.constraints?.vendir },
+        { toolName: 'helm', constraint: config.constraints?.helm },
+      ],
     };
     await vendirCommands(execOptions);
     logger.debug('Returning updated Vendir artifacts');
@@ -84,37 +83,25 @@ export async function updateArtifacts({
 
     // add modified vendir archives to artifacts
     if (is.truthy(isUpdateOptionAddVendirArchives)) {
-      const vendirPath = getSiblingFileName(
-        packageFileName,
-        getParentDir(packageFileName)
-      );
+      // Files must be in the vendor path to get added
+      const vendorDir = getSiblingFileName(packageFileName, './');
       const status = await getRepoStatus();
-      const vendirAddition = status.not_added ?? [];
-      const vendirDeletion = status.deleted ?? [];
-
-      for (const file of vendirAddition) {
-        // only add artifacts in the vendir sub path
-        if (!isFileInDir(vendirPath, file)) {
-          continue;
+      for (const f of status.modified.concat(status.not_added)) {
+        if (f.startsWith(vendorDir)) {
+          fileChanges.push({
+            file: {
+              type: 'addition',
+              path: f,
+              contents: await readLocalFile(f),
+            },
+          });
         }
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: file,
-            contents: await readLocalFile(file),
-          },
-        });
       }
-
-      for (const file of vendirDeletion) {
-        // only add artifacts in the vendir sub path
-        if (!isFileInDir(vendirPath, file)) {
-          continue;
-        }
+      for (const f of status.deleted ?? []) {
         fileChanges.push({
           file: {
             type: 'deletion',
-            path: file,
+            path: f,
           },
         });
       }

@@ -97,7 +97,7 @@ describe('modules/manager/vendir/artifacts', () => {
         newPackageFileContent: vendirFile,
         config,
       })
-    ).toMatchObject([
+    ).toEqual([
       {
         file: {
           type: 'addition',
@@ -106,8 +106,7 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([{ cmd: 'vendir sync' }]);
   });
 
   it('returns updated vendir.yml for lockfile maintenance', async () => {
@@ -135,8 +134,7 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([{ cmd: 'vendir sync' }]);
   });
 
   it('catches errors', async () => {
@@ -166,9 +164,9 @@ describe('modules/manager/vendir/artifacts', () => {
     ]);
   });
 
-  it('add sub chart artifacts to file list if vendir.yml exists', async () => {
+  it('add artifacts to file list if vendir.yml exists', async () => {
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as never);
-    fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
@@ -176,12 +174,12 @@ describe('modules/manager/vendir/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
 
-    // sub chart artifacts
-    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    // artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('vendor');
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
-        not_added: ['charts/example-1.9.2.tgz'],
-        deleted: ['charts/example-1.6.2.tgz'],
+        not_added: ['vendor/Chart.yaml', 'vendor/my-chart/Chart.yaml'],
+        deleted: ['vendor/removed.yaml'],
       })
     );
     const updatedDeps = [{ depName: 'dep1' }];
@@ -190,7 +188,7 @@ describe('modules/manager/vendir/artifacts', () => {
       updatedDeps,
       newPackageFileContent: vendirFile,
       config: {
-        postUpdateOptions: ['helmUpdateSubChartArchives'],
+        postUpdateOptions: ['vendirUpdateVendoredFiles'],
         ...config,
       },
     });
@@ -198,35 +196,50 @@ describe('modules/manager/vendir/artifacts', () => {
       {
         file: {
           type: 'addition',
-          path: 'vendir.yml',
+          path: 'vendir.lock.yml',
           contents: vendirLockFile2,
         },
       },
       {
         file: {
           type: 'addition',
-          path: 'charts/example-1.9.2.tgz',
+          path: 'vendor/Chart.yaml',
+          contents: undefined,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'vendor/my-chart/Chart.yaml',
           contents: undefined,
         },
       },
       {
         file: {
           type: 'deletion',
-          path: 'charts/example-1.6.2.tgz',
+          path: 'vendor/removed.yaml',
         },
       },
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
-      },
-      {
-        cmd: "helm dependency update ''",
+        cmd: 'vendir sync',
+        options: {
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+        },
       },
     ]);
   });
 
-  it('add sub chart artifacts to file list if vendir.yml is missing', async () => {
+  it('add artifacts to file list if vendir.lock.yml is missing', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
     const execSnapshots = mockExecAll();
@@ -235,12 +248,12 @@ describe('modules/manager/vendir/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
 
-    // sub chart artifacts
-    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    // artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('vendor');
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
-        not_added: ['charts/example-1.9.2.tgz'],
-        deleted: ['charts/example-1.6.2.tgz'],
+        not_added: ['vendor/Chart.yaml'],
+        deleted: ['vendor/removed.yaml'],
       })
     );
     const updatedDeps = [{ depName: 'dep1' }];
@@ -250,7 +263,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          postUpdateOptions: ['vendirUpdateVendoredFiles'],
           ...config,
         },
       })
@@ -258,50 +271,36 @@ describe('modules/manager/vendir/artifacts', () => {
       {
         file: {
           type: 'addition',
-          path: 'charts/example-1.9.2.tgz',
+          path: 'vendor/Chart.yaml',
           contents: undefined,
         },
       },
       {
         file: {
           type: 'deletion',
-          path: 'charts/example-1.6.2.tgz',
+          path: 'vendor/removed.yaml',
         },
       },
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'vendir sync',
         options: {
           env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          },
-        },
-      },
-      {
-        cmd: "helm dependency update ''",
-        options: {
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
           },
         },
       },
     ]);
   });
 
-  it('add sub chart artifacts without old archives', async () => {
+  it('add artifacts without old archives', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
     const execSnapshots = mockExecAll();
@@ -310,11 +309,11 @@ describe('modules/manager/vendir/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
 
-    // sub chart artifacts
-    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    // artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('vendor');
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
-        not_added: ['charts/example-1.9.2.tgz'],
+        not_added: ['vendor/Chart.yaml'],
       })
     );
     const updatedDeps = [{ depName: 'dep1' }];
@@ -324,7 +323,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          postUpdateOptions: ['vendirUpdateVendoredFiles'],
           ...config,
         },
       })
@@ -332,172 +331,23 @@ describe('modules/manager/vendir/artifacts', () => {
       {
         file: {
           type: 'addition',
-          path: 'charts/example-1.9.2.tgz',
+          path: 'vendor/Chart.yaml',
           contents: undefined,
         },
       },
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'vendir sync',
         options: {
           env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          },
-        },
-      },
-      {
-        cmd: "helm dependency update ''",
-        options: {
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          },
-        },
-      },
-    ]);
-  });
-
-  it('add sub chart artifacts and ignore files outside of the chart folder', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
-    fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
-    const execSnapshots = mockExecAll();
-    fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
-    );
-    fs.getParentDir.mockReturnValue('');
-
-    // sub chart artifacts
-    fs.getSiblingFileName.mockReturnValueOnce('charts');
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        not_added: ['charts/example-1.9.2.tgz', 'exampleFile'],
-        deleted: ['charts/example-1.6.2.tgz', 'aFolder/otherFile'],
-      })
-    );
-    const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
-        packageFileName: 'vendir.yml',
-        updatedDeps,
-        newPackageFileContent: vendirFile,
-        config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
-          ...config,
-        },
-      })
-    ).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'charts/example-1.9.2.tgz',
-          contents: undefined,
-        },
-      },
-      {
-        file: {
-          type: 'deletion',
-          path: 'charts/example-1.6.2.tgz',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
-        options: {
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          },
-        },
-      },
-      {
-        cmd: "helm dependency update ''",
-        options: {
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          },
-        },
-      },
-    ]);
-  });
-
-  it('skip artifacts which are not lock files or in the chart folder', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
-    fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
-    const execSnapshots = mockExecAll();
-    fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
-    );
-    fs.getParentDir.mockReturnValue('');
-
-    // sub chart artifacts
-    fs.getSiblingFileName.mockReturnValueOnce('charts');
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['example/example.tgz'],
-      })
-    );
-    const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
-        packageFileName: 'vendir.yml',
-        updatedDeps,
-        newPackageFileContent: vendirFile,
-        config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
-          ...config,
-        },
-      })
-    ).toBeNull();
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
-        options: {
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          },
-        },
-      },
-      {
-        cmd: "helm dependency update ''",
-        options: {
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
           },
         },
       },

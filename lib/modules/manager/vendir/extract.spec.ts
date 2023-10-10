@@ -1,8 +1,8 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const oneHelmChart = Fixtures.get('one-helm-chart.yaml');
-const multipleHelmChart = Fixtures.get('multiple-helm-chart.yaml');
+const oneContents = Fixtures.get('one-contents.yaml');
+const multipleContents = Fixtures.get('multiple-contents.yaml');
 const emptyDirectories = Fixtures.get('empty-directory.yaml');
 
 describe('modules/manager/vendir/extract', () => {
@@ -27,7 +27,7 @@ describe('modules/manager/vendir/extract', () => {
     });
 
     it('single chart - extracts helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(oneHelmChart);
+      const result = extractPackageFile(oneContents);
       expect(result).toMatchObject({
         deps: [
           {
@@ -41,7 +41,7 @@ describe('modules/manager/vendir/extract', () => {
     });
 
     it('multiple charts - extracts helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(multipleHelmChart);
+      const result = extractPackageFile(multipleContents);
       expect(result).toMatchObject({
         deps: [
           {

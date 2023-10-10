@@ -10,9 +10,15 @@ export interface Directories {
   contents: Contents[];
 }
 
-export interface Contents {
+export type Contents = HelmChartContent | OtherContent;
+
+export interface HelmChartContent {
   path: string;
-  helmChart?: HelmChart;
+  helmChart: HelmChart;
+}
+
+export interface OtherContent {
+  path: string;
 }
 
 export interface HelmChart {

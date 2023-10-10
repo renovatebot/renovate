@@ -196,6 +196,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'flutter',
     versioning: semverVersioningId,
   },
+  vendir: {
+    datasource: 'github-releases',
+    packageName: 'carvel-dev/vendir',
+    versioning: semverVersioningId,
+  },
 };
 
 export function supportsDynamicInstall(toolName: string): boolean {

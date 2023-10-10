@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { HelmDatasource } from '../../datasource/helm';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Vendir } from './types';
+import { isHelmChart } from './utils';
 
 // TODO: Add support for other vendir types (like git tags, github releases, etc.)
 // Recommend looking at the kustomize manager for more information on support.
@@ -64,20 +65,17 @@ export function extractPackageFile(
   // TODO: Add support for OCI Repos by translating Registry URLs and using
   // Docker datasource. (See Helmv3 for example implementation)
   const contents = pkg.directories.flatMap((directory) => directory.contents);
-  const charts = contents.filter(
-    (chart) => typeof chart.helmChart === 'object'
-  );
-  charts.forEach((chart) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const dep = extractHelmChart(chart.helmChart);
-    if (dep) {
-      deps.push({
-        ...dep,
-        depType: 'HelmChart',
-      });
+  for (const content of contents) {
+    if (isHelmChart(content)) {
+      const dep = extractHelmChart(content.helmChart);
+      if (dep) {
+        deps.push({
+          ...dep,
+          depType: 'HelmChart',
+        });
+      }
     }
-  });
+  }
 
   if (!deps.length) {
     return null;
