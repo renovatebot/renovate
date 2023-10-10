@@ -47,7 +47,14 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPlatformApi(config.platform!);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
-  const returnConfig: any = { ...config, ...platformInfo };
+  const returnConfig: any = {
+    ...config,
+    ...platformInfo,
+    hostRules: [
+      ...(config.hostRules ?? []),
+      ...(platformInfo?.hostRules ?? []),
+    ],
+  };
   // istanbul ignore else
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
@@ -75,7 +82,6 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       delete returnConfig[field];
     }
   });
-  returnConfig.hostRules = returnConfig.hostRules || [];
   const typedPlatformRule = {
     ...platformRule,
     hostType: returnConfig.platform,
