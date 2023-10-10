@@ -195,7 +195,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'hashicorp/google',
       '4.84.0'
     );
-    expect(log.error.mock.calls).toMatchSnapshot();
+    expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
@@ -252,7 +252,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'hashicorp/azurerm',
       '2.56.0'
     );
-    expect(log.error.mock.calls).toMatchSnapshot();
+    expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
@@ -315,7 +315,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       '2.56.0'
     );
 
-    expect(log.error.mock.calls).toMatchSnapshot();
+    expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
