@@ -59,9 +59,14 @@ export async function getInRangeReleases(
         version.isGreaterThan(release.version, currentVersion)
     );
 
-    // if there is only 1 release it can be one of two things
-    // either there really is only 1 release OR
-    // the pinned version actually doesn't exist i.e pinning to 1.2.3 but only 1.2.4, 1.2.2 exists
+    /**
+     * If there is only one release, it can be one of two things:
+     *
+     *   1. There really is only one release
+     *
+     *   2. Pinned version doesn't actually exist, i.e pinning `^1.2.3` to `1.2.3`
+     *      while only `1.2.2` and `1.2.4` exist.
+     */
     if (releases.length === 1) {
       const newRelease = releases[0];
       const closestPreviousRelease = previousReleases
