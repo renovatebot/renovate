@@ -461,7 +461,6 @@ describe('modules/datasource/terraform-provider/index', () => {
           arch: 'amd64',
           filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
           url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          shasums_url: null,
         },
       ]);
 
