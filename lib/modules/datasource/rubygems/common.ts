@@ -38,10 +38,7 @@ export function getV1Releases(
 
   return http.getJsonSafe(versionsUrl, GemVersions).transform((releaseResult) =>
     getV1Metadata(http, registryUrl, packageName)
-      .transform((metadata) => {
-        const res = assignMetadata(releaseResult, metadata);
-        return res;
-      })
+      .transform((metadata) => assignMetadata(releaseResult, metadata))
       .unwrapOrElse(releaseResult)
   );
 }
