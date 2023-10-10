@@ -141,11 +141,21 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('returns ChangeLogResult without release notes', async () => {
+      httpMock
+        .scope(
+          'https://gitlab.com/api/v4/projects/gitlab-org%2Fgitter%2Fwebapp'
+        )
+        .get('/repository/tree?per_page=100&path=lib')
+        .reply(200, [])
+        .get('/releases?per_page=100')
+        .reply(200, []);
       const input = {
         project: partial<ChangeLogProject>({
           type: 'gitlab',
-          repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
+          repository: 'gitlab-org/gitter/webapp',
           sourceDirectory: 'lib',
+          apiBaseUrl: 'https://gitlab.com/api/v4/',
+          baseUrl: 'https://gitlab.com/',
         }),
         versions: [
           partial<ChangeLogRelease>({
@@ -159,9 +169,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       ).toEqual({
         hasReleaseNotes: false,
         project: {
-          repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
+          repository: 'gitlab-org/gitter/webapp',
           type: 'gitlab',
           sourceDirectory: 'lib',
+          apiBaseUrl: 'https://gitlab.com/api/v4/',
+          baseUrl: 'https://gitlab.com/',
         },
         versions: [
           {
@@ -252,13 +264,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           notesSourceUrl:
             'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.0',
-          url: 'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0',
+          url: 'https://gitlab.com/some/yet-other-repository/-/releases/v1.0.0',
         },
         {
           notesSourceUrl:
             'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.1',
-          url: 'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1',
+          url: 'https://gitlab.com/some/yet-other-repository/-/releases/v1.0.1',
         },
       ]);
     });
@@ -291,13 +303,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           notesSourceUrl:
             'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.0',
-          url: 'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.0',
+          url: 'https://my.custom.domain/some/yet-other-repository/-/releases/v1.0.0',
         },
         {
           notesSourceUrl:
             'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases',
           tag: 'v1.0.1',
-          url: 'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases/v1.0.1',
+          url: 'https://my.custom.domain/some/yet-other-repository/-/releases/v1.0.1',
         },
       ]);
     });
