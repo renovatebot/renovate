@@ -50,7 +50,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   const returnConfig: any = {
     ...config,
     ...platformInfo,
-    hostRules: [...(config.hostRules ?? []), ...(platformInfo.hostRules ?? [])],
+    hostRules: [...(config.hostRules ?? []), ...(platformInfo?.hostRules ?? [])],
   };
   // istanbul ignore else
   if (config?.gitAuthor) {
