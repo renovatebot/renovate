@@ -112,8 +112,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         newVersion: '1.1.0',
       });
       const res = await releases.getInRangeReleases(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toEqual([{ version: '1.0.1' }, { version: '1.1.0' }]);
     });
   });
 });
