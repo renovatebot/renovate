@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { toSha256 } from '../../../util/hash';
 import type { Http } from '../../../util/http';
@@ -11,6 +12,22 @@ interface CacheRecord {
   data: ReleaseResult;
 }
 
+function hashVersions(versions: string[]): string {
+  return toSha256(versions.sort().join(','));
+}
+
+function hashReleases(releases: ReleaseResult): string {
+  return hashVersions(releases.releases.map((release) => release.version));
+}
+
+type CacheError =
+  | { type: 'cache-not-found' }
+  | {
+      type: 'cache-outdated';
+      staleData: ReleaseResult;
+    }
+  | { type: 'inconsistent-data' };
+
 export class MetadataCache {
   constructor(private readonly http: Http) {}
 
@@ -21,19 +38,22 @@ export class MetadataCache {
   ): Promise<ReleaseResult> {
     const cacheNs = `datasource-rubygems`;
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
-    const hash = toSha256(versions.join(''));
+    const hash = hashVersions(versions);
 
-    const loadCache = (): AsyncResult<ReleaseResult, NonNullable<unknown>> =>
-      Result.wrapNullable(
+    const loadCache = (): AsyncResult<ReleaseResult, CacheError> =>
+      Result.wrapNullable<CacheRecord, CacheError, CacheError>(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
-        'cache-not-found' as const
+        { type: 'cache-not-found' }
       ).transform((cache) => {
         return hash === cache.hash
           ? Result.ok(cache.data)
-          : Result.err('cache-outdated' as const);
+          : Result.err({ type: 'cache-outdated', staleData: cache.data });
       });
 
-    const saveCache = async (data: ReleaseResult): Promise<ReleaseResult> => {
+    const saveCache = async (
+      hash: string,
+      data: ReleaseResult
+    ): Promise<void> => {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
         const newCache: CacheRecord = { hash, data };
@@ -46,19 +66,36 @@ export class MetadataCache {
           ttlMinutes + ttlRandomDelta
         );
       }
-
-      return data;
     };
 
     return await loadCache()
-      .catch(() =>
-        getV1Releases(this.http, registryUrl, packageName).transform(saveCache)
+      .catch((err) =>
+        getV1Releases(this.http, registryUrl, packageName).transform(
+          async (
+            newData: ReleaseResult
+          ): Promise<Result<ReleaseResult, CacheError>> => {
+            const newHash = hashReleases(newData);
+            if (newHash === hash) {
+              await saveCache(newHash, newData);
+              return Result.ok(newData);
+            }
+
+            if (err.type === 'cache-outdated') {
+              return Result.ok(err.staleData);
+            }
+
+            logger.debug(
+              { err },
+              'Rubygems: error fetching releases timestamp data'
+            );
+            return Result.err({ type: 'inconsistent-data' });
+          }
+        )
       )
-      .catch(() =>
-        Result.ok({
-          releases: versions.map((version) => ({ version })),
-        })
-      )
+      .catch(() => {
+        const releases = versions.map((version) => ({ version }));
+        return Result.ok({ releases } as ReleaseResult);
+      })
       .unwrapOrThrow();
   }
 }

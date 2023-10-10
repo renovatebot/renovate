@@ -8,17 +8,18 @@ jest.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 describe('modules/datasource/rubygems/metadata-cache', () => {
-  const cache: Map<string, unknown> = new Map();
+  const packageCacheMock: Map<string, unknown> = new Map();
 
   beforeEach(() => {
-    cache.clear();
+    packageCacheMock.clear();
 
     packageCache.get.mockImplementation(
-      (ns, key) => Promise.resolve(cache.get(`${ns}::${key}`)) as never
+      (ns, key) =>
+        Promise.resolve(packageCacheMock.get(`${ns}::${key}`)) as never
     );
 
     packageCache.set.mockImplementation((ns, key, value) => {
-      cache.set(`${ns}::${key}`, value);
+      packageCacheMock.set(`${ns}::${key}`, value);
       return Promise.resolve() as never;
     });
   });
@@ -64,7 +65,11 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
         homepage_uri: 'https://example.com',
       });
 
-    const res = await cache.getRelease('https://rubygems.org', 'foobar', []);
+    const res = await cache.getRelease('https://rubygems.org', 'foobar', [
+      '1.0.0',
+      '2.0.0',
+      '3.0.0',
+    ]);
 
     expect(res).toEqual({
       changelogUrl: 'https://example.com/changelog',
@@ -89,6 +94,110 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
           changelogUrl: 'https://v3.example.com/changelog',
           sourceUrl: 'https://v3.example.com/source',
         },
+      ],
+    });
+  });
+
+  it('returns stale cache on hash mismatch', async () => {
+    const staleData = {
+      changelogUrl: 'https://example.com/changelog',
+      sourceUrl: 'https://example.com/source',
+      homepage: 'https://example.com',
+      releases: [
+        { version: '1.0.0', releaseTimestamp: '2021-01-01' },
+        { version: '2.0.0', releaseTimestamp: '2022-01-01' },
+      ],
+    };
+
+    packageCacheMock.set(
+      'datasource-rubygems::metadata-cache:https://rubygems.org:foobar',
+      {
+        hash: 'abc',
+        data: staleData,
+      }
+    );
+
+    const cache = new MetadataCache(new Http('test'));
+
+    httpMock
+      .scope('https://rubygems.org')
+      .get('/api/v1/versions/foobar.json')
+      .reply(200, [
+        { number: '1.0.0', created_at: '2021-01-01' },
+        { number: '2.0.0', created_at: '2022-01-01' },
+      ])
+      .get('/api/v1/gems/foobar.json')
+      .reply(200, {
+        name: 'foobar',
+        created_at: '2022-01-01',
+        changelog_uri: 'https://example.com/changelog',
+        source_code_uri: 'https://example.com/source',
+        homepage_uri: 'https://example.com',
+      });
+
+    const res = await cache.getRelease('https://rubygems.org', 'foobar', [
+      '1.0.0',
+      '2.0.0',
+      '3.0.0',
+    ]);
+
+    expect(res).toEqual(staleData);
+  });
+
+  it('handles inconsistent data data', async () => {
+    const cache = new MetadataCache(new Http('test'));
+
+    httpMock
+      .scope('https://rubygems.org')
+      .get('/api/v1/versions/foobar.json')
+      .reply(200, [
+        {
+          number: '1.0.0',
+          created_at: '2021-01-01',
+          metadata: {
+            changelog_uri: 'https://v1.example.com/changelog',
+            source_code_uri: 'https://v1.example.com/source',
+          },
+        },
+        {
+          number: '2.0.0',
+          created_at: '2022-01-01',
+          metadata: {
+            changelog_uri: 'https://v2.example.com/changelog',
+            source_code_uri: 'https://v2.example.com/source',
+          },
+        },
+        {
+          number: '3.0.0',
+          created_at: '2023-01-01',
+          metadata: {
+            changelog_uri: 'https://v3.example.com/changelog',
+            source_code_uri: 'https://v3.example.com/source',
+          },
+        },
+      ])
+      .get('/api/v1/gems/foobar.json')
+      .reply(200, {
+        name: 'foobar',
+        created_at: '2023-01-01',
+        changelog_uri: 'https://example.com/changelog',
+        source_code_uri: 'https://example.com/source',
+        homepage_uri: 'https://example.com',
+      });
+
+    const res = await cache.getRelease('https://rubygems.org', 'foobar', [
+      '1.0.0',
+      '2.0.0',
+      '3.0.0',
+      '4.0.0',
+    ]);
+
+    expect(res).toEqual({
+      releases: [
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+        { version: '3.0.0' },
+        { version: '4.0.0' },
       ],
     });
   });
