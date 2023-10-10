@@ -1,3 +1,5 @@
+import type { HostRule } from '../../../types';
+
 export interface Vendir {
   kind?: string;
   directories: Directories[];
@@ -21,4 +23,8 @@ export interface HelmChart {
 
 export interface Repository {
   url: string;
+}
+
+export interface RepositoryRule extends Repository {
+  hostRule: HostRule;
 }

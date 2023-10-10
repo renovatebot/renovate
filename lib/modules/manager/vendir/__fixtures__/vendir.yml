@@ -1,0 +1,15 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+
+minimumRequiredVersion: 0.32.0
+
+# one or more directories to manage with vendir
+directories:
+  - path: vendor
+    contents:
+    - path: renovate
+      helmChart:
+        name: renovate
+        version: 36.109.4
+        repository:
+          url: https://docs.renovatebot.com/helm-charts

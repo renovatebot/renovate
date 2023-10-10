@@ -1,5 +1,6 @@
 import { HelmDatasource } from '../../datasource/helm';
 export { extractPackageFile } from './extract';
+export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
   commitMessageTopic: 'vendir {{depName}}',
