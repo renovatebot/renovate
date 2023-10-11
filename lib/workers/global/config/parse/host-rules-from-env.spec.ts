@@ -1,8 +1,4 @@
-import { mockedFunction } from '../../../../../test/util';
-import { getPlatformList as _getPlatformList } from '../../../../modules/platform';
 import { hostRulesFromEnv } from './host-rules-from-env';
-
-const getPlatformList = mockedFunction(_getPlatformList);
 
 describe('workers/global/config/parse/host-rules-from-env', () => {
   it('supports docker username/password', () => {
@@ -56,7 +52,6 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
   });
 
   it('support https authentication options', () => {
-    getPlatformList.mockReturnValue(['github']);
     const envParam: NodeJS.ProcessEnv = {
       GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY: 'private-key',
       GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE: 'certificate',
@@ -77,8 +72,6 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
   it('make sure {{PLATFORM}}_TOKEN will not be picked up', () => {
     const unsupportedEnv = ['GITHUB_TOKEN'];
 
-    getPlatformList.mockReturnValue(['github']);
-
     for (const e of unsupportedEnv) {
       const envParam: NodeJS.ProcessEnv = {
         [e]: 'private-key',
@@ -97,7 +90,6 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
   });
 
   it('supports platform env token', () => {
-    getPlatformList.mockReturnValue(['github']);
     const envParam: NodeJS.ProcessEnv = {
       GITHUB_SOME_GITHUB__ENTERPRISE_HOST_TOKEN: 'some-token',
     };
