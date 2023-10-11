@@ -38,14 +38,14 @@ export class MetadataCache {
   ): Promise<ReleaseResult> {
     const cacheNs = `datasource-rubygems`;
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
-    const hash = hashVersions(versions);
+    const versionsHash = hashVersions(versions);
 
     const loadCache = (): AsyncResult<ReleaseResult, CacheError> =>
       Result.wrapNullable<CacheRecord, CacheError, CacheError>(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
         { type: 'cache-not-found' }
       ).transform((cache) => {
-        return hash === cache.hash
+        return versionsHash === cache.hash
           ? Result.ok(cache.data)
           : Result.err({ type: 'cache-outdated', staleData: cache.data });
       });
@@ -74,9 +74,9 @@ export class MetadataCache {
           async (
             newData: ReleaseResult
           ): Promise<Result<ReleaseResult, CacheError>> => {
-            const newHash = hashReleases(newData);
-            if (newHash === hash) {
-              await saveCache(newHash, newData);
+            const v1ReleasesHash = hashReleases(newData);
+            if (v1ReleasesHash === versionsHash) {
+              await saveCache(v1ReleasesHash, newData);
               return Result.ok(newData);
             }
 
