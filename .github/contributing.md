@@ -14,12 +14,6 @@ Read the [prerequisites](https://github.com/renovatebot/renovate/blob/main/docs/
 
 Read the [Fork and Clone section](https://github.com/renovatebot/renovate/blob/main/docs/development/local-development.md#fork-and-clone) of the local development docs.
 
-## Submitting Changes
-
-If you've never worked with Git before, please read chapter one, two and three of the [ProGit 2 book](https://git-scm.com/book/en/v2) first.
-
-Then read [ProGit 2, chapter 6.2 GitHub - Contributing to a Project].
-
 
 ## Security / Disclosure
 
