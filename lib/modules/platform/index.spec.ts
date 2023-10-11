@@ -142,16 +142,16 @@ describe('modules/platform/index', () => {
         gitAuthor: 'user@domain.com',
         hostRules: [
           {
-            hostType: 'github',
-            matchHost: 'github.com',
-            token: '456',
-            username: 'def',
-          },
-          {
             hostType: 'docker',
             matchHost: 'ghcr.io',
             password: '123',
             username: 'USERNAME',
+          },
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: '456',
+            username: 'def',
           },
           {
             hostType: 'github',

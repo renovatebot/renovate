@@ -26,6 +26,62 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid
 }
 `;
 
+exports[`modules/manager/npm/extract/index .extractPackageFile() does not set registryUrls for non-npmjs 1`] = `
+{
+  "deps": [
+    {
+      "currentRawValue": "github:owner/a#v1.1.0",
+      "currentValue": "v1.1.0",
+      "datasource": "github-tags",
+      "depName": "a",
+      "depType": "dependencies",
+      "gitRef": true,
+      "packageName": "owner/a",
+      "pinDigests": false,
+      "prettyDepType": "dependency",
+      "sourceUrl": "https://github.com/owner/a",
+    },
+    {
+      "commitMessageTopic": "Node.js",
+      "currentValue": "8.9.2",
+      "datasource": "github-tags",
+      "depName": "node",
+      "depType": "engines",
+      "packageName": "nodejs/node",
+      "prettyDepType": "engine",
+      "versioning": "node",
+    },
+    {
+      "commitMessageTopic": "Yarn",
+      "currentValue": "3.2.4",
+      "datasource": "npm",
+      "depName": "yarn",
+      "depType": "volta",
+      "packageName": "@yarnpkg/cli",
+      "prettyDepType": "volta",
+      "registryUrls": [
+        "https://registry.example.com",
+      ],
+    },
+  ],
+  "extractedConstraints": {
+    "node": "8.9.2",
+  },
+  "managerData": {
+    "hasPackageManager": false,
+    "npmLock": undefined,
+    "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
+    "yarnZeroInstall": false,
+  },
+  "npmrc": undefined,
+  "packageFileVersion": undefined,
+  "skipInstalls": true,
+}
+`;
+
 exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engines 1`] = `
 {
   "deps": [
