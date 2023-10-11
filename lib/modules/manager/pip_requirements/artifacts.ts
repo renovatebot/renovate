@@ -59,6 +59,7 @@ export async function updateArtifacts({
         // If there's a match, then the regular expression guarantees
         // that the named subgroup deepConstraint did match as well.
         const depConstraint = depAndHashMatch.groups!.depConstraint;
+        cmd.push('pip install setuptools');
         cmd.push(`hashin ${quote(depConstraint)} -r ${quote(packageFileName)}`);
       }
     }

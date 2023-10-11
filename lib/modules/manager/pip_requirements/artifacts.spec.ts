@@ -81,10 +81,12 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
+      { cmd: 'pip install setuptools' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
       },
+      { cmd: 'pip install setuptools' },
       {
         cmd: "hashin 'boto3-stubs[iam] == 1.24.36.post1' -r requirements.txt",
         options: { cwd: '/tmp/github/some/repo' },
@@ -114,8 +116,14 @@ describe('modules/manager/pip_requirements/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
+        cmd: 'pip install setuptools',
+      },
+      {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'pip install setuptools',
       },
       {
         cmd: "hashin 'boto3-stubs[iam] == 1.24.36.post1' -r requirements.txt",
@@ -149,6 +157,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
+      { cmd: 'pip install setuptools' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
@@ -178,6 +187,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
+      { cmd: 'pip install setuptools' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
@@ -233,6 +243,8 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           '&& ' +
           'install-tool hashin 0.1.7 ' +
           '&& ' +
+          'pip install setuptools ' +
+          '&& ' +
           'hashin atomicwrites==1.4.0 -r requirements.txt' +
           '"',
       },
@@ -267,6 +279,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
       { cmd: 'install-tool hashin 0.1.7' },
+      { cmd: 'pip install setuptools' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
