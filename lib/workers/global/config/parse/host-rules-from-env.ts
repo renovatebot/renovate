@@ -37,17 +37,16 @@ function setHostRuleValue(
   key: string,
   value: string | undefined
 ): void {
-  if (value === undefined) {
-    return;
-  }
-  switch (key) {
-    case 'token':
-    case 'username':
-    case 'password':
-    case 'httpsCertificateAuthority':
-    case 'httpsCertificate':
-    case 'httpsPrivateKey':
-      rule[key] = value!;
+  if (value !== undefined) {
+    switch (key) {
+      case 'token':
+      case 'username':
+      case 'password':
+      case 'httpsCertificateAuthority':
+      case 'httpsCertificate':
+      case 'httpsPrivateKey':
+        rule[key] = value!;
+    }
   }
 }
 
