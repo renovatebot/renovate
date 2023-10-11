@@ -397,6 +397,10 @@ const repoGroups = {
   router5: 'https://github.com/router5/router5',
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
+  'aws-sdk-rust': [
+    'https://github.com/awslabs/smithy-rs',
+    'https://github.com/awslabs/aws-sdk-rust',
+  ],
   sanity: 'https://github.com/sanity-io/sanity',
   scaffdog: 'https://github.com/scaffdog/scaffdog',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
