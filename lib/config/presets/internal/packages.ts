@@ -103,6 +103,20 @@ export const presets: Record<string, Preset> = {
       'symplify/easy-coding-standard',
     ],
   },
+  phpUnitTest: {
+    description: 'Unit test packages for PHP.',
+    matchPackageNames: [
+      'behat/behat',
+      'brianium/paratest',
+      'facile-it/paraunit',
+      'mockery/mockery',
+      'phpspec/prophecy',
+      'phpspec/prophecy-phpunit',
+      'phpspec/phpspec',
+      'phpunit/phpunit',
+    ],
+    matchPackagePrefixes: ['pestphp/'],
+  },
   postcss: {
     description: 'All PostCSS packages.',
     matchPackageNames: ['postcss'],
@@ -128,6 +142,6 @@ export const presets: Record<string, Preset> = {
   },
   unitTest: {
     description: 'All unit test packages.',
-    extends: ['packages:jsUnitTest'],
+    extends: ['packages:jsUnitTest', 'packages:phpUnitTest'],
   },
 };

@@ -8,7 +8,7 @@ import type { WoodpeckerConfig } from './types';
 function woodpeckerVersionDecider(
   woodpeckerConfig: WoodpeckerConfig
 ): (keyof WoodpeckerConfig)[] {
-  const keys = ['clone', 'steps', 'pipeline'];
+  const keys = ['clone', 'steps', 'pipeline', 'services'];
   return Object.keys(woodpeckerConfig).filter((key) =>
     keys.includes(key)
   ) as (keyof WoodpeckerConfig)[];
