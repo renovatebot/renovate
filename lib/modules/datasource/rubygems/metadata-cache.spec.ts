@@ -98,52 +98,6 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     });
   });
 
-  it('returns stale cache on hash mismatch', async () => {
-    const staleData = {
-      changelogUrl: 'https://example.com/changelog',
-      sourceUrl: 'https://example.com/source',
-      homepage: 'https://example.com',
-      releases: [
-        { version: '1.0.0', releaseTimestamp: '2021-01-01' },
-        { version: '2.0.0', releaseTimestamp: '2022-01-01' },
-      ],
-    };
-
-    packageCacheMock.set(
-      'datasource-rubygems::metadata-cache:https://rubygems.org:foobar',
-      {
-        hash: 'abc',
-        data: staleData,
-      }
-    );
-
-    const cache = new MetadataCache(new Http('test'));
-
-    httpMock
-      .scope('https://rubygems.org')
-      .get('/api/v1/versions/foobar.json')
-      .reply(200, [
-        { number: '1.0.0', created_at: '2021-01-01' },
-        { number: '2.0.0', created_at: '2022-01-01' },
-      ])
-      .get('/api/v1/gems/foobar.json')
-      .reply(200, {
-        name: 'foobar',
-        created_at: '2022-01-01',
-        changelog_uri: 'https://example.com/changelog',
-        source_code_uri: 'https://example.com/source',
-        homepage_uri: 'https://example.com',
-      });
-
-    const res = await cache.getRelease('https://rubygems.org', 'foobar', [
-      '1.0.0',
-      '2.0.0',
-      '3.0.0',
-    ]);
-
-    expect(res).toEqual(staleData);
-  });
-
   it('handles inconsistent data data', async () => {
     const cache = new MetadataCache(new Http('test'));
 

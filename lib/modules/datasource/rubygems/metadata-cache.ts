@@ -20,13 +20,7 @@ function hashReleases(releases: ReleaseResult): string {
   return hashVersions(releases.releases.map((release) => release.version));
 }
 
-type CacheError =
-  | { type: 'cache-not-found' }
-  | {
-      type: 'cache-outdated';
-      staleData: ReleaseResult;
-    }
-  | { type: 'inconsistent-data' };
+type CacheError = 'cache-not-found' | 'cache-outdated' | 'inconsistent-data';
 
 export class MetadataCache {
   constructor(private readonly http: Http) {}
@@ -43,22 +37,23 @@ export class MetadataCache {
     const loadCache = (): AsyncResult<ReleaseResult, CacheError> =>
       Result.wrapNullable<CacheRecord, CacheError, CacheError>(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
-        { type: 'cache-not-found' }
+        'cache-not-found'
       ).transform((cache) => {
         return versionsHash === cache.hash
           ? Result.ok(cache.data)
-          : Result.err({ type: 'cache-outdated', staleData: cache.data });
+          : Result.err('cache-outdated');
       });
 
     const saveCache = async (
       hash: string,
-      data: ReleaseResult
+      data: ReleaseResult,
+      ttlMinutes = 100 * 24 * 60,
+      ttlDelta = 10 * 24 * 60
     ): Promise<void> => {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
         const newCache: CacheRecord = { hash, data };
-        const ttlMinutes = 100 * 24 * 60;
-        const ttlRandomDelta = Math.floor(Math.random() * 10 * 24 * 60);
+        const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
         await packageCache.set(
           cacheNs,
           cacheKey,
@@ -80,15 +75,11 @@ export class MetadataCache {
               return Result.ok(newData);
             }
 
-            if (err.type === 'cache-outdated') {
-              return Result.ok(err.staleData);
-            }
-
             logger.debug(
               { err },
               'Rubygems: error fetching releases timestamp data'
             );
-            return Result.err({ type: 'inconsistent-data' });
+            return Result.err('inconsistent-data');
           }
         )
       )
