@@ -1,6 +1,5 @@
 import { logger } from '../../../../logger';
 import { getDatasourceList } from '../../../../modules/datasource';
-import { getPlatformList } from '../../../../modules/platform';
 import type { HostRule } from '../../../../types';
 
 type AuthField = 'token' | 'username' | 'password';
@@ -35,7 +34,7 @@ function restoreHttpsAuthField(x: HttpsAuthField): string {
 
 export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   const datasources = new Set(getDatasourceList());
-  const platforms = new Set(getPlatformList());
+  const platforms = new Set(['github']);
 
   const hostRules: HostRule[] = [];
 

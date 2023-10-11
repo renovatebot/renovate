@@ -75,9 +75,9 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
   });
 
   it('make sure {{PLATFORM}}_TOKEN will not be picked up', () => {
-    const unsupportedEnv = ['BITBUCKET_TOKEN', 'GITHUB_TOKEN', 'GITLAB_TOKEN'];
+    const unsupportedEnv = ['GITHUB_TOKEN'];
 
-    getPlatformList.mockReturnValue(['github', 'bitbucket', 'gitlab']);
+    getPlatformList.mockReturnValue(['github']);
 
     for (const e of unsupportedEnv) {
       const envParam: NodeJS.ProcessEnv = {
