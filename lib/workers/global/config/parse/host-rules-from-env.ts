@@ -32,6 +32,25 @@ function restoreHttpsAuthField(x: HttpsAuthField): string {
   }
 }
 
+function setHostRuleValue(
+  rule: HostRule,
+  key: string,
+  value: string | undefined
+): void {
+  if (value === undefined) {
+    return;
+  }
+  switch (key) {
+    case 'token':
+    case 'username':
+    case 'password':
+    case 'httpsCertificateAuthority':
+    case 'httpsCertificate':
+    case 'httpsPrivateKey':
+      rule[key] = value!;
+  }
+}
+
 export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   const datasources = new Set(getDatasourceList());
   const platforms = new Set(['github']);
@@ -60,7 +79,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
 
         let matchHost: string | undefined = undefined;
         const rule: HostRule = {};
-        rule[suffix] = env[envName];
+        setHostRuleValue(rule, suffix, env[envName]);
         if (splitEnv.length === 0) {
           // host-less rule
         } else if (splitEnv.length === 1) {
@@ -75,7 +94,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
         logger.debug(`Converting ${envName} into a global host rule`);
         if (existingRule) {
           // Add current field to existing rule
-          existingRule[suffix] = env[envName];
+          setHostRuleValue(existingRule, suffix, env[envName]);
         } else {
           // Create a new rule
           const newRule: HostRule = {
@@ -84,7 +103,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
           if (matchHost) {
             newRule.matchHost = matchHost;
           }
-          newRule[suffix] = env[envName];
+          setHostRuleValue(newRule, suffix, env[envName]);
           hostRules.push(newRule);
         }
       }

@@ -1,4 +1,4 @@
-export interface HostRuleSearchResult extends Record<string, any> {
+export interface HostRuleSearchResult {
   authType?: string;
   token?: string;
   username?: string;
