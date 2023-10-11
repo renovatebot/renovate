@@ -51,8 +51,8 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     ...config,
     ...platformInfo,
     hostRules: [
-      ...(config.hostRules ?? []),
       ...(platformInfo?.hostRules ?? []),
+      ...(config.hostRules ?? []),
     ],
   };
   // istanbul ignore else
