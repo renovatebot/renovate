@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { NpmDatasource } from '../../../datasource/npm';
 
 import type {
   ExtractConfig,
@@ -179,7 +180,7 @@ export async function extractPackageFile(
           dep.depName,
           yarnConfig
         );
-        if (registryUrlFromYarnConfig) {
+        if (registryUrlFromYarnConfig && dep.datasource === NpmDatasource.id) {
           dep.registryUrls = [registryUrlFromYarnConfig];
         }
       }
