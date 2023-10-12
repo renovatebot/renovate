@@ -153,11 +153,11 @@ importers:
         specifier: 10.2.1
         version: 10.2.1
       emojibase:
-        specifier: 15.1.0
-        version: 15.1.0
+        specifier: 15.2.0
+        version: 15.2.0
       emojibase-regex:
-        specifier: 15.1.0
-        version: 15.1.0
+        specifier: 15.2.0
+        version: 15.2.0
       extract-zip:
         specifier: 2.0.1
         version: 2.0.1
@@ -506,8 +506,8 @@ importers:
         specifier: 5.1.0
         version: 5.1.0
       emojibase-data:
-        specifier: 15.1.0
-        version: 15.1.0(emojibase@15.1.0)
+        specifier: 15.2.0
+        version: 15.2.0(emojibase@15.2.0)
       eslint:
         specifier: 8.51.0
         version: 8.51.0
@@ -5624,20 +5624,20 @@ packages:
   /emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
-  /emojibase-data@15.1.0(emojibase@15.1.0):
-    resolution: {integrity: sha512-373zSNmw5k+pGpGQPgaR/JUTDgYGUc6TDkRsnRH624F8shD87bh+kDniJS1v0q8s0U+1K1nIdWFYwGNjwc+nBw==}
+  /emojibase-data@15.2.0(emojibase@15.2.0):
+    resolution: {integrity: sha512-hDiw4ugxnI4pcVQO+73NlKx6aZP/A+BAPfDgK/3A83RVbHZa0Ut6GHpd5r5XUV9G7BZhKejlIRuxhXialpbt6Q==}
     peerDependencies:
       emojibase: '*'
     dependencies:
-      emojibase: 15.1.0
+      emojibase: 15.2.0
     dev: true
 
-  /emojibase-regex@15.1.0:
-    resolution: {integrity: sha512-UILgA04OkdURIl3LOFk7hPlI1n8Gtw5FIQxoJ5sUc+sMqNPwaLHnWM5oQXcLY0RR3p/iai9x01zvySNGLt78sw==}
+  /emojibase-regex@15.2.0:
+    resolution: {integrity: sha512-65H5YepRW3gdrghV/Ed9kW3Qry8/qeKJmMlm31nTsOrEZfuAgyr28FmloXpyak86+chR8cukZA7dlafZzrJXbw==}
     dev: false
 
-  /emojibase@15.1.0:
-    resolution: {integrity: sha512-ZY7artRbpn2sXJcBaaP4dnn5PnyG69hSMPv5HIOrQg3YFnEnKFnoEiDZh5KfiuMGjLOC2ej9TVPuW0OrnGXRjQ==}
+  /emojibase@15.2.0:
+    resolution: {integrity: sha512-gB6rIVtyJPersQvAo4nOGYPeILMhlcfZdiwCWVeRAtkJ7sm0tExZETGyLhrTQcHvZQhDEYI1vlCeqUhn5gZkQA==}
 
   /emojilib@2.4.0:
     resolution: {integrity: sha512-5U0rVMU5Y2n2+ykNLQqMoqklN9ICBT/KsvC1Gz6vqHbz2AXXGkG+Pm5rMWk/8Vjrr/mY9985Hi8DYzn1F09Nyw==}
