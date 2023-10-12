@@ -5,6 +5,7 @@ import type { NewValueConfig, VersioningApi } from '../types';
 import {
   getDatedContainerImageCodename,
   getDatedContainerImageVersion,
+  isDatedCodeName,
 } from './common';
 
 export const id = 'ubuntu';
@@ -31,10 +32,6 @@ function isValid(input: string): boolean {
   }
 
   return isDatedCodeName(input);
-}
-
-function isDatedCodeName(input: string): boolean {
-  return regEx(/^(?<codename>\w+)-(?<date>\d{8})$/).test(input);
 }
 
 function isVersion(input: string): boolean {
