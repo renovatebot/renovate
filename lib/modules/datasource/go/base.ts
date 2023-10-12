@@ -59,8 +59,10 @@ export class BaseGoDatasource {
     }
 
     if (goModule.startsWith('code.cloudfoundry.org/')) {
-      const split = goModule.split('/');
-      const packageName = 'cloudfoundry/' + split[1];
+      const packageName = goModule.replace(
+        'code.cloudfoundry.org',
+        'cloudfoundry'
+      );
       return {
         datasource: GithubTagsDatasource.id,
         packageName,
