@@ -2,6 +2,10 @@ import { regEx } from '../../../util/regex';
 import { coerceString } from '../../../util/string';
 import { DistroInfo } from '../distro';
 import type { NewValueConfig, VersioningApi } from '../types';
+import {
+  getDatedContainerImageCodename,
+  getDatedContainerImageVersion,
+} from './common';
 
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
@@ -61,23 +65,6 @@ function isStable(version: string): boolean {
 }
 
 // digestion of version
-
-function getDatedContainerImageCodename(version: string): null | string {
-  const groups = /^(?<codename>\w+)-(?<date>\d{8})$/.exec(version);
-  if (!groups?.groups) {
-    return null;
-  }
-  return groups.groups.codename;
-}
-
-function getDatedContainerImageVersion(version: string): null | number {
-  const groups = /^(?<codename>\w+)-(?<date>\d{8})$/.exec(version);
-  if (!groups?.groups) {
-    return null;
-  }
-
-  return parseInt(groups.groups.date, 10);
-}
 
 function getVersionByCodename(version: string): string {
   const datedImgVersion = getDatedContainerImageCodename(version);
