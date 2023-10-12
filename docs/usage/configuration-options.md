@@ -2973,7 +2973,7 @@ Table with options:
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `npmDedupe`                  | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
-| `pnpmDedupe`                 | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -3123,25 +3123,34 @@ This limit is enforced on a per-repository basis.
 
 ## prCreation
 
-This setting tells Renovate when you would like it to raise PRs:
+This setting tells Renovate _when_ to create PRs:
 
-- `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
-- `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
-- `status-success`: Renovate won't raise PRs unless tests pass
+- `immediate` (default): Renovate creates PRs immediately after creating the corresponding branch
+- `not-pending`: Renovate waits until status checks have completed (passed or failed) before raising the PR
+- `status-success`: Renovate only creates PRs if/when the the test pass
+- `approval`: Renovate creates branches for updates immediately, but creates the PR _after_ getting Dependency Dashboard approval
 
-Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
+When prCreation is set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
+You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR.
 
-With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
-You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
-
-With prCreation set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
+When prCreation is set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-If there are no checks associated, Renovate will create the PR once 24 hrs have elapsed since creation of the commit.
+If there are no checks associated, Renovate will create the PR once 24 hours have elapsed since creation of the commit.
 
-With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
+When prCreation is set to `status-success`, Renovate creates the PR only if all tests have passed.
+When a branch remains without PR due to a failing test: select the corresponding PR from the Dependency Dashboard, and push your fixes to the branch.
 
-For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
-Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
+When prCreation is set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
+Renovate still creates the _branch_ immediately.
+
+<!-- prettier-ignore -->
+!!! note
+    For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+    Instead, Renovate create the PR on its _next_ run after the relevant tests have completed, so there will be some delay.
+
+<!-- prettier-ignore -->
+!!! warning
+    If you set `prCreation=approval` you must _not_ use `dependencyDashboardApproval=true`!
 
 ## prFooter
 
@@ -3635,6 +3644,43 @@ Example:
   }
 }
 ```
+
+## versionCompatibility
+
+This option is used for advanced use cases where the version string embeds more data than just the version.
+It's typically used with docker and tags datasources.
+
+Here are two examples:
+
+- The image tag `ghcr.io/umami-software/umami:postgresql-v1.37.0` embeds text like `postgresql-` as a prefix to the actual version to differentiate different DB types.
+- Docker image tags like `node:18.10.0-alpine` embed the base image as a suffix to the version.
+
+Here is an example of solving these types of cases:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/umami-software/umami"],
+      "versionCompatibility": "^(?<compatibility>.*)-(?<version>.*)$",
+      "versioning": "semver"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["node"],
+      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
+      "versioning": "node"
+    }
+  ]
+}
+```
+
+This feature is most useful when the `currentValue` is a version and not a range/constraint.
+
+This feature _can_ be used in combination with `extractVersion` although that's likely only a rare edge case.
+When combined, `extractVersion` is applied to datasource results first, and then `versionCompatibility`.
+`extractVersion` should be used when the raw version string returned by the `datasource` contains extra details (such as a `v` prefix) when compared to the value/version used within the repository.
 
 ## versioning
 

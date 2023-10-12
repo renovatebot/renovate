@@ -84,7 +84,7 @@ export interface LookupUpdate {
   newMajor?: number;
   newMinor?: number;
   newName?: string;
-  newValue: string;
+  newValue?: string;
   semanticCommitType?: string;
   pendingChecks?: boolean;
   pendingVersions?: string[];

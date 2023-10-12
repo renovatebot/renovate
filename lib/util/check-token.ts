@@ -50,8 +50,9 @@ export function checkGithubToken(
       'github-token-required-warning-logged'
     );
     if (!warningLogged) {
+      const withoutDuplicates = [...new Set(githubDeps)];
       logger.warn(
-        { githubDeps },
+        { githubDeps: withoutDuplicates },
         `GitHub token is required for some dependencies`
       );
       memCache.set('github-token-required-warning-logged', true);

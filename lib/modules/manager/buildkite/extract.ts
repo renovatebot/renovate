@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -33,11 +34,16 @@ export function extractPackageFile(
           logger.debug('Examining git plugin');
           const { registry, gitPluginName } = gitPluginMatch.groups;
           const gitDepName = gitPluginName.replace(regEx('\\.git$'), '');
+
+          let datasource: string = GithubTagsDatasource.id;
+          if (registry === 'bitbucket.org') {
+            datasource = BitbucketTagsDatasource.id;
+          }
           const dep: PackageDependency = {
             depName: gitDepName,
             currentValue,
             registryUrls: ['https://' + registry],
-            datasource: GithubTagsDatasource.id,
+            datasource,
           };
           deps.push(dep);
           continue;
