@@ -17,10 +17,9 @@ import { find as _find } from '../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import * as _pipenv from '.';
+import * as pipenv from '.';
 
 const datasource = mocked(_datasource);
-const pipenv = mocked(_pipenv);
 const find = mocked(_find);
 
 jest.mock('../../../util/exec/env');
@@ -364,8 +363,39 @@ describe('modules/manager/pipenv/artifacts', () => {
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { python: '== 3.8.*' } },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'current pipfile.lock',
+          path: 'Pipfile.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PASSWORD: 'passwordTwo',
+            PATH: '/tmp/path',
+            PIPENV_CACHE_DIR: '/tmp/renovate/cache/others/pipenv',
+            USERNAME: 'usernameOne',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('does not pass private credential environment vars if variable names differ from allowed', async () => {
@@ -397,7 +427,36 @@ describe('modules/manager/pipenv/artifacts', () => {
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { python: '== 3.8.*' } },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'current pipfile.lock',
+          path: 'Pipfile.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+            PIPENV_CACHE_DIR: '/tmp/renovate/cache/others/pipenv',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 });
