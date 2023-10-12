@@ -19,6 +19,7 @@ import {
 async function updateAllLocks(
   locks: ProviderLock[]
 ): Promise<ProviderLockUpdate[]> {
+  debugger;
   const updates = await p.map(
     locks,
     async (lock) => {
@@ -74,6 +75,8 @@ export async function updateArtifacts({
     logger.debug('No .terraform.lock.hcl found');
     return null;
   }
+
+  debugger;
 
   try {
     const lockFileContent = await readLockFile(lockFilePath);
