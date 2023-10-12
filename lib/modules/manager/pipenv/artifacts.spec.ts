@@ -1,6 +1,7 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { Fixtures } from '../../../../test/fixtures';
 import {
   env,
   fs,
@@ -22,13 +23,15 @@ import * as pipenv from '.';
 const datasource = mocked(_datasource);
 const find = mocked(_find);
 
+const pipfile6 = Fixtures.get('Pipfile6');
+const pipfile7 = Fixtures.get('Pipfile7');
+
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/http');
 jest.mock('../../datasource', () => mockDeep());
-jest.mock('../pipenv/extract');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -333,17 +336,6 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('passes private credential environment vars', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('current pipfile');
-    const packageFileContent = {
-      registryUrls: ['https://$USERNAME:${PASSWORD}@mypypi.example.com/simple'],
-      deps: [],
-    };
-    pipenv.extractPackageFile.mockResolvedValueOnce(packageFileContent);
-    find.mockReturnValueOnce({
-      username: 'usernameOne',
-      password: 'passwordTwo',
-    });
-
     fs.ensureCacheDir.mockResolvedValueOnce(
       '/tmp/renovate/cache/others/pipenv'
     );
@@ -356,17 +348,22 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
 
+    find.mockReturnValueOnce({
+      username: 'usernameOne',
+      password: 'passwordTwo',
+    });
+
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: 'some new content',
+        newPackageFileContent: pipfile6,
         config: { ...config, constraints: { python: '== 3.8.*' } },
       })
     ).toEqual([
       {
         file: {
-          contents: 'current pipfile.lock',
+          contents: 'New Pipfile.lock',
           path: 'Pipfile.lock',
           type: 'addition',
         },
@@ -399,15 +396,6 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('does not pass private credential environment vars if variable names differ from allowed', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('current pipfile');
-    const packageFileContent = {
-      registryUrls: [
-        'https://$USERNAME_FOO:$PAZZWORD@mypypi.example.com/simple',
-      ],
-      deps: [],
-    };
-    pipenv.extractPackageFile.mockResolvedValueOnce(packageFileContent);
-
     fs.ensureCacheDir.mockResolvedValueOnce(
       '/tmp/renovate/cache/others/pipenv'
     );
@@ -424,13 +412,13 @@ describe('modules/manager/pipenv/artifacts', () => {
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: 'some new content',
+        newPackageFileContent: pipfile7,
         config: { ...config, constraints: { python: '== 3.8.*' } },
       })
     ).toEqual([
       {
         file: {
-          contents: 'current pipfile.lock',
+          contents: 'New Pipfile.lock',
           path: 'Pipfile.lock',
           type: 'addition',
         },

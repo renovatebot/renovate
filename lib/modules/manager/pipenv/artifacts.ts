@@ -165,7 +165,7 @@ export async function updateArtifacts({
     if (sourceUrl) {
       logger.trace('Pipfile contains credentials');
       const hostRule = getMatchingHostRule(sourceUrl);
-      const extraEnv = execOptions.extraEnv;
+      const extraEnv = execOptions.extraEnv!;
       if (hostRule) {
         logger.trace('Found matching hostRule for Pipfile credentials');
         if (hostRule.username) {
