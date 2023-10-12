@@ -30,8 +30,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       '@cdktf/hcl2json':
-        specifier: 0.18.0
-        version: 0.18.0
+        specifier: 0.18.2
+        version: 0.18.2
       '@iarna/toml':
         specifier: 3.0.0
         version: 3.0.0
@@ -87,8 +87,8 @@ importers:
         specifier: 0.2.4
         version: 0.2.4
       '@yarnpkg/core':
-        specifier: 3.5.3
-        version: 3.5.3(typanion@3.14.0)
+        specifier: 3.5.4
+        version: 3.5.4(typanion@3.14.0)
       '@yarnpkg/parsers':
         specifier: 2.5.1
         version: 2.5.1
@@ -153,11 +153,11 @@ importers:
         specifier: 10.2.1
         version: 10.2.1
       emojibase:
-        specifier: 15.0.0
-        version: 15.0.0
+        specifier: 15.2.0
+        version: 15.2.0
       emojibase-regex:
-        specifier: 15.0.0
-        version: 15.0.0
+        specifier: 15.2.0
+        version: 15.2.0
       extract-zip:
         specifier: 2.0.1
         version: 2.0.1
@@ -327,8 +327,8 @@ importers:
         specifier: 1.3.0
         version: 1.3.0
       zod:
-        specifier: 3.22.3
-        version: 3.22.3
+        specifier: 3.22.4
+        version: 3.22.4
     optionalDependencies:
       re2:
         specifier: 1.20.3
@@ -506,8 +506,8 @@ importers:
         specifier: 5.1.0
         version: 5.1.0
       emojibase-data:
-        specifier: 15.0.0
-        version: 15.0.0(emojibase@15.0.0)
+        specifier: 15.2.0
+        version: 15.2.0(emojibase@15.2.0)
       eslint:
         specifier: 8.51.0
         version: 8.51.0
@@ -1904,8 +1904,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /@cdktf/hcl2json@0.18.0:
-    resolution: {integrity: sha512-wnnGTdXExmG+HCLsAsce3fOTDBpj8MpadMzKU7hxj+/xdGvACnU0JB7wcK0FRIKlbJFmxgwYzFmVrgd7z3Be/g==}
+  /@cdktf/hcl2json@0.18.2:
+    resolution: {integrity: sha512-TSuIMet9RSuXUWPz40ed/W4WMu92aHVnJ44lB5nap9E1PE8brr7FhnW32dFOy9m2H8WU4GAfSQ0k3GW6JitSig==}
     dependencies:
       fs-extra: 11.1.1
     dev: false
@@ -4297,8 +4297,8 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@yarnpkg/core@3.5.3(typanion@3.14.0):
-    resolution: {integrity: sha512-yyU/fA2aWQ53KD5vsthJRJKhNO4zFgaKLNM3X6JgfUPfLLNQJxHvFpB4+X+v9HxceokiDGx3hp0DaAUWjO2mEw==}
+  /@yarnpkg/core@3.5.4(typanion@3.14.0):
+    resolution: {integrity: sha512-iIOoFnGOXP3LLxg0RiRIUB1n55bY0R1BRxxKsA2CtNeivR4wyBh/828SamthVzkKbsUs6y9q7U+1RMn9fEEHFg==}
     engines: {node: '>=12 <14 || 14.2 - 14.9 || >14.10.0'}
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
@@ -5624,20 +5624,20 @@ packages:
   /emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
 
-  /emojibase-data@15.0.0(emojibase@15.0.0):
-    resolution: {integrity: sha512-hqrLNhEeBejKOQp5ArJcofkzV3qZBcp8czXj8nIKUGpBVc50NddNGwir4yAYxn3oNgrSj/lYdB9XxIVAKTkong==}
+  /emojibase-data@15.2.0(emojibase@15.2.0):
+    resolution: {integrity: sha512-hDiw4ugxnI4pcVQO+73NlKx6aZP/A+BAPfDgK/3A83RVbHZa0Ut6GHpd5r5XUV9G7BZhKejlIRuxhXialpbt6Q==}
     peerDependencies:
       emojibase: '*'
     dependencies:
-      emojibase: 15.0.0
+      emojibase: 15.2.0
     dev: true
 
-  /emojibase-regex@15.0.0:
-    resolution: {integrity: sha512-b5y58xrmZhH551zIa3ZOHl1mRI5KecA+5sAyWZCQEaj1maufZJJoENVwDqigzJoAkG604DuRqfdpy4E5rzSUsg==}
+  /emojibase-regex@15.2.0:
+    resolution: {integrity: sha512-65H5YepRW3gdrghV/Ed9kW3Qry8/qeKJmMlm31nTsOrEZfuAgyr28FmloXpyak86+chR8cukZA7dlafZzrJXbw==}
     dev: false
 
-  /emojibase@15.0.0:
-    resolution: {integrity: sha512-bvSIs98sHaVnyKPmW+obRjo49MFx0g+rhfSz6mTePAagEZSlDPosq0b6AcSJa5gt48z3VP2ooXclyBs8vIkpGA==}
+  /emojibase@15.2.0:
+    resolution: {integrity: sha512-gB6rIVtyJPersQvAo4nOGYPeILMhlcfZdiwCWVeRAtkJ7sm0tExZETGyLhrTQcHvZQhDEYI1vlCeqUhn5gZkQA==}
 
   /emojilib@2.4.0:
     resolution: {integrity: sha512-5U0rVMU5Y2n2+ykNLQqMoqklN9ICBT/KsvC1Gz6vqHbz2AXXGkG+Pm5rMWk/8Vjrr/mY9985Hi8DYzn1F09Nyw==}
@@ -11143,8 +11143,8 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  /zod@3.22.3:
-    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
     dev: false
 
   /zwitch@1.0.5:

@@ -115,7 +115,7 @@ export const presets: Record<string, Preset> = {
       'phpspec/phpspec',
       'phpunit/phpunit',
     ],
-    matchPackagePrefixes: ['pestphp/'],
+    matchPackagePrefixes: ['pestphp/', 'php-mock/'],
   },
   postcss: {
     description: 'All PostCSS packages.',
