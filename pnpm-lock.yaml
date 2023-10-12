@@ -30,8 +30,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       '@cdktf/hcl2json':
-        specifier: 0.18.0
-        version: 0.18.0
+        specifier: 0.18.1
+        version: 0.18.1
       '@iarna/toml':
         specifier: 3.0.0
         version: 3.0.0
@@ -1904,8 +1904,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /@cdktf/hcl2json@0.18.0:
-    resolution: {integrity: sha512-wnnGTdXExmG+HCLsAsce3fOTDBpj8MpadMzKU7hxj+/xdGvACnU0JB7wcK0FRIKlbJFmxgwYzFmVrgd7z3Be/g==}
+  /@cdktf/hcl2json@0.18.1:
+    resolution: {integrity: sha512-zsWgeMxzhJEthkl4SA6VHEd6A3Nx9Jq6mYNFDvB0RtRUFoLVNJuuzgvwyUoeuzgMuOGtU3DhyvfYS8THDJKzuQ==}
     dependencies:
       fs-extra: 11.1.1
     dev: false
