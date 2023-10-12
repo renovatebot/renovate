@@ -13,6 +13,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
@@ -115,9 +116,9 @@ function getMatchingHostRule(url: string | undefined): HostRule {
 function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string
-): Record<string, string> {
+): NodeJS.ProcessEnv {
   const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
-  const envVars: Record<string, string> = {};
+  const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
     const matchingHostRule = getMatchingHostRule(source.url);
@@ -185,6 +186,7 @@ export async function updateArtifacts({
       getPoetryRequirement(newPackageFileContent, existingLockFileContent);
     const extraEnv = {
       ...getSourceCredentialVars(newPackageFileContent, packageFileName),
+      ...getGitEnvironmentVariables(['poetry']),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };
 
