@@ -89,14 +89,10 @@ function getMatchingHostRule(url: string | undefined): HostRule {
 }
 
 async function findPipfileSourceUrlWithCredentials(
+  pipfileContent: string,
   pipfileName: string
 ): Promise<string | null> {
-  const content = await readLocalFile(pipfileName, 'utf8');
-  if (!content) {
-    logger.debug('No Pipfile found');
-    return null;
-  }
-  const pipfile = await extractPackageFile(content, pipfileName);
+  const pipfile = await extractPackageFile(pipfileContent, pipfileName);
   if (!pipfile) {
     logger.debug('Error parsing Pipfile');
     return null;
@@ -162,19 +158,23 @@ export async function updateArtifacts({
       ],
     };
 
-    const sourceUrl = await findPipfileSourceUrlWithCredentials(pipfileName);
+    const sourceUrl = await findPipfileSourceUrlWithCredentials(
+      newPipfileContent,
+      pipfileName
+    );
     if (sourceUrl) {
-      logger.debug('Pipfile contains credentials');
+      logger.trace('Pipfile contains credentials');
       const hostRule = getMatchingHostRule(sourceUrl);
-      if (hostRule && execOptions.extraEnv) {
-        logger.debug('Found matching hostRule for Pipfile credentials');
+      const extraEnv = execOptions.extraEnv;
+      if (hostRule) {
+        logger.trace('Found matching hostRule for Pipfile credentials');
         if (hostRule.username) {
-          logger.debug('Adding USERNAME environment variable for pipenv');
-          execOptions.extraEnv['USERNAME'] = hostRule.username;
+          logger.trace('Adding USERNAME environment variable for pipenv');
+          extraEnv.USERNAME = hostRule.username;
         }
         if (hostRule.password) {
-          logger.debug('Adding PASSWORD environment variable for pipenv');
-          execOptions.extraEnv['PASSWORD'] = hostRule.password;
+          logger.trace('Adding PASSWORD environment variable for pipenv');
+          extraEnv.PASSWORD = hostRule.password;
         }
       }
     }
