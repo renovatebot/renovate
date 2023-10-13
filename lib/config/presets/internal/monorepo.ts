@@ -69,7 +69,6 @@ const repoGroups = {
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
   'datadog-browser-sdk': 'https://github.com/DataDog/browser-sdk',
-  'web3-react': 'https://github.com/Uniswap/web3-react',
   'datatables-net': [
     'https://github.com/DataTables/Dist-DataTables',
     'https://github.com/DataTables/Dist-DataTables-Bootstrap',
@@ -448,6 +447,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',
