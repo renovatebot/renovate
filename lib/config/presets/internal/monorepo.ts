@@ -69,6 +69,7 @@ const repoGroups = {
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   'contentful-rich-text': 'https://github.com/contentful/rich-text',
   'datadog-browser-sdk': 'https://github.com/DataDog/browser-sdk',
+  'web3-react': 'https://github.com/Uniswap/web3-react',
   'datatables-net': [
     'https://github.com/DataTables/Dist-DataTables',
     'https://github.com/DataTables/Dist-DataTables-Bootstrap',
