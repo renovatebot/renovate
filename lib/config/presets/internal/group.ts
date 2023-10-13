@@ -301,7 +301,11 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        excludePackageNames: ['calico/node', 'docker.io/calico/node', 'kindest/node'],
+        excludePackageNames: [
+          'calico/node',
+          'docker.io/calico/node',
+          'kindest/node',
+        ],
         matchDatasources: ['docker'],
         matchDepNames: ['node'],
         matchPackagePatterns: ['/node$'],
