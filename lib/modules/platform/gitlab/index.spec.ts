@@ -979,8 +979,7 @@ describe('modules/platform/gitlab/index', () => {
         .post(
           '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
           (body: any): boolean => {
-            expect(body.pipeline_id).not.toBeNull();
-            expect(body.pipeline_id).toStrictEqual(123);
+            expect(body.pipeline_id).toBe(123);
             return true;
           }
         )
