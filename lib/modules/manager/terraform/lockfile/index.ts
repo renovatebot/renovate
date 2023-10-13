@@ -99,18 +99,55 @@ export async function updateArtifacts({
       );
       for (const dep of providerDeps) {
         massageProviderLookupName(dep);
-        const { registryUrls, newVersion, newValue, packageName } = dep;
+        const {
+          registryUrls,
+          currentValue,
+          currentVersion,
+          newValue,
+          newVersion,
+          packageName,
+        } = dep;
 
         const registryUrl = registryUrls
           ? registryUrls[0]
           : TerraformProviderDatasource.defaultRegistryUrls[0];
-        const newConstraint = isPinnedVersion(newValue) ? newVersion : newValue;
         const updateLock = locks.find(
           (value) => value.packageName === packageName
         );
         // istanbul ignore if: needs test
         if (!updateLock) {
           continue;
+        }
+        let newConstraint: string | undefined = updateLock.constraints;
+        if (newConstraint && currentValue === newValue) {
+          logger.debug(
+            `Leaving constraints "${newConstraint}" unchanged for "${packageName}" as current and new values are the same`
+          );
+        } else if (
+          newConstraint &&
+          currentValue &&
+          newValue &&
+          newConstraint.includes(currentValue)
+        ) {
+          logger.debug(
+            `Updating constraint "${newConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`
+          );
+          newConstraint = newConstraint.replace(currentValue, newValue);
+        } else if (
+          newConstraint &&
+          currentVersion &&
+          newVersion &&
+          newConstraint.includes(currentVersion)
+        ) {
+          logger.debug(
+            `Updating constraint "${newConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`
+          );
+          newConstraint = newConstraint.replace(currentVersion, newVersion);
+        } else {
+          newConstraint = isPinnedVersion(newValue) ? newVersion : newValue;
+          logger.debug(
+            `Could not detect constraint to update for "${packageName}" so setting to newValue "${newConstraint}"`
+          );
         }
         const update: ProviderLockUpdate = {
           // TODO #22198
