@@ -4,7 +4,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { GalaxyDatasource } from '.';
 
-const baseUrl = 'https://galaxy.ansible.com/';
+const baseUrl = 'https://old-galaxy.ansible.com/';
 
 describe('modules/datasource/galaxy/index', () => {
   describe('getReleases', () => {
