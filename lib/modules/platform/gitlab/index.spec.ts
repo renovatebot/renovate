@@ -973,6 +973,38 @@ describe('modules/platform/gitlab/index', () => {
       expect(timers.setTimeout.mock.calls[0][0]).toBe(1000);
     });
 
+    it('set branch status with pipeline_id', async () => {
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          (body: any): boolean => {
+            expect(body.pipeline_id).not.toBeNull();
+            expect(body.pipeline_id).toStrictEqual(123);
+            return true;
+          }
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+        )
+        .reply(200, { last_pipeline: { id: 123 } });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        })
+      ).toResolve();
+    });
+
     it('waits for RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY ms when set', async () => {
       const delay = 5000;
       process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY = String(delay);

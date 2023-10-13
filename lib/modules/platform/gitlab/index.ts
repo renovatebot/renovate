@@ -55,6 +55,7 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
+import { LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
   GitlabComment,
@@ -63,7 +64,6 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
-import { LastPipelineId } from './schema';
 
 let config: {
   repository: string;
