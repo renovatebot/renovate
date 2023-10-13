@@ -13,6 +13,7 @@ import datasources from './api';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
+  applyVersionCompatibility,
   filterValidVersions,
   getDatasourceFor,
   sortAndRemoveDuplicates,
@@ -363,6 +364,11 @@ export function applyDatasourceFilters(
 ): ReleaseResult {
   let res = releaseResult;
   res = applyExtractVersion(res, config.extractVersion);
+  res = applyVersionCompatibility(
+    res,
+    config.versionCompatibility,
+    config.currentCompatibility
+  );
   res = filterValidVersions(res, config);
   res = sortAndRemoveDuplicates(res, config);
   res = applyConstraintsFiltering(res, config);
