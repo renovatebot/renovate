@@ -39,7 +39,6 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
-
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
