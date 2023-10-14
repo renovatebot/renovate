@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
@@ -40,7 +39,6 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
-
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
@@ -81,19 +79,8 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      const pnpmVersionFromPackageJson = getPackageManagerVersion(
-        'pnpm',
-        await lazyPgkJson.getValue()
-      );
-
-      if (
-        pnpmVersionFromPackageJson &&
-        semver.gte(pnpmVersionFromPackageJson, '8.8.0')
-      ) {
-        commands.push('pnpm dedupe --ignore-scripts');
-      } else {
-        commands.push('pnpm dedupe');
-      }
+      logger.debug('Performing pnpm dedupe');
+      commands.push('pnpm dedupe');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
