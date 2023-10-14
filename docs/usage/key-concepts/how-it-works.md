@@ -11,7 +11,7 @@ To be compatible with the variety of dependency-naming and versioning convention
 
 ## Modules
 
-The three modules are: [manager](../modules/manager/index.md), [datasource](../modules/datasource/index.md) and [versionning](../modules/versioning.md).
+The three modules are: [manager](../modules/manager/index.md), [datasource](../modules/datasource/index.md) and [versioning](../modules/versioning.md).
 
 They are used sequentially:
 
