@@ -1912,5 +1912,5 @@ export async function commitFiles(
   // and return the remote commit SHA
   await git.resetToCommit(commitResult.parentCommitSha);
   const commitSha = await git.fetchBranch(branchName);
-  return commitSha as LongCommitSha;
+  return commitSha;
 }

@@ -579,8 +579,8 @@ export async function getFileList(): Promise<string[]> {
     .map((line) => line.split(regEx(/\t/)).pop()!);
 }
 
-export function getBranchList(): LongCommitSha[] {
-  return Object.keys(config.branchCommits) as LongCommitSha[];
+export function getBranchList(): string[] {
+  return Object.keys(config.branchCommits);
 }
 
 export async function isBranchBehindBase(
