@@ -5,13 +5,13 @@ description: Learn all about Renovate's workflow
 
 # Introduction
 
-Renovate works by searching for all the dependencies in your project and then for each look for updates.
+Renovate works by searching for all the dependencies in your project and then look for updates for each.
 
-To be compatible with the variety of dependency-naming and versioning conventions, Renovate has defined modules that holds parts of a global workflow.
+To be compatible with the variety of dependency-naming and versioning conventions, Renovate has defined modules for each known convention, and you can define your own too.
 
 ## Modules
 
-The three modules are: manager, datasource and versioning.
+The three modules are: [manager](../modules/manager/index.md), [datasource](../modules/datasource/index.md) and [versionning](../modules/versioning.md).
 
 They are used sequentially:
 
