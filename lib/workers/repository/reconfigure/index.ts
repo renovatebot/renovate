@@ -69,16 +69,16 @@ export async function validateReconfigureBranch(
       state: 'red',
     });
     setReconfigureBranchCache(branchSha!, false);
-    await scm.checkoutBranch(config.baseBranch!);
+    await scm.checkoutBranch(config.defaultBranch!);
     return;
   }
 
   let configFileRaw: string | null = null;
   try {
     configFileRaw = await readLocalFile(configFileName, 'utf8');
-  } catch (error) {
+  } catch (err) {
     /*istanbul ignore next - should never happen*/
-    logger.error({ error }, 'Error while reading config file');
+    logger.error({ err }, 'Error while reading config file');
   }
 
   if (!is.nonEmptyString(configFileRaw)) {
@@ -102,7 +102,7 @@ export async function validateReconfigureBranch(
       configFileParsed = configFileParsed.renovate;
     }
   } catch (err) {
-    logger.error({ err }, 'Error while reading config file');
+    logger.error({ err }, 'Error while parsing config file');
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -118,7 +118,7 @@ export async function validateReconfigureBranch(
     );
 
     // add comment to reconfigure PR if it exists
-    const branchPr = await platform.getBranchPr(branchName, config.baseBranch);
+    const branchPr = await platform.getBranchPr(branchName, config.defaultBranch);
     if (branchPr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
       body += `Location: \`${configFileName}\`\n`;

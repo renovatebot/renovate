@@ -39,7 +39,6 @@ describe('workers/repository/finalize/prune', () => {
 
     it('ignores reconfigure branch', async () => {
       delete config.branchList;
-      git.getBranchList.mockReturnValueOnce(['renovate/reconfigure']);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(0);
     });
