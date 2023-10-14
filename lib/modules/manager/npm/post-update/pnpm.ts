@@ -87,10 +87,7 @@ export async function generateLockFile(
       );
       const cleanedVersion = semver.coerce(pnpmVersionFromPackageJson);
 
-      if (
-        cleanedVersion &&
-        semver.gte(cleanedVersion, '8.8.0')
-      ) {
+      if (cleanedVersion && semver.gte(cleanedVersion, '8.8.0')) {
         commands.push('pnpm dedupe --ignore-scripts');
       } else {
         commands.push('pnpm dedupe');
