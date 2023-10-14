@@ -50,26 +50,4 @@ describe('util/hash', () => {
 
     expect(actualHash).toBe(expectedHash);
   });
-
-  // Need help: this fails with the following msg
-  //     Node.js v18.13.0
-  // C:\Users\LENOVO\Desktop\Whitesource\renovate\lib\util\hash.spec.ts:37
-  //             const error = new Error('Stream error');
-  //                           ^
-
-  // Error: Stream error
-  // Is this what we should expect, the same happends with hasha.fromStream as well
-
-  // it('handles errors', async () => {
-  //   // Create a readable stream with an error
-  //   const readableStreamWithError = new Readable();
-  //   const error = new Error('Stream error');
-  //   readableStreamWithError._read = () => {
-  //     readableStreamWithError.emit('error', error);
-  //   };
-
-  //   expect(
-  //     async () => await hashStream(readableStreamWithError, 'sha256')
-  //   ).toThrow();
-  // });
 });
