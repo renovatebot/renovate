@@ -2,6 +2,7 @@ import { git, logger, mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { setBranchNewCommit } from './set-branch-commit';
+import type { LongCommitSha } from './types';
 
 jest.mock('../cache/repository');
 jest.mock('.');
@@ -17,7 +18,7 @@ describe('util/git/set-branch-commit', () => {
 
   describe('setBranchCommit', () => {
     it('sets new branch in cache if it does not exist', () => {
-      git.getBranchCommit.mockReturnValueOnce('base_SHA');
+      git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
       setBranchNewCommit('branch_name', 'base_branch', 'SHA');
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setBranchCommit(): Branch cache not present'
@@ -51,7 +52,7 @@ describe('util/git/set-branch-commit', () => {
           }),
         ],
       };
-      git.getBranchCommit.mockReturnValueOnce('base_SHA');
+      git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
       repositoryCache.getCache.mockReturnValue(repoCache);
       setBranchNewCommit('branch_name', 'base_branch', 'SHA');
       expect(repoCache.branches).toEqual([

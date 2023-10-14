@@ -1,5 +1,6 @@
 import { scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import type { LongCommitSha } from '../../../../util/git/types';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
 
@@ -20,7 +21,7 @@ describe('workers/repository/update/branch/commit', () => {
         updatedArtifacts: [],
         upgrades: [],
       } satisfies BranchConfig;
-      scm.commitAndPush.mockResolvedValueOnce('123test');
+      scm.commitAndPush.mockResolvedValueOnce('123test' as LongCommitSha);
       GlobalConfig.reset();
     });
 

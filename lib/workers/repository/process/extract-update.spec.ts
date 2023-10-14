@@ -3,6 +3,7 @@ import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
+import type { LongCommitSha } from '../../../util/git/types';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import * as _branchify from '../updates/branchify';
 import { extract, isCacheExtractValid, lookup, update } from './extract-update';
@@ -52,7 +53,7 @@ describe('workers/repository/process/extract-update', () => {
         suppressNotifications: ['deprecationWarningIssues'],
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
       expect(res).toEqual({
@@ -83,7 +84,7 @@ describe('workers/repository/process/extract-update', () => {
           addLabels: 'npm',
         },
       };
-      scm.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toBeUndefined();
@@ -106,8 +107,8 @@ describe('workers/repository/process/extract-update', () => {
           },
         },
       });
-      scm.getBranchCommit.mockResolvedValueOnce('123test');
-      scm.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
     });
@@ -123,7 +124,7 @@ describe('workers/repository/process/extract-update', () => {
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
@@ -140,7 +141,7 @@ describe('workers/repository/process/extract-update', () => {
       };
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);

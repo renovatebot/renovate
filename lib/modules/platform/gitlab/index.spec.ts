@@ -15,6 +15,7 @@ import {
 import type { logger as _logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
 
@@ -43,7 +44,7 @@ describe('modules/platform/gitlab/index', () => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha
     );
     hostRules.find.mockReturnValue({
       token: '123test',

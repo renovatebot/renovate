@@ -18,6 +18,7 @@ import {
 import type { logger as _logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import type { PlatformResult } from '../types';
 import type {
@@ -50,7 +51,8 @@ describe('modules/platform/gitea/index', () => {
   let gitvcs: jest.Mocked<typeof _git>;
   let hostRules: typeof import('../../../util/host-rules');
 
-  const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
+  const mockCommitHash =
+    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
 
   const mockUser: User = {
     id: 1,
@@ -93,7 +95,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'some-base-branch' },
       head: {
         label: 'some-head-branch',
-        sha: 'some-head-sha',
+        sha: 'some-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -109,7 +111,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'other-base-branch' },
       head: {
         label: 'other-head-branch',
-        sha: 'other-head-sha',
+        sha: 'other-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -125,7 +127,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'draft-base-branch' },
       head: {
         label: 'draft-head-branch',
-        sha: 'draft-head-sha',
+        sha: 'draft-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -794,7 +796,7 @@ describe('modules/platform/gitea/index', () => {
           base: { ref: 'third-party-base-branch' },
           head: {
             label: 'other-head-branch',
-            sha: 'other-head-sha',
+            sha: 'other-head-sha' as LongCommitSha,
             repo: partial<Repo>({ full_name: mockRepo.full_name }),
           },
           user: { username: 'not-renovate' },

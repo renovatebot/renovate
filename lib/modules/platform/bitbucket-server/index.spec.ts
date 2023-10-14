@@ -7,6 +7,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import type { Platform } from '../types';
 
 jest.mock('timers/promises');
@@ -215,7 +216,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         git.branchExists.mockReturnValue(true);
         git.isBranchBehindBase.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(
-          '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha
         );
         const endpoint =
           scenarioName === 'endpoint with path'
