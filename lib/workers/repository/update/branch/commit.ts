@@ -4,13 +4,14 @@ import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import type { LongCommitSha } from '../../../../util/git/types';
 import { minimatch } from '../../../../util/minimatch';
 import { sanitize } from '../../../../util/sanitize';
 import type { BranchConfig } from '../../../types';
 
 export function commitFilesToBranch(
   config: BranchConfig
-): Promise<string | null> {
+): Promise<LongCommitSha | null> {
   let updatedFiles = config.updatedPackageFiles!.concat(
     config.updatedArtifacts!
   );

@@ -1,3 +1,5 @@
+import type { LongCommitSha } from '../../../util/git/types';
+
 export interface PrReviewersParams {
   reviewers?: string[];
   team_reviewers?: string[];
@@ -28,7 +30,7 @@ export interface PR {
   };
   head?: {
     label: string;
-    sha: string;
+    sha: LongCommitSha;
     repo?: Repo;
   };
   assignee?: {

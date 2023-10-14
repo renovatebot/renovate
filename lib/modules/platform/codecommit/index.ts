@@ -15,6 +15,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import * as git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
@@ -273,7 +274,7 @@ export async function getPr(
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
     destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
-    sha: prInfo.revisionId,
+    sha: prInfo.revisionId as LongCommitSha, // Not sure about this one ... maybe not a problem, but something to check
     body: prInfo.description!,
   };
 }
