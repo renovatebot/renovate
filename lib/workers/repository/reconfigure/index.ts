@@ -53,7 +53,6 @@ export async function validateReconfigureBranch(
     await scm.checkoutBranch(branchName);
     configFileName = await detectConfigFile();
   } catch (err) {
-    /*istanbul ignore next - should never happen*/
     logger.error(
       { err },
       'Error while searching for config file in reconfigure branch'
@@ -76,9 +75,8 @@ export async function validateReconfigureBranch(
   let configFileRaw: string | null = null;
   try {
     configFileRaw = await readLocalFile(configFileName, 'utf8');
-  } catch (error) {
-    /*istanbul ignore next - should never happen*/
-    logger.error({ error }, 'Error while reading config file');
+  } catch (err) {
+    logger.error({ err }, 'Error while reading config file');
   }
 
   if (!is.nonEmptyString(configFileRaw)) {

@@ -11,12 +11,15 @@ import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
 import * as _cache from '../../../util/cache/repository';
 import { validateReconfigureBranch } from '.';
+import * as _merge from '../init/merge';
 
 jest.mock('../../../util/cache/repository');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
+jest.mock('../init/merge');
 
 const cache = mocked(_cache);
+const merge = mocked(_merge);
 
 describe('workers/repository/reconfigure/index', () => {
   const config: RenovateConfig = {
@@ -26,7 +29,7 @@ describe('workers/repository/reconfigure/index', () => {
 
   beforeEach(() => {
     config.repository = 'some/repo';
-    scm.getFileList.mockResolvedValue([]);
+    merge.detectConfigFile.mockResolvedValue('renovate.json');
     scm.branchExists.mockResolvedValue(true);
     cache.getCache.mockReturnValue({});
     git.getBranchCommit.mockReturnValue('sha');
@@ -40,21 +43,40 @@ describe('workers/repository/reconfigure/index', () => {
     expect(logger.debug).toHaveBeenCalledWith('No reconfigure branch found');
   });
 
+  it('logs error if config file search fails', async () => {
+    const err = new Error();
+    merge.detectConfigFile.mockRejectedValueOnce(err as never);
+    await validateReconfigureBranch(config);
+    expect(logger.error).toHaveBeenCalledWith(
+      { err: err },
+      'Error while searching for config file in reconfigure branch'
+    );
+  });
+
   it('throws error if config file not found in reconfigure branch', async () => {
+    merge.detectConfigFile.mockResolvedValue(null);
     await validateReconfigureBranch(config);
     expect(logger.warn).toHaveBeenCalledWith(
       'No config file found in reconfigure branch'
     );
   });
 
+  it('logs error if there is an erro while reading config file', async () => {
+    const err = new Error();
+    fs.readLocalFile.mockRejectedValueOnce(err as never);
+    await validateReconfigureBranch(config);
+    expect(logger.error).toHaveBeenCalledWith(
+      { err: err },
+      'Error while reading config file'
+    );
+  });
+
   it('throws error if config file is empty', async () => {
-    scm.getFileList.mockResolvedValueOnce(['renovate.json']);
     await validateReconfigureBranch(config);
     expect(logger.warn).toHaveBeenCalledWith('Empty or invalid config file');
   });
 
   it('throws error config file content is invalid', async () => {
-    scm.getFileList.mockResolvedValueOnce(['renovate.json']);
     fs.readLocalFile.mockResolvedValueOnce(`
         {
             "name":
@@ -68,7 +90,6 @@ describe('workers/repository/reconfigure/index', () => {
   });
 
   it('handles failed validation', async () => {
-    scm.getFileList.mockResolvedValueOnce(['renovate.json']);
     fs.readLocalFile.mockResolvedValueOnce(`
         {
             "enabledManagers": ["docker"]
@@ -88,7 +109,6 @@ describe('workers/repository/reconfigure/index', () => {
   });
 
   it('adds comment if reconfigure PR exists', async () => {
-    scm.getFileList.mockResolvedValueOnce(['renovate.json']);
     fs.readLocalFile.mockResolvedValueOnce(`
         {
             "enabledManagers": ["docker"]
@@ -112,7 +132,7 @@ describe('workers/repository/reconfigure/index', () => {
        } 
     }
     `;
-    scm.getFileList.mockResolvedValueOnce(['package.json']);
+    merge.detectConfigFile.mockResolvedValue('package.json');
     fs.readLocalFile.mockResolvedValueOnce(pJson).mockResolvedValueOnce(pJson);
     await validateReconfigureBranch(config);
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
@@ -137,7 +157,7 @@ describe('workers/repository/reconfigure/index', () => {
   });
 
   it('handles non-default config file', async () => {
-    scm.getFileList.mockResolvedValueOnce(['.renovaterc']);
+    merge.detectConfigFile.mockResolvedValue('.renovaterc');
     fs.readLocalFile.mockResolvedValueOnce(`
         {
             "enabledManagers": ["npm",]
