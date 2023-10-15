@@ -15,7 +15,6 @@ import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import * as git from '../../../util/git';
-import type { LongCommitSha } from '../../../util/git/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
