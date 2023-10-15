@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
-import { parseJsonWithFallback } from '../../../util/common';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -159,7 +159,7 @@ export async function getJsonFile(
 ): Promise<any> {
   // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return parseJsonWithFallback(raw, fileName);
+  return parseJson(raw, fileName);
 }
 
 // Initialize bitbucket by getting base branch and SHA

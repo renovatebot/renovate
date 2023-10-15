@@ -20,7 +20,7 @@ import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
-import { parseJsonWithFallback } from '../../../util/common';
+import { parseJson } from '../../../util/common';
 import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
@@ -70,9 +70,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       configFileRaw = null;
     }
     if (configFileRaw) {
-      let configFileParsed = configFileName.endsWith('.json5')
-        ? JSON5.parse(configFileRaw)
-        : parseJsonWithFallback(configFileRaw, configFileName);
+      let configFileParsed = parseJson(configFileRaw, configFileName);
       if (configFileName !== 'package.json') {
         return { configFileName, configFileRaw, configFileParsed };
       }
@@ -177,7 +175,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         };
       }
       try {
-        configFileParsed = parseJsonWithFallback(configFileRaw, configFileName);
+        configFileParsed = parseJson(configFileRaw, configFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { renovateConfig: configFileRaw },

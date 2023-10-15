@@ -24,7 +24,7 @@ import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
 import { coerceToNull } from '../../../util/coerce';
-import { parseJsonWithFallback } from '../../../util/common';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
@@ -283,7 +283,7 @@ export async function getJsonFile(
 ): Promise<any> {
   // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return parseJsonWithFallback(raw, fileName);
+  return parseJson(raw, fileName);
 }
 
 export async function listForks(

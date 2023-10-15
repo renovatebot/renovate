@@ -8,7 +8,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
-import { parseJsonWithFallback } from '../../../util/common';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -147,7 +147,7 @@ export async function getJsonFile(
 ): Promise<any> {
   // TODO #22198
   const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return parseJsonWithFallback(raw, fileName);
+  return parseJson(raw, fileName);
 }
 
 // Initialize Bitbucket Server by getting base branch

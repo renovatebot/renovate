@@ -1,5 +1,5 @@
 import { logger } from '../../test/util';
-import { detectPlatform, parseJsonWithFallback } from './common';
+import { detectPlatform, parseJson } from './common';
 import * as hostRules from './host-rules';
 
 const validJsonString = `
@@ -88,9 +88,9 @@ describe('util/common', () => {
     });
   });
 
-  describe('parseJsonWithFallback', () => {
+  describe('parseJson', () => {
     it('returns parsed json', () => {
-      expect(parseJsonWithFallback(validJsonString, 'renovate.json')).toEqual({
+      expect(parseJson(validJsonString, 'renovate.json')).toEqual({
         name: 'John Doe',
         age: 30,
         city: 'New York',
@@ -98,15 +98,11 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid json', () => {
-      expect(() =>
-        parseJsonWithFallback(invalidJsonString, 'renovate.json')
-      ).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
     });
 
     it('catches and warns if content parsing faield with JSON.parse but not with JSON5.parse', () => {
-      expect(
-        parseJsonWithFallback(onlyJson5parsableString, 'renovate.json')
-      ).toEqual({
+      expect(parseJson(onlyJson5parsableString, 'renovate.json')).toEqual({
         name: 'Bob',
         age: 35,
         city: 'San Francisco',

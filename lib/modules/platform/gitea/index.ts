@@ -10,7 +10,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
-import { parseJsonWithFallback } from '../../../util/common';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
@@ -257,7 +257,7 @@ const platform: Platform = {
   ): Promise<any> {
     // TODO #22198
     const raw = (await platform.getRawFile(fileName, repoName, branchOrTag))!;
-    return parseJsonWithFallback(raw, fileName);
+    return parseJson(raw, fileName);
   },
 
   async initRepo({

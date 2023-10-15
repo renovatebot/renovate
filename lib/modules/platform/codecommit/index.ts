@@ -12,7 +12,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
-import { parseJsonWithFallback } from '../../../util/common';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -329,7 +329,7 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return raw ? parseJsonWithFallback(raw, fileName) : null;
+  return raw ? parseJson(raw, fileName) : null;
 }
 
 export async function getRawFile(

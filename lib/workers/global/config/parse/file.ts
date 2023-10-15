@@ -6,7 +6,7 @@ import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { parseJsonWithFallback } from '../../../../util/common';
+import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
@@ -20,9 +20,8 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         json: true,
       }) as RenovateConfig;
     case '.json5':
-      return JSON5.parse(await readSystemFile(file, 'utf8'));
     case '.json':
-      return parseJsonWithFallback(await readSystemFile(file, 'utf8'), file);
+      return parseJson(await readSystemFile(file, 'utf8'), file);
     case '.js': {
       const tmpConfig = await import(file);
       let config = tmpConfig.default
