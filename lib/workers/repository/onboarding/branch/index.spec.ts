@@ -45,7 +45,6 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';
       OnboardingState.prUpdateRequested = false;
@@ -416,7 +415,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       });
 
       it('detects missing rebase checkbox', async () => {
-        const pr = { bodyStruct: { rebaseRequested: undefined } };
+        const pr = { bodyStruct: undefined };
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
 
         await checkOnboardingBranch(config);

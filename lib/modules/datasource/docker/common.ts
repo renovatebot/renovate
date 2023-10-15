@@ -27,6 +27,7 @@ import {
 } from '../../../util/url';
 import { api as dockerVersioning } from '../../versioning/docker';
 import { ecrRegex, getECRAuthToken } from './ecr';
+import { getGoogleAccessToken, googleRegex } from './google';
 import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
@@ -98,6 +99,34 @@ export async function getAuthHeaders(
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
+      }
+    } else if (
+      googleRegex.test(registryHost) &&
+      typeof opts.username === 'undefined' &&
+      typeof opts.password === 'undefined' &&
+      typeof opts.token === 'undefined'
+    ) {
+      logger.trace(
+        { registryHost, dockerRepository },
+        `Using google auth for Docker registry`
+      );
+      try {
+        const accessToken = await getGoogleAccessToken();
+        if (accessToken) {
+          const auth = Buffer.from(
+            `${'oauth2accesstoken'}:${accessToken}`
+          ).toString('base64');
+          opts.headers = { authorization: `Basic ${auth}` };
+        }
+      } catch (err) /* istanbul ignore next */ {
+        if (err.message?.includes('Could not load the default credentials')) {
+          logger.once.debug(
+            { registryHost, dockerRepository },
+            'Could not get Google access token, using no auth'
+          );
+        } else {
+          throw err;
+        }
       }
     } else if (opts.username && opts.password) {
       logger.trace(
@@ -249,25 +278,31 @@ export function getRegistryRepository(
       };
     }
   }
-  let registryHost: string | undefined;
+  let registryHost = registryUrl;
   const split = packageName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
     [registryHost] = split;
     split.shift();
   }
   let dockerRepository = split.join('/');
-  if (!registryHost) {
-    registryHost = registryUrl.replace(
-      'https://docker.io',
-      'https://index.docker.io'
-    );
-  }
-  if (registryHost === 'docker.io') {
-    registryHost = 'index.docker.io';
-  }
-  if (!regEx(/^https?:\/\//).exec(registryHost)) {
+
+  if (!regEx(/^https?:\/\//).test(registryHost)) {
     registryHost = `https://${registryHost}`;
   }
+
+  const { path, base } =
+    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)
+      ?.groups ?? {};
+  if (base && path) {
+    registryHost = base;
+    dockerRepository = `${trimTrailingSlash(path)}/${dockerRepository}`;
+  }
+
+  registryHost = registryHost.replace(
+    'https://docker.io',
+    'https://index.docker.io'
+  );
+
   const opts = hostRules.find({
     hostType: dockerDatasourceId,
     url: registryHost,

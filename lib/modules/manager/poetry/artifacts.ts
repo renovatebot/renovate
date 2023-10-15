@@ -13,6 +13,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
@@ -22,12 +23,33 @@ import { Lockfile, PoetrySchemaToml } from './schema';
 import type { PoetryFile, PoetrySource } from './types';
 
 export function getPythonConstraint(
+  pyProjectContent: string,
   existingLockFileContent: string
 ): string | null {
-  return Result.parse(
+  // Read Python version from `pyproject.toml` first as it could have been updated
+  const pyprojectPythonConstraint = Result.parse(
+    pyProjectContent,
+    PoetrySchemaToml.transform(
+      ({ packageFileContent }) =>
+        packageFileContent.deps.find((dep) => dep.depName === 'python')
+          ?.currentValue
+    )
+  ).unwrapOrNull();
+  if (pyprojectPythonConstraint) {
+    logger.debug('Using python version from pyproject.toml');
+    return pyprojectPythonConstraint;
+  }
+
+  const lockfilePythonConstraint = Result.parse(
     existingLockFileContent,
     Lockfile.transform(({ pythonVersions }) => pythonVersions)
   ).unwrapOrNull();
+  if (lockfilePythonConstraint) {
+    logger.debug('Using python version from poetry.lock');
+    return lockfilePythonConstraint;
+  }
+
+  return null;
 }
 
 export function getPoetryRequirement(
@@ -94,9 +116,9 @@ function getMatchingHostRule(url: string | undefined): HostRule {
 function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string
-): Record<string, string> {
+): NodeJS.ProcessEnv {
   const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
-  const envVars: Record<string, string> = {};
+  const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
     const matchingHostRule = getMatchingHostRule(source.url);
@@ -158,12 +180,13 @@ export async function updateArtifacts({
     }
     const pythonConstraint =
       config?.constraints?.python ??
-      getPythonConstraint(existingLockFileContent);
+      getPythonConstraint(newPackageFileContent, existingLockFileContent);
     const poetryConstraint =
       config.constraints?.poetry ??
       getPoetryRequirement(newPackageFileContent, existingLockFileContent);
     const extraEnv = {
       ...getSourceCredentialVars(newPackageFileContent, packageFileName),
+      ...getGitEnvironmentVariables(['poetry']),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };
 

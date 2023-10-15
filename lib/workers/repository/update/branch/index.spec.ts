@@ -139,7 +139,6 @@ describe('workers/repository/update/branch/index', () => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
-      jest.resetAllMocks();
       GlobalConfig.reset();
     });
 
@@ -1393,7 +1392,7 @@ describe('workers/repository/update/branch/index', () => {
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>()],
+        updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(

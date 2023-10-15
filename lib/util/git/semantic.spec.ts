@@ -7,7 +7,6 @@ jest.mock('.');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>();
 });
 

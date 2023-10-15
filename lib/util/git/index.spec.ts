@@ -892,10 +892,6 @@ describe('util/git/index', () => {
     });
 
     describe('cachedConflictResult', () => {
-      beforeEach(() => {
-        jest.resetAllMocks();
-      });
-
       it('returns cached values', async () => {
         conflictsCache.getCachedConflictResult.mockReturnValue(true);
 

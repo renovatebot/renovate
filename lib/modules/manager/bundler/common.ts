@@ -76,8 +76,9 @@ export function getBundlerConstraint(
 export async function getLockFilePath(
   packageFilePath: string
 ): Promise<string> {
-  logger.debug(`Looking for lockfile for ${packageFilePath}`);
-  return (await localPathExists(`${packageFilePath}.lock`))
+  const lockFilePath = (await localPathExists(`${packageFilePath}.lock`))
     ? `${packageFilePath}.lock`
     : `Gemfile.lock`;
+  logger.debug(`Lockfile for ${packageFilePath} found in ${lockFilePath}`);
+  return lockFilePath;
 }

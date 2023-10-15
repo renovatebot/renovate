@@ -29,7 +29,6 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = {
         ...getConfig(),
         errors: [],
@@ -38,7 +37,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       };
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
-      platform.massageMarkdown = jest.fn((input) => input);
+      platform.massageMarkdown.mockImplementation((input) => input);
       platform.createPr.mockResolvedValueOnce(partial<Pr>());
       GlobalConfig.reset();
     });
@@ -275,9 +274,9 @@ describe('workers/repository/onboarding/pr/index', () => {
       const err = partial<RequestError>({ response });
 
       beforeEach(() => {
-        jest.resetAllMocks();
         GlobalConfig.reset();
         scm.deleteBranch.mockResolvedValue();
+        platform.createPr.mockReset();
       });
 
       it('throws when trying to create a new PR', async () => {

@@ -32,7 +32,7 @@ export async function extractPackageFile(
       do {
         depBuffer += contentArr[lineNumber] + '\n';
         lineNumber += 1;
-      } while (!contentArr[lineNumber].includes('end'));
+      } while (contentArr[lineNumber].trim() !== 'end');
       let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       while (depMatchGroups) {
         const { app, requirement, opts } = depMatchGroups;

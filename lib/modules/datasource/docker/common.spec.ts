@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
@@ -16,17 +17,9 @@ const hostRules = mocked(_hostRules);
 
 const http = new Http(dockerDatasourceId);
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 describe('modules/datasource/docker/common', () => {
-  beforeEach(() => {
-    hostRules.find.mockReturnValue({
-      username: 'some-username',
-      password: 'some-password',
-    });
-    hostRules.hosts.mockReturnValue([]);
-  });
-
   describe('getRegistryRepository', () => {
     it('handles local registries', () => {
       const res = getRegistryRepository(
@@ -71,9 +64,58 @@ describe('modules/datasource/docker/common', () => {
         registryHost: 'https://my.local.registry',
       });
     });
+
+    it('supports insecure registryUrls', () => {
+      hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
+      const res = getRegistryRepository(
+        'prefix/image',
+        'my.local.registry/prefix'
+      );
+      expect(res).toStrictEqual({
+        dockerRepository: 'prefix/prefix/image',
+        registryHost: 'http://my.local.registry',
+      });
+    });
+
+    it.each([
+      {
+        name: 'strimzi-kafka-operator',
+        url: 'https://quay.io/strimzi-helm/',
+        res: {
+          dockerRepository: 'strimzi-helm/strimzi-kafka-operator',
+          registryHost: 'https://quay.io',
+        },
+      },
+      {
+        name: 'strimzi-kafka-operator',
+        url: 'https://docker.io/strimzi-helm/',
+        res: {
+          dockerRepository: 'strimzi-helm/strimzi-kafka-operator',
+          registryHost: 'https://index.docker.io',
+        },
+      },
+      {
+        name: 'nginx',
+        url: 'https://docker.io',
+        res: {
+          dockerRepository: 'library/nginx',
+          registryHost: 'https://index.docker.io',
+        },
+      },
+    ])('($name, $url)', ({ name, url, res }) => {
+      expect(getRegistryRepository(name, url)).toStrictEqual(res);
+    });
   });
 
   describe('getAuthHeaders', () => {
+    beforeEach(() => {
+      hostRules.find.mockReturnValue({
+        username: 'some-username',
+        password: 'some-password',
+      });
+      hostRules.hosts.mockReturnValue([]);
+    });
+
     it('throw page not found exception', async () => {
       httpMock
         .scope('https://my.local.registry')

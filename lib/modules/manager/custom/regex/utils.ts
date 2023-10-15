@@ -1,11 +1,14 @@
 import { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
-import type { RegexManagerTemplates } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
-import type { CustomExtractConfig, PackageDependency } from '../../types';
-import type { ExtractionTemplate } from './types';
+import type { PackageDependency } from '../../types';
+import type {
+  ExtractionTemplate,
+  RegexManagerConfig,
+  RegexManagerTemplates,
+} from './types';
 
 export const validMatchFields = [
   'depName',
@@ -51,7 +54,7 @@ function updateDependency(
 
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
-  config: CustomExtractConfig,
+  config: RegexManagerConfig,
   dep?: PackageDependency
 ): PackageDependency | null {
   const dependency = dep ?? {};

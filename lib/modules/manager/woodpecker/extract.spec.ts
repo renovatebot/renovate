@@ -11,6 +11,7 @@ describe('modules/manager/woodpecker/extract', () => {
 
     it('returns null for non-object YAML', () => {
       expect(extractPackageFile('nothing here', '', {})).toBeNull();
+      expect(extractPackageFile('clone: null', '', {})).toBeNull();
     });
 
     it('returns null for malformed YAML', () => {
@@ -21,6 +22,15 @@ describe('modules/manager/woodpecker/extract', () => {
       const res = extractPackageFile(yamlFile, '', {});
       expect(res).toEqual({
         deps: [
+          {
+            depName: 'woodpeckerci/plugin-git',
+            currentValue: '2.0.3',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:2.0.3',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
           {
             depName: 'quay.io/something/redis',
             currentValue: 'alpine',
@@ -89,6 +99,15 @@ describe('modules/manager/woodpecker/extract', () => {
             currentValue: undefined,
             currentDigest: undefined,
             replaceString: 'app-local-debug',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'postgres',
+            currentValue: '9.5.0',
+            currentDigest: undefined,
+            replaceString: 'postgres:9.5.0',
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',

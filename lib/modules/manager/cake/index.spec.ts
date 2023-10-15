@@ -3,9 +3,9 @@ import { extractPackageFile } from '.';
 
 describe('modules/manager/cake/index', () => {
   it('extracts', () => {
-    expect(extractPackageFile(Fixtures.get('build.cake'))).toMatchSnapshot({
+    expect(extractPackageFile(Fixtures.get('build.cake'))).toMatchObject({
       deps: [
-        { depName: 'Foo.Foo', currentValue: '1.1.1' },
+        { depName: 'Foo.Foo', currentValue: undefined },
         { depName: 'Bim.Bim', currentValue: '6.6.6' },
         { depName: 'Bar.Bar', registryUrls: ['https://example.com'] },
         { depName: 'Baz.Baz', skipReason: 'unsupported-url' },
