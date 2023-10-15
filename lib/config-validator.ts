@@ -149,7 +149,11 @@ async function validateAndSetFlag(
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validateAndSetFlag(file, fileConfig, strict);
+          await validateAndSetFlag(
+            file,
+            fileConfig,
+            strict && !!process.env.RENOVATE_CONFIG_FILE
+          );
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
