@@ -5,8 +5,8 @@ import type {
   UpdateArtifactsResult,
 } from '../../types';
 import type { PyProject } from '../schema';
-import type { PyProjectProcessor } from './types';
 import { parseDependencyList } from '../utils';
+import type { PyProjectProcessor } from './types';
 
 function depTypeFromEnv(envName: string): string {
   return `tool.hatch.envs.${envName}`;
@@ -18,7 +18,9 @@ export class HatchProcessor implements PyProjectProcessor {
     deps: PackageDependency[]
   ): PackageDependency[] {
     const hatch_envs = pyproject.tool?.hatch?.envs;
-    if (is.nullOrUndefined(hatch_envs)) return deps;
+    if (is.nullOrUndefined(hatch_envs)) {
+      return deps;
+    }
 
     for (const [envName, env] of Object.entries(hatch_envs)) {
       const depType = depTypeFromEnv(envName);
@@ -40,6 +42,6 @@ export class HatchProcessor implements PyProjectProcessor {
   ): Promise<UpdateArtifactsResult[] | null> {
     // Hatch does not have lock files at the moment
     // https://github.com/pypa/hatch/issues/749
-    return null;
+    return await null;
   }
 }
