@@ -20,6 +20,7 @@ async function validate(
   desc: string,
   config: RenovateConfig,
   strict: boolean,
+  isGlobalConfig: boolean,
   isPreset = false
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
@@ -36,7 +37,12 @@ async function validate(
     }
   }
   const massagedConfig = massageConfig(migratedConfig);
-  const res = await validateConfig(massagedConfig, isPreset);
+  const res = await validateConfig(
+    massagedConfig,
+    isPreset,
+    undefined,
+    isGlobalConfig
+  );
   if (res.errors.length) {
     logger.error(
       { file: desc, errors: res.errors },
@@ -75,7 +81,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict);
+          await validate(file, parsedContent, strict, false);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -96,7 +102,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict);
+          await validate(file, parsedContent, strict, false);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -112,7 +118,12 @@ type PackageJson = {
       ) as PackageJson;
       if (pkgJson.renovate) {
         logger.info(`Validating package.json > renovate`);
-        await validate('package.json > renovate', pkgJson.renovate, strict);
+        await validate(
+          'package.json > renovate',
+          pkgJson.renovate,
+          strict,
+          false
+        );
       }
       if (pkgJson['renovate-config']) {
         logger.info(`Validating package.json > renovate-config`);
@@ -134,7 +145,7 @@ type PackageJson = {
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validate(file, fileConfig, strict);
+          await validate(file, fileConfig, strict, true);
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;

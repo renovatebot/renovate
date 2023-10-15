@@ -27,6 +27,7 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, RenovateOptions['parent']>;
+let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
@@ -97,7 +98,8 @@ export function getParentName(parentPath: string | undefined): string {
 export async function validateConfig(
   config: RenovateConfig,
   isPreset?: boolean,
-  parentPath?: string
+  parentPath?: string,
+  isGlobalConfig?: boolean
 ): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
@@ -113,6 +115,15 @@ export async function validateConfig(
       }
     });
   }
+  if (!optionGlobals) {
+    optionGlobals = new Set<string>();
+    for (const option of options) {
+      if (option.globalOnly) {
+        optionGlobals.add(option.name);
+      }
+    }
+  }
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -131,6 +142,12 @@ export async function validateConfig(
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
+    }
+    if (optionGlobals.has(key)) {
+      if (isGlobalConfig) {
+        validateGlobalConfig(key, val, optionTypes[key], errors, currentPath);
+        continue;
+      }
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -693,6 +710,64 @@ function validateRegexManagerFields(
       errors.push({
         topic: 'Configuration Error',
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+      });
+    }
+  }
+}
+
+// basic validation for global config options
+function validateGlobalConfig(
+  key: string,
+  val: unknown,
+  type: string,
+  errors: ValidationMessage[],
+  currentPath: string | undefined
+): void {
+  if (type === 'string') {
+    if (!is.string(val)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be a string`,
+      });
+    }
+  } else if (type === 'integer') {
+    if (!is.number(val)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
+          val
+        )} (${typeof val})`,
+      });
+    }
+  } else if (type === 'boolean') {
+    if (val !== true && val !== false) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
+          val
+        )} (${typeof val})`,
+      });
+    }
+  } else if (type === 'array') {
+    if (!is.array(val)) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be a list (Array)`,
+      });
+    }
+  } else if (type === 'object') {
+    if (is.plainObject(val)) {
+      const res = validatePlainObject(val);
+      if (res !== true) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
+        });
+      }
+    } else {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}\` should be a json object`,
       });
     }
   }
