@@ -1,4 +1,3 @@
-import upath from 'upath';
 import { logger } from '../../logger';
 import { parseJson } from '../../util/common';
 import { regEx } from '../../util/regex';
