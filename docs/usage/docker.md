@@ -256,7 +256,7 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
 
 #### Google Container Registry / Google Artifact Registry
 
-##### Using Application Default Credentials / Workload Identity
+##### Using Application Default Credentials / Workload Identity (Self-Hosted only)
 
 Just configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) /
 [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_
