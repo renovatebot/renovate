@@ -148,6 +148,30 @@ describe('modules/platform/index', () => {
             username: 'USERNAME',
           },
           {
+            authType: 'Basic',
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: '123',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
             hostType: 'github',
             matchHost: 'github.com',
             token: '456',
@@ -183,6 +207,30 @@ describe('modules/platform/index', () => {
             matchHost: 'ghcr.io',
             password: '123',
             username: 'USERNAME',
+          },
+          {
+            authType: 'Basic',
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: '123',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: '123',
+            username: 'abc',
           },
           {
             hostType: 'github',
