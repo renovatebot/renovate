@@ -42,6 +42,6 @@ export class HatchProcessor implements PyProjectProcessor {
   ): Promise<UpdateArtifactsResult[] | null> {
     // Hatch does not have lock files at the moment
     // https://github.com/pypa/hatch/issues/749
-    return await null;
+    return Promise.resolve(null);
   }
 }
