@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import semver from 'semver';
 import { logger } from '../../../../../logger';
 import { getParentDir, getSiblingFileName } from '../../../../../util/fs';
 import type { PackageFile } from '../../../types';
@@ -12,34 +11,9 @@ export async function detectMonorepos(
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting workspaces');
-  // ignore lerna if using v7 or later by deleting all metadata
-  for (const p of packageFiles) {
-    if (p.managerData?.lernaJsonFile) {
-      const lernaConstraint = p.deps?.find(
-        (dep) => dep.depName === 'lerna'
-      )?.currentValue;
-      if (
-        !lernaConstraint ||
-        !semver.validRange(lernaConstraint) ||
-        semver.intersects(lernaConstraint, '>=7.0.0')
-      ) {
-        logger.debug('Deleting lerna metadata as v7 or later is in use');
-        delete p.managerData.lernaJsonFile;
-        delete p.managerData.lernaPackages;
-        delete p.managerData.lernaClient;
-      } else {
-        logger.warn(
-          'Support for lerna <7 is now deprecated, please prioritize updating to v7'
-        );
-      }
-    }
-  }
   for (const p of packageFiles) {
     const { packageFile, npmrc, managerData = {}, skipInstalls } = p;
     const {
-      lernaClient,
-      lernaJsonFile,
-      lernaPackages,
       npmLock,
       yarnZeroInstall,
       hasPackageManager,
@@ -47,9 +21,7 @@ export async function detectMonorepos(
       yarnLock,
     } = managerData;
 
-    const packages = (workspacesPackages ?? lernaPackages) as
-      | string[]
-      | undefined;
+    const packages = workspacesPackages as string[] | undefined;
     if (packages?.length) {
       const internalPackagePatterns = (
         is.array(packages) ? packages : [packages]
@@ -75,10 +47,8 @@ export async function detectMonorepos(
 
       for (const subPackage of internalPackageFiles) {
         subPackage.managerData = subPackage.managerData ?? {};
-        subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
         subPackage.managerData.hasPackageManager = hasPackageManager;
-        subPackage.managerData.lernaClient = lernaClient;
         subPackage.managerData.yarnLock ??= yarnLock;
         subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true

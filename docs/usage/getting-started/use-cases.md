@@ -58,8 +58,8 @@ This can be because:
 - The package manager/file format is not supported, or
 - The file format is not a standard or is proprietary
 
-If your dependencies are not found by default, you can use our "regex" manager to set your own custom patterns to extract dependencies.
-You configure the regex manager by telling it:
+If your dependencies are not found by default, you can use our `custom` manager to set your own custom patterns to extract dependencies.
+You configure the custom manager by telling it:
 
 - Which file pattern(s) to match
 - How to find the dependency name and version from within the file

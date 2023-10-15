@@ -110,11 +110,6 @@ const allToolConfig: Record<string, ToolConfig> = {
     extractVersion: '^kustomize/v(?<version>.*)$',
     versioning: semverVersioningId,
   },
-  lerna: {
-    datasource: 'npm',
-    packageName: 'lerna',
-    versioning: npmVersioningId,
-  },
   maven: {
     datasource: 'maven',
     packageName: 'org.apache.maven:maven',

@@ -204,7 +204,17 @@ export async function initPlatform({
     renovateUsername,
     token,
   };
-
+  if (platformResult.endpoint === 'https://api.github.com/') {
+    logger.debug('Adding GitHub token as GHCR password');
+    platformResult.hostRules = [
+      {
+        matchHost: 'ghcr.io',
+        hostType: 'docker',
+        username: 'USERNAME',
+        password: token.replace(/^x-access-token:/, ''),
+      },
+    ];
+  }
   return platformResult;
 }
 
@@ -1770,7 +1780,9 @@ export function massageMarkdown(input: string): string {
       'href="https://togithub.com/'
     )
     .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
-    .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/');
+    .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/')
+    .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
+    .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }
 
