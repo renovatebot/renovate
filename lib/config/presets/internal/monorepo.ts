@@ -430,6 +430,7 @@ const repoGroups = {
   'testcontainers-node':
     'https://github.com/testcontainers/testcontainers-node',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
+  tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
@@ -451,7 +452,12 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   xstate: 'https://github.com/statelyai/xstate',
   xterm: 'https://github.com/xtermjs/xterm.js',
-  'xunit-dotnet': 'https://github.com/xunit/xunit',
+  'xunit-dotnet': [
+    'https://github.com/xunit/assert.xunit',
+    'https://github.com/xunit/visualstudio.xunit',
+    'https://github.com/xunit/xunit',
+    'https://github.com/xunit/xunit.analyzers',
+  ],
   yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
