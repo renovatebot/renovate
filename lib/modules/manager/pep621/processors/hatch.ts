@@ -36,7 +36,7 @@ export class HatchProcessor implements PyProjectProcessor {
     return deps;
   }
 
-  async updateArtifacts(
+  updateArtifacts(
     updateArtifact: UpdateArtifact<Record<string, unknown>>,
     project: PyProject
   ): Promise<UpdateArtifactsResult[] | null> {
