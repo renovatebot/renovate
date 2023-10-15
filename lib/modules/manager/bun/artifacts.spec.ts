@@ -42,14 +42,16 @@ describe('modules/manager/bun/artifacts', () => {
     });
 
     it('skips if cannot read lock file', async () => {
-      updateArtifact.updatedDeps = [{}];
-      updateArtifact.config.lockFiles = ['bun.lockb'];
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lockb'] },
+      ];
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
     it('returns null if lock content unchanged', async () => {
-      updateArtifact.updatedDeps = [{}];
-      updateArtifact.config.lockFiles = ['bun.lockb'];
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lockb'] },
+      ];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       fs.readFile.mockResolvedValueOnce(oldLock as never);
@@ -57,8 +59,9 @@ describe('modules/manager/bun/artifacts', () => {
     });
 
     it('returns updated lock content', async () => {
-      updateArtifact.updatedDeps = [{}];
-      updateArtifact.config.lockFiles = ['bun.lockb'];
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lockb'] },
+      ];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       const newLock = Buffer.from('new');
@@ -75,7 +78,9 @@ describe('modules/manager/bun/artifacts', () => {
     });
 
     it('supports lockFileMaintenance', async () => {
-      updateArtifact.config.lockFiles = ['bun.lockb'];
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lockb'] },
+      ];
       updateArtifact.config.updateType = 'lockFileMaintenance';
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
@@ -99,8 +104,9 @@ describe('modules/manager/bun/artifacts', () => {
         stderr: '',
         options: { encoding: 'utf8' },
       });
-      updateArtifact.updatedDeps = [{}];
-      updateArtifact.config.lockFiles = ['bun.lockb'];
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lockb'] },
+      ];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       exec.mockRejectedValueOnce(execError);
@@ -116,8 +122,9 @@ describe('modules/manager/bun/artifacts', () => {
         stderr: '',
         options: { encoding: 'utf8' },
       });
-      updateArtifact.updatedDeps = [{}];
-      updateArtifact.config.lockFiles = ['bun.lockb'];
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lockb'] },
+      ];
       const oldLock = Buffer.from('old');
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       exec.mockRejectedValueOnce(execError);

@@ -18,7 +18,7 @@ const communityKubernetesDetails0111 = Fixtures.get(
   'community_kubernetes_version_details_0.11.1.json'
 );
 
-const baseUrl = 'https://galaxy.ansible.com';
+const baseUrl = 'https://old-galaxy.ansible.com';
 
 const datasource = GalaxyCollectionDatasource.id;
 

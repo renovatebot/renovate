@@ -164,6 +164,53 @@ describe('modules/manager/git-submodules/extract', () => {
       ]);
     });
 
+    it('combined username+pwd from host rule is used to detect branch for git-refs and git-tags', async () => {
+      gitMock.listRemote.mockResolvedValueOnce(
+        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+      );
+      hostRules.add({
+        hostType: 'git-refs',
+        matchHost: 'gitrefs.com',
+        username: 'git-refs-user',
+        password: 'git-refs-password',
+      });
+      hostRules.add({
+        hostType: 'git-tags',
+        matchHost: 'gittags.com',
+        username: 'git-tags-user',
+        password: 'git-tags-password',
+      });
+      const res = await extractPackageFile('', '.gitmodules.2', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('main');
+      expect(gitMock.env).toHaveBeenCalledWith({
+        GIT_CONFIG_COUNT: '6',
+        GIT_CONFIG_KEY_0:
+          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
+        GIT_CONFIG_KEY_4:
+          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
+        GIT_CONFIG_KEY_5:
+          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gitrefs.com/',
+        GIT_CONFIG_VALUE_1: 'git@gitrefs.com:',
+        GIT_CONFIG_VALUE_2: 'https://gitrefs.com/',
+        GIT_CONFIG_VALUE_3: 'ssh://git@gittags.com/',
+        GIT_CONFIG_VALUE_4: 'git@gittags.com:',
+        GIT_CONFIG_VALUE_5: 'https://gittags.com/',
+      });
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        '--symref',
+        'https://github.com/PowerShell/PowerShell-Docs',
+        'HEAD',
+      ]);
+    });
+
     it('extracts multiple submodules', async () => {
       hostRules.add({ matchHost: 'github.com', token: '123test' });
       hostRules.add({

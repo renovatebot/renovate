@@ -40,7 +40,7 @@ export function getPreset({
   const resolver = resolvers[platform];
   if (!resolver) {
     throw new Error(
-      `The platform you're using ($platform) does not support local presets.`
+      `The platform you're using (${platform}) does not support local presets.`
     );
   }
   const endpoint = GlobalConfig.get('endpoint');
