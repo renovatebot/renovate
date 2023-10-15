@@ -214,6 +214,25 @@ export async function initPlatform({
         password: token.replace(/^x-access-token:/, ''),
       },
     ];
+    logger.debug('Adding GitHub token as npm.pkg.github.com Basic token');
+    platformResult.hostRules.push({
+      matchHost: 'npm.pkg.github.com',
+      hostType: 'npm',
+      token: token.replace(/^x-access-token:/, ''),
+      authType: 'Basic',
+    });
+    const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
+    for (const hostType of usernamePasswordHostTypes) {
+      logger.debug(
+        `Adding GitHub token as ${hostType}.pkg.github.com password`
+      );
+      platformResult.hostRules.push({
+        hostType,
+        matchHost: `${hostType}.pkg.github.com`,
+        username: renovateUsername,
+        password: token.replace(/^x-access-token:/, ''),
+      });
+    }
   }
   return platformResult;
 }
