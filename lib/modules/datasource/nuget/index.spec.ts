@@ -426,7 +426,6 @@ describe('modules/datasource/nuget/index', () => {
         ],
         sourceUrl: 'https://github.com/nunit/nunit',
       });
-      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) for several catalog pages', async () => {
