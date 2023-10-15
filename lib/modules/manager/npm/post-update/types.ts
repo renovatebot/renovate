@@ -6,7 +6,6 @@ export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
   npmLockDirs: string[];
   pnpmShrinkwrapDirs: string[];
-  lernaJsonFiles: string[];
 }
 
 export interface AdditionalPackageFiles {
