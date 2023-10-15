@@ -274,7 +274,6 @@ export async function getPr(
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
     destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
-    sha: prInfo.revisionId as LongCommitSha, // Not sure about this one ... maybe not a problem, but something to check
     body: prInfo.description!,
   };
 }
