@@ -4,6 +4,7 @@ import { extractPackageFile } from '.';
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
+const hatchPyProject = Fixtures.get('pyproject_with_hatch.toml');
 
 describe('modules/manager/pep621/extract', () => {
   describe('extractPackageFile()', () => {
@@ -265,6 +266,41 @@ describe('modules/manager/pep621/extract', () => {
             'https://pypi.org/pypi/',
             'https://private-site.org/pypi/simple',
           ],
+        },
+      ]);
+    });
+
+    it('should extract dependencies from hatch environments', function () {
+      const result = extractPackageFile(hatchPyProject, 'pyproject.toml');
+
+      expect(result?.deps).toEqual([
+        {
+          currentValue: '==2.30.0',
+          datasource: 'pypi',
+          depName: 'requests',
+          depType: 'project.dependencies',
+          packageName: 'requests',
+        },
+        {
+          currentValue: '==6.5',
+          datasource: 'pypi',
+          depName: 'coverage',
+          depType: 'tool.hatch.envs.default',
+          packageName: 'coverage',
+        },
+        {
+          datasource: 'pypi',
+          depName: 'pytest',
+          depType: 'tool.hatch.envs.default',
+          packageName: 'pytest',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '>=23.1.0',
+          datasource: 'pypi',
+          depName: 'black',
+          depType: 'tool.hatch.envs.lint',
+          packageName: 'black',
         },
       ]);
     });
