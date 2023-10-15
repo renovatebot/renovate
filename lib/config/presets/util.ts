@@ -20,7 +20,7 @@ export async function fetchPreset({
   tag,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
-  // TODO: fix me, can be undefiend #7154
+  // TODO: fix me, can be undefiend #22198
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
@@ -45,7 +45,14 @@ export async function fetchPreset({
         endpoint,
         tag
       );
-      logger.info(
+      logger.warn(
+        {
+          repo,
+          filePreset,
+          presetPath,
+          endpoint,
+          tag,
+        },
         'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
       );
     }

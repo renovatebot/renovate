@@ -42,7 +42,6 @@ limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
 });

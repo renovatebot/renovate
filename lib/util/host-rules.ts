@@ -49,8 +49,10 @@ export function add(params: HostRule): void {
     confidentialFields.forEach((field) => {
       if (rule[field]) {
         logger.debug(
-          // TODO: types (#7154)
-          `Adding ${field} authentication for ${rule.matchHost!} to hostRules`
+          // TODO: types (#22198)
+          `Adding ${field} authentication for ${rule.matchHost!} (hostType=${
+            rule.hostType
+          }) to hostRules`
         );
       }
     });

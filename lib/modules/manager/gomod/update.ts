@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
@@ -28,6 +28,11 @@ export function updateDependency({
     }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split(newlineRegex);
+    // istanbul ignore if: hard to test
+    if (lines.length <= upgrade.managerData.lineNumber) {
+      logger.warn('go.mod current line no longer exists after update');
+      return null;
+    }
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
@@ -81,13 +86,13 @@ export function updateDependency({
         'gomod: need to update digest'
       );
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
         `$<depPart>$<divider>${newDigestRightSized}`
       );
     } else {
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
         `$<depPart>$<divider>${upgrade.newValue}`
       );

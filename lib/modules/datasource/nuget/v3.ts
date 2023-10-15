@@ -35,10 +35,10 @@ export async function getResourceUrl(
   if (cachedResult) {
     return cachedResult;
   }
-
+  let servicesIndexRaw: ServicesIndexRaw | undefined;
   try {
     const responseCacheKey = url;
-    let servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
+    servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
       cacheNamespace,
       responseCacheKey
     );
@@ -63,7 +63,9 @@ export async function getResourceUrl(
         ({ type, version }) => type === resourceType && semver.valid(version)
       )
       .sort((x, y) =>
-        x.version && y.version ? semver.compare(x.version, y.version) : 0
+        x.version && y.version
+          ? semver.compare(x.version, y.version)
+          : /* istanbul ignore next: hard to test */ 0
       );
     const { serviceId, version } = services.pop()!;
 
@@ -88,7 +90,7 @@ export async function getResourceUrl(
       throw err;
     }
     logger.debug(
-      { err, url },
+      { err, url, servicesIndexRaw },
       `nuget registry failure: can't get ${resourceType}`
     );
     return null;
@@ -146,7 +148,7 @@ export async function getReleases(
     return null;
   }
 
-  // istanbul ignore if: only happens when no stable version exists
+  // istanbul ignore next: only happens when no stable version exists
   if (latestStable === null && catalogPages.length) {
     const last = catalogEntries.pop()!;
     latestStable = removeBuildMeta(last.version);
@@ -168,7 +170,7 @@ export async function getReleases(
       const nuspecUrl = `${ensureTrailingSlash(
         packageBaseAddress
       )}${pkgName.toLowerCase()}/${
-        // TODO: types (#7154)
+        // TODO: types (#22198)
         latestStable
       }/${pkgName.toLowerCase()}.nuspec`;
       const metaresult = await http.get(nuspecUrl);

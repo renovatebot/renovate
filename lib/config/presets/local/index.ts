@@ -40,7 +40,7 @@ export function getPreset({
   const resolver = resolvers[platform];
   if (!resolver) {
     throw new Error(
-      `The platform you're using ($platform) does not support local presets.`
+      `The platform you're using (${platform}) does not support local presets.`
     );
   }
   const endpoint = GlobalConfig.get('endpoint');
@@ -48,7 +48,7 @@ export function getPreset({
     repo,
     presetName,
     presetPath,
-    // TODO: fix type #7154
+    // TODO: fix type #22198
     endpoint!,
     tag
   );

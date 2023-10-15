@@ -1,18 +1,17 @@
-This `custom` datasource allows requesting version data from generic HTTP endpoints.
+This `custom` datasource allows requesting version data from generic HTTP(S) endpoints.
 
 ## Usage
 
 The `customDatasources` option takes a record of `customDatasource` configs.
-This example shows how to update the `k3s.version` file with a custom datasource and
-a [regexManagers](../../manager/regex/):
+This example shows how to update the `k3s.version` file with a custom datasource and a [regex](../../manager/regex/index.md) custom manager:
 
 Options:
 
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| defaultRegistryUrlTemplate | ""      | url used if no `registryUrl` is provided when looking up new releases                                                                                                    |
+| defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
 | format                     | "json"  | format used by the API. Available values are: `json`, `plain`                                                                                                            |
-| transformTemplates         | []      | [jsonata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
+| transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
 
@@ -20,8 +19,9 @@ Available template variables:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["k3s.version"],
       "matchStrings": ["(?<currentValue>\\S+)"],
       "depNameTemplate": "k3s",
@@ -40,7 +40,7 @@ Available template variables:
 }
 ```
 
-After all transformations, the resulting json has to follow this formats:
+After all transformations, the resulting JSON must match one of these formats:
 
 Minimal-supported object:
 
@@ -90,7 +90,7 @@ The returned body will be directly interpreted as JSON and forwarded to the tran
 If the format is set to `plain`, Renovate will call the HTTP endpoint with the `Accept` header value `text/plain`.
 The body of the response will be treated as plain text and will be converted into JSON.
 
-Suppose the body of the HTTP response is as follows::
+Suppose the body of the HTTP response is as follows:
 
 ```
 1.0.0
@@ -143,8 +143,9 @@ You can use this configuration to request the newest versions of the Hashicorp p
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.hashicorp",
       "matchStrings": [
@@ -171,11 +172,58 @@ To have the latest Nomad version in your Ansible variables, use this snippet _af
 nomad_version: 1.6.0
 ```
 
+### Grafana Dashboard
+
+You can use the following configuration to upgrade the Grafana Dashboards versions in your [Grafana Helm chart](https://github.com/grafana/helm-charts/blob/e5f1e9c4a4a3b43a820dc4b9eb16f3daa0b6e74f/charts/grafana/values.yaml#L685-L688):
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["\\.yml$"],
+      "matchStrings": [
+        "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
+      ],
+      "versioningTemplate": "regex:^(?<major>\\d+)$",
+      "datasourceTemplate": "custom.grafana-dashboards"
+    }
+  ],
+  "customDatasources": {
+    "grafana-dashboards": {
+      "defaultRegistryUrlTemplate": "https://grafana.com/api/dashboards/{{packageName}}",
+      "format": "json",
+      "transformTemplates": [
+        "{\"releases\":[{\"version\": $string(revision)}]}"
+      ]
+    }
+  }
+}
+```
+
+Grafana Helm chart `values.yaml` snippet:
+
+```yml
+dashboards:
+  default:
+    1860-node-exporter-full:
+      # renovate: depName="Node Exporter Full"
+      gnetId: 1860
+      revision: 31
+      datasource: Prometheus
+    15760-kubernetes-views-pods:
+      # renovate: depName="Kubernetes / Views / Pods"
+      gnetId: 15760
+      revision: 20
+      datasource: Prometheus
+```
+
 ### Custom offline dependencies
 
 Sometimes the "dependency version source" is _not_ available via an API.
-To work around a missing API, you can create dependency "files". These files are served via HTTP(S), so that Renovate can access them.
-For example, imagine the following file `versiontracker.json` for the software `something``:
+To work around a missing API, you can create dependency "files".
+These files are served via HTTP(S), so that Renovate can access them.
+For example, imagine the following file `versiontracker.json` for the software `something`:
 
 ```json
 [
@@ -204,7 +252,7 @@ This example uses Nexus as the webserver.
 }
 ```
 
-This could be used to update Ansible YAML files with the latest version through a regex manager.
+This could be used to update Ansible YAML files with the latest version through a custom manager.
 For example, with the following Ansible content:
 
 ```yaml
@@ -212,12 +260,13 @@ For example, with the following Ansible content:
 something_version: '77'
 ```
 
-And the following regex manager:
+And the following custom manager:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.nexus_generic",
       "matchStrings": [

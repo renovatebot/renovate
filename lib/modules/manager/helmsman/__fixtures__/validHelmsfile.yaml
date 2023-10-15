@@ -2,6 +2,7 @@ namespaces:
   redis-operator:
   strimzi:
   monitoring:
+  test-apps:
 
 helmRepos:
   ot-helm: "https://ot-container-kit.github.io/helm-charts/"
@@ -11,14 +12,14 @@ helmRepos:
   prometheus-community: https://prometheus-community.github.io/helm-charts
 
 apps:
-# valid apps
+  # valid apps
   kube-prometheus:
     enabled: true
     namespace: monitoring
     chart: prometheus-community/kube-prometheus-stack
     version: 19.0.3
     valuesFiles:
-      -  ./kube-prometheus/values.yaml
+      - ./kube-prometheus/values.yaml
     priority: -90
   loki:
     enabled: true
@@ -44,14 +45,19 @@ apps:
     namespace: strimzi
     chart: strimzi/strimzi-kafka-operator
     version: 0.25.0
+  podinfo:
+    enabled: true
+    namespace: test-apps
+    chart: oci://ghcr.io/stefanprodan/charts/podinfo
+    version: 6.4.0
 
-# missing version
+  # missing version
   strimzi-operator-missing-version:
     enabled: true
     namespace: strimzi
     chart: strimzi/strimzi-kafka-operator
 
-# malformed  chart
+  # malformed  chart
   loki-no-registry-ref:
     enabled: true
     namespace: monitoring
@@ -68,7 +74,7 @@ apps:
     chart: prometheus-community/
     version: 19.0.3
     valuesFiles:
-      -  ./kube-prometheus/values.yaml
+      - ./kube-prometheus/values.yaml
     priority: -90
   otlp-collector-no-chart:
     enabled: true

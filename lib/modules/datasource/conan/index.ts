@@ -71,7 +71,7 @@ export class ConanDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}-revisions`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue?: string) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl!}:${packageName}:${newValue!}`,
   })
   override async getDigest(
@@ -101,7 +101,7 @@ export class ConanDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
@@ -140,6 +140,7 @@ export class ConanDatasource extends Datasource {
           const dep: ReleaseResult = { releases: [] };
 
           for (const resultString of Object.values(versions.results ?? {})) {
+            conanDatasourceRegex.lastIndex = 0;
             const fromMatch = conanDatasourceRegex.exec(resultString);
             if (fromMatch?.groups?.version && fromMatch?.groups?.userChannel) {
               const version = fromMatch.groups.version;

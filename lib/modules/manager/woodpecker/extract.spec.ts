@@ -11,6 +11,7 @@ describe('modules/manager/woodpecker/extract', () => {
 
     it('returns null for non-object YAML', () => {
       expect(extractPackageFile('nothing here', '', {})).toBeNull();
+      expect(extractPackageFile('clone: null', '', {})).toBeNull();
     });
 
     it('returns null for malformed YAML', () => {
@@ -21,6 +22,15 @@ describe('modules/manager/woodpecker/extract', () => {
       const res = extractPackageFile(yamlFile, '', {});
       expect(res).toEqual({
         deps: [
+          {
+            depName: 'woodpeckerci/plugin-git',
+            currentValue: '2.0.3',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:2.0.3',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
           {
             depName: 'quay.io/something/redis',
             currentValue: 'alpine',
@@ -89,6 +99,15 @@ describe('modules/manager/woodpecker/extract', () => {
             currentValue: undefined,
             currentDigest: undefined,
             replaceString: 'app-local-debug',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'postgres',
+            currentValue: '9.5.0',
+            currentDigest: undefined,
+            replaceString: 'postgres:9.5.0',
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
@@ -183,6 +202,109 @@ describe('modules/manager/woodpecker/extract', () => {
           },
         ],
       });
+    });
+
+    it('extracts the v.1.0.x version', () => {
+      const res = extractPackageFile(
+        `
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+          `,
+        '',
+        {}
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('should parse multiple sources of dependencies together', () => {
+      const res = extractPackageFile(
+        `
+        clone:
+          git:
+            image: woodpeckerci/plugin-git:latest
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+        `,
+        '',
+        {}
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'woodpeckerci/plugin-git',
+            currentValue: 'latest',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:latest',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('return dependency when an plugin-git is cloned', () => {
+      const res = extractPackageFile(
+        `
+        clone:
+          git:
+            image: woodpeckerci/plugin-git:latest
+        `,
+        '',
+        {}
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'woodpeckerci/plugin-git',
+            currentValue: 'latest',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:latest',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('return null when no dependencies are provided', () => {
+      const res = extractPackageFile(
+        `
+        info:
+          version:
+            3.5
+        `,
+        '',
+        {}
+      );
+
+      expect(res).toBeNull();
     });
   });
 });

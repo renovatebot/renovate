@@ -1,6 +1,8 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
+import { validateUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
@@ -86,7 +88,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let pkgUrl: string;
 
     try {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
 
       pkgUrl = createSDBackendURL(
         registryUrl,
@@ -136,7 +138,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       pkgUrl = createSDBackendURL(
         registryUrl,
         'modules.v1',
@@ -158,12 +160,18 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         version,
       })),
     };
+
+    // Add the source URL if given
+    if (validateUrl(res.modules[0].source)) {
+      dep.sourceUrl = res.modules[0].source;
+    }
+
     return dep;
   }
 
   private static getRegistryRepository(
     packageName: string,
-    registryUrl = ''
+    registryUrl: string | undefined
   ): RegistryRepository {
     let registry: string;
     const split = packageName.split('/');
@@ -171,7 +179,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       [registry] = split;
       split.shift();
     } else {
-      registry = registryUrl;
+      registry = coerceString(registryUrl);
     }
     if (!regEx(/^https?:\/\//).test(registry)) {
       registry = `https://${registry}`;

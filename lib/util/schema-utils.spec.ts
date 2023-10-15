@@ -1,10 +1,12 @@
+import { codeBlock } from 'common-tags';
 import { z } from 'zod';
 import {
   Json,
   Json5,
   LooseArray,
   LooseRecord,
-  Url,
+  MultidocYaml,
+  Toml,
   UtcDate,
   Yaml,
 } from './schema-utils';
@@ -279,24 +281,6 @@ describe('util/schema-utils', () => {
     });
   });
 
-  describe('Url', () => {
-    it('parses valid URLs', () => {
-      const urlStr = 'https://www.example.com/foo/bar?baz=qux';
-      const parsedUrl = Url.parse(urlStr);
-      expect(parsedUrl).toMatchObject({
-        protocol: 'https:',
-        hostname: 'www.example.com',
-        pathname: '/foo/bar',
-        search: '?baz=qux',
-      });
-    });
-
-    it('throws an error for invalid URLs', () => {
-      const urlStr = 'invalid-url-string';
-      expect(() => Url.parse(urlStr)).toThrow('Invalid URL');
-    });
-  });
-
   describe('Yaml', () => {
     const Schema = Yaml.pipe(
       z.object({ foo: z.array(z.object({ bar: z.literal('baz') })) })
@@ -331,6 +315,109 @@ describe('util/schema-utils', () => {
           issues: [
             {
               message: 'Invalid YAML',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
+  describe('MultidocYaml', () => {
+    const Schema = MultidocYaml.pipe(
+      z.array(
+        z.object({
+          foo: z.number(),
+        })
+      )
+    );
+
+    it('parses valid yaml', () => {
+      expect(
+        Schema.parse(codeBlock`
+          foo: 111
+          ---
+          foo: 222
+        `)
+      ).toEqual([{ foo: 111 }, { foo: 222 }]);
+    });
+
+    it('throws error for non-string', () => {
+      expect(Schema.safeParse(42)).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected string, received number',
+              code: 'invalid_type',
+              expected: 'string',
+              received: 'number',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+
+    it('throws error for invalid yaml', () => {
+      expect(Schema.safeParse('clearly: "invalid" "yaml"')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid YAML',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
+  describe('Toml', () => {
+    const Schema = Toml.pipe(
+      z.object({ foo: z.object({ bar: z.literal('baz') }) })
+    );
+
+    it('parses valid toml', () => {
+      const content = codeBlock`
+        [foo]
+        bar = "baz"
+      `;
+      expect(Schema.parse(content)).toEqual({
+        foo: { bar: 'baz' },
+      });
+    });
+
+    it('throws error for invalid schema', () => {
+      const content = codeBlock`
+        [foo]
+        bar = "brb"
+      `;
+      expect(Schema.safeParse(content)).toMatchObject({
+        error: {
+          issues: [
+            {
+              received: 'brb',
+              code: 'invalid_literal',
+              expected: 'baz',
+              path: ['foo', 'bar'],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+
+    it('throws error for invalid toml', () => {
+      expect(Schema.safeParse('clearly_invalid')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid TOML',
               code: 'custom',
               path: [],
             },

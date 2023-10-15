@@ -67,7 +67,12 @@ export function extractImage(image: Image): PackageDependency | null {
   if (!image.name) {
     return null;
   }
-  const nameDep = splitImageParts(image.newName ?? image.name);
+  const nameToSplit = image.newName ?? image.name;
+  if (!is.string(nameToSplit)) {
+    logger.debug({ image }, 'Invalid image name');
+    return null;
+  }
+  const nameDep = splitImageParts(nameToSplit);
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
@@ -110,7 +115,7 @@ export function extractImage(image: Image): PackageDependency | null {
       };
     }
 
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const dep = splitImageParts(`${depName}:${newTag}`);
     return {
       ...dep,

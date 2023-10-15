@@ -1,4 +1,3 @@
-import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
 import { logger, mocked } from '../../../test/util';

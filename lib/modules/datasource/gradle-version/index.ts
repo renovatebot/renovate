@@ -26,7 +26,7 @@ export class GradleVersionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GradleVersionDatasource.id}`,
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({

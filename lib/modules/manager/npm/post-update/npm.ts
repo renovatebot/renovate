@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -164,7 +164,7 @@ export async function generateLockFile(
     }
 
     // Read the result
-    // TODO #7154
+    // TODO #22198
     lockFile = (await readLocalFile(
       upath.join(lockFileDir, filename),
       'utf8'
@@ -183,7 +183,7 @@ export async function generateLockFile(
             | 'dependencies'
             | 'optionalDependencies';
 
-          // TODO #7154
+          // TODO #22198
           if (
             lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
           ) {
@@ -210,7 +210,7 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr };
   }
-  return { lockFile };
+  return { error: !lockFile, lockFile };
 }
 
 export function divideWorkspaceAndRootDeps(
@@ -251,7 +251,7 @@ export function divideWorkspaceAndRootDeps(
         // compare workspaceDir to workspace patterns
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
-        for (const workspacePattern of workspacePatterns ?? []) {
+        for (const workspacePattern of workspacePatterns) {
           if (minimatch(workspacePattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;

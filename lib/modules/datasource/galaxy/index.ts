@@ -15,7 +15,7 @@ export class GalaxyDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://old-galaxy.ansible.com/'];
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -32,7 +32,7 @@ export class GalaxyDatasource extends Datasource {
     const userName = lookUp[0];
     const projectName = lookUp[1];
 
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
     const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 

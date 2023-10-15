@@ -18,7 +18,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isSystemManifest } from './common';
+import { isSystemManifest, systemManifestHeaderRegex } from './common';
 import type {
   FluxManagerData,
   FluxManifest,
@@ -33,9 +33,7 @@ function readManifest(
   packageFile: string
 ): FluxManifest | null {
   if (isSystemManifest(packageFile)) {
-    const versionMatch = regEx(
-      /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*([A-Za-z,-]+))?/
-    ).exec(content);
+    const versionMatch = regEx(systemManifestHeaderRegex).exec(content);
     if (!versionMatch) {
       return null;
     }
@@ -302,7 +300,7 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    // TODO #7154
+    // TODO #22198
     const manifest = readManifest(content!, file);
     if (manifest) {
       manifests.push(manifest);

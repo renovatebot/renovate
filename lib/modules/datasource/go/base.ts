@@ -1,4 +1,4 @@
-// TODO: types (#7154)
+// TODO: types (#22198)
 import URL from 'node:url';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
@@ -55,6 +55,18 @@ export class BaseGoDatasource {
         datasource: BitbucketTagsDatasource.id,
         packageName,
         registryUrl: 'https://bitbucket.org',
+      };
+    }
+
+    if (goModule.startsWith('code.cloudfoundry.org/')) {
+      const packageName = goModule.replace(
+        'code.cloudfoundry.org',
+        'cloudfoundry'
+      );
+      return {
+        datasource: GithubTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://github.com',
       };
     }
 
@@ -179,9 +191,14 @@ export class BaseGoDatasource {
       return null;
     }
 
-    const [, prefix, , goImportURL] = importMatch;
+    const [, prefix, proto, goImportURL] = importMatch;
     if (!goModule.startsWith(prefix)) {
       logger.trace({ goModule }, 'go-import header prefix not match');
+      return null;
+    }
+
+    if (proto !== 'git') {
+      logger.trace({ goModule }, 'go-import header proto not git');
       return null;
     }
 

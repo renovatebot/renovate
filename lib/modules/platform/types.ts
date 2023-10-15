@@ -1,5 +1,5 @@
 import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, VulnerabilityAlert } from '../../types';
+import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
@@ -23,6 +23,10 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
+  /*
+   * return these only if _additional_ rules/hosts are required
+   */
+  hostRules?: HostRule[];
 }
 
 export interface RepoResult {
@@ -137,6 +141,7 @@ export interface FindPRConfig {
   prTitle?: string | null;
   state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
+  targetBranch?: string | null;
 }
 export interface MergePRConfig {
   branchName?: string;
@@ -168,6 +173,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 export interface AutodiscoverConfig {
   topics?: string[];
   includeMirrors?: boolean;
+  namespaces?: string[];
 }
 
 export interface Platform {
@@ -203,7 +209,7 @@ export interface Platform {
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #7154
+    // TODO: can be undefined or null ? #22198
     context: string | null | undefined
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
@@ -219,7 +225,7 @@ export interface Platform {
     branchName: string,
     internalChecksAsSuccess: boolean
   ): Promise<BranchStatus>;
-  getBranchPr(branchName: string): Promise<Pr | null>;
+  getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;

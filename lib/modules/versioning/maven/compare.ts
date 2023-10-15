@@ -111,13 +111,6 @@ function isNull(token: Token): boolean {
   );
 }
 
-const zeroToken: NumberToken = {
-  prefix: PREFIX_HYPHEN,
-  type: TYPE_NUMBER,
-  val: 0,
-  isTransition: false,
-};
-
 function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
@@ -136,7 +129,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
       buf = [];
     }
   });
-  return result.length ? result : [zeroToken];
+  return result;
 }
 
 function nullFor(token: Token): Token {

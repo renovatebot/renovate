@@ -36,7 +36,7 @@ export async function getPrHourlyRemaining(
       return config.prHourlyLimit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getConcurrentPrsRemaining(
@@ -49,7 +49,7 @@ export async function getConcurrentPrsRemaining(
       const openPrs: Pr[] = [];
       for (const { branchName } of branches) {
         try {
-          const pr = await platform.getBranchPr(branchName);
+          const pr = await platform.getBranchPr(branchName, config.baseBranch);
           if (
             pr &&
             pr.sourceBranch !== config.onboardingBranch &&
@@ -78,7 +78,7 @@ export async function getConcurrentPrsRemaining(
       return config.prConcurrentLimit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getPrsRemaining(
@@ -119,12 +119,12 @@ export async function getConcurrentBranchesRemaining(
 
       return concurrentRemaining;
     } catch (err) {
-      // TODO: #7154 should never throw
+      // TODO: #22198 should never throw
       logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getBranchesRemaining(

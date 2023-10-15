@@ -43,11 +43,18 @@ export function setPlatformApi(name: PlatformId): void {
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPrivateKey(config.gitPrivateKey);
   setNoVerify(config.gitNoVerify ?? []);
-  // TODO: `platform` (#7154)
+  // TODO: `platform` (#22198)
   setPlatformApi(config.platform!);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
-  const returnConfig: any = { ...config, ...platformInfo };
+  const returnConfig: any = {
+    ...config,
+    ...platformInfo,
+    hostRules: [
+      ...(platformInfo?.hostRules ?? []),
+      ...(config.hostRules ?? []),
+    ],
+  };
   // istanbul ignore else
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
@@ -59,7 +66,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   // This is done for validation and will be overridden later once repo config is incorporated
   setGitAuthor(returnConfig.gitAuthor);
   const platformRule: HostRule = {
-    // TODO: null check (#7154)
+    // TODO: null check (#22198)
     matchHost: URL.parse(returnConfig.endpoint).hostname!,
   };
   // There might have been platform-specific modifications to the token
@@ -70,12 +77,11 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     ['token', 'username', 'password'] as ('token' | 'username' | 'password')[]
   ).forEach((field) => {
     if (config[field]) {
-      // TODO: types #7154
+      // TODO: types #22198
       platformRule[field] = config[field] as string;
       delete returnConfig[field];
     }
   });
-  returnConfig.hostRules = returnConfig.hostRules || [];
   const typedPlatformRule = {
     ...platformRule,
     hostType: returnConfig.platform,

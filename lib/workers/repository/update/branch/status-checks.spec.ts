@@ -17,9 +17,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
     });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
+    afterEach(() => {});
 
     it('returns if not configured', async () => {
       await setStability(config);
@@ -56,10 +54,6 @@ describe('workers/repository/update/branch/status-checks', () => {
       config = {
         branchName: 'renovate/some-branch',
       };
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('returns if not configured', async () => {

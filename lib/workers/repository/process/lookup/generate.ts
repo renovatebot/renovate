@@ -10,6 +10,7 @@ import { getUpdateType } from './update-type';
 
 export async function generateUpdate(
   config: LookupUpdateConfig,
+  currentValue: string | undefined,
   versioning: VersioningApi,
   rangeStrategy: RangeStrategy,
   currentVersion: string,
@@ -49,7 +50,6 @@ export async function generateUpdate(
     update.registryUrl = release.registryUrl;
   }
 
-  const { currentValue } = config;
   if (currentValue) {
     try {
       update.newValue = versioning.getNewValue({
@@ -66,7 +66,7 @@ export async function generateUpdate(
       update.newValue = currentValue;
     }
   } else {
-    update.newValue = currentValue!;
+    update.newValue = currentValue;
   }
   update.newMajor = versioning.getMajor(newVersion)!;
   update.newMinor = versioning.getMinor(newVersion)!;
@@ -97,7 +97,7 @@ export async function generateUpdate(
   }
   if (
     rangeStrategy === 'bump' &&
-    // TODO #7154
+    // TODO #22198
     versioning.matches(newVersion, currentValue!)
   ) {
     update.isBump = true;

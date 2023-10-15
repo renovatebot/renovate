@@ -17,7 +17,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
@@ -85,7 +84,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
-        cmd: 'pnpm dedupe',
+        cmd: 'pnpm dedupe --config.ignore-scripts=true',
       },
     ]);
   });

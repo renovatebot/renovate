@@ -11,9 +11,10 @@ export class GitHubChangeLogSource extends ChangeLogSource {
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return config.sourceUrl!.startsWith('https://github.com/')
+    const baseUrl = this.getBaseUrl(config);
+    return baseUrl.startsWith('https://github.com/')
       ? 'https://api.github.com/'
-      : this.getBaseUrl(config) + 'api/v3/';
+      : baseUrl + 'api/v3/';
   }
 
   getCompareURL(
@@ -42,7 +43,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
   } {
     const sourceUrl = config.sourceUrl!;
     const parsedUrl = URL.parse(sourceUrl);
-    const host = parsedUrl.host!;
+    const host = parsedUrl.host;
     const manager = config.manager;
     const packageName = config.packageName;
 
@@ -54,7 +55,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
       url,
     });
     // istanbul ignore if
-    if (!token) {
+    if (host && !token) {
       if (host.endsWith('.github.com') || host === 'github.com') {
         if (!GlobalConfig.get('githubTokenWarn')) {
           logger.debug(

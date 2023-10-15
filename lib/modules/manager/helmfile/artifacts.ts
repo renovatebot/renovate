@@ -12,14 +12,12 @@ import {
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
 import { regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
+import { Yaml } from '../../../util/schema-utils';
 import { generateHelmEnvs } from '../helmv3/common';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import {
-  generateRegistryLoginCmd,
-  isOCIRegistry,
-  parseDoc,
-  parseLock,
-} from './utils';
+import { Doc, LockVersion } from './schema';
+import { generateRegistryLoginCmd, isOCIRegistry } from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -58,7 +56,7 @@ export async function updateArtifacts({
         toolName: 'helmfile',
         constraint:
           config.constraints?.helmfile ??
-          parseLock(existingLockFileContent).version,
+          Result.parse(existingLockFileContent, LockVersion).unwrapOrNull(),
       },
     ];
     const needKustomize = updatedDeps.some(
@@ -72,10 +70,13 @@ export async function updateArtifacts({
     }
 
     const cmd: string[] = [];
-    const doc = parseDoc(newPackageFileContent);
+    const doc = Result.parse(
+      newPackageFileContent,
+      Yaml.pipe(Doc)
+    ).unwrapOrThrow();
 
     for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
-      const loginCmd = generateRegistryLoginCmd(
+      const loginCmd = await generateRegistryLoginCmd(
         value.name,
         `https://${value.url}`,
         // this extracts the hostname from url like format ghcr.ip/helm-charts

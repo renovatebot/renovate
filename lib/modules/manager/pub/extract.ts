@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
+import type { SkipReason } from '../../../types';
 import { DartDatasource } from '../../datasource/dart';
+import { DartVersionDatasource } from '../../datasource/dart-version';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PubspecSchema } from './schema';
@@ -14,27 +16,55 @@ function extractFromSection(
     return [];
   }
 
-  const datasource = DartDatasource.id;
+  const skippedPackages = [
+    'flutter_driver',
+    'flutter_localizations',
+    'flutter_test',
+    'flutter_web_plugins',
+    'meta',
+  ];
   const deps: PackageDependency[] = [];
   for (const depName of Object.keys(sectionContent)) {
-    if (depName === 'meta') {
+    if (skippedPackages.includes(depName)) {
       continue;
     }
 
     let currentValue = sectionContent[depName];
+    let skipReason: SkipReason | undefined;
+
     if (!is.string(currentValue)) {
       const version = currentValue.version;
+      const path = currentValue.path;
       if (version) {
         currentValue = version;
+      } else if (path) {
+        currentValue = '';
+        skipReason = 'path-dependency';
       } else {
         currentValue = '';
       }
     }
 
-    deps.push({ depName, depType: sectionKey, currentValue, datasource });
+    deps.push({
+      depName,
+      depType: sectionKey,
+      currentValue,
+      datasource: DartDatasource.id,
+      skipReason,
+    });
   }
 
   return deps;
+}
+
+function extractDart(pubspec: PubspecSchema): PackageDependency[] {
+  return [
+    {
+      depName: 'dart',
+      currentValue: pubspec.environment.sdk,
+      datasource: DartVersionDatasource.id,
+    },
+  ];
 }
 
 function extractFlutter(pubspec: PubspecSchema): PackageDependency[] {
@@ -61,14 +91,12 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps = [
-    ...extractFromSection(pubspec, 'dependencies'),
-    ...extractFromSection(pubspec, 'dev_dependencies'),
-    ...extractFlutter(pubspec),
-  ];
-
-  if (deps.length) {
-    return { deps };
-  }
-  return null;
+  return {
+    deps: [
+      ...extractFromSection(pubspec, 'dependencies'),
+      ...extractFromSection(pubspec, 'dev_dependencies'),
+      ...extractDart(pubspec),
+      ...extractFlutter(pubspec),
+    ],
+  };
 }
