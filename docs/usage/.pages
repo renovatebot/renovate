@@ -29,6 +29,7 @@ nav:
       - 'Updating and Rebasing Branches': 'updating-rebasing.md'
       - 'Semantic Commit Messages': 'semantic-commits.md'
       - 'Noise Reduction': 'noise-reduction.md'
+      - 'Upgrade best practices': 'upgrade-best-practices.md'
   - Included Presets:
       - 'Default Presets': 'presets-default.md'
       - 'Docker Presets': 'presets-docker.md'
@@ -42,7 +43,7 @@ nav:
       - 'Regex Manager Presets': 'presets-regexManagers.md'
       - 'Replacement Presets': 'presets-replacements.md'
       - 'Schedule Presets': 'presets-schedule.md'
-      - 'Security Presets': 'security-schedule.md'
+      - 'Security Presets': 'presets-security.md'
       - 'Workaround Presets': 'presets-workarounds.md'
   - All Other:
       - ... | user-stories

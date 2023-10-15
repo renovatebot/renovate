@@ -55,7 +55,7 @@ steps:
       TOKEN: $(System.AccessToken)
 ```
 
-## Create a .npmrc file
+### Create a .npmrc file
 
 Create a `.npmrc` file in your repository:
 
@@ -66,7 +66,7 @@ always-auth=true
 
 For the `registry` key, replace `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed.
 
-## Create a config.js file
+### Create a config.js file
 
 Create a `config.js` file in your repository:
 
@@ -138,3 +138,27 @@ Make sure that the "Project Collection Build Service (YOUR-PROJECT)" user has th
 - Contribute
 - Contribute to pull requests
 - Create branch
+- Read
+
+The user must have the following permission at Project-level:
+
+- View project-level information
+
+### Linking a work item to the Pull Requests
+
+If you want Renovate to automatically link an existing work item to the Pull Requests, you can set the `azureWorkItemId` configuration.
+Make sure the user has the following permissions on the work item's _area path_:
+
+- Edit work items in this node
+- View work items in this node
+
+If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
+
+### Adding tags to Pull Requests
+
+Tags can be added to Pull Requests using the `labels` or `addLabels` configurations.
+If the tag does not exist in the DevOps project, it will be created automatically during creation of the Pull Request as long as the user has the permissions at Project-level:
+
+- Create tag definition
+
+Otherwise, when a tag does not exist and the user does not have permission to create it, Renovate will output an error during creation of the Pull Request.

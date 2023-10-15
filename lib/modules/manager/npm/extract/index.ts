@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { NpmDatasource } from '../../../datasource/npm';
 
 import type {
   ExtractConfig,
@@ -136,31 +137,6 @@ export async function extractPackageFile(
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
-  let lernaJsonFile: string | undefined;
-  let lernaPackages: string[] | undefined;
-  let lernaClient: 'yarn' | 'npm' | undefined;
-  let lernaJson:
-    | {
-        packages: string[];
-        npmClient: string;
-        useWorkspaces?: boolean;
-      }
-    | undefined;
-  try {
-    lernaJsonFile = getSiblingFileName(packageFile, 'lerna.json');
-    // TODO #22198
-    lernaJson = JSON.parse((await readLocalFile(lernaJsonFile, 'utf8'))!);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, lernaJsonFile }, 'Could not parse lerna.json');
-  }
-  if (lernaJson && !lernaJson.useWorkspaces) {
-    lernaPackages = lernaJson.packages;
-    lernaClient =
-      lernaJson.npmClient === 'yarn' || lockFiles.yarnLock ? 'yarn' : 'npm';
-  } else {
-    lernaJsonFile = undefined;
-  }
-
   if (res.deps.length === 0) {
     logger.debug('Package file has no deps');
     if (
@@ -168,7 +144,6 @@ export async function extractPackageFile(
         !!res.managerData?.packageJsonName ||
         !!res.packageFileVersion ||
         !!npmrc ||
-        !!lernaJsonFile ||
         workspacesPackages
       )
     ) {
@@ -205,7 +180,7 @@ export async function extractPackageFile(
           dep.depName,
           yarnConfig
         );
-        if (registryUrlFromYarnConfig) {
+        if (registryUrlFromYarnConfig && dep.datasource === NpmDatasource.id) {
           dep.registryUrls = [registryUrlFromYarnConfig];
         }
       }
@@ -218,9 +193,6 @@ export async function extractPackageFile(
     managerData: {
       ...res.managerData,
       ...lockFiles,
-      lernaClient,
-      lernaJsonFile,
-      lernaPackages,
       yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager

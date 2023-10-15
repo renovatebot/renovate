@@ -6,6 +6,7 @@ import type { GetDigestInputConfig, GetPkgReleasesConfig } from '../types';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
 
+const mixedCaseJson = Fixtures.get('mixed_case.json');
 const pocoJson = Fixtures.get('poco.json');
 const pocoRevisions = Fixtures.getJson('poco_revisions.json');
 const pocoYamlGitHubContent = Fixtures.get('poco.yaml');
@@ -145,6 +146,32 @@ describe('modules/datasource/conan/index', () => {
           },
           {
             version: '1.10.1',
+          },
+        ],
+      });
+    });
+
+    it('processes mixed case names', async () => {
+      httpMock
+        .scope(nonDefaultRegistryUrl)
+        .get('/v2/conans/search?q=FooBar')
+        .reply(200, mixedCaseJson);
+      expect(
+        await getPkgReleases({
+          ...config,
+          packageName: 'FooBar/1.0.0@_/_',
+        })
+      ).toEqual({
+        registryUrl: 'https://not.conan.io',
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '1.1.0',
+          },
+          {
+            version: '2.2.0',
           },
         ],
       });

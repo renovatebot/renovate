@@ -37,7 +37,10 @@ async function getUrl(
 const headRefRe = regEx(/ref: refs\/heads\/(?<branch>\w+)\s/);
 
 async function getDefaultBranch(subModuleUrl: string): Promise<string> {
-  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables();
+  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
+    'git-tags',
+    'git-refs',
+  ]);
   const gitEnv = {
     // pass all existing env variables
     ...process.env,
