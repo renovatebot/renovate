@@ -22,3 +22,8 @@ detached = true
 dependencies = [
   "black>=23.1.0",
 ]
+
+[tool.hatch.envs.experimental]
+extra-dependencies = [
+  "baz",
+]

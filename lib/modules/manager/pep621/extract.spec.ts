@@ -302,6 +302,13 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'tool.hatch.envs.lint',
           packageName: 'black',
         },
+        {
+          datasource: 'pypi',
+          depName: 'baz',
+          depType: 'tool.hatch.envs.experimental',
+          packageName: 'baz',
+          skipReason: 'unspecified-version',
+        },
       ]);
     });
   });
