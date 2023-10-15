@@ -2,8 +2,8 @@
 
 exports[`modules/datasource/galaxy/index getReleases processes real data 1`] = `
 {
-  "dependencyUrl": "https://old-galaxy.ansible.com/yatesr/timezone",
-  "registryUrl": "https://old-galaxy.ansible.com/",
+  "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
+  "registryUrl": "https://galaxy.ansible.com/",
   "releases": [
     {
       "releaseTimestamp": "2015-11-17T00:43:42.000Z",

@@ -15,7 +15,7 @@ export class GalaxyDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
-  override readonly defaultRegistryUrls = ['https://old-galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
 
   override readonly defaultVersioning = pep440Versioning.id;
 
