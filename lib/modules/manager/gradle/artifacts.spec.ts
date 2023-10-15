@@ -159,13 +159,13 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -202,13 +202,13 @@ describe('modules/manager/gradle/artifacts', () => {
       // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'gradlew.bat --console=plain -q properties',
+          cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: 'gradlew.bat --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -245,13 +245,13 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -296,13 +296,13 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain -q :dependencies --write-locks',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -346,7 +346,7 @@ describe('modules/manager/gradle/artifacts', () => {
             ' bash -l -c "' +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew --console=plain -q properties' +
+            './gradlew --console=plain --dependency-verification lenient -q properties' +
             '"',
           options: { cwd: '/tmp/github/some/repo' },
         },
@@ -363,7 +363,7 @@ describe('modules/manager/gradle/artifacts', () => {
             ' bash -l -c "' +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew --console=plain -q :dependencies --write-locks' +
+            './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
             '"',
           options: {
             cwd: '/tmp/github/some/repo',
@@ -396,12 +396,12 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 16.0.1' },
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'install-tool java 16.0.1' },
         {
-          cmd: './gradlew --console=plain -q :dependencies --write-locks',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -437,13 +437,13 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -487,7 +487,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
@@ -540,12 +540,12 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew --console=plain -q :dependencies --write-locks',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -592,7 +592,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 help',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -649,20 +649,20 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q properties',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
           options: {
             cwd: '/tmp/github/some/repo',
           },
         },
         {
-          cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
           },
         },
         {
-          cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 help',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -705,7 +705,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q --write-verification-metadata sha256 help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 help',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
@@ -747,7 +747,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew --console=plain -q --write-verification-metadata sha256,pgp help',
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp help',
           options: {
             cwd: '/tmp/github/some/repo',
             stdio: ['pipe', 'ignore', 'pipe'],
