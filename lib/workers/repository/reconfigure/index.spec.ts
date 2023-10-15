@@ -10,8 +10,8 @@ import {
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
 import * as _cache from '../../../util/cache/repository';
-import { validateReconfigureBranch } from '.';
 import * as _merge from '../init/merge';
+import { validateReconfigureBranch } from '.';
 
 jest.mock('../../../util/cache/repository');
 jest.mock('../../../util/fs');
@@ -48,7 +48,7 @@ describe('workers/repository/reconfigure/index', () => {
     merge.detectConfigFile.mockRejectedValueOnce(err as never);
     await validateReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
-      { err: err },
+      { err },
       'Error while searching for config file in reconfigure branch'
     );
   });
@@ -66,7 +66,7 @@ describe('workers/repository/reconfigure/index', () => {
     fs.readLocalFile.mockRejectedValueOnce(err as never);
     await validateReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
-      { err: err },
+      { err },
       'Error while reading config file'
     );
   });
@@ -85,7 +85,7 @@ describe('workers/repository/reconfigure/index', () => {
     await validateReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
       { err: expect.any(Object) },
-      'Error while reading config file'
+      'Error while parsing config file'
     );
   });
 
