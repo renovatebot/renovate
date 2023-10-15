@@ -89,7 +89,7 @@ export async function fetchPreset({
 
 export function parsePreset(content: string, fileName: string): Preset {
   try {
-    return parseJson(content, fileName);
+    return parseJson(content, fileName) as Preset;
   } catch (err) {
     throw new Error(PRESET_INVALID_JSON);
   }

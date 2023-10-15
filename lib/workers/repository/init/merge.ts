@@ -70,7 +70,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       configFileRaw = null;
     }
     if (configFileRaw) {
-      let configFileParsed = parseJson(configFileRaw, configFileName);
+      let configFileParsed = parseJson(configFileRaw, configFileName) as any;
       if (configFileName !== 'package.json') {
         return { configFileName, configFileRaw, configFileParsed };
       }

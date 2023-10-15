@@ -21,7 +21,10 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       }) as RenovateConfig;
     case '.json5':
     case '.json':
-      return parseJson(await readSystemFile(file, 'utf8'), file);
+      return parseJson(
+        await readSystemFile(file, 'utf8'),
+        file
+      ) as RenovateConfig;
     case '.js': {
       const tmpConfig = await import(file);
       let config = tmpConfig.default
