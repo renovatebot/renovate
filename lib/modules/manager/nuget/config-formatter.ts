@@ -79,7 +79,7 @@ function formatPackageSourceElement(
     element += `protocolVersion="${registryInfo.protocolVersion.toString()}" `;
   }
 
-  return (element += '/>\n');
+  return  `${element}/>\n`;
 }
 
 function formatPackageSourceCredentialElement(
