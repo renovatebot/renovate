@@ -54,7 +54,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         username: 'some-username',
         password: 'some-password',
       });
-      _hostRules.add({
+      hostRules.add({
         hostType: 'nuget',
         matchHost: 'my-registry2.example.org',
         password: 'some-password',
