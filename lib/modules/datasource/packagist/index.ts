@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -17,7 +18,6 @@ import {
   extractDepReleases,
   parsePackagesResponses,
 } from './schema';
-import is from '@sindresorhus/is';
 
 export class PackagistDatasource extends Datasource {
   static readonly id = 'packagist';
