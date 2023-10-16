@@ -6,7 +6,7 @@ import type { Registry } from './types';
 describe('modules/manager/nuget/config-formatter', () => {
   describe('createNuGetConfigXml', () => {
     beforeEach(() => {
-      _hostRules.clear();
+      hostRules.clear();
     });
 
     it('returns xml with registries', () => {
