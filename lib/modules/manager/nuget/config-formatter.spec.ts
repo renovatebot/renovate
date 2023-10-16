@@ -19,6 +19,9 @@ describe('modules/manager/nuget/config-formatter', () => {
           name: 'myRegistry2',
           url: 'https://my-registry2.example.org/index.json',
         },
+        {
+          url: 'https://my-unnamed-registry.example.org/index.json',
+        },
       ];
 
       const xml = createNuGetConfigXml(registries);
@@ -45,6 +48,13 @@ describe('modules/manager/nuget/config-formatter', () => {
         'https://my-registry2.example.org/index.json'
       );
       expect(myRegistry2?.attr['protocolVersion']).toBe('3');
+
+      const myUnnamedRegistry = packageSources?.childWithAttribute(
+        'value',
+        'https://my-unnamed-registry.example.org/index.json'
+      );
+      expect(myUnnamedRegistry?.name).toBe('add');
+      expect(myUnnamedRegistry?.attr['key']).toBe('Package source 1');
     });
 
     it('returns xml with authenticated registries', () => {
