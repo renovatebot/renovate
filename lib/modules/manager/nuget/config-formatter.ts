@@ -27,7 +27,6 @@ export function createNuGetConfigXml(registries: Registry[]): string {
       url: registry.url,
     });
 
-    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if (is.nonEmptyString(password) || is.nonEmptyString(username)) {
       credentials.push({
         name: registryName,
