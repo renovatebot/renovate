@@ -115,7 +115,7 @@ describe('modules/manager/nuget/config-formatter', () => {
     });
 
     it('escapes registry credential names containing special characters', () => {
-      _hostRules.add({
+      hostRules.add({
         hostType: 'nuget',
         matchHost: 'my-registry.example.org',
         username: 'some-username',
