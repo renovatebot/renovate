@@ -80,6 +80,7 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+The pattern matches against the organization/repo string.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
@@ -89,19 +90,31 @@ Commas will be used as delimiter for a new filter.
 
 ```
 # DO NOT use commas inside the filter if your are using env or cli variables to configure it.
-RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg/{my-repo,foo-repo}"
 
 # in this example you can use regex instead
-RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg\/(my|foo)-repo/"
 ```
 
 **Minimatch**:
+
+The configuration:
 
 ```json
 {
   "autodiscoverFilter": ["project/*"]
 }
 ```
+
+will match any repository in the "project" organization, while:
+
+```json
+{
+  "autodiscoverFilter": ["MyRepo/my-*"]
+}
+```
+
+will match any repo in the "MyRepo" organization that begins with "my-".
 
 The search for repositories is case-insensitive.
 
