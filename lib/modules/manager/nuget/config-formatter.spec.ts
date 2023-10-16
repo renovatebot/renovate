@@ -48,7 +48,6 @@ describe('modules/manager/nuget/config-formatter', () => {
         'key',
         'myRegistry2'
       );
-      expect(myRegistry2).toBeDefined();
       expect(myRegistry2?.name).toBe('add');
       expect(myRegistry2?.attr['value']).toBe(
         'https://my-registry2.example.org/index.json'
