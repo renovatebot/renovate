@@ -142,7 +142,6 @@ describe('modules/manager/nuget/config-formatter', () => {
           'my__x0020__very__x003f____x0020__weird__x0021__-regi__x0024__try_name'
         );
 
-      expect(registryCredentialsWithSpecialName).toBeDefined();
       expect(
         registryCredentialsWithSpecialName?.childWithAttribute(
           'key',
