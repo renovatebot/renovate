@@ -92,7 +92,6 @@ describe('modules/manager/nuget/config-formatter', () => {
         'key',
         'myRegistry'
       );
-      expect(myRegistry).toBeDefined();
       expect(myRegistry?.name).toBe('add');
 
       const myRegistry2 = packageSources?.childWithAttribute(
