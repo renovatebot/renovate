@@ -1,20 +1,12 @@
-import { mockDeep } from 'jest-mock-extended';
 import { XmlDocument } from 'xmldoc';
-import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { createNuGetConfigXml } from './config-formatter';
 import type { Registry } from './types';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-
-const hostRules = mocked(_hostRules);
-
 describe('modules/manager/nuget/config-formatter', () => {
   describe('createNuGetConfigXml', () => {
     beforeEach(() => {
-      hostRules.find.mockImplementation((search) => {
-        return {};
-      });
+      _hostRules.clear();
     });
 
     it('returns xml with registries', () => {
@@ -56,20 +48,16 @@ describe('modules/manager/nuget/config-formatter', () => {
     });
 
     it('returns xml with authenticated registries', () => {
-      hostRules.find.mockImplementation((search) => {
-        if (search.hostType === 'nuget') {
-          if (search.url === 'https://my-registry.example.org') {
-            return {
-              username: 'some-username',
-              password: 'some-password',
-            };
-          } else {
-            return {
-              password: 'some-password',
-            };
-          }
-        }
-        return {};
+      _hostRules.add({
+        hostType: 'nuget',
+        matchHost: 'my-registry.example.org',
+        username: 'some-username',
+        password: 'some-password',
+      });
+      _hostRules.add({
+        hostType: 'nuget',
+        matchHost: 'my-registry2.example.org',
+        password: 'some-password',
       });
 
       const registries: Registry[] = [
@@ -129,14 +117,11 @@ describe('modules/manager/nuget/config-formatter', () => {
     });
 
     it('escapes registry credential names containing special characters', () => {
-      hostRules.find.mockImplementation((search) => {
-        if (search.hostType === 'nuget') {
-          return {
-            username: 'some-username',
-            password: 'some-password',
-          };
-        }
-        return {};
+      _hostRules.add({
+        hostType: 'nuget',
+        matchHost: 'my-registry.example.org',
+        username: 'some-username',
+        password: 'some-password',
       });
 
       const registries: Registry[] = [
