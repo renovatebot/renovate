@@ -1,4 +1,6 @@
+import is from '@sindresorhus/is';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { parseRegistryUrl } from '../../datasource/nuget/common';
 import type { ParsedRegistryUrl } from '../../datasource/nuget/types';
@@ -84,12 +86,7 @@ function formatPackageSourceElement(
 function formatPackageSourceCredentialElement(
   credential: PackageSourceCredential
 ): string {
-  const escapedName = credential.name.replace(
-    /(?!(\d|\w|-|\.))./g,
-    function (match) {
-      return `__x${match.codePointAt(0)!.toString(16).padStart(4, '0')}__`;
-    }
-  );
+  const escapedName = escapeName(credential.name);
 
   let packageSourceCredential = `<${escapedName}>\n`;
 
@@ -114,4 +111,23 @@ function formatPackageSource(packageSourceMap: PackageSourceMap): string {
   }
 
   return `${packageSource}</packageSource>\n`;
+}
+
+const charactersToEscape = regEx(/[^A-Za-z0-9\-_.]/);
+
+function escapeName(name: string): string {
+  let escapedName = '';
+  for (let i = 0; i < name.length; i++) {
+    const char = name[i];
+    if (char.match(charactersToEscape)) {
+      escapedName += `__x${char
+        .codePointAt(0)!
+        .toString(16)
+        .padStart(4, '0')}__`;
+    } else {
+      escapedName += char;
+    }
+  }
+
+  return escapedName;
 }
