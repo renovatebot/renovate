@@ -1,5 +1,5 @@
 import { XmlDocument } from 'xmldoc';
-import * as _hostRules from '../../../util/host-rules';
+import * as hostRules from '../../../util/host-rules';
 import { createNuGetConfigXml } from './config-formatter';
 import type { Registry } from './types';
 
