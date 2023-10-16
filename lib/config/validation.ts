@@ -743,7 +743,7 @@ function validateGlobalConfig(
     if (val !== true && val !== false) {
       errors.push({
         topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
+        message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
           val
         )} (${typeof val})`,
       });
@@ -767,7 +767,7 @@ function validateGlobalConfig(
     } else {
       errors.push({
         topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a json object`,
+        message: `Configuration option \`${currentPath}\` should be a JSON object`,
       });
     }
   }
