@@ -71,7 +71,8 @@ export async function getInRangeReleases(
       const newRelease = releases[0];
       const closestPreviousRelease = previousReleases
         .filter((release) => !version.equals(release.version, newVersion))
-        .sort((b, a) => version.sortVersions(a.version, b.version)).shift();
+        .sort((b, a) => version.sortVersions(a.version, b.version))
+        .shift();
 
       if (
         closestPreviousRelease &&
