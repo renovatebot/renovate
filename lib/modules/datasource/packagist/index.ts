@@ -17,6 +17,7 @@ import {
   extractDepReleases,
   parsePackagesResponses,
 } from './schema';
+import is from '@sindresorhus/is';
 
 export class PackagistDatasource extends Datasource {
   static readonly id = 'packagist';
@@ -141,8 +142,11 @@ export class PackagistDatasource extends Datasource {
       () => null
     );
 
-    const results = await Promise.all([pkgPromise, devPromise]);
-    return parsePackagesResponses(packageName, results);
+    const responses: NonNullable<unknown>[] = await Promise.all([
+      pkgPromise,
+      devPromise,
+    ]).then((responses) => responses.filter(is.object));
+    return parsePackagesResponses(packageName, responses);
   }
 
   public getPkgUrl(
