@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as p from '../../../util/promises';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
@@ -47,14 +46,6 @@ export class GalaxyCollectionDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    if (!baseUrlResponse?.body) {
-      logger.warn(
-        { dependency: packageName },
-        `Received invalid data from ${baseUrl}`
-      );
-      return null;
-    }
-
     const baseProject = baseUrlResponse.body;
 
     const versionsUrl = ensureTrailingSlash(joinUrlParts(baseUrl, 'versions'));
@@ -71,8 +62,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const versionsProject = versionsUrlResponse.body;
 
-    const releases = await p.map(
-      versionsProject.data,
+    const releases = versionsProject.data.map(
       (value) => {
         const release: Release = {
           version: value.version,
