@@ -1,6 +1,9 @@
 import { XmlDocument } from 'xmldoc';
+import { fs } from '../../../../test/util';
 import { bumpPackageVersion } from './update';
-import { findVersion } from './util';
+import { findVersion, getConfiguredRegistries } from './util';
+
+jest.mock('../../../util/fs');
 
 describe('modules/manager/nuget/util', () => {
   describe('findVersion', () => {
@@ -24,6 +27,33 @@ describe('modules/manager/nuget/util', () => {
       const versionNode = findVersion(project);
       const newVersion = versionNode!.val;
       expect(newVersion).toBe('0.0.2');
+    });
+  });
+
+  describe('getConfiguredRegistries', () => {
+    it('reads package source mapping from config file', async () => {
+      fs.findUpLocal.mockReturnValue(
+        Promise.resolve<string | null>('NuGet.config')
+      );
+      fs.readLocalFile.mockImplementation((file): Promise<any> => {
+        const content: string | null =
+          '<configuration><packageSources><clear /><add key="nuget.org" value="https://api.nuget.org/v3/index.json" /><add key="contoso.com" value="https://contoso.com/packages/" /></packageSources><packageSourceMapping><packageSource key="nuget.org"><package pattern="*" /></packageSource><packageSource key="contoso.com"><package pattern="Contoso.*" /><package pattern="NuGet.Common" /></packageSource></packageSourceMapping></configuration>';
+        if (file !== 'NuGet.config') {
+          return Promise.reject(new Error(`Unexpected file: ${file}`));
+        }
+        return Promise.resolve(content);
+      });
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries?.length).toBe(2);
+      expect(registries![0].name).toBe('nuget.org');
+      expect(registries![0].sourceMappedPackagePatterns).toEqual(['*']);
+
+      expect(registries![1].name).toBe('contoso.com');
+      expect(registries![1].sourceMappedPackagePatterns).toEqual([
+        'Contoso.*',
+        'NuGet.Common',
+      ]);
     });
   });
 });
