@@ -83,7 +83,7 @@ export async function getReleaseList(
     ReleasesSchema
   );
   return res.body.map((release) => ({
-    url: `${apiUrl}/tag/${release.tag_name}`,
+    url: `${project.baseUrl}${project.repository}/releases/tag/${release.tag_name}`,
     notesSourceUrl: apiUrl,
     name: release.name,
     body: release.body,

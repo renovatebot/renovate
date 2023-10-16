@@ -58,6 +58,18 @@ export class BaseGoDatasource {
       };
     }
 
+    if (goModule.startsWith('code.cloudfoundry.org/')) {
+      const packageName = goModule.replace(
+        'code.cloudfoundry.org',
+        'cloudfoundry'
+      );
+      return {
+        datasource: GithubTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://github.com',
+      };
+    }
+
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
