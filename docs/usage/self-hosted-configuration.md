@@ -277,7 +277,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 <!-- prettier-ignore -->
 !!! note
-    You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+    You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`. In addition, platform host rules will only be picked up when `matchHost` is supplied.
 
 ### npmjs registry token example
 
