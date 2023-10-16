@@ -37,7 +37,7 @@ export class HatchProcessor implements PyProjectProcessor {
   }
 
   updateArtifacts(
-    updateArtifact: UpdateArtifact<Record<string, unknown>>,
+    updateArtifact: UpdateArtifact,
     project: PyProject
   ): Promise<UpdateArtifactsResult[] | null> {
     // Hatch does not have lock files at the moment
