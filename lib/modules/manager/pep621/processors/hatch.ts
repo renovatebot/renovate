@@ -8,10 +8,6 @@ import type { PyProject } from '../schema';
 import { parseDependencyList } from '../utils';
 import type { PyProjectProcessor } from './types';
 
-function depTypeFromEnv(envName: string): string {
-  return `tool.hatch.envs.${envName}`;
-}
-
 export class HatchProcessor implements PyProjectProcessor {
   process(
     pyproject: PyProject,
@@ -23,7 +19,7 @@ export class HatchProcessor implements PyProjectProcessor {
     }
 
     for (const [envName, env] of Object.entries(hatch_envs)) {
-      const depType = depTypeFromEnv(envName);
+      const depType = `tool.hatch.envs.${envName}`;
       const envDeps = parseDependencyList(depType, env?.dependencies);
       deps.push(...envDeps);
       const extraDeps = parseDependencyList(

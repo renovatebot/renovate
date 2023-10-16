@@ -4,7 +4,6 @@ import { extractPackageFile } from '.';
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
-const hatchPyProject = Fixtures.get('pyproject_with_hatch.toml');
 
 describe('modules/manager/pep621/extract', () => {
   describe('extractPackageFile()', () => {
@@ -271,6 +270,7 @@ describe('modules/manager/pep621/extract', () => {
     });
 
     it('should extract dependencies from hatch environments', function () {
+      const hatchPyProject = Fixtures.get('pyproject_with_hatch.toml');
       const result = extractPackageFile(hatchPyProject, 'pyproject.toml');
 
       expect(result?.deps).toEqual([
