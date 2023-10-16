@@ -114,6 +114,5 @@ function formatPackageSource(packageSourceMap: PackageSourceMap): string {
     packageSource += `<package pattern="${pattern}" />\n`;
   }
 
-  packageSource += '</packageSource>\n';
-  return packageSource;
+  return `${packageSource}</packageSource>\n`;
 }
