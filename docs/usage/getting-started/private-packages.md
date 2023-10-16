@@ -476,6 +476,28 @@ module.exports = {
 };
 ```
 
+## Automatic hostRules credentials for platform-hosted registries
+
+### GitHub Packages
+
+For GitHub Packages, Renovate will automatically provision hostRules for both `ghcr.io` (containers) and `*.pkg.github.com` (maven, npm, nuget, rubygems) using the GitHub platform token.
+This means that any private packages hosted in GitHub will be automatically authenticated if they are accessible using the same token by Renovate.
+
+If you wish to _override_ this authentication by providing a different token then your rule must be at least as specific as the automatic rule that Renovate generates. For example:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "npm.pkg.github.com",
+      "hostType": "npm",
+      "token": "some-personal-access-token",
+      "authType": "Basic"
+    }
+  ]
+}
+```
+
 ## Encryption and the Mend Renovate App
 
 Many users use [the Mend Renovate App](https://github.com/apps/renovate), which is hosted by Mend.
