@@ -76,7 +76,7 @@ function formatPackageSourceElement(
   let element = `<add key="${name}" value="${registryInfo.feedUrl}" `;
 
   if (registryInfo.protocolVersion) {
-    element += `protocolVersion="${registryInfo.protocolVersion.toString()}" `;
+    element += `protocolVersion="${registryInfo.protocolVersion}" `;
   }
 
   return  `${element}/>\n`;
