@@ -48,7 +48,7 @@ describe('modules/manager/nuget/config-formatter', () => {
     });
 
     it('returns xml with authenticated registries', () => {
-      _hostRules.add({
+      hostRules.add({
         hostType: 'nuget',
         matchHost: 'my-registry.example.org',
         username: 'some-username',
