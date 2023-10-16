@@ -949,7 +949,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {
-          message: `Configuration option \`detectGlobalManagerConfig\` should be boolean. Found: ${JSON.stringify(
+          message: `Configuration option \`detectGlobalManagerConfig\` should be a boolean. Found: ${JSON.stringify(
             'invalid-type'
           )} (string)`,
           topic: 'Configuration Error',
@@ -1021,7 +1021,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {
-          message: 'Configuration option `secrets` should be a json object',
+          message: 'Configuration option `secrets` should be a JSON object',
           topic: 'Configuration Error',
         },
         {
