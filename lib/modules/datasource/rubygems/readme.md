@@ -1,10 +1,10 @@
 # Rubygems datasource
 
-Datasource query order depends on the registry:
+Datasource query order depends on the registry.
 
 ## Querying `rubygems.org`
 
-Rubygems rate limit are easy to hit, so we need to be careful with the queries.
+Rubygems rate limits are easy to hit, so we need to be careful with the queries.
 
 - First, we query `https://rubygems.org/versions` endpoint for current versions for all packages. Either full or delta sync is performed depending on the cache state.
 
@@ -42,7 +42,7 @@ Rubygems rate limit are easy to hit, so we need to be careful with the queries.
     delta_sync_error --> Empty: (3) Status other than 404 or 416
   ```
 
-- Then, more data is obtained from `https://rubygems.org/api/v1/versions/<package>.json` and `https://rubygems.org/api/v1/gems/<package>.json.json`
+- Then, more data is obtained from `https://rubygems.org/api/v1/versions/<package>.json` and `https://rubygems.org/api/v1/gems/<package>.json`
 
 ## Querying `rubygems.pkg.github.com` or `gitlab.com`
 
