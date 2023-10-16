@@ -227,7 +227,6 @@ describe('modules/manager/nuget/config-formatter', () => {
         'key',
         'myRegistry'
       );
-      expect(myRegistryMaps).toBeDefined();
       expect(myRegistryMaps?.name).toBe('packageSource');
       expect(myRegistryMaps?.childNamed('package')?.attr['pattern']).toBe('*');
 
