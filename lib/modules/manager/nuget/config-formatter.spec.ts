@@ -215,7 +215,6 @@ describe('modules/manager/nuget/config-formatter', () => {
         'key',
         'myRegistry2'
       );
-      expect(myRegistry2Maps).toBeDefined();
       expect(myRegistry2Maps?.name).toBe('packageSource');
       expect(
         myRegistry2Maps
