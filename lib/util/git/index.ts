@@ -658,7 +658,7 @@ export async function isBranchModified(
             ])
           )
             .trim()
-            .split('\n')
+            .split(newlineRegex)
         ),
       ];
       logger.debug(`Git authors in branch: ${branchAuthors.join(', ')}`);
@@ -678,7 +678,7 @@ export async function isBranchModified(
             ])
           )
             .trim()
-            .split('\n')
+            .split(newlineRegex)
         ),
       ];
     }
