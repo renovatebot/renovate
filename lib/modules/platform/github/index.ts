@@ -219,7 +219,6 @@ export async function initPlatform({
       matchHost: 'npm.pkg.github.com',
       hostType: 'npm',
       token: token.replace(/^x-access-token:/, ''),
-      authType: 'Basic',
     });
     const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
     for (const hostType of usernamePasswordHostTypes) {

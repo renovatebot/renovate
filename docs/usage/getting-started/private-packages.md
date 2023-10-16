@@ -491,8 +491,7 @@ If you wish to _override_ this authentication by providing a different token the
     {
       "matchHost": "npm.pkg.github.com",
       "hostType": "npm",
-      "token": "some-personal-access-token",
-      "authType": "Basic"
+      "token": "some-personal-access-token"
     }
   ]
 }

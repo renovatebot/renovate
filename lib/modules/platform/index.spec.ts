@@ -148,7 +148,6 @@ describe('modules/platform/index', () => {
             username: 'USERNAME',
           },
           {
-            authType: 'Basic',
             hostType: 'npm',
             matchHost: 'npm.pkg.github.com',
             token: '123',
@@ -209,7 +208,6 @@ describe('modules/platform/index', () => {
             username: 'USERNAME',
           },
           {
-            authType: 'Basic',
             hostType: 'npm',
             matchHost: 'npm.pkg.github.com',
             token: '123',

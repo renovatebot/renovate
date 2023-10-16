@@ -39,7 +39,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "username": "USERNAME",
     },
     {
-      "authType": "Basic",
       "hostType": "npm",
       "matchHost": "npm.pkg.github.com",
       "token": "123test",
@@ -80,7 +79,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "username": "USERNAME",
     },
     {
-      "authType": "Basic",
       "hostType": "npm",
       "matchHost": "npm.pkg.github.com",
       "token": "123test",
@@ -121,7 +119,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "username": "USERNAME",
     },
     {
-      "authType": "Basic",
       "hostType": "npm",
       "matchHost": "npm.pkg.github.com",
       "token": "123test",
@@ -162,7 +159,6 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
       "username": "USERNAME",
     },
     {
-      "authType": "Basic",
       "hostType": "npm",
       "matchHost": "npm.pkg.github.com",
       "token": "123test",
