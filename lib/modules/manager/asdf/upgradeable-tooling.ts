@@ -281,9 +281,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: semeruJreMatches.version,
         };
       }
-      const temurinJdkMatches = version.match(
-        /^temurin-(?<version>\d\S+)/
-      )?.groups;
+      const temurinJdkMatches = version.match(/^temurin-(?<version>\d\S+)/)
+        ?.groups;
       if (temurinJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -291,9 +290,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = version.match(
-        /^temurin-jre-(?<version>\d\S+)/
-      )?.groups;
+      const temurinJreMatches = version.match(/^temurin-jre-(?<version>\d\S+)/)
+        ?.groups;
       if (temurinJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,

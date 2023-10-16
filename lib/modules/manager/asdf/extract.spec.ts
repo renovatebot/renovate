@@ -621,7 +621,9 @@ awscli    2.8.6
           },
         ],
       });
-      const semeruJdkRes = extractPackageFile('java semeru-openj9-17.0.8.1+1_openj9-0.40.0');
+      const semeruJdkRes = extractPackageFile(
+        'java semeru-openj9-17.0.8.1+1_openj9-0.40.0'
+      );
       expect(semeruJdkRes).toEqual({
         deps: [
           {
@@ -632,7 +634,9 @@ awscli    2.8.6
           },
         ],
       });
-      const semeruJreRes = extractPackageFile('java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0');
+      const semeruJreRes = extractPackageFile(
+        'java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0'
+      );
       expect(semeruJreRes).toEqual({
         deps: [
           {
