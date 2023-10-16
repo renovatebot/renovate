@@ -102,7 +102,6 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry2'
       );
       expect(myRegistry2?.name).toBe('add');
-      expect(myRegistry2).toBeDefined();
 
       const myRegistryCredentials = xmlDocument.descendantWithPath(
         'packageSourceCredentials.myRegistry'
