@@ -87,7 +87,7 @@ function formatPackageSourceCredentialElement(
   const escapedName = credential.name.replace(
     /(?!(\d|\w|-|\.))./g,
     function (match) {
-      return '__x' + match.codePointAt(0)?.toString(16).padStart(4, '0') + '__';
+      return `__x${match.codePointAt(0)!.toString(16).padStart(4, '0')}__`;
     }
   );
 
