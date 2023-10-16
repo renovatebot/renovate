@@ -10,7 +10,7 @@ export async function generatePlatforms(
   let platformContent = 'Supported values for `platform` are: ';
   const platforms = getPlatformList();
   for (const platform of platforms) {
-    let md = await readFile(`lib/modules/platform/${platform}/index.md`);
+    let md = await readFile(`lib/modules/platform/${platform}/readme.md`);
 
     md += generateFeatureAndBugMarkdown(platformIssuesMap, platform);
 
