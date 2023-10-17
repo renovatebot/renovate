@@ -1,5 +1,5 @@
 import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, VulnerabilityAlert } from '../../types';
+import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
@@ -23,6 +23,10 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
+  /*
+   * return these only if _additional_ rules/hosts are required
+   */
+  hostRules?: HostRule[];
 }
 
 export interface RepoResult {
@@ -229,7 +233,7 @@ export interface Platform {
 
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
-  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchModified(branchName: string, baseBranch?: string): Promise<boolean>;
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<CommitSha | null>;

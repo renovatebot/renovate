@@ -430,6 +430,7 @@ const repoGroups = {
   'testcontainers-node':
     'https://github.com/testcontainers/testcontainers-node',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
+  tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
@@ -446,6 +447,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',

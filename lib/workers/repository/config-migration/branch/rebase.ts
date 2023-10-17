@@ -16,7 +16,7 @@ export async function rebaseMigrationBranch(
 ): Promise<string | null> {
   logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
-  if (await scm.isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName, config.baseBranch)) {
     logger.debug('Migration branch has been edited and cannot be rebased');
     return null;
   }
