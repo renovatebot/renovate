@@ -262,6 +262,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'object',
     cli: false,
+    mergeable: true,
   },
   {
     name: 'forceCli',
