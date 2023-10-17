@@ -45,7 +45,7 @@ describe('modules/platform/default-scm', () => {
 
   it('delegate isBranchModified to util/git', async () => {
     git.isBranchModified.mockResolvedValueOnce(true);
-    await defaultGitScm.isBranchModified('branchName', 'main');
+    await defaultGitScm.isBranchModified('branchName');
     expect(git.isBranchModified).toHaveBeenCalledTimes(1);
   });
 
