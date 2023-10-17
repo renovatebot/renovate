@@ -31,6 +31,21 @@ export const PyProjectSchema = z.object({
             .optional(),
         })
         .optional(),
+      hatch: z
+        .object({
+          envs: z
+            .record(
+              z.string(),
+              z
+                .object({
+                  dependencies: DependencyListSchema,
+                  'extra-dependencies': DependencyListSchema,
+                })
+                .optional()
+            )
+            .optional(),
+        })
+        .optional(),
     })
     .optional(),
 });
