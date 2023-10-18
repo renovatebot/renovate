@@ -42,9 +42,19 @@ export async function autodiscoverRepositories(
   });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
-    logger.debug(
-      'The account associated with your token does not have access to any repos'
-    );
+    let debugMessage = 'The account associated with your token didn\'t allow to find any repositories. This can be caused by the token\'s permissions';
+
+    const autodiscoverFilterOptions = Object.entries({
+        autodiscoverTopics: config.autodiscoverTopics, 
+        autodiscoverNamespaces: config.autodiscoverNamespaces
+    }).filter(([_, value]) => value?.length);
+
+    if(autodiscoverFilterOptions.length) {
+        debugMessage += ", or the option" + (autodiscoverFilterOptions.length > 1 ? "s": "") + " ";
+        debugMessage += autodiscoverFilterOptions.map(([key, value]) => `${key} (set to '${value}')`).join(" or ");
+    }
+    
+    logger.debug(debugMessage);
     return config;
   }
 
