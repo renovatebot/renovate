@@ -96,6 +96,7 @@ It is built similarly to the default "full" Renovate image described above, but 
 - It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
 
 Plus, the Enterprise Edition has:
+
 - Unlimited horizontal scaling to run multiple 'worker' containers
 - Dedicated support from Mend.io
 - Premium features, including Smart Merge Control
