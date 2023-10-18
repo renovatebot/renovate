@@ -48,8 +48,8 @@ importers:
         specifier: 0.44.0
         version: 0.44.0(@opentelemetry/api@1.6.0)
       '@opentelemetry/instrumentation-bunyan':
-        specifier: 0.32.1
-        version: 0.32.1(@opentelemetry/api@1.6.0)
+        specifier: 0.32.2
+        version: 0.32.2(@opentelemetry/api@1.6.0)
       '@opentelemetry/instrumentation-http':
         specifier: 0.44.0
         version: 0.44.0(@opentelemetry/api@1.6.0)
@@ -2620,15 +2620,15 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.17.1(@opentelemetry/api@1.6.0)
     dev: false
 
-  /@opentelemetry/instrumentation-bunyan@0.32.1(@opentelemetry/api@1.6.0):
-    resolution: {integrity: sha512-TjH357ldA5DpK09XUDWffqV9Km++N9H0dwmxHrElM2TSe4Usgkgw6mlodbuh45hoVDD+cCPi+GO6Dq1QLVEdZg==}
+  /@opentelemetry/instrumentation-bunyan@0.32.2(@opentelemetry/api@1.6.0):
+    resolution: {integrity: sha512-/sLChixYxFas7c5SbLLGUq2yKmU8c58IPlYNNqRSiT0epouqeBjxNUwQeizXl6Ba5+T/Yq7cwCVjh72CRb3tlA==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
     dependencies:
       '@opentelemetry/api': 1.6.0
-      '@opentelemetry/instrumentation': 0.41.2(@opentelemetry/api@1.6.0)
-      '@types/bunyan': 1.8.8
+      '@opentelemetry/instrumentation': 0.44.0(@opentelemetry/api@1.6.0)
+      '@types/bunyan': 1.8.9
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -2644,22 +2644,6 @@ packages:
       '@opentelemetry/instrumentation': 0.44.0(@opentelemetry/api@1.6.0)
       '@opentelemetry/semantic-conventions': 1.17.1
       semver: 7.5.4
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /@opentelemetry/instrumentation@0.41.2(@opentelemetry/api@1.6.0):
-    resolution: {integrity: sha512-rxU72E0pKNH6ae2w5+xgVYZLzc5mlxAbGzF4shxMVK8YC2QQsfN38B2GPbj0jvrKWWNUElfclQ+YTykkNg/grw==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.3.0
-    dependencies:
-      '@opentelemetry/api': 1.6.0
-      '@types/shimmer': 1.0.3
-      import-in-the-middle: 1.4.2
-      require-in-the-middle: 7.2.0
-      semver: 7.5.4
-      shimmer: 1.2.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -3779,17 +3763,10 @@ packages:
     resolution: {integrity: sha512-VfelZ1XShSzkthxVm98S0Jn1SXQk5Umk11EODMVdVzU8piGToVVHlVfjF748sWb8Nsuh0Ajdb2mW9IL2ZuWv1g==}
     dev: true
 
-  /@types/bunyan@1.8.8:
-    resolution: {integrity: sha512-Cblq+Yydg3u+sGiz2mjHjC5MPmdjY+No4qvHrF+BUhblsmSfMvsHLbOG62tPbonsqBj6sbWv1LHcsoe5Jw+/Ow==}
-    dependencies:
-      '@types/node': 18.17.5
-    dev: false
-
   /@types/bunyan@1.8.9:
     resolution: {integrity: sha512-ZqS9JGpBxVOvsawzmVt30sP++gSQMTejCkIAQ3VdadOcRE8izTyW66hufvwLeH+YEGP6Js2AW7Gz+RMyvrEbmw==}
     dependencies:
       '@types/node': 18.17.5
-    dev: true
 
   /@types/cacache@17.0.0:
     resolution: {integrity: sha512-4BfoYFzkHdmINTyUIX9MSbKUkntVPR082FRnNc+5KlvvebrcxWWhfP3MRQ28QgfFncP3fTKCuemDYJqFjmWEAA==}
