@@ -2,7 +2,7 @@
 
 exports[`modules/datasource/galaxy-collection/index getReleases processes real data 1`] = `
 {
-  "registryUrl": "https://galaxy.ansible.com/",
+  "registryUrl": "https://galaxy.ansible.com",
   "releases": [
     {
       "dependencies": {},
