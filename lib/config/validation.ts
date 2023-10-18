@@ -147,7 +147,7 @@ export async function validateConfig(
       if (!isGlobalConfig) {
         // token is a global config option and a field of repo config option hostRules.encrypted
         if (!(key === 'token' && parentPath?.includes('hostRules'))) {
-          errors.push({
+          warnings.push({
             topic: 'Configuration Error',
             message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
           });
