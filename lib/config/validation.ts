@@ -153,6 +153,7 @@ export async function validateConfig(
           });
         }
       }
+      continue;
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
