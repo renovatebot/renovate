@@ -118,6 +118,7 @@ export const presets: Record<string, Preset> = {
           'java-jre',
           'sapmachine',
         ],
+        matchPackagePatterns: ['^azul/zulu-openjdk'],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
       },
