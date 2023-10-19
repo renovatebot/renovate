@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import hasha from 'hasha';
 import { minimatch } from 'minimatch';
 import upath from 'upath';
+import { hashFile, hashFromArray } from './utils/hash.mjs';
 
 console.log('generating imports');
 const newFiles = new Set();
@@ -34,9 +34,6 @@ const dataPaths = [
   'data',
   'node_modules/emojibase-data/en/shortcodes/github.json',
 ];
-const options = {
-  algorithm: 'sha256',
-};
 
 /**
  *
@@ -74,7 +71,7 @@ function expandPaths(paths) {
  */
 async function getFileHash(filePath) {
   try {
-    const hash = await hasha.fromFile(filePath, options);
+    const hash = await hashFile(filePath, 'sha256');
     return hash;
   } catch (err) {
     throw new Error(`ERROR: Unable to generate hash for ${filePath}`);
@@ -108,7 +105,7 @@ export async function getManagerHash(managerName, isCustomManager) {
   }
 
   if (hashes.length) {
-    return hasha(hashes, options);
+    return hashFromArray(hashes, 'sha512');
   }
 
   throw new Error(`Unable to generate hash for manager/${managerName}`);
