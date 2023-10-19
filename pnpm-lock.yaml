@@ -398,8 +398,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       '@types/diff':
-        specifier: 5.0.6
-        version: 5.0.6
+        specifier: 5.0.7
+        version: 5.0.7
       '@types/eslint':
         specifier: 8.44.4
         version: 8.44.4
@@ -3803,8 +3803,8 @@ packages:
     resolution: {integrity: sha512-ZB+G1yG5pQoWaaHg0D4H9c29q61Y0O/kyOtEx0IKL3Gca3EGEcN3jh5OHnoQp00/pFoqJR63htsviivOkTXuCw==}
     dev: true
 
-  /@types/diff@5.0.6:
-    resolution: {integrity: sha512-OxYeXtiT2eAkK5Js6V6wY+Jb9uKdeSQIXxEZcRBqrE/VBJPMnrmsArARjGjiIulpu13vnpvGf+LLTNyZaJNPuw==}
+  /@types/diff@5.0.7:
+    resolution: {integrity: sha512-adBosR2GntaQQiuHnfRN9HtxYpoHHJBcdyz7VSXhjpSAmtvIfu/S1fjTqwuIx/Ypba6LCZdfWIqPYx2BR5TneQ==}
     dev: true
 
   /@types/emscripten@1.39.8:
