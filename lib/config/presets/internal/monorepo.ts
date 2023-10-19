@@ -355,6 +355,7 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt.js', // old repo
     'https://github.com/nuxt/nuxt',
   ],
+  okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
