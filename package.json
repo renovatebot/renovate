@@ -142,12 +142,12 @@
     "node": "^18.12.0 || >=20.0.0"
   },
   "dependencies": {
-    "@aws-sdk/credential-providers": "3.363.0",
     "@aws-sdk/client-codecommit": "3.363.0",
     "@aws-sdk/client-ec2": "3.363.0",
     "@aws-sdk/client-ecr": "3.363.0",
     "@aws-sdk/client-rds": "3.363.0",
     "@aws-sdk/client-s3": "3.363.0",
+    "@aws-sdk/credential-providers": "3.363.0",
     "@breejs/later": "4.1.0",
     "@cdktf/hcl2json": "0.18.0",
     "@iarna/toml": "3.0.0",
@@ -204,7 +204,6 @@
     "got": "11.8.6",
     "graph-data-structure": "3.3.0",
     "handlebars": "4.7.8",
-    "hasha": "5.2.2",
     "ignore": "5.2.4",
     "ini": "4.1.1",
     "js-yaml": "4.1.0",
