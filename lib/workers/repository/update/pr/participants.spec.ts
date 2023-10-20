@@ -46,6 +46,31 @@ describe('workers/repository/update/pr/participants', () => {
       expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b']);
     });
 
+    it('expands group code owners assignees', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['c']);
+      platform.expandGroupMembers = jest
+        .fn()
+        .mockResolvedValueOnce(['c.1', 'c.2']);
+      await addParticipants(
+        {
+          ...config,
+          assigneesFromCodeOwners: true,
+          expandCodeownersGroups: true,
+        },
+        pr
+      );
+      expect(platform.expandGroupMembers).toHaveBeenCalledWith(['c']);
+    });
+
+    it('does not expand group code owners assignees when not enabled', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['c']);
+      platform.expandGroupMembers = jest
+        .fn()
+        .mockResolvedValueOnce(['c.1', 'c.2']);
+      await addParticipants(config, pr);
+      expect(platform.expandGroupMembers).not.toHaveBeenCalled();
+    });
+
     it('supports assigneesSampleSize', async () => {
       util.sampleSize.mockReturnValueOnce(['a', 'c']);
       await addParticipants({ ...config, assigneesSampleSize: 2 }, pr);
