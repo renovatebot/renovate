@@ -34,7 +34,7 @@ nav:
       - 'Default Presets': 'presets-default.md'
       - 'Docker Presets': 'presets-docker.md'
       - 'Full Config Presets': 'presets-config.md'
-      - 'Group Presets': 'presets-group.md'
+      - 'Group Presets': 'group.ts'
       - 'Helper Presets': 'presets-helpers.md'
       - 'Monorepo Presets': 'presets-monorepo.md'
       - 'npm Presets': 'presets-npm.md'
