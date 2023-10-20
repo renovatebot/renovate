@@ -47,10 +47,10 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('expands group code owners assignees', async () => {
-      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['c']);
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', 'group']);
       platform.expandGroupMembers = jest
         .fn()
-        .mockResolvedValueOnce(['c.1', 'c.2']);
+        .mockResolvedValueOnce(['user', 'group.user']);
       await addParticipants(
         {
           ...config,
@@ -59,16 +59,46 @@ describe('workers/repository/update/pr/participants', () => {
         },
         pr
       );
-      expect(platform.expandGroupMembers).toHaveBeenCalledWith(['c']);
+      expect(platform.expandGroupMembers).toHaveBeenCalledWith([
+        'user',
+        'group',
+      ]);
+      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
+      expect(platform.addAssignees).toHaveBeenCalledWith(123, [
+        'a',
+        'b',
+        'c',
+        'user',
+        'group.user',
+      ]);
     });
 
-    it('does not expand group code owners assignees when not enabled', async () => {
-      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['c']);
+    it('does not expand group code owners assignees when assigneesFromCodeOwners disabled', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', 'group']);
       platform.expandGroupMembers = jest
         .fn()
-        .mockResolvedValueOnce(['c.1', 'c.2']);
+        .mockResolvedValueOnce(['user', 'group.user']);
       await addParticipants(config, pr);
+      expect(codeOwners.codeOwnersForPr).not.toHaveBeenCalled();
       expect(platform.expandGroupMembers).not.toHaveBeenCalled();
+      expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b', 'c']);
+    });
+
+    it('does not expand group code owners assignees when expandCodeOwnersGroups disabled', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', 'group']);
+      platform.expandGroupMembers = jest
+        .fn()
+        .mockResolvedValueOnce(['user', 'group.user']);
+      await addParticipants({ ...config, assigneesFromCodeOwners: true }, pr);
+      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
+      expect(platform.expandGroupMembers).not.toHaveBeenCalled();
+      expect(platform.addAssignees).toHaveBeenCalledWith(123, [
+        'a',
+        'b',
+        'c',
+        'user',
+        'group',
+      ]);
     });
 
     it('supports assigneesSampleSize', async () => {

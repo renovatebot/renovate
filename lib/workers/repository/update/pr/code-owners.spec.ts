@@ -67,6 +67,7 @@ describe('workers/repository/update/pr/code-owners', () => {
         packages/c/ @dan
         packages/d/ @maria @jimmy
         packages/e/ @jimmy
+        packages/f/ @group
 
       `;
 
