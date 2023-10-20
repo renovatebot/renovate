@@ -1350,7 +1350,7 @@ export async function filterUnavailableUsers(
 export async function expandGroupMembers(
   reviewersOrAssignees: string[]
 ): Promise<string[]> {
-  let expandedReviewersOrAssignees: string[] = [];
+  const expandedReviewersOrAssignees: string[] = [];
   for (const reviewerOrAssignee of reviewersOrAssignees) {
     try {
       const members = await getMemberUsernames(reviewerOrAssignee);
