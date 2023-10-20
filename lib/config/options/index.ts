@@ -2099,6 +2099,7 @@ const options: RenovateOptions[] = [
       'Expand the configured code owner groups into a full list of group members.',
     type: 'boolean',
     default: false,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'assigneesSampleSize',
