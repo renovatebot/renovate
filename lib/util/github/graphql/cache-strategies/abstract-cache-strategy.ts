@@ -110,9 +110,12 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
 
       // If we reached previously stored item that is stabilized,
       // we assume the further pagination will not yield any new items.
+      //
+      // However, we don't break the loop here, allowing to reconcile
+      // the entire page of items. This protects us from unusual cases
+      // when release authors intentionally break the timeline.
       if (oldItem && this.isStabilized(oldItem)) {
         isPaginationDone = true;
-        break;
       }
 
       // Check if item is new or updated
