@@ -1354,8 +1354,7 @@ export async function expandGroupMembers(
   for (const reviewerOrAssignee of reviewersOrAssignees) {
     try {
       const members = await getMemberUsernames(reviewerOrAssignee);
-      expandedReviewersOrAssignees =
-        expandedReviewersOrAssignees.concat(members);
+      expandedReviewersOrAssignees.push(...members);
     } catch (err) {
       // Unable to fetch group or is not a group, so add back to list.
       logger.debug(
