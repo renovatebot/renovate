@@ -118,7 +118,8 @@ See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-s
 
 ## expandCodeownersGroups
 
-If configured, Renovate will expand the configured code owner groups into a full list of group members.
+If configured, Renovate will expand the configured code owner groups into a full list of group members and assign them individually.
+This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
 
 ## assigneesSampleSize
 
