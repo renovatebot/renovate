@@ -268,5 +268,48 @@ describe('modules/manager/pep621/extract', () => {
         },
       ]);
     });
+
+    it('should extract dependencies from hatch environments', function () {
+      const hatchPyProject = Fixtures.get('pyproject_with_hatch.toml');
+      const result = extractPackageFile(hatchPyProject, 'pyproject.toml');
+
+      expect(result?.deps).toEqual([
+        {
+          currentValue: '==2.30.0',
+          datasource: 'pypi',
+          depName: 'requests',
+          depType: 'project.dependencies',
+          packageName: 'requests',
+        },
+        {
+          currentValue: '==6.5',
+          datasource: 'pypi',
+          depName: 'coverage',
+          depType: 'tool.hatch.envs.default',
+          packageName: 'coverage',
+        },
+        {
+          datasource: 'pypi',
+          depName: 'pytest',
+          depType: 'tool.hatch.envs.default',
+          packageName: 'pytest',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '>=23.1.0',
+          datasource: 'pypi',
+          depName: 'black',
+          depType: 'tool.hatch.envs.lint',
+          packageName: 'black',
+        },
+        {
+          datasource: 'pypi',
+          depName: 'baz',
+          depType: 'tool.hatch.envs.experimental',
+          packageName: 'baz',
+          skipReason: 'unspecified-version',
+        },
+      ]);
+    });
   });
 });
