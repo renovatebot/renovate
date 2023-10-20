@@ -46,13 +46,13 @@ export class MetadataCache {
 
     const saveCache = async (
       hash: string,
-      data: ReleaseResult,
-      ttlMinutes = 100 * 24 * 60,
-      ttlDelta = 10 * 24 * 60
+      data: ReleaseResult
     ): Promise<void> => {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
         const newCache: CacheRecord = { hash, data };
+        const ttlMinutes = 100 * 24 * 60;
+        const ttlDelta = 10 * 24 * 60;
         const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
         await packageCache.set(
           cacheNs,
