@@ -1,7 +1,7 @@
 // TODO: types (#22198)
-import hasha from 'hasha';
 import semver from 'semver';
 import { logger } from '../../../logger';
+import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import type { UpdateDependencyConfig } from '../types';
 import { parseUrlPath } from './extract';
@@ -163,9 +163,7 @@ export async function updateDependency({
     newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${
       upgrade.newValue
     }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
-    newSha256 = await hasha.fromStream(http.stream(newUrl), {
-      algorithm: 'sha256',
-    });
+    newSha256 = await hashStream(http.stream(newUrl), 'sha256');
   } catch (errOuter) {
     logger.debug(
       `Failed to download release download for ${upgrade.depName} - trying archive instead`
@@ -174,9 +172,7 @@ export async function updateDependency({
       const ownerName = String(upgrade.managerData.ownerName);
       const repoName = String(upgrade.managerData.repoName);
       newUrl = `https://github.com/${ownerName}/${repoName}/archive/${upgrade.newValue}.tar.gz`;
-      newSha256 = await hasha.fromStream(http.stream(newUrl), {
-        algorithm: 'sha256',
-      });
+      newSha256 = await hashStream(http.stream(newUrl), 'sha256');
     } catch (errInner) {
       logger.debug(
         `Failed to download archive download for ${upgrade.depName} - update failed`
