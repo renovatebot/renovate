@@ -105,7 +105,7 @@ export async function getManagerHash(managerName, isCustomManager) {
   }
 
   if (hashes.length) {
-    return hashFromArray(hashes, 'sha512');
+    return hashFromArray(hashes, 'sha256');
   }
 
   throw new Error(`Unable to generate hash for manager/${managerName}`);
