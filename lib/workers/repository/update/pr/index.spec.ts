@@ -682,7 +682,6 @@ describe('workers/repository/update/pr/index', () => {
         logJSON: {
           hasReleaseNotes: true,
           project: {
-            type: 'github',
             repository: 'some/repo',
             baseUrl: 'https://github.com',
             apiBaseUrl: 'https://api.github.com/',

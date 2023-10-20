@@ -11,24 +11,26 @@ import type { BranchUpgradeConfig } from '../../../../types';
 import { slugifyUrl } from './common';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
-import type {
-  ChangeLogError,
-  ChangeLogPlatform,
-  ChangeLogRelease,
-  ChangeLogResult,
+import {
+  ChangeLogContentSource,
+  type ChangeLogError,
+  type ChangeLogPlatform,
+  type ChangeLogRelease,
+  type ChangeLogResult,
 } from './types';
 
-export abstract class ChangeLogSource {
+export abstract class ChangeLogSource extends ChangeLogContentSource {
   private readonly cacheNamespace: string;
 
   constructor(
-    private readonly platform: ChangeLogPlatform,
+    platform: ChangeLogPlatform,
     private readonly datasource:
       | 'bitbucket-tags'
       | 'gitea-tags'
       | 'github-tags'
       | 'gitlab-tags'
   ) {
+    super(platform);
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -167,7 +169,6 @@ export abstract class ChangeLogSource {
       project: {
         apiBaseUrl,
         baseUrl,
-        type: this.platform,
         repository,
         sourceUrl,
         sourceDirectory,
@@ -176,7 +177,7 @@ export abstract class ChangeLogSource {
       versions: changelogReleases,
     };
 
-    res = await addReleaseNotes(res, config);
+    res = await addReleaseNotes(res, { ...config, source: this });
 
     return res;
   }

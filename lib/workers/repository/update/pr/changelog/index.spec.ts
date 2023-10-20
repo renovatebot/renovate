@@ -120,7 +120,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -155,7 +154,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -185,7 +183,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -214,7 +211,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -302,7 +298,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -342,7 +337,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -380,7 +374,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },

@@ -90,7 +90,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
         },
         versions: [
           { version: '5.6.1' },
@@ -132,7 +131,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
         },
         versions: [
           { version: '5.6.1' },
@@ -167,7 +165,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
         },
         versions: [
           { version: '5.6.1' },
@@ -202,7 +199,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
         },
         versions: [
           { version: '5.6.1' },
@@ -271,7 +267,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
-          type: 'gitlab',
         },
         versions: [
           { version: '5.6.1' },
@@ -306,7 +301,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          type: 'gitlab',
         },
         versions: [
           { version: '5.6.1' },
@@ -344,7 +338,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           repository: 'replacement/sourceurl',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/replacement/sourceurl/',
-          type: 'gitlab',
         },
       });
       expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument

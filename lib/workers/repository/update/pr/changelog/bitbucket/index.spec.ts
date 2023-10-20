@@ -11,6 +11,8 @@ const apiBaseUrl = 'https://api.bitbucket.org/';
 
 const changelogMd = Fixtures.get('jest.md', '../..');
 
+const bitbucketChangeLogSource = new BitbucketChangeLogSource();
+
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   packageName: 'some-repo',
@@ -55,7 +57,6 @@ const bitbucketTreeResponseNoChangelogFiles = {
 };
 
 const bitbucketProject = partial<ChangeLogProject>({
-  type: 'bitbucket',
   repository: 'some-org/some-repo',
   baseUrl,
   apiBaseUrl,
@@ -69,7 +70,10 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       .reply(200, bitbucketTreeResponse)
       .get('/2.0/repositories/some-org/some-repo/src/abcd/CHANGELOG.md')
       .reply(200, changelogMd);
-    const res = await getReleaseNotesMdFile(bitbucketProject);
+    const res = await getReleaseNotesMdFile(
+      bitbucketProject,
+      bitbucketChangeLogSource
+    );
 
     expect(res).toMatchObject({
       changelogFile: 'CHANGELOG.md',
@@ -82,14 +86,18 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       .scope(apiBaseUrl)
       .get('/2.0/repositories/some-org/some-repo/src?pagelen=100')
       .reply(200, bitbucketTreeResponseNoChangelogFiles);
-    const res = await getReleaseNotesMdFile(bitbucketProject);
+    const res = await getReleaseNotesMdFile(
+      bitbucketProject,
+      bitbucketChangeLogSource
+    );
     expect(res).toBeNull();
   });
 
   it('handles release list', async () => {
     const res = await getReleaseList(
       bitbucketProject,
-      partial<ChangeLogRelease>({})
+      partial<ChangeLogRelease>({}),
+      bitbucketChangeLogSource
     );
     expect(res).toBeEmptyArray();
   });

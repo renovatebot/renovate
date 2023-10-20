@@ -10,7 +10,6 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON filters u
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
     "sourceUrl": "https://github.com/chalk/chalk",
-    "type": "github",
   },
   "versions": [
     {
@@ -69,7 +68,6 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
     "sourceUrl": "https://github-enterprise.example.com/chalk/chalk",
-    "type": "github",
   },
   "versions": [
     {
@@ -128,7 +126,6 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
     "sourceUrl": "https://github.com/chalk/chalk",
-    "type": "github",
   },
   "versions": [
     {
@@ -187,7 +184,6 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
     "sourceUrl": "https://github-enterprise.example.com/chalk/chalk",
-    "type": "github",
   },
   "versions": [
     {
@@ -246,7 +242,6 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
     "sourceUrl": "https://github.com/chalk/chalk",
-    "type": "github",
   },
   "versions": [
     {
@@ -305,7 +300,6 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON uses GitH
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
     "sourceUrl": "https://github.com/chalk/chalk",
-    "type": "github",
   },
   "versions": [
     {
@@ -369,7 +363,6 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON works wit
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
     "sourceUrl": "https://github.com/chalk/chalk",
-    "type": "github",
   },
   "versions": [
     {

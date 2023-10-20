@@ -100,7 +100,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -125,7 +124,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -151,7 +149,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -177,7 +174,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -264,7 +260,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -297,7 +292,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'sindresorhus/got',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/sindresorhus/got',
-          type: 'github',
         },
       });
       expect(upgrade.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
@@ -325,7 +319,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          type: 'github',
         },
         versions: [
           { version: '2.5.2' },
@@ -361,7 +354,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           repository: 'sindresorhus/got',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/sindresorhus/got',
-          type: 'github',
         },
       });
       expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
@@ -405,7 +397,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          type: 'github',
           repository: 'chalk/chalk',
           sourceUrl: 'https://github.com/chalk/chalk',
           sourceDirectory: undefined,

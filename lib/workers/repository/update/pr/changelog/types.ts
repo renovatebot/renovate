@@ -1,3 +1,20 @@
+import type { BranchUpgradeConfig } from '../../../../types';
+
+export abstract class ChangeLogContentSource {
+  constructor(public readonly platform: ChangeLogPlatform) {}
+
+  abstract getReleaseList(
+    project: ChangeLogProject,
+    _release: ChangeLogRelease
+  ): Promise<ChangeLogNotes[]>;
+
+  abstract getChangeLogFile(
+    repository: string,
+    apiBaseUrl: string,
+    sourceDirectory?: string
+  ): Promise<ChangeLogFile | null>;
+}
+
 export interface ChangeLogNotes {
   body?: string;
   id?: number;
@@ -25,9 +42,12 @@ export interface ChangeLogRelease {
 
 export type ChangeLogPlatform = 'bitbucket' | 'gitea' | 'github' | 'gitlab';
 
+export interface ChangeLogConfig extends BranchUpgradeConfig {
+  source: ChangeLogContentSource;
+}
+
 export interface ChangeLogProject {
   packageName?: string;
-  type: ChangeLogPlatform;
   apiBaseUrl: string;
   baseUrl: string;
   repository: string;

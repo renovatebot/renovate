@@ -6,7 +6,6 @@ import * as hostRules from '../../../../../../util/host-rules';
 import { toBase64 } from '../../../../../../util/string';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { GiteaChangeLogSource } from '../gitea/source';
-import { getReleaseNotesMd } from '.';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -92,7 +91,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
         },
         versions: [
           { version: '5.6.1' },
@@ -197,7 +195,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
         },
         versions: [
           {
@@ -242,7 +239,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
         },
         versions: [
           { version: '5.6.1' },
@@ -277,7 +273,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
         },
         versions: [
           { version: '5.6.1' },
@@ -345,7 +340,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitea-enterprise.example.com/meno/dropzone/',
-          type: 'gitea',
         },
         versions: [
           { version: '5.6.1' },
@@ -382,7 +376,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          type: 'gitea',
         },
         versions: [
           { version: '5.6.1' },
@@ -422,7 +415,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'replacement/sourceurl',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/replacement/sourceurl/',
-          type: 'gitea',
         },
       });
       expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
@@ -480,7 +472,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           content: toBase64('some content'),
         });
       expect(
-        await getReleaseNotesMd(
+        await changelogSource.getChangeLogFile(
           'some/repo',
           'https://git.test.com/api/v1/',
           'charts/some'
