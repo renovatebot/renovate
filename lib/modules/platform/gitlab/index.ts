@@ -1358,6 +1358,9 @@ export async function expandGroupMembers(
         expandedReviewersOrAssignees.concat(members);
     } catch (err) {
       // Unable to fetch group or is not a group, so add back to list.
+      logger.debug(
+        `Unable to fetch group or "${reviewerOrAssignee}" is not a group`
+      );
       expandedReviewersOrAssignees.push(reviewerOrAssignee);
     }
   }
