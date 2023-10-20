@@ -262,17 +262,36 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
 // Get all repositories that the user has access to
 export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
-  return (await fetchRepositories())
-    .filter(is.nonEmptyObject)
-    .filter((repo) => !repo.archived)
-    .filter((repo) => {
-      if (config?.topics) {
-        const autodiscoverTopics = config.topics;
-        return repo.topics.some((topic) => autodiscoverTopics.includes(topic));
-      }
-      return true;
-    })
-    .map((repo) => repo.full_name);
+  const nonEmptyRepositories = (await fetchRepositories()).filter(
+    is.nonEmptyObject
+  );
+  const nonArchivedRepositories = nonEmptyRepositories.filter(
+    (repo) => !repo.archived
+  );
+  if (nonArchivedRepositories.length < nonEmptyRepositories.length) {
+    logger.debug(
+      `Filtered out ${
+        nonEmptyRepositories.length - nonArchivedRepositories.length
+      } archived repositories`
+    );
+  }
+  if (!config?.topics) {
+    return nonArchivedRepositories.map((repo) => repo.full_name);
+  }
+
+  logger.debug({ topics: config.topics }, 'Filtering by topics');
+  const topicRepositories = nonArchivedRepositories.filter((repo) =>
+    repo.topics?.some((topic) => config?.topics?.includes(topic))
+  );
+
+  if (topicRepositories.length < nonArchivedRepositories.length) {
+    logger.debug(
+      `Filtered out ${
+        nonArchivedRepositories.length - topicRepositories.length
+      } repositories not matching topic filters`
+    );
+  }
+  return topicRepositories.map((repo) => repo.full_name);
 }
 
 async function getBranchProtection(
