@@ -7,10 +7,16 @@ import { sampleSize } from '../../../../util/sample';
 import { codeOwnersForPr } from './code-owners';
 
 async function addCodeOwners(
+  config: RenovateConfig,
   assigneesOrReviewers: string[],
   pr: Pr
 ): Promise<string[]> {
-  return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
+  const assignees =
+    config.expandCodeownersGroups && platform.expandGroupMembers
+      ? await platform.expandGroupMembers(await codeOwnersForPr(pr))
+      : await codeOwnersForPr(pr);
+
+  return [...new Set(assigneesOrReviewers.concat(assignees))];
 }
 
 function filterUnavailableUsers(
@@ -41,7 +47,7 @@ export async function addParticipants(
   let assignees = config.assignees ?? [];
   logger.debug(`addParticipants(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
-    assignees = await addCodeOwners(assignees, pr);
+    assignees = await addCodeOwners(config, assignees, pr);
   }
   if (assignees.length > 0) {
     try {
@@ -67,7 +73,7 @@ export async function addParticipants(
 
   let reviewers = config.reviewers ?? [];
   if (config.reviewersFromCodeOwners) {
-    reviewers = await addCodeOwners(reviewers, pr);
+    reviewers = await addCodeOwners(config, reviewers, pr);
   }
   if (
     is.array(config.additionalReviewers) &&
