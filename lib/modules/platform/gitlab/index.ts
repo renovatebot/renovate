@@ -53,7 +53,13 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
+import {
+  getMemberUserIDs,
+  getMemberUsernames,
+  getUserID,
+  gitlabApi,
+  isUserBusy,
+} from './http';
 import { getMR, updateMR } from './merge-request';
 import { LastPipelineId } from './schema';
 import type {
@@ -1339,4 +1345,21 @@ export async function filterUnavailableUsers(
     }
   }
   return filteredUsers;
+}
+
+export async function expandGroupMembers(
+  reviewersOrAssignees: string[]
+): Promise<string[]> {
+  let expandedReviewersOrAssignees: string[] = [];
+  for (const reviewerOrAssignee of reviewersOrAssignees) {
+    try {
+      const members = await getMemberUsernames(reviewerOrAssignee);
+      expandedReviewersOrAssignees =
+        expandedReviewersOrAssignees.concat(members);
+    } catch (err) {
+      // Unable to fetch group or is not a group, so add back to list.
+      expandedReviewersOrAssignees.push(reviewerOrAssignee);
+    }
+  }
+  return expandedReviewersOrAssignees;
 }
