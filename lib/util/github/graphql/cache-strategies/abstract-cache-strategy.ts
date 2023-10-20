@@ -113,7 +113,8 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       //
       // However, we don't break the loop here, allowing to reconcile
       // the entire page of items. This protects us from unusual cases
-      // when release authors intentionally break the timeline.
+      // when release authors intentionally break the timeline. Therefore,
+      // while it feels appealing to break early, please don't do that.
       if (oldItem && this.isStabilized(oldItem)) {
         isPaginationDone = true;
       }
