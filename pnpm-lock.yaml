@@ -126,8 +126,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       commander:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       conventional-commits-detector:
         specifier: 1.0.3
         version: 1.0.3
@@ -5157,8 +5157,8 @@ packages:
     dev: false
     optional: true
 
-  /commander@11.0.0:
-    resolution: {integrity: sha512-9HMlXtt/BNoYr8ooyjjNRdIilOTkVJXB+GhxMTtOKwk0R4j4lS4NpjuqmRxroBfnfTSHQIHQB7wryHhXarNjmQ==}
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
     dev: false
 
@@ -5573,7 +5573,7 @@ packages:
     hasBin: true
     dependencies:
       '@one-ini/wasm': 0.1.1
-      commander: 11.0.0
+      commander: 11.1.0
       minimatch: 9.0.2
       semver: 7.5.4
     dev: false
