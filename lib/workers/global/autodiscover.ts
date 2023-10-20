@@ -13,6 +13,7 @@ function repoName(value: string | { repository: string }): string {
 export async function autodiscoverRepositories(
   config: AllConfig
 ): Promise<AllConfig> {
+  const { autodiscoverFilter } = config;
   if (config.platform === 'local') {
     if (config.repositories?.length) {
       logger.debug(
@@ -42,18 +43,17 @@ export async function autodiscoverRepositories(
   });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
-    logger.debug(
-      'The account associated with your token does not have access to any repos'
-    );
+    logger.debug('No repositories were autodiscovered');
     return config;
   }
 
-  if (config.autodiscoverFilter) {
+  logger.debug(`Autodiscovered ${discovered.length} repositories`);
+
+  if (autodiscoverFilter) {
+    logger.debug({ autodiscoverFilter }, 'Applying autodiscoverFilter');
     discovered = applyFilters(
       discovered,
-      is.string(config.autodiscoverFilter)
-        ? [config.autodiscoverFilter]
-        : config.autodiscoverFilter
+      is.string(autodiscoverFilter) ? [autodiscoverFilter] : autodiscoverFilter
     );
 
     if (!discovered.length) {
@@ -61,12 +61,12 @@ export async function autodiscoverRepositories(
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
+    logger.debug(
+      `Autodiscovered ${discovered.length} repositories after filter`
+    );
   }
 
-  logger.info(
-    { length: discovered.length, repositories: discovered },
-    `Autodiscovered repositories`
-  );
+  logger.info({ repositories: discovered }, `Autodiscovered repositories`);
 
   // istanbul ignore if
   if (config.repositories?.length) {
