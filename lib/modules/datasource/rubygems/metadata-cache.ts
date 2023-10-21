@@ -20,7 +20,10 @@ function hashReleases(releases: ReleaseResult): string {
   return hashVersions(releases.releases.map((release) => release.version));
 }
 
-type CacheError = 'cache-not-found' | 'cache-outdated' | 'inconsistent-data';
+type CacheError =
+  | { type: 'cache-not-found' }
+  | { type: 'cache-outdated' }
+  | { type: 'inconsistent-data' };
 
 export class MetadataCache {
   constructor(private readonly http: Http) {}
@@ -37,11 +40,11 @@ export class MetadataCache {
     const loadCache = (): AsyncResult<ReleaseResult, CacheError> =>
       Result.wrapNullable<CacheRecord, CacheError, CacheError>(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
-        'cache-not-found'
+        { type: 'cache-not-found' }
       ).transform((cache) => {
         return versionsHash === cache.hash
           ? Result.ok(cache.data)
-          : Result.err('cache-outdated');
+          : Result.err({ type: 'cache-outdated' });
       });
 
     const saveCache = async (
@@ -79,7 +82,7 @@ export class MetadataCache {
               { err },
               'Rubygems: error fetching releases timestamp data'
             );
-            return Result.err('inconsistent-data');
+            return Result.err({ type: 'inconsistent-data' });
           }
         )
       )
