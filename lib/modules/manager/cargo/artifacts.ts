@@ -8,8 +8,8 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 
 async function cargoUpdate(
   manifestPath: string,
@@ -38,14 +38,31 @@ async function cargoUpdatePrecise(
   updatedDeps: Upgrade<Record<string, unknown>>[],
   constraint: string | undefined
 ): Promise<void> {
-  const cmds = updatedDeps
-    .filter((dep) => !!dep.lockedVersion)
-    .map(
-      (dep) =>
-        `cargo update --manifest-path ${quote(manifestPath)}` +
-        ` --package ${dep.packageName!}@${dep.lockedVersion}` +
-        ` --precise ${dep.newVersion}`
-    );
+  // Update all dependencies that have been bumped in `Cargo.toml` first.
+  const cmds = [
+    'cargo update --config net.git-fetch-with-cli=true' +
+      ` --manifest-path ${quote(manifestPath)} --workspace`,
+  ].concat(
+    // Update individual dependencies to their `newVersion`. Necessary when
+    // using the `lockfile-update` rangeStrategy which doesn't touch Cargo.lock.
+    updatedDeps
+      .filter((dep) => !!dep.lockedVersion)
+      .map(
+        (dep) =>
+          // Hack: If a package is already at `newVersion` then skip updating.
+          // This often happens when a preceding dependency also bumps this one.
+          `cargo update --config net.git-fetch-with-cli=true` +
+          ` --manifest-path ${quote(manifestPath)}` +
+          ` --package ${dep.packageName!}@${dep.newVersion}` +
+          ` --precise ${dep.newVersion}` +
+          ' > /dev/null 2>&1 || ' +
+          // Otherwise update the package to `newVersion`.
+          `cargo update --config net.git-fetch-with-cli=true` +
+          ` --manifest-path ${quote(manifestPath)}` +
+          ` --package ${dep.packageName!}@${dep.lockedVersion}` +
+          ` --precise ${dep.newVersion}`
+      )
+  );
 
   const execOptions: ExecOptions = {
     docker: {},

@@ -142,14 +142,27 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'cargo update --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1',
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --package dep1@1.0.1 --precise 1.0.1' +
+          ' > /dev/null 2>&1 ||' +
+          ' cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --package dep1@1.0.0 --precise 1.0.1',
       },
     ]);
   });
 
   it('returns an artifact error when cargo update fails', async () => {
     const cmd =
-      'cargo update --manifest-path Cargo.toml --package dep1@1.0.0 --precise 1.0.1';
+      'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace';
     const execError = new ExecError('Exec error', {
       cmd,
       stdout: '',
