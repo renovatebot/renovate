@@ -44,7 +44,7 @@ async function cargoUpdatePrecise(
       ` --manifest-path ${quote(manifestPath)} --workspace`,
   ].concat(
     // Update individual dependencies to their `newVersion`. Necessary when
-    // using the `lockfile-update` rangeStrategy which doesn't touch Cargo.lock.
+    // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.lock.
     updatedDeps
       .filter((dep) => !!dep.lockedVersion)
       .map(
