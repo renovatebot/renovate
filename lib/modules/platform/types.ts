@@ -16,7 +16,6 @@ export interface PlatformParams {
   username?: string;
   password?: string;
   gitAuthor?: string;
-  platformGitCredentialsFile: boolean;
 }
 
 export interface PlatformResult {
@@ -50,6 +49,7 @@ export interface RepoParams {
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
   includeMirrors?: boolean;
+  platformGitCredentialsFile: boolean;
 }
 
 export interface PrDebugData {
