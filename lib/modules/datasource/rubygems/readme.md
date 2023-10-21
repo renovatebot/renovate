@@ -5,8 +5,13 @@ Datasource query order depends on the registry.
 ## Querying `rubygems.org`
 
 Rubygems rate limits are easy to hit, so we need to be careful with the queries.
+This is implemented with two-level cache:
 
-- First, we query `https://rubygems.org/versions` endpoint for current versions for all packages. Either full or delta sync is performed depending on the cache state.
+- First, we query `https://rubygems.org/versions` endpoint for current versions for all packages.
+
+  Either full or delta sync is performed, depending on the cache state.
+
+  All the data of this layer is stored in-memory as the mapping `packageName -> version[]`.
 
   ```mermaid
   stateDiagram-v2
@@ -42,7 +47,9 @@ Rubygems rate limits are easy to hit, so we need to be careful with the queries.
     delta_sync_error --> Empty: (3) Status other than 404 or 416
   ```
 
-- Then, more data is obtained from `https://rubygems.org/api/v1/versions/<package>.json` and `https://rubygems.org/api/v1/gems/<package>.json`
+- Then, more data is obtained from `https://rubygems.org/api/v1/versions/<package>.json` and `https://rubygems.org/api/v1/gems/<package>.json`.
+
+  Cache key is formed from the `packageName` and `version[]` from the previous layer, so that we reach these endpoints only when the list of versions has changed.
 
 ## Querying `rubygems.pkg.github.com` or `gitlab.com`
 
