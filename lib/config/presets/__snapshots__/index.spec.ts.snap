@@ -8,6 +8,7 @@ exports[`config/presets/index getPreset gets linters 1`] = `
   "extends": [
     "packages:emberTemplateLint",
     "packages:eslint",
+    "packages:phpLinters",
     "packages:stylelint",
     "packages:tslint",
   ],
@@ -134,6 +135,9 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
   "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
+    "friendsofphp/php-cs-fixer",
+    "squizlabs/php_codesniffer",
+    "symplify/easy-coding-standard",
     "codelyzer",
     "prettier",
     "remark-lint",
@@ -165,6 +169,9 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
       "matchPackageNames": [
         "@types/eslint",
         "babel-eslint",
+        "friendsofphp/php-cs-fixer",
+        "squizlabs/php_codesniffer",
+        "symplify/easy-coding-standard",
         "codelyzer",
         "prettier",
         "remark-lint",

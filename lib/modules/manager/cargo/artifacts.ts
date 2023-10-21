@@ -9,13 +9,16 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import { getGitEnvironmentVariables } from '../../../util/git/auth';
 
 async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
   constraint: string | undefined
 ): Promise<void> {
-  let cmd = `cargo update --manifest-path ${quote(manifestPath)}`;
+  let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
+    manifestPath
+  )}`;
   // If we're updating a specific crate, `cargo-update` requires `--workspace`
   // for more information, see: https://github.com/renovatebot/renovate/issues/12332
   if (!isLockFileMaintenance) {
@@ -23,6 +26,7 @@ async function cargoUpdate(
   }
 
   const execOptions: ExecOptions = {
+    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };

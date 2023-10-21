@@ -1,7 +1,8 @@
+import { mockDeep } from 'jest-mock-extended';
 import { hostRules } from '../../../test/util';
 import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url';
 
-jest.mock('../host-rules');
+jest.mock('../host-rules', () => mockDeep());
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {
@@ -76,6 +77,21 @@ describe('util/git/url', () => {
       expect(getHttpUrl('git@github.com:some/repo', 'token')).toBe(
         'https://x-access-token:token@github.com/some/repo'
       );
+    });
+
+    it('removes username/password from URL', () => {
+      expect(getHttpUrl('https://user:password@foo.bar/someOrg/someRepo')).toBe(
+        'https://foo.bar/someOrg/someRepo'
+      );
+    });
+
+    it('replaces username/password with given token', () => {
+      expect(
+        getHttpUrl(
+          'https://user:password@foo.bar/someOrg/someRepo',
+          'another-user:a-secret-pwd'
+        )
+      ).toBe('https://another-user:a-secret-pwd@foo.bar/someOrg/someRepo');
     });
   });
 

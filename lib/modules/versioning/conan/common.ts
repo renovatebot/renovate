@@ -1,5 +1,6 @@
 import * as semver from 'semver';
 import { regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
 
 export function makeVersion(
   version: string,
@@ -66,7 +67,7 @@ export function matchesWithOptions(
     options.includePrerelease
   ) {
     const coercedVersion = semver.coerce(cleanedVersion)?.raw;
-    cleanedVersion = coercedVersion ? coercedVersion : '';
+    cleanedVersion = coerceString(coercedVersion);
   }
   return semver.satisfies(cleanedVersion, cleanRange, options);
 }

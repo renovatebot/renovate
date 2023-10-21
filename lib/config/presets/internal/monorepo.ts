@@ -35,6 +35,8 @@ const repoGroups = {
   'aspnet aspnetwebstack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet extensions': 'https://github.com/aspnet/Extensions',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
+  'aspnet-health-checks':
+    'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
@@ -310,6 +312,7 @@ const repoGroups = {
   mailing: 'https://github.com/sofn-xyz/mailing',
   mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
+  marten: 'https://github.com/JasperFx/marten',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
     'https://github.com/material-components/material-components-web',
@@ -322,6 +325,7 @@ const repoGroups = {
   'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
+  'mongo-csharp-driver': 'https://github.com/mongodb/mongo-csharp-driver',
   mstest: 'https://github.com/microsoft/testfx',
   'mutation-testing-elements':
     'https://github.com/stryker-mutator/mutation-testing-elements',
@@ -346,10 +350,12 @@ const repoGroups = {
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
   nswag: 'https://github.com/RicoSuter/NSwag',
+  nuget: 'https://github.com/NuGet/NuGet.Client',
   nuxtjs: [
     'https://github.com/nuxt/nuxt.js', // old repo
     'https://github.com/nuxt/nuxt',
   ],
+  okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
@@ -367,6 +373,8 @@ const repoGroups = {
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
   prisma: 'https://github.com/prisma/prisma',
+  'prometheus-net': 'https://github.com/prometheus-net/prometheus-net',
+  promster: 'https://github.com/tdeekens/promster',
   quartznet: 'https://github.com/quartznet/quartznet',
   'reach-ui': 'https://github.com/reach/reach-ui',
   react: 'https://github.com/facebook/react',
@@ -382,6 +390,7 @@ const repoGroups = {
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
   reakit: 'https://github.com/reakit/reakit',
   redwood: 'https://github.com/redwoodjs/redwood',
+  refit: 'https://github.com/reactiveui/refit',
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   remark: 'https://github.com/remarkjs/remark',
   remix: 'https://github.com/remix-run/remix',
@@ -422,6 +431,7 @@ const repoGroups = {
   'testcontainers-node':
     'https://github.com/testcontainers/testcontainers-node',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
+  tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
@@ -438,11 +448,18 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
+  wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',
   xstate: 'https://github.com/statelyai/xstate',
   xterm: 'https://github.com/xtermjs/xterm.js',
-  'xunit-dotnet': 'https://github.com/xunit/xunit',
+  'xunit-dotnet': [
+    'https://github.com/xunit/assert.xunit',
+    'https://github.com/xunit/visualstudio.xunit',
+    'https://github.com/xunit/xunit',
+    'https://github.com/xunit/xunit.analyzers',
+  ],
   yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
@@ -469,8 +486,10 @@ const patternGroups = {
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
+  forge: '^@forge/',
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
+  'prometheus-simpleclient': '^io.prometheus:simpleclient',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',

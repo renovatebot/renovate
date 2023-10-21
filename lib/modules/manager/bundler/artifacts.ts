@@ -112,9 +112,12 @@ export async function updateArtifacts(
           additionalArgs = '--conservative ';
         }
         if (deps.length) {
-          const cmd = `bundler lock ${updateArg}${additionalArgs}--update ${deps
+          let cmd = `bundler lock ${updateArg}${additionalArgs}--update ${deps
             .map(quote)
             .join(' ')}`;
+          if (cmd.includes(' --conservative ')) {
+            cmd = cmd.replace(' --strict', '');
+          }
           commands.push(cmd);
         }
       }
@@ -174,7 +177,7 @@ export async function updateArtifacts(
     }
 
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile: lockFileName,
       extraEnv: {
         ...bundlerHostRulesVariables,
         GEM_HOME: await ensureCacheDir('bundler'),

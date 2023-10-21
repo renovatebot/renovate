@@ -4,6 +4,8 @@ import {
   GetAuthorizationTokenCommandOutput,
 } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
+import * as _googleAuth from 'google-auth-library';
+import { mockDeep } from 'jest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
@@ -13,14 +15,18 @@ import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
+const googleAuth = mocked(_googleAuth);
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
 
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
 const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
+const gcrUrl = 'https://eu.gcr.io/v2';
+const garUrl = 'https://europe-docker.pkg.dev/v2';
 const dockerHubUrl = 'https://hub.docker.com/v2/repositories';
 
 function mockEcrAuthResolve(
@@ -350,6 +356,218 @@ describe('modules/datasource/docker/index', () => {
         'some-tag'
       );
       expect(res).toBeNull();
+    });
+
+    it('supports Google ADC authentication for gcr', async () => {
+      httpMock
+        .scope(gcrUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports Google ADC authentication for gar', async () => {
+      httpMock
+        .scope(garUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-repo/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports basic authentication for gcr', async () => {
+      httpMock
+        .scope(gcrUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('supports basic authentication for gar', async () => {
+      httpMock
+        .scope(garUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-repo/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('supports public gcr', async () => {
+      httpMock
+        .scope(gcrUrl)
+        .get('/')
+        .reply(200)
+        .head('/some-project/some-package/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('supports public gar', async () => {
+      httpMock
+        .scope(garUrl)
+        .get('/')
+        .reply(200)
+        .head('/some-project/some-repo/some-package/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('continues without token if Google ADC fails for gcr', async () => {
+      hostRules.find.mockReturnValue({});
+      httpMock.scope(gcrUrl).get('/').reply(401, '', {
+        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+      });
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        }))
+      );
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBeNull();
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('continues without token if Google ADC fails for gar', async () => {
+      hostRules.find.mockReturnValue({});
+      httpMock.scope(garUrl).get('/').reply(401, '', {
+        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+      });
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockRejectedValue('some-error'),
+        }))
+      );
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBeNull();
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
     });
 
     it('continues without token, when no header is present', async () => {

@@ -11,10 +11,6 @@ const helmMultiAndNestedImageValues = Fixtures.get(
 
 describe('modules/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [');
       expect(result).toBeNull();

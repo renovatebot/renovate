@@ -4,10 +4,10 @@ import {
   lookup as _dnsLookup,
 } from 'node:dns';
 import type { EntryObject, IPFamily, LookupOptions } from 'cacheable-lookup';
-import QuickLRU from 'quick-lru';
+import { LRUCache } from 'lru-cache';
 import { logger } from '../../logger';
 
-const cache = new QuickLRU<string, any>({ maxSize: 1000 });
+const cache = new LRUCache<string, any>({ max: 1000 });
 
 function lookup(
   ...[host, options, callback]:

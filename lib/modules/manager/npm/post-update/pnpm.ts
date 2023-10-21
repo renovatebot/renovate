@@ -79,8 +79,7 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      logger.debug('Performing pnpm dedupe');
-      commands.push('pnpm dedupe');
+      commands.push('pnpm dedupe --config.ignore-scripts=true');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {

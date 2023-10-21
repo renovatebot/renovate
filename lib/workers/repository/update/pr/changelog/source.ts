@@ -4,6 +4,7 @@ import { getPkgReleases } from '../../../../../modules/datasource';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as packageCache from '../../../../../util/cache/package';
+import { memoize } from '../../../../../util/memoize';
 import { regEx } from '../../../../../util/regex';
 import { parseUrl, trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -114,15 +115,17 @@ export abstract class ChangeLogSource {
     }
 
     const changelogReleases: ChangeLogRelease[] = [];
-    // compare versions
-    const include = (v: string): boolean =>
+
+    // Check if `v` belongs to the range (currentVersion, newVersion]
+    const inRange = (v: string): boolean =>
       version.isGreaterThan(v, currentVersion) &&
       !version.isGreaterThan(v, newVersion);
 
+    const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
     for (let i = 1; i < validReleases.length; i += 1) {
       const prev = validReleases[i - 1];
       const next = validReleases[i];
-      if (!include(next.version)) {
+      if (!inRange(next.version)) {
         continue;
       }
       let release = await packageCache.get(
@@ -138,20 +141,9 @@ export abstract class ChangeLogSource {
           changes: [],
           compare: {},
         };
-        const prevHead = await this.getRef(
-          version,
-          packageName,
-          prev,
-          apiBaseUrl,
-          repository
-        );
-        const nextHead = await this.getRef(
-          version,
-          packageName,
-          next,
-          apiBaseUrl,
-          repository
-        );
+        const tags = await getTags();
+        const prevHead = this.getRef(version, packageName, prev, tags);
+        const nextHead = this.getRef(version, packageName, next, tags);
         if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
           release.compare.url = this.getCompareURL(
             baseUrl,
@@ -206,15 +198,12 @@ export abstract class ChangeLogSource {
       .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
   }
 
-  private async getRef(
+  private getRef(
     version: allVersioning.VersioningApi,
     packageName: string,
     release: Release,
-    apiBaseUrl: string,
-    repository: string
-  ): Promise<string | null> {
-    const tags = await this.getAllTags(apiBaseUrl, repository);
-
+    tags: string[]
+  ): string | null {
     const tagName = this.findTagOfRelease(
       version,
       packageName,
@@ -244,7 +233,7 @@ export abstract class ChangeLogSource {
     if (is.nullOrUndefined(parsedUrl)) {
       return '';
     }
-    const protocol = parsedUrl.protocol;
+    const protocol = parsedUrl.protocol.replace(regEx(/^git\+/), '');
     const host = parsedUrl.host;
     return `${protocol}//${host}/`;
   }

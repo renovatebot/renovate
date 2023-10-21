@@ -1,7 +1,9 @@
 // TODO fix mocks
 import type * as _timers from 'timers/promises';
+import { mockDeep } from 'jest-mock-extended';
 import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -16,6 +18,10 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
 
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('../../../util/git');
+jest.mock('timers/promises');
+
 const gitlabApiHost = 'https://gitlab.com';
 
 describe('modules/platform/gitlab/index', () => {
@@ -28,16 +34,12 @@ describe('modules/platform/gitlab/index', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.resetAllMocks();
+
     gitlab = await import('.');
-    jest.mock('../../../logger');
-    logger = (await import('../../../logger')).logger as never;
-    jest.mock('../../../util/host-rules');
-    jest.mock('timers/promises');
-    timers = require('timers/promises');
-    hostRules = require('../../../util/host-rules');
-    jest.mock('../../../util/git');
-    git = require('../../../util/git');
+    logger = mocked(await import('../../../logger')).logger;
+    timers = jest.requireMock('timers/promises');
+    hostRules = jest.requireMock('../../../util/host-rules');
+    git = jest.requireMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
@@ -206,6 +208,53 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const repos = await gitlab.getRepos({ topics: ['one', 'two'] });
       expect(repos).toEqual(['a/b', 'c/d']);
+    });
+
+    it('should query the groups endpoint for each namespace', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+        ])
+        .get(
+          '/api/v4/groups/c%2Fd/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'c/d/e',
+          },
+          {
+            path_with_namespace: 'c/d/f',
+          },
+        ]);
+      const repos = await gitlab.getRepos({ namespaces: ['a', 'c/d'] });
+      expect(repos).toEqual(['a/b', 'c/d/e', 'c/d/f']);
+    });
+
+    it('should consider topics when querying the groups endpoint', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false&topic=one%2Ctwo'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'a/c',
+          },
+        ]);
+      const repos = await gitlab.getRepos({
+        namespaces: ['a'],
+        topics: ['one', 'two'],
+      });
+      expect(repos).toEqual(['a/b', 'a/c']);
     });
   });
 
@@ -879,6 +928,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+        )
         .reply(200, []);
 
       await expect(
@@ -902,6 +955,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+        )
         .reply(200, []);
 
       await gitlab.setBranchStatus({
@@ -916,6 +973,37 @@ describe('modules/platform/gitlab/index', () => {
       expect(timers.setTimeout.mock.calls[0][0]).toBe(1000);
     });
 
+    it('set branch status with pipeline_id', async () => {
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          (body: any): boolean => {
+            expect(body.pipeline_id).toBe(123);
+            return true;
+          }
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+        )
+        .reply(200, { last_pipeline: { id: 123 } });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        })
+      ).toResolve();
+    });
+
     it('waits for RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY ms when set', async () => {
       const delay = 5000;
       process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY = String(delay);
@@ -928,6 +1016,10 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, {})
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [])
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
         )
         .reply(200, []);
 
@@ -2295,8 +2387,6 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('updatePr(prNo, title, body)', () => {
-    jest.resetAllMocks();
-
     it('updates the PR', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -2452,8 +2542,6 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('mergePr(pr)', () => {
-    jest.resetAllMocks();
-
     it('merges the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -2499,8 +2587,8 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('returns updated pr body', async () => {
-      jest.mock('../utils/pr-body');
-      const { smartTruncate } = require('../utils/pr-body');
+      jest.doMock('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
@@ -2508,8 +2596,8 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description if too low API version', async () => {
-      jest.mock('../utils/pr-body');
-      const { smartTruncate } = require('../utils/pr-body');
+      jest.doMock('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.3.0');
       gitlab.massageMarkdown(prBody);
@@ -2518,8 +2606,8 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('truncates description for API version gt 13.4', async () => {
-      jest.mock('../utils/pr-body');
-      const { smartTruncate } = require('../utils/pr-body');
+      jest.doMock('../utils/pr-body');
+      const { smartTruncate } = await import('../utils/pr-body');
 
       await initFakePlatform('13.4.1');
       gitlab.massageMarkdown(prBody);
