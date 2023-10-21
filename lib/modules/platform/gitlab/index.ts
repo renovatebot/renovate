@@ -302,7 +302,6 @@ export async function initRepo({
   cloneSubmodules,
   ignorePrAuthor,
   gitUrl,
-  endpoint,
   includeMirrors,
   platformGitCredentialsFile,
 }: RepoParams): Promise<RepoResult> {
