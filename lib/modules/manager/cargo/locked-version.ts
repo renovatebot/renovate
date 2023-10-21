@@ -10,6 +10,13 @@ export async function extractLockFileVersions(
   if (!content) {
     return versionsByPackage;
   }
+  return extractLockFileContentVersions(content);
+}
+
+export function extractLockFileContentVersions(
+  content: string
+): Map<string, string[]> {
+  const versionsByPackage = new Map<string, string[]>();
   const lock = parseLockFile(content);
   if (!lock) {
     return versionsByPackage;
