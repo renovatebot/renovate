@@ -49,7 +49,7 @@ This is implemented with two-level cache:
 
 - Then, more data is obtained from `https://rubygems.org/api/v1/versions/<package>.json` and `https://rubygems.org/api/v1/gems/<package>.json`.
 
-  Cache key is formed from the `packageName` and `version[]` from the previous layer, so that we reach these endpoints only when the list of versions has changed.
+  From the previous layer, the cache key is formed from the `packageName`, and the list of versions is additionally hashed and stored to ensure consistency, so that we reach these API endpoints only when the key has expired or when the list of versions has changed.
 
   The data for this cache layer is being persisted in the longer-term package cache.
 
