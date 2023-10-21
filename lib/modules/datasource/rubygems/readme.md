@@ -51,6 +51,8 @@ This is implemented with two-level cache:
 
   Cache key is formed from the `packageName` and `version[]` from the previous layer, so that we reach these endpoints only when the list of versions has changed.
 
+  The data for this cache layer is being persisted in the longer-term package cache.
+
 ## Querying `rubygems.pkg.github.com` or `gitlab.com`
 
 These particular registries are queried using obsolete API
