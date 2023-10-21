@@ -239,7 +239,8 @@ export async function getJsonFile(
 function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
-  res: HttpResponse<RepoResponse>
+  res: HttpResponse<RepoResponse>, 
+  platformGitCredentialsFile: boolean,
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
@@ -286,8 +287,12 @@ function getRepoUrl(
 
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  // TODO: types (#22198)
-  repoUrl.auth = `oauth2:${opts.token!}`;
+  if (!platformGitCredentialsFile) {
+    // TODO: types (#22198)
+    repoUrl.auth = `oauth2:${opts.token!}`;
+  } else {
+    logger.debug('Token not used in url because of config platformGitCredentialsFile activated');
+  }
   return URL.format(repoUrl);
 }
 
@@ -299,6 +304,7 @@ export async function initRepo({
   gitUrl,
   endpoint,
   includeMirrors,
+  platformGitCredentialsFile,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -353,7 +359,7 @@ export async function initRepo({
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const url = getRepoUrl(repository, gitUrl, res);
+    const url = getRepoUrl(repository, gitUrl, res, platformGitCredentialsFile);
     await git.initRepo({
       ...config,
       url,
