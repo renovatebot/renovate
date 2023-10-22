@@ -116,11 +116,6 @@ If enabled Renovate tries to determine PR assignees by matching rules defined in
 
 See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
 
-## expandCodeownersGroups
-
-If configured, Renovate will expand the configured code owner groups into a full list of group members and assign them individually.
-This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
-
 ## assigneesSampleSize
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
@@ -1243,6 +1238,11 @@ Example:
 ```
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
+
+## expandCodeownersGroups
+
+If configured, Renovate will expand the configured code owner groups into a full list of group members and assign them individually.
+This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
 
 ## extends
 
