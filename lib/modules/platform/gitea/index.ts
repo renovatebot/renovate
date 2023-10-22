@@ -642,17 +642,13 @@ const platform: Platform = {
       prUpdateParams.base = targetBranch;
     }
 
-    if (is.nonEmptyArray(addLabels)) {
-      for (const label of addLabels) {
-        await addLabel!(number, label);
-      }
+    if (addLabels) {
+      const labels = Array.isArray(addLabels)
+        ? await Promise.all(addLabels.map(lookupLabelByName))
+        : [];
+      prUpdateParams.labels = labels.filter(is.number);
     }
 
-    if (is.nonEmptyArray(removeLabels)) {
-      for (const label of removeLabels) {
-        await deleteLabel(number, label);
-      }
-    }
     await helper.updatePR(config.repository, number, prUpdateParams);
   },
 
