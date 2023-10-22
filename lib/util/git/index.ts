@@ -1135,20 +1135,26 @@ export async function configureCredentialHelperStore(
   endpoint: string,
   token: string
 ): Promise<void> {
-  logger.debug("Configuring credential helper and git-credential file");
+  logger.debug('Configuring credential helper and git-credential file');
   try {
     await git.raw(['config', 'credential.helper', 'store']);
     const localDir = GlobalConfig.get('localDir')!;
     const gitCredentialsFile = upath.join(localDir, '.git-credentials');
     if (await fs.pathExists(gitCredentialsFile)) {
-      logger.debug({ gitCredentialsFile }, "The git-credentials file already exists")
+      logger.debug(
+        { gitCredentialsFile },
+        'The git-credentials file already exists'
+      );
     } else {
-      const contents : string = `https://oauth2:${token}@${endpoint}`;
-      logger.debug({ gitCredentialsFile, contents }, "Writing credentials to file")
-      await fs.outputFile(gitCredentialsFile, contents, {mode: 0o640});
+      const contents: string = `https://oauth2:${token}@${endpoint}`;
+      logger.debug(
+        { gitCredentialsFile, contents },
+        'Writing credentials to file'
+      );
+      await fs.outputFile(gitCredentialsFile, contents, { mode: 0o640 });
     }
   } catch (err) {
-    logger.debug({ err },"Failed to configure git-credentials");
+    logger.debug({ err }, '"Failed to configure git-credentials');
     throw new Error(PLATFORM_GIT_CREDENTIALS_ERROR);
   }
 }
