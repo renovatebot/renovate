@@ -2728,9 +2728,10 @@ const options: RenovateOptions[] = [
   {
     name: 'platformGitCredentialsFile',
     description:
-      "If set to `true` then the repository URL doesn't contain the authentication token, and the .git-credentials file will be used.",
+      'If set to `true` then the `~/.git-credentials` file will be used for platform authentication instead of embedding credentials in the URL.",
     type: 'boolean',
     default: false,
+    advancedUse: true,
     supportedPlatforms: ['gitlab'],
   },
 ];
