@@ -245,7 +245,7 @@ function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>, 
-  platformGitCredentialsFile: boolean
+  platformGitCredentialsFile?: boolean
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
