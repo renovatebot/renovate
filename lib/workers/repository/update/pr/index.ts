@@ -335,12 +335,8 @@ export async function ensurePr(
       logger.debug('Processing existing PR');
 
       const existingLabelsHash = existingPr.bodyStruct?.labelsHash;
-      // eslint-disable-next-line
-      console.log(existingPr.bodyStruct);
       // remove labels hash from pr body if existing pr doesn't have one
       if (!existingLabelsHash) {
-        // eslint-disable-next-line
-        console.log('mast kaam kiya rahul');
         prBody = prBody.replace(regEx(/<!--labels:.*?-->/g), '');
       }
 
@@ -586,5 +582,12 @@ function areLabelsModified(
   }
 
   const existingLabelsHash = toBase64(JSON.stringify(existingLabels));
-  return existingLabelsHash !== oldLabelsHash;
+  if (existingLabelsHash !== oldLabelsHash) {
+    logger.debug(
+      'PR labels have been modified by user, skipping labels update'
+    );
+    return true;
+  }
+
+  return false;
 }

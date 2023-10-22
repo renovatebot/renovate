@@ -771,14 +771,22 @@ export async function updatePr({
     description: sanitize(description),
     ...(newState && { state_event: newState }),
   };
+  // eslint-disable-next-line
+  console.log(addLabels, removeLabels);
   if (targetBranch) {
     body.target_branch = targetBranch;
   }
   if (addLabels) {
+    // eslint-disable-next-line
+    console.log(1);
+    logger.debug(`Assigning labels ${addLabels.join(',')} to ${iid}`);
     body.add_labels = addLabels;
   }
 
   if (removeLabels) {
+    // eslint-disable-next-line
+    console.log(2);
+    logger.debug(`Unassigning labels ${removeLabels.join(',')} to ${iid}`);
     body.remove_labels = removeLabels;
   }
 
