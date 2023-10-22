@@ -27,6 +27,8 @@ import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
 import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
+import { regEx } from '../../../../util/regex';
+import { fromBase64, toBase64 } from '../../../../util/string';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -43,8 +45,6 @@ import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
 } from './pr-fingerprint';
-import { fromBase64, toBase64 } from '../../../../util/string';
-import { regEx } from '../../../../util/regex';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -392,15 +392,19 @@ export async function ensurePr(
         updatePrConfig.targetBranch = config.baseBranch;
       }
       if (existingLabelsHash) {
-        const newLabelsHash = toBase64(JSON.stringify(prepareLabels(config)));
-        if (existingLabelsHash !== newLabelsHash) {
+        const newLabels = prepareLabels(config);
+        const newLabelsHash = toBase64(JSON.stringify(newLabels));
+        if (
+          !areLabelsModified(existingLabelsHash, existingPr.labels) &&
+          existingLabelsHash !== newLabelsHash
+        ) {
           logger.debug(
             {
               branchName,
               oldLabels: existingLabelsHash
                 ? JSON.parse(fromBase64(existingLabelsHash))
                 : [],
-              newLabels: prepareLabels(config),
+              newLabels,
             },
             'PR labels have changed'
           );
@@ -571,4 +575,16 @@ function getChangedLabels(
     existingLabels?.filter((l) => !newLabels?.includes(l)) ?? null;
 
   return [labelsToAdd, labelsToRemove];
+}
+
+function areLabelsModified(
+  oldLabelsHash: string,
+  existingLabels?: string[]
+): boolean {
+  if (!existingLabels) {
+    return false;
+  }
+
+  const existingLabelsHash = toBase64(JSON.stringify(existingLabels));
+  return existingLabelsHash !== oldLabelsHash;
 }
