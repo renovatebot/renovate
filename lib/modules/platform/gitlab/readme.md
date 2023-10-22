@@ -33,6 +33,10 @@ If you're using a private [GitLab container registry](https://docs.gitlab.com/ee
 - Make sure the user that owns the `RENOVATE_TOKEN` PAT is a member of the corresponding GitLab projects/groups with the right permissions.
 - Make sure the `RENOVATE_TOKEN` PAT has the `read_registry` scope.
 
+If you are using a private gitlab and it is configured such as the HTTPS is configured for something else as HTTPS authentication (Kerberos authentication for example), you may want to use `git-credential` feature.
+It will not send the token in the URL but rather write the `.git-credentials` file and configure `git` to use it.
+You can activate this feature by setting `platformGitCredentialsFile` to `true`.
+
 ## Features awaiting implementation
 
 - The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will accept the Merge Request without further configuration, and respect the strategy defined in the Merge Request, and this cannot be overridden yet

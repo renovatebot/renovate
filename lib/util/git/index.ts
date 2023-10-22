@@ -1122,6 +1122,28 @@ export async function fetchBranch(
   }
 }
 
+export async function configureCredentialHelperStore(
+  endpoint: string,
+  token: string,
+): Promise<void> {
+  logger.debug("Configuring credential helper and git-credential file");
+  try {
+    await gitRetry(() => git.raw(['config', 'credential.helper', 'store']));
+    const localDir = GlobalConfig.get('localDir')!;
+    const gitCredentialsFile = upath.join(localDir, '.git-credentials');
+    if (await fs.pathExists(gitCredentialsFile)) {
+      logger.debug({gitCredentialsFile}, "The git-credentials file already exists")
+    } else {
+      const contents : string = `https://oauth2:${token}@${endpoint}`;
+      logger.debug({gitCredentialsFile, contents}, "Writing credentials to file")
+      await fs.outputFile(gitCredentialsFile, contents, {mode: 0o666});
+    }
+  } catch (err) {
+    logger.debug("Failed to configure git-credentials");
+    throw err;
+  }
+}
+
 export async function commitFiles(
   commitConfig: CommitFilesConfig
 ): Promise<CommitSha | null> {

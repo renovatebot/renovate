@@ -94,6 +94,7 @@ export async function initPlatform({
   endpoint,
   token,
   gitAuthor,
+  platformGitCredentialsFile,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -142,6 +143,10 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
+  if (platformGitCredentialsFile) {
+    await git.configureCredentialHelperStore(platformConfig.endpoint, token);
+  }
+
   draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
