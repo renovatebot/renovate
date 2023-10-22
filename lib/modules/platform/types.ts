@@ -16,7 +16,7 @@ export interface PlatformParams {
   username?: string;
   password?: string;
   gitAuthor?: string;
-  platformGitCredentialsFile: boolean;
+  platformGitCredentialsFile?: boolean;
 }
 
 export interface PlatformResult {

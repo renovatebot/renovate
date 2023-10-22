@@ -22,6 +22,7 @@ import {
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
+  PLATFORM_GIT_CREDENTIALS_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
@@ -1122,25 +1123,33 @@ export async function fetchBranch(
   }
 }
 
+/**
+ *
+ * Configure git to be able to use the git-credential feature
+ *
+ * 0. Run the command: git config credential.helper store
+ * 1. Creates, if missing, the file localDir/.git-credentials and fill it with `https://oauth2:<TOKEN>@<ENDPOINT>
+ *
+ */
 export async function configureCredentialHelperStore(
   endpoint: string,
   token: string,
 ): Promise<void> {
   logger.debug("Configuring credential helper and git-credential file");
   try {
-    await gitRetry(() => git.raw(['config', 'credential.helper', 'store']));
+    await git.raw(['config', 'credential.helper', 'store']);
     const localDir = GlobalConfig.get('localDir')!;
     const gitCredentialsFile = upath.join(localDir, '.git-credentials');
     if (await fs.pathExists(gitCredentialsFile)) {
-      logger.debug({gitCredentialsFile}, "The git-credentials file already exists")
+      logger.debug({ gitCredentialsFile }, "The git-credentials file already exists")
     } else {
       const contents : string = `https://oauth2:${token}@${endpoint}`;
-      logger.debug({gitCredentialsFile, contents}, "Writing credentials to file")
+      logger.debug({ gitCredentialsFile, contents }, "Writing credentials to file")
       await fs.outputFile(gitCredentialsFile, contents, {mode: 0o666});
     }
   } catch (err) {
-    logger.debug("Failed to configure git-credentials");
-    throw err;
+    logger.debug({ err },"Failed to configure git-credentials");
+    throw new Error(PLATFORM_GIT_CREDENTIALS_ERROR);
   }
 }
 

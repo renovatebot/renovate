@@ -34,8 +34,8 @@ If you're using a private [GitLab container registry](https://docs.gitlab.com/ee
 - Make sure the `RENOVATE_TOKEN` PAT has the `read_registry` scope.
 
 If you are using a private gitlab and it is configured such as the HTTPS is configured for something else as HTTPS authentication (Kerberos authentication for example), you may want to use `git-credential` feature.
-It will not send the token in the URL but rather write the `.git-credentials` file and configure `git` to use it.
-You can activate this feature by setting `platformGitCredentialsFile` to `true`.
+It will not send the token in the URL but rather write the `.git-credentials` file (if it doesn't exist) and configure `git` to use it.
+You can activate this feature by setting [`platformGitCredentialsFile`](https://docs.renovatebot.com/configuration-options/#platformGitCredentialsFile) to `true`.
 
 ## Features awaiting implementation
 

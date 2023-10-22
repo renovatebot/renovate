@@ -2959,6 +2959,13 @@ It does not apply when you use a Personal Access Token as credential.
 When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
 This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
 
+## platformGitCredentialsFile
+
+When `platformGitCredentialsFile` is enabled, Renovate won't pass the gitlab token throught the URL but configure git to use the `.git-credentials` file.
+It is useful if you are using a private gitlab and it is configured such as the HTTPS is configured for something else as HTTPS authentication (Kerberos authentication for example).
+
+It runs the command `git config credential.helper store` and then write, if it doesn't exist, the file `.git-credentials` with `https://oauth2:<TOKEN>@<ENDPOINT>`
+
 ## postUpdateOptions
 
 Table with options:

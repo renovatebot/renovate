@@ -292,11 +292,11 @@ function getRepoUrl(
 
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
-  if (!platformGitCredentialsFile) {
+  if (platformGitCredentialsFile) {
+    logger.debug('Token not used in url because of config platformGitCredentialsFile activated');
+  } else {
     // TODO: types (#22198)
     repoUrl.auth = `oauth2:${opts.token!}`;
-  } else {
-    logger.debug('Token not used in url because of config platformGitCredentialsFile activated');
   }
   return URL.format(repoUrl);
 }
