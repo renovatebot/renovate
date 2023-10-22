@@ -2766,4 +2766,40 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(filteredUsers).toEqual(['maria']);
     });
   });
+
+  describe('expandGroupMembers(reviewersOrAssignees)', () => {
+    it('expands group members for groups with members', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/group-a/members')
+        .reply(200, [{ username: 'maria' }, { username: 'jimmy' }])
+        .get('/api/v4/groups/group-b/members')
+        .reply(200, [{ username: 'john' }]);
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        'group-a',
+        'group-b',
+      ]);
+      expect(expandedGroupMembers).toEqual(['maria', 'jimmy', 'john']);
+    });
+
+    it('users are not expanded', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/john/members')
+        .reply(404, { message: '404 Group Not Found' });
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.(['john']);
+      expect(expandedGroupMembers).toEqual(['john']);
+    });
+
+    it('groups with no members expand into empty list', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/group-c/members')
+        .reply(200, []);
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        'group-c',
+      ]);
+      expect(expandedGroupMembers).toEqual([]);
+    });
+  });
 });
