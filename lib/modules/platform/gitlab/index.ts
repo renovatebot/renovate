@@ -244,7 +244,7 @@ export async function getJsonFile(
 function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
-  res: HttpResponse<RepoResponse>, 
+  res: HttpResponse<RepoResponse>,
   platformGitCredentialsFile?: boolean
 ): string {
   if (gitUrl === 'ssh') {
