@@ -245,7 +245,7 @@ function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>, 
-  platformGitCredentialsFile: boolean,
+  platformGitCredentialsFile: boolean
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
@@ -293,7 +293,9 @@ function getRepoUrl(
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
   if (platformGitCredentialsFile) {
-    logger.debug('Token not used in url because of config platformGitCredentialsFile activated');
+    logger.debug(
+      'Token not used in url because of config platformGitCredentialsFile activated'
+    );
   } else {
     // TODO: types (#22198)
     repoUrl.auth = `oauth2:${opts.token!}`;

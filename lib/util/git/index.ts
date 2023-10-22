@@ -1133,7 +1133,7 @@ export async function fetchBranch(
  */
 export async function configureCredentialHelperStore(
   endpoint: string,
-  token: string,
+  token: string
 ): Promise<void> {
   logger.debug("Configuring credential helper and git-credential file");
   try {
