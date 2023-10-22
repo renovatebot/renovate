@@ -1154,7 +1154,7 @@ export async function configureCredentialHelperStore(
       await fs.outputFile(gitCredentialsFile, contents, { mode: 0o640 });
     }
   } catch (err) {
-    logger.debug({ err }, '"Failed to configure git-credentials');
+    logger.debug({ err }, 'Failed to configure git-credentials');
     throw new Error(PLATFORM_GIT_CREDENTIALS_ERROR);
   }
 }
