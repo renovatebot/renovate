@@ -1145,7 +1145,7 @@ export async function configureCredentialHelperStore(
     } else {
       const contents : string = `https://oauth2:${token}@${endpoint}`;
       logger.debug({ gitCredentialsFile, contents }, "Writing credentials to file")
-      await fs.outputFile(gitCredentialsFile, contents, {mode: 0o666});
+      await fs.outputFile(gitCredentialsFile, contents, {mode: 0o640});
     }
   } catch (err) {
     logger.debug({ err },"Failed to configure git-credentials");

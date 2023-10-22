@@ -208,6 +208,7 @@ export interface RenovateConfig
   errors?: ValidationMessage[];
 
   gitAuthor?: string;
+  platformGitCredentialsFile?: boolean;
 
   hostRules?: HostRule[];
 
