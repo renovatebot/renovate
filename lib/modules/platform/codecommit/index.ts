@@ -273,7 +273,6 @@ export async function getPr(
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
     destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
-    sha: prInfo.revisionId,
     body: prInfo.description!,
   };
 }

@@ -596,6 +596,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'npm-run-all-to-maintenance-fork': {
+    description: 'Maintenance fork of `npm-run-all`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['npm-run-all'],
+        replacementName: 'npm-run-all2',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
   'parcel-css-to-lightningcss': {
     description: '`@parcel/css` was renamed to `lightningcss`.',
     packageRules: [

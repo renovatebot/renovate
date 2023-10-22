@@ -84,7 +84,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
-        cmd: 'pnpm dedupe',
+        cmd: 'pnpm dedupe --config.ignore-scripts=true',
       },
     ]);
   });

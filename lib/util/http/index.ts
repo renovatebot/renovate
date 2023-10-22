@@ -179,6 +179,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
+    options.timeout ??= 60000;
 
     const memCacheKey =
       options.memCache !== false &&

@@ -282,9 +282,10 @@ export async function ensurePr(
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
           [
-            '\n',
-            ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
-            'If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
+            '> :exclamation: **Important**',
+            '> ',
+            '> Release Notes retrieval for this PR were skipped because no github.com credentials were available. ',
+            '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
             '\n',
           ].join('\n'),
         ];
