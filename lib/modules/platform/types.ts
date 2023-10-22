@@ -50,7 +50,7 @@ export interface RepoParams {
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
   includeMirrors?: boolean;
-  platformGitCredentialsFile: boolean;
+  platformGitCredentialsFile?: boolean;
 }
 
 export interface PrDebugData {

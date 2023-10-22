@@ -17,12 +17,12 @@ import type { RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
+  PLATFORM_GIT_CREDENTIALS_ERROR,
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
-  PLATFORM_GIT_CREDENTIALS_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
