@@ -11,10 +11,13 @@ async function addCodeOwners(
   assigneesOrReviewers: string[],
   pr: Pr
 ): Promise<string[]> {
+  const codeOwners = await codeOwnersForPr(pr);
+  const normalizedCodeOwners = [...new Set(codeOwners.map(noLeadingAtSymbol))];
+
   const assignees =
     config.expandCodeownersGroups && platform.expandGroupMembers
-      ? await platform.expandGroupMembers(await codeOwnersForPr(pr))
-      : await codeOwnersForPr(pr);
+      ? await platform.expandGroupMembers(normalizedCodeOwners)
+      : normalizedCodeOwners;
 
   return [...new Set(assigneesOrReviewers.concat(assignees))];
 }

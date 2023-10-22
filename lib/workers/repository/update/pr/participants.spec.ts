@@ -47,7 +47,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('expands group code owners assignees', async () => {
-      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', 'group']);
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
       platform.expandGroupMembers = jest
         .fn()
         .mockResolvedValueOnce(['user', 'group.user']);
@@ -74,7 +74,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('does not expand group code owners assignees when assigneesFromCodeOwners disabled', async () => {
-      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', 'group']);
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
       platform.expandGroupMembers = jest
         .fn()
         .mockResolvedValueOnce(['user', 'group.user']);
@@ -85,7 +85,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('does not expand group code owners assignees when expandCodeOwnersGroups disabled', async () => {
-      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', 'group']);
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
       platform.expandGroupMembers = jest
         .fn()
         .mockResolvedValueOnce(['user', 'group.user']);
