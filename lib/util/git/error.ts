@@ -140,7 +140,5 @@ export function handleCommitError(
 }
 
 export function bulkChangesDisallowed(err: Error): boolean {
-  return err.message.includes(
-    'remote: Repository policies do not allow pushes that update more than'
-  );
+  return err.message.includes('update more than');
 }

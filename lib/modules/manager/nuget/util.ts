@@ -44,6 +44,7 @@ export async function getConfiguredRegistries(
 
   logger.debug(`Found NuGet.config at ${nuGetConfigPath}`);
   const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
+
   if (!nuGetConfig) {
     return undefined;
   }
@@ -52,6 +53,8 @@ export async function getConfiguredRegistries(
   if (!packageSources) {
     return undefined;
   }
+
+  const packageSourceMapping = nuGetConfig.childNamed('packageSourceMapping');
 
   const registries = getDefaultRegistries();
   for (const child of packageSources.children) {
@@ -66,10 +69,24 @@ export async function getConfiguredRegistries(
           if (child.attr.protocolVersion) {
             registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
           }
-          logger.debug(`Adding registry URL ${registryUrl}`);
+          const sourceMappedPackagePatterns = packageSourceMapping
+            ?.childWithAttribute('key', child.attr.key)
+            ?.childrenNamed('package')
+            .map((packagePattern) => packagePattern.attr['pattern']);
+
+          logger.debug(
+            {
+              name: child.attr.key,
+              registryUrl,
+              sourceMappedPackagePatterns,
+            },
+            `Adding registry URL ${registryUrl}`
+          );
+
           registries.push({
             name: child.attr.key,
             url: registryUrl,
+            sourceMappedPackagePatterns,
           });
         } else {
           logger.debug(

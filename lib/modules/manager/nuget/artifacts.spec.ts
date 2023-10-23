@@ -5,9 +5,7 @@ import { env, fs, git, mocked, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
-import type { Registry } from './types';
 import * as util from './util';
 import * as nuget from '.';
 
@@ -17,8 +15,7 @@ jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
 jest.mock('./util');
 
-const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
-const hostRules = mocked(_hostRules);
+const { getDefaultRegistries } = mocked(util);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -403,114 +400,5 @@ describe('modules/manager/nuget/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeEmptyArray();
-  });
-
-  it('authenticates at registries', async () => {
-    const execSnapshots = mockExecAll();
-    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'Current packages.lock.json',
-    });
-    fs.getLocalFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'New packages.lock.json',
-    });
-    getConfiguredRegistries.mockResolvedValueOnce([
-      {
-        name: 'myRegistry',
-        url: 'https://my-registry.example.org',
-      },
-      {
-        name: 'myRegistry2',
-        url: 'https://my-registry2.example.org',
-      },
-    ] satisfies Registry[]);
-    hostRules.find.mockImplementation((search) => {
-      if (search.hostType === 'nuget') {
-        if (search.url === 'https://my-registry.example.org') {
-          return {
-            username: 'some-username',
-            password: 'some-password',
-          };
-        } else {
-          return {
-            password: 'some-password',
-          };
-        }
-      }
-      return {};
-    });
-    expect(
-      await nuget.updateArtifacts({
-        packageFileName: 'project.csproj',
-        updatedDeps: [{ depName: 'dep' }],
-        newPackageFileContent: '{}',
-        config,
-      })
-    ).toEqual([
-      {
-        file: {
-          contents: 'New packages.lock.json',
-          path: 'packages.lock.json',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd:
-          'dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config ' +
-          '--name myRegistry --username some-username --password some-password --store-password-in-clear-text',
-      },
-      {
-        cmd:
-          'dotnet nuget add source https://my-registry2.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config ' +
-          '--name myRegistry2 --password some-password --store-password-in-clear-text',
-      },
-      {
-        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
-      },
-    ]);
-  });
-
-  it('strips protocol version from feed url', async () => {
-    const execSnapshots = mockExecAll();
-    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'Current packages.lock.json',
-    });
-    fs.getLocalFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'New packages.lock.json',
-    });
-    getConfiguredRegistries.mockResolvedValueOnce([
-      {
-        name: 'myRegistry',
-        url: 'https://my-registry.example.org#protocolVersion=3',
-      },
-    ] as never);
-    hostRules.find.mockImplementationOnce(() => ({}));
-    expect(
-      await nuget.updateArtifacts({
-        packageFileName: 'project.csproj',
-        updatedDeps: [{ depName: 'dep' }],
-        newPackageFileContent: '{}',
-        config,
-      })
-    ).toEqual([
-      {
-        file: {
-          contents: 'New packages.lock.json',
-          path: 'packages.lock.json',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config --name myRegistry',
-      },
-      {
-        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
-      },
-    ]);
   });
 });

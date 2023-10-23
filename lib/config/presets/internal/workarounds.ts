@@ -105,7 +105,7 @@ export const presets: Record<string, Preset> = {
     description: 'Limit Java runtime versions to LTS releases.',
     packageRules: [
       {
-        allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
+        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker', 'java-version'],
@@ -117,6 +117,10 @@ export const presets: Record<string, Preset> = {
           'java',
           'java-jre',
           'sapmachine',
+        ],
+        matchPackagePatterns: [
+          '^azul/zulu-openjdk',
+          '^bellsoft/liberica-openj(dk|re)-',
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
