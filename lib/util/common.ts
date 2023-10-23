@@ -72,7 +72,7 @@ export function parseJsonWithFallback(
   content: string,
   context: string
 ): unknown {
-  let parsedJson: any;
+  let parsedJson: unknown;
 
   try {
     parsedJson = JSON.parse(content);
