@@ -61,7 +61,6 @@ type PackageJson = {
   'renovate-config'?: Record<string, RenovateConfig>;
 };
 
-
 (async () => {
   const strictArgIndex = process.argv.indexOf('--strict');
   const strict = strictArgIndex >= 0;
@@ -116,11 +115,7 @@ type PackageJson = {
       ) as PackageJson;
       if (pkgJson.renovate) {
         logger.info(`Validating package.json > renovate`);
-        await validate(
-          'package.json > renovate',
-          pkgJson.renovate,
-          strict
-        );
+        await validate('package.json > renovate', pkgJson.renovate, strict);
       }
       if (pkgJson['renovate-config']) {
         logger.info(`Validating package.json > renovate-config`);
