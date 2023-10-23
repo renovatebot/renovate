@@ -25,7 +25,7 @@ Did you read our documentation on adding a package manager?
 
 ### Do many users need to extend the [`fileMatch`](../usage/configuration-options.md#filematch) pattern for custom file names?
 
-- [ ] Yes.
+- [ ] Yes, provide details.
 - [ ] No.
 
 ### Is the [`fileMatch`](../usage/configuration-options.md#filematch) pattern going to get many "false hits" for files that have nothing to do with package management?
