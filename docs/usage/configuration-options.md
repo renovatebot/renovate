@@ -1241,7 +1241,7 @@ The above would mean Renovate would not include files matching the above glob pa
 
 ## expandCodeOwnersGroups
 
-If configured, Renovate will expand the configured code owner groups into a full list of group members and assign them individually.
+If configured, Renovate will expand any matching `CODEOWNERS` groups into a full list of group members and assign them individually instead of the group.
 This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
 
 ## extends
