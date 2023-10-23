@@ -2094,7 +2094,7 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'expandCodeownersGroups',
+    name: 'expandCodeOwnersGroups',
     description:
       'Expand the configured code owner groups into a full list of group members.',
     type: 'boolean',
