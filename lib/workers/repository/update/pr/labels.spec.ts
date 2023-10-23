@@ -1,4 +1,4 @@
-import { prepareLabels } from './labels';
+import { areLabelsModified, getChangedLabels, prepareLabels } from './labels';
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {
@@ -76,6 +76,37 @@ describe('workers/repository/update/pr/labels', () => {
       });
       expect(result).toBeArrayOfSize(0);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getChangedLabels', () => {
+    it('adds new labels', () => {
+      expect(getChangedLabels('WyJucG0iXQ==', 'WyJub2RlIiwibnBtIl0=')).toEqual([
+        ['node'],
+        [],
+      ]);
+    });
+
+    it('removes old labels', () => {
+      expect(getChangedLabels('WyJub2RlIiwibnBtIl0=', 'WyJucG0iXQ==')).toEqual([
+        [],
+        ['node'],
+      ]);
+    });
+  });
+
+  describe('areLabelsModified', () => {
+    it('returns true', () => {
+      expect(areLabelsModified('WyJub2RlIiwibnBtIl0=', ['npm'])).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(
+        areLabelsModified('WyJub2RlIiwibnBtIl0=', ['npm', 'node'])
+      ).toBeFalse();
+      expect(
+        areLabelsModified('WyJub2RlIiwibnBtIl0=', ['node', 'npm'])
+      ).toBeFalse();
     });
   });
 });

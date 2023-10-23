@@ -775,12 +775,9 @@ export async function updatePr({
     body.target_branch = targetBranch;
   }
   if (addLabels) {
-    logger.debug(`Assigning labels ${addLabels.join(',')} to ${iid}`);
     body.add_labels = addLabels;
   }
-
   if (removeLabels) {
-    logger.debug(`Unassigning labels ${removeLabels.join(',')} to ${iid}`);
     body.remove_labels = removeLabels;
   }
 

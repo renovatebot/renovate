@@ -642,6 +642,7 @@ const platform: Platform = {
       prUpdateParams.base = targetBranch;
     }
 
+    // no need to do extra call for removing labels as gitea API replaces labels array
     if (addLabels) {
       const labels = Array.isArray(addLabels)
         ? await Promise.all(addLabels.map(lookupLabelByName))

@@ -2568,10 +2568,6 @@ describe('modules/platform/gitlab/index', () => {
           removeLabels: ['old_label'],
         })
       ).toResolve();
-      expect(logger.debug).toHaveBeenCalledWith([
-        `Assigning labels new_label to #1`,
-        `Unassigning labels old_label from #1`,
-      ]);
     });
   });
 

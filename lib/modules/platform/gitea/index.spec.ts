@@ -1310,20 +1310,14 @@ describe('modules/platform/gitea/index', () => {
         prBody: 'New Body',
         state: 'closed',
         addLabels: ['new_label'],
-        removeLabels: ['old_label'],
       });
 
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
         title: 'New Title',
         body: 'New Body',
         state: 'closed',
+        labels: [2],
       });
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Deleting label old_label from Issue #1'
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Adding label new_label to Issue #1'
-      );
     });
   });
 

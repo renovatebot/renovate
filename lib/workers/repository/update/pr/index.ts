@@ -38,7 +38,7 @@ import type {
 import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import { prepareLabels } from './labels';
+import { areLabelsModified, getChangedLabels, prepareLabels } from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './pr-cache';
 import {
@@ -556,38 +556,4 @@ export async function ensurePr(
     return { type: 'with-pr', pr: existingPr };
   }
   return { type: 'without-pr', prBlockedBy: 'Error' };
-}
-
-function getChangedLabels(
-  oldLabelsHash: string,
-  newLabelsHash: string
-): [string[] | null, string[] | null] {
-  const existingLabels: string[] = JSON.parse(fromBase64(oldLabelsHash));
-  const newLabels: string[] = JSON.parse(fromBase64(newLabelsHash));
-
-  const labelsToAdd =
-    newLabels?.filter((l) => !existingLabels?.includes(l)) ?? null;
-  const labelsToRemove =
-    existingLabels?.filter((l) => !newLabels?.includes(l)) ?? null;
-
-  return [labelsToAdd, labelsToRemove];
-}
-
-function areLabelsModified(
-  oldLabelsHash: string,
-  existingLabels?: string[]
-): boolean {
-  if (!existingLabels) {
-    return false;
-  }
-
-  const existingLabelsHash = toBase64(JSON.stringify(existingLabels));
-  if (existingLabelsHash !== oldLabelsHash) {
-    logger.debug(
-      'PR labels have been modified by user, skipping labels update'
-    );
-    return true;
-  }
-
-  return false;
 }
