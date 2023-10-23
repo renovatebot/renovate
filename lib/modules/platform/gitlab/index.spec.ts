@@ -2540,8 +2540,7 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
 
-    // eslint-disable-next-line
-    it.only('adds and removes labels', async () => {
+    it('adds and removes labels', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)

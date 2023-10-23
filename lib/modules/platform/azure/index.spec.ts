@@ -1411,7 +1411,7 @@ describe('modules/platform/azure/index', () => {
       const prBody =
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
         'plus also [a link](https://github.com/foo/bar/issues/5)' +
-        `<!--labels:["npm"]-->`;
+        `<!--labels:aSmofwineo-->`;
       expect(azure.massageMarkdown(prBody)).toBe(
         'plus also [a link](https://github.com/foo/bar/issues/5)'
       );

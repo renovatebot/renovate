@@ -1310,7 +1310,7 @@ describe('modules/platform/gitea/index', () => {
         prBody: 'New Body',
         state: 'closed',
         addLabels: ['new_label'],
-        removeLabels: ['new_label'],
+        removeLabels: ['old_label'],
       });
 
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {

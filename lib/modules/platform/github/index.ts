@@ -1713,7 +1713,6 @@ export async function updatePr({
       options
     );
     const result = coerceRestPr(ghPr);
-
     cachePr(result);
     logger.debug(`PR updated...prNo: ${prNo}`);
   } catch (err) /* istanbul ignore next */ {

@@ -849,16 +849,6 @@ const platform: Platform = {
     }
   },
 
-  async addLabel(issue: number, labelName: string): Promise<void> {
-    logger.debug(`Adding label ${labelName} to Issue #${issue}`);
-    const label = await lookupLabelByName(labelName);
-    if (label) {
-      await helper.assignLabel(config.repository, issue, label);
-    } else {
-      logger.warn({ issue, labelName }, 'Failed to lookup label for addition');
-    }
-  },
-
   getRepoForceRebase(): Promise<boolean> {
     return Promise.resolve(false);
   },
@@ -979,7 +969,6 @@ const platform: Platform = {
 /* eslint-disable @typescript-eslint/unbound-method */
 export const {
   addAssignees,
-  addLabel,
   addReviewers,
   createPr,
   deleteLabel,

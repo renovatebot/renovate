@@ -1371,7 +1371,7 @@ describe('modules/platform/bitbucket/index', () => {
         '<details><summary>foo</summary>\n<blockquote>\n\n<details><summary>text</summary>' +
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
         '\n\n</details>\n\n</blockquote>\n</details>' +
-        `<!--labels:["npm"]-->`;
+        `<!--labels:aSdwerfwefmk1-->`;
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });
