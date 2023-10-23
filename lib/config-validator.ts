@@ -17,10 +17,10 @@ import {
 let returnVal = 0;
 
 async function validate(
+  isGlobalConfig: boolean,
   desc: string,
   config: RenovateConfig,
   strict: boolean,
-  isGlobalConfig: boolean,
   isPreset = false
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
@@ -81,7 +81,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict, false);
+          await validate(false, file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -102,7 +102,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict, false);
+          await validate(false, file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -119,6 +119,7 @@ type PackageJson = {
       if (pkgJson.renovate) {
         logger.info(`Validating package.json > renovate`);
         await validate(
+          false,
           'package.json > renovate',
           pkgJson.renovate,
           strict,
@@ -129,6 +130,7 @@ type PackageJson = {
         logger.info(`Validating package.json > renovate-config`);
         for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
           await validate(
+            true,
             'package.json > renovate-config',
             presetConfig,
             strict,
@@ -145,7 +147,7 @@ type PackageJson = {
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validate(file, fileConfig, strict, true);
+          await validate(true, file, fileConfig, strict);
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
