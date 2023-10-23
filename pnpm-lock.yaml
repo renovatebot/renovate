@@ -350,8 +350,8 @@ importers:
         specifier: 29.6.3
         version: 29.6.3
       '@ls-lint/ls-lint':
-        specifier: 2.2.1
-        version: 2.2.1
+        specifier: 2.2.2
+        version: 2.2.2
       '@openpgp/web-stream-tools':
         specifier: 0.0.14
         version: 0.0.14(typescript@5.1.6)
@@ -2302,8 +2302,8 @@ packages:
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
     dev: false
 
-  /@ls-lint/ls-lint@2.2.1:
-    resolution: {integrity: sha512-lDdbPp5qjnYFpuNuoAVHY8eACqvqheJDu+Fo/5kAxuGlCgdu3mObGYlz8Ccqq+eb+0Ct6g4kXWN+TrnaZ0UL9w==}
+  /@ls-lint/ls-lint@2.2.2:
+    resolution: {integrity: sha512-gdolCgwveSHZczfKtoVFkf+NZJjd7KRQs9QnLVEiMFEJLK4H7nBrZuC/ASl/AYMZvFmtCocRt3d5E0UF/34vCQ==}
     cpu: [x64, arm64, s390x]
     os: [darwin, linux, win32]
     hasBin: true
