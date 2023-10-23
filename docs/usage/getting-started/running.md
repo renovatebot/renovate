@@ -3,7 +3,7 @@
 As end user, you can choose from these ways to run Renovate:
 
 - You use the Mend Renovate App
-- You self-host Renovate - eg. Renovate CLI, Renovate Docker image, or Renovate Community Edition / Enterprise Edition containers
+- You self-host Renovate - e.g. Renovate CLI, Renovate Docker image, or Renovate Community Edition / Enterprise Edition
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
 If you're using the Mend Renovate App, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
@@ -85,7 +85,7 @@ Details for how it works can be found in the project.
 
 #### Mend Renovate Community Edition / Enterprise Edition
 
-Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are commercial offerings of Renovate for self-hosted users.
+Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are non-Open Source offerings of Renovate for self-hosted users.
 Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
@@ -97,7 +97,7 @@ It is built similarly to the default "full" Renovate image described above, but 
 
 Plus, the Enterprise Edition has:
 
-- Unlimited horizontal scaling to run multiple 'worker' containers
+- Horizontal scaling to run multiple 'worker' containers
 - Dedicated support from Mend.io
 - Premium features, including Smart Merge Control
 
