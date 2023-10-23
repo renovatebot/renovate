@@ -3,7 +3,7 @@
 As end user, you can choose from these ways to run Renovate:
 
 - You use the Mend Renovate App
-- You self-host Renovate - e.g. Renovate CLI, Renovate Docker image, or Renovate Community Edition / Enterprise Edition
+- You self-administer/host your own Renovate instance
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
 If you're using the Mend Renovate App, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
@@ -19,7 +19,7 @@ When self-hosting Renovate you're the "administrator" of the bot, this means you
 
 If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
 
-If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the public GitHub repository [`mend/renovate-ce-ee`](https://github.com/mend/renovate-ce-ee).
+If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository ](https://github.com/mend/renovate-ce-ee).
 
 ### Available distributions
 
@@ -85,7 +85,7 @@ Details for how it works can be found in the project.
 
 #### Mend Renovate Community Edition / Enterprise Edition
 
-Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are non-Open Source offerings of Renovate for self-hosted users.
+Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are closed-source offerings of Renovate for self-hosted users.
 Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
@@ -101,9 +101,9 @@ Plus, the Enterprise Edition has:
 - Dedicated support from Mend.io
 - Premium features, including Smart Merge Control
 
-Note: Visit the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
+Go to the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
 
-For help configuring Renovate CE or Renovate EE, refer to the documentation on the public GitHub repository [`mend/renovate-ce-ee`](https://github.com/mend/renovate-ce-ee).
+To learn how to configure Renovate CE or Renovate EE, read the documentation on the public GitHub repository [`mend/renovate-ce-ee`](https://github.com/mend/renovate-ce-ee).
 
 #### Mend Remediate
 
