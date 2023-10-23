@@ -1,9 +1,7 @@
 # Bot comparison
 
-This page explains the key differences between Renovate and Dependabot.
-
-This is not meant to be a “versus” or anti-Dependabot page, and it's not marketing.
-It should be as objective as possible, to help users decide which tool is best for them.
+This page explains the key differences between Renovate and Dependabot, to help you choose a bot.
+We're trying to be as objective as possible, so this is not a "versus" or anti-Dependabot page.
 
 If you see anything wrong on this page, please let us know by creating a [Discussion](https://github.com/renovatebot/renovate/discussions), or edit this page with a PR.
 
@@ -27,9 +25,9 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 
 ## Hosted app
 
-This section explains the key differences when you're using the Mend Renovate app or the GitHub-native Dependabot.
+This section explains the key differences between the Mend Renovate app and the GitHub-native Dependabot.
 
-If you're going to self-host a bot, read the hosted app section first anyway.
+Even if you're going to self-host a bot, read the hosted app section first, because many features and concepts are similar.
 Then read the self-hosted section.
 
 ### Dependency Dashboard
@@ -41,15 +39,16 @@ Dependabot does not have a similar feature.
 
 ### Grouped updates
 
-Renovate comes with community-provided groupings of dependencies, so it will group common dependencies out-of-the-box.
+Renovate comes with community-provided groupings of dependencies.
+So Renovate groups common dependencies into a single PR, out-of-the-box.
 
-With Dependabot you'll have to set your own [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups).
+Dependabot can group dependencies into a single PR too, but you must set your own [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) first.
 
 ### Upgrades common monorepo packages at once
 
-Renovate has a [`group:monorepos`](https://docs.renovatebot.com/presets-group/#groupmonorepos) preset, that upgrades common monorepo packages at once.
+Renovate has a [`group:monorepos`](https://docs.renovatebot.com/presets-group/#groupmonorepos) preset, that upgrades common monorepo packages in a single PR.
 
-Dependabot does not update common monorepo packages at once.
+Dependabot does not update common monorepo packages in a single PR.
 
 ### Supported platforms
 
@@ -80,7 +79,7 @@ If you're an advanced user, you may use the [`dependabot-core` repository](https
 
 ### Compatibility score badges
 
-Renovate has four _Merge Confidence_ badges:
+Renovate shows four _Merge Confidence_ badges in its PRs:
 
 - **Age**: The age of the package
 - **Adoption**: The percentage of this package's users (within Renovate) which are using this release
@@ -89,7 +88,7 @@ Renovate has four _Merge Confidence_ badges:
 
 Read the [Merge Confidence badges](./merge-confidence.md) page to learn more.
 
-Dependabot shows one compatibility score badge.
+Dependabot shows one compatibility score badge in its PRs.
 This score tells you how many other repositories have passing CI tests for the proposed update.
 Read the [GitHub Docs, Dependabot's compatibility scores](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/about-dependabot-security-updates#about-compatibility-scores) to learn more about Dependabot's badge.
 
@@ -101,8 +100,8 @@ Dependabot is built-in to GitHub.
 
 ### Scheduling
 
-Read [Renovate scheduling](./key-concepts/scheduling.md).
-With Renovate you can set a schedule per package, manager, or globally.
+You can set a schedule for Renovate, per dependency, manager, or even a global schedule.
+Read [Renovate scheduling](./key-concepts/scheduling.md) to learn more.
 
 Dependabot has four options that apply at a language level:
 
@@ -125,13 +124,13 @@ Renovate uses TypeScript.
 
 ## Self-hosting a bot
 
-This section explains how you can self-host each bot.
+This section explains how to self-host each bot.
 
 ### Self-hosting Renovate
 
 You can self-host Renovate on all [officially supported platforms](https://docs.renovatebot.com/#supported-platforms).
 
-If you decide to self-host Renovate, start by reading the items from the [Self-hosting Renovate reading list](./reading-list.md#self-hosting-renovate).
+If you decide to self-host Renovate, read the items from the [Self-hosting Renovate reading list](./reading-list.md#self-hosting-renovate).
 
 Available [Renovate distributions](./getting-started/running.md#available-distributions):
 
