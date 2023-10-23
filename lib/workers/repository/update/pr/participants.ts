@@ -15,7 +15,7 @@ async function addCodeOwners(
   const normalizedCodeOwners = [...new Set(codeOwners.map(noLeadingAtSymbol))];
 
   const assignees =
-    config.expandCodeownersGroups && platform.expandGroupMembers
+    config.expandCodeOwnersGroups && platform.expandGroupMembers
       ? await platform.expandGroupMembers(normalizedCodeOwners)
       : normalizedCodeOwners;
 

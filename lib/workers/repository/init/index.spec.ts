@@ -52,7 +52,7 @@ describe('workers/repository/init/index', () => {
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       config.getRepoConfig.mockResolvedValueOnce({
         filterUnavailableUsers: true,
-        expandCodeownersGroups: true,
+        expandCodeOwnersGroups: true,
       });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce(
@@ -63,7 +63,7 @@ describe('workers/repository/init/index', () => {
         "Configuration option 'filterUnavailableUsers' is not supported on the current platform 'undefined'."
       );
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        "Configuration option 'expandCodeownersGroups' is not supported on the current platform 'undefined'."
+        "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform 'undefined'."
       );
     });
   });

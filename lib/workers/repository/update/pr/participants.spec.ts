@@ -55,7 +55,7 @@ describe('workers/repository/update/pr/participants', () => {
         {
           ...config,
           assigneesFromCodeOwners: true,
-          expandCodeownersGroups: true,
+          expandCodeOwnersGroups: true,
         },
         pr
       );

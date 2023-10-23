@@ -31,11 +31,11 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
     );
   }
 
-  if (config.expandCodeownersGroups && !platform.expandGroupMembers) {
+  if (config.expandCodeOwnersGroups && !platform.expandGroupMembers) {
     // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     logger.warn(
-      `Configuration option 'expandCodeownersGroups' is not supported on the current platform '${platform}'.`
+      `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform '${platform}'.`
     );
   }
 }

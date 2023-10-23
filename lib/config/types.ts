@@ -275,7 +275,7 @@ export interface AllConfig
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
-  expandCodeownersGroups?: boolean;
+  expandCodeOwnersGroups?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
   ignoreReviewers?: string[];
