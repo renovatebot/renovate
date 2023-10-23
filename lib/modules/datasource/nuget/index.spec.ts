@@ -29,6 +29,9 @@ const pkgListV2Page1of2 = Fixtures.get('nunit/v2_paginated_1.xml');
 const pkgListV2Page2of2 = Fixtures.get('nunit/v2_paginated_2.xml');
 
 const nugetIndexV3 = Fixtures.get('v3_index.json');
+const nugetIndexV3NoPackageBaseAddress = Fixtures.get(
+  'v3_index_no_packagebaseaddress.json'
+);
 
 const nlogMocks = [
   {
@@ -237,6 +240,21 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .reply(200, {});
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+      expect(res).toBeNull();
+    });
+
+    // this still doesn't cover that throw
+    it('returns null for something', async () => {
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, nugetIndexV3NoPackageBaseAddress)
+        .get('/v3/metadata/nunit/index.json')
+        .reply(200, {});
+      // XXX or do we need to/should we test getResourceUrl directly?
       const res = await getPkgReleases({
         ...configV3,
       });

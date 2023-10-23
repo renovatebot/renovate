@@ -68,6 +68,9 @@ export async function getResourceUrl(
           ? semver.compare(x.version, y.version)
           : /* istanbul ignore next: hard to test */ 0
       );
+    if (services.length === 0) {
+      throw new Error();
+    }
     const { serviceId, version } = services.pop()!;
 
     // istanbul ignore if
