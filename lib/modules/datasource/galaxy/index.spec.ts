@@ -4,7 +4,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { GalaxyDatasource } from '.';
 
-const baseUrl = 'https://old-galaxy.ansible.com/';
+const baseUrl = 'https://galaxy.ansible.com/';
 
 describe('modules/datasource/galaxy/index', () => {
   describe('getReleases', () => {
@@ -77,7 +77,7 @@ describe('modules/datasource/galaxy/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
-        .reply(200, Fixtures.get('timezone'));
+        .reply(200, Fixtures.get('timezone.json'));
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
         packageName: 'yatesr.timezone',

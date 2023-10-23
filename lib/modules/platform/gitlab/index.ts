@@ -55,6 +55,7 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
+import { LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
   GitlabComment,
@@ -911,9 +912,20 @@ export async function setBranchStatus({
     description,
     context,
   };
+
   if (targetUrl) {
     options.target_url = targetUrl;
   }
+
+  if (branchSha) {
+    const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
+    await gitlabApi
+      .getJsonSafe(commitUrl, LastPipelineId)
+      .onValue((pipelineId) => {
+        options.pipeline_id = pipelineId;
+      });
+  }
+
   try {
     // give gitlab some time to create pipelines for the sha
     await setTimeout(
