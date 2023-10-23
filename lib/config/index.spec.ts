@@ -2,11 +2,7 @@ import { getConfig } from './defaults';
 import { filterConfig, getManagerConfig, mergeChildConfig } from './index';
 
 jest.mock('../modules/datasource/npm');
-try {
-  jest.mock('../../config.js');
-} catch (err) {
-  // file does not exist
-}
+jest.mock('../../config.js', () => ({}), { virtual: true });
 
 const defaultConfig = getConfig();
 
@@ -58,6 +54,25 @@ describe('config/index', () => {
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.constraints).toMatchSnapshot();
       expect(config.constraints.node).toBe('<15');
+    });
+
+    it('merges forced options', () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        force: {
+          schedule: 'at any time',
+        },
+      });
+      const childConfig = {
+        force: {
+          constraints: {
+            node: '<15',
+          },
+        },
+      };
+      const config = mergeChildConfig(parentConfig, childConfig);
+      expect(config.force.schedule).toBe('at any time');
+      expect(config.force.constraints.node).toBe('<15');
     });
 
     it('handles null parent packageRules', async () => {

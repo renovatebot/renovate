@@ -373,7 +373,7 @@ describe('config/validation', () => {
 
     it('validates regEx for each fileMatch', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['js', '***$}{]]['],
@@ -392,9 +392,9 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('errors if regexManager has empty fileMatch', async () => {
+    it('errors if customManager has empty fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: [],
@@ -410,16 +410,16 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty fileMatch array",
+            "message": "Each Custom Manager must contain a non-empty fileMatch array",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if no regexManager customType', async () => {
+    it('errors if no customManager customType', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['some-file'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
@@ -437,20 +437,58 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty customType string",
+            "message": "Each Custom Manager must contain a non-empty customType string",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if empty regexManager matchStrings', async () => {
+    it('errors if invalid customManager customType', async () => {
       const config = {
-        regexManagers: [
-          { customType: 'regex', fileMatch: ['foo'], matchStrings: [] },
+        customManagers: [
+          {
+            customType: 'unknown',
+            fileMatch: ['some-file'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        [
+          {
+            "message": "Invalid customType: unknown. Key is not a custom manager",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
+    it('errors if empty customManager matchStrings', async () => {
+      const config = {
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['foo'],
+            matchStrings: [],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
+          },
+          {
+            customType: 'regex',
+            fileMatch: ['foo'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
@@ -463,20 +501,20 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if no regexManager fileMatch', async () => {
+    it('errors if no customManager fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -494,11 +532,14 @@ describe('config/validation', () => {
 
     it('validates regEx for each matchStrings', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
@@ -510,9 +551,29 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
-    it('passes if regexManager fields are present', async () => {
+    // testing if we get all errors at once or not (possible), this does not include customType or fileMatch
+    // since they are common to all custom managers
+    it('validates all possible regex manager options', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
+          {
+            customType: 'regex',
+            fileMatch: ['Dockerfile'],
+            matchStrings: ['***$}{]]['], // invalid matchStrings regex, no depName, datasource and currentValue
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(4);
+    });
+
+    it('passes if customManager fields are present', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
@@ -533,9 +594,9 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if extra regexManager fields are present', async () => {
+    it('errors if extra customManager fields are present', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
@@ -555,9 +616,9 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
-    it('errors if regexManager fields are missing', async () => {
+    it('errors if customManager fields are missing', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
@@ -688,7 +749,7 @@ describe('config/validation', () => {
             fileMatch: ['bar'],
           },
         },
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['build.gradle'],

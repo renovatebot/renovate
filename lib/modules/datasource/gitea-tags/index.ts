@@ -7,17 +7,13 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { CommitsSchema, TagSchema, TagsSchema } from './schema';
 
 export class GiteaTagsDatasource extends Datasource {
-  override http = new GiteaHttp(GiteaTagsDatasource.id);
-
   static readonly id = 'gitea-tags';
 
-  static readonly customRegistrySupport = true;
-
-  static readonly registryStrategy = 'first';
+  override http = new GiteaHttp(GiteaTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://gitea.com'];
 
-  static readonly cacheNamespace = `datasource-${GiteaTagsDatasource.id}`;
+  private static readonly cacheNamespace = `datasource-${GiteaTagsDatasource.id}`;
 
   constructor() {
     super(GiteaTagsDatasource.id);
@@ -28,7 +24,7 @@ export class GiteaTagsDatasource extends Datasource {
     return registryUrl ?? this.defaultRegistryUrls[0];
   }
 
-  private static getApiUrl(registryUrl?: string): string {
+  static getApiUrl(registryUrl?: string): string {
     const res = GiteaTagsDatasource.getRegistryURL(registryUrl).replace(
       regEx(/\/api\/v1$/),
       ''

@@ -4,8 +4,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
-    description: 'Update `_VERSION` variables in Dockerfiles.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: [
@@ -17,11 +16,10 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description: 'Update `_VERSION` variables in Dockerfiles.',
   },
   githubActionsVersions: {
-    description:
-      'Update `_VERSION` environment variables in GitHub Action files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: ['^.github/(?:workflows|actions)/.+\\.ya?ml$'],
@@ -30,10 +28,24 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description:
+      'Update `_VERSION` environment variables in GitHub Action files.',
+  },
+  gitlabPipelineVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+        ],
+      },
+    ],
+    description:
+      'Update `_VERSION` environment variables in GitLab pipeline file.',
   },
   helmChartYamlAppVersions: {
-    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         datasourceTemplate: 'docker',
@@ -43,10 +55,25 @@ export const presets: Record<string, Preset> = {
         ],
       },
     ],
+    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
+  },
+  mavenPropertyVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        datasourceTemplate:
+          '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
+        fileMatch: ['(^|/)pom\\.xml$'],
+        matchStrings: [
+          '<!--\\s?renovate:( datasource=(?<datasource>[a-z-.]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
+        ],
+        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
+      },
+    ],
+    description: 'Update `*.version` properties in `pom.xml` files.',
   },
   tfvarsVersions: {
-    description: 'Update `*_version` variables in `.tfvars` files.',
-    regexManagers: [
+    customManagers: [
       {
         customType: 'regex',
         fileMatch: ['.+\\.tfvars$'],
@@ -56,5 +83,6 @@ export const presets: Record<string, Preset> = {
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },
     ],
+    description: 'Update `*_version` variables in `.tfvars` files.',
   },
 };

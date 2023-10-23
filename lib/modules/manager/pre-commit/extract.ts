@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
+import { detectPlatform } from '../../../util/common';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -12,10 +13,6 @@ import {
   matchesPrecommitDependencyHeuristic,
 } from './parsing';
 import type { PreCommitConfig } from './types';
-
-function isEmptyObject(obj: any): boolean {
-  return Object.keys(obj).length === 0 && obj.constructor === Object;
-}
 
 /**
  * Determines the datasource(id) to be used for this dependency
@@ -31,17 +28,17 @@ function determineDatasource(
   repository: string,
   hostname: string
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  if (hostname === 'github.com') {
+  if (hostname === 'github.com' || detectPlatform(repository) === 'github') {
     logger.debug({ repository, hostname }, 'Found github dependency');
     return { datasource: GithubTagsDatasource.id };
   }
-  if (hostname === 'gitlab.com') {
+  if (hostname === 'gitlab.com' || detectPlatform(repository) === 'gitlab') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
     return { datasource: GitlabTagsDatasource.id };
   }
   const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
-  if (isEmptyObject(res)) {
+  if (is.emptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
     logger.debug(
       { repository, hostUrl },
@@ -53,7 +50,7 @@ function determineDatasource(
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
-    if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
+    if (is.nonEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
         { repository, hostUrl, hostType },
         `Provided hostname matches a ${hostType} hostrule.`

@@ -6,6 +6,7 @@ import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
+import { coerceString } from '../../../../util/string';
 import * as template from '../../../../util/template';
 import { joinUrlParts } from '../../../../util/url';
 import { getPlatformPrOptions } from '../../update/pr';
@@ -21,7 +22,7 @@ export async function ensureConfigMigrationPr(
 ): Promise<void> {
   logger.debug('ensureConfigMigrationPr()');
   const docsLink = joinUrlParts(
-    config.productLinks?.documentation ?? '',
+    coerceString(config.productLinks?.documentation),
     'configuration-options/#configmigration'
   );
   const branchName = getMigrationBranchName(config);

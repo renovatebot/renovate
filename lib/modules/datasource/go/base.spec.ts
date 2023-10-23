@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -7,18 +8,19 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
     it.each`
-      module                     | datasource          | packageName
-      ${'gopkg.in/foo'}          | ${'github-tags'}    | ${'go-foo/foo'}
-      ${'gopkg.in/foo/bar'}      | ${'github-tags'}    | ${'foo/bar'}
-      ${'github.com/foo/bar'}    | ${'github-tags'}    | ${'foo/bar'}
-      ${'bitbucket.org/foo/bar'} | ${'bitbucket-tags'} | ${'foo/bar'}
+      module                           | datasource          | packageName
+      ${'gopkg.in/foo'}                | ${'github-tags'}    | ${'go-foo/foo'}
+      ${'gopkg.in/foo/bar'}            | ${'github-tags'}    | ${'foo/bar'}
+      ${'github.com/foo/bar'}          | ${'github-tags'}    | ${'foo/bar'}
+      ${'bitbucket.org/foo/bar'}       | ${'bitbucket-tags'} | ${'foo/bar'}
+      ${'code.cloudfoundry.org/lager'} | ${'github-tags'}    | ${'cloudfoundry/lager'}
     `(
       '$module -> $datasource: $packageName',
       async ({ module, datasource, packageName }) => {
@@ -30,13 +32,8 @@ describe('modules/datasource/go/base', () => {
 
   describe('go-get requests', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     describe('meta name=go-source', () => {
@@ -381,6 +378,21 @@ describe('modules/datasource/go/base', () => {
           datasource: GitTagsDatasource.id,
           packageName: 'ssh://git.example.com/uncommon',
         });
+      });
+
+      it('returns null for mod imports', async () => {
+        const meta =
+          '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go mod https://buf.build/gen/go">';
+        httpMock
+          .scope('https://buf.build')
+          .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go'
+        );
+
+        expect(res).toBeNull();
       });
     });
   });

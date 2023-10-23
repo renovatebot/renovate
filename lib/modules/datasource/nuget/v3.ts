@@ -8,6 +8,7 @@ import { Http, HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
+import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
 import { massageUrl, removeBuildMeta } from './common';
 import type {
@@ -35,10 +36,10 @@ export async function getResourceUrl(
   if (cachedResult) {
     return cachedResult;
   }
-
+  let servicesIndexRaw: ServicesIndexRaw | undefined;
   try {
     const responseCacheKey = url;
-    let servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
+    servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
       cacheNamespace,
       responseCacheKey
     );
@@ -63,7 +64,9 @@ export async function getResourceUrl(
         ({ type, version }) => type === resourceType && semver.valid(version)
       )
       .sort((x, y) =>
-        x.version && y.version ? semver.compare(x.version, y.version) : 0
+        x.version && y.version
+          ? semver.compare(x.version, y.version)
+          : /* istanbul ignore next: hard to test */ 0
       );
     const { serviceId, version } = services.pop()!;
 
@@ -88,7 +91,7 @@ export async function getResourceUrl(
       throw err;
     }
     logger.debug(
-      { err, url },
+      { err, url, servicesIndexRaw },
       `nuget registry failure: can't get ${resourceType}`
     );
     return null;
@@ -108,6 +111,26 @@ async function getCatalogEntry(
   return items.map(({ catalogEntry }) => catalogEntry);
 }
 
+/**
+ * Compare two versions. Return:
+ * - `1` if `a > b` or `b` is invalid
+ * - `-1` if `a < b` or `a` is invalid
+ * - `0` if `a == b` or both `a` and `b` are invalid
+ */
+export function sortNugetVersions(a: string, b: string): number {
+  if (versioning.isValid(a)) {
+    if (versioning.isValid(b)) {
+      return versioning.sortVersions(a, b);
+    } else {
+      return 1;
+    }
+  } else if (versioning.isValid(b)) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
 export async function getReleases(
   http: Http,
   registryUrl: string,
@@ -121,7 +144,9 @@ export async function getReleases(
   const catalogPagesQueue = catalogPages.map(
     (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page)
   );
-  const catalogEntries = (await p.all(catalogPagesQueue)).flat();
+  const catalogEntries = (await p.all(catalogPagesQueue))
+    .flat()
+    .sort((a, b) => sortNugetVersions(a.version, b.version));
 
   let homepage: string | null = null;
   let latestStable: string | null = null;
@@ -131,7 +156,7 @@ export async function getReleases(
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
-      if (semver.valid(version) && !semver.prerelease(version)) {
+      if (versioning.isValid(version) && versioning.isStable(version)) {
         latestStable = removeBuildMeta(version);
         homepage = projectUrl ? massageUrl(projectUrl) : homepage;
       }
@@ -146,7 +171,7 @@ export async function getReleases(
     return null;
   }
 
-  // istanbul ignore if: only happens when no stable version exists
+  // istanbul ignore next: only happens when no stable version exists
   if (latestStable === null && catalogPages.length) {
     const last = catalogEntries.pop()!;
     latestStable = removeBuildMeta(last.version);

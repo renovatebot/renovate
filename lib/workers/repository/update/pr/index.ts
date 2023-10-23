@@ -99,7 +99,7 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
       0
     );
   }
-  return pr.reviewers ? pr.reviewers.length > 0 : false;
+  return is.nonEmptyArray(pr.reviewers);
 }
 
 // Ensures that PR exists with matching title/body
@@ -280,9 +280,10 @@ export async function ensurePr(
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
           [
-            '\n',
-            ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
-            'If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
+            '> :exclamation: **Important**',
+            '> ',
+            '> Release Notes retrieval for this PR were skipped because no github.com credentials were available. ',
+            '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
             '\n',
           ].join('\n'),
         ];

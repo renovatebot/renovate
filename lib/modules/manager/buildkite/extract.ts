@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -24,7 +25,7 @@ export function extractPackageFile(
         logger.trace('depLineMatch');
         let skipReason: SkipReason | undefined;
         let repo: string | undefined;
-        logger.trace(`Found BuildKite plugin ${depName}`);
+        logger.trace(`Found Buildkite plugin ${depName}`);
         // Plugins may simply be git repos. If so, we need to parse out the registry.
         const gitPluginMatch = regEx(
           /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/
@@ -33,11 +34,16 @@ export function extractPackageFile(
           logger.debug('Examining git plugin');
           const { registry, gitPluginName } = gitPluginMatch.groups;
           const gitDepName = gitPluginName.replace(regEx('\\.git$'), '');
+
+          let datasource: string = GithubTagsDatasource.id;
+          if (registry === 'bitbucket.org') {
+            datasource = BitbucketTagsDatasource.id;
+          }
           const dep: PackageDependency = {
             depName: gitDepName,
             currentValue,
             registryUrls: ['https://' + registry],
-            datasource: GithubTagsDatasource.id,
+            datasource,
           };
           deps.push(dep);
           continue;
@@ -50,13 +56,13 @@ export function extractPackageFile(
           } else {
             logger.warn(
               { dependency: depName },
-              'Something is wrong with BuildKite plugin name'
+              'Something is wrong with Buildkite plugin name'
             );
             skipReason = 'invalid-dependency-specification';
           }
         } else {
           logger.debug(
-            `Skipping non-pinned buildkite current version ${currentValue}`
+            `Skipping non-pinned Buildkite current version ${currentValue}`
           );
           skipReason = 'invalid-version';
         }
@@ -73,7 +79,7 @@ export function extractPackageFile(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Error extracting BuildKite plugins');
+    logger.debug({ err, packageFile }, 'Error extracting Buildkite plugins');
   }
 
   if (!deps.length) {

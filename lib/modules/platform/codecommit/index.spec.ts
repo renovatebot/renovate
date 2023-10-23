@@ -15,6 +15,7 @@ import {
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
+import * as aws4 from 'aws4';
 import { logger } from '../../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -42,9 +43,13 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   beforeEach(() => {
+    delete process.env.AWS_REGION;
+    delete process.env.AWS_ACCESS_KEY_ID;
+    delete process.env.AWS_SECRET_ACCESS_KEY;
     codeCommitClient.reset();
     config.prList = undefined;
     config.repository = undefined;
+    jest.useRealTimers();
   });
 
   it('validates massageMarkdown functionality', () => {
@@ -70,7 +75,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init with env vars', async () => {
-      const temp = process.env.AWS_REGION;
       process.env.AWS_REGION = 'REGION';
       await expect(
         codeCommit.initPlatform({
@@ -80,14 +84,19 @@ describe('modules/platform/codecommit/index', () => {
       ).resolves.toEqual({
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
-      process.env.AWS_REGION = temp;
     });
 
-    it('should ', async () => {
+    it('should', async () => {
       await expect(
         codeCommit.initPlatform({ endpoint: 'non://parsable.url' })
       ).resolves.toEqual({
         endpoint: 'non://parsable.url',
+      });
+    });
+
+    it('should as well', async () => {
+      await expect(codeCommit.initPlatform({})).resolves.toEqual({
+        endpoint: 'https://git-codecommit.us-east-1.amazonaws.com/',
       });
     });
   });
@@ -188,6 +197,33 @@ describe('modules/platform/codecommit/index', () => {
           'name'
         )
       ).toBe('https://git-codecommit.eu-central-1.amazonaws.com/v1/repos/name');
+    });
+
+    it('gets url with username and token', () => {
+      jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+      process.env.AWS_ACCESS_KEY_ID = 'access-key-id';
+      process.env.AWS_SECRET_ACCESS_KEY = 'secret-access-key';
+      process.env.AWS_REGION = 'eu-central-1';
+      process.env.AWS_SESSION_TOKEN = '';
+      const signer = new aws4.RequestSigner({
+        service: 'codecommit',
+        host: 'git-codecommit.eu-central-1.amazonaws.com',
+        method: 'GIT',
+        path: 'v1/repos/name',
+      });
+      const dateTime = signer.getDateTime();
+      const token = `${dateTime}Z${signer.signature()}`;
+      expect(
+        getCodeCommitUrl(
+          {
+            defaultBranch: 'main',
+            repositoryId: 'id',
+          },
+          'name'
+        )
+      ).toBe(
+        `https://access-key-id:${token}@git-codecommit.eu-central-1.amazonaws.com/v1/repos/name`
+      );
     });
   });
 
@@ -587,6 +623,14 @@ describe('modules/platform/codecommit/index', () => {
         .resolvesOnce({ fileContent: uint8arrData });
       const res = await codeCommit.getJsonFile('file.json');
       expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('returns null', async () => {
+      codeCommitClient
+        .on(GetFileCommand)
+        .resolvesOnce({ fileContent: undefined });
+      const res = await codeCommit.getJsonFile('file.json');
+      expect(res).toBeNull();
     });
   });
 

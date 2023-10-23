@@ -67,7 +67,12 @@ export function extractImage(image: Image): PackageDependency | null {
   if (!image.name) {
     return null;
   }
-  const nameDep = splitImageParts(image.newName ?? image.name);
+  const nameToSplit = image.newName ?? image.name;
+  if (!is.string(nameToSplit)) {
+    logger.debug({ image }, 'Invalid image name');
+    return null;
+  }
+  const nameDep = splitImageParts(nameToSplit);
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {

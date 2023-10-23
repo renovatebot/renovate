@@ -174,7 +174,6 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
       const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
       const cache = partial<RepoCacheData>({
-        scan: {},
         branches,
       });
       getCacheSpy.mockReturnValueOnce(cache);
