@@ -262,6 +262,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'object',
     cli: false,
+    mergeable: true,
   },
   {
     name: 'forceCli',
@@ -371,7 +372,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.23.4',
+    default: 'ghcr.io/containerbase/sidecar:9.23.5',
     globalOnly: true,
   },
   {

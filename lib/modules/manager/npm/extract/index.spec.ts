@@ -672,7 +672,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig
       );
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         deps: [
           {
             depName: 'a',

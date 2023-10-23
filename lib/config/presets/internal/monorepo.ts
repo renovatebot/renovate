@@ -355,6 +355,7 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt.js', // old repo
     'https://github.com/nuxt/nuxt',
   ],
+  okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
@@ -447,6 +448,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',
