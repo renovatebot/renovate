@@ -1291,7 +1291,7 @@ A similar one could strip leading `v` prefixes:
 }
 ```
 
-## fetchReleaseNotes
+## fetchChangeLogs
 
 Use this config option to configure release notes fetching.
 The available options are:
@@ -1300,7 +1300,7 @@ The available options are:
 - `branch` - fetch release notes while creating/updating branch
 - `pr`(default) - fetches release notes while creating/updating pull-request
 
-It is not recommended to set fetchReleaseNotes=branch unless you are embedding release notes in commit information, because it results in a performance decrease.
+It is not recommended to set fetchChangeLogs=branch unless you are embedding release notes in commit information, because it results in a performance decrease.
 
 Renovate can fetch release notes when they are hosted on one of these platforms:
 

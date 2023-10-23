@@ -123,7 +123,7 @@ describe('workers/repository/updates/branchify', () => {
     });
 
     it('no fetch changelogs', async () => {
-      config.fetchReleaseNotes = 'off';
+      config.fetchChangeLogs = 'off';
       flattenUpdates.mockResolvedValueOnce([
         {
           depName: 'foo',

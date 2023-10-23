@@ -2620,7 +2620,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'fetchReleaseNotes',
+    name: 'fetchChangeLogs',
     description: 'Controls if and when release notes are fetched.',
     type: 'string',
     allowedValues: ['off', 'branch', 'pr'],

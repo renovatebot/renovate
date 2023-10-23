@@ -21,7 +21,7 @@ import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
-import { FetchReleaseNotesMigration } from './custom/fetch-release-notes-migration';
+import { FetchChangeLogsMigration } from './custom/fetch-release-notes-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -97,6 +97,7 @@ export class MigrationsService {
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
+    ['fetchReleaseNotes', 'fetchChangeLogs'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
@@ -151,7 +152,7 @@ export class MigrationsService {
     DatasourceMigration,
     RecreateClosedMigration,
     StabilityDaysMigration,
-    FetchReleaseNotesMigration,
+    FetchChangeLogsMigration,
     CustomManagersMigration,
   ];
 
