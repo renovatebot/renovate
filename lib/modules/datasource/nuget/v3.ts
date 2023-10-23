@@ -68,9 +68,12 @@ export async function getResourceUrl(
           ? semver.compare(x.version, y.version)
           : /* istanbul ignore next: hard to test */ 0
       );
+
+    // replace a TypeError in the deconstruction with a custom one
     if (services.length === 0) {
-      throw new Error();
+      throw new Error(`no ${resourceType} services found`);
     }
+
     const { serviceId, version } = services.pop()!;
 
     // istanbul ignore if

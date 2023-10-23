@@ -1,0 +1,21 @@
+{
+  "count": 1,
+  "items": [
+    {
+      "@id": "https://api.nuget.org/v3/metadata/nunit/5.0.json",
+      "lower": "5.0",
+      "upper": "5.0",
+      "count": 1,
+      "items": [
+        {
+          "@id": "foo",
+          "packageContent": "foo",
+          "catalogEntry": {
+            "id": "nunit",
+            "version": "5.0"
+          }
+        }
+      ]
+    }
+  ]
+}

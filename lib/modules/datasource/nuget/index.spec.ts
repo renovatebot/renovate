@@ -29,9 +29,6 @@ const pkgListV2Page1of2 = Fixtures.get('nunit/v2_paginated_1.xml');
 const pkgListV2Page2of2 = Fixtures.get('nunit/v2_paginated_2.xml');
 
 const nugetIndexV3 = Fixtures.get('v3_index.json');
-const nugetIndexV3NoPackageBaseAddress = Fixtures.get(
-  'v3_index_no_packagebaseaddress.json'
-);
 
 const nlogMocks = [
   {
@@ -246,19 +243,29 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).toBeNull();
     });
 
-    // this still doesn't cover that throw
-    it('returns null for something', async () => {
+    // This is for coverage and to make sure we don't completely fall over--we
+    // don't have a way to test if we successfully replaced the TypeError.
+    it(`doesn't trigger a TypeError when PackageBaseAddress is missing from service index`, async () => {
+      const nugetIndexV3NoPackageBaseAddress = Fixtures.get(
+        'v3_index_no_packagebaseaddress.json'
+      );
+      const nugetRegistrationV3NoPackageBaseAddress = Fixtures.get(
+        'v3_registration_no_packagebaseaddress.json'
+      );
+
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .reply(200, nugetIndexV3NoPackageBaseAddress)
         .get('/v3/metadata/nunit/index.json')
-        .reply(200, {});
-      // XXX or do we need to/should we test getResourceUrl directly?
+        .reply(200, nugetRegistrationV3NoPackageBaseAddress)
+        .get('/v3/index.json')
+        .reply(200, nugetIndexV3NoPackageBaseAddress);
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).toBeNull();
+      expect(res).not.toBeNull();
+      expect(res!.releases).toHaveLength(1);
     });
 
     it('returns null for non 200 (v3v2)', async () => {
