@@ -77,7 +77,7 @@ describe('modules/datasource/galaxy/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
-        .reply(200, Fixtures.get('timezone'));
+        .reply(200, Fixtures.get('timezone.json'));
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
         packageName: 'yatesr.timezone',

@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { queryReleases } from '../../../util/github/graphql';
@@ -9,6 +8,7 @@ import type {
   GithubRestRelease,
 } from '../../../util/github/types';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
+import { hashStream } from '../../../util/hash';
 import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
@@ -84,7 +84,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     algorithm: string
   ): Promise<string> {
     const res = this.http.stream(asset.browser_download_url);
-    const digest = await hasha.fromStream(res, { algorithm });
+    const digest = await hashStream(res, algorithm);
     return digest;
   }
 

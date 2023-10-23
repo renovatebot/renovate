@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -76,9 +76,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     return cachedResult;
   }
   try {
-    const hash = await hasha.fromStream(http.stream(url), {
-      algorithm: 'sha256',
-    });
+    const hash = await hashStream(http.stream(url), 'sha256');
     const cacheMinutes = 3 * 24 * 60; // 3 days
     await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;

@@ -2,7 +2,7 @@
 
 exports[`modules/datasource/galaxy-collection/index getReleases processes real data 1`] = `
 {
-  "registryUrl": "https://galaxy.ansible.com/",
+  "registryUrl": "https://old-galaxy.ansible.com/",
   "releases": [
     {
       "dependencies": {},
@@ -41,7 +41,7 @@ exports[`modules/datasource/galaxy-collection/index getReleases processes real d
 
 exports[`modules/datasource/galaxy-collection/index getReleases returns only valid versions if a version detail fails 1`] = `
 {
-  "registryUrl": "https://galaxy.ansible.com/",
+  "registryUrl": "https://old-galaxy.ansible.com/",
   "releases": [
     {
       "dependencies": {},
