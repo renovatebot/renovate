@@ -38,7 +38,7 @@ export async function validateReconfigureBranch(
   // look for config file
   // 1. check reconfigure branch cache and use the configFileName if it exists
   // 2. checkout reconfigure branch and look for the config file, don't assume default configFileName
-  const branchSha = getBranchCommit(branchName);
+  const branchSha = getBranchCommit(branchName)!;
   const cache = getCache();
   let configFileName: string | null = null;
   const reconfigureCache = cache.reconfigureBranchCache;
@@ -67,7 +67,7 @@ export async function validateReconfigureBranch(
       description: 'Validation Failed - No config file found',
       state: 'red',
     });
-    setReconfigureBranchCache(branchSha!, false);
+    setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.defaultBranch!);
     return;
   }
@@ -87,7 +87,7 @@ export async function validateReconfigureBranch(
       description: 'Validation Failed - Empty/Invalid config file',
       state: 'red',
     });
-    setReconfigureBranchCache(branchSha!, false);
+    setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -140,7 +140,7 @@ export async function validateReconfigureBranch(
       description: 'Validation Failed',
       state: 'red',
     });
-    setReconfigureBranchCache(branchSha!, false);
+    setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
@@ -153,6 +153,6 @@ export async function validateReconfigureBranch(
     state: 'green',
   });
 
-  setReconfigureBranchCache(branchSha!, true);
+  setReconfigureBranchCache(branchSha, true);
   await scm.checkoutBranch(config.baseBranch!);
 }

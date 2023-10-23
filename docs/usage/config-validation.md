@@ -51,7 +51,7 @@ Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovat
 
 ### Validation of Renovate config change PRs
 
-Renovate can validate configuration changes in Pull Requests as long as you use a designated branch name.
+Renovate can validate configuration changes in Pull Requests when you use a special branch name.
 
 Follow these steps to validate your configuration:
 
