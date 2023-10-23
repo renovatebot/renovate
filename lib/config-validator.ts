@@ -15,6 +15,7 @@ import {
 } from './workers/global/config/parse/file';
 
 let returnVal = 0;
+let isFoundConfigFile = false;
 
 async function validate(
   desc: string,
@@ -22,6 +23,8 @@ async function validate(
   strict: boolean,
   isPreset = false
 ): Promise<void> {
+  isFoundConfigFile = true;
+
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
@@ -58,16 +61,6 @@ type PackageJson = {
   'renovate-config'?: Record<string, RenovateConfig>;
 };
 
-let isFoundConfigFile = false;
-async function validateAndSetFlag(
-  file: string,
-  config: RenovateConfig,
-  strict: boolean,
-  isPreset = false
-): Promise<void> {
-  isFoundConfigFile = true;
-  await validate(file, config, strict, isPreset);
-}
 
 (async () => {
   const strictArgIndex = process.argv.indexOf('--strict');
@@ -86,7 +79,7 @@ async function validateAndSetFlag(
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validateAndSetFlag(file, parsedContent, strict);
+          await validate(file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -107,7 +100,7 @@ async function validateAndSetFlag(
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validateAndSetFlag(file, parsedContent, strict);
+          await validate(file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -123,7 +116,7 @@ async function validateAndSetFlag(
       ) as PackageJson;
       if (pkgJson.renovate) {
         logger.info(`Validating package.json > renovate`);
-        await validateAndSetFlag(
+        await validate(
           'package.json > renovate',
           pkgJson.renovate,
           strict
@@ -132,7 +125,7 @@ async function validateAndSetFlag(
       if (pkgJson['renovate-config']) {
         logger.info(`Validating package.json > renovate-config`);
         for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
-          await validateAndSetFlag(
+          await validate(
             'package.json > renovate-config',
             presetConfig,
             strict,
@@ -149,7 +142,7 @@ async function validateAndSetFlag(
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validateAndSetFlag(
+          await validate(
             file,
             fileConfig,
             strict && !!process.env.RENOVATE_CONFIG_FILE
