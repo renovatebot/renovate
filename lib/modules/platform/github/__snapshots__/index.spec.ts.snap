@@ -31,6 +31,37 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "ghcr.io",
+      "password": "123test",
+      "username": "USERNAME",
+    },
+    {
+      "hostType": "npm",
+      "matchHost": "npm.pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "hostType": "rubygems",
+      "matchHost": "rubygems.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "maven",
+      "matchHost": "maven.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "nuget",
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -40,6 +71,37 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "ghcr.io",
+      "password": "123test",
+      "username": "USERNAME",
+    },
+    {
+      "hostType": "npm",
+      "matchHost": "npm.pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "hostType": "rubygems",
+      "matchHost": "rubygems.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "maven",
+      "matchHost": "maven.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "nuget",
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -49,6 +111,37 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "ghcr.io",
+      "password": "123test",
+      "username": "USERNAME",
+    },
+    {
+      "hostType": "npm",
+      "matchHost": "npm.pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "hostType": "rubygems",
+      "matchHost": "rubygems.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "maven",
+      "matchHost": "maven.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "nuget",
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -58,6 +151,37 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "ghcr.io",
+      "password": "123test",
+      "username": "USERNAME",
+    },
+    {
+      "hostType": "npm",
+      "matchHost": "npm.pkg.github.com",
+      "token": "123test",
+    },
+    {
+      "hostType": "rubygems",
+      "matchHost": "rubygems.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "maven",
+      "matchHost": "maven.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+    {
+      "hostType": "nuget",
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "renovate-bot",
+    },
+  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }

@@ -12,7 +12,8 @@ export interface FingerprintExtractConfig {
   managers: WorkerExtractConfig[];
 }
 
-function getRegexManagerFields(
+// checks for regex manager fields
+function getCustomManagerFields(
   config: WorkerExtractConfig
 ): CustomExtractConfig {
   const regexFields = {} as CustomExtractConfig;
@@ -36,7 +37,7 @@ function getFilteredManagerConfig(
   config: WorkerExtractConfig
 ): WorkerExtractConfig {
   return {
-    ...(isCustomManager(config.manager) && getRegexManagerFields(config)),
+    ...(isCustomManager(config.manager) && getCustomManagerFields(config)),
     manager: config.manager,
     fileMatch: config.fileMatch,
     npmrc: config.npmrc,
@@ -65,7 +66,7 @@ export function generateFingerprintConfig(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
-      const filteredCustomManagers = (config.regexManagers ?? []).filter(
+      const filteredCustomManagers = (config.customManagers ?? []).filter(
         (mgr) => mgr.customType === manager
       );
       for (const customManager of filteredCustomManagers) {

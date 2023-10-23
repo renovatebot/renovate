@@ -84,7 +84,7 @@ export interface LookupUpdate {
   newMajor?: number;
   newMinor?: number;
   newName?: string;
-  newValue: string;
+  newValue?: string;
   semanticCommitType?: string;
   pendingChecks?: boolean;
   pendingVersions?: string[];
@@ -154,6 +154,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   currentRawValue?: any;
   depGroup?: string;
   lockFiles?: string[];
+  manager?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;

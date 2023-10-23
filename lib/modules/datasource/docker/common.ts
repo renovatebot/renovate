@@ -26,7 +26,9 @@ import {
   trimTrailingSlash,
 } from '../../../util/url';
 import { api as dockerVersioning } from '../../versioning/docker';
+import { getGoogleAuthToken } from '../util';
 import { ecrRegex, getECRAuthToken } from './ecr';
+import { googleRegex } from './google';
 import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
@@ -98,6 +100,25 @@ export async function getAuthHeaders(
       const auth = await getECRAuthToken(region, opts);
       if (auth) {
         opts.headers = { authorization: `Basic ${auth}` };
+      }
+    } else if (
+      googleRegex.test(registryHost) &&
+      typeof opts.username === 'undefined' &&
+      typeof opts.password === 'undefined' &&
+      typeof opts.token === 'undefined'
+    ) {
+      logger.trace(
+        { registryHost, dockerRepository },
+        `Using google auth for Docker registry`
+      );
+      const auth = await getGoogleAuthToken();
+      if (auth) {
+        opts.headers = { authorization: `Basic ${auth}` };
+      } else {
+        logger.once.debug(
+          { registryHost, dockerRepository },
+          'Could not get Google access token, using no auth'
+        );
       }
     } else if (opts.username && opts.password) {
       logger.trace(

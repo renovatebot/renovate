@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -141,8 +142,11 @@ export class PackagistDatasource extends Datasource {
       () => null
     );
 
-    const results = await Promise.all([pkgPromise, devPromise]);
-    return parsePackagesResponses(packageName, results);
+    const responses: NonNullable<unknown>[] = await Promise.all([
+      pkgPromise,
+      devPromise,
+    ]).then((responses) => responses.filter(is.object));
+    return parsePackagesResponses(packageName, responses);
   }
 
   public getPkgUrl(

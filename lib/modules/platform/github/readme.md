@@ -85,6 +85,16 @@ The [GitHub App associated email](https://github.community/t/logging-into-git-as
 It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
 A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
+## Package Registry Credentials
+
+When Renovate runs against repositories on `github.com`, it automatically provisions `hostRules` for these GitHub Packages registries using the platform token:
+
+- `ghcr.io`
+- `maven.pkg.github.com`
+- `npm.pkg.github.com`
+- `nuget.pkg.github.com`
+- `rubygems.pkg.github.com`
+
 ## Features awaiting implementation
 
 - The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will use the merge strategy configured in the GitHub repository itself, and this cannot be overridden yet
