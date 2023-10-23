@@ -28,7 +28,7 @@ Did you read our documentation on adding a package manager?
 - [ ] Yes.
 - [ ] No.
 
-### Is the `fileMatch` pattern going to get many "false hits" for files that have nothing to do with package management?
+### Is the [`fileMatch`](../usage/configuration-options.md#filematch) pattern going to get many "false hits" for files that have nothing to do with package management?
 
 ## Parsing and Extraction
 
