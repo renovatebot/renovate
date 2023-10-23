@@ -53,15 +53,15 @@ Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovat
 
 Renovate can validate configuration changes in Pull Requests as long as you use a designated branch name.
 
-Follow these steps:
+Follow these steps to validate your configuration:
 
-1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern.
-   For example, if you're using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
+1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern. For example, if you're using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`.
+1. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
 
-2. Each time Renovate runs, it searches for a branch that matches the reconfigure pattern and validates the Renovate configuration file.
+Renovate will now:
 
-3. Renovate will check for a config file in the reconfigure branch, even if it has been renamed compared to the existing config file in the default branch.
-
-4. Depending on the outcome of the Renovate config validation run, Renovate will add a passing or failing check to the branch.
-
-5. If there's an open pull request from the _reconfigure_ branch then Renovate will comment in that PR with details in case there are validation errors. Each commit will be validated again the next time Renovate runs on the repository.
+1. Search for a branch that matches the special reconfigure pattern.
+1. Check for a config file in the reconfigure branch. Renovate can even find a renamed configuration file (compared to the config file in the default branch).
+1. Add a passing or failing status to the branch, depending on the outcome of the config validation run.
+1. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
+1. Validate each commit the next time Renovate runs on the repository, until the PR is merged.
