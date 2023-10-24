@@ -97,7 +97,6 @@ export class MigrationsService {
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
-    ['fetchReleaseNotes', 'fetchChangeLogs'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
