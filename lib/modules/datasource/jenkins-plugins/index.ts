@@ -1,8 +1,8 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { clone } from '../../../util/clone';
-import { Datasource } from '../datasource';
 import { ensureTrailingSlash } from '../../../util/url';
+import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
   JenkinsPluginsInfoResponse,
