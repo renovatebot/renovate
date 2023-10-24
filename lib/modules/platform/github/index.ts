@@ -204,7 +204,10 @@ export async function initPlatform({
     renovateUsername,
     token,
   };
-  if (platformResult.endpoint === 'https://api.github.com/') {
+  if (
+    process.env.RENOVATE_X_GITHUB_HOST_RULES &&
+    platformResult.endpoint === 'https://api.github.com/'
+  ) {
     logger.debug('Adding GitHub token as GHCR password');
     platformResult.hostRules = [
       {
