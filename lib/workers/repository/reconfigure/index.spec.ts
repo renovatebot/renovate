@@ -35,6 +35,7 @@ describe('workers/repository/reconfigure/index', () => {
     git.getBranchCommit.mockReturnValue('sha');
     fs.readLocalFile.mockResolvedValue(null);
     platform.getBranchPr.mockResolvedValue(null);
+    platform.getBranchStatusCheck.mockResolvedValue(null);
   });
 
   it('no effect on repo with no reconfigure branch', async () => {
@@ -129,7 +130,7 @@ describe('workers/repository/reconfigure/index', () => {
     {
        "renovate": {
         "enabledManagers": ["npm"]
-       } 
+       }
     }
     `;
     merge.detectConfigFile.mockResolvedValue('package.json');
@@ -151,9 +152,19 @@ describe('workers/repository/reconfigure/index', () => {
       },
     });
     await validateReconfigureBranch(config);
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Cache is valid. Skipping validation check'
-    );
+    expect(logger.debug).toHaveBeenCalledWith('Skipping validation check');
+  });
+
+  it('skips validation if status check present', async () => {
+    cache.getCache.mockReturnValueOnce({
+      reconfigureBranchCache: {
+        reconfigureBranchSha: 'new_sha',
+        isConfigValid: false,
+      },
+    });
+    platform.getBranchStatusCheck.mockResolvedValueOnce('green');
+    await validateReconfigureBranch(config);
+    expect(logger.debug).toHaveBeenCalledWith('Skipping validation check');
   });
 
   it('handles non-default config file', async () => {

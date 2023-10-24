@@ -42,10 +42,17 @@ export async function validateReconfigureBranch(
   const cache = getCache();
   let configFileName: string | null = null;
   const reconfigureCache = cache.reconfigureBranchCache;
+  const validationStatus = await platform.getBranchStatusCheck(
+    branchName,
+    'renovate/config-validation'
+  );
 
   // only use valid cached information
-  if (reconfigureCache?.reconfigureBranchSha === branchSha) {
-    logger.debug('Cache is valid. Skipping validation check');
+  if (
+    reconfigureCache?.reconfigureBranchSha === branchSha ||
+    validationStatus !== null
+  ) {
+    logger.debug('Skipping validation check');
     return;
   }
 
