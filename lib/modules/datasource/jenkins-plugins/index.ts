@@ -16,6 +16,8 @@ export class JenkinsPluginsDatasource extends Datasource {
     super(JenkinsPluginsDatasource.id);
   }
 
+  override readonly customRegistrySupport = true;
+
   override readonly defaultRegistryUrls = ['https://updates.jenkins.io'];
 
   override readonly registryStrategy = 'hunt';
