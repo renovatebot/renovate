@@ -365,8 +365,8 @@ importers:
         specifier: 1.3.82
         version: 1.3.82
       '@types/auth-header':
-        specifier: 1.0.3
-        version: 1.0.3
+        specifier: 1.0.4
+        version: 1.0.4
       '@types/aws4':
         specifier: 1.11.4
         version: 1.11.4
@@ -3717,8 +3717,8 @@ packages:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
     dev: true
 
-  /@types/auth-header@1.0.3:
-    resolution: {integrity: sha512-qJPcmsWtShQEGxV+/IkxDwnHsve9q/SZ/efJh3o9b17R1Ow/GL8i84/FYHjWgua3cIru9osl40D6M19cvKQ3Wg==}
+  /@types/auth-header@1.0.4:
+    resolution: {integrity: sha512-rG9GxxkIwG1dcfDFjE49XAYM8yr83khd0y4bOlnf89q7+AJUpkes0D27S6H+l4+5c3AIdYAvFoI42JSHJed4Vw==}
     dev: true
 
   /@types/aws4@1.11.4:
