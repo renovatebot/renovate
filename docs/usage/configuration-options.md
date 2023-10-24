@@ -1293,16 +1293,16 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchChangeLogs
 
-Use this config option to configure changelog/release notes fetching.
+Use this config option to configure changelogs/release notes fetching.
 The available options are:
 
-- `off` - disable changelog fetching
-- `branch` - fetch changelog while creating/updating branch
-- `pr`(default) - fetches changelog while creating/updating pull-request
+- `off` - disable changelogs fetching
+- `branch` - fetch changelogs while creating/updating branch
+- `pr`(default) - fetches changelogs while creating/updating pull-request
 
-It is not recommended to set fetchChangeLogs=branch unless you are embedding changelog in commit information, because it results in a performance decrease.
+It is not recommended to set fetchChangeLogs=branch unless you are embedding changelogs in commit information, because it results in a performance decrease.
 
-Renovate can fetch changelog when they are hosted on one of these platforms:
+Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 - Bitbucket Cloud
 - GitHub (.com and Enterprise Server)
@@ -2793,9 +2793,9 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
-Source URLs are necessary in order to look up changelog.
+Source URLs are necessary in order to look up changelogs.
 
-Using this field we can specify the exact URL to fetch changelog from.
+Using this field we can specify the exact URL to fetch changelogs from.
 
 Example setting source URL for package "dummy":
 
