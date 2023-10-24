@@ -10,8 +10,7 @@ export function prepareLabels(config: RenovateConfig): string[] {
   return [...new Set([...labels, ...addLabels])]
     .filter(is.nonEmptyStringAndNotWhitespace)
     .map((label) => template.compile(label, config))
-    .filter(is.nonEmptyStringAndNotWhitespace)
-    .sort();
+    .filter(is.nonEmptyStringAndNotWhitespace);
 }
 
 export function getChangedLabels(
@@ -37,7 +36,7 @@ export function areLabelsModified(
     return false;
   }
 
-  const existingLabelsHash = toBase64(JSON.stringify(existingLabels.sort()));
+  const existingLabelsHash = toBase64(JSON.stringify(existingLabels));
   if (existingLabelsHash !== oldLabelsHash) {
     logger.debug(
       'PR labels have been modified by user, skipping labels update'
