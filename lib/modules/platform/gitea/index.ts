@@ -622,8 +622,7 @@ const platform: Platform = {
     number,
     prTitle,
     prBody: body,
-    addLabels,
-    removeLabels,
+    labels,
     state,
     targetBranch,
   }: UpdatePrConfig): Promise<void> {
@@ -643,11 +642,10 @@ const platform: Platform = {
     }
 
     // no need to do extra call for removing labels as gitea API replaces labels array
-    if (addLabels) {
-      const labels = Array.isArray(addLabels)
-        ? await Promise.all(addLabels.map(lookupLabelByName))
-        : [];
-      prUpdateParams.labels = labels.filter(is.number);
+    if (Array.isArray(labels)) {
+      prUpdateParams.labels = (
+        await Promise.all(labels.map(lookupLabelByName))
+      ).filter(is.number);
     }
 
     await helper.updatePR(config.repository, number, prUpdateParams);
