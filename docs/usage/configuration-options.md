@@ -2036,10 +2036,11 @@ Consider this example:
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
 
-Renovate only adds labels when it creates the PR, which means:
+Behaviour details:
 
+- Renovate only adds labels when it creates the PR
 - If you remove labels which Renovate added, it won't re-apply them
-- If you change your config, the new/changed labels are not applied to any open PRs
+- If you change your config, the new/changed labels are applied to any open PRs
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
