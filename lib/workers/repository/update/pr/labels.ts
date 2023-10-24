@@ -32,11 +32,9 @@ export function areLabelsModified(
   oldLabelsHash: string,
   existingLabels?: string[]
 ): boolean {
-  if (!existingLabels?.length) {
-    return false;
-  }
-
-  const existingLabelsHash = toBase64(JSON.stringify(existingLabels));
+  const existingLabelsHash = toBase64(
+    JSON.stringify(existingLabels?.sort() ?? [])
+  );
   if (existingLabelsHash !== oldLabelsHash) {
     logger.debug(
       'PR labels have been modified by user, skipping labels update'

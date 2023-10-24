@@ -102,8 +102,10 @@ export function getPrBody(
     const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
     prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
 
-    const prLabelsHash = toBase64(JSON.stringify(prepareLabels(config)));
-    prBody += `\n<!--labels:${prLabelsHash}-->\n`;
+    // sort the labels, create labelHash and add it as comment to pr body
+    // adding the comment at top, to tackle github's pr-description length limit of 2000 chars
+    const prLabelsHash = toBase64(JSON.stringify(prepareLabels(config).sort()));
+    prBody = `\n<!--labels:${prLabelsHash}-->\n` + prBody;
 
     prBody = platform.massageMarkdown(prBody);
 

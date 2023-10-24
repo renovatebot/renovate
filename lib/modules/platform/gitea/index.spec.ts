@@ -1291,7 +1291,7 @@ describe('modules/platform/gitea/index', () => {
       });
     });
 
-    it('should add and remove labels', async () => {
+    it('should add new labels', async () => {
       helper.getRepoLabels.mockResolvedValueOnce([
         { id: 1, name: 'old_label', description: 'its a me', color: '#000000' },
         {
@@ -1317,6 +1317,29 @@ describe('modules/platform/gitea/index', () => {
         body: 'New Body',
         state: 'closed',
         labels: [2],
+      });
+    });
+
+    it('should remove old labels', async () => {
+      helper.getRepoLabels.mockResolvedValueOnce([
+        { id: 1, name: 'old_label', description: 'its a me', color: '#000000' },
+      ]);
+      helper.getOrgLabels.mockResolvedValueOnce([]);
+      helper.searchPRs.mockResolvedValueOnce(mockPRs);
+      await initFakeRepo();
+      await gitea.updatePr({
+        number: 1,
+        prTitle: 'New Title',
+        prBody: 'New Body',
+        state: 'closed',
+        addLabels: [],
+      });
+
+      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
+        title: 'New Title',
+        body: 'New Body',
+        state: 'closed',
+        labels: [],
       });
     });
   });

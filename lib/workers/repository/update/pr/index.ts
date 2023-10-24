@@ -387,12 +387,17 @@ export async function ensurePr(
         );
         updatePrConfig.targetBranch = config.baseBranch;
       }
+      // if labelsHash is present in pr body
+      // divide labels into two categories: i) which needs to be added ii) which needs to be removed
+      // note: existing labels aren't present in these two categories
+      // this is necessary because some platforms handle these two categories separately
       if (existingLabelsHash) {
         const newLabels = prepareLabels(config);
         const newLabelsHash = toBase64(JSON.stringify(newLabels));
+        // only update labels if there is any change to the labels array && labels haven't been modified by user
         if (
-          !areLabelsModified(existingLabelsHash, existingPr.labels) &&
-          existingLabelsHash !== newLabelsHash
+          existingLabelsHash !== newLabelsHash &&
+          !areLabelsModified(existingLabelsHash, existingPr.labels)
         ) {
           logger.debug(
             {
@@ -408,6 +413,11 @@ export async function ensurePr(
             existingLabelsHash,
             newLabelsHash
           );
+
+          // for gitea
+          updatePrConfig.labels = newLabels;
+
+          // for github, gitlab
           updatePrConfig.addLabels = addLabels;
           updatePrConfig.removeLabels = removeLabels;
         }
