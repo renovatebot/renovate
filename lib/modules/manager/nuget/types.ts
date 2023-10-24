@@ -35,6 +35,7 @@ export interface PackageSourceCredential {
   readonly name: string;
   readonly username: string | undefined;
   readonly password: string | undefined;
+  readonly authType: string | undefined;
 }
 
 export interface PackageSourceMap {

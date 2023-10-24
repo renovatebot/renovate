@@ -24,7 +24,7 @@ export function createNuGetConfigXml(registries: Registry[]): string {
 
     contents += formatPackageSourceElement(registryInfo, registryName);
 
-    const { password, username } = hostRules.find({
+    const { password, username, authType } = hostRules.find({
       hostType: NugetDatasource.id,
       url: registry.url,
     });
@@ -34,6 +34,7 @@ export function createNuGetConfigXml(registries: Registry[]): string {
         name: registryName,
         password,
         username,
+        authType,
       });
     }
 
@@ -96,6 +97,10 @@ function formatPackageSourceCredentialElement(
 
   if (credential.password) {
     packageSourceCredential += `<add key="ClearTextPassword" value="${credential.password}" />\n`;
+  }
+
+  if (credential.authType) {
+    packageSourceCredential += `<add key="ValidAuthenticationTypes" value="${credential.authType}" />`;
   }
 
   packageSourceCredential += `</${escapedName}>\n`;
