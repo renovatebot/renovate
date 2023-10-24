@@ -2,21 +2,6 @@
   "version": "3.0.0",
   "resources": [
     {
-      "@id": "https://api.nuget.org/v3/query",
-      "@type": "SearchQueryService",
-      "comment": "Filter and search for packages by keyword."
-    },
-    {
-      "@id": "https://api.nuget.org/v3/query",
-      "@type": "SearchQueryService/3.0.0-beta",
-      "comment": "Filter and search for packages by keyword."
-    },
-    {
-      "@id": "https://api.nuget.org/v3/query",
-      "@type": "SearchQueryService/3.0.0-rc",
-      "comment": "Filter and search for packages by keyword."
-    },
-    {
       "@id": "https://api.nuget.org/v3/metadata",
       "@type": "RegistrationsBaseUrl",
       "comment": "Get package metadata."
@@ -24,11 +9,6 @@
     {
       "@id": "https://api.nuget.org/v3/metadata",
       "@type": "RegistrationsBaseUrl/3.0.0-beta",
-      "comment": "Get package metadata."
-    },
-    {
-      "@id": "https://api.nuget.org/v3/metadata",
-      "@type": "RegistrationsBaseUrl/3.0.0-rc",
       "comment": "Get package metadata."
     }
   ]

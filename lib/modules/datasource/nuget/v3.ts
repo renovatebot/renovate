@@ -69,9 +69,12 @@ export async function getResourceUrl(
           : /* istanbul ignore next: hard to test */ 0
       );
 
-    // replace a TypeError in the deconstruction with a custom one
     if (services.length === 0) {
-      throw new Error(`no ${resourceType} services found`);
+      logger.debug(
+        { url, servicesIndexRaw },
+        `no ${resourceType} services found`
+      );
+      return null;
     }
 
     const { serviceId, version } = services.pop()!;
