@@ -1293,27 +1293,27 @@ A similar one could strip leading `v` prefixes:
 
 ## fetchChangeLogs
 
-Use this config option to configure release notes fetching.
+Use this config option to configure changelog/release notes fetching.
 The available options are:
 
-- `off` - disable release notes fetching
-- `branch` - fetch release notes while creating/updating branch
-- `pr`(default) - fetches release notes while creating/updating pull-request
+- `off` - disable changelog fetching
+- `branch` - fetch changelog while creating/updating branch
+- `pr`(default) - fetches changelog while creating/updating pull-request
 
-It is not recommended to set fetchChangeLogs=branch unless you are embedding release notes in commit information, because it results in a performance decrease.
+It is not recommended to set fetchChangeLogs=branch unless you are embedding changelog in commit information, because it results in a performance decrease.
 
-Renovate can fetch release notes when they are hosted on one of these platforms:
+Renovate can fetch changelog when they are hosted on one of these platforms:
 
 - Bitbucket Cloud
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate can only show release notes from some platforms and some package managers.
-    We're planning improvements so that Renovate can show more release notes.
+    Renovate can only show changelogs from some platforms and some package managers.
+    We're planning improvements so that Renovate can show more changelogs.
     Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
 
 ## fileMatch
@@ -2793,9 +2793,9 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
-Source URLs are necessary in order to look up release notes.
+Source URLs are necessary in order to look up changelog.
 
-Using this field we can specify the exact URL to fetch release notes from.
+Using this field we can specify the exact URL to fetch changelog from.
 
 Example setting source URL for package "dummy":
 
