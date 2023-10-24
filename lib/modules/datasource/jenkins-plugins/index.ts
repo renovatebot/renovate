@@ -24,9 +24,9 @@ export class JenkinsPluginsDatasource extends Datasource {
   private static readonly packageVersionsPath = 'current/plugin-versions.json';
 
   async getReleases({
-                      packageName,
-                      registryUrl,
-                    }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // istanbul ignore if
     if (!registryUrl) {
       return null;
@@ -51,10 +51,12 @@ export class JenkinsPluginsDatasource extends Datasource {
     key: 'info',
     ttlMinutes: 1440,
   })
-  async getJenkinsPluginInfo(updateSiteUrl: string): Promise<Record<string, ReleaseResult>> {
+  async getJenkinsPluginInfo(
+    updateSiteUrl: string
+  ): Promise<Record<string, ReleaseResult>> {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsInfoResponse>(
-        `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`,
+        `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`
       );
 
     const info: Record<string, ReleaseResult> = {};
@@ -68,10 +70,12 @@ export class JenkinsPluginsDatasource extends Datasource {
   }
 
   @cache({ namespace: JenkinsPluginsDatasource.id, key: 'versions' })
-  async getJenkinsPluginVersions(updateSiteUrl: string): Promise<Record<string, Release[]>> {
+  async getJenkinsPluginVersions(
+    updateSiteUrl: string
+  ): Promise<Record<string, Release[]>> {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsVersionsResponse>(
-        `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`,
+        `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`
       );
 
     const versions: Record<string, Release[]> = {};
