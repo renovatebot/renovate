@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { fromBase64, toBase64 } from '../../../../util/string';
+import { toBase64 } from '../../../../util/string';
 import * as template from '../../../../util/template';
 
 export function prepareLabels(config: RenovateConfig): string[] {
@@ -14,16 +14,11 @@ export function prepareLabels(config: RenovateConfig): string[] {
 }
 
 export function getChangedLabels(
-  oldLabelsHash: string,
-  newLabelsHash: string
+  oldLabels: string[],
+  newLabels: string[]
 ): [string[] | null, string[] | null] {
-  const existingLabels: string[] = JSON.parse(fromBase64(oldLabelsHash));
-  const newLabels: string[] = JSON.parse(fromBase64(newLabelsHash));
-
-  const labelsToAdd =
-    newLabels?.filter((l) => !existingLabels?.includes(l)) ?? null;
-  const labelsToRemove =
-    existingLabels?.filter((l) => !newLabels?.includes(l)) ?? null;
+  const labelsToAdd = newLabels?.filter((l) => !oldLabels?.includes(l));
+  const labelsToRemove = oldLabels?.filter((l) => !newLabels?.includes(l));
 
   return [labelsToAdd, labelsToRemove];
 }

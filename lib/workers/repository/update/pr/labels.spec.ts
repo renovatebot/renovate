@@ -81,14 +81,14 @@ describe('workers/repository/update/pr/labels', () => {
 
   describe('getChangedLabels', () => {
     it('adds new labels', () => {
-      expect(getChangedLabels('WyJucG0iXQ==', 'WyJub2RlIiwibnBtIl0=')).toEqual([
+      expect(getChangedLabels(['npm'], ['node', 'npm'])).toEqual([
         ['node'],
         [],
       ]);
     });
 
     it('removes old labels', () => {
-      expect(getChangedLabels('WyJub2RlIiwibnBtIl0=', 'WyJucG0iXQ==')).toEqual([
+      expect(getChangedLabels(['node', 'npm'], ['npm'])).toEqual([
         [],
         ['node'],
       ]);

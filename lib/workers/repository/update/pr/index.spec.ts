@@ -282,13 +282,24 @@ describe('workers/repository/update/pr/index', () => {
           labels: ['old_label'],
         };
         platform.getBranchPr.mockResolvedValueOnce(existingPr);
-
+        prBody.getPrBody.mockReturnValueOnce(
+          `\n<!--labels:${toBase64(
+            JSON.stringify(['new_label'])
+          )}-->\n Some body`
+        );
         config.labels = ['new_label'];
         const res = await ensurePr(config);
 
         expect(res).toEqual({
           type: 'with-pr',
-          pr: { ...pr, labels: ['old_label'] },
+          pr: {
+            ...pr,
+            labels: ['old_label'],
+            bodyStruct: {
+              hash: expect.any(String),
+              labelsHash: toBase64(JSON.stringify(['new_label'])),
+            },
+          },
         });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();

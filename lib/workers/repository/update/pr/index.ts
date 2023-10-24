@@ -28,7 +28,7 @@ import { fingerprint } from '../../../../util/fingerprint';
 import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { regEx } from '../../../../util/regex';
-import { fromBase64, toBase64 } from '../../../../util/string';
+import { toBase64 } from '../../../../util/string';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -402,16 +402,14 @@ export async function ensurePr(
           logger.debug(
             {
               branchName,
-              oldLabels: existingLabelsHash
-                ? JSON.parse(fromBase64(existingLabelsHash))
-                : [],
+              oldLabels: existingPr.labels,
               newLabels,
             },
             'PR labels have changed'
           );
           const [addLabels, removeLabels] = getChangedLabels(
-            existingLabelsHash,
-            newLabelsHash
+            existingPr.labels!,
+            newLabels
           );
 
           // for gitea
