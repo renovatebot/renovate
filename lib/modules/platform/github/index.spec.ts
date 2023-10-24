@@ -3428,6 +3428,17 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('getJsonFile()', () => {
+    it('returns null', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.get('/repos/some/repo/contents/file.json').reply(200, {
+        content: '',
+      });
+      const res = await github.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
+
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       const scope = httpMock.scope(githubApiHost);

@@ -328,7 +328,7 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any> {
-   const raw = (await getRawFile(fileName, repoName, branchOrTag));
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
   return raw ? parseJson(raw, fileName) : null;
 }
 
