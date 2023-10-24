@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
-export class FetchChangeLogsMigration extends AbstractMigration {
+export class FetchReleaseNotesMigration extends AbstractMigration {
   override readonly propertyName = 'fetchChangeLogs';
 
   override run(value: unknown): void {
