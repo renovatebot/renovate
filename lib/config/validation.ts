@@ -97,9 +97,9 @@ export function getParentName(parentPath: string | undefined): string {
 
 export async function validateConfig(
   config: RenovateConfig,
+  isGlobalConfig: boolean,
   isPreset?: boolean,
-  parentPath?: string,
-  isGlobalConfig?: boolean
+  parentPath?: string
 ): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
@@ -290,6 +290,7 @@ export async function validateConfig(
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
                   subval as RenovateConfig,
+                  isGlobalConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`
                 );
@@ -633,6 +634,7 @@ export async function validateConfig(
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
                   val,
+                  isGlobalConfig,
                   isPreset,
                   currentPath
                 );
