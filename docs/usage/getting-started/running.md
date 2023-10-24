@@ -19,7 +19,7 @@ When self-hosting Renovate you're the "administrator" of the bot, this means you
 
 If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
 
-If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository ](https://github.com/mend/renovate-ce-ee).
+If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository](https://github.com/mend/renovate-ce-ee).
 
 ### Available distributions
 
