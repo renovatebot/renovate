@@ -246,21 +246,55 @@ describe('modules/datasource/nuget/index', () => {
     // This is for coverage and to make sure we don't completely fall over--we
     // don't have a way to test if we successfully replaced the TypeError.
     it(`doesn't trigger a TypeError when PackageBaseAddress is missing from service index`, async () => {
-      const nugetIndexV3NoPackageBaseAddress = Fixtures.get(
-        'v3_index_no_packagebaseaddress.json'
-      );
-      const nugetRegistrationV3NoPackageBaseAddress = Fixtures.get(
-        'v3_registration_no_packagebaseaddress.json'
-      );
+      const nugetIndex = `
+        {
+          "version": "3.0.0",
+          "resources": [
+            {
+              "@id": "https://api.nuget.org/v3/metadata",
+              "@type": "RegistrationsBaseUrl",
+              "comment": "Get package metadata."
+            },
+            {
+              "@id": "https://api.nuget.org/v3/metadata",
+              "@type": "RegistrationsBaseUrl/3.0.0-beta",
+              "comment": "Get package metadata."
+            }
+          ]
+        }
+      `;
+      const nunitRegistration = `
+        {
+          "count": 1,
+          "items": [
+            {
+              "@id": "https://api.nuget.org/v3/metadata/nunit/5.0.json",
+              "lower": "5.0",
+              "upper": "5.0",
+              "count": 1,
+              "items": [
+                {
+                  "@id": "foo",
+                  "packageContent": "foo",
+                  "catalogEntry": {
+                    "id": "nunit",
+                    "version": "5.0"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      `;
 
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
-        .reply(200, nugetIndexV3NoPackageBaseAddress)
+        .reply(200, nugetIndex)
         .get('/v3/metadata/nunit/index.json')
-        .reply(200, nugetRegistrationV3NoPackageBaseAddress)
+        .reply(200, nunitRegistration)
         .get('/v3/index.json')
-        .reply(200, nugetIndexV3NoPackageBaseAddress);
+        .reply(200, nugetIndex);
       const res = await getPkgReleases({
         ...configV3,
       });
