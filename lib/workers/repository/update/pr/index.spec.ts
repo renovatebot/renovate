@@ -19,6 +19,7 @@ import type { Pr } from '../../../../modules/platform/types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import type { PrCache } from '../../../../util/cache/repository/types';
 import { fingerprint } from '../../../../util/fingerprint';
+import { toBase64 } from '../../../../util/string';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { embedChangelogs } from '../../changelog';
@@ -269,6 +270,102 @@ describe('workers/repository/update/pr/index', () => {
     });
 
     describe('Update', () => {
+      // updates labels
+      it('updates PR if labels have changed in config', async () => {
+        const existingPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(
+            `\n<!--labels:${toBase64(
+              JSON.stringify(['old_label'])
+            )}-->\n Some body`
+          ),
+          labels: ['old_label'],
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+
+        config.labels = ['new_label'];
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, labels: ['old_label'] },
+        });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            oldLabels: ['old_label'],
+            newLabels: ['new_label'],
+          },
+          `PR labels have changed`
+        );
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      // skips updating labels if existing pr doesn't have labelsHash
+      it('skips pr update if existing pr does not have labelsHash', async () => {
+        const existingPr: Pr = {
+          ...pr,
+          labels: ['old_label'],
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+
+        config.labels = ['new_label'];
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, labels: ['old_label'] },
+        });
+        expect(platform.updatePr).not.toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            oldLabels: ['old_label'],
+            newLabels: ['new_label'],
+          },
+          `PR labels have changed`
+        );
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      // skip updating labels if pr labels have been modified by user
+      it('skips pr update if pr labels have been modified by user', async () => {
+        const existingPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(
+            `\n<!--labels:${toBase64(
+              JSON.stringify(['old_label'])
+            )}-->\n Some body`
+          ),
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+
+        config.labels = ['new_label'];
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr,
+        });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            oldLabels: ['old_label'],
+            newLabels: ['new_label'],
+          },
+          `PR labels have changed`
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR labels have been modified by user, skipping labels update'
+        );
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
       it('updates PR due to title change', async () => {
         const changedPr: Pr = { ...pr, title: 'Another title' }; // user changed the prTitle
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
