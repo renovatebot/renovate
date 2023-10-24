@@ -741,7 +741,7 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 ## redisUrl
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
-The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
+The global cache is used to store lookup results (e.g. dependency versions and changelogs) between repositories and runs.
 Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories

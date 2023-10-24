@@ -281,7 +281,7 @@ Only add the script to cron after you checked it works.
 
 <!-- prettier-ignore -->
 !!! note
-    The GitHub.com token as an environment variable is needed to fetch Release Notes that are usually hosted on github.com.
+    The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
     You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
