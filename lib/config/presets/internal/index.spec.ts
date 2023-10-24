@@ -30,7 +30,7 @@ describe('config/presets/internal/index', () => {
             const config = await resolveConfigPresets(
               massageConfig(presetConfig)
             );
-            const res = await validateConfig(config, false, true);
+            const res = await validateConfig(false, config, true);
             expect(res.errors).toHaveLength(0);
             expect(res.warnings).toHaveLength(0);
           } catch (err) {
