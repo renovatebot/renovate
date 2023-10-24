@@ -30,8 +30,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       '@cdktf/hcl2json':
-        specifier: 0.18.2
-        version: 0.18.2
+        specifier: 0.19.0
+        version: 0.19.0
       '@iarna/toml':
         specifier: 3.0.0
         version: 3.0.0
@@ -72,11 +72,11 @@ importers:
         specifier: 1.3.7
         version: 1.3.7
       '@renovatebot/pep440':
-        specifier: 3.0.8
-        version: 3.0.8
+        specifier: 3.0.9
+        version: 3.0.9
       '@renovatebot/ruby-semver':
-        specifier: 3.0.15
-        version: 3.0.15
+        specifier: 3.0.16
+        version: 3.0.16
       '@sindresorhus/is':
         specifier: 4.6.0
         version: 4.6.0
@@ -150,8 +150,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0
       emoji-regex:
-        specifier: 10.2.1
-        version: 10.2.1
+        specifier: 10.3.0
+        version: 10.3.0
       emojibase:
         specifier: 15.2.0
         version: 15.2.0
@@ -1901,8 +1901,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /@cdktf/hcl2json@0.18.2:
-    resolution: {integrity: sha512-TSuIMet9RSuXUWPz40ed/W4WMu92aHVnJ44lB5nap9E1PE8brr7FhnW32dFOy9m2H8WU4GAfSQ0k3GW6JitSig==}
+  /@cdktf/hcl2json@0.19.0:
+    resolution: {integrity: sha512-wo68qo74dTxcZWJkwlhTV+YoVopUUUTpRC8W73HWkaL/lw6GDozh4GHwphagIHYJy07Ecxdx/WTp0sGDBaFBuQ==}
     dependencies:
       fs-extra: 11.1.1
     dev: false
@@ -2942,13 +2942,13 @@ packages:
       - encoding
     dev: false
 
-  /@renovatebot/pep440@3.0.8:
-    resolution: {integrity: sha512-Sf1B1AziXTD4tdL5dDuBjrQl/ivlNm8ACtlLj3vA4zqQ4AKAa+giYyIFKvDNiF15p8X7RBX75T96M8vd+gMsdg==}
+  /@renovatebot/pep440@3.0.9:
+    resolution: {integrity: sha512-iyO66zZdtBegsbMzr/67U8l+vAbJLSGyJu/n0A5CCXAl+tGk+otlsINlC2CHTwlkI0rGe9kXyTqWls6/igOQDg==}
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
-  /@renovatebot/ruby-semver@3.0.15:
-    resolution: {integrity: sha512-f4HN4BTqP0LqVELXIfZYVbFtcnX2jsUGlCrd/l4GubI5n0UVpuPb1Qfn8H1IqL/WrcWHD2itNDcLr2eemc/Nig==}
+  /@renovatebot/ruby-semver@3.0.16:
+    resolution: {integrity: sha512-KT6vKk4OYdb3Gmfve0RVWTpsz56LxK1YOVQ822sH39kWSrOTRbeb1cbXBdeLwvpAhDFX8TCs5lBJnSvIQOgwpg==}
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
@@ -5588,8 +5588,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /emoji-regex@10.2.1:
-    resolution: {integrity: sha512-97g6QgOk8zlDRdgq1WxwgTMgEWGVAQvB5Fdpgc1MkNy56la5SKP9GsMXKDOdqwn90/41a8yPwIGk1Y6WVbeMQA==}
+  /emoji-regex@10.3.0:
+    resolution: {integrity: sha512-QpLs9D9v9kArv4lfDEgg1X/gN5XLnf/A6l9cs8SPZLRZR3ZkY9+kwIQTxm+fsSej5UMYGE8fdoaZVIBlqG0XTw==}
     dev: false
 
   /emoji-regex@8.0.0:
