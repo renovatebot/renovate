@@ -1309,7 +1309,7 @@ describe('modules/platform/gitea/index', () => {
         prTitle: 'New Title',
         prBody: 'New Body',
         state: 'closed',
-        addLabels: ['new_label'],
+        labels: ['new_label'],
       });
 
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
@@ -1332,7 +1332,7 @@ describe('modules/platform/gitea/index', () => {
         prTitle: 'New Title',
         prBody: 'New Body',
         state: 'closed',
-        addLabels: [],
+        labels: [],
       });
 
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
