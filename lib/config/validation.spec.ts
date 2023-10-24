@@ -203,7 +203,8 @@ describe('config/validation', () => {
         major: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config,
+        false
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(3);
@@ -220,7 +221,8 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config,
+        false
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -237,7 +239,8 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config as any
+        config as any,
+        false
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
@@ -256,7 +259,8 @@ describe('config/validation', () => {
       ],
     ])('validates enabled managers for %s', async (_case, config) => {
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config,
+        false
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -273,7 +277,8 @@ describe('config/validation', () => {
       'errors if included not supported enabled managers for %s',
       async (_case, config) => {
         const { warnings, errors } = await configValidation.validateConfig(
-          config
+          config,
+          false
         );
         expect(warnings).toHaveLength(0);
         expect(errors).toHaveLength(1);
@@ -313,7 +318,8 @@ describe('config/validation', () => {
         major: null,
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config
+        config,
+        false
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
