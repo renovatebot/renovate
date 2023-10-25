@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { toSha256 } from '../../../util/hash';
@@ -27,9 +26,9 @@ type CacheStaleError = {
   type: 'cache-stale';
   cache: CacheRecord;
 };
-type CacheInconsistentError = { type: 'cache-inconsistent' };
+type CacheInvalidError = { type: 'cache-invalid' };
 type CacheLoadError = CacheNotFoundError | CacheStaleError;
-type CacheError = CacheNotFoundError | CacheStaleError | CacheInconsistentError;
+type CacheError = CacheNotFoundError | CacheStaleError | CacheInvalidError;
 
 export class MetadataCache {
   constructor(private readonly http: Http) {}
@@ -70,15 +69,15 @@ export class MetadataCache {
       .catch((err) =>
         getV1Releases(this.http, registryUrl, packageName).transform(
           async (
-            newData: ReleaseResult
+            data: ReleaseResult
           ): Promise<Result<ReleaseResult, CacheError>> => {
-            const v1ReleasesHash = hashReleases(newData);
-            if (v1ReleasesHash === versionsHash) {
+            const dataHash = hashReleases(data);
+            if (dataHash === versionsHash) {
               await saveCache({
-                hash: v1ReleasesHash,
-                data: newData,
+                hash: dataHash,
+                data,
               });
-              return Result.ok(newData);
+              return Result.ok(data);
             }
 
             /**
@@ -97,7 +96,7 @@ export class MetadataCache {
               return Result.ok(staleCache.data);
             }
 
-            return Result.err({ type: 'cache-inconsistent' });
+            return Result.err({ type: 'cache-invalid' });
           }
         )
       )

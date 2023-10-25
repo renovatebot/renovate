@@ -98,7 +98,44 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     });
   });
 
-  it('handles inconsistent data', async () => {
+  it('handles inconsistent data between versions and endpoint', async () => {
+    const cache = new MetadataCache(new Http('test'));
+
+    httpMock
+      .scope('https://rubygems.org')
+      .get('/api/v1/versions/foobar.json')
+      .reply(200, [
+        { number: '1.0.0', created_at: '2021-01-01' },
+        { number: '2.0.0', created_at: '2022-01-01' },
+        { number: '3.0.0', created_at: '2023-01-01' },
+      ])
+      .get('/api/v1/gems/foobar.json')
+      .reply(200, {
+        name: 'foobar',
+        created_at: '2023-01-01',
+        changelog_uri: 'https://example.com/changelog',
+        source_code_uri: 'https://example.com/source',
+        homepage_uri: 'https://example.com',
+      });
+
+    const res = await cache.getRelease('https://rubygems.org', 'foobar', [
+      '1.0.0',
+      '2.0.0',
+      '3.0.0',
+      '4.0.0',
+    ]);
+
+    expect(res).toEqual({
+      releases: [
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+        { version: '3.0.0' },
+        { version: '4.0.0' },
+      ],
+    });
+  });
+
+  it('handles inconsistent data between cache and endpoint', async () => {
     packageCacheMock.set(
       'datasource-rubygems::metadata-cache:https://rubygems.org:foobar',
       {
