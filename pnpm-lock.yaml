@@ -458,8 +458,8 @@ importers:
         specifier: 2.7.3
         version: 2.7.3
       '@types/semver':
-        specifier: 7.5.3
-        version: 7.5.3
+        specifier: 7.5.4
+        version: 7.5.4
       '@types/semver-stable':
         specifier: 3.0.0
         version: 3.0.0
@@ -3999,8 +3999,8 @@ packages:
     resolution: {integrity: sha512-WLZZQdwo5P+H6R+bDDCFqFSlP5Jtk6gyXpE0R0KAVQbcMGmxpVsNX8dah640hY4+PpRG2+Ph3dcwDHzrOAOZ7A==}
     dev: true
 
-  /@types/semver@7.5.3:
-    resolution: {integrity: sha512-OxepLK9EuNEIPxWNME+C6WwbRAOOI2o2BaQEGzz5Lu2e4Z5eDnEo+/aVEDMIXywoJitJ7xWd641wrGLZdtwRyw==}
+  /@types/semver@7.5.4:
+    resolution: {integrity: sha512-MMzuxN3GdFwskAnb6fz0orFvhfqi752yjaXylr0Rp4oDg5H0Zn1IuyRhDVvYOwAXoJirx2xuS16I3WjxnAIHiQ==}
 
   /@types/shimmer@1.0.3:
     resolution: {integrity: sha512-F/IjUGnV6pIN7R4ZV4npHJVoNtaLZWvb+2/9gctxjb99wkpI7Ozg8VPogwDiTRyjLwZXAYxjvdg1KS8LTHKdDA==}
@@ -4231,7 +4231,7 @@ packages:
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.52.0)
       '@types/json-schema': 7.0.13
-      '@types/semver': 7.5.3
+      '@types/semver': 7.5.4
       '@typescript-eslint/scope-manager': 5.62.0
       '@typescript-eslint/types': 5.62.0
       '@typescript-eslint/typescript-estree': 5.62.0(typescript@5.1.6)
@@ -4251,7 +4251,7 @@ packages:
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.52.0)
       '@types/json-schema': 7.0.13
-      '@types/semver': 7.5.3
+      '@types/semver': 7.5.4
       '@typescript-eslint/scope-manager': 6.9.0
       '@typescript-eslint/types': 6.9.0
       '@typescript-eslint/typescript-estree': 6.9.0(typescript@5.1.6)
@@ -4287,7 +4287,7 @@ packages:
     engines: {node: '>=12 <14 || 14.2 - 14.9 || >14.10.0'}
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
-      '@types/semver': 7.5.3
+      '@types/semver': 7.5.4
       '@types/treeify': 1.0.1
       '@yarnpkg/fslib': 2.10.3
       '@yarnpkg/json-proxy': 2.1.1
