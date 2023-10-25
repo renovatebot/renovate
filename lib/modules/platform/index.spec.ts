@@ -11,6 +11,7 @@ jest.unmock('./scm');
 describe('modules/platform/index', () => {
   beforeEach(() => {
     jest.resetModules();
+    process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
   });
 
   it('validates', () => {
