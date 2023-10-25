@@ -75,6 +75,11 @@ To build the correct docker image:
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 ```
 
+More recent docker versions are using buildx by default, so you need to run the following to get the image loaded to the docker image store.
+```
+docker build -f .devcontainer/Dockerfile -t renovatebot_local --load .
+```
+
 Then you can run `pnpm` directly from Docker, for instance:
 
 ```
