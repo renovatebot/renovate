@@ -377,8 +377,8 @@ importers:
         specifier: 1.8.9
         version: 1.8.9
       '@types/cacache':
-        specifier: 17.0.0
-        version: 17.0.0
+        specifier: 17.0.1
+        version: 17.0.1
       '@types/callsite':
         specifier: 1.0.32
         version: 1.0.32
@@ -3765,8 +3765,8 @@ packages:
     dependencies:
       '@types/node': 18.17.5
 
-  /@types/cacache@17.0.0:
-    resolution: {integrity: sha512-4BfoYFzkHdmINTyUIX9MSbKUkntVPR082FRnNc+5KlvvebrcxWWhfP3MRQ28QgfFncP3fTKCuemDYJqFjmWEAA==}
+  /@types/cacache@17.0.1:
+    resolution: {integrity: sha512-UE0nmwT8EGT8aZNYXh4xNemW2n45zPMdAxc4fKee5fqTML+XcZCq/CwFvVu3wpQm9QHxL6XQsxE5hgVqJ7S9ZA==}
     dependencies:
       '@types/node': 18.17.5
     dev: true
