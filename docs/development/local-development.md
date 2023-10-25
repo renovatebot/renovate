@@ -77,6 +77,7 @@ docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 
 Starting from Docker Engine 23.0 and Docker Desktop 4.19, Docker uses Buildx by default.
 So you must run the following command to get the image loaded to the Docker image store:
+
 ```
 docker build -f .devcontainer/Dockerfile -t renovatebot_local --load .
 ```
