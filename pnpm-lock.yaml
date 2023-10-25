@@ -410,8 +410,8 @@ importers:
         specifier: 1.5.2
         version: 1.5.2
       '@types/global-agent':
-        specifier: 2.1.1
-        version: 2.1.1
+        specifier: 2.1.2
+        version: 2.1.2
       '@types/ini':
         specifier: 1.3.32
         version: 1.3.32
@@ -3841,8 +3841,8 @@ packages:
     resolution: {integrity: sha512-nbRjSECoAF6Mv7TqJBqwbYUUc438/9AOI4lVz/hBAYh0xIxiBebmVMRh2DPfF2d+Fz+oBVWM6ZPBVgoOqlAU2g==}
     dev: true
 
-  /@types/global-agent@2.1.1:
-    resolution: {integrity: sha512-sVox8Phk1UKgP6LQPAdeRxfww6vHKt7Bf59dXzYLsQBUEMEn8S10a+ESp/yO0i4fJ3WS4+CIuz42hgJcuA+3mA==}
+  /@types/global-agent@2.1.2:
+    resolution: {integrity: sha512-6UyOC/RcPM2ebJE1ljPxFszfX19ZdY9IJ1cQQ5uI53QS9943r432ecQ0Wmd/HCRSbQl4obBVN0dmv2U7eHESPQ==}
     dev: true
 
   /@types/graceful-fs@4.1.7:
