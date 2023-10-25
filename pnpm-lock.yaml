@@ -431,8 +431,8 @@ importers:
         specifier: 3.3.3
         version: 3.3.3
       '@types/markdown-it':
-        specifier: 13.0.3
-        version: 13.0.3
+        specifier: 13.0.5
+        version: 13.0.5
       '@types/markdown-table':
         specifier: 2.0.0
         version: 2.0.0
@@ -3919,8 +3919,8 @@ packages:
     resolution: {integrity: sha512-/BJF3NT0pRMuxrenr42emRUF67sXwcZCd+S1ksG/Fcf9O7C3kKCY4uJSbKBE4KDUIYr3WMsvfmWD8hRjXExBJQ==}
     dev: true
 
-  /@types/markdown-it@13.0.3:
-    resolution: {integrity: sha512-5XXD3Bl9+UzneLlI7rQnDYzGT5+Z3XSzSyEwJK36lHmwDBKfjylsalyGxRTCXgFrX0gb++h7/UPPbwumhTKvBQ==}
+  /@types/markdown-it@13.0.5:
+    resolution: {integrity: sha512-QhJP7hkq3FCrFNx0szMNCT/79CXfcEgUIA3jc5GBfeXqoKsk3R8JZm2wRXJ2DiyjbPE4VMFOSDemLFcUTZmHEQ==}
     dependencies:
       '@types/linkify-it': 3.0.3
       '@types/mdurl': 1.0.3
