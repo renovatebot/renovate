@@ -407,8 +407,8 @@ importers:
         specifier: 9.0.2
         version: 9.0.2
       '@types/github-url-from-git':
-        specifier: 1.5.1
-        version: 1.5.1
+        specifier: 1.5.2
+        version: 1.5.2
       '@types/global-agent':
         specifier: 2.1.1
         version: 2.1.1
@@ -3837,8 +3837,8 @@ packages:
     resolution: {integrity: sha512-WLeklQNHJVFaChgqO0GdlSxvTPIofIPz/rK2UJdDXkkCYZjy8nonkl4RwssvD/BbKYoFHcvJ7qlAE1RvYNaHOQ==}
     dev: true
 
-  /@types/github-url-from-git@1.5.1:
-    resolution: {integrity: sha512-B/SvVZMrLRUI9mOoguNNz58gV8A5PDtcGIaUe5PYmzAUTsIJ+ZAn/ujwBIuGIU3mRHY5SfV9dyWfnhOWtOVh6A==}
+  /@types/github-url-from-git@1.5.2:
+    resolution: {integrity: sha512-nbRjSECoAF6Mv7TqJBqwbYUUc438/9AOI4lVz/hBAYh0xIxiBebmVMRh2DPfF2d+Fz+oBVWM6ZPBVgoOqlAU2g==}
     dev: true
 
   /@types/global-agent@2.1.1:
