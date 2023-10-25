@@ -422,8 +422,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@types/linkify-markdown':
-        specifier: 1.0.1
-        version: 1.0.1
+        specifier: 1.0.2
+        version: 1.0.2
       '@types/lodash':
         specifier: 4.14.199
         version: 4.14.199
@@ -3907,8 +3907,8 @@ packages:
     resolution: {integrity: sha512-pTjcqY9E4nOI55Wgpz7eiI8+LzdYnw3qxXCfHyBDdPbYvbyLgWLJGh8EdPvqawwMK1Uo1794AUkkR38Fr0g+2g==}
     dev: true
 
-  /@types/linkify-markdown@1.0.1:
-    resolution: {integrity: sha512-RYDOtCol7/sHGhSJvWVnl0AmOdQQWgUYys6cwn5Lt3RiYhyhTLMLv7B9wdixMgCfnNt0MQj/YSGi3qN0IQqLeQ==}
+  /@types/linkify-markdown@1.0.2:
+    resolution: {integrity: sha512-d/PzUlr9EKbyiIPvSa/ES/5tmjpmjAirZCRobEoMH3vZlcPgjSOKQaH0IhcmFB8Iiqk2BX3+/NRsHuAkOdNbPg==}
     dev: true
 
   /@types/lodash@4.14.199:
