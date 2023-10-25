@@ -83,7 +83,7 @@ docker build -f .devcontainer/Dockerfile -t renovatebot_local --load .
 Then you can run `pnpm` directly from Docker, for instance:
 
 ```
-docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local pnpm install
+docker run -it --rm -v "${PWD}:/usr/src/app" -w /usr/src/app renovatebot_local pnpm install
 ```
 
 ## Fork and Clone
