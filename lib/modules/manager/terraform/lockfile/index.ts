@@ -143,8 +143,13 @@ export async function updateArtifacts({
             `Updating constraint "${newConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`
           );
           newConstraint = newConstraint.replace(currentVersion, newVersion);
+        } else if (isPinnedVersion(newValue)) {
+          newConstraint = newVersion;
+          logger.debug(
+            `Pinning constraint for "${packageName}" to "${newConstraint}"`
+          );
         } else {
-          newConstraint = isPinnedVersion(newValue) ? newVersion : newValue;
+          newConstraint = newValue;
           logger.debug(
             `Could not detect constraint to update for "${packageName}" so setting to newValue "${newConstraint}"`
           );
