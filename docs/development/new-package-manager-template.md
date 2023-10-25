@@ -6,7 +6,7 @@ Did you read our documentation on adding a package manager?
 
 ## Basics
 
-### What's the package manager's name?
+### What's the name of the package manager?
 
 ### What language(s) does this package manager support?
 
@@ -21,7 +21,7 @@ Did you read our documentation on adding a package manager?
 
 ### What kind of package files, and names, does this package manager use?
 
-### Which [`fileMatch`](../usage/configuration-options.md#filematch) pattern(s) should be used?
+### Which [`fileMatch`](../usage/configuration-options.md#filematch) pattern(s) should Renovate use?
 
 ### Do many users need to extend the [`fileMatch`](../usage/configuration-options.md#filematch) pattern for custom file names?
 
@@ -34,7 +34,12 @@ Did you read our documentation on adding a package manager?
 
 ### Can package files have "local" links to each other that need to be resolved?
 
-### Should package files be parsed together (in serial) or can they be parsed independently?
+### Package file parsing method
+
+The package files should be:
+
+- [ ] Parsed together (in serial).
+- [ ] Parsed independently.
 
 ### Which format/syntax does the package file use?
 
@@ -43,14 +48,14 @@ Did you read our documentation on adding a package manager?
 - [ ] YAML
 - [ ] Custom (explain below)
 
-### How should we parse the package file(s)?
+### How should we parse the package files?
 
 - [ ] Off the shelf parser.
 - [ ] Using regex.
 - [ ] Custom-parsed line by line.
 - [ ] Other.
 
-### Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, development dependencies, etc?
+### Does the package file have different "types" of dependencies?
 
 - [ ] Yes, production and development dependencies.
 - [ ] No, all dependencies are treated the same.
@@ -65,28 +70,34 @@ Did you read our documentation on adding a package manager?
 
 ### Does this versioning scheme support range constraints, like `^1.0.0` or `1.x`?
 
-- [ ] Supports range constraints (e.g `^1.0.0` or `1.x`).
+- [ ] Supports range constraints (for example: `^1.0.0` or `1.x`), provide details.
 - [ ] No.
 
 ## Lookup
 
-### Is a new datasource required? Provide details
+### Is a new datasource required?
 
 - [ ] Yes, provide details.
 - [ ] No.
 
-### Will users want/need to set a custom host/registry for Renovate's lookup?
+### Will users want (or need to) set a custom host or custom registry for Renovate's lookup?
 
 - [ ] Yes, provide details.
 - [ ] No.
 
 Where can Renovate find the custom host/registry?
 
+- [ ] No custom host or registry is needed.
 - [ ] In the package file(s), provide details.
 - [ ] In some other file inside the repository, provide details.
 - [ ] User needs to configure Renovate where to find the information, provide details.
 
-### Do the package files have any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc.) that should be used in the lookup procedure?
+### Are there any constraints in the package files that Renovate should use in the lookup procedure?
+
+- [ ] Yes, there are constraints on the parent language (for example: supports only Python `v3.x`), provide details.
+- [ ] Yes, there are constraints on the parent platform (for example: only supports Linux, Windows, etc.), provide details.
+- [ ] Yes, some other kind of constraint, provide details.
+- [ ] No constraints.
 
 ### Will users need the ability to configure language or other constraints using Renovate config?
 
@@ -95,26 +106,50 @@ Where can Renovate find the custom host/registry?
 
 ## Artifacts
 
-### Are lock files or checksum files used?
+### Does the package manager use a lock file or checksum file?
 
 - [ ] Yes, uses lock file.
-- [ ] Yes, uses checksum.
-- [ ] Yes, uses both lock file and checksum.
-- [ ] No lock file or checksum is used.
+- [ ] Yes, uses checksum file.
+- [ ] Yes, uses lock file _and_ checksum file.
+- [ ] No lock file or checksum.
 
-Is the locksum or checksum mandatory?
+### Is the locksum or checksum mandatory?
 
-- [ ] Locksum is mandatory.
-- [ ] Checksum is mandatory
-- [ ] Both lock file and checksum are mandatory.
+- [ ] Yes, locksum is mandatory.
+- [ ] Yes, checksum is mandatory.
+- [ ] Yes, lock file _and_ checksum are mandatory.
+- [ ] No mandatory locksum or checksum.
+- [ ] Package manager does not use locksums or checksums.
+
+### If lockfiles or checksums are used: what tool and exact commands should Renovate use to update one (or more) package versions in a dependency file?
+
+### Package manager cache
+
+#### Does the package manager use a cache?
+
+- [ ] Yes, provide details.
 - [ ] No.
 
-### If lockfiles or checksums are used: what tool and exact commands should be used to update one (or more) package versions in a dependency file?
+#### If the package manager uses a cache, how can Renovate control the cache?
 
-### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or environment variables? Do you recommend the cache be kept or disabled/ignored?
+- [ ] Package manager does not use a cache.
+- [ ] Controlled via command line interface, provide details.
+- [ ] Controlled via environment variables, provide details.
 
-### If applicable, what command should be used to generate a lock file from scratch if you already have a package file? This will be used for "lock file maintenance"
+#### Should Renovate keep a cache?
+
+- [ ] Yes, ignore/disable the cache.
+- [ ] No.
+
+### Generating a lockfile from scratch
+
+Renovate can perform "lock file maintenance" by getting the package manager to generate a lockfile from scratch.
+Can the package manager generate a lockfile from scratch?
+
+- [ ] Yes, explain which command Renovate should use to generate the lockfile.
+- [ ] No, the package manager does _not_ generate a lockfile from scratch.
+- [ ] No, the package manager does not use lockfiles.
 
 ## Other
 
-### Is there anything else to know about this package manager?
+### What else should we know about this package manager?
