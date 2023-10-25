@@ -413,8 +413,8 @@ importers:
         specifier: 2.1.1
         version: 2.1.1
       '@types/ini':
-        specifier: 1.3.31
-        version: 1.3.31
+        specifier: 1.3.32
+        version: 1.3.32
       '@types/js-yaml':
         specifier: 4.0.7
         version: 4.0.7
@@ -3855,8 +3855,8 @@ packages:
     resolution: {integrity: sha512-FD+nQWA2zJjh4L9+pFXqWOi0Hs1ryBCfI+985NjluQ1p8EYtoLvjLOKidXBtZ4/IcxDX4o8/E8qDS3540tNliw==}
     dev: false
 
-  /@types/ini@1.3.31:
-    resolution: {integrity: sha512-8ecxxaG4AlVEM1k9+BsziMw8UsX0qy3jYI1ad/71RrDZ+rdL6aZB0wLfAuflQiDhkD5o4yJ0uPK3OSUic3fG0w==}
+  /@types/ini@1.3.32:
+    resolution: {integrity: sha512-cCXfrhgTiChyYIBs7ZZdsi8a9JLs4vVdCsUJt8nczxpNcHcUEMO8Tu5vsMwbepDobKC1mOf4w32jgOz1NEDoaA==}
     dev: true
 
   /@types/istanbul-lib-coverage@2.0.4:
