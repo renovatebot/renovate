@@ -392,8 +392,8 @@ importers:
         specifier: 1.8.3
         version: 1.8.3
       '@types/conventional-commits-detector':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 1.0.1
+        version: 1.0.1
       '@types/diff':
         specifier: 5.0.7
         version: 5.0.7
@@ -3803,8 +3803,8 @@ packages:
     resolution: {integrity: sha512-v3smfzf7umSwpkJrmlUe+apSv6bVnrIFCeBeprnP4f8lIh6pECZxyD50e8yFwfouIt85TdxN5yXiFwS5fnsS3w==}
     dev: true
 
-  /@types/conventional-commits-detector@1.0.0:
-    resolution: {integrity: sha512-ZB+G1yG5pQoWaaHg0D4H9c29q61Y0O/kyOtEx0IKL3Gca3EGEcN3jh5OHnoQp00/pFoqJR63htsviivOkTXuCw==}
+  /@types/conventional-commits-detector@1.0.1:
+    resolution: {integrity: sha512-Adz5W9P8sREhvuTNqtVIdbJIgasX5uEg+Z7IQGaZ8/nBRAZmqyuFmfhhvTW42kaJTN1+1u2okQa8yT+YZn9/lw==}
     dev: true
 
   /@types/diff@5.0.7:
