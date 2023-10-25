@@ -33,7 +33,7 @@ If you're using a private [GitLab container registry](https://docs.gitlab.com/ee
 - Make sure the user that owns the `RENOVATE_TOKEN` PAT is a member of the corresponding GitLab projects/groups with the right permissions.
 - Make sure the `RENOVATE_TOKEN` PAT has the `read_registry` scope.
 
-If you are using a private gitlab and HTTPS is configured for something else  like Kerberos authentication, you may want to use `platformGitCredentialsFile` feature.
+If you are using a private gitlab and HTTPS is configured for something else like Kerberos authentication, you may want to use `platformGitCredentialsFile` feature.
 
 ## Features awaiting implementation
 
