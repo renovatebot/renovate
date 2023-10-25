@@ -267,7 +267,7 @@
     "@swc/core": "1.3.82",
     "@types/auth-header": "1.0.4",
     "@types/aws4": "1.11.4",
-    "@types/breejs__later": "4.1.3",
+    "@types/breejs__later": "4.1.4",
     "@types/bunyan": "1.8.9",
     "@types/cacache": "17.0.0",
     "@types/callsite": "1.0.32",
