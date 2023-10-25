@@ -84,8 +84,8 @@ importers:
         specifier: 0.7.33
         version: 0.7.33
       '@types/tmp':
-        specifier: 0.2.4
-        version: 0.2.4
+        specifier: 0.2.5
+        version: 0.2.5
       '@yarnpkg/core':
         specifier: 3.5.4
         version: 3.5.4(typanion@3.14.0)
@@ -4027,8 +4027,8 @@ packages:
       minipass: 4.2.8
     dev: true
 
-  /@types/tmp@0.2.4:
-    resolution: {integrity: sha512-Vq3rwM+2KgiLacq68EjTJD9cuJ/ne5pXntWn8B8Rxj25SLkGAhCgooCZ1lhcIcV5OFveJ+s5Cqpi+XKfFM/xZA==}
+  /@types/tmp@0.2.5:
+    resolution: {integrity: sha512-KodRrjqWrk/3VyzfR4aeXkf2n5Ssg+bvVUhXlvHVffLiIHriLlrO3vYobB+Kvnr9DkNzMiyWHT3G6hT/xX0ryQ==}
     dev: false
 
   /@types/traverse@0.6.33:
