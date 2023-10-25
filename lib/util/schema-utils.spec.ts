@@ -5,6 +5,7 @@ import {
   Json5,
   LooseArray,
   LooseRecord,
+  MultidocYaml,
   Toml,
   UtcDate,
   Yaml,
@@ -289,6 +290,58 @@ describe('util/schema-utils', () => {
       expect(Schema.parse('foo:\n- bar: baz')).toEqual({
         foo: [{ bar: 'baz' }],
       });
+    });
+
+    it('throws error for non-string', () => {
+      expect(Schema.safeParse(42)).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected string, received number',
+              code: 'invalid_type',
+              expected: 'string',
+              received: 'number',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+
+    it('throws error for invalid yaml', () => {
+      expect(Schema.safeParse('clearly: "invalid" "yaml"')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid YAML',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
+  describe('MultidocYaml', () => {
+    const Schema = MultidocYaml.pipe(
+      z.array(
+        z.object({
+          foo: z.number(),
+        })
+      )
+    );
+
+    it('parses valid yaml', () => {
+      expect(
+        Schema.parse(codeBlock`
+          foo: 111
+          ---
+          foo: 222
+        `)
+      ).toEqual([{ foo: 111 }, { foo: 222 }]);
     });
 
     it('throws error for non-string', () => {
