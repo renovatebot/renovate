@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
 import { fs } from '../../../../test/util';
 import { bumpPackageVersion } from './update';
@@ -35,14 +36,61 @@ describe('modules/manager/nuget/util', () => {
       fs.findUpLocal.mockReturnValue(
         Promise.resolve<string | null>('NuGet.config')
       );
-      fs.readLocalFile.mockImplementation((file): Promise<any> => {
-        const content: string | null =
-          '<configuration><packageSources><clear /><add key="nuget.org" value="https://api.nuget.org/v3/index.json" /><add key="contoso.com" value="https://contoso.com/packages/" /></packageSources><packageSourceMapping><packageSource key="nuget.org"><package pattern="*" /></packageSource><packageSource key="contoso.com"><package pattern="Contoso.*" /><package pattern="NuGet.Common" /></packageSource></packageSourceMapping></configuration>';
-        if (file !== 'NuGet.config') {
-          return Promise.reject(new Error(`Unexpected file: ${file}`));
-        }
-        return Promise.resolve(content);
-      });
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <configuration>
+            <packageSources>
+              <clear/>
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json"/>
+              <add key="contoso.com" value="https://contoso.com/packages/"/>
+            </packageSources>
+            <packageSourceMapping>
+              <packageSource key="nuget.org">
+                <package pattern="*"/>
+              </packageSource>
+              <packageSource key="contoso.com">
+                <package pattern="Contoso.*"/>
+                <package pattern="NuGet.Common"/>
+              </packageSource>
+            </packageSourceMapping>
+          </configuration>`
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries?.length).toBe(2);
+      expect(registries![0].name).toBe('nuget.org');
+      expect(registries![0].url).toBe('https://api.nuget.org/v3/index.json');
+      expect(registries![0].sourceMappedPackagePatterns).toEqual(['*']);
+
+      expect(registries![1].name).toBe('contoso.com');
+      expect(registries![1].url).toBe('https://contoso.com/packages/');
+      expect(registries![1].sourceMappedPackagePatterns).toEqual([
+        'Contoso.*',
+        'NuGet.Common',
+      ]);
+    });
+
+    it('reads nuget config file with default registry', async () => {
+      fs.findUpLocal.mockReturnValue(
+        Promise.resolve<string | null>('NuGet.config')
+      );
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+        <configuration>
+          <packageSources>
+            <add key="contoso.com" value="https://contoso.com/packages/"/>
+          </packageSources>
+          <packageSourceMapping>
+            <packageSource key="nuget.org">
+              <package pattern="*"/>
+            </packageSource>
+            <packageSource key="contoso.com">
+              <package pattern="Contoso.*"/>
+              <package pattern="NuGet.Common"/>
+            </packageSource>
+          </packageSourceMapping>
+        </configuration>`
+      );
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries?.length).toBe(2);
