@@ -69,6 +69,7 @@ describe('modules/manager/nuget/util', () => {
         'NuGet.Common',
       ]);
     });
+
     it('reads nuget config file with default registry', async () => {
       fs.findUpLocal.mockReturnValue(
         Promise.resolve<string | null>('NuGet.config')
