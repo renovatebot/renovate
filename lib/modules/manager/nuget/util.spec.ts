@@ -1,8 +1,8 @@
+import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
 import { fs } from '../../../../test/util';
 import { bumpPackageVersion } from './update';
 import { findVersion, getConfiguredRegistries } from './util';
-import { codeBlock } from 'common-tags';
 
 jest.mock('../../../util/fs');
 
