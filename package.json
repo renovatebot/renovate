@@ -274,7 +274,7 @@
     "@types/changelog-filename-regex": "2.0.1",
     "@types/clean-git-ref": "2.0.1",
     "@types/common-tags": "1.8.3",
-    "@types/conventional-commits-detector": "1.0.0",
+    "@types/conventional-commits-detector": "1.0.1",
     "@types/diff": "5.0.7",
     "@types/eslint": "8.44.5",
     "@types/fs-extra": "11.0.2",
