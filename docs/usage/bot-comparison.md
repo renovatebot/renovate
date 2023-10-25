@@ -116,6 +116,8 @@ Renovate uses the [GNU Affero General Public License](https://github.com/renovat
 
 Dependabot uses [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE).
 
+Neither license is relevant to the end user though if consuming through an App/SaaS.
+
 ### Programming language of project
 
 Renovate uses TypeScript.
@@ -144,7 +146,7 @@ Available [Renovate distributions](./getting-started/running.md#available-distri
 
 ### Self-hosting Dependabot
 
-You can self-host Dependabot on other platforms than GitHub.
+You can self-host Dependabot on other platforms than GitHub but none are officially supported.
 
 #### `dependabot-core`
 
@@ -155,7 +157,7 @@ Quote from the `dependabot-core` readme:
 
 #### `dependabot-script`
 
-The Dependabot team has a community-maintained collection of scripts to start self-hosting Dependabot: [`dependabot-script`](https://github.com/dependabot/dependabot-script).
+The Dependabot team has a community-maintained collection of scripts to start self-hosting Dependabot: [`dependabot-script`](https://github.com/dependabot/dependabot-script) but the repository has included a message warning that the scripts are broken since March 2023.
 
 #### `dependabot-gitlab/dependabot`
 
