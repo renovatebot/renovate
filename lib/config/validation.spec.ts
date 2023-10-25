@@ -368,7 +368,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -409,7 +408,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -429,7 +427,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config as any,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -458,7 +455,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config as any,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -488,7 +484,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config as any,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -526,7 +521,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config as RenovateConfig,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -558,7 +552,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config as any,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -581,7 +574,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -603,7 +595,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -628,7 +619,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -652,7 +642,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config as any,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -674,7 +663,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -689,7 +677,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -703,7 +690,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -717,7 +703,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config as never, // TODO: #15963
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -731,7 +716,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -865,7 +849,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -881,7 +864,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(1);
@@ -901,7 +883,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(warnings).toHaveLength(0);
@@ -922,7 +903,6 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-
         true
       );
       expect(errors).toHaveLength(0);
