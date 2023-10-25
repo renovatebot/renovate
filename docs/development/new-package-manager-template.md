@@ -12,10 +12,14 @@ Did you read our documentation on adding a package manager?
 
 ### How popular is this package manager?
 
-### Are there other package managers for this language?
+### Does this language have other (competing?) package managers?
 
 - [ ] Yes (give names).
 - [ ] No.
+
+### What are the big selling points for this package manager?
+
+Explain how this package manager is different from existing ones.
 
 ## Detecting package files
 
