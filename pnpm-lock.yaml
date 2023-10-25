@@ -374,8 +374,8 @@ importers:
         specifier: 4.1.4
         version: 4.1.4
       '@types/bunyan':
-        specifier: 1.8.9
-        version: 1.8.9
+        specifier: 1.8.10
+        version: 1.8.10
       '@types/cacache':
         specifier: 17.0.1
         version: 17.0.1
@@ -3760,10 +3760,17 @@ packages:
     resolution: {integrity: sha512-AAJ8GjEpC76hyJj0UfPUADVGVnpFjyv3IepCEjOCij0wyJzyYdrRg0sCpO234WKbsHVW3iy3LC7GOvZr7LvBGw==}
     dev: true
 
+  /@types/bunyan@1.8.10:
+    resolution: {integrity: sha512-A82U/3EAdWX89f+dfysGiRvbeoLuRLV3i6SLg3HuNK4Yf+dHOqdbxT70vQUwvD3DOr2Dvpcv9dRX4ipTf0LpEg==}
+    dependencies:
+      '@types/node': 18.17.5
+    dev: true
+
   /@types/bunyan@1.8.9:
     resolution: {integrity: sha512-ZqS9JGpBxVOvsawzmVt30sP++gSQMTejCkIAQ3VdadOcRE8izTyW66hufvwLeH+YEGP6Js2AW7Gz+RMyvrEbmw==}
     dependencies:
       '@types/node': 18.17.5
+    dev: false
 
   /@types/cacache@17.0.1:
     resolution: {integrity: sha512-UE0nmwT8EGT8aZNYXh4xNemW2n45zPMdAxc4fKee5fqTML+XcZCq/CwFvVu3wpQm9QHxL6XQsxE5hgVqJ7S9ZA==}
