@@ -437,8 +437,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@types/marshal':
-        specifier: 0.5.1
-        version: 0.5.1
+        specifier: 0.5.2
+        version: 0.5.2
       '@types/mdast':
         specifier: 3.0.14
         version: 3.0.14
@@ -3930,8 +3930,8 @@ packages:
     resolution: {integrity: sha512-fVZN/DRjZvjuk+lo7ovlI/ZycS51gpYU5vw5EcFeqkcX6lucQ+UWgEOH2O4KJHkSck4DHAY7D7CkVLD0wzc5qw==}
     dev: true
 
-  /@types/marshal@0.5.1:
-    resolution: {integrity: sha512-AVyEWaUglZLG7tEyTaNtl8w873d4g+8+U8Hw49hF8CUWnNdk8Wa3w2DIwdwwAZxYnDo4ScQkhB3FPZRvEmSm1g==}
+  /@types/marshal@0.5.2:
+    resolution: {integrity: sha512-nnLVRVfde/iHWBe0ziFuE4Tc9Pnzlfghn2/vbGaTf4nDmuh9NBqGr2waZmoYGynUWVf15MrNc/IU5YH3J1VGbw==}
     dependencies:
       '@types/node': 18.17.5
     dev: true
