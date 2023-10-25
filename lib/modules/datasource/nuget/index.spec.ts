@@ -2,6 +2,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { logger } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
@@ -243,9 +244,7 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).toBeNull();
     });
 
-    // This is for coverage and to make sure we don't completely fall over--we
-    // don't have a way to test if we successfully replaced the TypeError.
-    it(`doesn't trigger a TypeError when PackageBaseAddress is missing from service index`, async () => {
+    it('logs instead of triggering a TypeError when PackageBaseAddress is missing from service index', async () => {
       const nugetIndex = `
         {
           "version": "3.0.0",
@@ -300,6 +299,13 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res!.releases).toHaveLength(1);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          url: 'https://api.nuget.org/v3/index.json',
+          servicesIndexRaw: JSON.parse(nugetIndex),
+        },
+        'no PackageBaseAddress services found'
+      );
     });
 
     it('returns null for non 200 (v3v2)', async () => {
