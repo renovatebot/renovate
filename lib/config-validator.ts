@@ -117,19 +117,17 @@ type PackageJson = {
           false,
           'package.json > renovate',
           pkgJson.renovate,
-          strict,
-          false
+          strict
         );
       }
       if (pkgJson['renovate-config']) {
         logger.info(`Validating package.json > renovate-config`);
         for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
           await validate(
-            true,
+            false,
             'package.json > renovate-config',
             presetConfig,
-            strict,
-            true
+            strict
           );
         }
       }
