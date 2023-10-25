@@ -10,8 +10,8 @@ import { getV1Releases } from './common';
 
 interface CacheRecord {
   hash: string;
-  createdAt: string;
   data: ReleaseResult;
+  isFallback?: true;
 }
 
 function hashVersions(versions: string[]): string {
@@ -40,7 +40,7 @@ export class MetadataCache {
     versions: string[]
   ): Promise<ReleaseResult> {
     const cacheNs = `datasource-rubygems`;
-    const cacheKey = `metadata-cache-v2:${registryUrl}:${packageName}`;
+    const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
     const versionsHash = hashVersions(versions);
 
     const loadCache = (): AsyncResult<ReleaseResult, CacheLoadError> =>
@@ -55,20 +55,13 @@ export class MetadataCache {
 
     const saveCache = async (
       cache: CacheRecord,
+      ttlMinutes = 100 * 24 * 60,
       ttlDelta = 10 * 24 * 60
     ): Promise<void> => {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
-        const createdAtDate = DateTime.fromISO(cache.createdAt);
-        const now = DateTime.now();
-        const ttlElapsedMinutes = Math.max(
-          0,
-          now.diff(createdAtDate, 'minutes').minutes
-        );
-
-        const ttlMinutes = 100 * 24 * 60;
         const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
-        const ttl = ttlMinutes + ttlRandomDelta - ttlElapsedMinutes;
+        const ttl = ttlMinutes + ttlRandomDelta;
         await packageCache.set(cacheNs, cacheKey, cache, ttl);
       }
     };
@@ -81,19 +74,27 @@ export class MetadataCache {
           ): Promise<Result<ReleaseResult, CacheError>> => {
             const v1ReleasesHash = hashReleases(newData);
             if (v1ReleasesHash === versionsHash) {
-              const createdAt = DateTime.now().toISO()!;
               await saveCache({
                 hash: v1ReleasesHash,
                 data: newData,
-                createdAt,
               });
               return Result.ok(newData);
             }
 
+            /**
+             * Return stale cache for 24 hours,
+             * if metadata is inconsistent with versions list.
+             */
             if (err.type === 'cache-stale') {
-              const cache = err.cache;
-              await saveCache(cache, 0);
-              return Result.ok(cache.data);
+              const staleCache = err.cache;
+              if (!staleCache.isFallback) {
+                await saveCache(
+                  { ...staleCache, isFallback: true },
+                  24 * 60,
+                  0
+                );
+              }
+              return Result.ok(staleCache.data);
             }
 
             return Result.err({ type: 'cache-inconsistent' });

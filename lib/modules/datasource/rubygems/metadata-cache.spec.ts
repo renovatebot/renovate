@@ -98,37 +98,30 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     });
   });
 
-  it('handles inconsistent data data', async () => {
+  it('handles inconsistent data', async () => {
+    packageCacheMock.set(
+      'datasource-rubygems::metadata-cache:https://rubygems.org:foobar',
+      {
+        hash: '123',
+        createdAt: '2021-01-01',
+        data: {
+          releases: [
+            { version: '1.0.0' },
+            { version: '2.0.0' },
+            { version: '3.0.0' },
+          ],
+        },
+      }
+    );
     const cache = new MetadataCache(new Http('test'));
 
     httpMock
       .scope('https://rubygems.org')
       .get('/api/v1/versions/foobar.json')
       .reply(200, [
-        {
-          number: '1.0.0',
-          created_at: '2021-01-01',
-          metadata: {
-            changelog_uri: 'https://v1.example.com/changelog',
-            source_code_uri: 'https://v1.example.com/source',
-          },
-        },
-        {
-          number: '2.0.0',
-          created_at: '2022-01-01',
-          metadata: {
-            changelog_uri: 'https://v2.example.com/changelog',
-            source_code_uri: 'https://v2.example.com/source',
-          },
-        },
-        {
-          number: '3.0.0',
-          created_at: '2023-01-01',
-          metadata: {
-            changelog_uri: 'https://v3.example.com/changelog',
-            source_code_uri: 'https://v3.example.com/source',
-          },
-        },
+        { number: '1.0.0', created_at: '2021-01-01' },
+        { number: '2.0.0', created_at: '2022-01-01' },
+        { number: '3.0.0', created_at: '2023-01-01' },
       ])
       .get('/api/v1/gems/foobar.json')
       .reply(200, {
@@ -151,9 +144,25 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
         { version: '1.0.0' },
         { version: '2.0.0' },
         { version: '3.0.0' },
-        { version: '4.0.0' },
       ],
     });
+    expect(packageCache.set).toHaveBeenCalledWith(
+      'datasource-rubygems',
+      'metadata-cache:https://rubygems.org:foobar',
+      {
+        createdAt: '2021-01-01',
+        data: {
+          releases: [
+            { version: '1.0.0' },
+            { version: '2.0.0' },
+            { version: '3.0.0' },
+          ],
+        },
+        hash: '123',
+        isFallback: true,
+      },
+      24 * 60
+    );
   });
 
   it('returns cached data', async () => {
