@@ -2728,7 +2728,7 @@ const options: RenovateOptions[] = [
   {
     name: 'platformGitCredentialsFile',
     description:
-      'If set to `true` then the `~/.git-credentials` file will be used for platform authentication instead of embedding credentials in the URL.",
+      'If set to `true` then the `~/.git-credentials` file will be used for platform authentication instead of embedding credentials in the URL.',
     type: 'boolean',
     default: false,
     advancedUse: true,
