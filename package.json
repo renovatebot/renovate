@@ -303,7 +303,7 @@
     "@types/traverse": "0.6.34",
     "@types/url-join": "4.0.1",
     "@types/validate-npm-package-name": "4.0.0",
-    "@types/xmldoc": "1.1.7",
+    "@types/xmldoc": "1.1.8",
     "@typescript-eslint/eslint-plugin": "6.9.0",
     "@typescript-eslint/parser": "6.9.0",
     "aws-sdk-client-mock": "3.0.0",
