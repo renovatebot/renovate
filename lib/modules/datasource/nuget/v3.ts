@@ -70,6 +70,7 @@ export async function getResourceUrl(
       );
 
     if (services.length === 0) {
+      await packageCache.set(cacheNamespace, resultCacheKey, null, 60);
       logger.debug(
         { url, servicesIndexRaw },
         `no ${resourceType} services found`
