@@ -299,7 +299,7 @@
     "@types/semver": "7.5.4",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.2",
-    "@types/tar": "6.1.6",
+    "@types/tar": "6.1.7",
     "@types/traverse": "0.6.34",
     "@types/url-join": "4.0.2",
     "@types/validate-npm-package-name": "4.0.0",
