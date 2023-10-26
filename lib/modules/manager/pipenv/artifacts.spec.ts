@@ -23,9 +23,6 @@ import * as pipenv from '.';
 const datasource = mocked(_datasource);
 const find = mockedFunction(_find);
 
-const pipfile6 = Fixtures.get('Pipfile6');
-const pipfile7 = Fixtures.get('Pipfile7');
-
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
@@ -353,11 +350,13 @@ describe('modules/manager/pipenv/artifacts', () => {
       password: 'passwordTwo',
     });
 
+    const pipfile = Fixtures.get('Pipfile6');
+
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: pipfile6,
+        newPackageFileContent: pipfile,
         config: { ...config, constraints: { python: '== 3.8.*' } },
       })
     ).toEqual([
@@ -408,11 +407,13 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
 
+    const pipfile = Fixtures.get('Pipfile7');
+
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: pipfile7,
+        newPackageFileContent: pipfile,
         config: { ...config, constraints: { python: '== 3.8.*' } },
       })
     ).toEqual([

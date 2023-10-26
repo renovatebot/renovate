@@ -3,7 +3,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -139,12 +139,12 @@ export async function updateArtifacts({
       existingLockFileContent,
       config
     );
+    const extraEnv: Opt<ExtraEnv> = {
+      PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
+      PIP_CACHE_DIR: await ensureCacheDir('pip'),
+    };
     const execOptions: ExecOptions = {
       cwdFile: pipfileName,
-      extraEnv: {
-        PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
       docker: {},
       toolConstraints: [
         {
@@ -165,7 +165,6 @@ export async function updateArtifacts({
     if (sourceUrl) {
       logger.trace('Pipfile contains credentials');
       const hostRule = getMatchingHostRule(sourceUrl);
-      const extraEnv = execOptions.extraEnv!;
       if (hostRule) {
         logger.trace('Found matching hostRule for Pipfile credentials');
         if (hostRule.username) {
@@ -178,6 +177,7 @@ export async function updateArtifacts({
         }
       }
     }
+    execOptions.extraEnv = extraEnv;
 
     logger.trace({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
