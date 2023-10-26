@@ -251,11 +251,6 @@ describe('modules/datasource/nuget/index', () => {
           "resources": [
             {
               "@id": "https://api.nuget.org/v3/metadata",
-              "@type": "RegistrationsBaseUrl",
-              "comment": "Get package metadata."
-            },
-            {
-              "@id": "https://api.nuget.org/v3/metadata",
               "@type": "RegistrationsBaseUrl/3.0.0-beta",
               "comment": "Get package metadata."
             }
