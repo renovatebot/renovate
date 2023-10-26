@@ -281,7 +281,7 @@
 
     Please stick to one topic/question per Discussion. Start a new discussion per topic.
 
-    This is to benefit future users who may search and find this discussion and not be confused because there's multiple questions and answers within. One question and answer per Discussion works best.
+    This prevents future users from finding this discussion and getting confused by multiple questions and answers. One question and answer per Discussion works best.
 
     For example:
      - Don't create a discussion with multiple questions requiring multiple answers
@@ -291,8 +291,8 @@
   comment: >
     Hi there,
 
-    Please do not unnecessarily `@` maintainers like `@rarkins` or `@viceice`. Doing so causes annoying notifications and make maintaining a repo of this size difficult.
+    Please do not unnecessarily `@` mention maintainers like `@rarkins` or `@viceice`. Doing so causes annoying notifications and makes it harder to maintain this repository.
 
-    For example, never `@` mention a maintainer when you are creating a discussion if your desire is to get attention. This is inconsiderate behavior, just like shouting out your coffee order in a Starbucks before it's your turn.
+    For example, never `@` mention a maintainer when you are creating a discussion if your desire is to get attention. This is rude behavior, just like shouting out your coffee order in a Starbucks before it's your turn.
 
-    If there's an existing issue or discussion which you were hoping for a follow-up to but multiple days or weeks have elapsed, it's ok for you to comment, but please still do not `@` people. The maintainers do not promise to answer every Discussion but do answer most. If you're not getting an answer then take a look at the informatio you've provided and see if you can improve it.
+    It's OK to comment in an issue or discussion after multiple days or weeks. But please, still don't `@` mention people. The maintainers try to answer most discussions, but they can't answer all discussions. If you're still not getting an answer, take a look at the information you've given us and see if you can improve it.
