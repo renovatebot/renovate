@@ -298,7 +298,7 @@
     "@types/prettier": "2.7.3",
     "@types/semver": "7.5.4",
     "@types/semver-stable": "3.0.0",
-    "@types/semver-utils": "1.1.1",
+    "@types/semver-utils": "1.1.2",
     "@types/tar": "6.1.6",
     "@types/traverse": "0.6.33",
     "@types/url-join": "4.0.1",

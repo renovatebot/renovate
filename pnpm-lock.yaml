@@ -464,8 +464,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@types/semver-utils':
-        specifier: 1.1.1
-        version: 1.1.1
+        specifier: 1.1.2
+        version: 1.1.2
       '@types/tar':
         specifier: 6.1.6
         version: 6.1.6
@@ -3995,8 +3995,8 @@ packages:
     resolution: {integrity: sha512-lKoRU5o4X5fBHVQes2YOvSGckuTG7SpOxBQmJTczKl85hgQQHf6eQR1Yi/nmJzQWDEL2JVTUeUYR4iGz1zgdGg==}
     dev: true
 
-  /@types/semver-utils@1.1.1:
-    resolution: {integrity: sha512-WLZZQdwo5P+H6R+bDDCFqFSlP5Jtk6gyXpE0R0KAVQbcMGmxpVsNX8dah640hY4+PpRG2+Ph3dcwDHzrOAOZ7A==}
+  /@types/semver-utils@1.1.2:
+    resolution: {integrity: sha512-d6Bjg2Sc6frOiTxobEnHWaUENpU0EnkUCV98mo18qEZ7Ah8ImOnQSfulflh3lEvI1A/gS0urUc9VZcfJHKKUiA==}
     dev: true
 
   /@types/semver@7.5.4:
