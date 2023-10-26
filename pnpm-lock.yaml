@@ -461,8 +461,8 @@ importers:
         specifier: 7.5.4
         version: 7.5.4
       '@types/semver-stable':
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 3.0.1
+        version: 3.0.1
       '@types/semver-utils':
         specifier: 1.1.2
         version: 1.1.2
@@ -3991,8 +3991,8 @@ packages:
       '@types/node': 18.17.5
     dev: false
 
-  /@types/semver-stable@3.0.0:
-    resolution: {integrity: sha512-lKoRU5o4X5fBHVQes2YOvSGckuTG7SpOxBQmJTczKl85hgQQHf6eQR1Yi/nmJzQWDEL2JVTUeUYR4iGz1zgdGg==}
+  /@types/semver-stable@3.0.1:
+    resolution: {integrity: sha512-Y+b/SPlJ7qFinOWj+kDYCqhSXfDxLHozmmPg8i4XuDV0oL78kjVkzoN68XcZp5uSvtYZ6UVjUtStdxRfcH/s0w==}
     dev: true
 
   /@types/semver-utils@1.1.2:
