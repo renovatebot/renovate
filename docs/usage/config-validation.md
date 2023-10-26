@@ -58,7 +58,7 @@ Follow these steps to validate your configuration:
 1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern. For example, if you're using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`.
 1. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
 
-Renovate will now:
+The next time Renovate runs on that repo it will:
 
 1. Search for a branch that matches the special reconfigure pattern.
 1. Check for a config file in the reconfigure branch. Renovate can even find a renamed configuration file (compared to the config file in the default branch).
