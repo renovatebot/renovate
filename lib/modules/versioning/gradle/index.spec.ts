@@ -76,6 +76,7 @@ describe('modules/versioning/gradle/index', () => {
     ${'Hoxton.SR1'}              | ${'Hoxton.RELEASE'}          | ${1}
     ${'1.0-sp-1'}                | ${'1.0-release'}             | ${1}
     ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
+    ${''}                        | ${''}                        | ${0}
   `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(compare(a, b)).toEqual(expected);
   });
@@ -266,6 +267,13 @@ describe('modules/versioning/gradle/index', () => {
     currentValue             | rangeStrategy | currentVersion | newVersion  | expected
     ${'1'}                   | ${null}       | ${null}        | ${'1.1'}    | ${'1.1'}
     ${'[1.2.3,]'}            | ${null}       | ${null}        | ${'1.2.4'}  | ${null}
+    ${'+'}                   | ${null}       | ${null}        | ${'1.2.4'}  | ${null}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'1.2.4'}  | ${'1.+'}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'2.1.2'}  | ${'2.+'}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'2'}      | ${'2.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'1.3.4'}  | ${'1.3.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'1.5.2'}  | ${'1.5.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'2'}      | ${'2'}
     ${'[1.2.3]'}             | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.0.0,1.2.3]'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.0.0,1.2.23]'}      | ${'pin'}      | ${'1.0.0'}     | ${'1.2.23'} | ${'1.2.23'}

@@ -256,6 +256,13 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
 
 #### Google Container Registry / Google Artifact Registry
 
+##### Using Application Default Credentials / Workload Identity (Self-Hosted only)
+
+Just configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) /
+[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_
+provide a username, password or token. Renovate will automatically retrieve the credentials using the
+google-auth-library.
+
 ##### Using long-lived service account credentials
 
 To access the Google Container Registry (deprecated) or the Google Artifact Registry, use the JSON service account with `Basic` authentication, and use the:
@@ -377,7 +384,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:36.91.0
+FROM renovate/renovate:37.31.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

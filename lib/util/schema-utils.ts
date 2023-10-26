@@ -1,8 +1,8 @@
 import { JsonMap, parse } from '@iarna/toml';
-import { load } from 'js-yaml';
+import { load, loadAll } from 'js-yaml';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
-import type { JsonValue } from 'type-fest';
+import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
 
 interface ErrorContext<T> {
@@ -226,18 +226,18 @@ export const UtcDate = z
     return date;
   });
 
-export const Url = z.string().transform((str, ctx): URL => {
+export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return new URL(str);
+    return load(str, { json: true }) as JsonValue;
   } catch (e) {
-    ctx.addIssue({ code: 'custom', message: 'Invalid URL' });
+    ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
   }
 });
 
-export const Yaml = z.string().transform((str, ctx): JsonValue => {
+export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
   try {
-    return load(str, { json: true }) as JsonValue;
+    return loadAll(str, null, { json: true }) as JsonArray;
   } catch (e) {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;

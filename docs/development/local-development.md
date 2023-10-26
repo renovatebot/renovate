@@ -75,10 +75,17 @@ To build the correct docker image:
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 ```
 
+Starting from Docker Engine 23.0 and Docker Desktop 4.19, Docker uses Buildx by default.
+So you must run the following command to get the image loaded to the Docker image store:
+
+```
+docker build -f .devcontainer/Dockerfile -t renovatebot_local --load .
+```
+
 Then you can run `pnpm` directly from Docker, for instance:
 
 ```
-docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local pnpm install
+docker run -it --rm -v "${PWD}:/usr/src/app" -w /usr/src/app renovatebot_local pnpm install
 ```
 
 ## Fork and Clone

@@ -46,7 +46,7 @@ export interface Items {
 }
 
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
-  const q = `repo:renovatebot/renovate type:issue is:open -label:priority-5-triage`;
+  const q = `repo:renovatebot/renovate type:issue is:open`;
   const per_page = 100;
   try {
     const query = getQueryString({ q, per_page });

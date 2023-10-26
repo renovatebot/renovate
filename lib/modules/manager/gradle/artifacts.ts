@@ -177,7 +177,7 @@ export async function updateArtifacts({
     const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
-    const baseCmd = `${gradlewName} --console=plain -q`;
+    const baseCmd = `${gradlewName} --console=plain --dependency-verification lenient -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},

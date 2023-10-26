@@ -68,10 +68,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual([]);
     expect(isPaginationDone).toBe(false);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
-      items: {},
-      createdAt: isoTs(now),
-    });
+    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual(cacheRecord);
   });
 
   it('reconciles old cache record with new items', async () => {

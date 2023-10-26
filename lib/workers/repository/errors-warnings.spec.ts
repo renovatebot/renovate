@@ -85,9 +85,9 @@ describe('workers/repository/errors-warnings', () => {
         "
         ---
 
-        ### ⚠ Dependency Lookup Warnings ⚠
-
-        Warnings were logged while processing this repo. Please check the Dependency Dashboard for more information.
+        > ⚠ **Warning**
+        > 
+        > Some dependencies could not be looked up. Check the Dependency Dashboard for more information.
 
         "
       `);
@@ -133,9 +133,9 @@ describe('workers/repository/errors-warnings', () => {
         "
         ---
 
-        ### ⚠ Dependency Lookup Warnings ⚠
-
-        Warnings were logged while processing this repo. Please check the logs for more information.
+        > ⚠ **Warning**
+        > 
+        > Some dependencies could not be looked up. Check the warning logs for more information.
 
         "
       `);
@@ -197,11 +197,11 @@ describe('workers/repository/errors-warnings', () => {
         "
         ---
 
-        ### ⚠ Dependency Lookup Warnings ⚠
-
-        -   Renovate failed to look up the following dependencies: \`dependency-1\`, \`dependency-2\`.
-
-        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+        > ⚠ **Warning**
+        > 
+        > Renovate failed to look up the following dependencies: \`dependency-1\`, \`dependency-2\`.
+        > 
+        > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
         ---
 
@@ -275,6 +275,7 @@ describe('workers/repository/errors-warnings', () => {
               {},
             ],
           },
+          partial<PackageFile>(), // for coverage
           {
             packageFile: 'backend/package.json',
             deps: [
@@ -293,24 +294,39 @@ describe('workers/repository/errors-warnings', () => {
               },
             ],
           },
+          // coverage
+          partial<PackageFile>({
+            packageFile: 'Dockerfile',
+          }),
         ],
       };
       const res = getDepWarningsOnboardingPR(packageFiles, config);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
-
-        ### ⚠ Dependency Lookup Warnings ⚠
-
-        Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
-
-        -   \`Warning 1\`
-        -   \`Warning 2\`
-
-        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+        > 
+        > ⚠ **Warning**
+        > 
+        > Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.
+        > 
+        > -   \`Warning 1\`
+        > -   \`Warning 2\`
+        > 
+        > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
         "
       `);
+    });
+
+    it('handle empty package files', () => {
+      const config: RenovateConfig = {};
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: undefined as never,
+      };
+      let res = getDepWarningsOnboardingPR(packageFiles, config);
+      expect(res).toBe('');
+      res = getDepWarningsOnboardingPR(undefined as never, config);
+      expect(res).toBe('');
     });
 
     it('suppress notifications contains dependencyLookupWarnings flag then return empty string', () => {

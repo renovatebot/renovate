@@ -22,6 +22,9 @@ export interface TerraformModuleVersions {
 
 export interface TerraformModuleVersionsModules {
   versions: TerraformModuleVersionsModuleVersion[];
+  // 'source' is not part of the base spec but GitLab supports it:
+  // https://docs.gitlab.com/ee/api/packages/terraform-modules.html#list-available-versions-for-a-specific-module
+  source?: string;
 }
 
 export interface TerraformModuleVersionsModuleVersion {

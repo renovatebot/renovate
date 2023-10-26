@@ -1,10 +1,10 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import type { HttpResponse } from '../../../util/http/types';
 import * as pep440Versioning from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type { GalaxyResult } from './types';
+import { GalaxyV1 } from './schema';
 
 export class GalaxyDatasource extends Datasource {
   static readonly id = 'galaxy';
@@ -32,25 +32,15 @@ export class GalaxyDatasource extends Datasource {
     const userName = lookUp[0];
     const projectName = lookUp[1];
 
-    // TODO: types (#22198)
     const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
     const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 
-    let raw: HttpResponse<GalaxyResult> | null = null;
+    let body: GalaxyV1 | null = null;
     try {
-      raw = await this.http.getJson<GalaxyResult>(galaxyAPIUrl);
+      const raw = await this.http.getJson(galaxyAPIUrl, GalaxyV1);
+      body = raw.body;
     } catch (err) {
-      this.handleGenericErrors(err);
-    }
-
-    const body = raw?.body;
-
-    if (!body) {
-      logger.warn(
-        { dependency: packageName },
-        `Received invalid data from ${galaxyAPIUrl}`
-      );
-      return null;
+      throw this.handleGenericErrors(err);
     }
 
     // istanbul ignore if
@@ -78,15 +68,15 @@ export class GalaxyDatasource extends Datasource {
 
     result.dependencyUrl = galaxyProjectUrl;
     const { github_user: user, github_repo: repo } = resultObject;
-    if (typeof user === 'string' && typeof repo === 'string') {
+    if (is.nonEmptyString(user) && is.nonEmptyString(repo)) {
       result.sourceUrl = `https://github.com/${user}/${repo}`;
     }
 
     result.releases = versions.map(
-      (version: { name: string; release_date: string }) => {
+      (version: { name: string; created: string }) => {
         const release: Release = {
           version: version.name,
-          releaseTimestamp: version.release_date,
+          releaseTimestamp: version.created,
         };
 
         return release;
