@@ -21,7 +21,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as pipenv from '.';
 
 const datasource = mocked(_datasource);
-const find = mocked(_find);
+const find = mockedFunction(_find);
 
 const pipfile6 = Fixtures.get('Pipfile6');
 const pipfile7 = Fixtures.get('Pipfile7');

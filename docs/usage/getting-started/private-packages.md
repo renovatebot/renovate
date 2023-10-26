@@ -446,7 +446,7 @@ For example:
 
 ### pipenv
 
-If a `Pipfile` contains a `source` with `USERNAME` or `PASSWORD` environment variables and there is a `hostRule` with a matching host, then these variables would be passed to `pipenv lock`.
+If a `Pipfile` contains a `source` with `USERNAME` or `PASSWORD` environment variables and there is a `hostRules` entry with a matching host plus `username` and `password` fields, then these variables would be passed to `pipenv lock`.
 
 For example:
 
