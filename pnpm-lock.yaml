@@ -476,8 +476,8 @@ importers:
         specifier: 4.0.2
         version: 4.0.2
       '@types/validate-npm-package-name':
-        specifier: 4.0.0
-        version: 4.0.0
+        specifier: 4.0.1
+        version: 4.0.1
       '@types/xmldoc':
         specifier: 1.1.8
         version: 1.1.8
@@ -4046,8 +4046,8 @@ packages:
     resolution: {integrity: sha512-uv54MkAtQ4B5Qm20LmMN7tAdczqRenu1K6Sf7PHCygqylVJlRwjpUE5OGofqxdXGH3QJUu+qvDZzPadz5EOjxA==}
     dev: true
 
-  /@types/validate-npm-package-name@4.0.0:
-    resolution: {integrity: sha512-RpO62vB2lkjEkyLbwTheA2+uwYmtVMWTr/kWRI++UAgVdZqNqdAuIQl/SxBCGeMKfdjWaXPbyhZbiCc4PAj+KA==}
+  /@types/validate-npm-package-name@4.0.1:
+    resolution: {integrity: sha512-yzivVVAvMhDeboopQ49JNZ+9aCQV5jy4KfUw2LLFJ08oNyNFnG2Il7p/giMQBcJi4FVVqcl2vBIEll6YrKrS/Q==}
     dev: true
 
   /@types/xmldoc@1.1.8:
