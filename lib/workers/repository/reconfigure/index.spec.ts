@@ -152,7 +152,9 @@ describe('workers/repository/reconfigure/index', () => {
       },
     });
     await validateReconfigureBranch(config);
-    expect(logger.debug).toHaveBeenCalledWith('Skipping validation check');
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipping validation check as branch sha is unchanged'
+    );
   });
 
   it('skips validation if status check present', async () => {
@@ -164,7 +166,9 @@ describe('workers/repository/reconfigure/index', () => {
     });
     platform.getBranchStatusCheck.mockResolvedValueOnce('green');
     await validateReconfigureBranch(config);
-    expect(logger.debug).toHaveBeenCalledWith('Skipping validation check');
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipping validation check as status check already exists'
+    );
   });
 
   it('handles non-default config file', async () => {

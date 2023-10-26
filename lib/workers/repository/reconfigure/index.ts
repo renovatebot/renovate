@@ -47,11 +47,16 @@ export async function validateReconfigureBranch(
     logger.debug('Skipping validation check as branch sha is unchanged');
     return;
   }
-  
+
   const validationStatus = await platform.getBranchStatusCheck(
     branchName,
     'renovate/config-validation'
   );
+  // if old status check is present skip validation
+  if (is.nonEmptyString(validationStatus)) {
+    logger.debug('Skipping validation check as status check already exists');
+    return;
+  }
 
   try {
     await scm.checkoutBranch(branchName);
