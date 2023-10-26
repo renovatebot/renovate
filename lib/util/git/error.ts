@@ -1,6 +1,7 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { regEx } from '../regex';
 import type { FileChange } from './types';
 
 // istanbul ignore next
@@ -63,7 +64,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
       logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
       const res = new Error(CONFIG_VALIDATION);
       res.validationError = message;
-      res.validationMessage = err.message;
+      res.validationMessage = `\`${err.message.replace(regEx(/`/g), "'")}\``;
       return res;
     }
   }
@@ -82,7 +83,7 @@ export function handleCommitError(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'None';
     error.validationError = 'An existing branch is blocking Renovate';
-    error.validationMessage = `Renovate needs to create the branch "${branchName}" but is blocked from doing so because of an existing branch called "renovate". Please remove it so that Renovate can proceed.`;
+    error.validationMessage = `Renovate needs to create the branch \`${branchName}\` but is blocked from doing so because of an existing branch called \`renovate\`. Please remove it so that Renovate can proceed.`;
     throw error;
   }
   if (
@@ -114,9 +115,9 @@ export function handleCommitError(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = branchName;
     error.validationError = 'Bitbucket committer error';
-    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: "${String(
-      err.message
-    )}"`;
+    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: \`${String(
+      err.message.replace(regEx(/`/g), "'")
+    )}\``;
     throw error;
   }
   if (err.message.includes('remote: error: cannot lock ref')) {

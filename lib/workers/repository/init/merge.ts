@@ -24,6 +24,7 @@ import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
+import { regEx } from '../../../util/regex';
 import {
   getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
@@ -140,7 +141,9 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config renovate.json5'
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
-        const validationMessage = `JSON5.parse error:  ${String(err.message)}`;
+        const validationMessage = `JSON5.parse error: \`${String(
+          err.message.replace(regEx(/`/g), "'")
+        )}\``;
         return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
@@ -181,7 +184,9 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config'
         );
         const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = `JSON.parse error:  ${String(err.message)}`;
+        const validationMessage = `JSON.parse error:  \`${String(
+          err.message.replace(regEx(/`/g), "'")
+        )}\``;
         return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
@@ -234,7 +239,7 @@ export async function mergeRenovateConfig(
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
-      .map((e) => e.message)
+      .map((e) => `\`${e.message.replace(regEx(/`/g), "'")}\``)
       .join(', ');
     throw error;
   }
