@@ -48,6 +48,7 @@ describe('modules/platform/github/index', () => {
 
     const repoCache = repository.getCache();
     delete repoCache.platform;
+    delete process.env.RENOVATE_X_GITHUB_HOST_RULES;
   });
 
   describe('initPlatform()', () => {
@@ -162,6 +163,7 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
+      process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
       httpMock
         .scope(githubApiHost, {
           reqheaders: {
