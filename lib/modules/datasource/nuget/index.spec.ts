@@ -289,11 +289,10 @@ describe('modules/datasource/nuget/index', () => {
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
+        .twice()
         .reply(200, nugetIndex)
         .get('/v3/metadata/nunit/index.json')
-        .reply(200, nunitRegistration)
-        .get('/v3/index.json')
-        .reply(200, nugetIndex);
+        .reply(200, nunitRegistration);
       const res = await getPkgReleases({
         ...configV3,
       });
