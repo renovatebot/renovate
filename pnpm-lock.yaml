@@ -566,8 +566,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
       nock:
-        specifier: 13.3.4
-        version: 13.3.4
+        specifier: 13.3.6
+        version: 13.3.6
       npm-run-all:
         specifier: 4.1.5
         version: 4.1.5
@@ -8626,13 +8626,12 @@ packages:
       path-to-regexp: 1.8.0
     dev: true
 
-  /nock@13.3.4:
-    resolution: {integrity: sha512-DDpmn5oLEdCTclEqweOT4U7bEpuoifBMFUXem9sA4turDAZ5tlbrEoWqCorwXey8CaAw44mst5JOQeVNiwtkhw==}
+  /nock@13.3.6:
+    resolution: {integrity: sha512-lT6YuktKroUFM+27mubf2uqQZVy2Jf+pfGzuh9N6VwdHlFoZqvi4zyxFTVR1w/ChPqGY6yxGehHp6C3wqCASCw==}
     engines: {node: '>= 10.13'}
     dependencies:
       debug: 4.3.4
       json-stringify-safe: 5.0.1
-      lodash: 4.17.21
       propagate: 2.0.1
     transitivePeerDependencies:
       - supports-color
