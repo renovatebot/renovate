@@ -3346,6 +3346,7 @@ You can use the `registryAliases` object to set registry aliases.
 This feature works with the following managers:
 
 - [`ansible`](/modules/manager/ansible)
+- [`bitbucket-pipelines`](/modules/manager/bitbucket-pipelines)
 - [`docker-compose`](/modules/manager/docker-compose)
 - [`dockerfile`](/modules/manager/dockerfile)
 - [`droneci`](/modules/manager/droneci)
@@ -3356,6 +3357,15 @@ This feature works with the following managers:
 - [`kubernetes`](/modules/manager/kubernetes)
 - [`terraform`](/modules/manager/terraform)
 - [`woodpecker`](/modules/manager/woodpecker)
+
+```json
+{
+  "registryAliases": {
+    "jfrogecosystem": "some.jfrog.mirror",
+    "jfrog.com": "some.jfrog.mirror"
+  }
+}
+```
 
 ## registryUrls
 

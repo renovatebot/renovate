@@ -1,5 +1,6 @@
 nav:
   - Home: 'index.md'
+  - Bot comparison: 'bot-comparison.md'
   - Reading List: 'reading-list.md'
   - ... | getting-started
   - Troubleshooting: 'troubleshooting.md'
