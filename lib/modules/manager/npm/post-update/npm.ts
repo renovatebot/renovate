@@ -51,15 +51,17 @@ export async function generateLockFile(
     };
     const commands: string[] = [];
     let cmdOptions = '';
-    if (
-      postUpdateOptions?.includes('npmDedupe') === true ||
-      skipInstalls === false
-    ) {
+    if (skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
       logger.debug('Updating lock file only');
       cmdOptions += '--package-lock-only --no-audit';
+    }
+
+    if (postUpdateOptions?.includes('npmDedupe')) {
+      logger.debug('Deduplicate dependencies');
+      cmdOptions += ' --prefer-dedupe';
     }
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
@@ -127,12 +129,6 @@ export async function generateLockFile(
     if (upgrades.some((upgrade) => upgrade.isRemediation)) {
       // We need to run twice to get the correct lock file
       commands.push(`npm install ${cmdOptions}`.trim());
-    }
-
-    // postUpdateOptions
-    if (config.postUpdateOptions?.includes('npmDedupe')) {
-      logger.debug('Performing npm dedupe');
-      commands.push('npm dedupe');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
