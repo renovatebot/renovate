@@ -524,35 +524,37 @@ replace-with = "mcorbin"
       await writeLocalFile('Cargo.lock', cargo9lock);
 
       const res = await extractPackageFile(cargo9toml, 'Cargo.toml', config);
-      expect(res?.deps[0].lockedVersion).toBe('2.0.1');
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toMatchObject([{ lockedVersion: '2.0.1' }]);
     });
 
     it('extracts locked versions for renamed packages', async () => {
       await writeLocalFile('Cargo.lock', cargo7lock);
 
       const res = await extractPackageFile(cargo7toml, 'Cargo.toml', config);
-      expect(res?.deps[0].lockedVersion).toBe('1.0.1');
-      expect(res?.deps[1].lockedVersion).toBe('2.0.1');
-      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toMatchObject([
+        { lockedVersion: '1.0.1' },
+        { lockedVersion: '2.0.1' },
+      ]);
     });
 
     it('handles missing locked versions', async () => {
       await writeLocalFile('Cargo.lock', cargo8lock);
 
       const res = await extractPackageFile(cargo8toml, 'Cargo.toml', config);
-      expect(res?.deps[0].lockedVersion).toBe('2.0.1');
-      expect(res?.deps[1].lockedVersion).toBeUndefined();
-      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toMatchObject([
+        { lockedVersion: '2.0.1' },
+        expect.not.objectContaining({ lockedVersion: expect.anything() }),
+      ]);
     });
 
     it('handles invalid lock file', async () => {
       await writeLocalFile('Cargo.lock', 'foo');
 
       const res = await extractPackageFile(cargo8toml, 'Cargo.toml', config);
-      expect(res?.deps[0].lockedVersion).toBeUndefined();
-      expect(res?.deps[1].lockedVersion).toBeUndefined();
-      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toMatchObject([
+        expect.not.objectContaining({ lockedVersion: expect.anything() }),
+        expect.not.objectContaining({ lockedVersion: expect.anything() }),
+      ]);
     });
   });
 });

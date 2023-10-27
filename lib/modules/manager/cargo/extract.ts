@@ -1,6 +1,7 @@
 import { parse } from '@iarna/toml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
+import { coerceArray } from '../../../util/array';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { CrateDatasource } from '../../datasource/crate';
 import { api as versioning } from '../../versioning/cargo';
@@ -292,12 +293,20 @@ export async function extractPackageFile(
     logger.debug(
       `Found lock file ${lockFileName} for packageFile: ${packageFile}`
     );
-    res.lockFiles = [lockFileName];
 
     const versionsByPackage = await extractLockFileVersions(lockFileName);
+    if (!versionsByPackage) {
+      logger.debug(
+        `Could not extract lock file versions from ${lockFileName}.`
+      );
+      return res;
+    }
+
+    res.lockFiles = [lockFileName];
+
     for (const dep of deps) {
       const packageName = dep.packageName ?? dep.depName!;
-      const versions = versionsByPackage.get(packageName) ?? [];
+      const versions = coerceArray(versionsByPackage.get(packageName));
       try {
         const lockedVersion = versioning.getSatisfyingVersion(
           versions,

@@ -11,8 +11,8 @@ export function updateLockedDependency(
     `cargo.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = extractLockFileContentVersions(lockFileContent ?? '');
-    if (locked?.get(depName ?? '')?.find((version) => version === newVersion)) {
+    const locked = extractLockFileContentVersions(lockFileContent!);
+    if (locked?.get(depName)?.find((version) => version === newVersion)) {
       return { status: 'already-updated' };
     }
     return { status: 'unsupported' };

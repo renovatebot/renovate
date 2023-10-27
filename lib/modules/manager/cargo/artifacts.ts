@@ -42,27 +42,26 @@ async function cargoUpdatePrecise(
   const cmds = [
     'cargo update --config net.git-fetch-with-cli=true' +
       ` --manifest-path ${quote(manifestPath)} --workspace`,
-  ].concat(
-    // Update individual dependencies to their `newVersion`. Necessary when
-    // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
-    updatedDeps
-      .filter((dep) => !!dep.lockedVersion)
-      .map(
-        (dep) =>
-          // Hack: If a package is already at `newVersion` then skip updating.
-          // This often happens when a preceding dependency also bumps this one.
-          `cargo update --config net.git-fetch-with-cli=true` +
-          ` --manifest-path ${quote(manifestPath)}` +
-          ` --package ${dep.packageName!}@${dep.newVersion}` +
-          ` --precise ${dep.newVersion}` +
-          ' > /dev/null 2>&1 || ' +
-          // Otherwise update the package to `newVersion`.
-          `cargo update --config net.git-fetch-with-cli=true` +
-          ` --manifest-path ${quote(manifestPath)}` +
-          ` --package ${dep.packageName!}@${dep.lockedVersion}` +
-          ` --precise ${dep.newVersion}`
-      )
-  );
+  ];
+
+  // Update individual dependencies to their `newVersion`. Necessary when
+  // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
+  for (const dep of updatedDeps) {
+    cmds.push(
+      // Hack: If a package is already at `newVersion` then skip updating.
+      // This often happens when a preceding dependency also bumps this one.
+      `cargo update --config net.git-fetch-with-cli=true` +
+        ` --manifest-path ${quote(manifestPath)}` +
+        ` --package ${dep.packageName!}@${dep.newVersion}` +
+        ` --precise ${dep.newVersion}` +
+        ' > /dev/null 2>&1 || ' +
+        // Otherwise update the package to `newVersion`.
+        `cargo update --config net.git-fetch-with-cli=true` +
+        ` --manifest-path ${quote(manifestPath)}` +
+        ` --package ${dep.packageName!}@${dep.lockedVersion}` +
+        ` --precise ${dep.newVersion}`
+    );
+  }
 
   const execOptions: ExecOptions = {
     docker: {},

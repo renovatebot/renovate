@@ -25,13 +25,13 @@ describe('modules/manager/cargo/locked-version', () => {
       GlobalConfig.reset();
     });
 
-    it('returns empty map for missing lock file', async () => {
-      expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
+    it('returns null for missing lock file', async () => {
+      expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
     });
 
-    it('returns empty map for invalid lock file', async () => {
+    it('returns null for invalid lock file', async () => {
       await writeLocalFile('Cargo.lock', 'foo');
-      expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
+      expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
     });
 
     it('returns empty map for lock file without packages', async () => {

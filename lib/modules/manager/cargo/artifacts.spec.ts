@@ -137,7 +137,7 @@ describe('modules/manager/cargo/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchObject([
+    ).toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
@@ -190,7 +190,7 @@ describe('modules/manager/cargo/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchObject([
+    ).toEqual([
       { artifactError: { lockFile: 'Cargo.lock', stderr: 'Exec error' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd }]);

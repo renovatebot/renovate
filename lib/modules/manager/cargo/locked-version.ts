@@ -1,29 +1,28 @@
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { CargoLockSchema, CargoLockSchemaToml } from './schema';
 
 export async function extractLockFileVersions(
   lockFilePath: string
-): Promise<Map<string, string[]>> {
-  const versionsByPackage = new Map<string, string[]>();
+): Promise<Map<string, string[]> | null> {
   const content = await readLocalFile(lockFilePath, 'utf8');
-  if (!content) {
-    return versionsByPackage;
+  if (content) {
+    return extractLockFileContentVersions(content);
   }
-  return extractLockFileContentVersions(content);
+  return null;
 }
 
 export function extractLockFileContentVersions(
   content: string
-): Map<string, string[]> {
+): Map<string, string[]> | null {
   const versionsByPackage = new Map<string, string[]>();
   const lock = parseLockFile(content);
   if (!lock) {
-    return versionsByPackage;
+    return null;
   }
-  const packages = lock.package ?? [];
-  for (const pkg of packages) {
-    const versions = versionsByPackage.get(pkg.name) ?? [];
+  for (const pkg of coerceArray(lock.package)) {
+    const versions = coerceArray(versionsByPackage.get(pkg.name));
     versions.push(pkg.version);
     versionsByPackage.set(pkg.name, versions);
   }
