@@ -1,6 +1,7 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -10,6 +11,7 @@ import {
 } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import { extractLockFileContentVersions } from './locked-version';
 
 async function cargoUpdate(
   manifestPath: string,
@@ -38,7 +40,7 @@ async function cargoUpdatePrecise(
   updatedDeps: Upgrade<Record<string, unknown>>[],
   constraint: string | undefined
 ): Promise<void> {
-  // Update all dependencies that have been bumped in `Cargo.toml` first.
+  // First update all dependencies that have been bumped in `Cargo.toml`.
   const cmds = [
     'cargo update --config net.git-fetch-with-cli=true' +
       ` --manifest-path ${quote(manifestPath)} --workspace`,
@@ -48,15 +50,7 @@ async function cargoUpdatePrecise(
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
     cmds.push(
-      // Hack: If a package is already at `newVersion` then skip updating.
-      // This often happens when a preceding dependency also bumps this one.
       `cargo update --config net.git-fetch-with-cli=true` +
-        ` --manifest-path ${quote(manifestPath)}` +
-        ` --package ${dep.packageName!}@${dep.newVersion}` +
-        ` --precise ${dep.newVersion}` +
-        ' > /dev/null 2>&1 || ' +
-        // Otherwise update the package to `newVersion`.
-        `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
         ` --package ${dep.packageName!}@${dep.lockedVersion}` +
         ` --precise ${dep.newVersion}`
@@ -71,23 +65,16 @@ async function cargoUpdatePrecise(
   await exec(cmds, execOptions);
 }
 
-export async function updateArtifacts({
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts(
+  {
+    packageFileName,
+    updatedDeps,
+    newPackageFileContent,
+    config,
+  }: UpdateArtifact,
+  recursionLimit = 10
+): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`cargo.updateArtifacts(${packageFileName})`);
-
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
-
-  if (
-    !isLockFileMaintenance &&
-    (updatedDeps === undefined || updatedDeps.length < 1)
-  ) {
-    logger.debug('No updated cargo deps - returning null');
-    return null;
-  }
 
   // For standalone package crates, the `Cargo.lock` will be in the same
   // directory as `Cargo.toml` (ie. a sibling). For cargo workspaces, it
@@ -103,6 +90,24 @@ export async function updateArtifacts({
     logger.debug('No Cargo.lock found');
     return null;
   }
+
+  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  if (
+    !isLockFileMaintenance &&
+    (updatedDeps === undefined || updatedDeps.length < 1)
+  ) {
+    logger.debug('No more dependencies to update');
+    return [
+      {
+        file: {
+          type: 'addition',
+          path: lockFileName,
+          contents: existingLockFileContent,
+        },
+      },
+    ];
+  }
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
@@ -148,7 +153,43 @@ export async function updateArtifacts({
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
+
+    // Sometimes `cargo update` will fail when a preceding dependency update
+    // causes another dependency to update. In this case we can no longer
+    // reference the dependency by its old version, so we filter it out
+    // and retry recursively.
+    const newCargoLockContent = await readLocalFile(lockFileName, 'utf8');
+    if (
+      recursionLimit > 0 &&
+      newCargoLockContent &&
+      String(err.stderr).match(/error: package ID specification/)
+    ) {
+      const versions = extractLockFileContentVersions(newCargoLockContent);
+      const newUpdatedDeps = updatedDeps.filter(
+        (dep) =>
+          !coerceArray(versions?.get(dep.packageName!)).includes(
+            dep.newVersion!
+          )
+      );
+
+      if (newUpdatedDeps.length < updatedDeps.length) {
+        logger.debug(
+          'Dependency already up to date - reattempting recursively'
+        );
+        return updateArtifacts(
+          {
+            packageFileName,
+            updatedDeps: newUpdatedDeps,
+            newPackageFileContent,
+            config,
+          },
+          recursionLimit - 1
+        );
+      }
+    }
+
     logger.debug({ err }, 'Failed to update Cargo lock file');
+
     return [
       {
         artifactError: {
