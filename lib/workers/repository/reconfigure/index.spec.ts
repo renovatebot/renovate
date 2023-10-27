@@ -62,7 +62,7 @@ describe('workers/repository/reconfigure/index', () => {
     );
   });
 
-  it('logs error if there is an erro while reading config file', async () => {
+  it('logs error if config file is unreadable', async () => {
     const err = new Error();
     fs.readLocalFile.mockRejectedValueOnce(err as never);
     await validateReconfigureBranch(config);
@@ -77,7 +77,7 @@ describe('workers/repository/reconfigure/index', () => {
     expect(logger.warn).toHaveBeenCalledWith('Empty or invalid config file');
   });
 
-  it('throws error config file content is invalid', async () => {
+  it('throws error if config file content is invalid', async () => {
     fs.readLocalFile.mockResolvedValueOnce(`
         {
             "name":
