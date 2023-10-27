@@ -34,7 +34,6 @@ export async function prepareGradleCommand(
     }
     return gradleWrapperFileName();
   }
-  /* eslint-enable no-bitwise */
   return null;
 }
 
