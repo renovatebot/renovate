@@ -120,7 +120,7 @@ export async function validateReconfigureBranch(
   // failing check
   if (validationResult.errors.length > 0) {
     logger.debug(
-      { errors: validationResult.errors.join(', ') },
+      { errors: validationResult.errors.map((err) => err.message).join(', ') },
       'Validation Errors'
     );
 
