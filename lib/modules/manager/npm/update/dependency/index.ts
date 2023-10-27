@@ -187,7 +187,6 @@ export function updateDependency({
         overrideDepParents
       );
     }
-    /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
     // istanbul ignore if
     if (!newFileContent) {
       logger.debug(
