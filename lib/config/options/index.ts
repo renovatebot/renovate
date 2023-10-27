@@ -1455,7 +1455,7 @@ const options: RenovateOptions[] = [
   {
     name: 'separateMultipleMinor',
     description:
-      'If set to `true`, PRs will be raised separately for each available `minor` upgrade version.',
+      'If set to `true`, PRs will be raised separately for each available `minor` stream.',
     stage: 'package',
     type: 'boolean',
     default: false,
