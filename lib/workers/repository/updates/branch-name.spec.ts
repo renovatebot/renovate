@@ -51,7 +51,8 @@ describe('workers/repository/updates/branch-name', () => {
         groupSlug: 'some group slug',
         updateType: 'minor',
         separateMultipleMinor: true,
-        newMinor: 2.1,
+        newMinor: 1,
+        newMajor: 2,
         group: {
           branchName: '{{groupSlug}}-{{branchTopic}}',
           branchTopic: 'grouptopic',
