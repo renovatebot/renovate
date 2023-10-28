@@ -37,7 +37,9 @@ Pull Requests can only be merged once all status checks are green, which means `
 
 Use these commands to help run your tests:
 
-- To run a single test file
+- To run a single test folder
+  ```bash
+  pnpm jest platform/gitlab
   ```bash
   pnpm jest platform/gitlab/index
   ```
