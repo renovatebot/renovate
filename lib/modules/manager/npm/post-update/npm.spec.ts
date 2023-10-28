@@ -179,7 +179,9 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(1);
+    expect(execSnapshots[0].cmd).toContain('--prefer-dedupe');
+    expect(execSnapshots[0].cmd).toContain('--package-lock-only');
   });
 
   it('deduplicates dependencies after installation with NPM <= 6', async () => {
@@ -200,7 +202,10 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toHaveLength(2);
+    expect(execSnapshots[0].cmd).not.toContain('--prefer-dedupe');
+    expect(execSnapshots[0].cmd).not.toContain('--package-lock-only');
+    expect(execSnapshots[1].cmd).toBe('npm dedupe');
   });
 
   it('runs twice if remediating', async () => {
