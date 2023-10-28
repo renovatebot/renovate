@@ -27,8 +27,6 @@ describe('modules/manager/npm/post-update/npm', () => {
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
-    const skipInstalls = true;
-    const postUpdateOptions = ['npmDedupe'];
     const updates = [
       { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
     ];
@@ -36,7 +34,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, postUpdateOptions },
+      {},
       updates
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
@@ -160,6 +158,49 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     // TODO: is that right?
     expect(execSnapshots).toEqual([]);
+  });
+
+  it('deduplicates dependencies on installation with NPM >= 7', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
+    const postUpdateOptions = ['npmDedupe'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions },
+      updates
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.error).toBeFalse();
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('deduplicates dependencies after installation with NPM <= 6', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
+    const postUpdateOptions = ['npmDedupe'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions, constraints: { npm: '^6.0.0' } },
+      updates
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeFalse();
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
   });
 
   it('runs twice if remediating', async () => {

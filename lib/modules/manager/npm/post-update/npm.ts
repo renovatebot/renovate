@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -49,9 +50,16 @@ export async function generateLockFile(
         config.constraints?.npm ??
         getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
     };
+    const supportsPreferDedupeFlag =
+      !npmToolConstraint.constraint ||
+      !semver.gtr('7.0.0', npmToolConstraint.constraint);
     const commands: string[] = [];
     let cmdOptions = '';
-    if (skipInstalls === false) {
+    if (
+      (postUpdateOptions?.includes('npmDedupe') === true &&
+        !supportsPreferDedupeFlag) ||
+      skipInstalls === false
+    ) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
@@ -59,8 +67,8 @@ export async function generateLockFile(
       cmdOptions += '--package-lock-only --no-audit';
     }
 
-    if (postUpdateOptions?.includes('npmDedupe')) {
-      logger.debug('Deduplicate dependencies');
+    if (postUpdateOptions?.includes('npmDedupe') && supportsPreferDedupeFlag) {
+      logger.debug('Deduplicate dependencies on installation');
       cmdOptions += ' --prefer-dedupe';
     }
 
@@ -129,6 +137,15 @@ export async function generateLockFile(
     if (upgrades.some((upgrade) => upgrade.isRemediation)) {
       // We need to run twice to get the correct lock file
       commands.push(`npm install ${cmdOptions}`.trim());
+    }
+
+    // postUpdateOptions
+    if (
+      config.postUpdateOptions?.includes('npmDedupe') &&
+      !supportsPreferDedupeFlag
+    ) {
+      logger.debug('Performing npm dedupe after installation');
+      commands.push('npm dedupe');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
