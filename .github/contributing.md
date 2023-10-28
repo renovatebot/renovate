@@ -35,17 +35,17 @@ Also, let the maintainers know that you plan to work on a particular issue so th
 
 Pull Requests can only be merged once all status checks are green, which means `pnpm test` passes, and coverage is 100%.
 
-To help you execute your tests, here are some helper commands:
+Use these commands to help run your tests:
 
-- to execute a single test file
+- To run a single test file
   ```bash
   pnpm run jest ./lib/modules/platform/gitlab/index.spec.ts
   ```
-- to execute a single test batch, the `-t` value should be part of the `describe` value of the test batch
+- To run a single test batch, the `-t` value must be part of the `describe` value of the test batch
   ```bash
   pnpm run jest ./lib/modules/platform/gitlab/index.spec.ts -t "getJsonFile"
   ```
-- to execute a single test, the `-t` value should be part of the `it` value of the test batch
+- To run a single test, the `-t` value must be part of the `it` value of the test batch
   ```bash
   pnpm run jest ./lib/modules/platform/gitlab/index.spec.ts -t "returns file content from given repo"
   ```
