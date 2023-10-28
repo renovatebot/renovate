@@ -37,9 +37,14 @@ Pull Requests can only be merged once all status checks are green, which means `
 
 Use these commands to help run your tests:
 
-- To run a single test folder
+- To run a single test folder, specify the path
   ```bash
   pnpm jest platform/gitlab
+  ```
+- To run against a single test file, specify down the filename (suffix is not necessary)
+  ```bash
+  pnpm jest platform/gitlab/index
+  ```
 - To run a single test batch, the `-t` value must be part of the `describe` value of the test batch
   ```bash
   pnpm run jest platform/gitlab/index -t "getJsonFile"
