@@ -41,13 +41,13 @@ To help you execute your tests, here are some helper commands:
   ```bash
   pnpm run jest ./lib/modules/platform/gitlab/index.spec.ts
   ```
-- to execute a single test batch
+- to execute a single test batch, the `-t` value should be part of the `describe` value of the test batch
   ```bash
-  pnpm run jest lib/modules/platform/gitlab/index.spec.ts
+  pnpm run jest ./lib/modules/platform/gitlab/index.spec.ts -t "getJsonFile"
   ```
-- to execute a single test batch, the argument should be part of the `describe` value of the test batch
+- to execute a single test, the `-t` value should be part of the `it` value of the test batch
   ```bash
-  pnpm run jest lib/modules/platform/gitlab/index.spec.ts -t getJsonFile
+  pnpm run jest ./lib/modules/platform/gitlab/index.spec.ts -t "returns file content from given repo"
   ```
   
 And some options:
