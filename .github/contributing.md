@@ -40,9 +40,6 @@ Use these commands to help run your tests:
 - To run a single test folder
   ```bash
   pnpm jest platform/gitlab
-  ```bash
-  pnpm jest platform/gitlab/index
-  ```
 - To run a single test batch, the `-t` value must be part of the `describe` value of the test batch
   ```bash
   pnpm run jest platform/gitlab/index -t "getJsonFile"
