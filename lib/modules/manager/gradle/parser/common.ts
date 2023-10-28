@@ -112,6 +112,31 @@ export function coalesceVariable(ctx: Ctx): Ctx {
   return ctx;
 }
 
+export function findVariableInKotlinImport(
+  name: string,
+  ctx: Ctx,
+  variables: PackageVariables = ctx.globalVars
+): VariableData | undefined {
+  if (ctx.tmpKotlinImportStore.length && name.includes('.')) {
+    for (const tokens of ctx.tmpKotlinImportStore) {
+      const lastToken = tokens[tokens.length - 1];
+      if (lastToken && name.startsWith(`${lastToken.value}.`)) {
+        const prefix = tokens
+          .slice(0, -1)
+          .map((token) => token.value)
+          .join('.');
+        const identifier = `${prefix}.${name}`;
+
+        if (variables[identifier]) {
+          return variables[identifier];
+        }
+      }
+    }
+  }
+
+  return undefined;
+}
+
 export function findVariable(
   name: string,
   ctx: Ctx,
@@ -129,7 +154,11 @@ export function findVariable(
     }
   }
 
-  return variables[name];
+  if (variables[name]) {
+    return variables[name];
+  }
+
+  return findVariableInKotlinImport(name, ctx, variables);
 }
 
 export function interpolateString(
@@ -271,3 +300,14 @@ export const qValueMatcher = qConcatExpr(
   qPropertyAccessIdentifier,
   qVariableAccessIdentifier
 );
+
+// import foo.bar
+// runtimeOnly("some:foo:${bar.bazVersion}")
+export const qKotlinImport = q
+  .sym<Ctx>('import')
+  .join(qVariableAssignmentIdentifier)
+  .handler((ctx) => {
+    ctx.tmpKotlinImportStore.push(ctx.varTokens);
+    return ctx;
+  })
+  .handler(cleanupTempVars);
