@@ -115,7 +115,7 @@ export function coalesceVariable(ctx: Ctx): Ctx {
 export function findVariableInKotlinImport(
   name: string,
   ctx: Ctx,
-  variables: PackageVariables = ctx.globalVars
+  variables: PackageVariables
 ): VariableData | undefined {
   if (ctx.tmpKotlinImportStore.length && name.includes('.')) {
     for (const tokens of ctx.tmpKotlinImportStore) {
