@@ -251,7 +251,7 @@
     "zod": "3.22.4"
   },
   "optionalDependencies": {
-    "re2": "1.20.3"
+    "re2": "1.20.4"
   },
   "devDependencies": {
     "@hyrious/marshal": "0.3.2",

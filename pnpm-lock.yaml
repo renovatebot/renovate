@@ -328,8 +328,8 @@ importers:
         version: 3.22.4
     optionalDependencies:
       re2:
-        specifier: 1.20.3
-        version: 1.20.3
+        specifier: 1.20.4
+        version: 1.20.4
     devDependencies:
       '@hyrious/marshal':
         specifier: 0.3.2
@@ -9493,8 +9493,8 @@ packages:
       strip-json-comments: 2.0.1
     dev: true
 
-  /re2@1.20.3:
-    resolution: {integrity: sha512-g5j4YjygwGEccP9SCuDI90uPlgALLEYLotfL0K+kqL3XKB4ht7Nm1JuXfOTG96c7JozpvCUxTz1T7oTNwwMI6w==}
+  /re2@1.20.4:
+    resolution: {integrity: sha512-a5mMfXcMnWJS3Wwm7W7DiOw/BhwmhMtN5ZxNV7OLOgLDxl1u/ZxuohpttgltEzVWG1+aeFT/jfUX7J/ZiNkuBA==}
     requiresBuild: true
     dependencies:
       install-artifact-from-github: 1.3.3
@@ -10785,6 +10785,7 @@ packages:
   /unique-slug@4.0.0:
     resolution: {integrity: sha512-WrcA6AyEfqDX5bWige/4NQfPZMtASNVxdmWR76WESYQVAACSgWcR6e9i0mofqqBxYFtL4oAxPIptY73/0YE1DQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    requiresBuild: true
     dependencies:
       imurmurhash: 0.1.4
     dev: false
