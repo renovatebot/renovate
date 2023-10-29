@@ -41,7 +41,7 @@ async function raiseWarningIssue(
     body += `Error type: ${error.validationError}\n`;
   }
   if (error.validationMessage) {
-    body += `Message: ${error.validationMessage}`;
+    body += `Message: ${error.validationMessage}\n`;
   }
 
   const pr = await platform.getBranchPr(
