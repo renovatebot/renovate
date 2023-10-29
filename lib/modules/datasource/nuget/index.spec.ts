@@ -2,6 +2,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { logger } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
@@ -91,6 +92,15 @@ const configV3Multiple = {
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://myprivatefeed/index.json',
+  ],
+};
+
+const configV3AzureDevOps = {
+  datasource,
+  versioning,
+  packageName: 'nunit',
+  registryUrls: [
+    'https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
   ],
 };
 
@@ -234,6 +244,64 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).toBeNull();
     });
 
+    it('logs instead of triggering a TypeError when PackageBaseAddress is missing from service index', async () => {
+      const nugetIndex = `
+        {
+          "version": "3.0.0",
+          "resources": [
+            {
+              "@id": "https://api.nuget.org/v3/metadata",
+              "@type": "RegistrationsBaseUrl/3.0.0-beta",
+              "comment": "Get package metadata."
+            }
+          ]
+        }
+      `;
+      const nunitRegistration = `
+        {
+          "count": 1,
+          "items": [
+            {
+              "@id": "https://api.nuget.org/v3/metadata/nunit/5.0.json",
+              "lower": "5.0",
+              "upper": "5.0",
+              "count": 1,
+              "items": [
+                {
+                  "@id": "foo",
+                  "packageContent": "foo",
+                  "catalogEntry": {
+                    "id": "nunit",
+                    "version": "5.0"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      `;
+
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, nugetIndex)
+        .get('/v3/metadata/nunit/index.json')
+        .reply(200, nunitRegistration);
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+      expect(res).not.toBeNull();
+      expect(res!.releases).toHaveLength(1);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          url: 'https://api.nuget.org/v3/index.json',
+          servicesIndexRaw: JSON.parse(nugetIndex),
+        },
+        'no PackageBaseAddress services found'
+      );
+    });
+
     it('returns null for non 200 (v3v2)', async () => {
       httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
       httpMock
@@ -372,6 +440,51 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res?.sourceUrl).toBeDefined();
+    });
+
+    it('processes real data (v3) feed is azure devops', async () => {
+      httpMock
+        .scope('https://pkgs.dev.azure.com')
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json'
+        )
+        .twice()
+        .reply(200, Fixtures.get('azure_devops/v3_index.json'))
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2-semver2/nunit/index.json'
+        )
+        .reply(200, Fixtures.get('azure_devops/nunit/v3_registration.json'))
+        .get(
+          '/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.nuspec'
+        )
+        .reply(200, Fixtures.get('azure_devops/nunit/nuspec.xml'));
+      const res = await getPkgReleases({
+        ...configV3AzureDevOps,
+      });
+      expect(res).toMatchObject({
+        homepage: 'https://nunit.org/',
+        registryUrl:
+          'https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
+        releases: [
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.5.7.10213',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.6.5',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '2.7.1',
+          },
+          {
+            releaseTimestamp: '2021-12-03T03:20:52.000Z',
+            version: '3.13.2',
+          },
+        ],
+        sourceUrl: 'https://github.com/nunit/nunit',
+      });
     });
 
     it('processes real data (v3) for several catalog pages', async () => {

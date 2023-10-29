@@ -9,7 +9,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { Doc } from './types';
+import type { Doc } from './schema';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,

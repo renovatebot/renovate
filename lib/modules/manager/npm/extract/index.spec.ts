@@ -15,10 +15,6 @@ const input01Content = Fixtures.get('inputs/01.json', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
-const workspacesSimpleContent = Fixtures.get(
-  'inputs/workspaces-simple.json',
-  '..'
-);
 const vendorisedContent = Fixtures.get('is-object.json', '..');
 const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
@@ -297,108 +293,8 @@ describe('modules/manager/npm/extract/index', () => {
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
-    it('finds lerna', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{}');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          lernaClient: 'npm',
-          lernaJsonFile: 'lerna.json',
-          lernaPackages: undefined,
-        },
-      });
-    });
-
-    it('finds "npmClient":"npm" in lerna.json', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{ "npmClient": "npm" }');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          lernaClient: 'npm',
-          lernaJsonFile: 'lerna.json',
-          lernaPackages: undefined,
-        },
-      });
-    });
-
-    it('finds "npmClient":"yarn" in lerna.json', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{ "npmClient": "yarn" }');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          lernaClient: 'yarn',
-          lernaJsonFile: 'lerna.json',
-          lernaPackages: undefined,
-        },
-      });
-    });
-
-    it('finds simple yarn workspaces', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{}');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        workspacesSimpleContent,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: { workspacesPackages: ['packages/*'] },
-      });
-    });
-
-    it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
-      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{"useWorkspaces": true}');
-        }
-        return Promise.resolve(null);
-      });
-      const res = await npmExtract.extractPackageFile(
-        workspacesSimpleContent,
-        'package.json',
-        defaultExtractConfig
-      );
-      expect(res).toMatchSnapshot({
-        managerData: { workspacesPackages: ['packages/*'] },
-      });
-    });
-
     it('finds complex yarn workspaces', async () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
-        if (fileName === 'lerna.json') {
-          return Promise.resolve('{}');
-        }
         return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
@@ -750,6 +646,63 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('does not set registryUrls for non-npmjs', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.yarnrc.yml') {
+          return Promise.resolve(
+            'npmRegistryServer: https://registry.example.com'
+          );
+        }
+        return Promise.resolve(null);
+      });
+      const pJson = {
+        dependencies: {
+          a: 'github:owner/a#v1.1.0',
+        },
+        engines: {
+          node: '8.9.2',
+        },
+        volta: {
+          yarn: '3.2.4',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultExtractConfig
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'a',
+            currentValue: 'v1.1.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/a',
+          },
+          {
+            commitMessageTopic: 'Node.js',
+            currentValue: '8.9.2',
+            datasource: 'github-tags',
+            depName: 'node',
+            depType: 'engines',
+            packageName: 'nodejs/node',
+            prettyDepType: 'engine',
+            versioning: 'node',
+          },
+          {
+            commitMessageTopic: 'Yarn',
+            currentValue: '3.2.4',
+            datasource: 'npm',
+            depName: 'yarn',
+            depType: 'volta',
+            prettyDepType: 'volta',
+            packageName: '@yarnpkg/cli',
+          },
+        ],
+      });
+    });
+
     it('extracts npm package alias', async () => {
       fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
         if (fileName === 'package-lock.json') {
@@ -953,9 +906,6 @@ describe('modules/manager/npm/extract/index', () => {
           extractedConstraints: {},
           managerData: {
             hasPackageManager: false,
-            lernaClient: undefined,
-            lernaJsonFile: undefined,
-            lernaPackages: undefined,
             npmLock: undefined,
             packageJsonName: 'renovate',
             pnpmShrinkwrap: undefined,

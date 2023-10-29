@@ -15,6 +15,9 @@ export const redactedFields = [
   'gitPrivateKey',
   'forkToken',
   'password',
+  'httpsCertificate',
+  'httpsPrivateKey',
+  'httpsCertificateAuthority',
 ];
 
 // TODO: returns null or undefined only when input is null or undefined.

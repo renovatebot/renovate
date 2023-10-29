@@ -15,11 +15,12 @@ const hostRules = mocked(_hostRules);
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
     it.each`
-      module                     | datasource          | packageName
-      ${'gopkg.in/foo'}          | ${'github-tags'}    | ${'go-foo/foo'}
-      ${'gopkg.in/foo/bar'}      | ${'github-tags'}    | ${'foo/bar'}
-      ${'github.com/foo/bar'}    | ${'github-tags'}    | ${'foo/bar'}
-      ${'bitbucket.org/foo/bar'} | ${'bitbucket-tags'} | ${'foo/bar'}
+      module                           | datasource          | packageName
+      ${'gopkg.in/foo'}                | ${'github-tags'}    | ${'go-foo/foo'}
+      ${'gopkg.in/foo/bar'}            | ${'github-tags'}    | ${'foo/bar'}
+      ${'github.com/foo/bar'}          | ${'github-tags'}    | ${'foo/bar'}
+      ${'bitbucket.org/foo/bar'}       | ${'bitbucket-tags'} | ${'foo/bar'}
+      ${'code.cloudfoundry.org/lager'} | ${'github-tags'}    | ${'cloudfoundry/lager'}
     `(
       '$module -> $datasource: $packageName',
       async ({ module, datasource, packageName }) => {
@@ -377,6 +378,21 @@ describe('modules/datasource/go/base', () => {
           datasource: GitTagsDatasource.id,
           packageName: 'ssh://git.example.com/uncommon',
         });
+      });
+
+      it('returns null for mod imports', async () => {
+        const meta =
+          '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go mod https://buf.build/gen/go">';
+        httpMock
+          .scope('https://buf.build')
+          .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go'
+        );
+
+        expect(res).toBeNull();
       });
     });
   });

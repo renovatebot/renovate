@@ -355,6 +355,7 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt.js', // old repo
     'https://github.com/nuxt/nuxt',
   ],
+  okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
@@ -420,6 +421,7 @@ const repoGroups = {
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
   'system.io.abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
+  tamagui: 'https://github.com/tamagui/tamagui',
   'tanstack-query': 'https://github.com/TanStack/query',
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
@@ -430,6 +432,7 @@ const repoGroups = {
   'testcontainers-node':
     'https://github.com/testcontainers/testcontainers-node',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
+  tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
@@ -446,6 +449,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',
