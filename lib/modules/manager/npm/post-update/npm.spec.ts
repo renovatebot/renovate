@@ -160,7 +160,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toEqual([]);
   });
 
-  it('deduplicates dependencies on installation with NPM >= 7', async () => {
+  it('deduplicates dependencies on installation with npm >= 7', async () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -184,7 +184,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots[0].cmd).toContain('--package-lock-only');
   });
 
-  it('deduplicates dependencies after installation with NPM <= 6', async () => {
+  it('deduplicates dependencies after installation with npm <= 6', async () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
