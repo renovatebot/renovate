@@ -2973,7 +2973,7 @@ Table with options:
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `npmDedupe`                  | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
-| `pnpmDedupe`                 | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -3338,6 +3338,7 @@ You can use the `registryAliases` object to set registry aliases.
 This feature works with the following managers:
 
 - [`ansible`](/modules/manager/ansible)
+- [`bitbucket-pipelines`](/modules/manager/bitbucket-pipelines)
 - [`docker-compose`](/modules/manager/docker-compose)
 - [`dockerfile`](/modules/manager/dockerfile)
 - [`droneci`](/modules/manager/droneci)
@@ -3348,6 +3349,15 @@ This feature works with the following managers:
 - [`kubernetes`](/modules/manager/kubernetes)
 - [`terraform`](/modules/manager/terraform)
 - [`woodpecker`](/modules/manager/woodpecker)
+
+```json
+{
+  "registryAliases": {
+    "jfrogecosystem": "some.jfrog.mirror",
+    "jfrog.com": "some.jfrog.mirror"
+  }
+}
+```
 
 ## registryUrls
 

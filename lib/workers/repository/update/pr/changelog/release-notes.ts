@@ -66,7 +66,7 @@ export function getCachedReleaseList(
 ): Promise<ChangeLogNotes[]> {
   const { repository, apiBaseUrl } = project;
   // TODO: types (#22198)
-  const cacheKey = `getReleaseList-${apiBaseUrl!}-${repository}`;
+  const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
   const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
@@ -241,7 +241,7 @@ export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject
 ): Promise<ChangeLogFile | null> {
   const { repository, type } = project;
-  const apiBaseUrl = project.apiBaseUrl!;
+  const apiBaseUrl = project.apiBaseUrl;
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
@@ -295,8 +295,8 @@ export function getReleaseNotesMdFile(
   const { sourceDirectory, repository, apiBaseUrl } = project;
   // TODO: types (#22198)
   const cacheKey = sourceDirectory
-    ? `getReleaseNotesMdFile@v2-${repository}-${sourceDirectory}-${apiBaseUrl!}`
-    : `getReleaseNotesMdFile@v2-${repository}-${apiBaseUrl!}`;
+    ? `getReleaseNotesMdFile@v2-${repository}-${sourceDirectory}-${apiBaseUrl}`
+    : `getReleaseNotesMdFile@v2-${repository}-${apiBaseUrl}`;
   const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {

@@ -13,15 +13,13 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getFiles } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import { NugetDatasource } from '../../datasource/nuget';
-import { parseRegistryUrl } from '../../datasource/nuget/common';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { createNuGetConfigXml } from './config-formatter';
 import {
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
@@ -29,41 +27,20 @@ import {
 } from './package-tree';
 import { getConfiguredRegistries, getDefaultRegistries } from './util';
 
-async function addSourceCmds(
-  packageFileName: string,
-  _config: UpdateArtifactsConfig,
-  nugetConfigFile: string
-): Promise<string[]> {
+async function createCachedNuGetConfigFile(
+  nugetCacheDir: string,
+  packageFileName: string
+): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
-  const result: string[] = [];
-  for (const registry of registries) {
-    const { password, username } = hostRules.find({
-      hostType: NugetDatasource.id,
-      url: registry.url,
-    });
-    const registryInfo = parseRegistryUrl(registry.url);
-    let addSourceCmd = `dotnet nuget add source ${quote(
-      registryInfo.feedUrl
-    )} --configfile ${quote(nugetConfigFile)}`;
-    if (registry.name) {
-      // Add name for registry, if known.
-      addSourceCmd += ` --name ${quote(registry.name)}`;
-    }
-    // Add registry credentials from host rules, if configured.
-    if (username) {
-      // Add username from host rules, if configured.
-      addSourceCmd += ` --username ${quote(username)}`;
-    }
-    if (password) {
-      // Add password from host rules, if configured.
-      addSourceCmd += ` --password ${quote(
-        password
-      )} --store-password-in-clear-text`;
-    }
-    result.push(addSourceCmd);
-  }
-  return result;
+
+  const contents = createNuGetConfigXml(registries);
+
+  const cachedNugetConfigFile = join(nugetCacheDir, `nuget.config`);
+  await ensureDir(nugetCacheDir);
+  await outputCacheFile(cachedNugetConfigFile, contents);
+
+  return cachedNugetConfigFile;
 }
 
 async function runDotnetRestore(
@@ -72,6 +49,11 @@ async function runDotnetRestore(
   config: UpdateArtifactsConfig
 ): Promise<void> {
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
+
+  const nugetConfigFile = await createCachedNuGetConfigFile(
+    nugetCacheDir,
+    packageFileName
+  );
 
   const execOptions: ExecOptions = {
     docker: {},
@@ -84,17 +66,7 @@ async function runDotnetRestore(
     ],
   };
 
-  const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
-
-  await ensureDir(nugetCacheDir);
-
-  await outputCacheFile(
-    nugetConfigFile,
-    `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
-  );
-
   const cmds = [
-    ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
     ...dependentPackageFileNames.map(
       (fileName) =>
         `dotnet restore ${quote(
