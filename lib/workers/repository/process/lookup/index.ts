@@ -145,8 +145,6 @@ export async function lookupUpdates(
           return res;
         }
       }
-      // Reapply package rules in case we missed something from sourceUrl
-      config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
@@ -232,13 +230,15 @@ export async function lookupUpdates(
       }
       res.currentVersion = currentVersion!;
 
-      // Reapply package rules to check matches for matchCurrentAge
       const currentVersionRelease = allVersions.find(
         (version) => version.version === currentVersion
       );
+      // Reapply package rules to check matches for matchCurrentAge and
+      // Reapply package rules in case we missed something from sourceUrl
       config = applyPackageRules({
         ...config,
         releaseTimestamp: currentVersionRelease?.releaseTimestamp,
+        sourceUrl: res.sourceUrl,
       });
       if (
         config.currentValue &&
