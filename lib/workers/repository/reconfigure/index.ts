@@ -110,6 +110,13 @@ export async function validateReconfigureBranch(
     }
   } catch (err) {
     logger.error({ err }, 'Error while parsing config file');
+    await platform.setBranchStatus({
+      branchName,
+      context,
+      description: 'Validation Failed - Unparsable config file',
+      state: 'red',
+    });
+    setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }

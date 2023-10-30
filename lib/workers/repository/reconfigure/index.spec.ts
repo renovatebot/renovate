@@ -88,6 +88,12 @@ describe('workers/repository/reconfigure/index', () => {
       { err: expect.any(Object) },
       'Error while parsing config file'
     );
+    expect(platform.setBranchStatus).toHaveBeenCalledWith({
+      branchName: 'prefix/reconfigure',
+      context: 'renovate/config-validation',
+      description: 'Validation Failed - Unparsable config file',
+      state: 'red',
+    });
   });
 
   it('handles failed validation', async () => {
