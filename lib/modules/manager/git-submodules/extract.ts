@@ -54,19 +54,24 @@ async function getDefaultBranch(subModuleUrl: string): Promise<string> {
 }
 
 async function getBranch(
+  git: SimpleGit,
   gitModulesPath: string,
   submoduleName: string,
   subModuleUrl: string
 ): Promise<string> {
-  return (
-    (await Git(simpleGitConfig()).raw([
+  const branchFromConfig = (
+    await Git(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
       '--get',
       `submodule.${submoduleName}.branch`,
-    ])) || (await getDefaultBranch(subModuleUrl))
-  ).trim();
+    ]));
+
+  return (branchFromConfig.trim() === '.' ?
+          (await git.branch("--show-current")) :
+          (branchFromConfig || (await getDefaultBranch(subModuleUrl))))
+    .trim();
 }
 
 async function getModules(
@@ -123,6 +128,7 @@ export default async function extractPackageFile(
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
       const httpSubModuleUrl = getHttpUrl(subModuleUrl);
       const currentValue = await getBranch(
+        git,
         gitModulesPath,
         name,
         httpSubModuleUrl

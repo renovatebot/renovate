@@ -299,5 +299,12 @@ describe('modules/manager/git-submodules/extract', () => {
         ],
       });
     });
+
+    it('fallback to current branch if special value is detected', async () => {
+      gitMock.branch.mockReturnValue('staging');
+      const res = await extractPackageFile('', '.gitmodules.7', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('staging');
+    });
   });
 });
