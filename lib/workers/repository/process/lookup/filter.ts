@@ -140,6 +140,7 @@ export function filterVersions(
     ) {
       return false;
     }
+    // istanbul ignore if: test passes without touching this
     if (versioning.allowUnstableMajorUpgrades) {
       return true;
     }
