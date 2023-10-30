@@ -1,6 +1,6 @@
 name: Administration only
 description: For administrators only
-labels: ['status:ready', 'priority-3-medium', 'needs-discussion']
+labels: ['priority-3-medium', 'needs-discussion']
 body:
   - type: markdown
     attributes:
@@ -18,13 +18,6 @@ body:
     attributes:
       label: Describe the proposed change(s).
       description: 'Do not report any security concerns here. Email renovate-disclosure@mend.io instead.'
-    validations:
-      required: true
-
-  - type: textarea
-    id: describe-why-we-need-want-these-changes
-    attributes:
-      label: Describe why we need/want these change(s).
     validations:
       required: true
 

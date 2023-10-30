@@ -56,7 +56,6 @@ describe('util/merge-confidence/index', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
       process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL = apiBaseUrl;
       hostRules.add(hostRule);
       initConfig();

@@ -43,7 +43,7 @@ export function regEx(
   }
 
   try {
-    const instance = new RegEx(pattern, flags);
+    const instance = flags ? new RegEx(pattern, flags) : new RegEx(pattern);
     if (canBeCached) {
       cache.set(key, instance);
     }
@@ -102,8 +102,7 @@ export function configRegexPredicate(
 }
 
 const UUIDRegex = regEx(
-  /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/,
-  'i'
+  /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i
 );
 
 export function isUUID(input: string): boolean {

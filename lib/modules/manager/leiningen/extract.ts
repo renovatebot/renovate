@@ -1,3 +1,4 @@
+import { coerceArray } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ClojureDatasource } from '../../datasource/clojure';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -139,8 +140,9 @@ function extractLeinRepos(content: string): string[] {
       }
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
-    const matches =
-      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)) ?? [];
+    const matches = coerceArray(
+      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g))
+    );
     const urls = matches.map((x) =>
       x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
     );

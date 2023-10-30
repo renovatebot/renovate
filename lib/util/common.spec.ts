@@ -13,6 +13,8 @@ describe('util/common', () => {
       ${'https://myorg.visualstudio.com/my-project/_git/my-repo.git'}        | ${'azure'}
       ${'https://bitbucket.org/some-org/some-repo'}                          | ${'bitbucket'}
       ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
+      ${'https://gitea.com/semantic-release/gitlab'}                         | ${'gitea'}
+      ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'gitea'}
       ${'https://github.com/semantic-release/gitlab'}                        | ${'github'}
       ${'https://github-enterprise.example.com/chalk/chalk'}                 | ${'github'}
       ${'https://gitlab.com/chalk/chalk'}                                    | ${'gitlab'}
@@ -38,9 +40,16 @@ describe('util/common', () => {
         hostType: 'gitlab-changelog',
         matchHost: 'gl.example.com',
       });
+      hostRules.add({
+        hostType: 'unknown',
+        matchHost: 'f.example.com',
+      });
 
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
         'bitbucket'
+      );
+      expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBe(
+        'gitea'
       );
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
         'github'
@@ -48,7 +57,7 @@ describe('util/common', () => {
       expect(detectPlatform('https://gl.example.com/chalk/chalk')).toBe(
         'gitlab'
       );
-      expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBeNull();
+      expect(detectPlatform('https://f.example.com/chalk/chalk')).toBeNull();
     });
   });
 });

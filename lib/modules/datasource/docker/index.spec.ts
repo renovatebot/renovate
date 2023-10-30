@@ -4,6 +4,8 @@ import {
   GetAuthorizationTokenCommandOutput,
 } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
+import * as _googleAuth from 'google-auth-library';
+import { mockDeep } from 'jest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
@@ -13,14 +15,18 @@ import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
+const googleAuth = mocked(_googleAuth);
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
 
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
 const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
+const gcrUrl = 'https://eu.gcr.io/v2';
+const garUrl = 'https://europe-docker.pkg.dev/v2';
 const dockerHubUrl = 'https://hub.docker.com/v2/repositories';
 
 function mockEcrAuthResolve(
@@ -352,6 +358,218 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
+    it('supports Google ADC authentication for gcr', async () => {
+      httpMock
+        .scope(gcrUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports Google ADC authentication for gar', async () => {
+      httpMock
+        .scope(garUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-repo/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports basic authentication for gcr', async () => {
+      httpMock
+        .scope(gcrUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('supports basic authentication for gar', async () => {
+      httpMock
+        .scope(garUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/some-project/some-repo/some-package/manifests/some-tag')
+        .matchHeader(
+          'authorization',
+          'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+        )
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        }))
+      );
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('supports public gcr', async () => {
+      httpMock
+        .scope(gcrUrl)
+        .get('/')
+        .reply(200)
+        .head('/some-project/some-package/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('supports public gar', async () => {
+      httpMock
+        .scope(garUrl)
+        .get('/')
+        .reply(200)
+        .head('/some-project/some-repo/some-package/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBe('some-digest');
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('continues without token if Google ADC fails for gcr', async () => {
+      hostRules.find.mockReturnValue({});
+      httpMock.scope(gcrUrl).get('/').reply(401, '', {
+        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+      });
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        }))
+      );
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'eu.gcr.io/some-project/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBeNull();
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('continues without token if Google ADC fails for gar', async () => {
+      hostRules.find.mockReturnValue({});
+      httpMock.scope(garUrl).get('/').reply(401, '', {
+        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+      });
+      googleAuth.GoogleAuth.mockImplementationOnce(
+        jest.fn().mockImplementationOnce(() => ({
+          getAccessToken: jest.fn().mockRejectedValue('some-error'),
+        }))
+      );
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName:
+            'europe-docker.pkg.dev/some-project/some-repo/some-package',
+        },
+        'some-tag'
+      );
+      expect(res).toBeNull();
+      expect(googleAuth.GoogleAuth).toHaveBeenCalledTimes(1);
+    });
+
     it('continues without token, when no header is present', async () => {
       httpMock
         .scope(baseUrl)
@@ -454,7 +672,10 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(200, {
@@ -476,6 +697,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'arm',
                 os: 'linux',
@@ -485,6 +707,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: '386',
                 os: 'linux',
@@ -493,6 +716,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'amd64',
                 os: 'linux',
@@ -546,10 +770,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
-        .reply(200, {});
+        .reply(200, { config: {} });
       httpMock
         .scope(baseUrl)
         .get('/')
@@ -569,6 +796,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'arm',
                 os: 'linux',
@@ -578,6 +806,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: '386',
                 os: 'linux',
@@ -586,6 +815,7 @@ describe('modules/datasource/docker/index', () => {
             {
               digest:
                 'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
               platform: {
                 architecture: 'amd64',
                 os: 'linux',
@@ -607,7 +837,7 @@ describe('modules/datasource/docker/index', () => {
         `Current digest ${currentDigest} relates to architecture null`
       );
       expect(res).toBe(
-        'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
+        'sha256:5194622ded36da4097a53c4ec9d85bba370d9e826e88a74fa910c46ddbf3208c'
       );
     });
 
@@ -638,7 +868,10 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.manifest.v1+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(200, {
@@ -660,6 +893,7 @@ describe('modules/datasource/docker/index', () => {
             manifests: [
               {
                 digest: 'some-new-image-digest',
+                mediaType: 'application/vnd.oci.image.manifest.v1+json',
                 platform: {
                   architecture: 'amd64',
                 },
@@ -712,7 +946,10 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(200, {
@@ -731,6 +968,7 @@ describe('modules/datasource/docker/index', () => {
           manifests: [
             {
               digest: 'some-new-image-digest',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
               platform: {
                 architecture: 'amd64',
               },
@@ -863,7 +1101,10 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(404, {});
@@ -1063,11 +1304,7 @@ describe('modules/datasource/docker/index', () => {
           {
             link: `<${baseUrl}/library/node/tags/list?n=1&page=2>; rel="next", `,
           }
-        )
-        .get('/')
-        .reply(200)
-        .get('/library/node/manifests/1.0.1')
-        .reply(200);
+        );
 
       const config = {
         datasource: DockerDatasource.id,
@@ -1116,6 +1353,31 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'bitnami/redis',
         registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(1);
+    });
+
+    it('uses quay api 2', async () => {
+      const tags = [{ name: '5.0.12' }];
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true'
+        )
+        .reply(200, { tags, has_additional: true })
+        .get(
+          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=2&onlyActiveTags=true'
+        )
+        .reply(200, { tags: [], has_additional: false })
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/bitnami/redis/manifests/5.0.12')
+        .reply(200, '', {});
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'redis',
+        registryUrls: ['https://quay.io/bitnami'],
       };
       const res = await getPkgReleases(config);
       expect(res?.releases).toHaveLength(1);
@@ -1282,12 +1544,16 @@ describe('modules/datasource/docker/index', () => {
           .reply(200, {
             schemaVersion: 2,
             mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-            config: { digest: 'some-config-digest' },
+            config: {
+              digest: 'some-config-digest',
+              mediaType: 'application/vnd.docker.container.image.v1+json',
+            },
           })
           .get('/')
           .reply(200)
           .get('/node/blobs/some-config-digest')
           .reply(200, {
+            architecture: 'amd64',
             config: {
               Labels: {
                 'org.opencontainers.image.source':
@@ -1536,11 +1802,7 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
         })
         .get('/library/node/tags/list?n=10000')
-        .reply(200, { tags }, {})
-        .get('/')
-        .reply(200)
-        .get('/library/node/manifests/1.0.0')
-        .reply(200);
+        .reply(200, { tags }, {});
       httpMock
         .scope(authUrl)
         .get(
@@ -1561,23 +1823,38 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags?page_size=1000')
         .reply(200, {
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000`,
-          results: [{ name: '1.0.0' }],
+          results: [
+            {
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
         })
         .get('/library/node/tags?page=2&page_size=1000')
         .reply(200, {
-          results: [{ name: '0.9.0' }],
+          results: [
+            {
+              name: '0.9.0',
+              tag_last_pushed: '2020-01-01T00:00:00.000Z',
+              digest: 'bbb',
+            },
+          ],
         });
-      httpMock
-        .scope(baseUrl)
-        .get('/')
-        .reply(200)
-        .get('/library/node/manifests/1.0.0')
-        .reply(200);
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'docker.io/node',
       });
-      expect(res?.releases).toHaveLength(2);
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.9.0',
+          releaseTimestamp: '2020-01-01T00:00:00.000Z',
+        },
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
+        },
+      ]);
     });
 
     it('adds no library/ prefix for other registries', async () => {
@@ -1685,10 +1962,14 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -1745,10 +2026,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
-        .reply(200, {}); // DockerDatasource.getLabels() inner response
+        .reply(200, { architecture: 'amd64' }); // DockerDatasource.getLabels() inner response
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
@@ -1786,16 +2070,25 @@ describe('modules/datasource/docker/index', () => {
           schemaVersion: 2,
           mediaType:
             'application/vnd.docker.distribution.manifest.list.v2+json',
-          manifests: [{ digest: 'some-image-digest' }],
+          manifests: [
+            {
+              digest: 'some-image-digest',
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            },
+          ],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -1899,16 +2192,25 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.index.v1+json',
-          manifests: [{ digest: 'some-image-digest' }],
+          manifests: [
+            {
+              digest: 'some-image-digest',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+            },
+          ],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.manifest.v1+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -1945,15 +2247,24 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.index.v1+json',
-          manifests: [{ digest: 'some-image-digest' }],
+          manifests: [
+            {
+              digest: 'some-image-digest',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+            },
+          ],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -2027,7 +2338,10 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/node/blobs/some-config-digest')
         .reply(302, undefined, {
@@ -2039,6 +2353,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/some-config-digest')
         .query({ 'X-Amz-Algorithm': 'xxxx' })
         .reply(200, {
+          architecture: 'amd64',
           config: {},
         });
       const res = await getPkgReleases({
@@ -2084,10 +2399,14 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: { digest: 'some-config-digest' },
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
         })
         .get('/visualon/drone-git/blobs/some-config-digest')
         .reply(200, {
+          architecture: 'amd64',
           config: {
             Labels: {
               'org.opencontainers.image.source':
@@ -2105,6 +2424,102 @@ describe('modules/datasource/docker/index', () => {
         sourceUrl: 'https://github.com/visualon/drone-git',
         releases: [{ version: '1.0.0' }],
       });
+    });
+  });
+
+  describe('getLabels', () => {
+    const ds = new DockerDatasource();
+
+    it('uses annotations for oci image', async () => {
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/2-alpine')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.source':
+              'https://github.com/renovatebot/renovate',
+            'org.opencontainers.image.revision':
+              'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+          },
+        });
+
+      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
+        {
+          'org.opencontainers.image.source':
+            'https://github.com/renovatebot/renovate',
+          'org.opencontainers.image.revision':
+            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+        }
+      );
+    });
+
+    it('uses annotations for oci helm', async () => {
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/2-alpine')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.source':
+              'https://github.com/renovatebot/renovate',
+            'org.opencontainers.image.revision':
+              'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+          },
+        });
+
+      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
+        {
+          'org.opencontainers.image.source':
+            'https://github.com/renovatebot/renovate',
+          'org.opencontainers.image.revision':
+            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+        }
+      );
+    });
+
+    it('uses sources for oci helm', async () => {
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/')
+        .twice()
+        .reply(200)
+        .get('/harbor/manifests/16.7.2')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          },
+        })
+        .get('/harbor/blobs/some-config-digest')
+        .reply(200, {
+          name: 'harbor',
+          version: '16.7.2',
+          home: 'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+        });
+
+      expect(await ds.getLabels('https://ghcr.io', 'harbor', '16.7.2')).toEqual(
+        {
+          'org.opencontainers.image.source':
+            'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+        }
+      );
     });
   });
 });

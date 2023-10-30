@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
 import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -15,13 +16,9 @@ import {
   sideCarImage,
 } from '.';
 
-jest.mock('../../../modules/datasource');
+jest.mock('../../../modules/datasource', () => mockDeep());
 
 describe('util/exec/docker/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('prefetchDockerImage', () => {
     beforeEach(() => {
       resetPrefetchedImages();

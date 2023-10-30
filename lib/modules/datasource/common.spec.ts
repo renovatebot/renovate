@@ -3,6 +3,7 @@ import { defaultVersioning } from '../versioning';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
+  applyVersionCompatibility,
   filterValidVersions,
   getDatasourceFor,
   getDefaultVersioning,
@@ -223,6 +224,43 @@ describe('modules/datasource/common', () => {
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+  });
+
+  describe('applyVersionCompatibility', () => {
+    let input: ReleaseResult;
+
+    beforeEach(() => {
+      input = {
+        releases: [
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '2.0.0-alpine' },
+        ],
+      };
+    });
+
+    it('returns immediately if no versionCompatibility', () => {
+      const result = applyVersionCompatibility(input, undefined, undefined);
+      expect(result).toBe(input);
+    });
+
+    it('filters out non-matching', () => {
+      const versionCompatibility = '^(?<version>[^-]+)$';
+      expect(
+        applyVersionCompatibility(input, versionCompatibility, undefined)
+      ).toMatchObject({
+        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+
+    it('filters out incompatible', () => {
+      const versionCompatibility = '^(?<version>[^-]+)(?<compatibility>.*)?$';
+      expect(
+        applyVersionCompatibility(input, versionCompatibility, '-alpine')
+      ).toMatchObject({
+        releases: [{ version: '2.0.0' }],
       });
     });
   });

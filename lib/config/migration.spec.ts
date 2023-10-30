@@ -643,10 +643,11 @@ describe('config/migration', () => {
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
 
-  it('it migrates regexManagers', () => {
+  it('it migrates customManagers', () => {
     const config: RenovateConfig = {
-      regexManagers: [
+      customManagers: [
         {
+          customType: 'regex',
           fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
           matchStrings: [
             '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
@@ -669,9 +670,6 @@ describe('config/migration', () => {
 
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {
-      gradle: {
-        enabled: false,
-      },
       'gradle-lite': {
         enabled: true,
         fileMatch: ['foo'],

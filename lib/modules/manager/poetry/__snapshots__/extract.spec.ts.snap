@@ -345,7 +345,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts mixed vers
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
@@ -426,7 +425,6 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
@@ -471,6 +469,19 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "versioning": "poetry",
+  },
+  {
+    "commitMessageTopic": "Python",
+    "currentValue": "~2.7 || ^3.4",
+    "datasource": "github-releases",
+    "depName": "python",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+    "packageName": "containerbase/python-prebuild",
+    "registryUrls": null,
     "versioning": "poetry",
   },
   {
@@ -550,13 +561,25 @@ exports[`modules/manager/poetry/extract extractPackageFile() handles multiple co
     },
   ],
   "extractedConstraints": {},
-  "registryUrls": undefined,
 }
 `;
 
 exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVersions from the lockfile 1`] = `
 {
   "deps": [
+    {
+      "commitMessageTopic": "Python",
+      "currentValue": "^3.9",
+      "datasource": "github-releases",
+      "depName": "python",
+      "depType": "dependencies",
+      "managerData": {
+        "nestedVersion": false,
+      },
+      "packageName": "containerbase/python-prebuild",
+      "registryUrls": null,
+      "versioning": "poetry",
+    },
     {
       "currentValue": "*",
       "datasource": "pypi",
@@ -572,6 +595,5 @@ exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVers
   "extractedConstraints": {
     "python": "^3.9",
   },
-  "registryUrls": undefined,
 }
 `;

@@ -1,0 +1,35 @@
+{
+  "modules": [
+    {
+      "versions": [
+        {
+          "version": "0.0.2",
+          "submodules": [],
+          "root": {
+            "dependencies": [],
+            "providers": [
+              {
+                "name": "local",
+                "version": ""
+              }
+            ]
+          }
+        },
+        {
+          "version": "0.0.1",
+          "submodules": [],
+          "root": {
+            "dependencies": [],
+            "providers": [
+              {
+                "name": "local",
+                "version": ""
+              }
+            ]
+          }
+        }
+      ],
+      "source": "https://gitlab.com/renovate-issue-25003/mymodule"
+    }
+  ]
+}

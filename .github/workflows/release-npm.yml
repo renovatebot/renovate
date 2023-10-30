@@ -39,7 +39,7 @@ jobs:
             echo "NPM_TAG=${{ github.event.inputs.tag }}" >> "$GITHUB_ENV"
           fi
 
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           ref: ${{ env.GIT_SHA }}
 
@@ -48,7 +48,7 @@ jobs:
         run: corepack enable
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -61,7 +61,7 @@ jobs:
           git config --global user.name  'Renovate Bot'
 
       - name: Installing dependencies
-        uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
+        uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
         with:
           timeout_minutes: 10
           max_attempts: 3

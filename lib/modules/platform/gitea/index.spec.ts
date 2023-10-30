@@ -35,6 +35,9 @@ import type {
   User,
 } from './types';
 
+jest.mock('./gitea-helper');
+jest.mock('../../../util/git');
+
 /**
  * latest tested gitea version.
  */
@@ -45,7 +48,7 @@ describe('modules/platform/gitea/index', () => {
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
   let gitvcs: jest.Mocked<typeof _git>;
-  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
+  let hostRules: typeof import('../../../util/host-rules');
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -199,17 +202,14 @@ describe('modules/platform/gitea/index', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-    jest.mock('./gitea-helper');
-    jest.mock('../../../util/git');
-    jest.mock('../../../logger');
 
     gitea = await import('.');
-    helper = mocked(await import('./gitea-helper'));
-    logger = mocked((await import('../../../logger')).logger);
-    gitvcs = require('../../../util/git');
+    helper = jest.requireMock('./gitea-helper');
+    logger = mocked(await import('../../../logger')).logger;
+    gitvcs = jest.requireMock('../../../util/git');
     gitvcs.isBranchBehindBase.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
-    hostRules = mocked(await import('../../../util/host-rules'));
+    hostRules = await import('../../../util/host-rules');
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
