@@ -52,7 +52,7 @@ export async function generateLockFile(
     };
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
-      !semver.gtr('7.0.0', npmToolConstraint.constraint);
+      semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     const commands: string[] = [];
     let cmdOptions = '';
     if (
