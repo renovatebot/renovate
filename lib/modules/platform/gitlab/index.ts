@@ -31,6 +31,7 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
+import { noLeadingAtSymbol } from '../../../workers/repository/common';
 import { getPrBodyStruct } from '../pr-body';
 import type {
   AutodiscoverConfig,
@@ -1351,7 +1352,22 @@ export async function expandGroupMembers(
   reviewersOrAssignees: string[]
 ): Promise<string[]> {
   const expandedReviewersOrAssignees: string[] = [];
+  const normalizedReviewersOrAssigneesWithoutEmails: string[] = [];
+
+  // Skip passing user emails to Gitlab API, but include them in the final result
   for (const reviewerOrAssignee of reviewersOrAssignees) {
+    if (reviewerOrAssignee.indexOf('@') > 0) {
+      expandedReviewersOrAssignees.push(reviewerOrAssignee);
+      break;
+    }
+
+    // Normalize the potential group names before passing to Gitlab API
+    normalizedReviewersOrAssigneesWithoutEmails.push(
+      noLeadingAtSymbol(reviewerOrAssignee)
+    );
+  }
+
+  for (const reviewerOrAssignee of normalizedReviewersOrAssigneesWithoutEmails) {
     try {
       const members = await getMemberUsernames(reviewerOrAssignee);
       expandedReviewersOrAssignees.push(...members);

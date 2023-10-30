@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
 import { sampleSize } from '../../../../util/sample';
+import { noLeadingAtSymbol } from '../../common';
 import { codeOwnersForPr } from './code-owners';
 
 async function addCodeOwners(
@@ -12,12 +13,11 @@ async function addCodeOwners(
   pr: Pr
 ): Promise<string[]> {
   const codeOwners = await codeOwnersForPr(pr);
-  const normalizedCodeOwners = [...new Set(codeOwners.map(noLeadingAtSymbol))];
 
   const assignees =
     config.expandCodeOwnersGroups && platform.expandGroupMembers
-      ? await platform.expandGroupMembers(normalizedCodeOwners)
-      : normalizedCodeOwners;
+      ? await platform.expandGroupMembers(codeOwners)
+      : codeOwners;
 
   return [...new Set(assigneesOrReviewers.concat(assignees))];
 }
@@ -29,10 +29,6 @@ function filterUnavailableUsers(
   return config.filterUnavailableUsers && platform.filterUnavailableUsers
     ? platform.filterUnavailableUsers(users)
     : Promise.resolve(users);
-}
-
-function noLeadingAtSymbol(input: string): string {
-  return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
 function prepareParticipants(

@@ -16,3 +16,7 @@ export function extractRepoProblems(
       )
   );
 }
+
+export function noLeadingAtSymbol(input: string): string {
+  return input.length && input.startsWith('@') ? input.slice(1) : input;
+}

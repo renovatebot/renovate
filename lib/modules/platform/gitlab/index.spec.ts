@@ -17,6 +17,7 @@ import type { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
+import { gitlabApi } from './http';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
@@ -2776,8 +2777,8 @@ These updates have all been created already. Click a checkbox below to force a r
         .get('/api/v4/groups/group-b/members')
         .reply(200, [{ username: 'john' }]);
       const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'group-a',
-        'group-b',
+        '@group-a',
+        '@group-b',
       ]);
       expect(expandedGroupMembers).toEqual(['maria', 'jimmy', 'john']);
     });
@@ -2797,9 +2798,16 @@ These updates have all been created already. Click a checkbox below to force a r
         .get('/api/v4/groups/group-c/members')
         .reply(200, []);
       const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'group-c',
+        '@group-c',
       ]);
       expect(expandedGroupMembers).toEqual([]);
+    });
+
+    it('includes email in final result', async () => {
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        'user@email.com',
+      ]);
+      expect(expandedGroupMembers).toEqual(['user@email.com']);
     });
   });
 });
