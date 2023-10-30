@@ -87,13 +87,16 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 
 ## Package Registry Credentials
 
-When Renovate runs against repositories on `github.com`, it automatically provisions `hostRules` for these GitHub Packages registries using the platform token:
+When Renovate runs against repositories on `github.com`, and the environment variable `RENOVATE_X_GITHUB_HOST_RULES` is set, then Renovate automatically provisions `hostRules` for these GitHub Packages registries using the platform token:
 
 - `ghcr.io`
 - `maven.pkg.github.com`
 - `npm.pkg.github.com`
 - `nuget.pkg.github.com`
 - `rubygems.pkg.github.com`
+
+<!-- prettier-ignore -->
+!!! warning Users have reported that this feature is not working correctly, so it has been reverted to experimental mode.
 
 ## Features awaiting implementation
 

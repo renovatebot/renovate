@@ -29,7 +29,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     version    | expected
     ${'1'}     | ${false}
     ${'1.2'}   | ${true}
-    ${'1.2.3'} | ${false}
+    ${'1.2.3'} | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(!!semver.isValid(version)).toBe(expected);
   });
@@ -70,8 +70,10 @@ describe('modules/versioning/go-mod-directive/index', () => {
     ${'1.16'}    | ${'bump'}     | ${'1.16.4'}    | ${'1.17.0'} | ${'1.17'}
     ${'1.16'}    | ${'bump'}     | ${'1.16.4'}    | ${'1.16.4'} | ${'1.16'}
     ${'1.16'}    | ${'replace'}  | ${'1.16.4'}    | ${'1.16.4'} | ${'1.16'}
-    ${'1.16'}    | ${'replace'}  | ${'1.16.4'}    | ${'2.0.0'}  | ${'2.0'}
+    ${'1.16'}    | ${'replace'}  | ${'1.21.2'}    | ${'1.21.2'} | ${'1.21.2'}
     ${'1.16'}    | ${'widen'}    | ${'1.16.4'}    | ${'1.16.4'} | ${'1.16'}
+    ${'1.16'}    | ${'bump'}     | ${'1.16.4'}    | ${'1.21.3'} | ${'1.21.3'}
+    ${'1.21.2'}  | ${'bump'}     | ${'1.21.2'}    | ${'1.21.3'} | ${'1.21.3'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
