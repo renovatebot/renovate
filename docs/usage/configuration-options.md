@@ -1300,7 +1300,8 @@ The available options are:
 - `branch` - fetch changelogs while creating/updating branch
 - `pr`(default) - fetches changelogs while creating/updating pull-request
 
-It is not recommended to set fetchChangeLogs=branch unless you are embedding changelogs in commit information, because it results in a performance decrease.
+Avoid setting `fetchChangeLogs=branch`, because this slows down Renovate.
+But if you're embedding changelogs in commit information, you may use `fetchChangeLogs=branch`.
 
 Renovate can fetch changelogs when they are hosted on one of these platforms:
 
