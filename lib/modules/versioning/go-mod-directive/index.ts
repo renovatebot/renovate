@@ -9,7 +9,7 @@ export const urls = ['https://go.dev/ref/mod'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
-const validRegex = regEx(/^\d+\.\d+$/);
+const validRegex = regEx(/^\d+\.\d+(\.\d+)?$/);
 
 function toNpmRange(range: string): string {
   return `^${range}`;
@@ -25,9 +25,15 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'bump') {
+    if (npm.matches(newVersion, '>=1.20.0')) {
+      return newVersion;
+    }
     return shorten(newVersion);
   }
   if (rangeStrategy === 'replace' && !matches(currentValue, newVersion)) {
+    if (npm.matches(newVersion, '>=1.20.0')) {
+      return newVersion;
+    }
     return shorten(newVersion);
   }
   return currentValue;
