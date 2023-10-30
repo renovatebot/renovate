@@ -13,7 +13,7 @@ export interface DotnetTool {
 export interface Registry {
   readonly url: string;
   readonly name?: string;
-  readonly sourceMappedPackagePatterns?: string[];
+  sourceMappedPackagePatterns?: string[];
 }
 
 export interface MsbuildGlobalManifest {

@@ -30,6 +30,7 @@ describe('modules/manager/gradle/parser/common', () => {
       registryUrls: [],
 
       varTokens: [],
+      tmpKotlinImportStore: [],
       tmpNestingDepth: [],
       tmpTokenStore: {},
       tokenMap: {},
@@ -139,6 +140,11 @@ describe('modules/manager/gradle/parser/common', () => {
 
     ctx.tmpNestingDepth = [];
     expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars['foo']);
+
+    ctx.tmpKotlinImportStore = [[token, token]];
+    expect(findVariable('test.foo3', ctx)).toStrictEqual(
+      ctx.globalVars['test.test.foo3']
+    );
   });
 
   it('interpolateString', () => {
