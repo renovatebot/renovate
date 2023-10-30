@@ -119,7 +119,12 @@ export async function updateArtifacts({
           continue;
         }
         let newConstraint: string | undefined = updateLock.constraints;
-        if (newConstraint && currentValue === newValue) {
+        if (
+          newConstraint &&
+          currentValue &&
+          newValue &&
+          currentValue === newValue
+        ) {
           logger.debug(
             `Leaving constraints "${newConstraint}" unchanged for "${packageName}" as current and new values are the same`
           );
