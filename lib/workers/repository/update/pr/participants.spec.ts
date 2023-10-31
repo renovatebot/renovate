@@ -54,7 +54,7 @@ describe('workers/repository/update/pr/participants', () => {
       ]);
       platform.expandGroupMembers = jest
         .fn()
-        .mockResolvedValueOnce(['user', 'group.user']);
+        .mockResolvedValueOnce(['u@email.com', 'user', 'group.user']);
       await addParticipants(
         {
           ...config,
