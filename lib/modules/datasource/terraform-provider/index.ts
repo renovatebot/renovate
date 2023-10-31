@@ -283,6 +283,44 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   @cache({
+    namespace: `datasource-${TerraformProviderDatasource.id}-zip-hashes`,
+    key: (registryURL: string, repository: string, version: string) =>
+      `${registryURL}/${repository}/${version}`,
+  })
+  async getZipHashes(builds: TerraformBuild[]): Promise<string[] | undefined> {
+    if (builds.length === 0) {
+      return [];
+    }
+
+    const zipHashUrl = builds[0].shasums_url;
+
+    if (!zipHashUrl) {
+      return [];
+    }
+
+    // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
+    let rawHashData: string;
+    try {
+      rawHashData = (await this.http.get(zipHashUrl)).body;
+    } catch (err) {
+      /* istanbul ignore next */
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      logger.debug(
+        { err, zipHashUrl },
+        `Failed to retrieve zip hashes from ${zipHashUrl}`
+      );
+      return undefined;
+    }
+
+    return rawHashData
+      .trimEnd()
+      .split('\n')
+      .map((line) => line.split(/\s/)[0]);
+  }
+
+  @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}-releaseBackendIndex`,
     key: (backendLookUpName: string, version: string) =>
       `${backendLookUpName}/${version}`,

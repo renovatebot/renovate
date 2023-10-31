@@ -1053,5 +1053,42 @@ describe('modules/manager/gradle/parser', () => {
         ],
       });
     });
+
+    it('imported objects', () => {
+      const input = codeBlock`
+        object ModuleConfiguration {
+          object Build {
+            object Database {
+              const val h2Version = "2.0.206"
+            }
+          }
+        }
+      `;
+
+      const gradleKtsInput = codeBlock`
+        import ModuleConfiguration.Build.Database
+        dependencies {
+          runtimeOnly("com.h2database:h2:\${Database.h2Version}")
+        }
+      `;
+
+      const { vars } = parseKotlinSource(input);
+      const res = parseGradle(gradleKtsInput, vars);
+      expect(res).toMatchObject({
+        vars: {
+          'ModuleConfiguration.Build.Database.h2Version': {
+            key: 'ModuleConfiguration.Build.Database.h2Version',
+            value: '2.0.206',
+          },
+        },
+        deps: [
+          {
+            depName: 'com.h2database:h2',
+            currentValue: '2.0.206',
+            groupName: 'ModuleConfiguration.Build.Database.h2Version',
+          },
+        ],
+      });
+    });
   });
 });

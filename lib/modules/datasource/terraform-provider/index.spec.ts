@@ -9,7 +9,7 @@ const hashicorpGoogleBetaReleases = Fixtures.get(
   'releaseBackendIndexGoogleBeta.json'
 );
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
-const telmateProxmocVersions = Fixtures.get(
+const telmateProxmoxVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json'
 );
 
@@ -282,7 +282,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/Telmate/proxmox/versions')
-        .reply(200, telmateProxmocVersions)
+        .reply(200, telmateProxmoxVersions)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const result = await terraformProviderDatasource.getBuilds(
@@ -297,7 +297,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/Telmate/proxmox/versions')
-        .reply(200, telmateProxmocVersions)
+        .reply(200, telmateProxmoxVersions)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult)
         .get('/v1/providers/Telmate/proxmox/2.6.1/download/darwin/arm64')
@@ -377,7 +377,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/Telmate/proxmox/versions')
-        .reply(200, telmateProxmocVersions)
+        .reply(200, telmateProxmoxVersions)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult)
         .get('/v1/providers/Telmate/proxmox/2.6.1/download/darwin/arm64')
@@ -409,6 +409,86 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.6.1'
       );
       expect(res).toBeNull();
+    });
+  });
+
+  describe('getZipHashes', () => {
+    it('can fetch zip hashes', async () => {
+      httpMock
+        .scope(secondaryUrl)
+        .get(
+          '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+        )
+        .reply(
+          200,
+          '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628 terraform-provider-azurerm_2.56.0_darwin_amd64.zip\n' +
+            '766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71 terraform-provider-azurerm_2.56.0_linux_amd64.zip\n' +
+            'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f terraform-provider-azurerm_2.56.0_manifest.json'
+        );
+
+      const res = await terraformProviderDatasource.getZipHashes([
+        {
+          name: 'azurerm',
+          version: '2.56.0',
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          shasums_url:
+            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+        },
+      ]);
+
+      expect(res).toMatchObject([
+        '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628',
+        '766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71',
+        'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f',
+      ]);
+    });
+
+    it('does not fetch anything when there are no builds passed in', async () => {
+      const res = await terraformProviderDatasource.getZipHashes([]);
+
+      expect(res).toBeEmptyArray();
+    });
+
+    it('does not fetch anything when there is no shasums_url defined', async () => {
+      const res = await terraformProviderDatasource.getZipHashes([
+        {
+          name: 'azurerm',
+          version: '2.56.0',
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+        },
+      ]);
+
+      expect(res).toBeEmptyArray();
+    });
+
+    it('does not hard fail when the ziphashes endpoint is not available', async () => {
+      httpMock
+        .scope(secondaryUrl)
+        .get(
+          '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+        )
+        .reply(404);
+
+      const res = await terraformProviderDatasource.getZipHashes([
+        {
+          name: 'azurerm',
+          version: '2.56.0',
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
+          shasums_url:
+            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+        },
+      ]);
+
+      expect(res).toBeUndefined();
     });
   });
 });
