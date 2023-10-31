@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { isCustomManager } from '../../../modules/manager/custom';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class MatchManagersMigration extends AbstractMigration {
@@ -10,10 +9,9 @@ export class MatchManagersMigration extends AbstractMigration {
       return;
     }
 
+    // prefix custom. before custom managers if not present
     const newValue = value.map((manager) =>
-      isCustomManager(manager) && !manager.startsWith('custom.')
-        ? `custom.${manager}`
-        : manager
+      manager === 'regex' ? 'custom.regex' : manager
     );
     this.rewrite(newValue);
   }
