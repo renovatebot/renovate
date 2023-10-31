@@ -115,8 +115,9 @@ export function handleCommitError(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = branchName;
     error.validationError = 'Bitbucket committer error';
-    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: \`${String(
-      err.message.replace(regEx(/`/g), "'")
+    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: \`${err.message.replace(
+      regEx(/`/g),
+      "'"
     )}\``;
     throw error;
   }

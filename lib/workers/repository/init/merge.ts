@@ -141,8 +141,9 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config renovate.json5'
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
-        const validationMessage = `JSON5.parse error: \`${String(
-          err.message.replace(regEx(/`/g), "'")
+        const validationMessage = `JSON5.parse error: \`${err.message.replace(
+          regEx(/`/g),
+          "'"
         )}\``;
         return {
           configFileName,
@@ -184,8 +185,9 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config'
         );
         const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = `JSON.parse error:  \`${String(
-          err.message.replace(regEx(/`/g), "'")
+        const validationMessage = `JSON.parse error:  \`${err.message.replace(
+          regEx(/`/g),
+          "'"
         )}\``;
         return {
           configFileName,
@@ -239,7 +241,7 @@ export async function mergeRenovateConfig(
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
-      .map((e) => `\`${e.message.replace(regEx(/`/g), "'")}\``)
+      .map((e) => e.message)
       .join(', ');
     throw error;
   }
