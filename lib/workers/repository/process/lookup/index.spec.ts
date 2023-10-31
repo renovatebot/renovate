@@ -1747,20 +1747,36 @@ describe('workers/repository/process/lookup/index', () => {
 
     it('applies versionCompatibility for 18.10.0', async () => {
       config.currentValue = '18.10.0-alpine';
+      config.currentDigest = 'aaa111';
       config.packageName = 'node';
       config.versioning = nodeVersioningId;
       config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
+          { version: '18.10.0' },
           { version: '18.18.0' },
           { version: '18.19.0-alpine' },
           { version: '18.20.0' },
         ],
       });
+      getDockerDigest.mockResolvedValueOnce('bbb222');
+      getDockerDigest.mockResolvedValueOnce('ccc333');
       const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(2);
       expect(res).toMatchObject({
-        updates: [{ newValue: '18.19.0-alpine', updateType: 'minor' }],
+        updates: [
+          {
+            newValue: '18.19.0-alpine',
+            newDigest: 'bbb222',
+            updateType: 'minor',
+          },
+          {
+            newValue: '18.10.0-alpine',
+            newDigest: 'ccc333',
+            updateType: 'digest',
+          },
+        ],
       });
     });
 
