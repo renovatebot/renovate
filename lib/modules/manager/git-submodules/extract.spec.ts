@@ -301,10 +301,42 @@ describe('modules/manager/git-submodules/extract', () => {
     });
 
     it('fallback to current branch if special value is detected', async () => {
-      gitMock.branch.mockReturnValue('staging');
+      gitMock.branch.mockResolvedValueOnce({
+        all: [
+          'staging',
+          'main'
+        ],
+        branches: {
+          'staging': {
+            current: true,
+            name: 'staging',
+            commit: '9eeb873',
+            label: 'staging branch'
+          },
+          main: {
+            current: true,
+            name: 'main',
+            commit: 'e14c7e1',
+            label: 'main branch'
+          }
+        },
+        current: 'staging',
+        detached: false
+      });
+
       const res = await extractPackageFile('', '.gitmodules.7', {});
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0].currentValue).toBe('staging');
+      expect(res).toEqual({
+        datasource: 'git-refs',
+        deps: [
+          {
+            currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            currentValue: 'staging',
+            depName: 'PowerShell-Docs',
+            packageName:
+              'https://github.com/PowerShell/PowerShell-Docs',
+          },
+        ],
+      });
     });
   });
 });

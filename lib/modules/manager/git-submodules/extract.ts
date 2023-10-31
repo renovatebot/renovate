@@ -66,12 +66,11 @@ async function getBranch(
       gitModulesPath,
       '--get',
       `submodule.${submoduleName}.branch`,
-    ]));
+    ])).trim();
 
-  return (branchFromConfig.trim() === '.' ?
-          (await git.branch("--show-current")) :
-          (branchFromConfig || (await getDefaultBranch(subModuleUrl))))
-    .trim();
+  return (branchFromConfig === '.' ?
+          (await git.branch(['--show-current'])).current.trim() :
+          (branchFromConfig || (await getDefaultBranch(subModuleUrl)).trim()));
 }
 
 async function getModules(
