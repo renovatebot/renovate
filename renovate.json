@@ -28,6 +28,11 @@
     {
       "matchFileNames": ["**/__fixtures__/**"],
       "enabled": false
+    },
+    {
+      "description": "Manually update opentelemetry-js monorepo when the opentelemetry export bug is fixed, see issue https://github.com/open-telemetry/opentelemetry-js/issues/4216",
+      "matchPackagePatterns": ["^@opentelemetry"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [

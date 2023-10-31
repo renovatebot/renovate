@@ -140,7 +140,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config renovate.json5'
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
-        const validationMessage = `JSON5.parse error:  ${String(err.message)}`;
+        const validationMessage = `JSON5.parse error: \`${err.message.replaceAll(
+          '`',
+          "'"
+        )}\``;
         return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
@@ -181,7 +184,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config'
         );
         const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = `JSON.parse error:  ${String(err.message)}`;
+        const validationMessage = `JSON.parse error:  \`${err.message.replaceAll(
+          '`',
+          "'"
+        )}\``;
         return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
