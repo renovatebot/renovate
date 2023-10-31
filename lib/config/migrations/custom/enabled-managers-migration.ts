@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { isCustomManager } from '../../../modules/manager/custom';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class EnabledManagersMigration extends AbstractMigration {
@@ -11,15 +10,14 @@ export class EnabledManagersMigration extends AbstractMigration {
     }
 
     const newValue = value.map((manager) => {
-      if (manager === 'yarn') {
-        return 'npm';
+      switch (manager) {
+        case 'yarn':
+          return 'npm';
+        case 'regex':
+          return 'custom.regex';
+        default:
+          return manager;
       }
-
-      if (isCustomManager(manager)) {
-        return `custom.${manager}`;
-      }
-
-      return manager;
     });
     this.rewrite(newValue);
   }
