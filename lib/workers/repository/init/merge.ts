@@ -24,7 +24,6 @@ import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
-import { regEx } from '../../../util/regex';
 import {
   getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
@@ -141,8 +140,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config renovate.json5'
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
-        const validationMessage = `JSON5.parse error: \`${err.message.replace(
-          regEx(/`/g),
+        const validationMessage = `JSON5.parse error: \`${err.message.replaceAll(
+          '`',
           "'"
         )}\``;
         return {
@@ -185,8 +184,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config'
         );
         const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = `JSON.parse error:  \`${err.message.replace(
-          regEx(/`/g),
+        const validationMessage = `JSON.parse error:  \`${err.message.replaceAll(
+          '`',
           "'"
         )}\``;
         return {

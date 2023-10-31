@@ -1,7 +1,6 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { regEx } from '../regex';
 import type { FileChange } from './types';
 
 // istanbul ignore next
@@ -115,8 +114,8 @@ export function handleCommitError(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = branchName;
     error.validationError = 'Bitbucket committer error';
-    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: \`${err.message.replace(
-      regEx(/`/g),
+    error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: \`${err.message.replaceAll(
+      '`',
       "'"
     )}\``;
     throw error;
