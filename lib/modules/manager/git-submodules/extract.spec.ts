@@ -302,12 +302,9 @@ describe('modules/manager/git-submodules/extract', () => {
 
     it('fallback to current branch if special value is detected', async () => {
       gitMock.branch.mockResolvedValueOnce({
-        all: [
-          'staging',
-          'main'
-        ],
+        all: ['staging', 'main'],
         branches: {
-          'staging': {
+          staging: {
             current: true,
             name: 'staging',
             commit: '9eeb873',
@@ -332,8 +329,7 @@ describe('modules/manager/git-submodules/extract', () => {
             currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
             currentValue: 'staging',
             depName: 'PowerShell-Docs',
-            packageName:
-              'https://github.com/PowerShell/PowerShell-Docs',
+            packageName: 'https://github.com/PowerShell/PowerShell-Docs',
           },
         ],
       });
