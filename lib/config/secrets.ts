@@ -66,7 +66,7 @@ function replaceSecretsInString(
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'config';
     error.validationError = 'Disallowed secret substitution';
-    error.validationMessage = `The field ${key} may not use secret substitution`;
+    error.validationMessage = `The field \`${key}\` may not use secret substitution`;
     throw error;
   }
   return value.replace(secretTemplateRegex, (_, secretName) => {
