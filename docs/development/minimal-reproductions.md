@@ -86,3 +86,23 @@ After a while, issues without a reproduction may be closed unfixed.
 
 Thank you for describing your issue in detail.
 But we still need a minimal reproduction in a repository, and we'd like you to be the one to make sure it matches both your description as well as expected behavior.
+
+### Forcing Renovate to create a lot of pending updates
+
+Put a old version of a frequently updated dependency in your repository.
+Set a high `minimumReleaseAge` for that dependency, for example:
+
+```json
+{
+  "extends": ["config:best-practices"],
+  "packageRules": [
+    {
+      "description": "Force lots of pending updates for the Prettier package",
+      "matchPackageNames": ["prettier"],
+      "minimumReleaseAge": "365 days"
+    }
+  ]
+}
+```
+
+You'll get a lot of pending updates, which you can see on the Dependency Dashboard.

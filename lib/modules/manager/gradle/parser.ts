@@ -3,6 +3,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import { qApplyFrom } from './parser/apply-from';
 import { qAssignments } from './parser/assignments';
+import { qKotlinImport } from './parser/common';
 import { qDependencies, qLongFormDep } from './parser/dependencies';
 import { setParseGradleFunc } from './parser/handlers';
 import { qKotlinMultiObjectVarAssignment } from './parser/objects';
@@ -29,6 +30,7 @@ const ctx: Ctx = {
   registryUrls: [],
 
   varTokens: [],
+  tmpKotlinImportStore: [],
   tmpNestingDepth: [],
   tmpTokenStore: {},
   tokenMap: {},
@@ -51,6 +53,7 @@ export function parseGradle(
     type: 'root-tree',
     maxDepth: 32,
     search: q.alt<Ctx>(
+      qKotlinImport,
       qAssignments,
       qDependencies,
       qPlugins,

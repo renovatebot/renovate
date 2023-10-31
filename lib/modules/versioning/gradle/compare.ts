@@ -50,6 +50,7 @@ export function tokenize(versionStr: string): Token[] | null {
 
   function yieldToken(): void {
     if (currentVal === '') {
+      // We tried to yield an empty token, which means we're in a bad state.
       result = null;
     }
     if (result) {
