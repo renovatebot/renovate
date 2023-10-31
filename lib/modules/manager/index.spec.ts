@@ -41,8 +41,8 @@ describe('modules/manager/index', () => {
     it('works', () => {
       expect(manager.getEnabledManagersList()).toEqual(manager.allManagersList);
       expect(manager.getEnabledManagersList(['custom.regex', 'npm'])).toEqual([
-        'regex',
         'npm',
+        'regex',
       ]);
     });
   });
