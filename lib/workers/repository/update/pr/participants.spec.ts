@@ -61,7 +61,7 @@ describe('workers/repository/update/pr/participants', () => {
       );
       expect(platform.expandGroupMembers).toHaveBeenCalledWith([
         'user',
-        'group',
+        '@group',
       ]);
       expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
       expect(platform.addAssignees).toHaveBeenCalledWith(123, [
