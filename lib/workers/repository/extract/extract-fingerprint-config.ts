@@ -1,12 +1,6 @@
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  RegexManagerTemplates,
-  RenovateConfig,
-} from '../../../config/types';
-import {
-  allManagersList,
-  getEnabledManagersList,
-} from '../../../modules/manager';
+import type { RenovateConfig } from '../../../config/types';
+import { getEnabledManagersList } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
