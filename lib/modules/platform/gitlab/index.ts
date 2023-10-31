@@ -1358,7 +1358,7 @@ export async function expandGroupMembers(
   for (const reviewerOrAssignee of reviewersOrAssignees) {
     if (reviewerOrAssignee.indexOf('@') > 0) {
       expandedReviewersOrAssignees.push(reviewerOrAssignee);
-      break;
+      continue;
     }
 
     // Normalize the potential group names before passing to Gitlab API

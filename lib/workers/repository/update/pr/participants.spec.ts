@@ -47,7 +47,11 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('expands group code owners assignees', async () => {
-      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce([
+        'user',
+        '@group',
+        'u@email.com',
+      ]);
       platform.expandGroupMembers = jest
         .fn()
         .mockResolvedValueOnce(['user', 'group.user']);
@@ -62,12 +66,14 @@ describe('workers/repository/update/pr/participants', () => {
       expect(platform.expandGroupMembers).toHaveBeenCalledWith([
         'user',
         '@group',
+        'u@email.com',
       ]);
       expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
       expect(platform.addAssignees).toHaveBeenCalledWith(123, [
         'a',
         'b',
         'c',
+        'u@email.com',
         'user',
         'group.user',
       ]);
