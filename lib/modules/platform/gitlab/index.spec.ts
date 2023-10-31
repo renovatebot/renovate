@@ -17,7 +17,6 @@ import type { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
-import { gitlabApi } from './http';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
