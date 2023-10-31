@@ -2776,10 +2776,16 @@ These updates have all been created already. Click a checkbox below to force a r
         .get('/api/v4/groups/group-b/members')
         .reply(200, [{ username: 'john' }]);
       const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        'u@email.com',
         '@group-a',
         '@group-b',
       ]);
-      expect(expandedGroupMembers).toEqual(['maria', 'jimmy', 'john']);
+      expect(expandedGroupMembers).toEqual([
+        'u@email.com',
+        'maria',
+        'jimmy',
+        'john',
+      ]);
     });
 
     it('users are not expanded', async () => {
@@ -2804,9 +2810,9 @@ These updates have all been created already. Click a checkbox below to force a r
 
     it('includes email in final result', async () => {
       const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'user@email.com',
+        'u@email.com',
       ]);
-      expect(expandedGroupMembers).toEqual(['user@email.com']);
+      expect(expandedGroupMembers).toEqual(['u@email.com']);
     });
   });
 });
