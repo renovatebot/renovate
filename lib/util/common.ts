@@ -59,3 +59,7 @@ export function detectPlatform(
 
   return null;
 }
+
+export function noLeadingAtSymbol(input: string): string {
+  return input.length && input.startsWith('@') ? input.slice(1) : input;
+}

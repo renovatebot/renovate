@@ -19,6 +19,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
+import { noLeadingAtSymbol } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -31,7 +32,6 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
-import { noLeadingAtSymbol } from '../../../workers/repository/common';
 import { getPrBodyStruct } from '../pr-body';
 import type {
   AutodiscoverConfig,
@@ -1356,7 +1356,7 @@ export async function expandGroupMembers(
 
   // Skip passing user emails to Gitlab API, but include them in the final result
   for (const reviewerOrAssignee of reviewersOrAssignees) {
-    if (reviewerOrAssignee.indexOf('@') > 0) {
+    if (reviewerOrAssignee.indexOf('@') > 1) {
       expandedReviewersOrAssignees.push(reviewerOrAssignee);
       break;
     }

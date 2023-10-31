@@ -3,8 +3,8 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
+import { noLeadingAtSymbol } from '../../../../util/common';
 import { sampleSize } from '../../../../util/sample';
-import { noLeadingAtSymbol } from '../../common';
 import { codeOwnersForPr } from './code-owners';
 
 async function addCodeOwners(
