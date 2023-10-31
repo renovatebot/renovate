@@ -1,21 +1,24 @@
 import is from '@sindresorhus/is';
-import type { FetchChangeLogsOptions } from '../../types';
-import { AbstractMigration } from '../base/abstract-migration';
+import type { RenovateConfig } from '../../types';
+import { RenamePropertyMigration } from '../base/rename-property-migration';
 
-export class FetchReleaseNotesMigration extends AbstractMigration {
-  override deprecated = true;
-  override readonly propertyName = 'fetchReleaseNotes';
-
-  readonly newPropertyName = 'fetchChangeLogs';
+export class FetchReleaseNotesMigration extends RenamePropertyMigration {
+  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
+    super(
+      'fetchReleaseNotes',
+      'fetchChangeLogs',
+      originalConfig,
+      migratedConfig
+    );
+  }
 
   override run(value: unknown): void {
-    let newValue: FetchChangeLogsOptions | undefined;
+    let newValue: unknown = value;
+
     if (is.boolean(value)) {
       newValue = value ? 'pr' : 'off';
-    } else if (value === 'off' || value === 'pr' || value === 'branch') {
-      newValue = value;
     }
 
-    this.setSafely(this.newPropertyName, newValue);
+    super.run(newValue);
   }
 }
