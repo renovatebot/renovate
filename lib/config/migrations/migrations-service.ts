@@ -153,7 +153,6 @@ export class MigrationsService {
     RecreateClosedMigration,
     StabilityDaysMigration,
     FetchReleaseNotesMigration,
-    RegexManagersMigration,
     MatchManagersMigration,
     CustomManagersMigration,
   ];

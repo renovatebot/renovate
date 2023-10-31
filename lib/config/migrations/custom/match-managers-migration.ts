@@ -11,7 +11,9 @@ export class MatchManagersMigration extends AbstractMigration {
     }
 
     const newValue = value.map((manager) =>
-      isCustomManager(manager) ? `custom.${manager}` : manager
+      isCustomManager(manager) && !manager.startsWith('custom.')
+        ? `custom.${manager}`
+        : manager
     );
     this.rewrite(newValue);
   }
