@@ -69,7 +69,7 @@ async function getBranch(
     ])
   ).trim();
 
-  return branchFromConfig === '.' 
+  return branchFromConfig === '.'
     ? (await git.branch(['--show-current'])).current.trim()
     : branchFromConfig || (await getDefaultBranch(subModuleUrl)).trim();
 }

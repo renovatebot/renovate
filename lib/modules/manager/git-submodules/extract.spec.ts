@@ -308,17 +308,17 @@ describe('modules/manager/git-submodules/extract', () => {
             current: true,
             name: 'staging',
             commit: '9eeb873',
-            label: 'staging branch'
+            label: 'staging branch',
           },
           main: {
             current: true,
             name: 'main',
             commit: 'e14c7e1',
-            label: 'main branch'
-          }
+            label: 'main branch',
+          },
         },
         current: 'staging',
-        detached: false
+        detached: false,
       });
 
       const res = await extractPackageFile('', '.gitmodules.7', {});
