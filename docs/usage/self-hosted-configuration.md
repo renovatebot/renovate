@@ -266,7 +266,7 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
-- Datasource name (e.g. `NPM`, `PYPI`) or Platform name (e.g. `GITHUB`)
+- Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only  `GITHUB`)
 - Underscore (`_`)
 - `matchHost`
 - Underscore (`_`)

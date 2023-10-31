@@ -45,7 +45,7 @@ function setHostRuleValue(
       case 'httpsCertificateAuthority':
       case 'httpsCertificate':
       case 'httpsPrivateKey':
-        rule[key] = value!;
+        rule[key] = value;
     }
   }
 }
@@ -71,10 +71,8 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
       (platforms.has(hostType) && splitEnv.length > 1)
     ) {
       let suffix = splitEnv.pop()!;
-      if (isAuthField(suffix) || isHttpsAuthField(suffix)) {
-        if (isHttpsAuthField(suffix)) {
-          suffix = restoreHttpsAuthField(suffix);
-        }
+      if (isHttpsAuthField(suffix)) {
+        suffix = restoreHttpsAuthField(suffix);
 
         let matchHost: string | undefined = undefined;
         const rule: HostRule = {};
