@@ -64,7 +64,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
       logger.debug({ err }, 'Converting git error to CONFIG_VALIDATION error');
       const res = new Error(CONFIG_VALIDATION);
       res.validationError = message;
-      res.validationMessage = `\`${err.message.replace(regEx(/`/g), "'")}\``;
+      res.validationMessage = `\`${err.message.replaceAll('`', "'")}\``;
       return res;
     }
   }
