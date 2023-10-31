@@ -51,12 +51,54 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     ]);
   });
 
+  it('support https authentication options', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY: 'private-key',
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE: 'certificate',
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY:
+        'certificate-authority',
+    };
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      {
+        hostType: 'github',
+        matchHost: 'some.github-enterprise.host',
+        httpsPrivateKey: 'private-key',
+        httpsCertificate: 'certificate',
+        httpsCertificateAuthority: 'certificate-authority',
+      },
+    ]);
+  });
+
+  it('make sure {{PLATFORM}}_TOKEN will not be picked up', () => {
+    const unsupportedEnv = ['GITHUB_TOKEN'];
+
+    for (const e of unsupportedEnv) {
+      const envParam: NodeJS.ProcessEnv = {
+        [e]: 'private-key',
+      };
+      expect(hostRulesFromEnv(envParam)).toMatchObject([]);
+    }
+  });
+
   it('supports datasource env token', () => {
     const envParam: NodeJS.ProcessEnv = {
       PYPI_TOKEN: 'some-token',
     };
     expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'pypi', token: 'some-token' },
+    ]);
+  });
+
+  it('supports platform env token', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      GITHUB_SOME_GITHUB__ENTERPRISE_HOST_TOKEN: 'some-token',
+    };
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      {
+        hostType: 'github',
+        matchHost: 'some.github-enterprise.host',
+        token: 'some-token',
+      },
     ]);
   });
 
