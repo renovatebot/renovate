@@ -180,6 +180,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'practicalscheme/gauche',
     },
   },
+  'github-cli': {
+    asdfPluginUrl: 'https://github.com/bartlomiejdanek/asdf-github-cli.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cli/cli',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   gohugo: hugoDefinition,
   golang: {
     asdfPluginUrl: 'https://github.com/kennyp/asdf-golang',
@@ -259,6 +267,26 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
           currentValue: adoptOpenJreMatches.version,
+        };
+      }
+      const semeruJdkMatches = version.match(
+        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/
+      )?.groups;
+      if (semeruJdkMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jdk',
+          currentValue: semeruJdkMatches.version,
+        };
+      }
+      const semeruJreMatches = version.match(
+        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/
+      )?.groups;
+      if (semeruJreMatches) {
+        return {
+          datasource: JavaVersionDatasource.id,
+          packageName: 'java-jre',
+          currentValue: semeruJreMatches.version,
         };
       }
       const temurinJdkMatches = version.match(
