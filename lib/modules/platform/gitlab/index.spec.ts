@@ -496,15 +496,19 @@ describe('modules/platform/gitlab/index', () => {
         repository: 'some/repo/project',
         platformGitCredentialsFile: true,
       });
-      expect(git.initRepo.mock.calls).toMatchObject({
-        cloneSubmodules: undefined,
-        defaultBranch: 'master',
-        ignorePrAuthor: undefined,
-        mergeMethod: 'merge',
-        gitCredentialContent:
-          'https://oauth2:123test@gitlab.com/some%2Frepo%2Fproject.git',
-        repository: 'some%2Frepo%2Fproject',
-      });
+      expect(git.initRepo.mock.calls).toMatchObject([
+        [
+          {
+            cloneSubmodules: undefined,
+            defaultBranch: 'master',
+            ignorePrAuthor: undefined,
+            mergeMethod: 'merge',
+            gitCredentialContent: 'https://oauth2:123test@gitlab.com',
+            repository: 'some%2Frepo%2Fproject',
+            url: 'https://gitlab.com/some%2Frepo%2Fproject.git',
+          },
+        ],
+      ]);
     });
   });
 
