@@ -92,6 +92,7 @@ pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
 rust 1.64.0
+sbt 1.9.7
 scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
@@ -431,6 +432,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'rust-lang/rust',
             depName: 'rust',
+          },
+          {
+            currentValue: '1.9.7',
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '3.2.1',

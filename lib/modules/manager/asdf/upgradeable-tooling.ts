@@ -452,6 +452,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'rust-lang/rust',
     },
   },
+  sbt: {
+    asdfPluginUrl: 'https://github.com/bram2000/asdf-sbt.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'sbt/sbt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   scala: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-scala',
     config: (version) => {
