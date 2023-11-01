@@ -51,7 +51,7 @@ Automerging lint tool updates can be a real time-saver.
 Sometimes an update to a lint tool or plugin definition causes tests to fail, and that is usually deliberate/intentional because the lint authors have added a new rule that you need to adhere to.
 But in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well be automerged:
 
-```json title="Example of automerging lint and prettier development packages"
+```json title="Example of automerging lint and Prettier development packages"
 {
   "packageRules": [
     {
