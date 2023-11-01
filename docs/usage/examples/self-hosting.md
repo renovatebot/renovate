@@ -274,7 +274,7 @@ renovate
 ```
 
 Save the script file, and run the script manually.
-Only add the script to `cron`` after you checked it works.
+Only add the script to `cron` after you checked it works.
 
 <!-- prettier-ignore -->
 !!! note
