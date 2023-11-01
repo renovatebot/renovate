@@ -9,6 +9,13 @@ Let Renovate use your PAT by doing _one_ of the following:
 - Set your PAT as an environment variable `RENOVATE_TOKEN`
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
+Permissions for your PAT should be at minimum:
+
+| Scope            Permission   |
+| -------------- | -------------|
+| [`Work Items`] | Read & write |
+| [`Code`]       | Read & Write |
+
 Remember to set `platform=azure` somewhere in your Renovate config file.
 
 ## Features awaiting implementation
