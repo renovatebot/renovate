@@ -63,6 +63,7 @@ erlang 25.1.2
 flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
+github-cli 2.32.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
@@ -233,6 +234,13 @@ dummy 1.2.3
             datasource: 'docker',
             packageName: 'practicalscheme/gauche',
             depName: 'gauche',
+          },
+          {
+            currentValue: '2.32.1',
+            datasource: 'github-releases',
+            packageName: 'cli/cli',
+            depName: 'github-cli',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '0.104.3',

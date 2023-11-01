@@ -180,6 +180,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'practicalscheme/gauche',
     },
   },
+  'github-cli': {
+    asdfPluginUrl: 'https://github.com/bartlomiejdanek/asdf-github-cli.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'cli/cli',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   gohugo: hugoDefinition,
   golang: {
     asdfPluginUrl: 'https://github.com/kennyp/asdf-golang',
