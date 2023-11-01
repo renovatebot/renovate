@@ -54,6 +54,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'asdf-plugin-manager': {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-plugin-manager',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'asdf-community/asdf-plugin-manager',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {

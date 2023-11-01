@@ -46,6 +46,7 @@ describe('modules/manager/asdf/extract', () => {
         codeBlock`
 adr-tools 3.0.0
 argocd 2.5.4
+asdf-plugin-manager 1.1.1
 awscli 2.8.6
 bun 0.2.2
 cargo-make 0.36.2
@@ -123,6 +124,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'argoproj/argo-cd',
             depName: 'argocd',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.1.1',
+            datasource: 'github-releases',
+            packageName: 'asdf-community/asdf-plugin-manager',
+            depName: 'asdf-plugin-manager',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
