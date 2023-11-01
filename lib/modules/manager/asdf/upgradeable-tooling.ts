@@ -524,6 +524,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  vault: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hashicorp/vault',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   zig: {
     asdfPluginUrl: 'https://github.com/cheetah/asdf-zig',
     config: {
