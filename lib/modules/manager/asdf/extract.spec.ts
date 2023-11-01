@@ -63,6 +63,7 @@ erlang 25.1.2
 flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
+github-cli 2.32.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
@@ -233,6 +234,13 @@ dummy 1.2.3
             datasource: 'docker',
             packageName: 'practicalscheme/gauche',
             depName: 'gauche',
+          },
+          {
+            currentValue: '2.32.1',
+            datasource: 'github-releases',
+            packageName: 'cli/cli',
+            depName: 'github-cli',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '0.104.3',
@@ -615,6 +623,32 @@ awscli    2.8.6
         deps: [
           {
             currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jre',
+          },
+        ],
+      });
+      const semeruJdkRes = extractPackageFile(
+        'java semeru-openj9-17.0.8.1+1_openj9-0.40.0'
+      );
+      expect(semeruJdkRes).toEqual({
+        deps: [
+          {
+            currentValue: '17.0.8.1+1',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jdk',
+          },
+        ],
+      });
+      const semeruJreRes = extractPackageFile(
+        'java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0'
+      );
+      expect(semeruJreRes).toEqual({
+        deps: [
+          {
+            currentValue: '17.0.8.1+1',
             datasource: 'java-version',
             depName: 'java',
             packageName: 'java-jre',
