@@ -3428,7 +3428,7 @@ i.e. Renovate will run on the repository around the clock.
 The easiest way to define a schedule is to use a preset if one of them fits your requirements.
 See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think it would help others.
 
-``` title="Some text schedules that are known to work"
+```title="Some text schedules that are known to work"
 every weekend
 before 5:00am
 after 10pm and before 5:00am

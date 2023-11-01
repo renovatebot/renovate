@@ -55,7 +55,7 @@ There are three ways to do this:
 
 ### index-url in `requirements.txt`
 
-``` title="Setting index URL in first line of requirements.txt"
+```title="Setting index URL in first line of requirements.txt"
 --index-url http://example.com/private-pypi/
 some-package==0.3.1
 some-other-package==1.0.0
