@@ -494,7 +494,7 @@ describe('modules/platform/gitlab/index', () => {
         });
       await gitlab.initRepo({
         repository: 'some/repo/project',
-        platformGitCredentialsFile: true
+        platformGitCredentialsFile: true,
       });
       expect(git.initRepo.mock.calls).toMatchSnapshot();
     });

@@ -363,12 +363,18 @@ export async function initRepo({
       url: defaults.endpoint,
     });
 
-    const url = getRepoUrl(repository, gitUrl, res, platformGitCredentialsFile, opts.token);
+    const url = getRepoUrl(
+      repository,
+      gitUrl,
+      res,
+      platformGitCredentialsFile,
+      opts.token
+    );
     await git.initRepo({
       ...config,
       url,
       platformGitCredentialsFile,
-      token: opts.token
+      token: opts.token,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
