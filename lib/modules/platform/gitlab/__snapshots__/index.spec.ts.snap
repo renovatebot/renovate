@@ -230,11 +230,10 @@ exports[`modules/platform/gitlab/index initRepo should fall back respecting when
     {
       "cloneSubmodules": undefined,
       "defaultBranch": "master",
+      "gitCredentialContent": undefined,
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",
-      "platformGitCredentialsFile": undefined,
       "repository": "some%2Frepo%2Fproject",
-      "token": "123test",
       "url": "http://oauth2:123test@mycompany.com/gitlab/some/repo/project.git",
     },
   ],
@@ -247,29 +246,11 @@ exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gi
     {
       "cloneSubmodules": undefined,
       "defaultBranch": "master",
+      "gitCredentialContent": undefined,
       "ignorePrAuthor": undefined,
       "mergeMethod": "merge",
-      "platformGitCredentialsFile": undefined,
       "repository": "some%2Frepo%2Fproject",
-      "token": "123test",
       "url": "ssh://git@gitlab.com/some%2Frepo%2Fproject.git",
-    },
-  ],
-]
-`;
-
-exports[`modules/platform/gitlab/index initRepo should work well with git credential helper 1`] = `
-[
-  [
-    {
-      "cloneSubmodules": undefined,
-      "defaultBranch": "master",
-      "ignorePrAuthor": undefined,
-      "mergeMethod": "merge",
-      "platformGitCredentialsFile": true,
-      "repository": "some%2Frepo%2Fproject",
-      "token": "123test",
-      "url": "https://gitlab.com/some%2Frepo%2Fproject.git",
     },
   ],
 ]
