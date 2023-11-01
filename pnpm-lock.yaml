@@ -249,8 +249,8 @@ importers:
         specifier: 6.1.11
         version: 6.1.11
       openpgp:
-        specifier: 5.10.2
-        version: 5.10.2
+        specifier: 5.11.0
+        version: 5.11.0
       p-all:
         specifier: 3.0.0
         version: 3.0.0
@@ -9075,8 +9075,8 @@ packages:
       mimic-fn: 4.0.0
     dev: true
 
-  /openpgp@5.10.2:
-    resolution: {integrity: sha512-nRqMp4o31rBagWB02tgfKCsocXWq4uYobZf9GDVlD5rQXBq/wRIZHiDhGX1dlDAI2inkZcPd2dSZOqmtGnsK1A==}
+  /openpgp@5.11.0:
+    resolution: {integrity: sha512-hytHsxIPtRhuh6uAmoBUThHSwHSX3imLu7x4453T+xkVqIw49rl22MRD4KQIAQdCDoVdouejzYgcuLmMA/2OAA==}
     engines: {node: '>= 8.0.0'}
     dependencies:
       asn1.js: 5.4.1
