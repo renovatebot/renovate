@@ -3,7 +3,7 @@
 exports[`modules/manager/npm/post-update/npm generates lock files 1`] = `
 [
   {
-    "cmd": "npm install --package-lock-only --no-audit --ignore-scripts",
+    "cmd": "npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",

@@ -27,6 +27,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
+    const skipInstalls = true;
+    const postUpdateOptions = ['npmDedupe'];
     const updates = [
       { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
     ];
@@ -34,7 +36,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      {},
+      { skipInstalls, postUpdateOptions },
       updates
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
