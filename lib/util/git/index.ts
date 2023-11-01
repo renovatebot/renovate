@@ -1138,7 +1138,7 @@ export async function fetchBranch(
  *
  */
 export async function configureCredentialHelperStore(
-  content?: string
+  content: string
 ): Promise<void> {
   logger.debug('Configuring credential helper and git-credential file');
   const gitCredentialsFile = upath.join(
