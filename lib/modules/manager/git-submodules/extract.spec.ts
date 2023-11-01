@@ -311,7 +311,7 @@ describe('modules/manager/git-submodules/extract', () => {
             label: 'staging branch',
           },
           main: {
-            current: true,
+            current: false,
             name: 'main',
             commit: 'e14c7e1',
             label: 'main branch',
