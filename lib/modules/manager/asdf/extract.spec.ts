@@ -73,9 +73,9 @@ helmfile 0.147.0
 hugo 0.104.3
 idris 1.3.4
 java adoptopenjdk-16.0.0+36
+jq 1.7
 julia 1.8.2
 just 1.7.0
-jq 1.7
 kotlin 1.7.20
 kubectl 1.26.3
 kustomize 4.5.7
@@ -305,18 +305,18 @@ dummy 1.2.3
             depName: 'java',
           },
           {
-            currentValue: '1.8.2',
-            datasource: 'github-releases',
-            packageName: 'JuliaLang/julia',
-            depName: 'julia',
-            extractVersion: '^v(?<version>\\S+)',
-          },
-          {
             currentValue: '1.7',
             datasource: 'github-releases',
             packageName: 'jqlang/jq',
             depName: 'jq',
             extractVersion: '^jq-(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.8.2',
+            datasource: 'github-releases',
+            packageName: 'JuliaLang/julia',
+            depName: 'julia',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.7.0',
