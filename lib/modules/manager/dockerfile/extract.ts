@@ -236,6 +236,10 @@ export function getDep(
     }
   }
 
+  if (dep.depName) {
+    dep.depType = 'stage';
+  }
+
   return dep;
 }
 
@@ -289,6 +293,7 @@ export function extractPackageFile(
       const syntaxImage = syntaxMatch.groups.image;
       const lineNumberRanges: number[][] = [[lineNumberInstrStart, lineNumber]];
       const dep = getDep(syntaxImage, true, config.registryAliases);
+      dep.depType = 'syntax';
       processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
       logger.trace(
         {
@@ -416,9 +421,6 @@ export function extractPackageFile(
 
   if (!deps.length) {
     return null;
-  }
-  for (const d of deps) {
-    d.depType = 'stage';
   }
   deps[deps.length - 1].depType = 'final';
   return { deps };

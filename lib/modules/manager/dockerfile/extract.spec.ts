@@ -954,7 +954,7 @@ describe('modules/manager/dockerfile/extract', () => {
           currentValue: '1',
           datasource: 'docker',
           depName: 'docker/dockerfile',
-          depType: 'stage',
+          depType: 'syntax',
           replaceString: 'docker/dockerfile:1',
         },
         {
@@ -1183,7 +1183,7 @@ describe('modules/manager/dockerfile/extract', () => {
           currentValue: '1.1.7',
           datasource: 'docker',
           depName: 'docker/dockerfile',
-          depType: 'stage',
+          depType: 'syntax',
           replaceString: 'docker/dockerfile:1.1.7',
         },
         {
@@ -1218,6 +1218,7 @@ describe('modules/manager/dockerfile/extract', () => {
         currentValue: '5.0.0',
         datasource: 'docker',
         depName: 'redis',
+        depType: 'stage',
         replaceString: 'redis:5.0.0@sha256:abcd',
       });
 
@@ -1228,6 +1229,7 @@ describe('modules/manager/dockerfile/extract', () => {
         currentValue: '5.0.0',
         datasource: 'docker',
         depName: 'redis',
+        depType: 'stage',
         replaceString: 'redis:5.0.0',
       });
 
@@ -1238,6 +1240,7 @@ describe('modules/manager/dockerfile/extract', () => {
         currentDigest: 'sha256:abcd',
         datasource: 'docker',
         depName: 'redis',
+        depType: 'stage',
         replaceString: 'redis@sha256:abcd',
       });
 
@@ -1251,6 +1254,7 @@ describe('modules/manager/dockerfile/extract', () => {
         currentValue: 'nonroot',
         datasource: 'docker',
         depName: 'gcr.io/distroless/static-debian11',
+        depType: 'stage',
         replaceString: 'gcr.io/distroless/static-debian11:nonroot@sha256:abc',
       });
 
