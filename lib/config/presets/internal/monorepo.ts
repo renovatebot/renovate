@@ -275,6 +275,8 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'google-api-dotnet-client': 
+    'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -350,8 +352,6 @@ const repoGroups = {
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
   nswag: 'https://github.com/RicoSuter/NSwag',
-  'google-api-dotnet-client': 
-    'https://github.com/googleapis/google-api-dotnet-client',
   nuget: 'https://github.com/NuGet/NuGet.Client',
   nuxtjs: [
     'https://github.com/nuxt/nuxt.js', // old repo
