@@ -621,6 +621,32 @@ awscli    2.8.6
           },
         ],
       });
+      const semeruJdkRes = extractPackageFile(
+        'java semeru-openj9-17.0.8.1+1_openj9-0.40.0'
+      );
+      expect(semeruJdkRes).toEqual({
+        deps: [
+          {
+            currentValue: '17.0.8.1+1',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jdk',
+          },
+        ],
+      });
+      const semeruJreRes = extractPackageFile(
+        'java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0'
+      );
+      expect(semeruJreRes).toEqual({
+        deps: [
+          {
+            currentValue: '17.0.8.1+1',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jre',
+          },
+        ],
+      });
       const temurinJdkRes = extractPackageFile('java temurin-16.0.0+36');
       expect(temurinJdkRes).toEqual({
         deps: [
