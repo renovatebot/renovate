@@ -162,6 +162,62 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(execSnapshots).toEqual([]);
   });
 
+  it('deduplicates dependencies on installation with npm >= 7', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
+    const postUpdateOptions = ['npmDedupe'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions },
+      updates
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.error).toBeFalse();
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toHaveLength(1);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('deduplicates dependencies after installation with npm <= 6', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
+    const postUpdateOptions = ['npmDedupe'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions, constraints: { npm: '^6.0.0' } },
+      updates
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeFalse();
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toHaveLength(2);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm dedupe',
+      },
+    ]);
+  });
+
   it('runs twice if remediating', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');

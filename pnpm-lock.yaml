@@ -246,11 +246,11 @@ importers:
         specifier: 3.3.6
         version: 3.3.6
       node-html-parser:
-        specifier: 6.1.10
-        version: 6.1.10
+        specifier: 6.1.11
+        version: 6.1.11
       openpgp:
-        specifier: 5.10.2
-        version: 5.10.2
+        specifier: 5.11.0
+        version: 5.11.0
       p-all:
         specifier: 3.0.0
         version: 3.0.0
@@ -8762,8 +8762,8 @@ packages:
     dev: false
     optional: true
 
-  /node-html-parser@6.1.10:
-    resolution: {integrity: sha512-6/uWdWxjQWQ7tMcFK2wWlrflsQUzh1HsEzlIf2j5+TtzfhT2yUvg3DwZYAmjEHeR3uX74ko7exjHW69J0tOzIg==}
+  /node-html-parser@6.1.11:
+    resolution: {integrity: sha512-FAgwwZ6h0DSDWxfD0Iq1tsDcBCxdJB1nXpLPPxX8YyVWzbfCjKWEzaynF4gZZ/8hziUmp7ZSaKylcn0iKhufUQ==}
     dependencies:
       css-select: 5.1.0
       he: 1.2.0
@@ -9075,8 +9075,8 @@ packages:
       mimic-fn: 4.0.0
     dev: true
 
-  /openpgp@5.10.2:
-    resolution: {integrity: sha512-nRqMp4o31rBagWB02tgfKCsocXWq4uYobZf9GDVlD5rQXBq/wRIZHiDhGX1dlDAI2inkZcPd2dSZOqmtGnsK1A==}
+  /openpgp@5.11.0:
+    resolution: {integrity: sha512-hytHsxIPtRhuh6uAmoBUThHSwHSX3imLu7x4453T+xkVqIw49rl22MRD4KQIAQdCDoVdouejzYgcuLmMA/2OAA==}
     engines: {node: '>= 8.0.0'}
     dependencies:
       asn1.js: 5.4.1
@@ -10370,6 +10370,7 @@ packages:
 
   /string_decoder@1.3.0:
     resolution: {integrity: sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==}
+    requiresBuild: true
     dependencies:
       safe-buffer: 5.2.1
     dev: false

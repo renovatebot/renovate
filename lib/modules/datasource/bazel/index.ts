@@ -15,6 +15,7 @@ export class BazelDatasource extends Datasource {
     'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main';
 
   override readonly defaultRegistryUrls = [BazelDatasource.bazelCentralRepoUrl];
+  override readonly registryStrategy = 'hunt';
   override readonly customRegistrySupport = true;
   override readonly caching = true;
 
