@@ -68,13 +68,14 @@ export async function globalInitialize(
   config_: AllConfig
 ): Promise<RenovateConfig> {
   let config = config_;
-  setGlobalHostRules(config);
   await checkVersions();
+  setGlobalHostRules(config);
   config = await initPlatform(config);
   config = await setDirectories(config);
   await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
+  setGlobalHostRules(config);
   await initMergeConfidence();
   return config;
 }
