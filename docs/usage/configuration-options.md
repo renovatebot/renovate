@@ -2964,8 +2964,8 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 When `platformGitCredentialsFile` is enabled, Renovate won't pass the gitlab token through the URL and instead configure git to use a `.git-credentials` file.
 It is useful if you cannot pass credentials through the URL, such as when the HTTPS is configured for something else like Kerberos as HTTPS authentication.
 
-It runs the command `git config credential.helper store` and then writes the file `~/.git-credentials` with `https://oauth2:<TOKEN>@<ENDPOINT> if it doesn't already exist`.
-This feature will not work if a `~/.git-credentials` file already exists.
+It runs the command `git config --global credential.helper 'store --file=.git-credentials'` and then writes the file `.git-credentials` in the directory the repository is cloned in, with `https://oauth2:<TOKEN>@<ENDPOINT>` if it doesn't already exist.
+This feature will not work if the file `.git-credentials` already exists.
 
 ## postUpdateOptions
 

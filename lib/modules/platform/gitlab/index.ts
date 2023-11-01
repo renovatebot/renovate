@@ -94,7 +94,6 @@ export async function initPlatform({
   endpoint,
   token,
   gitAuthor,
-  platformGitCredentialsFile,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -142,9 +141,6 @@ export async function initPlatform({
       'Error authenticating with GitLab. Check that your token includes "api" permissions'
     );
     throw new Error('Init: Authentication failure');
-  }
-  if (platformGitCredentialsFile) {
-    await git.configureCredentialHelperStore(platformConfig.endpoint, token);
   }
 
   draftPrefix = semver.lt(defaults.version, '13.2.0')
@@ -245,7 +241,8 @@ function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>,
-  platformGitCredentialsFile?: boolean
+  platformGitCredentialsFile?: boolean,
+  token?: string
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
@@ -254,11 +251,6 @@ function getRepoUrl(
     logger.debug(`Using ssh URL: ${res.body.ssh_url_to_repo}`);
     return res.body.ssh_url_to_repo;
   }
-
-  const opts = hostRules.find({
-    hostType: defaults.hostType,
-    url: defaults.endpoint,
-  });
 
   if (
     gitUrl === 'endpoint' ||
@@ -282,7 +274,7 @@ function getRepoUrl(
         protocol.slice(0, -1) ||
         /* istanbul ignore next: should never happen */ 'https',
       // TODO: types (#22198)
-      auth: `oauth2:${opts.token!}`,
+      auth: `oauth2:${token!}`,
       host,
       pathname: `${newPathname}/${repository}.git`,
     });
@@ -298,7 +290,7 @@ function getRepoUrl(
     );
   } else {
     // TODO: types (#22198)
-    repoUrl.auth = `oauth2:${opts.token!}`;
+    repoUrl.auth = `oauth2:${token!}`;
   }
   return URL.format(repoUrl);
 }
@@ -365,10 +357,18 @@ export async function initRepo({
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const url = getRepoUrl(repository, gitUrl, res, platformGitCredentialsFile);
+
+    const opts = hostRules.find({
+      hostType: defaults.hostType,
+      url: defaults.endpoint,
+    });
+
+    const url = getRepoUrl(repository, gitUrl, res, platformGitCredentialsFile, opts.token);
     await git.initRepo({
       ...config,
       url,
+      platformGitCredentialsFile,
+      token: opts.token
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');

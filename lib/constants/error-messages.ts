@@ -10,7 +10,8 @@ export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 export const PLATFORM_UNKNOWN_ERROR = 'platform-unknown-error';
-export const PLATFORM_GIT_CREDENTIALS_ERROR = 'platform-git-credentials-error';
+export const PLATFORM_GIT_CREDENTIALS_COMMAND_ERROR = 'platform-git-credentials-command-error';
+export const PLATFORM_GIT_CREDENTIALS_FILE_ERROR = 'platform-git-credentials-file-error';
 
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';

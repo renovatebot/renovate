@@ -17,6 +17,8 @@ export interface StorageConfig {
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
   fullClone?: boolean;
+  token?: string;
+  platformGitCredentialsFile?: boolean;
 }
 
 export interface LocalConfig extends StorageConfig {

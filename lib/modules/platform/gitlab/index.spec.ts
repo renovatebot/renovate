@@ -483,6 +483,21 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(git.initRepo.mock.calls).toMatchSnapshot();
     });
+
+    it('should work well with git credential helper', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some%2Frepo%2Fproject.git`,
+        });
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+        platformGitCredentialsFile: true
+      });
+      expect(git.initRepo.mock.calls).toMatchSnapshot();
+    });
   });
 
   describe('getRepoForceRebase', () => {
