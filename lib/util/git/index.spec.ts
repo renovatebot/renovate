@@ -810,7 +810,7 @@ describe('util/git/index', () => {
       await git.initRepo({
         url: origin.path,
         platformGitCredentialsFile: true,
-        token: token,
+        token,
       });
       const repo = Git(tmpDir.path);
       const res = (
