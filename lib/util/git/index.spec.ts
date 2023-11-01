@@ -804,19 +804,17 @@ describe('util/git/index', () => {
       expect(res).toBe('test-extra-config-value');
     });
 
-    it('should configure credential helper well', async () => {
-      const token = 'glpat-ELFDSKJFLDSU?REJ';
+    it('should configure credential.helper well', async () => {
       await fs.emptyDir(tmpDir.path);
       await git.initRepo({
         url: origin.path,
-        platformGitCredentialsFile: true,
-        token,
+        gitCredentialContent: "somethingThatDontMatter",
       });
       const repo = Git(tmpDir.path);
       const res = (
         await repo.raw(['config', '--global', 'credential.helper'])
       ).trim();
-      expect(res).toBe(`store --file=${tmpDir.path}/.git-credentials`);
+      expect(res).toBe(`store --file=${GlobalConfig.get('localDir')}/.git-credentials`);
     });
   });
 
