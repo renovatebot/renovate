@@ -180,8 +180,11 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toHaveLength(1);
-    expect(execSnapshots[0].cmd).toContain('--prefer-dedupe');
-    expect(execSnapshots[0].cmd).toContain('--package-lock-only');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts',
+      },
+    ]);
   });
 
   it('deduplicates dependencies after installation with npm <= 6', async () => {
@@ -203,9 +206,14 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toHaveLength(2);
-    expect(execSnapshots[0].cmd).not.toContain('--prefer-dedupe');
-    expect(execSnapshots[0].cmd).not.toContain('--package-lock-only');
-    expect(execSnapshots[1].cmd).toBe('npm dedupe');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm dedupe',
+      },
+    ]);
   });
 
   it('runs twice if remediating', async () => {
