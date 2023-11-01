@@ -949,6 +949,16 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1',
+          datasource: 'docker',
+          depName: 'docker/dockerfile',
+          depType: 'stage',
+          replaceString: 'docker/dockerfile:1',
+        },
+        {
+          autoReplaceStringTemplate:
             ' ARG `\n' +
             '\t# multi-line arg\n' +
             '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\n',
@@ -1153,6 +1163,38 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'myName/myPackage',
           depType: 'final',
           replaceString: 'myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
+  it('handles # syntax statements', () => {
+    const res = extractPackageFile(
+      '# syntax=docker/dockerfile:1.1.7\n' + 'FROM alpine:3.13.5\n',
+      '',
+      {}
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.1.7',
+          datasource: 'docker',
+          depName: 'docker/dockerfile',
+          depType: 'stage',
+          replaceString: 'docker/dockerfile:1.1.7',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.13.5',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'final',
+          replaceString: 'alpine:3.13.5',
         },
       ],
     });

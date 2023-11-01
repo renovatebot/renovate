@@ -283,6 +283,24 @@ export function extractPackageFile(
       instruction += '\n' + lineLookahead;
     }
 
+    const syntaxRegex = regEx('^#[ \\t]*syntax=(?<image>\\S+)', 'im');
+    const syntaxMatch = instruction.match(syntaxRegex);
+    if (syntaxMatch?.groups?.image) {
+      const syntaxImage = syntaxMatch.groups.image;
+      const lineNumberRanges: number[][] = [[lineNumberInstrStart, lineNumber]];
+      const dep = getDep(syntaxImage, true, config.registryAliases);
+      processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+      logger.trace(
+        {
+          depName: dep.depName,
+          currentValue: dep.currentValue,
+          currentDigest: dep.currentDigest,
+        },
+        'Dockerfile # syntax'
+      );
+      deps.push(dep);
+    }
+
     const argRegex = regEx(
       '^[ \\t]*ARG(?:' +
         escapeChar +
