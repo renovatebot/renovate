@@ -34,7 +34,7 @@ describe('workers/repository/error-config', () => {
 
 Location: \`package.json\`
 Error type: some-error
-Message: \`some-message\`
+Message: some-message
 `;
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';

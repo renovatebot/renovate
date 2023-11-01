@@ -419,8 +419,7 @@ export async function lookupUpdates(
           // digest update
           res.updates.push({
             updateType: 'digest',
-            // TODO #22198
-            newValue: config.currentValue!,
+            newValue: compareValue,
           });
         }
       } else if (config.pinDigests) {
