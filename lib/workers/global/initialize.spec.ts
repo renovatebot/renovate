@@ -49,12 +49,13 @@ describe('workers/global/initialize', () => {
     it('should have run before initPlatform', async () => {
       const hostRule = {
         hostType: 'github',
-        matchHost: 'some.github-enterprise.host',
+        matchHost: 'https://some.github-enterprise.host',
         httpsPrivateKey: 'private-key',
         httpsCertificate: 'certificate',
         httpsCertificateAuthority: 'certificate-authority',
       };
 
+      initPlatform.mockReset();
       initPlatform.mockImplementationOnce((r) => {
         const foundRule = hostRules.find({
           hostType: hostRule.hostType,
