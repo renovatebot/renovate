@@ -293,7 +293,7 @@ export function setGitAuthor(gitAuthor: string | undefined): void {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'None';
     error.validationError = 'Invalid gitAuthor';
-    error.validationMessage = `gitAuthor is not parsed as valid RFC5322 format: ${gitAuthor!}`;
+    error.validationMessage = `\`gitAuthor\` is not parsed as valid RFC5322 format: \`${gitAuthor!}\``;
     throw error;
   }
   config.gitAuthorName = gitAuthorParsed.name;

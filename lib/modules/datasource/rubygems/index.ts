@@ -1,6 +1,7 @@
 import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod';
 import { logger } from '../../../logger';
+import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
 import { AsyncResult, Result } from '../../../util/result';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
@@ -46,6 +47,16 @@ export class RubyGemsDatasource extends Datasource {
 
   private readonly versionsEndpointCache: VersionsEndpointCache;
 
+  @cache({
+    namespace: `datasource-${RubyGemsDatasource.id}`,
+    key: ({ packageName, registryUrl }: GetReleasesConfig) =>
+      // TODO: types (#22198)
+      `releases:${registryUrl!}:${packageName}`,
+    cacheable: ({ registryUrl }: GetReleasesConfig) => {
+      const registryHostname = parseUrl(registryUrl)?.hostname;
+      return registryHostname === 'rubygems.org';
+    },
+  })
   async getReleases({
     packageName,
     registryUrl,

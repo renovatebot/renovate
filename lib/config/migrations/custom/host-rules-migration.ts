@@ -77,7 +77,8 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
     if (distinctHostValues.size > 1) {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
-      error.validationMessage = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
+      error.validationMessage =
+        '`hostRules` cannot contain more than one host-matching field - use `matchHost` only.';
       error.validationError =
         'The renovate configuration file contains some invalid settings';
       throw error;
