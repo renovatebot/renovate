@@ -816,7 +816,7 @@ describe('util/git/index', () => {
       const res = (
         await repo.raw(['config', '--global', 'credential.helper'])
       ).trim();
-      expect(res).toBe(`store --file=.git-credentials`);
+      expect(res).toBe(`store --file=${tmpDir.path}/.git-credentials`);
     });
   });
 

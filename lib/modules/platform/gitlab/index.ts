@@ -370,11 +370,16 @@ export async function initRepo({
       platformGitCredentialsFile,
       opts.token
     );
+
+    const gitCredentialContent: string = url.replace(
+      new RegExp('(https?://)([^/]*).*'),
+      `$1oauth2:${opts.token}@$2`
+    );
+
     await git.initRepo({
       ...config,
       url,
-      platformGitCredentialsFile,
-      token: opts.token,
+      gitCredentialContent,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');

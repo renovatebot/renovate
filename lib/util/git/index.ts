@@ -248,8 +248,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   gitInitialized = false;
   submodulesInitizialized = false;
 
-  if (config.platformGitCredentialsFile) {
-    await configureCredentialHelperStore(config.url, config.token);
+  if (config.gitCredentialContent) {
+    await configureCredentialHelperStore(config.gitCredentialContent);
   }
 
   await fetchBranchCommits();
@@ -1138,8 +1138,7 @@ export async function fetchBranch(
  *
  */
 export async function configureCredentialHelperStore(
-  endpoint: string,
-  token?: string
+  content?: string
 ): Promise<void> {
   logger.debug('Configuring credential helper and git-credential file');
   const gitCredentialsFile = upath.join(
@@ -1165,16 +1164,12 @@ export async function configureCredentialHelperStore(
     );
     throw new Error(PLATFORM_GIT_CREDENTIALS_FILE_ERROR);
   } else {
-    const contents: string = endpoint.replace(
-      new RegExp('(https?://)([^/]*).*'),
-      `$1oauth2:${token}@$2`
-    );
     logger.debug(
-      { gitCredentialsFile, contents },
+      { gitCredentialsFile, content },
       'Writing credentials to file'
     );
     try {
-      await fs.outputFile(gitCredentialsFile, contents, { mode: 0o640 });
+      await fs.outputFile(gitCredentialsFile, content, { mode: 0o640 });
     } catch (err) {
       logger.warn({ err }, 'Failed to write to git-credentials file');
       throw new Error(PLATFORM_GIT_CREDENTIALS_FILE_ERROR);
