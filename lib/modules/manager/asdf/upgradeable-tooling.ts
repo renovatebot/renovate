@@ -332,6 +332,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  maven: {
+    asdfPluginUrl: 'https://github.com/halcyon/asdf-maven.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'apache/maven',
+      extractVersion: '^maven-(?<version>\\S+)',
+    },
+  },
   nim: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-nim',
     config: {
