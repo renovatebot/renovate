@@ -300,6 +300,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'casey/just',
     },
   },
+  jq: {
+    asdfPluginUrl: 'https://github.com/lsanwick/asdf-jq.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'jqlang/jq',
+      extractVersion: '^jq-(?<version>\\S+)',
+    },
+  },
   kotlin: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-kotlin',
     config: {
