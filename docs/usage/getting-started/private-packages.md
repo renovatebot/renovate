@@ -67,9 +67,7 @@ In addition to the above options to match against a host, you need to add the cr
 Typically they are either `token`, or `username` + `password`.
 Other credential terms are not supported yet.
 
-Here is an example of some host rules:
-
-```json
+```json title="Example host rules"
 {
   "hostRules": [
     {
@@ -210,7 +208,7 @@ The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@githu
 Maybe you're running your own ChartMuseum server to host your private Helm Charts.
 This is how you connect to a private Helm repository:
 
-```js
+```js title="Connecting to a private Helm repository"
 module.exports = {
   hostRules: [
     {
