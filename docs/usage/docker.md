@@ -51,9 +51,8 @@ You could then use this `packageRules` array, to tell Renovate to use `semver` v
 ```
 
 Another example is the official `python` image, which follows `pep440` versioning.
-You can tell Renovate to use the `pep440` versioning scheme with this set of `packageRules`:
 
-```json
+```json title="Telling Renovate to use the pep440 versioning scheme"
 {
   "packageRules": [
     {
@@ -202,7 +201,7 @@ We will explain how to authenticate for the most common registries.
 Here is an example of configuring a default Docker username/password in `config.js`.
 The Docker Hub password is stored in a process environment variable.
 
-```js
+```js title="config.js"
 module.exports = {
   hostRules: [
     {
