@@ -4,7 +4,11 @@ import * as p from '../../../../util/promises';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { get as getVersioning } from '../../../versioning';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../../types';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../../types';
 import { massageProviderLookupName } from '../util';
 import { TerraformProviderHash } from './hash';
 import type { ProviderLock, ProviderLockUpdate } from './types';
@@ -61,6 +65,55 @@ async function updateAllLocks(
   return updates.filter(is.truthy);
 }
 
+function getNewConstraint(
+  dep: Upgrade<Record<string, unknown>>,
+  oldConstraint: string | undefined
+): string | undefined {
+  const { currentValue, currentVersion, newValue, newVersion, packageName } =
+    dep;
+
+  if (oldConstraint && currentValue && newValue && currentValue === newValue) {
+    logger.debug(
+      `Leaving constraints "${oldConstraint}" unchanged for "${packageName}" as current and new values are the same`
+    );
+    return oldConstraint;
+  }
+
+  if (
+    oldConstraint &&
+    currentValue &&
+    newValue &&
+    oldConstraint.includes(currentValue)
+  ) {
+    logger.debug(
+      `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`
+    );
+    return oldConstraint.replace(currentValue, newValue);
+  }
+
+  if (
+    oldConstraint &&
+    currentVersion &&
+    newVersion &&
+    oldConstraint.includes(currentVersion)
+  ) {
+    logger.debug(
+      `Updating constraint "${oldConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`
+    );
+    return oldConstraint.replace(currentVersion, newVersion);
+  }
+
+  if (isPinnedVersion(newValue)) {
+    logger.debug(`Pinning constraint for "${packageName}" to "${newVersion}"`);
+    return newVersion;
+  }
+
+  logger.debug(
+    `Could not detect constraint to update for "${packageName}" so setting to newValue "${newValue}"`
+  );
+  return newValue;
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -99,14 +152,7 @@ export async function updateArtifacts({
       );
       for (const dep of providerDeps) {
         massageProviderLookupName(dep);
-        const {
-          registryUrls,
-          currentValue,
-          currentVersion,
-          newValue,
-          newVersion,
-          packageName,
-        } = dep;
+        const { registryUrls, newVersion, packageName } = dep;
 
         const registryUrl = registryUrls
           ? registryUrls[0]
@@ -118,47 +164,7 @@ export async function updateArtifacts({
         if (!updateLock) {
           continue;
         }
-        let newConstraint: string | undefined = updateLock.constraints;
-        if (
-          newConstraint &&
-          currentValue &&
-          newValue &&
-          currentValue === newValue
-        ) {
-          logger.debug(
-            `Leaving constraints "${newConstraint}" unchanged for "${packageName}" as current and new values are the same`
-          );
-        } else if (
-          newConstraint &&
-          currentValue &&
-          newValue &&
-          newConstraint.includes(currentValue)
-        ) {
-          logger.debug(
-            `Updating constraint "${newConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`
-          );
-          newConstraint = newConstraint.replace(currentValue, newValue);
-        } else if (
-          newConstraint &&
-          currentVersion &&
-          newVersion &&
-          newConstraint.includes(currentVersion)
-        ) {
-          logger.debug(
-            `Updating constraint "${newConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`
-          );
-          newConstraint = newConstraint.replace(currentVersion, newVersion);
-        } else if (isPinnedVersion(newValue)) {
-          newConstraint = newVersion;
-          logger.debug(
-            `Pinning constraint for "${packageName}" to "${newConstraint}"`
-          );
-        } else {
-          newConstraint = newValue;
-          logger.debug(
-            `Could not detect constraint to update for "${packageName}" so setting to newValue "${newConstraint}"`
-          );
-        }
+        const newConstraint = getNewConstraint(dep, updateLock.constraints);
         const update: ProviderLockUpdate = {
           // TODO #22198
           newVersion: newVersion!,
