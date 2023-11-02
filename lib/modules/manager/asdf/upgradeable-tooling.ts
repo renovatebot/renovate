@@ -54,6 +54,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'asdf-plugin-manager': {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-plugin-manager',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'asdf-community/asdf-plugin-manager',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {
@@ -452,6 +460,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'rust-lang/rust',
     },
   },
+  sbt: {
+    asdfPluginUrl: 'https://github.com/bram2000/asdf-sbt.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'sbt/sbt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   scala: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-scala',
     config: (version) => {
@@ -549,6 +565,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'aquasecurity/trivy',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  vault: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hashicorp/vault',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

@@ -46,6 +46,7 @@ describe('modules/manager/asdf/extract', () => {
         codeBlock`
 adr-tools 3.0.0
 argocd 2.5.4
+asdf-plugin-manager 1.1.1
 awscli 2.8.6
 bun 0.2.2
 cargo-make 0.36.2
@@ -92,6 +93,7 @@ pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
 rust 1.64.0
+sbt 1.9.7
 scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
@@ -101,6 +103,7 @@ terragrunt 0.43.2
 tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
+vault 1.15.1
 zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
@@ -124,6 +127,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'argoproj/argo-cd',
             depName: 'argocd',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.1.1',
+            datasource: 'github-releases',
+            packageName: 'asdf-community/asdf-plugin-manager',
+            depName: 'asdf-plugin-manager',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -432,6 +442,13 @@ dummy 1.2.3
             depName: 'rust',
           },
           {
+            currentValue: '1.9.7',
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '3.2.1',
             datasource: 'github-tags',
             packageName: 'lampepfl/dotty',
@@ -491,6 +508,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'aquasecurity/trivy',
             depName: 'trivy',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.15.1',
+            datasource: 'github-releases',
+            packageName: 'hashicorp/vault',
+            depName: 'vault',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

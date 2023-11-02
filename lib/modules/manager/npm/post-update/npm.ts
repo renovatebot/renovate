@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -49,10 +50,14 @@ export async function generateLockFile(
         config.constraints?.npm ??
         getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
     };
+    const supportsPreferDedupeFlag =
+      !npmToolConstraint.constraint ||
+      semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     const commands: string[] = [];
     let cmdOptions = '';
     if (
-      postUpdateOptions?.includes('npmDedupe') === true ||
+      (postUpdateOptions?.includes('npmDedupe') === true &&
+        !supportsPreferDedupeFlag) ||
       skipInstalls === false
     ) {
       logger.debug('Performing node_modules install');
@@ -60,6 +65,11 @@ export async function generateLockFile(
     } else {
       logger.debug('Updating lock file only');
       cmdOptions += '--package-lock-only --no-audit';
+    }
+
+    if (postUpdateOptions?.includes('npmDedupe') && supportsPreferDedupeFlag) {
+      logger.debug('Deduplicate dependencies on installation');
+      cmdOptions += ' --prefer-dedupe';
     }
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
@@ -130,8 +140,11 @@ export async function generateLockFile(
     }
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('npmDedupe')) {
-      logger.debug('Performing npm dedupe');
+    if (
+      config.postUpdateOptions?.includes('npmDedupe') &&
+      !supportsPreferDedupeFlag
+    ) {
+      logger.debug('Performing npm dedupe after installation');
       commands.push('npm dedupe');
     }
 
