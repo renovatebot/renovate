@@ -12,7 +12,7 @@ Let Renovate use your PAT by doing _one_ of the following:
 Permissions for your PAT should be at minimum:
 
 | Scope        | Permission   | Description                       |
-| ------------ | ------------ | ----------------------------------|
+| ------------ | ------------ | --------------------------------- |
 | `Code`       | Read & Write | Required                          |
 | `Work Items` | Read & write | Only needed for link to work item |
 
