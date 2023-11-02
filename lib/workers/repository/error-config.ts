@@ -3,7 +3,6 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../modules/platform';
-import { regEx } from '../../util/regex';
 
 export function raiseConfigWarningIssue(
   config: RenovateConfig,
@@ -42,10 +41,7 @@ async function raiseWarningIssue(
     body += `Error type: ${error.validationError}\n`;
   }
   if (error.validationMessage) {
-    body += `Message: \`${error.validationMessage.replace(
-      regEx(/`/g),
-      "'"
-    )}\`\n`;
+    body += `Message: ${error.validationMessage}\n`;
   }
 
   const pr = await platform.getBranchPr(
