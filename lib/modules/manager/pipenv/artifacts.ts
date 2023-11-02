@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -84,8 +83,7 @@ export function getPipenvConstraint(
 }
 
 function getMatchingHostRule(url: string | undefined): HostRule {
-  const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  return find({ hostType: PypiDatasource.id, url });
 }
 
 async function findPipfileSourceUrlWithCredentials(
