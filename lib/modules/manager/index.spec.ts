@@ -216,4 +216,17 @@ describe('modules/manager/index', () => {
       manager.getManagers().delete('dummy');
     });
   });
+
+  describe('isKnownManager', () => {
+    it('returns true', () => {
+      expect(manager.isKnownManager('npm')).toBeTrue();
+      expect(manager.isKnownManager('regex')).toBeTrue();
+      expect(manager.isKnownManager('custom.regex')).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(manager.isKnownManager('npm-unkown')).toBeFalse();
+      expect(manager.isKnownManager('custom.unknown')).toBeFalse();
+    });
+  });
 });

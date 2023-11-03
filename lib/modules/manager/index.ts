@@ -1,5 +1,6 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
+import { boolean } from './bazel-module/fragments';
 import { customManagerList, isCustomManager } from './custom';
 import customManagers from './custom/api';
 import type {
@@ -102,4 +103,8 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   }
 
   return config.rangeStrategy;
+}
+
+export function isKnownManager(mgr: string): boolean {
+  return allManagersList.includes(mgr.replace('custom.', ''));
 }
