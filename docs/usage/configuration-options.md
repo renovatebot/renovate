@@ -2038,7 +2038,7 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 Behaviour details:
 
-- Renovate only adds labels when it creates the PR
+- Renovate creates PRs with the currently configured/applicable labels
 - If you remove labels which Renovate added, it won't re-apply them
 - If you change your config, the new/changed labels are applied to any open PRs
 
