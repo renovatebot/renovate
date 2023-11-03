@@ -89,6 +89,10 @@ describe('util/common', () => {
   });
 
   describe('parseJson', () => {
+    it('returns null', () => {
+      expect(parseJson(null, 'renovate.json')).toBeNull();
+    });
+
     it('returns parsed json', () => {
       expect(parseJson(validJsonString, 'renovate.json')).toEqual({
         name: 'John Doe',

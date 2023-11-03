@@ -62,7 +62,11 @@ export function detectPlatform(
   return null;
 }
 
-export function parseJson(content: string, filename: string): unknown {
+export function parseJson(content: string | null, filename: string): unknown {
+  if (!content) {
+    return null;
+  }
+
   return filename.endsWith('.json5')
     ? JSON5.parse(content)
     : parseJsonWithFallback(content, filename);
