@@ -351,6 +351,7 @@ const options: RenovateOptions[] = [
     experimental: true,
     experimentalIssues: [23286],
     default: {},
+    mergeable: true,
   },
   {
     name: 'dockerChildPrefix',
@@ -372,7 +373,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.23.8',
+    default: 'ghcr.io/containerbase/sidecar:9.23.11',
     globalOnly: true,
   },
   {
