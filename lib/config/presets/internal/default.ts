@@ -3,7 +3,7 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
   approveMajorUpdates: {
-    description: 'Require dependency dashboard approval for `major` updates.',
+    description: 'Require Dependency Dashboard approval for `major` updates.',
     packageRules: [
       {
         dependencyDashboardApproval: true,
