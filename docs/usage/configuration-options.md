@@ -940,7 +940,7 @@ You may use the `customizeDashboard` object to customize the Dependency Dashboar
 
 Supported fields:
 
-- `repoProblemsHeader`: This field will replace the header of the Repository Problems in Dependency Dashboard issue.
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
 
 ### defaultRegistryUrlTemplate
 
