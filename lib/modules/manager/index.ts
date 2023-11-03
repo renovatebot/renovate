@@ -1,6 +1,5 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
-import { boolean } from './bazel-module/fragments';
 import { customManagerList, isCustomManager } from './custom';
 import customManagers from './custom/api';
 import type {
