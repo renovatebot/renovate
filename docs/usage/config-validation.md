@@ -39,7 +39,7 @@ For example:
 ```console
 $ npm install --global renovate
 added 750 packages, and audited 751 packages in 51s
-$ renovate-config-validator first_config.jsonn
+$ renovate-config-validator first_config.json
  INFO: Validating first_config_.json
  INFO: Config validated successfully
 ```
