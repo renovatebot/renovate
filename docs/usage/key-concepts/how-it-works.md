@@ -21,8 +21,8 @@ They are used sequentially:
 
 For example:
 
-1. the `gitlabci` manager find a dependency named `python:3.10-alpine` of datasource `docker`
-2. the `docker` datasource looks for versions and find `[python:3.9,python:3.9-alpine,python:3.10,python:3.10-alpine,python:3.11,python:3.11-alpine]`
+1. the `gitlabci` manager finds a dependency named `python:3.10-alpine` of datasource `docker`
+2. the `docker` datasource looks for versions and finds `[python:3.9,python:3.9-alpine,python:3.10,python:3.10-alpine,python:3.11,python:3.11-alpine]`
 3. the `docker` versioning takes `python:3.11-alpine` as it is compatible with `python:3.10-alpine`
 
 ```mermaid
