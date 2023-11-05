@@ -9,9 +9,7 @@ Renovate works by searching for all the dependencies in your project and then lo
 
 To be compatible with the variety of dependency-naming and versioning conventions, Renovate has defined modules for each known convention, and you can define your own too.
 
-## Core
-
-The core of renovate is responsible for the global workflow
+Please add comments to the [issue#25091](https://github.com/renovatebot/renovate/issues/25091) if you wish to see a part (better) shown in the graph below
 
 ## Modules
 
