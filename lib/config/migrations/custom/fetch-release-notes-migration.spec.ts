@@ -7,7 +7,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
         fetchReleaseNotes: false as never,
       },
       {
-        fetchReleaseNotes: 'off',
+        fetchChangeLogs: 'off',
       }
     );
     expect(FetchReleaseNotesMigration).toMigrate(
@@ -15,7 +15,31 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
         fetchReleaseNotes: true as never,
       },
       {
+        fetchChangeLogs: 'pr',
+      }
+    );
+    expect(FetchReleaseNotesMigration).toMigrate(
+      {
         fetchReleaseNotes: 'pr',
+      },
+      {
+        fetchChangeLogs: 'pr',
+      }
+    );
+    expect(FetchReleaseNotesMigration).toMigrate(
+      {
+        fetchReleaseNotes: 'off',
+      },
+      {
+        fetchChangeLogs: 'off',
+      }
+    );
+    expect(FetchReleaseNotesMigration).toMigrate(
+      {
+        fetchReleaseNotes: 'branch',
+      },
+      {
+        fetchChangeLogs: 'branch',
       }
     );
   });

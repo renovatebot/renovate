@@ -2621,8 +2621,8 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'fetchReleaseNotes',
-    description: 'Controls if and when release notes are fetched.',
+    name: 'fetchChangeLogs',
+    description: 'Controls if and when changelogs/release notes are fetched.',
     type: 'string',
     allowedValues: ['off', 'branch', 'pr'],
     default: 'pr',
