@@ -10,6 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
+import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import { extractLockFileContentVersions } from './locked-version';
 
@@ -37,7 +38,7 @@ async function cargoUpdate(
 
 async function cargoUpdatePrecise(
   manifestPath: string,
-  updatedDeps: Upgrade<Record<string, unknown>>[],
+  updatedDeps: Upgrade[],
   constraint: string | undefined
 ): Promise<void> {
   // First update all dependencies that have been bumped in `Cargo.toml`.
@@ -92,10 +93,7 @@ export async function updateArtifacts(
   }
 
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
-  if (
-    !isLockFileMaintenance &&
-    (updatedDeps === undefined || updatedDeps.length < 1)
-  ) {
+  if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No more dependencies to update');
     return [
       {
@@ -162,7 +160,7 @@ export async function updateArtifacts(
     if (
       recursionLimit > 0 &&
       newCargoLockContent &&
-      String(err.stderr).match(/error: package ID specification/)
+      regEx(/error: package ID specification/).test(err.stderr)
     ) {
       const versions = extractLockFileContentVersions(newCargoLockContent);
       const newUpdatedDeps = updatedDeps.filter(
