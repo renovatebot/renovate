@@ -20,4 +20,12 @@ describe('util/toml', () => {
       },
     });
   });
+
+  it('handles invalid toml', () => {
+    const input = codeBlock`
+      !@#$%^&*()
+    `;
+
+    expect(() => parseToml(input)).toThrow(SyntaxError);
+  });
 });
