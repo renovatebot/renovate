@@ -5,6 +5,7 @@ import type {
   ValidationMessage,
 } from '../../config/types';
 import type { Category } from '../../constants';
+import type { JSONataManagerTemplates } from '../../config/types'; // TODO: Review me
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
@@ -21,6 +22,13 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
+}
+
+export interface JsonataExtractConfig
+  extends ExtractConfig,
+    JSONataManagerTemplates {
+  autoReplaceStringTemplate?: string;
+  matchQueries: string[];
 }
 
 export interface UpdateArtifactsConfig {

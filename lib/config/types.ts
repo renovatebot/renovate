@@ -186,6 +186,25 @@ export type RenovateRepository =
       secrets?: Record<string, string>;
     };
 
+export interface JSONataManagerTemplates {
+  depNameTemplate?: string;
+  packageNameTemplate?: string;
+  datasourceTemplate?: string;
+  versioningTemplate?: string;
+  depTypeTemplate?: string;
+  currentValueTemplate?: string;
+  currentDigestTemplate?: string;
+  extractVersionTemplate?: string;
+  registryUrlTemplate?: string;
+}
+
+export interface JSONataManager extends JSONataManagerTemplates {
+  fileMatch: string[];
+  engine: 'jsonata';
+  matchQueries: string[];
+  autoReplaceStringTemplate?: string;
+}
+
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
@@ -249,6 +268,8 @@ export interface RenovateConfig
   vulnerabilitySeverity?: string;
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
+
+  jsonataManagers?: JSONataManager[]; // TODO: Review me
 
   fetchReleaseNotes?: FetchReleaseNotesOptions;
   secrets?: Record<string, string>;
@@ -382,7 +403,8 @@ export interface RenovateOptionBase {
     | 'hostRules'
     | 'packageRules'
     | 'postUpgradeTasks'
-    | 'customManagers';
+    | 'customManagers'
+    | 'jsonataManagers'; // TODO: Review me
 
   stage?: RenovateConfigStage;
 

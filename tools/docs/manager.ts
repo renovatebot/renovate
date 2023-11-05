@@ -21,6 +21,9 @@ function getTitle(manager: string, displayName: string): string {
   if (isCustomManager(manager)) {
     return `Custom Manager Support using ${displayName}`;
   }
+  if (manager === 'json') {
+    return `Custom Manager Support using JSON query`;
+  }
   return `Automated Dependency Updates for ${displayName}`;
 }
 

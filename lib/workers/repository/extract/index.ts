@@ -41,6 +41,10 @@ export async function extractAllDependencies(
       for (const customManager of filteredCustomManagers) {
         tryConfig(mergeChildConfig(managerConfig, customManager));
       }
+    } else if (manager === 'custom') {
+      for (const jsonManager of config.jsonataManagers ?? []) {
+        tryConfig(mergeChildConfig(managerConfig, jsonManager));
+      }
     } else {
       tryConfig(managerConfig);
     }

@@ -64,5 +64,18 @@ describe('workers/repository/extract/index', () => {
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('regex');
     });
+
+    it('checks custom json managers', async () => {
+      managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
+      config.jsonataManagers = [
+        {
+          fileMatch: ['package.json'],
+          engine: 'jsonata',
+          matchQueries: ['{}'],
+        },
+      ];
+      const res = await extractAllDependencies(config);
+      expect(Object.keys(res)).toContain('json-jsonata');
+    });
   });
 });

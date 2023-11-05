@@ -15,6 +15,12 @@ describe('modules/manager/index', () => {
     for (const m of manager.getManagerList()) {
       const supportedDatasources = manager.get(m, 'supportedDatasources');
 
+      // TODO: Review me
+      if (m === 'custom') {
+        // custom supports any
+        continue;
+      }
+
       it(`has valid supportedDatasources for ${m}`, () => {
         expect(supportedDatasources).toBeNonEmptyArray();
         supportedDatasources!.every((d) => {

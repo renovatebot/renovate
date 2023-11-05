@@ -146,6 +146,7 @@ export function parsePreset(input: string): ParsedPreset {
     'packages',
     'preview',
     'regexManagers',
+    'jsonataManagers',
     'replacements',
     'schedule',
     'security',
