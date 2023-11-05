@@ -1,0 +1,5 @@
+# Require version 2.3.1 or later
+github "ReactiveCocoa/ReactiveCocoa" >= 2.3.1
+
+# A binary only framework
+binary "https://my.domain.com/release/MyFramework.json" ~> 2.3

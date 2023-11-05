@@ -1,0 +1,47 @@
+# Require version 2.3.1 or later
+github "ReactiveCocoa/ReactiveCocoa" >= 2.3.1
+
+# Require version 1.x
+github "Mantle/Mantle" ~> 1.0    # (1.0 or later, but less than 2.0)
+
+# Require exactly version 0.4.1
+github "jspahrsummers/libextobjc" == 0.4.1
+
+# Use the latest version
+github "jspahrsummers/xcconfigs"
+
+# Use the branch
+github "jspahrsummers/xcconfigs-legacy" "branch"
+
+# Use a project from GitHub Enterprise
+github "https://enterprise.local/ghe/desktop/git-error-translations"
+
+# Use a project from any arbitrary server, on the "development" branch
+git "https://enterprise.local/desktop/git-error-translations2.git" "development"
+
+# Use a project from GitHub with full URL
+git "https://github.com/user/repo1" == 1.0
+
+# Use a project from GitLab with full URL
+git "https://gitlab.com/user/repo2" == 1.0
+
+# Use a project from other host with full URL
+git "https://githost.com/user/repo3" == 1.0
+
+# Use a local project
+git "file:///directory/to/project" "branch"
+
+# A binary only framework
+binary "https://my.domain.com/release/MyFramework.json" ~> 2.3
+
+# A binary only framework without version
+binary "https://my.domain.com/release/MyFrameworkVersionless.json"
+
+# A binary only framework via file: url
+binary "file:///some/local/path/MyFramework.json" ~> 2.3
+
+# A binary only framework via local relative path from Current Working Directory to binary project specification
+binary "relative/path/MyFramework.json" ~> 2.3
+
+# A binary only framework via absolute path to binary project specification
+binary "/absolute/path/MyFramework.json" ~> 2.3
