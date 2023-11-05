@@ -6,29 +6,19 @@ import { updateFile } from '../utils';
 function jsUcfirst(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-// matches preset names like: regexManagers and mergeConfidence
-const longPresetNameRegex = regEx(/(?<first>[a-z]+)(?<second>[A-Z][a-z]+)/);
 
 function getEditUrl(name: string): string {
   const url =
     'https://github.com/renovatebot/renovate/edit/main/lib/config/presets/internal/';
 
-  const groups = name.match(longPresetNameRegex);
-  if (!groups) {
-    return `${url}${name}.ts`;
+  switch (name) {
+    case 'regexManagers':
+      return `${url}regex-managers.ts`;
+    case 'mergeConfidence':
+      return `${url}merge-confidence.ts`;
+    default:
+      return `${url}${name}.ts`;
   }
-
-  return `${url}${groups[1]}-${groups[2].toLowerCase()}.ts`;
-  // switch (newName) {
-  //   case 'regexmanagers':
-  //     return `${url}regex-managers.ts`;
-  //   case 'mergeconfidence':
-  //     return `${url}merge-confidence.ts`;
-  //   case 'full config':
-  //     return `${url}config.ts`;
-  //   default:
-  //     return `${url}${newName}.ts`;
-  // }
 }
 
 /**
