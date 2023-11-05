@@ -32,7 +32,7 @@ import {
 import { OnboardingState } from '../onboarding/common';
 import type { RepoFileConfig } from './types';
 
-async function detectConfigFile(): Promise<string | null> {
+export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
   for (const fileName of configFileNames) {
     if (fileName === 'package.json') {
@@ -140,7 +140,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config renovate.json5'
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
-        const validationMessage = `JSON5.parse error:  ${String(err.message)}`;
+        const validationMessage = `JSON5.parse error: \`${err.message.replaceAll(
+          '`',
+          "'"
+        )}\``;
         return {
           configFileName,
           configFileParseError: { validationError, validationMessage },
@@ -181,7 +184,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
           'Error parsing renovate config'
         );
         const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = `JSON.parse error:  ${String(err.message)}`;
+        const validationMessage = `JSON.parse error:  \`${err.message.replaceAll(
+          '`',
+          "'"
+        )}\``;
         return {
           configFileName,
           configFileParseError: { validationError, validationMessage },

@@ -8,9 +8,7 @@ Requirements:
 
 Create a `docker-compose.yaml` and `otel-collector-config.yml` file as seen below in a folder.
 
-`docker-compose.yaml`:
-
-```yaml
+```yaml title="docker-compose.yaml"
 version: '3'
 services:
   # Jaeger
@@ -36,9 +34,7 @@ services:
       - jaeger
 ```
 
-`otel-collector-config.yml`:
-
-```yaml
+```yaml title="otel-collector-config.yml"
 receivers:
   otlp:
     protocols:

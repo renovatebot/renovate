@@ -836,7 +836,7 @@ describe('workers/repository/update/branch/index', () => {
         ignoreTests: true,
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
-        fetchReleaseNotes: 'branch',
+        fetchChangeLogs: 'branch',
       } satisfies BranchConfig;
       scm.getBranchCommit.mockResolvedValue('123test'); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({

@@ -112,6 +112,13 @@ describe('modules/manager/nuget/config-formatter', () => {
           ?.attr['value']
       ).toBe('some-password');
 
+      expect(
+        myRegistryCredentials?.childWithAttribute(
+          'key',
+          'ValidAuthenticationTypes'
+        )?.attr['value']
+      ).toBe('basic');
+
       const myRegistry2Credentials = xmlDocument.descendantWithPath(
         'packageSourceCredentials.myRegistry2'
       );
@@ -122,6 +129,13 @@ describe('modules/manager/nuget/config-formatter', () => {
         myRegistry2Credentials?.childWithAttribute('key', 'ClearTextPassword')
           ?.attr['value']
       ).toBe('some-password');
+
+      expect(
+        myRegistry2Credentials?.childWithAttribute(
+          'key',
+          'ValidAuthenticationTypes'
+        )?.attr['value']
+      ).toBe('basic');
     });
 
     it('escapes registry credential names containing special characters', () => {

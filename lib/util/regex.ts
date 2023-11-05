@@ -43,7 +43,7 @@ export function regEx(
   }
 
   try {
-    const instance = new RegEx(pattern, flags);
+    const instance = flags ? new RegEx(pattern, flags) : new RegEx(pattern);
     if (canBeCached) {
       cache.set(key, instance);
     }
