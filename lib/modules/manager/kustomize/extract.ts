@@ -121,6 +121,8 @@ export function extractImage(image: Image): PackageDependency | null {
       ...dep,
       datasource: DockerDatasource.id,
       replaceString: newTag,
+      autoReplaceStringTemplate:
+        '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
     };
   }
 

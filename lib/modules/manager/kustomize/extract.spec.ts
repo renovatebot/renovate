@@ -197,6 +197,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract a default image', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -212,6 +214,9 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract an image in a repo', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        currentDigest: undefined,
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -227,6 +232,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a different registry', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -242,6 +249,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a different port', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -257,6 +266,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a multi-depth registry', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
