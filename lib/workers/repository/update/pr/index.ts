@@ -234,7 +234,7 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchReleaseNotes === 'pr') {
+  if (config.fetchChangeLogs === 'pr') {
     // fetch changelogs when not already done;
     await embedChangelogs(upgrades);
   }

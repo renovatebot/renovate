@@ -56,7 +56,7 @@ async function getBaseBranchConfig(
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
       error.validationError = 'Error fetching config file';
-      error.validationMessage = `Error fetching config file ${configFileName} from branch ${baseBranch}`;
+      error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
       throw error;
     }
 

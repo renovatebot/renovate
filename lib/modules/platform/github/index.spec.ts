@@ -48,6 +48,7 @@ describe('modules/platform/github/index', () => {
 
     const repoCache = repository.getCache();
     delete repoCache.platform;
+    delete process.env.RENOVATE_X_GITHUB_HOST_RULES;
   });
 
   describe('initPlatform()', () => {
@@ -162,6 +163,7 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
+      process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
       httpMock
         .scope(githubApiHost, {
           reqheaders: {
@@ -177,12 +179,74 @@ describe('modules/platform/github/index', () => {
       ).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        hostRules: [
+          {
+            hostType: 'docker',
+            matchHost: 'ghcr.io',
+            password: 'ghs_123test',
+            username: 'USERNAME',
+          },
+          {
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: 'ghs_123test',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: 'ghs_123test',
+            username: 'my-app[bot]',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: 'ghs_123test',
+            username: 'my-app[bot]',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: 'ghs_123test',
+            username: 'my-app[bot]',
+          },
+        ],
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
       expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
+        hostRules: [
+          {
+            hostType: 'docker',
+            matchHost: 'ghcr.io',
+            password: 'ghs_123test',
+            username: 'USERNAME',
+          },
+          {
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: 'ghs_123test',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: 'ghs_123test',
+            username: 'my-app[bot]',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: 'ghs_123test',
+            username: 'my-app[bot]',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: 'ghs_123test',
+            username: 'my-app[bot]',
+          },
+        ],
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
