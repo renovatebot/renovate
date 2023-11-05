@@ -72,7 +72,8 @@ describe('config/presets/internal/regex-managers', () => {
           replaceString:
             '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\nENV KUSTOMIZE_VERSION v5.2.1\n',
           extractVersion: '^kustomize/(?<version>.+)$',
-          versioning: 'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+          versioning:
+            'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
       ]);
     });
