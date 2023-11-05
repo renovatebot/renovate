@@ -214,7 +214,7 @@ export async function extractPackageFile(
 
   let cargoManifest: CargoManifest;
   try {
-    cargoManifest = parseToml(content);
+    cargoManifest = parseToml(content) as CargoManifest;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Error parsing Cargo.toml file');
     return null;
