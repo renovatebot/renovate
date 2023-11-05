@@ -217,7 +217,6 @@ describe('modules/manager/kustomize/extract', () => {
         autoReplaceStringTemplate:
           '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
-        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
