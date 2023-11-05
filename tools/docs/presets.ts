@@ -1,6 +1,5 @@
 import { groups as presetGroups } from '../../lib/config/presets/internal';
 import { logger } from '../../lib/logger';
-import { regEx } from '../../lib/util/regex';
 import { updateFile } from '../utils';
 
 function jsUcfirst(string: string): string {
