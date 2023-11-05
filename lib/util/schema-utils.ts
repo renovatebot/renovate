@@ -1,9 +1,9 @@
-import { JsonMap, parse } from '@iarna/toml';
 import { load, loadAll } from 'js-yaml';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
+import { parse as parseToml } from './toml';
 
 interface ErrorContext<T> {
   error: z.ZodError;
@@ -244,9 +244,9 @@ export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
   }
 });
 
-export const Toml = z.string().transform((str, ctx): JsonMap => {
+export const Toml = z.string().transform((str, ctx) => {
   try {
-    return parse(str);
+    return parseToml(str);
   } catch (e) {
     ctx.addIssue({ code: 'custom', message: 'Invalid TOML' });
     return z.NEVER;

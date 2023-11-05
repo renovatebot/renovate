@@ -1,7 +1,7 @@
-import { parse } from '@iarna/toml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
+import { parse as parseToml } from '../../../util/toml';
 import { CrateDatasource } from '../../datasource/crate';
 import type {
   ExtractConfig,
@@ -133,7 +133,7 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
       try {
-        return parse(payload) as CargoConfig;
+        return parseToml(payload) as CargoConfig;
       } catch (err) {
         logger.debug({ err }, `Error parsing ${path}`);
       }
@@ -214,7 +214,7 @@ export async function extractPackageFile(
 
   let cargoManifest: CargoManifest;
   try {
-    cargoManifest = parse(content);
+    cargoManifest = parseToml(content);
   } catch (err) {
     logger.debug({ err, packageFile }, 'Error parsing Cargo.toml file');
     return null;
