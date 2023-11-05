@@ -23,6 +23,9 @@ describe('config/presets/internal/regex-managers', () => {
         # renovate: datasource=custom.hashicorp depName=consul
         ENV CONSUL_VERSION 1.3.1
 
+        # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$
+        ENV KUSTOMIZE_VERSION v5.2.1
+
         RUN echo "FOO"
       `;
 
@@ -62,6 +65,15 @@ describe('config/presets/internal/regex-managers', () => {
           replaceString:
             '# renovate: datasource=custom.hashicorp depName=consul\nENV CONSUL_VERSION 1.3.1\n',
         },
+        {
+          currentValue: 'v5.2.1',
+          datasource: 'github-releases',
+          depName: 'kubernetes-sigs/kustomize',
+          replaceString:
+            '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\nENV KUSTOMIZE_VERSION v5.2.1\n',
+          extractVersion: '^kustomize/(?<version>.+)$',
+          versioning: 'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        },
       ]);
     });
 
@@ -100,6 +112,8 @@ describe('config/presets/internal/regex-managers', () => {
           YARN_VERSION: '3.3.1'
           # renovate: datasource=custom.hashicorp depName=consul
           CONSUL_VERSION: 1.3.1
+          # renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$
+          TERRAFORM_VERSION: 1.5.7
 
         jobs:
           lint:
@@ -148,6 +162,15 @@ describe('config/presets/internal/regex-managers', () => {
           depName: 'consul',
           replaceString:
             '# renovate: datasource=custom.hashicorp depName=consul\n  CONSUL_VERSION: 1.3.1\n',
+        },
+        {
+          currentValue: '1.5.7',
+          datasource: 'github-releases',
+          depName: 'hashicorp/terraform',
+          replaceString:
+            '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n  TERRAFORM_VERSION: 1.5.7\n',
+          versioning: 'hashicorp',
+          extractVersion: '^v(?<version>.+)$',
         },
       ]);
     });
