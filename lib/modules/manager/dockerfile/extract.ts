@@ -236,10 +236,6 @@ export function getDep(
     }
   }
 
-  if (dep.depName) {
-    dep.depType = 'stage';
-  }
-
   return dep;
 }
 
