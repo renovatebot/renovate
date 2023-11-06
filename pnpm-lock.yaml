@@ -566,8 +566,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
       nock:
-        specifier: 13.3.6
-        version: 13.3.6
+        specifier: 13.3.7
+        version: 13.3.7
       npm-run-all:
         specifier: 4.1.5
         version: 4.1.5
@@ -8701,8 +8701,8 @@ packages:
       path-to-regexp: 1.8.0
     dev: true
 
-  /nock@13.3.6:
-    resolution: {integrity: sha512-lT6YuktKroUFM+27mubf2uqQZVy2Jf+pfGzuh9N6VwdHlFoZqvi4zyxFTVR1w/ChPqGY6yxGehHp6C3wqCASCw==}
+  /nock@13.3.7:
+    resolution: {integrity: sha512-z3voRxo6G0JxqCsjuzERh1ReFC4Vp2b7JpSgcMJB6jnJbUszf88awAeQLIID2UNMwbMh9/Zm5sFscagj0QYHEg==}
     engines: {node: '>= 10.13'}
     dependencies:
       debug: 4.3.4
