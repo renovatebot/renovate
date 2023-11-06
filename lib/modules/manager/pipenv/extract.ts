@@ -1,10 +1,10 @@
-import toml from '@iarna/toml';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile } from './types';
@@ -110,7 +110,7 @@ export async function extractPackageFile(
   let pipfile: PipFile;
   try {
     // TODO: fix type (#9610)
-    pipfile = toml.parse(content) as any;
+    pipfile = parseToml(content) as any;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Error parsing Pipfile');
     return null;

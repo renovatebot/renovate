@@ -32,9 +32,6 @@ importers:
       '@cdktf/hcl2json':
         specifier: 0.19.0
         version: 0.19.0
-      '@iarna/toml':
-        specifier: 3.0.0
-        version: 3.0.0
       '@opentelemetry/api':
         specifier: 1.6.0
         version: 1.6.0
@@ -302,6 +299,9 @@ importers:
       source-map-support:
         specifier: 0.5.21
         version: 0.5.21
+      toml-eslint-parser:
+        specifier: 0.6.0
+        version: 0.6.0
       traverse:
         specifier: 0.6.7
         version: 0.6.7
@@ -2006,10 +2006,6 @@ packages:
     resolution: {integrity: sha512-KhxiVDZ7Nisv/gShWHQjl7CsY9lUdGpHGdvafgS0RUIRssbYDJ9Y3jz/h5TQ1DnWmdTuANCEDRdoGK7XAFCzkQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
     dev: true
-
-  /@iarna/toml@3.0.0:
-    resolution: {integrity: sha512-td6ZUkz2oS3VeleBcN+m//Q6HlCFCPrnI0FZhrt/h4XqLEdOyYp2u21nd8MdsR+WJy5r9PTDaHTDDfhf4H4l6Q==}
-    dev: false
 
   /@isaacs/cliui@8.0.2:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -6041,7 +6037,6 @@ packages:
   /eslint-visitor-keys@3.4.3:
     resolution: {integrity: sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    dev: true
 
   /eslint@8.52.0:
     resolution: {integrity: sha512-zh/JHnaixqHZsolRB/w9/02akBk9EPrOs9JwcTP2ek7yL5bVvXuRariiaAjjoJ5DvuwQ1WAE/HsMz+w17YgBCg==}
@@ -10579,6 +10574,13 @@ packages:
     engines: {node: '>=8.0'}
     dependencies:
       is-number: 7.0.0
+
+  /toml-eslint-parser@0.6.0:
+    resolution: {integrity: sha512-aTmQa0RFb+2URe8IZOfo/oxt3b5rlXlpG9xE+6FmeI8immCGLnZYvKVxbnCYJx4bIKIaEwl0BnCDhwO70yeWSA==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    dependencies:
+      eslint-visitor-keys: 3.4.3
+    dev: false
 
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
