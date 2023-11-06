@@ -228,7 +228,7 @@
     "p-queue": "6.6.2",
     "p-throttle": "4.1.1",
     "parse-link-header": "2.0.0",
-    "prettier": "2.8.8",
+    "prettier": "3.0.3",
     "redis": "4.6.10",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
