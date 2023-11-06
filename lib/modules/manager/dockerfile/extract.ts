@@ -418,11 +418,9 @@ export function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  if (deps[0].depType !== 'syntax') {
-    deps[0].depType = 'stage';
-  }
-  for (const d of deps.slice(1)) {
-    d.depType = 'stage';
+  for (const d of deps) {
+      if(!d.depType)
+       d.depType = 'stage';
   }
   deps[deps.length - 1].depType = 'final';
   return { deps };
