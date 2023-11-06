@@ -48,6 +48,7 @@ describe('modules/platform/github/index', () => {
 
     const repoCache = repository.getCache();
     delete repoCache.platform;
+    delete process.env.RENOVATE_X_GITHUB_HOST_RULES;
   });
 
   describe('initPlatform()', () => {
@@ -162,6 +163,7 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
+      process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
       httpMock
         .scope(githubApiHost, {
           reqheaders: {
@@ -3428,6 +3430,17 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('getJsonFile()', () => {
+    it('returns null', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.get('/repos/some/repo/contents/file.json').reply(200, {
+        content: '',
+      });
+      const res = await github.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
+
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       const scope = httpMock.scope(githubApiHost);

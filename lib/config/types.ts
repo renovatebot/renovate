@@ -250,7 +250,7 @@ export interface RenovateConfig
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
-  fetchReleaseNotes?: FetchReleaseNotesOptions;
+  fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
@@ -298,7 +298,7 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
-export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
+export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 

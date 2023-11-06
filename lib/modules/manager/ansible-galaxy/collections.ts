@@ -30,7 +30,7 @@ function interpretLine(
     }
     case 'source': {
       localDependency.managerData.source = value;
-      if (value?.startsWith('git@')) {
+      if (value?.startsWith('git@') || value?.endsWith('.git')) {
         localDependency.packageName = value;
       } else {
         localDependency.registryUrls = value

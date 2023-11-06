@@ -37,6 +37,12 @@ describe('workers/repository/finalize/prune', () => {
       expect(git.getBranchList).toHaveBeenCalledTimes(0);
     });
 
+    it('ignores reconfigure branch', async () => {
+      delete config.branchList;
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(0);
+    });
+
     it('returns if no renovate branches', async () => {
       config.branchList = [];
       git.getBranchList.mockReturnValueOnce([]);

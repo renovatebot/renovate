@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
-        config.fetchReleaseNotes = 'pr';
+        config.fetchChangeLogs = 'pr';
 
         const res = await ensurePr(config);
 
@@ -871,13 +871,13 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: 'pr',
+              fetchChangeLogs: 'pr',
             })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
+        const res = await ensurePr({ ...config, fetchChangeLogs: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: existingPr,
@@ -904,13 +904,13 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: 'pr',
+              fetchChangeLogs: 'pr',
             })
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
+        const res = await ensurePr({ ...config, fetchChangeLogs: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: {

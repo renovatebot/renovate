@@ -490,7 +490,7 @@ export async function processBranch(
       } else {
         logger.debug('No updated lock files in branch');
       }
-      if (config.fetchReleaseNotes === 'branch') {
+      if (config.fetchChangeLogs === 'branch') {
         await embedChangelogs(config.upgrades);
       }
 
