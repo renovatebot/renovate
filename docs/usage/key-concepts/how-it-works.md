@@ -1,24 +1,29 @@
 ---
-title: How it works ?
-description: Learn all about Renovate's workflow
+title: How Renovate works
+description: Learn how Renovate works
 ---
 
 # Introduction
 
-Renovate works by searching for all the dependencies in your project and then look for updates for each.
+Renovate first finds all the dependencies in your repository, and then checks for updates to those dependencies.
 
-To be compatible with the variety of dependency-naming and versioning conventions, Renovate has defined modules for each known convention, and you can define your own too.
+Because Renovate needs to support a lot of dependency naming and versioning conventions, it has modules for each known convention.
+You can define your own modules, if you want.
 
 Please add comments to the [issue#25091](https://github.com/renovatebot/renovate/issues/25091) if you wish to see a part (better) shown in the graph below
 
 ## Modules
 
-The three modules are: [manager](../modules/manager/index.md), [datasource](../modules/datasource/index.md) and [versioning](../modules/versioning.md).
+Renovate's modules are:
 
-They are used sequentially:
+- [manager](../modules/manager/index.md)
+- [datasource](../modules/datasource/index.md)
+- [versioning](../modules/versioning.md).
 
-1. the manager module looks for files based on their name and extract dependencies from them, each dependency has a datasource
-2. the datasource module looks for the existing versions of the dependency
+Renovate uses these modules in order:
+
+1. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
+2. The datasource module looks for the existing versions of the dependency
 3. the versioning module search for a valid version regarding the dependency's version
 
 For example:
@@ -31,7 +36,7 @@ For example:
 
 ## Basic
 
-Here's a high-level overview of the renovate workflow, collect dependencies then update them:
+Here's a high-level overview of Renovate's workflow, where it collects dependencies and then updates them:
 
 ```mermaid
 flowchart LR
@@ -61,7 +66,7 @@ flowchart LR
     FED -->|dep1| D1[...]
     D1 -..-> CU
     FED -->|dep2| D2[use datasource to\n get possible updates]
-    D2 --> J[use versionning to find \n next valid update]
+    D2 --> J[use versioning to find \n next valid update]
 
     FED2 -...-> CU
 
@@ -79,7 +84,7 @@ flowchart LR
 
 ## Advanced
 
-And here's a mode detailed view of the workflow:
+Here's a detailed overview of the workflow:
 
 ```mermaid
 flowchart TB
@@ -117,7 +122,7 @@ flowchart TB
           FED -->|dep1| D1[...]
           D1 -..-> CU
           FED -->|dep2| D2[use datasource to \n get possible updates]
-          D2 --> J[use versionning to find \n next valid update]
+          D2 --> J[use versioning to find \n next valid update]
           FED2 -...-> CU
           UD -....-> CU
           J --> CU[Collect updates]
