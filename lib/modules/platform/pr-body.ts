@@ -70,11 +70,6 @@ export function getPrBodyStruct(
   const result: PrBodyStruct = { hash };
 
   const rebaseRequested = isRebaseRequested(body);
-  const labelsHash = getLabels(body);
-  if (labelsHash) {
-    result.labelsHash = labelsHash;
-  }
-
   if (!is.undefined(rebaseRequested)) {
     result.rebaseRequested = rebaseRequested;
   }

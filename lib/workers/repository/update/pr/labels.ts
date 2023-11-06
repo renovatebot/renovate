@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
-import { toBase64 } from '../../../../util/string';
 import * as template from '../../../../util/template';
+import { dequal } from 'dequal';
+import { logger } from '../../../../logger';
+import { id } from 'common-tags';
 
 export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];
@@ -24,18 +25,36 @@ export function getChangedLabels(
 }
 
 export function areLabelsModified(
-  oldLabelsHash: string,
-  existingLabels?: string[]
+  oldLabels: string[],
+  newLabels?: string[]
 ): boolean {
-  const existingLabelsHash = toBase64(
-    JSON.stringify(existingLabels?.sort() ?? [])
-  );
-  if (existingLabelsHash !== oldLabelsHash) {
+  const modified = !dequal(oldLabels.sort(), newLabels?.sort());
+
+  if (modified) {
     logger.debug(
       'PR labels have been modified by user, skipping labels update'
     );
-    return true;
   }
 
-  return false;
+  return modified;
+}
+
+export function shouldUpdateLabels(
+  labelsInDebugData?: string[],
+  labelsInPr?: string[],
+  newLabels?: string[]
+): boolean {
+  if (!labelsInDebugData) {
+    return false;
+  }
+
+  if (areLabelsModified(labelsInDebugData, labelsInPr)) {
+    return false;
+  }
+
+  if (dequal((newLabels ?? []).sort(), labelsInDebugData.sort())) {
+    return false;
+  }
+
+  return true;
 }

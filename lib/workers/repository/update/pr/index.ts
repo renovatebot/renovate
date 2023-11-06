@@ -27,8 +27,6 @@ import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
 import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { regEx } from '../../../../util/regex';
-import { toBase64 } from '../../../../util/string';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
@@ -38,13 +36,19 @@ import type {
 import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import { areLabelsModified, getChangedLabels, prepareLabels } from './labels';
+import {
+  areLabelsModified,
+  getChangedLabels,
+  prepareLabels,
+  shouldUpdateLabels,
+} from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './pr-cache';
 import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
 } from './pr-fingerprint';
+import { dequal } from 'dequal';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -79,15 +83,23 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 export function updatePrDebugData(
   targetBranch: string,
+  labels: string[],
   debugData: PrDebugData | undefined
 ): PrDebugData {
   const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
   const updatedByRenovateVersion = pkg.version;
-  return {
+
+  const updatedPrDebugData: PrDebugData = {
     createdInVer: createdByRenovateVersion,
     updatedInVer: updatedByRenovateVersion,
     targetBranch,
   };
+
+  if (debugData?.labels) {
+    updatedPrDebugData.labels = labels;
+  }
+
+  return updatedPrDebugData;
 }
 
 function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
@@ -324,6 +336,7 @@ export async function ensurePr(
     {
       debugData: updatePrDebugData(
         config.baseBranch,
+        prepareLabels(config).sort(),
         existingPr?.bodyStruct?.debugData
       ),
     },
@@ -333,13 +346,6 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
-
-      const existingLabelsHash = existingPr.bodyStruct?.labelsHash;
-      // remove labels hash from pr body if existing pr doesn't have one
-      if (!existingLabelsHash) {
-        prBody = prBody.replace(regEx(/<!--labels:.*?-->/g), '');
-      }
-
       if (
         !existingPr.hasAssignees &&
         !hasNotIgnoredReviewers(existingPr, config) &&
@@ -356,10 +362,17 @@ export async function ensurePr(
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
+      const labelsFromDebugData = existingPr.bodyStruct?.debugData?.labels;
+      const labelsNeedUpdate = shouldUpdateLabels(
+        labelsFromDebugData,
+        existingPr.labels,
+        config.labels
+      );
       if (
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
-        existingPrBodyHash === newPrBodyHash
+        existingPrBodyHash === newPrBodyHash &&
+        !labelsNeedUpdate
       ) {
         // adds or-cache for existing PRs
         setPrCache(branchName, prBodyFingerprint, false);
@@ -387,38 +400,30 @@ export async function ensurePr(
         );
         updatePrConfig.targetBranch = config.baseBranch;
       }
-      // if labelsHash is present in pr body
-      // divide labels into two categories: i) which needs to be added ii) which needs to be removed
-      // note: existing labels aren't present in these two categories
+      // divide labels into two categories: i) which needs to be added and ii) which needs to be removed
+      // Note: existing labels aren't present in these two categories
       // this is necessary because some platforms handle these two categories separately
-      if (existingLabelsHash) {
+      if (labelsNeedUpdate) {
         const newLabels = prepareLabels(config);
-        const newLabelsHash = toBase64(JSON.stringify(newLabels));
-        // only update labels if there is any change to the labels array && labels haven't been modified by user
-        if (
-          existingLabelsHash !== newLabelsHash &&
-          !areLabelsModified(existingLabelsHash, existingPr.labels)
-        ) {
-          logger.debug(
-            {
-              branchName,
-              oldLabels: existingPr.labels,
-              newLabels,
-            },
-            'PR labels have changed'
-          );
-          const [addLabels, removeLabels] = getChangedLabels(
-            existingPr.labels!,
-            newLabels
-          );
+        logger.debug(
+          {
+            branchName,
+            oldLabels: labelsFromDebugData,
+            newLabels,
+          },
+          'PR labels have changed'
+        );
+        const [addLabels, removeLabels] = getChangedLabels(
+          labelsFromDebugData!,
+          newLabels
+        );
 
-          // for gitea
-          updatePrConfig.labels = newLabels;
+        // for gitea
+        updatePrConfig.labels = newLabels;
 
-          // for github, gitlab
-          updatePrConfig.addLabels = addLabels;
-          updatePrConfig.removeLabels = removeLabels;
-        }
+        // for github, gitlab
+        updatePrConfig.addLabels = addLabels;
+        updatePrConfig.removeLabels = removeLabels;
       }
       if (existingPrTitle !== newPrTitle) {
         logger.debug(

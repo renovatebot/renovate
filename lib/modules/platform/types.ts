@@ -55,6 +55,7 @@ export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
   targetBranch: string;
+  labels?: string[];
 }
 
 export interface PrBodyStruct {
@@ -62,7 +63,6 @@ export interface PrBodyStruct {
   rawConfigHash?: string;
   rebaseRequested?: boolean;
   debugData?: PrDebugData;
-  labelsHash?: string;
 }
 
 /**

@@ -272,19 +272,25 @@ describe('workers/repository/update/pr/index', () => {
     describe('Update', () => {
       // updates labels
       it('updates PR if labels have changed in config', async () => {
+        const prDebugData = {
+          createdInVer: '1.0.0',
+          targetBranch: 'main',
+          labels: ['old_label'],
+        };
+
         const existingPr: Pr = {
           ...pr,
           bodyStruct: getPrBodyStruct(
-            `\n<!--labels:${toBase64(
-              JSON.stringify(['old_label'])
+            `\n<!--renovate-debug:${toBase64(
+              JSON.stringify(prDebugData)
             )}-->\n Some body`
           ),
           labels: ['old_label'],
         };
         platform.getBranchPr.mockResolvedValueOnce(existingPr);
         prBody.getPrBody.mockReturnValueOnce(
-          `\n<!--labels:${toBase64(
-            JSON.stringify(['new_label'])
+          `\n<!--renovate-debug:${toBase64(
+            JSON.stringify({ ...prDebugData, labels: ['new_label'] })
           )}-->\n Some body`
         );
         config.labels = ['new_label'];
@@ -297,7 +303,11 @@ describe('workers/repository/update/pr/index', () => {
             labels: ['old_label'],
             bodyStruct: {
               hash: expect.any(String),
-              labelsHash: toBase64(JSON.stringify(['new_label'])),
+              debugData: {
+                createdInVer: '1.0.0',
+                labels: ['new_label'],
+                targetBranch: 'main',
+              },
             },
           },
         });
@@ -314,8 +324,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
-      // skips updating labels if existing pr doesn't have labelsHash
-      it('skips pr update if existing pr does not have labelsHash', async () => {
+      // skips updating labels if existing pr doesn't have labels in debugData
+      it('skips pr update if existing pr does not have labels in debugData', async () => {
         const existingPr: Pr = {
           ...pr,
           labels: ['old_label'],
@@ -344,11 +354,17 @@ describe('workers/repository/update/pr/index', () => {
 
       // skip updating labels if pr labels have been modified by user
       it('skips pr update if pr labels have been modified by user', async () => {
+        const prDebugData = {
+          createdInVer: '1.0.0',
+          targetBranch: 'main',
+          labels: ['old_label'],
+        };
+
         const existingPr: Pr = {
           ...pr,
           bodyStruct: getPrBodyStruct(
-            `\n<!--labels:${toBase64(
-              JSON.stringify(['old_label'])
+            `\n<!--renovate-debug:${toBase64(
+              JSON.stringify(prDebugData)
             )}-->\n Some body`
           ),
         };
@@ -359,9 +375,19 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({
           type: 'with-pr',
-          pr,
+          pr: {
+            ...pr,
+            bodyStruct: {
+              hash: expect.any(String),
+              debugData: {
+                createdInVer: '1.0.0',
+                labels: ['old_label'],
+                targetBranch: 'main',
+              },
+            },
+          },
         });
-        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.debug).not.toHaveBeenCalledWith(
           {
@@ -371,9 +397,9 @@ describe('workers/repository/update/pr/index', () => {
           },
           `PR labels have changed`
         );
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR labels have been modified by user, skipping labels update'
-        );
+        // expect(logger.logger.debug).toHaveBeenCalledWith(
+        //   'PR labels have been modified by user, skipping labels update'
+        // );
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 

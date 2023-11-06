@@ -6,7 +6,6 @@ import * as template from '../../../../../util/template';
 import { joinUrlParts } from '../../../../../util/url';
 import type { BranchConfig } from '../../../../types';
 import { getDepWarningsPR, getWarnings } from '../../../errors-warnings';
-import { prepareLabels } from '../labels';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
@@ -101,11 +100,6 @@ export function getPrBody(
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
     prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
-
-    // sort the labels, create labelHash and add it as comment to pr body
-    // adding the comment at top, to tackle github's pr-description length limit of 2000 chars
-    const prLabelsHash = toBase64(JSON.stringify(prepareLabels(config).sort()));
-    prBody = `\n<!--labels:${prLabelsHash}-->\n` + prBody;
 
     prBody = platform.massageMarkdown(prBody);
 
