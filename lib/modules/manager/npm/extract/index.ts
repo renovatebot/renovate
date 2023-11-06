@@ -127,13 +127,13 @@ export async function extractPackageFile(
 
   let yarnConfig: YarnConfig | null = null;
   const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
-  if (is.string(repoYarnrcYml)) {
+  if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
     yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
 
   const legacyYarnrcFileName = getSiblingFileName(packageFile, '.yarnrc');
   const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
-  if (is.string(repoLegacyYarnrc)) {
+  if (is.string(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
