@@ -29,7 +29,7 @@ export async function fetchJSONFile(
   }
 
   // TODO: null check #22198
-  return parsePreset(fromBase64(res.content!));
+  return parsePreset(fromBase64(res.content!), fileName);
 }
 
 export function getPresetFromEndpoint(

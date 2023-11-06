@@ -1,9 +1,11 @@
+import JSON5 from 'json5';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../constants';
+import { logger } from '../logger';
 import * as hostRules from './host-rules';
 import { parseUrl } from './url';
 
@@ -58,4 +60,33 @@ export function detectPlatform(
   }
 
   return null;
+}
+
+export function parseJson(content: string | null, filename: string): unknown {
+  if (!content) {
+    return null;
+  }
+
+  return filename.endsWith('.json5')
+    ? JSON5.parse(content)
+    : parseJsonWithFallback(content, filename);
+}
+
+export function parseJsonWithFallback(
+  content: string,
+  context: string
+): unknown {
+  let parsedJson: unknown;
+
+  try {
+    parsedJson = JSON.parse(content);
+  } catch (err) {
+    parsedJson = JSON5.parse(content);
+    logger.warn(
+      { context },
+      'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.'
+    );
+  }
+
+  return parsedJson;
 }
