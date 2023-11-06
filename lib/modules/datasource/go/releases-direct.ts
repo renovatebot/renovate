@@ -126,8 +126,8 @@ export class GoDirectDatasource extends Datasource {
     }
 
     if (res.releases) {
-      res.releases = res.releases.filter((release) =>
-        release.version?.startsWith('v')
+      res.releases = res.releases.filter(
+        (release) => release.version?.startsWith('v')
       );
     }
 

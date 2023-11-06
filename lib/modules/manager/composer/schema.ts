@@ -309,9 +309,8 @@ export const ComposerExtract = z
 
         const gitRepo = gitRepos[depName];
         if (gitRepo) {
-          const bitbucketMatchGroups = bitbucketUrlRegex.exec(
-            gitRepo.url
-          )?.groups;
+          const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitRepo.url)
+            ?.groups;
 
           if (bitbucketMatchGroups) {
             dep.datasource = BitbucketTagsDatasource.id;

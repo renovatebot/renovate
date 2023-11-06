@@ -15,8 +15,8 @@ export class SourceUrlPrefixesMatcher extends Matcher {
     }
     const upperCaseSourceUrl = sourceUrl?.toUpperCase();
 
-    return matchSourceUrlPrefixes.some((prefix) =>
-      upperCaseSourceUrl?.startsWith(prefix.toUpperCase())
+    return matchSourceUrlPrefixes.some(
+      (prefix) => upperCaseSourceUrl?.startsWith(prefix.toUpperCase())
     );
   }
 }

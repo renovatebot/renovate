@@ -79,9 +79,8 @@ export class CpanDatasource extends Datasource {
           deprecated: isDeprecated,
           maturity,
         } = hit;
-        const version = module.find(
-          ({ name }) => name === packageName
-        )?.version;
+        const version = module.find(({ name }) => name === packageName)
+          ?.version;
         if (version) {
           // https://metacpan.org/pod/CPAN::DistnameInfo#maturity
           const isStable = maturity === 'released';

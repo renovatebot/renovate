@@ -29,9 +29,8 @@ export async function createConfigMigrationBranch(
   }
 
   await scm.checkoutBranch(config.defaultBranch!);
-  const contents = await MigratedDataFactory.applyPrettierFormatting(
-    migratedConfigData
-  );
+  const contents =
+    await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: getMigrationBranchName(config),

@@ -36,7 +36,7 @@ export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 type JsonArgs<
   Opts extends HttpOptions & HttpRequestOptions<ResT>,
   ResT = unknown,
-  Schema extends ZodType<ResT> = ZodType<ResT>
+  Schema extends ZodType<ResT> = ZodType<ResT>,
 > = {
   url: string;
   httpOptions?: Opts;
@@ -127,7 +127,10 @@ async function gotTask<T>(
 export class Http<Opts extends HttpOptions = HttpOptions> {
   private options?: GotOptions;
 
-  constructor(protected hostType: string, options: HttpOptions = {}) {
+  constructor(
+    protected hostType: string,
+    options: HttpOptions = {}
+  ) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
@@ -353,11 +356,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   getJsonSafe<
     ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>
+    Schema extends ZodType<ResT> = ZodType<ResT>,
   >(url: string, schema: Schema): AsyncResult<Infer<Schema>, SafeJsonError>;
   getJsonSafe<
     ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>
+    Schema extends ZodType<ResT> = ZodType<ResT>,
   >(
     url: string,
     options: Opts & HttpRequestOptions<Infer<Schema>>,
@@ -365,7 +368,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ): AsyncResult<Infer<Schema>, SafeJsonError>;
   getJsonSafe<
     ResT extends NonNullable<unknown>,
-    Schema extends ZodType<ResT> = ZodType<ResT>
+    Schema extends ZodType<ResT> = ZodType<ResT>,
   >(
     arg1: string,
     arg2?: (Opts & HttpRequestOptions<ResT>) | Schema,

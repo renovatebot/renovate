@@ -108,11 +108,8 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles from as', () => {
-      const res = extractPackageFile(
-        'FROM node:8.9.0-alpine as base\n',
-        '',
-        {}
-      )?.deps;
+      const res = extractPackageFile('FROM node:8.9.0-alpine as base\n', '', {})
+        ?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
@@ -724,11 +721,8 @@ describe('modules/manager/dockerfile/extract', () => {
     });
 
     it('handles FROM without ARG default value', () => {
-      const res = extractPackageFile(
-        'ARG img_base\nFROM $img_base\n',
-        '',
-        {}
-      )?.deps;
+      const res = extractPackageFile('ARG img_base\nFROM $img_base\n', '', {})
+        ?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:

@@ -12,11 +12,17 @@ const spaceRegex = regEx(`\\s+`);
 
 export class ImportEntry {
   readonly entryType = 'import';
-  constructor(readonly path: string, readonly isTry: boolean) {}
+  constructor(
+    readonly path: string,
+    readonly isTry: boolean
+  ) {}
 }
 
 export class BazelOption {
-  constructor(readonly name: string, readonly value?: string) {}
+  constructor(
+    readonly name: string,
+    readonly value?: string
+  ) {}
 
   static parse(input: string): BazelOption[] {
     const options: BazelOption[] = [];

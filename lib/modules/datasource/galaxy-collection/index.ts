@@ -59,9 +59,8 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
     try {
-      versionsUrlResponse = await this.http.getJson<VersionsProjectResult>(
-        versionsUrl
-      );
+      versionsUrlResponse =
+        await this.http.getJson<VersionsProjectResult>(versionsUrl);
     } catch (err) {
       this.handleGenericErrors(err);
     }

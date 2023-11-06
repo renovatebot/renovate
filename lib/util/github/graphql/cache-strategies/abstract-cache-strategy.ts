@@ -12,7 +12,7 @@ import { isDateExpired } from '../util';
  * and reconciling them with newly obtained ones from paginated queries.
  */
 export abstract class AbstractGithubGraphqlCacheStrategy<
-  GithubItem extends GithubDatasourceItem
+  GithubItem extends GithubDatasourceItem,
 > implements GithubGraphqlCacheStrategy<GithubItem>
 {
   /**

@@ -20,8 +20,9 @@ handlebars.registerHelper(
 
 handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 
-handlebars.registerHelper('containsString', (str, subStr) =>
-  str?.includes(subStr)
+handlebars.registerHelper(
+  'containsString',
+  (str, subStr) => str?.includes(subStr)
 );
 
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);

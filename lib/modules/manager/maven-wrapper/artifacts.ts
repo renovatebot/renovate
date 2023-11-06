@@ -176,9 +176,8 @@ function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
 function getCustomMavenWrapperRepoUrl(
   deps: PackageDependency[]
 ): string | null {
-  const replaceString = deps.find(
-    (dep) => dep.depName === 'maven-wrapper'
-  )?.replaceString;
+  const replaceString = deps.find((dep) => dep.depName === 'maven-wrapper')
+    ?.replaceString;
 
   if (!replaceString) {
     return null;

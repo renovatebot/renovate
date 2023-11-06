@@ -152,7 +152,7 @@ export const PoetryDependencies = LooseRecord(
 
 function withDepType<
   Output extends PackageDependency[],
-  Schema extends ZodType<Output, ZodTypeDef, unknown>
+  Schema extends ZodType<Output, ZodTypeDef, unknown>,
 >(schema: Schema, depType: string): ZodEffects<Schema> {
   return schema.transform((deps) => {
     for (const dep of deps) {

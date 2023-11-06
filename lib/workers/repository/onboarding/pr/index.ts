@@ -63,9 +63,8 @@ export async function ensureOnboardingPr(
       return;
     }
   }
-  const onboardingConfigHashComment = await getOnboardingConfigHashComment(
-    config
-  );
+  const onboardingConfigHashComment =
+    await getOnboardingConfigHashComment(config);
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${

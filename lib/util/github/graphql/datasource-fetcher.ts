@@ -42,7 +42,7 @@ function canBeSolvedByShrinking(err: Error): boolean {
 
 export class GithubGraphqlDatasourceFetcher<
   GraphqlItem,
-  ResultItem extends GithubDatasourceItem
+  ResultItem extends GithubDatasourceItem,
 > {
   static async query<T, U extends GithubDatasourceItem>(
     config: GithubPackageConfig,

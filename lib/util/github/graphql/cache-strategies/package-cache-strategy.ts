@@ -6,7 +6,7 @@ import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
  * Package cache strategy meant to be used for public packages.
  */
 export class GithubGraphqlPackageCacheStrategy<
-  GithubItem extends GithubDatasourceItem
+  GithubItem extends GithubDatasourceItem,
 > extends AbstractGithubGraphqlCacheStrategy<GithubItem> {
   load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined> {
     return packageCache.get(this.cacheNs, this.cacheKey);

@@ -43,9 +43,8 @@ export async function rebaseMigrationBranch(
   const commitMessage = commitMessageFactory.getCommitMessage();
 
   await scm.checkoutBranch(config.defaultBranch!);
-  contents = await MigratedDataFactory.applyPrettierFormatting(
-    migratedConfigData
-  );
+  contents =
+    await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName,

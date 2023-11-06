@@ -53,7 +53,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       newRules.push(rule);
       for (const [key, val] of Object.entries(rule) as [
         UpdateType,
-        PackageRule
+        PackageRule,
       ][]) {
         if (updateTypes.includes(key)) {
           let newRule = clone(rule);

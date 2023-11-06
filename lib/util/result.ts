@@ -66,7 +66,7 @@ type RawValue<T extends Val> = Exclude<
 function fromNullable<
   T extends Val,
   ErrForNull extends Val,
-  ErrForUndefined extends Val
+  ErrForUndefined extends Val,
 >(
   input: Nullable<T>,
   errForNull: ErrForNull,
@@ -151,7 +151,7 @@ export class Result<T extends Val, E extends Val = Error> {
     T extends Val,
     E extends Val = Error,
     EE extends Val = never,
-    Input = unknown
+    Input = unknown,
   >(
     input:
       | SafeParseReturnType<Input, T>
@@ -222,7 +222,7 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
-    ErrForNullable extends Val = Error
+    ErrForNullable extends Val = Error,
   >(
     callback: () => Nullable<T>,
     errForNullable: ErrForNullable
@@ -231,7 +231,7 @@ export class Result<T extends Val, E extends Val = Error> {
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     callback: () => Nullable<T>,
     errForNull: ErrForNull,
@@ -240,7 +240,7 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
-    ErrForNullable extends Val = Error
+    ErrForNullable extends Val = Error,
   >(
     promise: Promise<Nullable<T>>,
     errForNullable: ErrForNullable
@@ -249,7 +249,7 @@ export class Result<T extends Val, E extends Val = Error> {
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     promise: Promise<Nullable<T>>,
     errForNull: ErrForNull,
@@ -258,7 +258,7 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
-    ErrForNullable extends Val = Error
+    ErrForNullable extends Val = Error,
   >(
     value: Nullable<T>,
     errForNullable: ErrForNullable
@@ -267,7 +267,7 @@ export class Result<T extends Val, E extends Val = Error> {
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     value: Nullable<T>,
     errForNull: ErrForNull,
@@ -277,7 +277,7 @@ export class Result<T extends Val, E extends Val = Error> {
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     input: (() => Nullable<T>) | Promise<Nullable<T>> | Nullable<T>,
     arg2: ErrForNull,
@@ -519,7 +519,7 @@ export class Result<T extends Val, E extends Val = Error> {
   static parse<
     T,
     Schema extends ZodType<T, ZodTypeDef, Input>,
-    Input = unknown
+    Input = unknown,
   >(
     input: unknown,
     schema: Schema
@@ -633,7 +633,7 @@ export class AsyncResult<T extends Val, E extends Val>
     T extends Val,
     E extends Val = Error,
     EE extends Val = never,
-    Input = unknown
+    Input = unknown,
   >(
     promise:
       | Promise<SafeParseReturnType<Input, T>>
@@ -667,7 +667,7 @@ export class AsyncResult<T extends Val, E extends Val>
     T extends Val,
     E extends Val,
     ErrForNull extends Val,
-    ErrForUndefined extends Val
+    ErrForUndefined extends Val,
   >(
     promise: Promise<Nullable<T>>,
     errForNull: NonNullable<ErrForNull>,

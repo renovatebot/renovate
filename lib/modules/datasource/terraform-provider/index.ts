@@ -67,9 +67,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const repository = TerraformProviderDatasource.getRepository({
       packageName,
     });
-    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryUrl
-    );
+    const serviceDiscovery =
+      await this.getTerraformServiceDiscoveryResult(registryUrl);
 
     if (registryUrl === this.defaultRegistryUrls[0]) {
       return await this.queryRegistryExtendedApi(
@@ -220,9 +219,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     }
 
     // check public or private Terraform registry
-    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryURL
-    );
+    const serviceDiscovery =
+      await this.getTerraformServiceDiscoveryResult(registryURL);
     if (!serviceDiscovery) {
       logger.trace(`Failed to retrieve service discovery from ${registryURL}`);
       return null;

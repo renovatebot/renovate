@@ -65,8 +65,8 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
       ];
       await detectMonorepos(packageFiles);
       expect(
-        packageFiles.some((packageFile) =>
-          packageFile.deps?.some((dep) => dep.isInternal)
+        packageFiles.some(
+          (packageFile) => packageFile.deps?.some((dep) => dep.isInternal)
         )
       ).toBeTrue();
     });

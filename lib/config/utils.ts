@@ -6,7 +6,7 @@ import type { RenovateConfig } from './types';
 
 export function mergeChildConfig<
   T extends Record<string, any>,
-  TChild extends Record<string, any> | undefined
+  TChild extends Record<string, any> | undefined,
 >(parent: T, child: TChild): T & TChild {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {

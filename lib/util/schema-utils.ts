@@ -72,7 +72,7 @@ export function LooseArray<Schema extends z.ZodTypeAny>(
 
 type LooseRecordResult<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 > = z.ZodEffects<
   z.ZodRecord<z.ZodString, z.ZodAny>,
   Record<z.TypeOf<KeySchema>, z.TypeOf<ValueSchema>>,
@@ -81,7 +81,7 @@ type LooseRecordResult<
 
 type LooseRecordOpts<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 > = LooseOpts<Record<z.TypeOf<KeySchema> | z.TypeOf<ValueSchema>, unknown>>;
 
 /**
@@ -100,7 +100,7 @@ export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
 ): LooseRecordResult<z.ZodString, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 >(
   Key: KeySchema,
   Value: ValueSchema
@@ -111,7 +111,7 @@ export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
 ): LooseRecordResult<z.ZodString, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 >(
   Key: KeySchema,
   Value: ValueSchema,
@@ -119,7 +119,7 @@ export function LooseRecord<
 ): LooseRecordResult<KeySchema, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 >(
   arg1: ValueSchema | KeySchema,
   arg2?: ValueSchema | LooseOpts<Record<string, unknown>>,

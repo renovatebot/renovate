@@ -754,10 +754,8 @@ export async function mergePr({
   logger.trace(
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
-    }) with lastMergeSourceCommit ${
-      // TODO: types (#22198)
-      pr.lastMergeSourceCommit?.commitId
-    } using mergeStrategy ${mergeStrategy} (${
+    }) with lastMergeSourceCommit ${// TODO: types (#22198)
+    pr.lastMergeSourceCommit?.commitId} using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
     })`
   );

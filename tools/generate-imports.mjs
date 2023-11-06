@@ -193,9 +193,7 @@ await (async () => {
     await generateData();
     await generateHash();
     await Promise.all(
-      (
-        await glob('lib/**/*.generated.ts')
-      )
+      (await glob('lib/**/*.generated.ts'))
         .map((f) => upath.join(f))
         .filter((f) => !newFiles.has(f))
         .map(async (file) => {

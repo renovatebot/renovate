@@ -16,7 +16,7 @@ import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 function unlessServerSide<
   T extends NonNullable<unknown>,
-  E extends NonNullable<unknown>
+  E extends NonNullable<unknown>,
 >(err: E, cb: () => AsyncResult<T, E>): AsyncResult<T, E> {
   if (err instanceof HttpError && err.response?.statusCode) {
     const code = err.response.statusCode;

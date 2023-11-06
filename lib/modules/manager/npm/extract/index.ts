@@ -63,7 +63,7 @@ export async function extractPackageFile(
 
   for (const [key, val] of Object.entries(lockFiles) as [
     'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
-    string
+    string,
   ][]) {
     const filePath = getSiblingFileName(packageFile, val);
     if (await readLocalFile(filePath, 'utf8')) {
