@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../config/types';
-import * as template from '../../../../util/template';
 import { dequal } from 'dequal';
+import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { id } from 'common-tags';
+import * as template from '../../../../util/template';
 
 export function prepareLabels(config: RenovateConfig): string[] {
   const labels = config.labels ?? [];

@@ -36,19 +36,13 @@ import type {
 import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import {
-  areLabelsModified,
-  getChangedLabels,
-  prepareLabels,
-  shouldUpdateLabels,
-} from './labels';
+import { getChangedLabels, prepareLabels, shouldUpdateLabels } from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './pr-cache';
 import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
 } from './pr-fingerprint';
-import { dequal } from 'dequal';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -331,7 +325,7 @@ export async function ensurePr(
     }
   }
 
-  let prBody = getPrBody(
+  const prBody = getPrBody(
     config,
     {
       debugData: updatePrDebugData(
