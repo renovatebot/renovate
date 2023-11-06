@@ -9,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -18,6 +17,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -182,7 +182,7 @@ export async function getJsonFile(
   branchOrTag?: string
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return raw ? JSON5.parse(raw) : null;
+  return parseJson(raw, fileName);
 }
 
 export async function initRepo({

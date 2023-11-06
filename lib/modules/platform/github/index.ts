@@ -1,7 +1,6 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
@@ -25,6 +24,7 @@ import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
 import { coerceToNull } from '../../../util/coerce';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
@@ -331,9 +331,8 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any> {
-  // TODO #22198
-  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return JSON5.parse(raw);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  return parseJson(raw, fileName);
 }
 
 export async function listForks(
