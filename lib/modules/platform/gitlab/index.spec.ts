@@ -2819,7 +2819,10 @@ These updates have all been created already. Click a checkbox below to force a r
         '@group',
       ]);
       expect(expandedGroupMembers).toEqual(['group']);
-      expect(logger.debug).toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Unable to fetch group'
+      );
     });
 
     it('groups with no members expand into empty list', async () => {
