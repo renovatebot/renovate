@@ -72,8 +72,8 @@ importers:
         specifier: 3.0.10
         version: 3.0.10
       '@renovatebot/ruby-semver':
-        specifier: 3.0.16
-        version: 3.0.16
+        specifier: 3.0.17
+        version: 3.0.17
       '@sindresorhus/is':
         specifier: 4.6.0
         version: 4.6.0
@@ -2986,8 +2986,8 @@ packages:
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
-  /@renovatebot/ruby-semver@3.0.16:
-    resolution: {integrity: sha512-KT6vKk4OYdb3Gmfve0RVWTpsz56LxK1YOVQ822sH39kWSrOTRbeb1cbXBdeLwvpAhDFX8TCs5lBJnSvIQOgwpg==}
+  /@renovatebot/ruby-semver@3.0.17:
+    resolution: {integrity: sha512-ZRuezWVTxJHH6RlbXdS9/7YJZxvLWqlJssQ/gcKy5KKdo9sNEyNiTpfUPxLcHTWcTVuc4gls6qG09saLJ79P+g==}
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
