@@ -284,7 +284,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}-zip-hashes`,
-    key: (zipHashUrl: string) => zipHashUrl
+    key: (zipHashUrl: string) => zipHashUrl,
   })
   async getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>

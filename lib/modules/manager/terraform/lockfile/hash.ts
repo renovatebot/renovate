@@ -118,8 +118,9 @@ export class TerraformProviderHash {
     let zhHashes: string[] = [];
     if (builds.length > 0 && builds[0].shasums_url) {
       zhHashes =
-      (await TerraformProviderHash.terraformDatasource.getZipHashes(builds[0].shasums_url)) ??
-      [];
+        (await TerraformProviderHash.terraformDatasource.getZipHashes(
+          builds[0].shasums_url
+        )) ?? [];
     }
 
     const h1Hashes = await TerraformProviderHash.calculateHashScheme1Hashes(
