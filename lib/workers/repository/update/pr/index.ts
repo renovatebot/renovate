@@ -89,7 +89,9 @@ export function updatePrDebugData(
     targetBranch,
   };
 
-  if (debugData?.labels) {
+  // this might seems confusing but we wither want there to be no debugData ie. this is a new PR in creation
+  // or debugData with labels array ie. pr created with the new update labels logic
+  if (!debugData || is.array(debugData?.labels)) {
     updatedPrDebugData.labels = labels;
   }
 
