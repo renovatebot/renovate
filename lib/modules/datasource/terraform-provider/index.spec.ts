@@ -426,45 +426,15 @@ describe('modules/datasource/terraform-provider/index', () => {
             'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f terraform-provider-azurerm_2.56.0_manifest.json'
         );
 
-      const res = await terraformProviderDatasource.getZipHashes([
-        {
-          name: 'azurerm',
-          version: '2.56.0',
-          os: 'linux',
-          arch: 'amd64',
-          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          shasums_url:
-            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
-        },
-      ]);
+      const res = await terraformProviderDatasource.getZipHashes(
+        'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+      );
 
       expect(res).toMatchObject([
         '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628',
         '766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71',
         'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f',
       ]);
-    });
-
-    it('does not fetch anything when there are no builds passed in', async () => {
-      const res = await terraformProviderDatasource.getZipHashes([]);
-
-      expect(res).toBeEmptyArray();
-    });
-
-    it('does not fetch anything when there is no shasums_url defined', async () => {
-      const res = await terraformProviderDatasource.getZipHashes([
-        {
-          name: 'azurerm',
-          version: '2.56.0',
-          os: 'linux',
-          arch: 'amd64',
-          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-        },
-      ]);
-
-      expect(res).toBeEmptyArray();
     });
 
     it('does not hard fail when the ziphashes endpoint is not available', async () => {
@@ -475,18 +445,9 @@ describe('modules/datasource/terraform-provider/index', () => {
         )
         .reply(404);
 
-      const res = await terraformProviderDatasource.getZipHashes([
-        {
-          name: 'azurerm',
-          version: '2.56.0',
-          os: 'linux',
-          arch: 'amd64',
-          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          shasums_url:
-            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
-        },
-      ]);
+      const res = await terraformProviderDatasource.getZipHashes(
+        'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+      );
 
       expect(res).toBeUndefined();
     });
