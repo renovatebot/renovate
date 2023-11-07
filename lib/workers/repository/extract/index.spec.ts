@@ -46,7 +46,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
       expect(logger.debug).toHaveBeenCalledWith(
-        { manager: 'regex' },
+        { manager: 'custom.regex' },
         `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
       );
     });
