@@ -28,7 +28,7 @@ function getEditUrl(name: string): string {
 function generateFrontMatter(
   presetTitle: string,
   order: number,
-  presetName: string
+  presetName: string,
 ): string {
   return `---
 date: 2017-12-07
