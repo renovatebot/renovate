@@ -21,7 +21,7 @@ const http = new GiteaHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory?: string
+  sourceDirectory?: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('gitea.getReleaseNotesMd()');
   const apiPrefix = `${apiBaseUrl}repos/${repository}/contents`;
@@ -33,7 +33,7 @@ export async function getReleaseNotesMd(
       {
         paginate: false, // no pagination yet
       },
-      ContentsListResponseSchema
+      ContentsListResponseSchema,
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'file');
@@ -50,13 +50,13 @@ export async function getReleaseNotesMd(
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile}`
+      `Multiple candidates for changelog file, using ${changelogFile}`,
     );
   }
 
   const fileRes = await http.getJson(
     `${apiPrefix}/${changelogFile}`,
-    ContentsResponseSchema
+    ContentsResponseSchema,
   );
   // istanbul ignore if: should never happen
   if (!fileRes.body.content) {
@@ -70,7 +70,7 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  _release: ChangeLogRelease
+  _release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitea.getReleaseNotesMd()');
   const apiUrl = `${project.apiBaseUrl}repos/${project.repository}/releases`;
@@ -80,7 +80,7 @@ export async function getReleaseList(
     {
       paginate: true,
     },
-    ReleasesSchema
+    ReleasesSchema,
   );
   return res.body.map((release) => ({
     url: `${project.baseUrl}${project.repository}/releases/tag/${release.tag_name}`,

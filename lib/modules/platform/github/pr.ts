@@ -15,7 +15,7 @@ function getPrApiCache(): ApiCache<GhPr> {
   delete repoCache.platform.github.prCache;
   repoCache.platform.github.pullRequestsCache ??= { items: {} };
   const prApiCache = new ApiCache<GhPr>(
-    repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>
+    repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>,
   );
   return prApiCache;
 }
@@ -50,7 +50,7 @@ function getPrApiCache(): ApiCache<GhPr> {
 export async function getPrCache(
   http: GithubHttp,
   repo: string,
-  username: string | null
+  username: string | null,
 ): Promise<Record<number, GhPr>> {
   const prApiCache = getPrApiCache();
   const isInitial = is.emptyArray(prApiCache.getItems());
@@ -84,7 +84,7 @@ export async function getPrCache(
 
       if (username) {
         page = page.filter(
-          (ghPr) => ghPr?.user?.login && ghPr.user.login === username
+          (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
         );
       }
 
@@ -106,7 +106,7 @@ export async function getPrCache(
         requestsTotal,
         apiQuotaAffected,
       },
-      `getPrList success`
+      `getPrList success`,
     );
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getPrList err');

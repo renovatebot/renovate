@@ -13,7 +13,7 @@ import type { AzurePipelines, Container, Repository } from './types';
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 
 export function extractRepository(
-  repository: Repository
+  repository: Repository,
 ): PackageDependency | null {
   let repositoryUrl = null;
 
@@ -36,11 +36,11 @@ export function extractRepository(
           endpoint,
           encodeURIComponent(projectName),
           '_git',
-          encodeURIComponent(repoName)
+          encodeURIComponent(repoName),
         );
       } else {
         logger.debug(
-          'Renovate cannot update repositories that do not include the project name'
+          'Renovate cannot update repositories that do not include the project name',
         );
       }
     }
@@ -66,7 +66,7 @@ export function extractRepository(
 }
 
 export function extractContainer(
-  container: Container
+  container: Container,
 ): PackageDependency | null {
   if (!container.image) {
     return null;
@@ -79,7 +79,7 @@ export function extractContainer(
       currentValue: dep.currentValue,
       currentDigest: dep.currentDigest,
     },
-    'Azure pipelines docker image'
+    'Azure pipelines docker image',
   );
   dep.depType = 'docker';
 
@@ -87,7 +87,7 @@ export function extractContainer(
 }
 
 export function extractAzurePipelinesTasks(
-  task: string
+  task: string,
 ): PackageDependency | null {
   const match = AzurePipelinesTaskRegex.exec(task);
   if (match?.groups) {
@@ -102,7 +102,7 @@ export function extractAzurePipelinesTasks(
 
 export function parseAzurePipelines(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): AzurePipelines | null {
   let pkg: AzurePipelines | null = null;
   try {
@@ -117,7 +117,7 @@ export function parseAzurePipelines(
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];

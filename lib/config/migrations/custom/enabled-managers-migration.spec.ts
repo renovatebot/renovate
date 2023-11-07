@@ -8,7 +8,7 @@ describe('config/migrations/custom/enabled-managers-migration', () => {
       },
       {
         enabledManagers: ['test1', 'npm', 'test2'],
-      }
+      },
     );
   });
 });

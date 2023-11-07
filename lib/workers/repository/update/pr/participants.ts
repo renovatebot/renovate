@@ -10,7 +10,7 @@ import { codeOwnersForPr } from './code-owners';
 async function addCodeOwners(
   config: RenovateConfig,
   assigneesOrReviewers: string[],
-  pr: Pr
+  pr: Pr,
 ): Promise<string[]> {
   const codeOwners = await codeOwnersForPr(pr);
 
@@ -24,7 +24,7 @@ async function addCodeOwners(
 
 function filterUnavailableUsers(
   config: RenovateConfig,
-  users: string[]
+  users: string[],
 ): Promise<string[]> {
   return config.filterUnavailableUsers && platform.filterUnavailableUsers
     ? platform.filterUnavailableUsers(users)
@@ -33,7 +33,7 @@ function filterUnavailableUsers(
 
 function prepareParticipants(
   config: RenovateConfig,
-  usernames: string[]
+  usernames: string[],
 ): Promise<string[]> {
   const normalizedUsernames = [...new Set(usernames.map(noLeadingAtSymbol))];
   return filterUnavailableUsers(config, normalizedUsernames);
@@ -41,7 +41,7 @@ function prepareParticipants(
 
 export async function addParticipants(
   config: RenovateConfig,
-  pr: Pr
+  pr: Pr,
 ): Promise<void> {
   let assignees = config.assignees ?? [];
   logger.debug(`addParticipants(pr=${pr?.number})`);
@@ -65,7 +65,7 @@ export async function addParticipants(
     } catch (err) {
       logger.debug(
         { assignees: config.assignees, err },
-        'Failed to add assignees'
+        'Failed to add assignees',
       );
     }
   }
@@ -97,7 +97,7 @@ export async function addParticipants(
     } catch (err) {
       logger.debug(
         { reviewers: config.reviewers, err },
-        'Failed to add reviewers'
+        'Failed to add reviewers',
       );
     }
   }

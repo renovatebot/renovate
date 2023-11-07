@@ -50,7 +50,7 @@ describe('util/check-token', () => {
         url: 'https://api.github.com',
       });
       expect(logger.logger.trace).toHaveBeenCalledWith(
-        'GitHub token warning is disabled'
+        'GitHub token warning is disabled',
       );
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -159,7 +159,7 @@ describe('util/check-token', () => {
   describe('isGithubFineGrainedPersonalAccessToken', () => {
     it('returns true when string is a github fine grained personal access token', () => {
       expect(
-        isGithubFineGrainedPersonalAccessToken('github_pat_XXXXXX')
+        isGithubFineGrainedPersonalAccessToken('github_pat_XXXXXX'),
       ).toBeTrue();
     });
 
@@ -192,7 +192,7 @@ describe('util/check-token', () => {
       const TOKEN_STRING = 'ghp_TOKEN';
 
       expect(findGithubToken({ token: TOKEN_STRING_WITH_PREFIX })).toBe(
-        TOKEN_STRING
+        TOKEN_STRING,
       );
     });
   });
@@ -202,7 +202,7 @@ describe('util/check-token', () => {
       const githubToken = undefined;
       const gitTagsGithubToken = undefined;
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBeUndefined();
     });
 
@@ -210,7 +210,7 @@ describe('util/check-token', () => {
       const githubToken = 'ghp_github';
       const gitTagsGithubToken = 'ghp_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(gitTagsGithubToken);
     });
 
@@ -218,7 +218,7 @@ describe('util/check-token', () => {
       const githubToken = 'ghp_github';
       const gitTagsGithubToken = 'ghs_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(githubToken);
     });
 
@@ -226,7 +226,7 @@ describe('util/check-token', () => {
       const githubToken = 'ghs_github';
       const gitTagsGithubToken = 'ghs_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(gitTagsGithubToken);
     });
 
@@ -234,7 +234,7 @@ describe('util/check-token', () => {
       const githubToken = undefined;
       const gitTagsGithubToken = 'ghs_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(gitTagsGithubToken);
     });
 
@@ -242,7 +242,7 @@ describe('util/check-token', () => {
       const githubToken = 'ghs_gitTags';
       const gitTagsGithubToken = undefined;
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(githubToken);
     });
 
@@ -250,7 +250,7 @@ describe('util/check-token', () => {
       const githubToken = 'ghp_github';
       const gitTagsGithubToken = 'github_pat_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(githubToken);
     });
 
@@ -258,7 +258,7 @@ describe('util/check-token', () => {
       const githubToken = 'github_pat_github';
       const gitTagsGithubToken = 'ghs_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(githubToken);
     });
 
@@ -266,7 +266,7 @@ describe('util/check-token', () => {
       const githubToken = undefined;
       const gitTagsGithubToken = 'github_pat_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(gitTagsGithubToken);
     });
 
@@ -274,7 +274,7 @@ describe('util/check-token', () => {
       const githubToken = undefined;
       const gitTagsGithubToken = 'unknownTokenType_gitTags';
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(gitTagsGithubToken);
     });
 
@@ -282,7 +282,7 @@ describe('util/check-token', () => {
       const githubToken = 'unknownTokenType';
       const gitTagsGithubToken = undefined;
       expect(
-        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken),
       ).toBe(githubToken);
     });
   });

@@ -23,7 +23,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
     case '.json':
       return parseJson(
         await readSystemFile(file, 'utf8'),
-        file
+        file,
       ) as RenovateConfig;
     case '.js': {
       const tmpConfig = await import(file);
@@ -50,7 +50,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
     logger.fatal(
       { configFile },
-      `Custom config file specified in RENOVATE_CONFIG_FILE must exist`
+      `Custom config file specified in RENOVATE_CONFIG_FILE must exist`,
     );
     process.exit(1);
   }
@@ -65,7 +65,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       logger.fatal(
-        `Error parsing config file due to unresolved variable(s): ${err.message}`
+        `Error parsing config file due to unresolved variable(s): ${err.message}`,
       );
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {
@@ -85,7 +85,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   if (isMigrated) {
     logger.warn(
       { originalConfig: config, migratedConfig },
-      'Config needs migrating'
+      'Config needs migrating',
     );
     config = migratedConfig;
   }
@@ -93,7 +93,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 }
 
 export async function deleteNonDefaultConfig(
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
 ): Promise<void> {
   const configFile = env.RENOVATE_CONFIG_FILE;
 

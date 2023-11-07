@@ -134,7 +134,7 @@ const ApiResults = z.array(
   z.object({
     id: z.number(),
     value: z.string(),
-  })
+  }),
 );
 type ApiResults = z.infer<typeof ApiResults>;
 
@@ -155,8 +155,8 @@ const ApiResults = Json.pipe(
     z.object({
       id: z.number(),
       value: z.string(),
-    })
-  )
+    }),
+  ),
 );
 
 const results = ApiResults.parse(input);
@@ -269,10 +269,10 @@ const Versions = z
         version: z.string(),
       })
       .nullable()
-      .catch(null)
+      .catch(null),
   )
   .transform((releases) =>
-    releases.filter((x): x is { version: string } => x !== null)
+    releases.filter((x): x is { version: string } => x !== null),
   );
 ```
 
@@ -284,7 +284,7 @@ Instead, you should use the `LooseArray` and `LooseRecord` helpers from `schema-
 const Versions = LooseArray(
   z.object({
     version: z.string(),
-  })
+  }),
 );
 ```
 
@@ -339,7 +339,7 @@ const Users = z.object({
 
 const { body: users } = await http.getJson(
   'https://dummyjson.com/users',
-  LooseArray(User)
+  LooseArray(User),
 );
 ```
 

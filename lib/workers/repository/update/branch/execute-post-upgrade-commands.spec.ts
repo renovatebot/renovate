@@ -43,7 +43,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           modified: [],
           not_added: [],
           deleted: [],
-        })
+        }),
       );
       GlobalConfig.set({
         localDir: __dirname,
@@ -60,7 +60,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
         commands,
-        config
+        config,
       );
 
       expect(res.updatedArtifacts).toHaveLength(3);
@@ -93,7 +93,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           modified: [],
           not_added: [],
           deleted: [],
-        })
+        }),
       );
       GlobalConfig.set({
         localDir: __dirname,
@@ -108,7 +108,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
         commands,
-        config
+        config,
       );
 
       expect(res.updatedArtifacts).toHaveLength(0);

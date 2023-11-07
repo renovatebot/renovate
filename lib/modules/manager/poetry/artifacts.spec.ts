@@ -49,7 +49,7 @@ describe('modules/manager/poetry/artifacts', () => {
         python = "${pythonVersion}"
       `;
       expect(getPythonConstraint(pyprojectContent, poetryLock)).toBe(
-        pythonVersion
+        pythonVersion,
       );
     });
 
@@ -65,14 +65,14 @@ describe('modules/manager/poetry/artifacts', () => {
     it('detects poetry from first line of poetry.lock', () => {
       const pyprojectContent = '';
       expect(getPoetryRequirement(pyprojectContent, poetry142lock)).toBe(
-        '1.4.2'
+        '1.4.2',
       );
     });
 
     it('detects poetry from metadata', () => {
       const pyprojectContent = '';
       expect(getPoetryRequirement(pyprojectContent, poetry12lock)).toBe(
-        '<1.3.0'
+        '<1.3.0',
       );
     });
   });
@@ -94,7 +94,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps,
           newPackageFileContent: '',
           config,
-        })
+        }),
       ).toBeNull();
       expect(execSnapshots).toEqual([]);
     });
@@ -107,7 +107,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps: [],
           newPackageFileContent: '',
           config,
-        })
+        }),
       ).toBeNull();
       expect(execSnapshots).toEqual([]);
     });
@@ -124,7 +124,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps,
           newPackageFileContent: '',
           config,
-        })
+        }),
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
@@ -150,7 +150,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps,
           newPackageFileContent: '{}',
           config,
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -188,7 +188,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps,
           newPackageFileContent: pyproject10toml,
           config,
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -228,7 +228,7 @@ describe('modules/manager/poetry/artifacts', () => {
           url = "some.url"
         `,
           config,
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -259,7 +259,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps,
           newPackageFileContent: '{}',
           config,
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -306,7 +306,7 @@ describe('modules/manager/poetry/artifacts', () => {
               python: '~2.7 || ^3.4',
             },
           },
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -382,7 +382,7 @@ describe('modules/manager/poetry/artifacts', () => {
               python: '~2.7 || ^3.4',
             },
           },
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -440,7 +440,7 @@ describe('modules/manager/poetry/artifacts', () => {
       // poetry.lock
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
       fs.readLocalFile.mockResolvedValueOnce(
-        '[metadata]\npython-versions = "~2.7 || ^3.4"'
+        '[metadata]\npython-versions = "~2.7 || ^3.4"',
       );
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       // python
@@ -461,7 +461,7 @@ describe('modules/manager/poetry/artifacts', () => {
             ...config,
             constraints: {},
           },
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -500,7 +500,7 @@ describe('modules/manager/poetry/artifacts', () => {
       // poetry.lock
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
       fs.readLocalFile.mockResolvedValueOnce(
-        '[metadata]\npython-versions = "~2.7 || ^3.4"'
+        '[metadata]\npython-versions = "~2.7 || ^3.4"',
       );
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       // python
@@ -521,7 +521,7 @@ describe('modules/manager/poetry/artifacts', () => {
             ...config,
             constraints: {},
           },
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -554,7 +554,7 @@ describe('modules/manager/poetry/artifacts', () => {
           updatedDeps,
           newPackageFileContent: '{}',
           config,
-        })
+        }),
       ).toMatchObject([{ artifactError: { lockFile: 'poetry.lock' } }]);
       expect(execSnapshots).toMatchObject([]);
     });
@@ -574,7 +574,7 @@ describe('modules/manager/poetry/artifacts', () => {
             ...config,
             updateType: 'lockFileMaintenance',
           },
-        })
+        }),
       ).toEqual([
         {
           file: {
