@@ -13,7 +13,7 @@ describe('modules/manager/helmv3/update', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
         '0.0.2',
-        'patch'
+        'patch',
       );
       const expected = content.replace('0.0.2', '0.0.3');
       expect(bumpedContent).toEqual(expected);
@@ -23,7 +23,7 @@ describe('modules/manager/helmv3/update', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
         '0.0.1',
-        'patch'
+        'patch',
       );
       expect(bumpedContent).toEqual(content);
     });
@@ -32,7 +32,7 @@ describe('modules/manager/helmv3/update', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
         '0.0.1',
-        'minor'
+        'minor',
       );
       const expected = content.replace('0.0.2', '0.1.0');
       expect(bumpedContent).toEqual(expected);
@@ -42,7 +42,7 @@ describe('modules/manager/helmv3/update', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(
         content,
         '0.0.2',
-        true as any
+        true as any,
       );
       expect(bumpedContent).toEqual(content);
     });

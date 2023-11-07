@@ -46,7 +46,7 @@ declare global {
        * expect(desiredHouse).toMatchObject<House>({...standardHouse, kitchen: {area: 20}}) // wherein standardHouse is some base object of type House
        */
       toMatchObject<E extends object | any[]>(
-        expected: E
+        expected: E,
       ): R extends void | Promise<void> ? R : void;
     };
 }
@@ -89,7 +89,7 @@ interface JestEach extends JestItEach {
   (strings: TemplateStringsArray, ...placeholders: any[]): (
     name: string,
     fn: (arg: any) => ReturnType<Global.TestFn>,
-    timeout?: number
+    timeout?: number,
   ) => void;
 }
 

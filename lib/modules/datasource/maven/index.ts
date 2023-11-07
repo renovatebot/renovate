@@ -39,7 +39,7 @@ function getLatestSuitableVersion(releases: Release[]): string | null {
   return versions.reduce((latestVersion, version) =>
     compare(version, latestVersion) === 1
       ? version
-      : /* istanbul ignore next: hard to test */ latestVersion
+      : /* istanbul ignore next: hard to test */ latestVersion,
   );
 }
 
@@ -54,7 +54,7 @@ function extractVersions(metadata: XmlDocument): string[] {
 
 const mavenCentralHtmlVersionRegex = regEx(
   '^<a href="(?<version>[^"]+)/" title="(?:[^"]+)/">(?:[^"]+)/</a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-$',
-  'i'
+  'i',
 );
 
 export const defaultRegistryUrls = [MAVEN_REPO];
@@ -74,7 +74,7 @@ export class MavenDatasource extends Datasource {
 
   async fetchReleasesFromMetadata(
     dependency: MavenDependency,
-    repoUrl: string
+    repoUrl: string,
   ): Promise<ReleaseMap> {
     const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
@@ -82,7 +82,7 @@ export class MavenDatasource extends Datasource {
     const cacheKey = metadataUrl.toString();
     const cachedVersions = await packageCache.get<ReleaseMap>(
       cacheNamespace,
-      cacheKey
+      cacheKey,
     );
     /* istanbul ignore if */
     if (cachedVersions) {
@@ -91,7 +91,7 @@ export class MavenDatasource extends Datasource {
 
     const { isCacheable, xml: mavenMetadata } = await downloadMavenXml(
       this.http,
-      metadataUrl
+      metadataUrl,
     );
     if (!mavenMetadata) {
       return {};
@@ -100,7 +100,7 @@ export class MavenDatasource extends Datasource {
     const versions = extractVersions(mavenMetadata);
     const releaseMap = versions.reduce(
       (acc, version) => ({ ...acc, [version]: null }),
-      {}
+      {},
     );
     if (isCacheable) {
       await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
@@ -111,13 +111,13 @@ export class MavenDatasource extends Datasource {
   async addReleasesFromIndexPage(
     inputReleaseMap: ReleaseMap,
     dependency: MavenDependency,
-    repoUrl: string
+    repoUrl: string,
   ): Promise<ReleaseMap> {
     const cacheNs = 'datasource-maven:index-html-releases';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
     let workingReleaseMap = await packageCache.get<ReleaseMap>(
       cacheNs,
-      cacheKey
+      cacheKey,
     );
     if (!workingReleaseMap) {
       workingReleaseMap = {};
@@ -138,7 +138,7 @@ export class MavenDatasource extends Datasource {
                   'yyyy-MM-dd HH:mm',
                   {
                     zone: 'UTC',
-                  }
+                  },
                 );
                 if (date.isValid) {
                   const releaseTimestamp = date.toISO();
@@ -152,7 +152,7 @@ export class MavenDatasource extends Datasource {
         retryEarlier = true;
         logger.debug(
           { dependency, err },
-          'Failed to get releases from index.html'
+          'Failed to get releases from index.html',
         );
       }
       const cacheTTL = retryEarlier
@@ -203,7 +203,7 @@ export class MavenDatasource extends Datasource {
   async addReleasesUsingHeadRequests(
     inputReleaseMap: ReleaseMap,
     dependency: MavenDependency,
-    repoUrl: string
+    repoUrl: string,
   ): Promise<ReleaseMap> {
     const releaseMap = { ...inputReleaseMap };
 
@@ -253,7 +253,7 @@ export class MavenDatasource extends Datasource {
           this.http,
           version,
           dependency,
-          repoUrl
+          repoUrl,
         );
         const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
         const release: Release = { version };
@@ -312,12 +312,12 @@ export class MavenDatasource extends Datasource {
     releaseMap = await this.addReleasesFromIndexPage(
       releaseMap,
       dependency,
-      repoUrl
+      repoUrl,
     );
     releaseMap = await this.addReleasesUsingHeadRequests(
       releaseMap,
       dependency,
-      repoUrl
+      repoUrl,
     );
     const releases = this.getReleasesFromMap(releaseMap);
     if (!releases?.length) {
@@ -325,7 +325,7 @@ export class MavenDatasource extends Datasource {
     }
 
     logger.debug(
-      `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
+      `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`,
     );
 
     const latestSuitableVersion = getLatestSuitableVersion(releases);
@@ -335,7 +335,7 @@ export class MavenDatasource extends Datasource {
         this.http,
         dependency,
         repoUrl,
-        latestSuitableVersion
+        latestSuitableVersion,
       ));
 
     return { ...dependency, ...dependencyInfo, releases };

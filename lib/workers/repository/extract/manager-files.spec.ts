@@ -71,7 +71,7 @@ describe('workers/repository/extract/manager-files', () => {
       };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce(
-        '{"dependencies":{"chalk":"2.0.0"}}'
+        '{"dependencies":{"chalk":"2.0.0"}}',
       );
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toMatchObject([

@@ -5,7 +5,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 const apiData: Record<string, string[]> = JSON5.parse(
-  dataFiles.get('data/kubernetes-api.json5')!
+  dataFiles.get('data/kubernetes-api.json5')!,
 );
 
 export const supportedApis = new Set(Object.keys(apiData));

@@ -11,7 +11,7 @@ import { getBranchCommit } from '.';
 export function setBranchNewCommit(
   branchName: string,
   baseBranch: string,
-  commitSha: string
+  commitSha: string,
 ): void {
   logger.debug('setBranchCommit()');
   const cache = getCache();

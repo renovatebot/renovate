@@ -48,32 +48,32 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const excludedVersions = getExcludedVersions(range);
   const filteredRange = getFilteredRange(range);
   const filteredVersions = versions.filter(
-    (version) => !excludedVersions.includes(version)
+    (version) => !excludedVersions.includes(version),
   );
 
   return npm.getSatisfyingVersion(
     filteredVersions,
-    hashicorp2npm(filteredRange)
+    hashicorp2npm(filteredRange),
   );
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const excludedVersions = getExcludedVersions(range);
   const filteredRange = getFilteredRange(range);
   const filteredVersions = versions.filter(
-    (version) => !excludedVersions.includes(version)
+    (version) => !excludedVersions.includes(version),
   );
   return npm.minSatisfyingVersion(
     filteredVersions,
-    hashicorp2npm(filteredRange)
+    hashicorp2npm(filteredRange),
   );
 }
 

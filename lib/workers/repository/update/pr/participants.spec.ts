@@ -61,7 +61,7 @@ describe('workers/repository/update/pr/participants', () => {
           assigneesFromCodeOwners: true,
           expandCodeOwnersGroups: true,
         },
-        pr
+        pr,
       );
       expect(platform.expandGroupMembers).toHaveBeenCalledWith([
         'user',
@@ -182,7 +182,7 @@ describe('workers/repository/update/pr/participants', () => {
     it('supports additionalReviewers', async () => {
       await addParticipants(
         { ...config, additionalReviewers: ['foo', 'bar', 'baz'] },
-        pr
+        pr,
       );
       expect(platform.addReviewers).toHaveBeenCalledWith(123, [
         'x',

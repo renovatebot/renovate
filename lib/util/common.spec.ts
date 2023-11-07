@@ -73,16 +73,16 @@ describe('util/common', () => {
       });
 
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
-        'bitbucket'
+        'bitbucket',
       );
       expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBe(
-        'gitea'
+        'gitea',
       );
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
-        'github'
+        'github',
       );
       expect(detectPlatform('https://gl.example.com/chalk/chalk')).toBe(
-        'gitlab'
+        'gitlab',
       );
       expect(detectPlatform('https://f.example.com/chalk/chalk')).toBeNull();
     });
@@ -114,7 +114,7 @@ describe('util/common', () => {
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { context: 'renovate.json' },
-        'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.'
+        'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
       );
     });
   });

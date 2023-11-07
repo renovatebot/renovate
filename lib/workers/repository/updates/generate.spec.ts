@@ -697,10 +697,10 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(package): update dependency some-dep to v1.2.0'
+        'chore(package): update dependency some-dep to v1.2.0',
       );
       expect(res.commitMessage).toBe(
-        'chore(package): update dependency some-dep to v1.2.0'
+        'chore(package): update dependency some-dep to v1.2.0',
       );
     });
 
@@ -728,7 +728,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
       expect(res.commitMessage).toBe(
-        'chore(): update dependency some-dep to v1.2.0'
+        'chore(): update dependency some-dep to v1.2.0',
       );
     });
 
@@ -756,10 +756,10 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(bar): update dependency some-dep to v1.2.0'
+        'chore(bar): update dependency some-dep to v1.2.0',
       );
       expect(res.commitMessage).toBe(
-        'chore(bar): update dependency some-dep to v1.2.0'
+        'chore(bar): update dependency some-dep to v1.2.0',
       );
     });
 
@@ -786,10 +786,10 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(foo/bar): update dependency some-dep to v1.2.0'
+        'chore(foo/bar): update dependency some-dep to v1.2.0',
       );
       expect(res.commitMessage).toBe(
-        'chore(foo/bar): update dependency some-dep to v1.2.0'
+        'chore(foo/bar): update dependency some-dep to v1.2.0',
       );
     });
 
@@ -813,10 +813,10 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(foo/bar): update dependency some-dep v1.2.0'
+        'chore(foo/bar): update dependency some-dep v1.2.0',
       );
       expect(res.commitMessage).toBe(
-        'chore(foo/bar): update dependency some-dep v1.2.0'
+        'chore(foo/bar): update dependency some-dep v1.2.0',
       );
     });
 
@@ -840,10 +840,10 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(foo/bar): update dependency some-dep v3.2.0'
+        'chore(foo/bar): update dependency some-dep v3.2.0',
       );
       expect(res.commitMessage).toBe(
-        'chore(foo/bar): update dependency some-dep v3.2.0'
+        'chore(foo/bar): update dependency some-dep v3.2.0',
       );
     });
 
@@ -868,7 +868,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('chore(foo/bar): update dependency some-dep v3');
       expect(res.commitMessage).toBe(
-        'chore(foo/bar): update dependency some-dep v3'
+        'chore(foo/bar): update dependency some-dep v3',
       );
     });
 
@@ -891,10 +891,10 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(foo/bar): update dependency some-dep to v1.2.0'
+        'chore(foo/bar): update dependency some-dep to v1.2.0',
       );
       expect(res.commitMessage).toBe(
-        'chore(foo/bar): update dependency some-dep to v1.2.0'
+        'chore(foo/bar): update dependency some-dep to v1.2.0',
       );
     });
 
@@ -1165,7 +1165,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(
-        res.upgrades.map((upgrade) => upgrade.fileReplacePosition)
+        res.upgrades.map((upgrade) => upgrade.fileReplacePosition),
       ).toStrictEqual([undefined, undefined, 4, 1]);
     });
 
@@ -1279,7 +1279,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       const excludeCommitPaths = res.excludeCommitPaths ?? [];
       expect(excludeCommitPaths.sort()).toStrictEqual(
-        ['some/path', 'some/other/path', 'some/other-manager/path'].sort()
+        ['some/path', 'some/other/path', 'some/other-manager/path'].sort(),
       );
     });
 
@@ -1300,10 +1300,10 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
-        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1',
       );
       expect(res.commitMessage).toBe(
-        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1',
       );
     });
 
@@ -1336,7 +1336,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('PATCH: Update dependency some-dep to 1.2.0');
       expect(res.commitMessage).toBe(
-        'PATCH: Update dependency some-dep to 1.2.0'
+        'PATCH: Update dependency some-dep to 1.2.0',
       );
     });
 

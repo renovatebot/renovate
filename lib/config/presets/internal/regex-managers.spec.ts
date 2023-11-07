@@ -32,7 +32,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'Dockerfile',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([
@@ -131,7 +131,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'github-workflow.yaml',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([
@@ -221,7 +221,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'gitlab-ci.yml',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([
@@ -292,7 +292,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'Chart.yaml',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([
@@ -351,7 +351,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'pom.xml',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([

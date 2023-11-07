@@ -6,7 +6,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
@@ -22,7 +22,7 @@ export function extractPackageFile(
               currentValue: dep.currentValue,
               currentDigest: dep.currentDigest,
             },
-            'Cloud Build docker image'
+            'Cloud Build docker image',
           );
 
           deps.push(dep);
@@ -33,12 +33,12 @@ export function extractPackageFile(
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug(
         { err, packageFile },
-        'YAML exception extracting Docker images from a Cloud Build configuration file.'
+        'YAML exception extracting Docker images from a Cloud Build configuration file.',
       );
     } else {
       logger.debug(
         { err, packageFile },
-        'Error extracting Docker images from a Cloud Build configuration file.'
+        'Error extracting Docker images from a Cloud Build configuration file.',
       );
     }
   }

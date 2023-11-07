@@ -22,7 +22,7 @@ describe('modules/datasource/java-version/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -32,7 +32,7 @@ describe('modules/datasource/java-version/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -42,7 +42,7 @@ describe('modules/datasource/java-version/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -55,7 +55,7 @@ describe('modules/datasource/java-version/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -65,7 +65,7 @@ describe('modules/datasource/java-version/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

@@ -4,7 +4,7 @@ import type { ExtractionResult, TerraformManagerData } from './types';
 import { keyValueExtractionRegex } from './util';
 
 export const sourceExtractionRegex = regEx(
-  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
+  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/,
 );
 
 function extractBracesContent(content: string): number {
@@ -26,7 +26,7 @@ function extractBracesContent(content: string): number {
 export function extractTerragruntProvider(
   startingLine: number,
   lines: string[],
-  moduleName: string
+  moduleName: string,
 ): ExtractionResult {
   const lineNumber = startingLine;
   let line: string;

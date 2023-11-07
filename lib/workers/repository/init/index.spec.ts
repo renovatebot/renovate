@@ -41,7 +41,7 @@ describe('workers/repository/init/index', () => {
       config.getRepoConfig.mockResolvedValueOnce({});
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce(
-        partial<RenovateConfig>()
+        partial<RenovateConfig>(),
       );
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toEqual({});
@@ -56,14 +56,14 @@ describe('workers/repository/init/index', () => {
       });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce(
-        partial<RenovateConfig>()
+        partial<RenovateConfig>(),
       );
       await initRepo({});
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        "Configuration option 'filterUnavailableUsers' is not supported on the current platform 'undefined'."
+        "Configuration option 'filterUnavailableUsers' is not supported on the current platform 'undefined'.",
       );
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform 'undefined'."
+        "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform 'undefined'.",
       );
     });
   });

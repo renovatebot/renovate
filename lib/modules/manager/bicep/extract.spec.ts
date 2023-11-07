@@ -17,7 +17,7 @@ describe('modules/manager/bicep/extract', () => {
       }
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({
@@ -49,7 +49,7 @@ describe('modules/manager/bicep/extract', () => {
       // }
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toBeNull();
@@ -70,7 +70,7 @@ describe('modules/manager/bicep/extract', () => {
       }
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({
@@ -97,7 +97,7 @@ describe('modules/manager/bicep/extract', () => {
       output id string = storageAccount.id
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({
@@ -129,7 +129,7 @@ describe('modules/manager/bicep/extract', () => {
       }]
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({
@@ -161,7 +161,7 @@ describe('modules/manager/bicep/extract', () => {
       }]
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({
@@ -197,7 +197,7 @@ describe('modules/manager/bicep/extract', () => {
       }
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({
@@ -233,7 +233,7 @@ describe('modules/manager/bicep/extract', () => {
       }
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({
@@ -258,7 +258,7 @@ describe('modules/manager/bicep/extract', () => {
       }
       `,
       '',
-      {}
+      {},
     );
 
     expect(result).toEqual({

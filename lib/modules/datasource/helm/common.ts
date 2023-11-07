@@ -5,7 +5,7 @@ import type { HelmRelease } from './types';
 
 const chartRepo = regEx(/charts?|helm|helm-charts/i);
 const githubRelease = regEx(
-  /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//
+  /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
 );
 
 function isPossibleChartRepo(url: string): boolean {

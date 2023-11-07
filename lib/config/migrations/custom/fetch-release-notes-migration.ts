@@ -8,7 +8,7 @@ export class FetchReleaseNotesMigration extends RenamePropertyMigration {
       'fetchReleaseNotes',
       'fetchChangeLogs',
       originalConfig,
-      migratedConfig
+      migratedConfig,
     );
   }
 

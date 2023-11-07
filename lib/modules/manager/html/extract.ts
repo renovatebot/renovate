@@ -6,7 +6,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 const regex = regEx(/<\s*(script|link)\s+[^>]*?\/?>/i);
 
 const integrityRegex = regEx(
-  /\s+integrity\s*=\s*("|')(?<currentDigest>[^"']+)/
+  /\s+integrity\s*=\s*("|')(?<currentDigest>[^"']+)/,
 );
 
 export function extractDep(tag: string): PackageDependency | null {

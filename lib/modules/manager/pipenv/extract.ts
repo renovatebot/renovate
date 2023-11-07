@@ -15,13 +15,13 @@ const rangePattern: string = RANGE_PATTERN;
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
   regEx(/\?<\w+>/g),
-  '?:'
+  '?:',
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
 const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   pipfile: PipFile,
-  section: 'packages' | 'dev-packages'
+  section: 'packages' | 'dev-packages',
 ): PackageDependency[] {
   const pipfileSection = pipfile[section];
   if (!pipfileSection) {
@@ -55,7 +55,7 @@ function extractFromSection(
         const packageMatches = packageRegex.exec(depName);
         if (!packageMatches) {
           logger.debug(
-            `Skipping dependency with malformed package name "${depName}".`
+            `Skipping dependency with malformed package name "${depName}".`,
           );
           skipReason = 'invalid-name';
         }
@@ -63,7 +63,7 @@ function extractFromSection(
         const specifierMatches = specifierRegex.exec(currentValue!);
         if (!specifierMatches) {
           logger.debug(
-            `Skipping dependency with malformed version specifier "${currentValue!}".`
+            `Skipping dependency with malformed version specifier "${currentValue!}".`,
           );
           skipReason = 'invalid-version';
         }
@@ -88,7 +88,7 @@ function extractFromSection(
       if (requirements.index) {
         if (is.array(pipfile.source)) {
           const source = pipfile.source.find(
-            (item) => item.name === requirements.index
+            (item) => item.name === requirements.index,
           );
           if (source) {
             dep.registryUrls = [source.url];
@@ -103,7 +103,7 @@ function extractFromSection(
 
 export async function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`pipenv.extractPackageFile(${packageFile})`);
 

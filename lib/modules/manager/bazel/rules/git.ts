@@ -6,7 +6,7 @@ import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import type { PackageDependency } from '../../types';
 
 const githubUrlRegex = regEx(
-  /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/
+  /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/,
 );
 
 function githubPackageName(input: string): string | undefined {

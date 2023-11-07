@@ -6,5 +6,5 @@ export const DecryptedObject = Json.pipe(
     o: z.string().optional(),
     r: z.string().optional(),
     v: z.string().optional(),
-  })
+  }),
 );

@@ -27,8 +27,8 @@ describe('workers/global/config/parse/env', () => {
       };
       expect(() => env.getConfig(envParam)).toThrow(
         Error(
-          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
-        )
+          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'",
+        ),
       );
     });
 
@@ -106,7 +106,7 @@ describe('workers/global/config/parse/env', () => {
       expect(res).toEqual({ hostRules: [] });
       expect(logger.debug).toHaveBeenLastCalledWith(
         { val, envName },
-        'Could not parse object array'
+        'Could not parse object array',
       );
     });
 
@@ -120,7 +120,7 @@ describe('workers/global/config/parse/env', () => {
       expect(res).toEqual({ hostRules: [] });
       expect(logger.debug).toHaveBeenLastCalledWith(
         { val, envName },
-        'Could not parse environment variable'
+        'Could not parse environment variable',
       );
     });
 

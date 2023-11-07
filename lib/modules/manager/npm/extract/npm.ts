@@ -14,7 +14,7 @@ export async function getNpmLock(filePath: string): Promise<LockFile> {
   if (!parsedLockfile.success) {
     logger.debug(
       { filePath, err: parsedLockfile.error },
-      'Npm: unable to parse lockfile'
+      'Npm: unable to parse lockfile',
     );
     return { lockedVersions: {} };
   }

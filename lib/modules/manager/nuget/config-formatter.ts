@@ -72,7 +72,7 @@ export function createNuGetConfigXml(registries: Registry[]): string {
 
 function formatPackageSourceElement(
   registryInfo: ParsedRegistryUrl,
-  name: string
+  name: string,
 ): string {
   let element = `<add key="${name}" value="${registryInfo.feedUrl}" `;
 
@@ -84,7 +84,7 @@ function formatPackageSourceElement(
 }
 
 function formatPackageSourceCredentialElement(
-  credential: PackageSourceCredential
+  credential: PackageSourceCredential,
 ): string {
   const escapedName = escapeName(credential.name);
 

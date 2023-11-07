@@ -10,7 +10,7 @@ export class MatchStringsMigration extends AbstractMigration {
       const newValue = value
         .filter(is.nonEmptyString)
         .map((matchString) =>
-          matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>')
+          matchString.replace(regEx(/\(\?<lookupName>/g), '(?<packageName>'),
         );
 
       this.rewrite(newValue);

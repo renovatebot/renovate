@@ -36,22 +36,22 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
-          '{{packageFileDir}}'
+          '{{packageFileDir}}',
         );
       } else if (is.string(val) && val.includes('{{lookupName}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{lookupName}}/g),
-          '{{packageName}}'
+          '{{packageName}}',
         );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{depNameShort}}/g),
-          '{{depName}}'
+          '{{depName}}',
         );
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
-          '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}'
+          '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}',
         );
       } else if (optionTypes[key] === 'object' && is.boolean(val)) {
         migratedConfig[key] = { enabled: val };
@@ -99,7 +99,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         for (const [from, to] of Object.entries(migratedTemplates)) {
           migratedConfig[key] = (migratedConfig[key] as string).replace(
             regEx(from, 'g'),
-            to
+            to,
           );
         }
       }
@@ -140,7 +140,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
             // TODO: fix types #22198
             const combinedRule = mergeChildConfig(
               packageRule,
-              subrule as PackageRule
+              subrule as PackageRule,
             );
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
@@ -156,14 +156,14 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           migratedConfig.matchManagers.push('gradle');
         }
         migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
-          (manager) => manager !== 'gradle-lite'
+          (manager) => manager !== 'gradle-lite',
         );
       }
     }
     if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
         migratedConfig.gradle ?? {},
-        migratedConfig['gradle-lite']
+        migratedConfig['gradle-lite'],
       );
     }
     delete migratedConfig['gradle-lite'];
