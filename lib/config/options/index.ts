@@ -373,7 +373,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.23.12',
+    default: 'ghcr.io/containerbase/sidecar:9.23.13',
     globalOnly: true,
   },
   {
