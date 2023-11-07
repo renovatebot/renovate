@@ -2801,13 +2801,25 @@ These updates have all been created already. Click a checkbox below to force a r
       ]);
     });
 
-    it('users are not expanded', async () => {
+    it('users are not expanded when 404', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/groups/john/members')
         .reply(404, { message: '404 Group Not Found' });
       const expandedGroupMembers = await gitlab.expandGroupMembers?.(['john']);
       expect(expandedGroupMembers).toEqual(['john']);
+    });
+
+    it('users are not expanded when non 404', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/group/members')
+        .reply(403, { message: '403 Authorization' });
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        '@group',
+      ]);
+      expect(expandedGroupMembers).toEqual(['group']);
+      expect(logger.debug).toHaveBeenCalled();
     });
 
     it('groups with no members expand into empty list', async () => {
