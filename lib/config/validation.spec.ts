@@ -909,6 +909,42 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
     });
 
+    it('validates valid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 'https://www.example2.com/example',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('errors on invalid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 123,
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     it('errors if schedule is cron and has no * minutes', async () => {
       const config = {
         schedule: ['30 5 * * *'],

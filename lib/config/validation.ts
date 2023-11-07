@@ -143,8 +143,8 @@ export async function validateConfig(
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
     }
-    if (optionGlobals.has(key)) {
-      if (!isGlobalConfig) {
+    if (!isGlobalConfig) {
+      if (optionGlobals.has(key)) {
         // token is a global config option and a field of repo config option hostRules.encrypted
         if (!(key === 'token' && parentPath?.includes('hostRules'))) {
           warnings.push({
@@ -153,7 +153,6 @@ export async function validateConfig(
           });
         }
       }
-      continue;
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -626,6 +625,22 @@ export async function validateConfig(
                     });
                   }
                 }
+              }
+            } else if (
+              [
+                'customEnvVariables',
+                'migratePresets',
+                'productLinks',
+                'secrets',
+                'customizeDashboard',
+              ].includes(key)
+            ) {
+              const res = validatePlainObject(val);
+              if (res !== true) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
+                });
               }
             } else {
               const ignoredObjects = options
