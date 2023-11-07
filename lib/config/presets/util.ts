@@ -33,7 +33,7 @@ export async function fetchPreset({
         repo,
         buildFilePath('default.json'),
         endpoint,
-        tag
+        tag,
       );
     } catch (err) {
       if (err.message !== PRESET_DEP_NOT_FOUND) {
@@ -43,7 +43,7 @@ export async function fetchPreset({
         repo,
         buildFilePath('renovate.json'),
         endpoint,
-        tag
+        tag,
       );
       logger.warn(
         {
@@ -53,17 +53,17 @@ export async function fetchPreset({
           endpoint,
           tag,
         },
-        'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.'
+        'Fallback to renovate.json file as a preset is deprecated, please use a default.json file instead.',
       );
     }
   } else {
     jsonContent = await fetch(
       repo,
       buildFilePath(
-        regEx(/\.json5?$/).test(fileName) ? fileName : `${fileName}.json`
+        regEx(/\.json5?$/).test(fileName) ? fileName : `${fileName}.json`,
       ),
       endpoint,
-      tag
+      tag,
     );
   }
 

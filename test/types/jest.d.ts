@@ -75,7 +75,7 @@ type JestPromiseMatchers<T> = {
 
 type JestExpect = {
   <T = unknown>(
-    actual: T
+    actual: T,
   ): JestMatchers<void, T> &
     JestInverse<JestMatchers<void, T>> &
     JestPromiseMatchers<T>;

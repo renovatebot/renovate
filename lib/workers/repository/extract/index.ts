@@ -11,14 +11,14 @@ import { getManagerPackageFiles } from './manager-files';
 import { processSupersedesManagers } from './supersedes';
 
 export async function extractAllDependencies(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<ExtractResult> {
   let managerList = allManagersList;
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
     managerList = managerList.filter((manager) =>
-      enabledManagers.includes(manager)
+      enabledManagers.includes(manager),
     );
   }
   const extractList: WorkerExtractConfig[] = [];
@@ -36,7 +36,7 @@ export async function extractAllDependencies(
     managerConfig.manager = manager;
     if (isCustomManager(manager)) {
       const filteredCustomManagers = (config.customManagers ?? []).filter(
-        (mgr) => mgr.customType === manager
+        (mgr) => mgr.customType === manager,
       );
       for (const customManager of filteredCustomManagers) {
         tryConfig(mergeChildConfig(managerConfig, customManager));
@@ -65,7 +65,7 @@ export async function extractAllDependencies(
       const durationMs = Math.round(Date.now() - start);
       extractDurations[managerConfig.manager] = durationMs;
       return { manager: managerConfig.manager, packageFiles };
-    })
+    }),
   );
 
   // De-duplicate results using supersedesManagers
@@ -73,7 +73,7 @@ export async function extractAllDependencies(
 
   logger.debug(
     { managers: extractDurations },
-    'manager extract durations (ms)'
+    'manager extract durations (ms)',
   );
   let fileCount = 0;
   for (const { manager, packageFiles } of extractResults) {
@@ -94,7 +94,7 @@ export async function extractAllDependencies(
       if (!(enabledManager in extractResult.packageFiles)) {
         logger.debug(
           { manager: enabledManager },
-          `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
+          `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,
         );
       }
     }

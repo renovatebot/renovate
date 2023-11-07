@@ -34,7 +34,7 @@ export function getErrors(config: RenovateConfig): string {
 }
 
 function getDepWarnings(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): DepWarnings {
   const warnings: string[] = [];
   const warningFiles: string[] = [];
@@ -64,7 +64,7 @@ function getDepWarnings(
 
 export function getDepWarningsOnboardingPR(
   packageFiles: Record<string, PackageFile[]>,
-  config: RenovateConfig
+  config: RenovateConfig,
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
@@ -89,7 +89,7 @@ export function getDepWarningsOnboardingPR(
 export function getDepWarningsPR(
   packageFiles: Record<string, PackageFile[]>,
   config: RenovateConfig,
-  dependencyDashboard?: boolean
+  dependencyDashboard?: boolean,
 ): string {
   const { warnings } = getDepWarnings(packageFiles);
   if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
@@ -111,7 +111,7 @@ export function getDepWarningsPR(
 
 export function getDepWarningsDashboard(
   packageFiles: Record<string, PackageFile[]>,
-  config: RenovateConfig
+  config: RenovateConfig,
 ): string {
   if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
     return '';
@@ -123,13 +123,13 @@ export function getDepWarningsDashboard(
 
   const depWarnings = warnings
     .map((w) =>
-      w.replace(regEx(/^Failed to look up(?: [-\w]+)? dependency /), '')
+      w.replace(regEx(/^Failed to look up(?: [-\w]+)? dependency /), ''),
     )
     .map((dep) => '`' + dep + '`')
     .join(', ');
 
   let warningText = emojify(
-    `\n---\n\n> :warning: **Warning**\n> \n> Renovate failed to look up the following dependencies: `
+    `\n---\n\n> :warning: **Warning**\n> \n> Renovate failed to look up the following dependencies: `,
   );
   warningText += depWarnings;
   warningText += '.\n> \n> Files affected: ';

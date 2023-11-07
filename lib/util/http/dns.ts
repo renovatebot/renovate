@@ -17,7 +17,7 @@ function lookup(
         callback: (
           error: NodeJS.ErrnoException,
           address: string,
-          family: IPFamily
+          family: IPFamily,
         ) => void,
       ]
     | [
@@ -25,7 +25,7 @@ function lookup(
         callback: (
           error: NodeJS.ErrnoException,
           address: string,
-          family: IPFamily
+          family: IPFamily,
         ) => void,
       ]
     | [
@@ -33,7 +33,7 @@ function lookup(
         options: LookupOptions & { all: true },
         callback: (
           error: NodeJS.ErrnoException,
-          result: ReadonlyArray<EntryObject>
+          result: ReadonlyArray<EntryObject>,
         ) => void,
       ]
     | [
@@ -42,7 +42,7 @@ function lookup(
         callback: (
           error: NodeJS.ErrnoException,
           address: string,
-          family: IPFamily
+          family: IPFamily,
         ) => void,
       ]
 ): void {

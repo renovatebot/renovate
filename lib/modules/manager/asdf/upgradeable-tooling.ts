@@ -258,7 +258,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/halcyon/asdf-java',
     config: (version) => {
       const adoptOpenJdkMatches = version.match(
-        /^adoptopenjdk-(?<version>\d\S+)/
+        /^adoptopenjdk-(?<version>\d\S+)/,
       )?.groups;
       if (adoptOpenJdkMatches) {
         return {
@@ -268,7 +268,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         };
       }
       const adoptOpenJreMatches = version.match(
-        /^adoptopenjdk-jre-(?<version>\d\S+)/
+        /^adoptopenjdk-jre-(?<version>\d\S+)/,
       )?.groups;
       if (adoptOpenJreMatches) {
         return {
@@ -278,7 +278,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         };
       }
       const semeruJdkMatches = version.match(
-        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/
+        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/,
       )?.groups;
       if (semeruJdkMatches) {
         return {
@@ -288,7 +288,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         };
       }
       const semeruJreMatches = version.match(
-        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/
+        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/,
       )?.groups;
       if (semeruJreMatches) {
         return {

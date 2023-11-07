@@ -6,7 +6,7 @@ import { regEx } from '../../../util/regex';
 
 const importRegex = regEx(`^(?<type>(?:try-)?import)\\s+(?<path>\\S+)$`);
 const optionRegex = regEx(
-  `^(?<command>\\w+)(:(?<config>\\S+))?\\s+(?<options>.*)$`
+  `^(?<command>\\w+)(:(?<config>\\S+))?\\s+(?<options>.*)$`,
 );
 const spaceRegex = regEx(`\\s+`);
 
@@ -14,14 +14,14 @@ export class ImportEntry {
   readonly entryType = 'import';
   constructor(
     readonly path: string,
-    readonly isTry: boolean
+    readonly isTry: boolean,
   ) {}
 }
 
 export class BazelOption {
   constructor(
     readonly name: string,
-    readonly value?: string
+    readonly value?: string,
   ) {}
 
   static parse(input: string): BazelOption[] {
@@ -61,7 +61,7 @@ export class CommandEntry {
   constructor(
     readonly command: string,
     readonly options: BazelOption[],
-    readonly config?: string
+    readonly config?: string,
   ) {}
 
   getOption(name: string): BazelOption | undefined {
@@ -90,7 +90,7 @@ function createEntry(line: string): BazelrcEntries | undefined {
     return new CommandEntry(
       orGroups.command,
       BazelOption.parse(orGroups.options),
-      orGroups.config
+      orGroups.config,
     );
   }
   return undefined;
@@ -108,11 +108,11 @@ export function parse(contents: string): BazelrcEntries[] {
 async function readFile(
   file: string,
   workspaceDir: string,
-  readFiles: Set<string>
+  readFiles: Set<string>,
 ): Promise<CommandEntry[]> {
   if (readFiles.has(file)) {
     throw new Error(
-      `Attempted to read a bazelrc multiple times. file: ${file}`
+      `Attempted to read a bazelrc multiple times. file: ${file}`,
     );
   }
   readFiles.add(file);
@@ -129,7 +129,7 @@ async function readFile(
     }
 
     const importFile = upath.normalize(
-      entry.path.replace('%workspace%', workspaceDir)
+      entry.path.replace('%workspace%', workspaceDir),
     );
     if (fs.isValidLocalPath(importFile)) {
       const importEntries = await readFile(importFile, workspaceDir, readFiles);

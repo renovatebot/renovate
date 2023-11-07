@@ -17,23 +17,23 @@ export class CustomDatasource extends Datasource {
   }
 
   async getReleases(
-    getReleasesConfig: GetReleasesConfig
+    getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const customDatasourceName = getReleasesConfig.datasource?.replace(
       'custom.',
-      ''
+      '',
     );
 
     if (!is.nonEmptyString(customDatasourceName)) {
       logger.debug(
-        `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`
+        `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`,
       );
       return null;
     }
 
     const config = massageCustomDatasourceConfig(
       customDatasourceName,
-      getReleasesConfig
+      getReleasesConfig,
     );
     if (is.nullOrUndefined(config)) {
       return null;

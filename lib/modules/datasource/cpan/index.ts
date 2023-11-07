@@ -61,7 +61,7 @@ export class CpanDatasource extends Datasource {
       };
       const res = await this.http.postJson<MetaCpanApiFileSearchResult>(
         searchUrl,
-        { body }
+        { body },
       );
       hits = res.body?.hits?.hits?.map(({ _source }) => _source);
     } catch (err) {

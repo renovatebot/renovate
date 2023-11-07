@@ -150,50 +150,50 @@ describe('workers/repository/updates/flatten', () => {
           (upgrade) =>
             upgrade.isLockFileMaintenance ||
             upgrade.isRemediation ||
-            is.number(upgrade.depIndex)
-        )
+            is.number(upgrade.depIndex),
+        ),
       ).toBeTrue();
       expect(
-        res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug
+        res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug,
       ).toBe('org-repo');
       expect(res.filter((update) => update.sourceRepo)[0].sourceRepo).toBe(
-        'org/repo'
+        'org/repo',
       );
       expect(
-        res.filter((update) => update.sourceRepoOrg)[0].sourceRepoOrg
+        res.filter((update) => update.sourceRepoOrg)[0].sourceRepoOrg,
       ).toBe('org');
       expect(
-        res.filter((update) => update.sourceRepoName)[0].sourceRepoName
+        res.filter((update) => update.sourceRepoName)[0].sourceRepoName,
       ).toBe('repo');
       expect(
-        res.filter((update) => update.sourceRepoSlug)[1].sourceRepoSlug
+        res.filter((update) => update.sourceRepoSlug)[1].sourceRepoSlug,
       ).toBe('org-repo');
       expect(res.filter((update) => update.sourceRepo)[1].sourceRepo).toBe(
-        'org/repo'
+        'org/repo',
       );
       expect(
-        res.filter((update) => update.sourceRepoOrg)[1].sourceRepoOrg
+        res.filter((update) => update.sourceRepoOrg)[1].sourceRepoOrg,
       ).toBe('org');
       expect(
-        res.filter((update) => update.sourceRepoName)[1].sourceRepoName
+        res.filter((update) => update.sourceRepoName)[1].sourceRepoName,
       ).toBe('repo');
       expect(
-        res.filter((update) => update.sourceRepoSlug)[2].sourceRepoSlug
+        res.filter((update) => update.sourceRepoSlug)[2].sourceRepoSlug,
       ).toBe('nodejs-node');
       expect(res.filter((update) => update.sourceRepo)[2].sourceRepo).toBe(
-        'nodejs/node'
+        'nodejs/node',
       );
       expect(
-        res.filter((update) => update.sourceRepoOrg)[2].sourceRepoOrg
+        res.filter((update) => update.sourceRepoOrg)[2].sourceRepoOrg,
       ).toBe('nodejs');
       expect(
-        res.filter((update) => update.sourceRepoName)[2].sourceRepoName
+        res.filter((update) => update.sourceRepoName)[2].sourceRepoName,
       ).toBe('node');
       expect(
         res.filter(
           (r) =>
-            r.updateType === 'lockFileMaintenance' && r.isLockFileMaintenance
-        )
+            r.updateType === 'lockFileMaintenance' && r.isLockFileMaintenance,
+        ),
       ).toHaveLength(2);
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
     });

@@ -15,7 +15,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         getPkgReleases({
           datasource,
           packageName: 'elixir',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -28,7 +28,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'elixir',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -41,7 +41,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'elixir',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -54,7 +54,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'elixir',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -67,7 +67,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         getPkgReleases({
           datasource,
           packageName: 'elixir',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -174,7 +174,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'invalid',
-        })
+        }),
       ).toBeNull();
     });
   });

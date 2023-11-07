@@ -27,7 +27,7 @@ async function getJsonFile(file: string): Promise<RenovateConfig | null> {
 }
 
 async function validateOptimizeForDisabled(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
     const renovateConfig = await getJsonFile(defaultConfigFile(config));
@@ -42,7 +42,7 @@ async function validateOptimizeForDisabled(
      */
     if (config.extends?.includes(':disableRenovate')) {
       logger.debug(
-        'Global config disables Renovate - checking renovate.json to see if it is re-enabled'
+        'Global config disables Renovate - checking renovate.json to see if it is re-enabled',
       );
       if (
         renovateConfig?.extends?.includes(':enableRenovate') ??
@@ -52,7 +52,7 @@ async function validateOptimizeForDisabled(
         logger.debug('Repository config re-enables Renovate - continuing');
       } else {
         logger.debug(
-          'Repository config does not re-enable Renovate - skipping'
+          'Repository config does not re-enable Renovate - skipping',
         );
         throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
       }
@@ -75,7 +75,7 @@ async function validateIncludeForks(config: RenovateConfig): Promise<void> {
 
 // TODO: fix types (#22198)
 async function getPlatformConfig(
-  config: RepoParams
+  config: RepoParams,
 ): Promise<WorkerPlatformConfig> {
   const platformConfig = await platform.initRepo(config);
   return {
@@ -86,7 +86,7 @@ async function getPlatformConfig(
 
 // TODO: fix types (#22198)
 export async function initApis(
-  input: RenovateConfig
+  input: RenovateConfig,
 ): Promise<WorkerPlatformConfig> {
   let config: WorkerPlatformConfig = { ...input } as never;
   config = await getPlatformConfig(config as never);

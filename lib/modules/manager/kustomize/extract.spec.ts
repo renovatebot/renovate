@@ -76,7 +76,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the version of a non http base', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -88,7 +88,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the depName if the URL includes a port number', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -100,7 +100,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the version of a non http base with subdir', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -733,7 +733,7 @@ describe('modules/manager/kustomize/extract', () => {
 
         const pkg = extractResource(`${url}?ref=${version}`);
         expect(pkg).toEqual(sample);
-      }
+      },
     );
   });
 });

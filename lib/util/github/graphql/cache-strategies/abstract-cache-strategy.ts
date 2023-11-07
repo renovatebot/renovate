@@ -47,12 +47,12 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    */
   abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
   abstract persist(
-    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>,
   ): Promise<void>;
 
   constructor(
     protected readonly cacheNs: string,
-    protected readonly cacheKey: string
+    protected readonly cacheKey: string,
   ) {}
 
   /**

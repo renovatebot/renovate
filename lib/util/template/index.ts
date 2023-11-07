@@ -8,21 +8,21 @@ handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
-  JSON.stringify(JSON.parse(input), null, 2)
+  JSON.stringify(JSON.parse(input), null, 2),
 );
 
 // istanbul ignore next
 handlebars.registerHelper(
   'replace',
   (find, replace, context) =>
-    (context || '').replace(new RegExp(find, 'g'), replace) // TODO #12873
+    (context || '').replace(new RegExp(find, 'g'), replace), // TODO #12873
 );
 
 handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 
 handlebars.registerHelper(
   'containsString',
-  (str, subStr) => str?.includes(subStr)
+  (str, subStr) => str?.includes(subStr),
 );
 
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
@@ -194,7 +194,7 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
       return value.map((element) =>
         is.primitive(element)
           ? element
-          : proxyCompileInput(element as CompileInput)
+          : proxyCompileInput(element as CompileInput),
       );
     }
 
@@ -216,7 +216,7 @@ const templateRegex =
 export function compile(
   template: string,
   input: CompileInput,
-  filterFields = true
+  filterFields = true,
 ): string {
   const env = getChildEnv({});
   const data = { ...GlobalConfig.get(), ...input, env };
@@ -233,7 +233,7 @@ export function compile(
         if (!allowedFieldsList.includes(varName)) {
           logger.info(
             { varName, template },
-            'Disallowed variable name in template'
+            'Disallowed variable name in template',
           );
         }
       }
@@ -245,7 +245,7 @@ export function compile(
 export function safeCompile(
   template: string,
   input: CompileInput,
-  filterFields = true
+  filterFields = true,
 ): string {
   try {
     return compile(template, input, filterFields);
@@ -257,7 +257,7 @@ export function safeCompile(
 
 export function containsTemplates(
   value: unknown,
-  templates: string | string[]
+  templates: string | string[],
 ): boolean {
   if (!is.string(value)) {
     return false;

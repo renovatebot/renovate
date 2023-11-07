@@ -16,7 +16,7 @@ import { parseUrl } from './url';
  * @returns matched `platform` if found, otherwise `null`
  */
 export function detectPlatform(
-  url: string
+  url: string,
 ): 'azure' | 'bitbucket' | 'gitea' | 'github' | 'gitlab' | null {
   const { hostname } = parseUrl(url) ?? {};
   if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
@@ -62,6 +62,10 @@ export function detectPlatform(
   return null;
 }
 
+export function noLeadingAtSymbol(input: string): string {
+  return input.startsWith('@') ? input.slice(1) : input;
+}
+
 export function parseJson(content: string | null, filename: string): unknown {
   if (!content) {
     return null;
@@ -74,7 +78,7 @@ export function parseJson(content: string | null, filename: string): unknown {
 
 export function parseJsonWithFallback(
   content: string,
-  context: string
+  context: string,
 ): unknown {
   let parsedJson: unknown;
 
@@ -84,7 +88,7 @@ export function parseJsonWithFallback(
     parsedJson = JSON5.parse(content);
     logger.warn(
       { context },
-      'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.'
+      'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
     );
   }
 

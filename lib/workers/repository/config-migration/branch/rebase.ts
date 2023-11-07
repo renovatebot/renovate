@@ -12,7 +12,7 @@ import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,
-  migratedConfigData: MigratedData
+  migratedConfigData: MigratedData,
 ): Promise<string | null> {
   logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
@@ -38,7 +38,7 @@ export async function rebaseMigrationBranch(
 
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
-    configFileName
+    configFileName,
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 

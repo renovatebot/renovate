@@ -48,7 +48,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     if (!baseUrlResponse?.body) {
       logger.warn(
         { dependency: packageName },
-        `Received invalid data from ${baseUrl}`
+        `Received invalid data from ${baseUrl}`,
       );
       return null;
     }
@@ -82,10 +82,10 @@ export class GalaxyCollectionDatasource extends Datasource {
       (basicRelease) =>
         this.http
           .getJson<VersionsDetailResult>(
-            `${versionsUrl}${basicRelease.version}/`
+            `${versionsUrl}${basicRelease.version}/`,
           )
           .then(
-            (versionDetailResultResponse) => versionDetailResultResponse.body
+            (versionDetailResultResponse) => versionDetailResultResponse.body,
           )
           .then((versionDetails) => {
             try {
@@ -105,11 +105,11 @@ export class GalaxyCollectionDatasource extends Datasource {
             } catch (err) {
               logger.warn(
                 { dependency: packageName, err },
-                `Received invalid data from ${versionsUrl}${basicRelease.version}/`
+                `Received invalid data from ${versionsUrl}${basicRelease.version}/`,
               );
               return null;
             }
-          })
+          }),
     );
     // filter failed versions
     const filteredReleases = enrichedReleases.filter(is.truthy);

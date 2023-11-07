@@ -8,7 +8,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
       },
       {
         fetchChangeLogs: 'off',
-      }
+      },
     );
     expect(FetchReleaseNotesMigration).toMigrate(
       {
@@ -16,7 +16,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
       },
       {
         fetchChangeLogs: 'pr',
-      }
+      },
     );
     expect(FetchReleaseNotesMigration).toMigrate(
       {
@@ -24,7 +24,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
       },
       {
         fetchChangeLogs: 'pr',
-      }
+      },
     );
     expect(FetchReleaseNotesMigration).toMigrate(
       {
@@ -32,7 +32,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
       },
       {
         fetchChangeLogs: 'off',
-      }
+      },
     );
     expect(FetchReleaseNotesMigration).toMigrate(
       {
@@ -40,7 +40,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
       },
       {
         fetchChangeLogs: 'branch',
-      }
+      },
     );
   });
 });

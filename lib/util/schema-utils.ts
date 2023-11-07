@@ -26,7 +26,7 @@ interface LooseOpts<T> {
  */
 export function LooseArray<Schema extends z.ZodTypeAny>(
   Elem: Schema,
-  { onError }: LooseOpts<unknown[]> = {}
+  { onError }: LooseOpts<unknown[]> = {},
 ): z.ZodEffects<z.ZodArray<z.ZodAny, 'many'>, z.TypeOf<Schema>[], any[]> {
   if (!onError) {
     // Avoid error-related computations inside the loop
@@ -96,18 +96,18 @@ type LooseRecordOpts<
  * @returns Schema for record
  */
 export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
-  Value: ValueSchema
+  Value: ValueSchema,
 ): LooseRecordResult<z.ZodString, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
   ValueSchema extends z.ZodTypeAny,
 >(
   Key: KeySchema,
-  Value: ValueSchema
+  Value: ValueSchema,
 ): LooseRecordResult<KeySchema, ValueSchema>;
 export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
   Value: ValueSchema,
-  { onError }: LooseRecordOpts<z.ZodString, ValueSchema>
+  { onError }: LooseRecordOpts<z.ZodString, ValueSchema>,
 ): LooseRecordResult<z.ZodString, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
@@ -115,7 +115,7 @@ export function LooseRecord<
 >(
   Key: KeySchema,
   Value: ValueSchema,
-  { onError }: LooseRecordOpts<KeySchema, ValueSchema>
+  { onError }: LooseRecordOpts<KeySchema, ValueSchema>,
 ): LooseRecordResult<KeySchema, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
@@ -123,7 +123,7 @@ export function LooseRecord<
 >(
   arg1: ValueSchema | KeySchema,
   arg2?: ValueSchema | LooseOpts<Record<string, unknown>>,
-  arg3?: LooseRecordOpts<KeySchema, ValueSchema>
+  arg3?: LooseRecordOpts<KeySchema, ValueSchema>,
 ): LooseRecordResult<KeySchema, ValueSchema> {
   let Key: z.ZodSchema = z.any();
   let Value: ValueSchema;

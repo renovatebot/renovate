@@ -43,7 +43,7 @@ export class BazelDatasource extends Datasource {
     try {
       const { body: metadata } = await this.http.getJson(
         url,
-        BazelModuleMetadata
+        BazelModuleMetadata,
       );
       result.releases = metadata.versions
         .map((v) => new BzlmodVersion(v))

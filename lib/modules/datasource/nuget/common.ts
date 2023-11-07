@@ -28,7 +28,7 @@ export function parseRegistryUrl(registryUrl: string): ParsedRegistryUrl {
   if (!parsedUrl) {
     logger.debug(
       { urL: registryUrl },
-      `nuget registry failure: can't parse ${registryUrl}`
+      `nuget registry failure: can't parse ${registryUrl}`,
     );
     return { feedUrl: registryUrl, protocolVersion: null };
   }

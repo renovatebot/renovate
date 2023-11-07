@@ -31,7 +31,7 @@ const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
   ]);
 
 export function mergeBodyTransformer(
-  mergeStrategy: MergeStrategy | undefined
+  mergeStrategy: MergeStrategy | undefined,
 ): MergeRequestBody {
   const body: MergeRequestBody = {
     close_source_branch: true,

@@ -26,7 +26,7 @@ import { findVersion, getConfiguredRegistries } from './util';
  * so we don't include it in the extracting regexp
  */
 const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`
+  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`,
 );
 const elemNames = new Set([
   'PackageReference',
@@ -74,7 +74,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig
+  _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
 

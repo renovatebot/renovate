@@ -15,7 +15,7 @@ export async function generateUpdate(
   rangeStrategy: RangeStrategy,
   currentVersion: string,
   bucket: string,
-  release: Release
+  release: Release,
 ): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {
@@ -61,7 +61,7 @@ export async function generateUpdate(
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
-        'getNewValue error'
+        'getNewValue error',
       );
       update.newValue = currentValue;
     }
@@ -86,7 +86,7 @@ export async function generateUpdate(
       packageName,
       currentVersion,
       newVersion,
-      update.updateType
+      update.updateType,
     );
   }
   if (!versioning.isVersion(update.newValue)) {

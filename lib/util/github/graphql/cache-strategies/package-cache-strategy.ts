@@ -13,7 +13,7 @@ export class GithubGraphqlPackageCacheStrategy<
   }
 
   async persist(
-    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>,
   ): Promise<void> {
     const expiry = this.createdAt
       .plus({
@@ -28,7 +28,7 @@ export class GithubGraphqlPackageCacheStrategy<
         this.cacheNs,
         this.cacheKey,
         cacheRecord,
-        ttlMinutes
+        ttlMinutes,
       );
     }
   }
