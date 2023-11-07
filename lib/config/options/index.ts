@@ -351,6 +351,7 @@ const options: RenovateOptions[] = [
     experimental: true,
     experimentalIssues: [23286],
     default: {},
+    mergeable: true,
   },
   {
     name: 'dockerChildPrefix',

@@ -98,6 +98,8 @@ function formatPackageSourceCredentialElement(
     packageSourceCredential += `<add key="ClearTextPassword" value="${credential.password}" />\n`;
   }
 
+  packageSourceCredential += `<add key="ValidAuthenticationTypes" value="basic" />`;
+
   packageSourceCredential += `</${escapedName}>\n`;
 
   return packageSourceCredential;
