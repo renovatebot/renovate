@@ -1,5 +1,5 @@
-import JSON5 from 'json5';
 import { logger } from '../../logger';
+import { parseJson } from '../../util/common';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
 import type { FetchPresetConfig, Preset } from './types';
@@ -87,9 +87,9 @@ export async function fetchPreset({
   return jsonContent;
 }
 
-export function parsePreset(content: string): Preset {
+export function parsePreset(content: string, fileName: string): Preset {
   try {
-    return JSON5.parse(content);
+    return parseJson(content, fileName) as Preset;
   } catch (err) {
     throw new Error(PRESET_INVALID_JSON);
   }

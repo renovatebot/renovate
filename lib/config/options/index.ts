@@ -373,7 +373,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.23.9',
+    default: 'ghcr.io/containerbase/sidecar:9.23.12',
     globalOnly: true,
   },
   {
@@ -2629,8 +2629,8 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'fetchReleaseNotes',
-    description: 'Controls if and when release notes are fetched.',
+    name: 'fetchChangeLogs',
+    description: 'Controls if and when changelogs/release notes are fetched.',
     type: 'string',
     allowedValues: ['off', 'branch', 'pr'],
     default: 'pr',

@@ -2641,6 +2641,19 @@ These updates have all been created already. Click a checkbox below to force a r
   });
 
   describe('getJsonFile()', () => {
+    it('returns null', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+        )
+        .reply(200, {
+          content: '',
+        });
+      const res = await gitlab.getJsonFile('dir/file.json');
+      expect(res).toBeNull();
+    });
+
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       const scope = await initRepo();

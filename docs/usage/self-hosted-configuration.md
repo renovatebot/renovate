@@ -88,7 +88,7 @@ If you use an environment variable or the CLI to set the value for `autodiscover
 Commas will be used as delimiter for a new filter.
 
 ```
-# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+# DO NOT use commas inside the filter if your are using env or CLI variables to configure it.
 RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
 
 # in this example you can use regex instead
@@ -393,9 +393,8 @@ The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
-For example:
 
-```json
+```json title="Setting UID to 1001 and GID to 1002"
 {
   "dockerUser": "1001:1002"
 }
@@ -760,7 +759,7 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 ## redisUrl
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
-The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
+The global cache is used to store lookup results (e.g. dependency versions and changelogs) between repositories and runs.
 
 For non encrypted connections,
 
@@ -788,9 +787,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## repositoryCacheType
 
-Set this to an S3 URI to enable S3 backed repository cache.
-
-```ts
+```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
 {
   repositoryCacheType: 's3://bucket-name';
 }

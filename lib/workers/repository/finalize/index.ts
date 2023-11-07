@@ -5,6 +5,7 @@ import * as repositoryCache from '../../../util/cache/repository';
 import { clearRenovateRefs } from '../../../util/git';
 import { configMigration } from '../config-migration';
 import { PackageFiles } from '../package-files';
+import { validateReconfigureBranch } from '../reconfigure';
 import { pruneStaleBranches } from './prune';
 import {
   runBranchSummary,
@@ -16,6 +17,7 @@ export async function finalizeRepo(
   config: RenovateConfig,
   branchList: string[]
 ): Promise<void> {
+  await validateReconfigureBranch(config);
   await configMigration(config, branchList);
   await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);

@@ -1,7 +1,7 @@
-import toml from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency } from '../types';
 import { PyProject, PyProjectSchema } from './schema';
@@ -113,7 +113,7 @@ export function parsePyProject(
   content: string
 ): PyProject | null {
   try {
-    const jsonMap = toml.parse(content);
+    const jsonMap = parseToml(content);
     return PyProjectSchema.parse(jsonMap);
   } catch (err) {
     logger.debug(
