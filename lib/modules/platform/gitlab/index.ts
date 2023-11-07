@@ -1371,6 +1371,9 @@ export async function expandGroupMembers(
       const members = await getMemberUsernames(reviewerOrAssignee);
       expandedReviewersOrAssignees.push(...members);
     } catch (err) {
+      if (err.statusCode !== 404) {
+        logger.debug({ err, reviewerOrAssignee }, 'Unable to fetch group');
+      }
       expandedReviewersOrAssignees.push(reviewerOrAssignee);
     }
   }
