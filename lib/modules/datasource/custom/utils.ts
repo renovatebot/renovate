@@ -44,3 +44,21 @@ export function massageCustomDatasourceConfig(
     transformTemplates: transform,
   };
 }
+
+export function getCustomConfig(
+  getReleasesConfig: GetReleasesConfig,
+): Required<CustomDatasourceConfig> | null {
+  const customDatasourceName = getReleasesConfig.datasource?.replace(
+    'custom.',
+    '',
+  );
+
+  if (!is.nonEmptyString(customDatasourceName)) {
+    logger.debug(
+      `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`,
+    );
+    return null;
+  }
+
+  return massageCustomDatasourceConfig(customDatasourceName, getReleasesConfig);
+}
