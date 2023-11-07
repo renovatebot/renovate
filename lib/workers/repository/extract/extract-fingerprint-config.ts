@@ -55,7 +55,7 @@ export function generateFingerprintConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
-  const managerList: Set<string> = new Set(
+  const managerList = new Set(
     getEnabledManagersList(config.enabledManagers)
   );
 
