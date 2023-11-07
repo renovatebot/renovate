@@ -18,6 +18,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
+import { noLeadingAtSymbol } from '../../../util/common';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -53,7 +54,13 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
+import {
+  getMemberUserIDs,
+  getMemberUsernames,
+  getUserID,
+  gitlabApi,
+  isUserBusy,
+} from './http';
 import { getMR, updateMR } from './merge-request';
 import { LastPipelineId } from './schema';
 import type {
@@ -1338,4 +1345,37 @@ export async function filterUnavailableUsers(
     }
   }
   return filteredUsers;
+}
+
+export async function expandGroupMembers(
+  reviewersOrAssignees: string[]
+): Promise<string[]> {
+  const expandedReviewersOrAssignees: string[] = [];
+  const normalizedReviewersOrAssigneesWithoutEmails: string[] = [];
+
+  // Skip passing user emails to Gitlab API, but include them in the final result
+  for (const reviewerOrAssignee of reviewersOrAssignees) {
+    if (reviewerOrAssignee.indexOf('@') > 0) {
+      expandedReviewersOrAssignees.push(reviewerOrAssignee);
+      continue;
+    }
+
+    // Normalize the potential group names before passing to Gitlab API
+    normalizedReviewersOrAssigneesWithoutEmails.push(
+      noLeadingAtSymbol(reviewerOrAssignee)
+    );
+  }
+
+  for (const reviewerOrAssignee of normalizedReviewersOrAssigneesWithoutEmails) {
+    try {
+      const members = await getMemberUsernames(reviewerOrAssignee);
+      expandedReviewersOrAssignees.push(...members);
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        logger.debug({ err, reviewerOrAssignee }, 'Unable to fetch group');
+      }
+      expandedReviewersOrAssignees.push(reviewerOrAssignee);
+    }
+  }
+  return expandedReviewersOrAssignees;
 }

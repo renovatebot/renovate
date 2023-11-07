@@ -3,14 +3,23 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
+import { noLeadingAtSymbol } from '../../../../util/common';
 import { sampleSize } from '../../../../util/sample';
 import { codeOwnersForPr } from './code-owners';
 
 async function addCodeOwners(
+  config: RenovateConfig,
   assigneesOrReviewers: string[],
   pr: Pr
 ): Promise<string[]> {
-  return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
+  const codeOwners = await codeOwnersForPr(pr);
+
+  const assignees =
+    config.expandCodeOwnersGroups && platform.expandGroupMembers
+      ? await platform.expandGroupMembers(codeOwners)
+      : codeOwners;
+
+  return [...new Set(assigneesOrReviewers.concat(assignees))];
 }
 
 function filterUnavailableUsers(
@@ -20,10 +29,6 @@ function filterUnavailableUsers(
   return config.filterUnavailableUsers && platform.filterUnavailableUsers
     ? platform.filterUnavailableUsers(users)
     : Promise.resolve(users);
-}
-
-function noLeadingAtSymbol(input: string): string {
-  return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
 function prepareParticipants(
@@ -41,7 +46,7 @@ export async function addParticipants(
   let assignees = config.assignees ?? [];
   logger.debug(`addParticipants(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
-    assignees = await addCodeOwners(assignees, pr);
+    assignees = await addCodeOwners(config, assignees, pr);
   }
   if (assignees.length > 0) {
     try {
@@ -67,7 +72,7 @@ export async function addParticipants(
 
   let reviewers = config.reviewers ?? [];
   if (config.reviewersFromCodeOwners) {
-    reviewers = await addCodeOwners(reviewers, pr);
+    reviewers = await addCodeOwners(config, reviewers, pr);
   }
   if (
     is.array(config.additionalReviewers) &&

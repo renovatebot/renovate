@@ -30,6 +30,14 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
       `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`
     );
   }
+
+  if (config.expandCodeOwnersGroups && !platform.expandGroupMembers) {
+    // TODO: types (#22198)
+    const platform = GlobalConfig.get('platform')!;
+    logger.warn(
+      `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform '${platform}'.`
+    );
+  }
 }
 
 export async function initRepo(

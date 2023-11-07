@@ -1224,6 +1224,11 @@ Example:
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
 
+## expandCodeOwnersGroups
+
+If configured, Renovate will expand any matching `CODEOWNERS` groups into a full list of group members and assign them individually instead of the group.
+This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
+
 ## extends
 
 See [shareable config presets](./config-presets.md) for details.

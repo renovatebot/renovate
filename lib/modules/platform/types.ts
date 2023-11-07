@@ -229,6 +229,7 @@ export interface Platform {
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+  expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 }
 
 export interface PlatformScm {

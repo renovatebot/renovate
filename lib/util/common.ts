@@ -62,6 +62,10 @@ export function detectPlatform(
   return null;
 }
 
+export function noLeadingAtSymbol(input: string): string {
+  return input.startsWith('@') ? input.slice(1) : input;
+}
+
 export function parseJson(content: string | null, filename: string): unknown {
   if (!content) {
     return null;
