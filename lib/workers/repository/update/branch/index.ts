@@ -494,8 +494,9 @@ export async function processBranch(
         await embedChangelogs(config.upgrades);
       }
 
-      const postUpgradeCommandResults =
-        await executePostUpgradeCommands(config);
+      const postUpgradeCommandResults = await executePostUpgradeCommands(
+        config,
+      );
 
       if (postUpgradeCommandResults !== null) {
         const { updatedArtifacts, artifactErrors } = postUpgradeCommandResults;

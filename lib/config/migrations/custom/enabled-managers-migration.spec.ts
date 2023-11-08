@@ -14,7 +14,7 @@ describe('config/migrations/custom/enabled-managers-migration', () => {
           'custom.regex',
           'custom.regex',
         ],
-      }
+      },
     );
 
     // coverage
@@ -24,7 +24,7 @@ describe('config/migrations/custom/enabled-managers-migration', () => {
       },
       {
         enabledManagers: undefined,
-      }
+      },
     );
   });
 });

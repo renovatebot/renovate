@@ -116,7 +116,7 @@ export function getEnabledManagersList(enabledManagers?: string[]): string[] {
     return allManagersList.filter(
       (manager) =>
         enabledManagers.includes(manager) ||
-        enabledManagers.includes(`custom.${manager}`)
+        enabledManagers.includes(`custom.${manager}`),
     );
   }
 

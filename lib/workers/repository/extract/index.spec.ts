@@ -47,7 +47,7 @@ describe('workers/repository/extract/index', () => {
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
       expect(logger.debug).toHaveBeenCalledWith(
         { manager: 'custom.regex' },
-        `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
+        `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,
       );
     });
 

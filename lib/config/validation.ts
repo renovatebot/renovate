@@ -71,7 +71,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !allManagersList.includes(manager.replace('custom.', ''))
+    (manager) => !allManagersList.includes(manager.replace('custom.', '')),
   );
 }
 

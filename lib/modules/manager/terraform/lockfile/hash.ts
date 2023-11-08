@@ -123,8 +123,9 @@ export class TerraformProviderHash {
         )) ?? [];
     }
 
-    const h1Hashes =
-      await TerraformProviderHash.calculateHashScheme1Hashes(builds);
+    const h1Hashes = await TerraformProviderHash.calculateHashScheme1Hashes(
+      builds,
+    );
 
     const hashes = [];
     hashes.push(...h1Hashes.map((hash) => `h1:${hash}`));

@@ -91,8 +91,9 @@ export class ConanDatasource extends Datasource {
       conanPackage.userAndChannel,
       '/revisions',
     );
-    const revisionRep =
-      await this.http.getJson<ConanRevisionsJSON>(revisionLookUp);
+    const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
+      revisionLookUp,
+    );
     const revisions = revisionRep?.body.revisions;
     return revisions?.[0].revision ?? null;
   }
@@ -179,8 +180,9 @@ export class ConanDatasource extends Datasource {
                 url,
                 `v2/conans/${conanPackage.conanName}/${latestVersion}/${conanPackage.userAndChannel}/latest`,
               );
-              const revResp =
-                await this.http.getJson<ConanRevisionJSON>(latestRevisionUrl);
+              const revResp = await this.http.getJson<ConanRevisionJSON>(
+                latestRevisionUrl,
+              );
               const packageRev = revResp.body.revision;
 
               const [user, channel] = conanPackage.userAndChannel.split('/');
@@ -188,8 +190,9 @@ export class ConanDatasource extends Datasource {
                 `${groups.host}/artifactory/api/storage/${groups.repo}`,
                 `${user}/${conanPackage.conanName}/${latestVersion}/${channel}/${packageRev}/export/conanfile.py?properties=conan.package.url`,
               );
-              const packageUrlResp =
-                await this.http.getJson<ConanProperties>(packageUrl);
+              const packageUrlResp = await this.http.getJson<ConanProperties>(
+                packageUrl,
+              );
 
               if (
                 packageUrlResp.body.properties &&
