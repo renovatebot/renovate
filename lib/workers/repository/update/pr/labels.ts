@@ -44,17 +44,23 @@ export function shouldUpdateLabels(
   newLabels: string[] | undefined,
 ): boolean {
   if (!is.array(labelsInDebugData)) {
-    logger.debug({labelsInDebugData}, 'No labels in PR');
+    logger.debug({ labelsInDebugData }, 'No labels in PR');
     return false;
   }
 
   if (areLabelsModified(labelsInDebugData, labelsInPr ?? [])) {
-    logger.debug({labelsInDebugData, labelsInPr}, 'Labels in PR have been modified by user');
+    logger.debug(
+      { labelsInDebugData, labelsInPr },
+      'Labels in PR have been modified by user',
+    );
     return false;
   }
 
   if (dequal((newLabels ?? []).sort(), labelsInDebugData.sort())) {
-    logger.debug({newLabels, existingLabels: labelsInDebugData}, 'New labels and existing labels are same');
+    logger.debug(
+      { newLabels, existingLabels: labelsInDebugData },
+      'New labels and existing labels are same',
+    );
     return false;
   }
 
