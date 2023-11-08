@@ -55,7 +55,7 @@ describe('util/package-rules/managers', () => {
         },
         {
           matchManagers: ['custom.regex'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });

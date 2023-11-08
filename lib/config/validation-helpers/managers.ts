@@ -13,7 +13,7 @@ export function check({
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(
-        (confManager) => !isKnownManager(confManager)
+        (confManager) => !isKnownManager(confManager),
       )
     ) {
       managersErrMessage = `${currentPath}:

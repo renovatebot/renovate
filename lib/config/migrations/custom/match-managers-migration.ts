@@ -11,7 +11,7 @@ export class MatchManagersMigration extends AbstractMigration {
 
     // prefix custom. before custom managers if not present
     const newValue = value.map((manager) =>
-      manager === 'regex' ? 'custom.regex' : manager
+      manager === 'regex' ? 'custom.regex' : manager,
     );
     this.rewrite(newValue);
   }

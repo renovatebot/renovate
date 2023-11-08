@@ -13,7 +13,7 @@ describe('config/migrations/custom/match-managers-migration', () => {
           'custom.regex',
           'custom.someMgr',
         ],
-      }
+      },
     );
   });
 
@@ -25,7 +25,7 @@ describe('config/migrations/custom/match-managers-migration', () => {
       },
       {
         matchManagers: undefined,
-      }
+      },
     );
   });
 });
