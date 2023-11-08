@@ -154,7 +154,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(JSON.parse(testContent!).resolutions['**/@angular/cli']).toBe(
-        '8.1.0'
+        '8.1.0',
       );
     });
 

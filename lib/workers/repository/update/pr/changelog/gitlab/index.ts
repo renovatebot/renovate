@@ -16,7 +16,7 @@ const http = new GitlabHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory?: string
+  sourceDirectory?: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('gitlab.getReleaseNotesMd()');
   const urlEncodedRepo = encodeURIComponent(repository);
@@ -30,7 +30,7 @@ export async function getReleaseNotesMd(
       }`,
       {
         paginate: true,
-      }
+      },
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
@@ -46,7 +46,7 @@ export async function getReleaseNotesMd(
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile}`
+      `Multiple candidates for changelog file, using ${changelogFile}`,
     );
   }
 
@@ -58,7 +58,7 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  _release: ChangeLogRelease
+  _release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitlab.getReleaseNotesMd()');
   const apiBaseUrl = project.apiBaseUrl;

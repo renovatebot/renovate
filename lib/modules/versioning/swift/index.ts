@@ -40,7 +40,7 @@ export const isVersion = (input: string): boolean => !!valid(input);
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
   const semverRange = toSemverRange(range);
@@ -49,7 +49,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
   const semverRange = toSemverRange(range);

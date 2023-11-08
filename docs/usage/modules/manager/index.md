@@ -72,9 +72,7 @@ If there was a manager called `some-new-manager` you would enable it like this:
 
 #### Disabling managers
 
-To disable a specific manager like `gradle`, do this:
-
-```json
+```json title="Example of disabling a specific manager (gradle)"
 {
   "gradle": {
     "enabled": false

@@ -8,7 +8,7 @@ describe('config/migrations/custom/pin-versions-migration', () => {
       },
       {
         rangeStrategy: 'pin',
-      }
+      },
     );
   });
 
@@ -19,7 +19,7 @@ describe('config/migrations/custom/pin-versions-migration', () => {
       },
       {
         rangeStrategy: 'replace',
-      }
+      },
     );
   });
 });

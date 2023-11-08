@@ -32,7 +32,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
       ${'--jobs 600'}                         | ${[['jobs', '600']]}
     `('parse($a)', ({ a, expArgs }) => {
       const exp = (expArgs as [string, string | undefined][]).map(
-        (args) => new BazelOption(...args)
+        (args) => new BazelOption(...args),
       );
       const result = BazelOption.parse(a);
       expect(result).toEqual(exp);
@@ -85,7 +85,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
           new BazelOption('strip', 'never'),
           new BazelOption('test_timeout', '3600'),
         ],
-        'memcheck'
+        'memcheck',
       ),
       new ImportEntry('%workspace%/local.bazelrc', true),
     ]);
@@ -223,8 +223,8 @@ describe('modules/manager/bazel-module/bazelrc', () => {
       expect.assertions(1);
       await expect(read('.')).rejects.toEqual(
         new Error(
-          'Attempted to read a bazelrc multiple times. file: shared.bazelrc'
-        )
+          'Attempted to read a bazelrc multiple times. file: shared.bazelrc',
+        ),
       );
     });
 

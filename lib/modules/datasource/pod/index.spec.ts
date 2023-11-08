@@ -34,7 +34,7 @@ describe('modules/datasource/pod/index', () => {
           datasource: PodDatasource.id,
           packageName: 'foobar',
           registryUrls: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -44,7 +44,7 @@ describe('modules/datasource/pod/index', () => {
         await getPkgReleases({
           datasource: PodDatasource.id,
           packageName: 'foobar',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -155,7 +155,7 @@ describe('modules/datasource/pod/index', () => {
         await getPkgReleases({
           ...config,
           registryUrls: ['https://github.com/CocoaPods/Specs'],
-        })
+        }),
       ).toEqual({
         registryUrl: 'https://github.com/CocoaPods/Specs',
         releases: [

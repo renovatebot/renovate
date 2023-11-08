@@ -53,7 +53,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           currentVersion: undefined,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -63,7 +63,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           ...upgrade,
           currentVersion: '1.0.0',
           newVersion: '1.0.0',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -72,7 +72,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitlab.com/help',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -80,7 +80,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
@@ -122,7 +122,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
@@ -157,7 +157,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
@@ -192,7 +192,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
@@ -218,7 +218,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: undefined,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -227,7 +227,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'http://example.com',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -236,7 +236,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           releases: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -245,7 +245,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           releases: [{ version: '0.9.0' }],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -261,7 +261,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
           endpoint: 'https://gitlab-enterprise.example.com/',
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
@@ -296,7 +296,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           platform: 'gitlab',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
           endpoint: 'https://git.test.com/api/v4/',
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
@@ -373,7 +373,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           { name: 'v5.5.0' },
         ]);
       expect(
-        await changelogSource.getAllTags('https://git.test.com/', 'some/repo')
+        await changelogSource.getAllTags('https://git.test.com/', 'some/repo'),
       ).toEqual(['v5.2.0', 'v5.4.0', 'v5.5.0']);
     });
   });

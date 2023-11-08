@@ -8,10 +8,10 @@ import type { MergeConfidence } from '../../../../util/merge-confidence/types';
 export async function resolveBranchStatus(
   branchName: string,
   internalChecksAsSuccess: boolean,
-  ignoreTests = false
+  ignoreTests = false,
 ): Promise<BranchStatus> {
   logger.debug(
-    `resolveBranchStatus(branchName=${branchName}, ignoreTests=${ignoreTests})`
+    `resolveBranchStatus(branchName=${branchName}, ignoreTests=${ignoreTests})`,
   );
 
   if (ignoreTests) {
@@ -21,7 +21,7 @@ export async function resolveBranchStatus(
 
   const status = await platform.getBranchStatus(
     branchName,
-    internalChecksAsSuccess
+    internalChecksAsSuccess,
   );
   logger.debug(`Branch status ${status}`);
 
@@ -33,11 +33,11 @@ async function setStatusCheck(
   context: string,
   description: string,
   state: BranchStatus,
-  url?: string
+  url?: string,
 ): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
-    context
+    context,
   );
   if (existingState === state) {
     logger.debug(`Status check ${context} is already up-to-date`);
@@ -72,7 +72,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     context,
     description,
     config.stabilityStatus,
-    config.productLinks?.documentation
+    config.productLinks?.documentation,
   );
 }
 
@@ -100,6 +100,6 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     context,
     description,
     config.confidenceStatus,
-    config.productLinks?.documentation
+    config.productLinks?.documentation,
   );
 }

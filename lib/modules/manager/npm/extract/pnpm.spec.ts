@@ -29,7 +29,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
       const workSpaceFilePath = getFixturePath(
         'pnpm-monorepo/pnpm-workspace.yml',
-        '..'
+        '..',
       );
       const res = await extractPnpmFilters(workSpaceFilePath);
       expect(res).toBeUndefined();
@@ -37,7 +37,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
         {
           fileName: expect.any(String),
         },
-        'Failed to find required "packages" array in pnpm-workspace.yaml'
+        'Failed to find required "packages" array in pnpm-workspace.yaml',
       );
     });
 
@@ -53,7 +53,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
           fileName: expect.any(String),
           err: expect.anything(),
         }),
-        'Failed to parse pnpm-workspace.yaml'
+        'Failed to parse pnpm-workspace.yaml',
       );
     });
   });
@@ -67,7 +67,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(res).toBeNull();
       expect(logger.logger.trace).toHaveBeenCalledWith(
         expect.objectContaining({ packageFile }),
-        'Failed to locate pnpm-workspace.yaml in a parent directory.'
+        'Failed to locate pnpm-workspace.yaml in a parent directory.',
       );
     });
 
@@ -85,7 +85,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
           workspaceYamlPath: 'pnpm-workspace.yaml',
           packageFile,
         }),
-        'Failed to find a pnpm-lock.yaml sibling for the workspace.'
+        'Failed to find a pnpm-lock.yaml sibling for the workspace.',
       );
     });
   });
@@ -173,8 +173,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(packageFiles).toMatchSnapshot();
       expect(
         packageFiles.every(
-          (packageFile) => packageFile.managerData?.pnpmShrinkwrap !== undefined
-        )
+          (packageFile) =>
+            packageFile.managerData?.pnpmShrinkwrap !== undefined,
+        ),
       ).toBeTrue();
     });
 
@@ -233,8 +234,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(
         packageFiles.find(
           (packageFile) =>
-            packageFile.packageFile === 'not-matching/b/package.json'
-        )?.managerData.pnpmShrinkwrap
+            packageFile.packageFile === 'not-matching/b/package.json',
+        )?.managerData.pnpmShrinkwrap,
       ).toBeUndefined();
     });
   });
@@ -256,7 +257,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
     it('extracts version from normal repo', async () => {
       const plocktest1Lock = Fixtures.get(
         'lockfile-parsing/pnpm-lock.yaml',
-        '..'
+        '..',
       );
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');

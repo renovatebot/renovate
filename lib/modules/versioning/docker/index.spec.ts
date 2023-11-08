@@ -37,7 +37,7 @@ describe('modules/versioning/docker/index', () => {
       expect(docker.getMajor(version)).toBe(major);
       expect(docker.getMinor(version)).toBe(minor);
       expect(docker.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -62,7 +62,7 @@ describe('modules/versioning/docker/index', () => {
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
       expect(docker.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -117,7 +117,7 @@ describe('modules/versioning/docker/index', () => {
         const dockerSorted = docker.sortVersions(a, b);
         const semverSorted = semver.sortVersions(a, b);
         expect(dockerSorted).toBe(semverSorted);
-      }
+      },
     );
 
     it('sorts unstable', () => {
@@ -158,7 +158,7 @@ describe('modules/versioning/docker/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -193,7 +193,7 @@ describe('modules/versioning/docker/index', () => {
     ({ version, range, expected }) => {
       const res = docker.isCompatible(version, range);
       expect(!!res).toBe(expected);
-    }
+    },
   );
 
   it.each`

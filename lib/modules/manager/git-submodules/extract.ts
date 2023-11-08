@@ -14,7 +14,7 @@ import type { GitModule } from './types';
 async function getUrl(
   git: SimpleGit,
   gitModulesPath: string,
-  submoduleName: string
+  submoduleName: string,
 ): Promise<string> {
   const path = (
     await Git(simpleGitConfig()).raw([
@@ -54,24 +54,29 @@ async function getDefaultBranch(subModuleUrl: string): Promise<string> {
 }
 
 async function getBranch(
+  git: SimpleGit,
   gitModulesPath: string,
   submoduleName: string,
-  subModuleUrl: string
+  subModuleUrl: string,
 ): Promise<string> {
-  return (
-    (await Git(simpleGitConfig()).raw([
+  const branchFromConfig = (
+    await Git(simpleGitConfig()).raw([
       'config',
       '--file',
       gitModulesPath,
       '--get',
       `submodule.${submoduleName}.branch`,
-    ])) || (await getDefaultBranch(subModuleUrl))
+    ])
   ).trim();
+
+  return branchFromConfig === '.'
+    ? (await git.branch(['--show-current'])).current.trim()
+    : branchFromConfig || (await getDefaultBranch(subModuleUrl)).trim();
 }
 
 async function getModules(
   git: SimpleGit,
-  gitModulesPath: string
+  gitModulesPath: string,
 ): Promise<GitModule[]> {
   const res: GitModule[] = [];
   try {
@@ -101,7 +106,7 @@ async function getModules(
 export default async function extractPackageFile(
   _content: string,
   packageFile: string,
-  _config: ExtractConfig
+  _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const localDir = GlobalConfig.get('localDir');
   const git = Git(localDir, simpleGitConfig());
@@ -123,9 +128,10 @@ export default async function extractPackageFile(
       const subModuleUrl = await getUrl(git, gitModulesPath, name);
       const httpSubModuleUrl = getHttpUrl(subModuleUrl);
       const currentValue = await getBranch(
+        git,
         gitModulesPath,
         name,
-        httpSubModuleUrl
+        httpSubModuleUrl,
       );
       deps.push({
         depName: path,
@@ -136,7 +142,7 @@ export default async function extractPackageFile(
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, packageFile },
-        'Error mapping git submodules during extraction'
+        'Error mapping git submodules during extraction',
       );
     }
   }

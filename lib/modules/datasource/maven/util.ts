@@ -69,7 +69,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
-  opts: HttpOptions & HttpRequestOptions<string> = {}
+  opts: HttpOptions & HttpRequestOptions<string> = {},
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
@@ -85,7 +85,7 @@ export async function downloadHttpProtocol(
       logger.debug(`Cannot connect to host ${failedUrl}`);
     } else if (isPermissionsIssue(err)) {
       logger.debug(
-        `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`
+        `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`,
       );
     } else if (isTemporalError(err)) {
       logger.debug({ failedUrl, err }, 'Temporary error');
@@ -119,26 +119,26 @@ export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
       return streamToString(res);
     }
     logger.debug(
-      `Expecting Readable response type got '${typeof res}' type instead`
+      `Expecting Readable response type got '${typeof res}' type instead`,
     );
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (err.name === 'CredentialsProviderError') {
       logger.debug(
         { failedUrl },
-        'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
+        'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars',
       );
     } else if (err.message === 'Region is missing') {
       logger.debug(
         { failedUrl },
-        'Dependency lookup failed. Please a correct AWS_REGION env var'
+        'Dependency lookup failed. Please a correct AWS_REGION env var',
       );
     } else if (isS3NotFound(err)) {
       logger.trace({ failedUrl }, `S3 url not found`);
     } else {
       logger.debug(
         { failedUrl, message: err.message },
-        'Unknown S3 download error'
+        'Unknown S3 download error',
       );
     }
   }
@@ -147,7 +147,7 @@ export async function downloadS3Protocol(pkgUrl: URL): Promise<string | null> {
 
 export async function downloadArtifactRegistryProtocol(
   http: Http,
-  pkgUrl: URL
+  pkgUrl: URL,
 ): Promise<Partial<HttpResponse>> {
   const opts: HttpOptions = {};
   const host = pkgUrl.host;
@@ -160,7 +160,7 @@ export async function downloadArtifactRegistryProtocol(
   } else {
     logger.once.debug(
       { host, path },
-      'Could not get Google access token, using no auth'
+      'Could not get Google access token, using no auth',
     );
   }
 
@@ -171,7 +171,7 @@ export async function downloadArtifactRegistryProtocol(
 
 async function checkHttpResource(
   http: Http,
-  pkgUrl: URL
+  pkgUrl: URL,
 ): Promise<HttpResourceCheckResult> {
   try {
     const res = await http.head(pkgUrl.toString());
@@ -194,14 +194,14 @@ async function checkHttpResource(
     const failedUrl = pkgUrl.toString();
     logger.debug(
       { failedUrl, statusCode: err.statusCode },
-      `Can't check HTTP resource existence`
+      `Can't check HTTP resource existence`,
     );
     return 'error';
   }
 }
 
 export async function checkS3Resource(
-  pkgUrl: URL
+  pkgUrl: URL,
 ): Promise<HttpResourceCheckResult> {
   try {
     const s3Url = parseS3Url(pkgUrl);
@@ -222,7 +222,7 @@ export async function checkS3Resource(
     } else {
       logger.debug(
         { pkgUrl, name: err.name, message: err.message },
-        `Can't check S3 resource existence`
+        `Can't check S3 resource existence`,
       );
     }
     return 'error';
@@ -231,7 +231,7 @@ export async function checkS3Resource(
 
 export async function checkResource(
   http: Http,
-  pkgUrl: URL | string
+  pkgUrl: URL | string,
 ): Promise<HttpResourceCheckResult> {
   const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
   if (parsedUrl === null) {
@@ -246,7 +246,7 @@ export async function checkResource(
     default:
       logger.debug(
         { url: pkgUrl.toString() },
-        `Unsupported Maven protocol in check resource`
+        `Unsupported Maven protocol in check resource`,
       );
       return 'not-found';
   }
@@ -259,14 +259,14 @@ function containsPlaceholder(str: string): boolean {
 export function getMavenUrl(
   dependency: MavenDependency,
   repoUrl: string,
-  path: string
+  path: string,
 ): URL {
   return new URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 export async function downloadMavenXml(
   http: Http,
-  pkgUrl: URL | null
+  pkgUrl: URL | null,
 ): Promise<MavenXml> {
   if (!pkgUrl) {
     return {};
@@ -304,7 +304,7 @@ export async function downloadMavenXml(
   if (!rawContent) {
     logger.debug(
       { url: pkgUrl.toString(), statusCode },
-      `Content is not found for Maven url`
+      `Content is not found for Maven url`,
     );
     return {};
   }
@@ -355,14 +355,14 @@ async function getSnapshotFullVersion(
   http: Http,
   version: string,
   dependency: MavenDependency,
-  repoUrl: string
+  repoUrl: string,
 ): Promise<string | null> {
   // To determine what actual files are available for the snapshot, first we have to fetch and parse
   // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
   const metadataUrl = getMavenUrl(
     dependency,
     repoUrl,
-    `${version}/maven-metadata.xml`
+    `${version}/maven-metadata.xml`,
   );
 
   const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
@@ -384,7 +384,7 @@ export async function createUrlForDependencyPom(
   http: Http,
   version: string,
   dependency: MavenDependency,
-  repoUrl: string
+  repoUrl: string,
 ): Promise<string> {
   if (isSnapshotVersion(version)) {
     // By default, Maven snapshots are deployed to the repository with fixed file names.
@@ -393,7 +393,7 @@ export async function createUrlForDependencyPom(
       http,
       version,
       dependency,
-      repoUrl
+      repoUrl,
     );
 
     // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
@@ -412,14 +412,14 @@ export async function getDependencyInfo(
   dependency: MavenDependency,
   repoUrl: string,
   version: string,
-  recursionLimit = 5
+  recursionLimit = 5,
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
   const path = await createUrlForDependencyPom(
     http,
     version,
     dependency,
-    repoUrl
+    repoUrl,
   );
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
@@ -466,7 +466,7 @@ export async function getDependencyInfo(
         parentDependency,
         repoUrl,
         parentVersion,
-        recursionLimit - 1
+        recursionLimit - 1,
       );
       if (!result.sourceUrl && parentInformation.sourceUrl) {
         result.sourceUrl = parentInformation.sourceUrl;

@@ -41,7 +41,7 @@ There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](https
 
 I can create a `renovate.json` configuration with the following custom manager configuration:
 
-```json
+```json title="renovate.json"
 {
   "customManagers": [
     {

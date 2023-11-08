@@ -46,7 +46,7 @@ declare global {
        * expect(desiredHouse).toMatchObject<House>({...standardHouse, kitchen: {area: 20}}) // wherein standardHouse is some base object of type House
        */
       toMatchObject<E extends object | any[]>(
-        expected: E
+        expected: E,
       ): R extends void | Promise<void> ? R : void;
     };
 }
@@ -74,7 +74,9 @@ type JestPromiseMatchers<T> = {
 };
 
 type JestExpect = {
-  <T = unknown>(actual: T): JestMatchers<void, T> &
+  <T = unknown>(
+    actual: T,
+  ): JestMatchers<void, T> &
     JestInverse<JestMatchers<void, T>> &
     JestPromiseMatchers<T>;
   addSnapshotSerializer: (arg: Plugin) => void;
@@ -86,10 +88,13 @@ type JestExpect = {
 type JestItEach = Global.It['each'];
 
 interface JestEach extends JestItEach {
-  (strings: TemplateStringsArray, ...placeholders: any[]): (
+  (
+    strings: TemplateStringsArray,
+    ...placeholders: any[]
+  ): (
     name: string,
     fn: (arg: any) => ReturnType<Global.TestFn>,
-    timeout?: number
+    timeout?: number,
   ) => void;
 }
 
