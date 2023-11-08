@@ -25,7 +25,7 @@
     "generate": "run-s 'generate:*'",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
-    "jest": "LOG_LEVEL=fatal GIT_ALLOW_PROTOCOL=file jest --logHeapUsage",
+    "jest": "NODE_OPTIONS='--experimental-vm-modules' LOG_LEVEL=fatal GIT_ALLOW_PROTOCOL=file jest --logHeapUsage",
     "jest:14": "run-s 'jest {@}' --",
     "jest:16": "run-s 'jest {@}' --",
     "jest-debug": "NODE_OPTIONS='--inspect-brk --experimental-vm-modules' jest --testTimeout=100000000",
