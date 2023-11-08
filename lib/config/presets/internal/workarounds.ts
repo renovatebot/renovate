@@ -105,7 +105,7 @@ export const presets: Record<string, Preset> = {
     description: 'Limit Java runtime versions to LTS releases.',
     packageRules: [
       {
-        allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
+        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker', 'java-version'],
@@ -117,6 +117,10 @@ export const presets: Record<string, Preset> = {
           'java',
           'java-jre',
           'sapmachine',
+        ],
+        matchPackagePatterns: [
+          '^azul/zulu-openjdk',
+          '^bellsoft/liberica-openj(dk|re)-',
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
@@ -135,11 +139,12 @@ export const presets: Record<string, Preset> = {
   },
   reduceRepologyServerLoad: {
     description:
-      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
+      'Limit requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
     hostRules: [
       {
         concurrentRequestLimit: 1,
         matchHost: 'repology.org',
+        maxRequestsPerSecond: 0.5,
       },
     ],
   },

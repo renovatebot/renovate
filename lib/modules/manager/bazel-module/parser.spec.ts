@@ -27,7 +27,7 @@ describe('modules/manager/bazel-module/parser', () => {
             name: fragments.string('rules_foo'),
             version: fragments.string('1.2.3'),
           },
-          true
+          true,
         ),
         fragments.record(
           {
@@ -36,7 +36,7 @@ describe('modules/manager/bazel-module/parser', () => {
             version: fragments.string('1.0.0'),
             dev_dependency: fragments.boolean(true),
           },
-          true
+          true,
         ),
       ]);
     });
@@ -60,20 +60,20 @@ describe('modules/manager/bazel-module/parser', () => {
             name: fragments.string('rules_foo'),
             version: fragments.string('1.2.3'),
           },
-          true
+          true,
         ),
         fragments.record(
           {
             rule: fragments.string('git_override'),
             module_name: fragments.string('rules_foo'),
             remote: fragments.string(
-              'https://github.com/example/rules_foo.git'
+              'https://github.com/example/rules_foo.git',
             ),
             commit: fragments.string(
-              '6a2c2e22849b3e6b33d5ea9aa72222d4803a986a'
+              '6a2c2e22849b3e6b33d5ea9aa72222d4803a986a',
             ),
           },
-          true
+          true,
         ),
       ]);
     });
@@ -96,14 +96,14 @@ describe('modules/manager/bazel-module/parser', () => {
             name: fragments.string('rules_foo'),
             version: fragments.string('1.2.3'),
           },
-          true
+          true,
         ),
         fragments.record(
           {
             rule: fragments.string('archive_override'),
             module_name: fragments.string('rules_foo'),
           },
-          true
+          true,
         ),
       ]);
     });
@@ -124,7 +124,7 @@ describe('modules/manager/bazel-module/parser', () => {
             name: fragments.string('rules_foo'),
             version: fragments.string('1.2.3'),
           },
-          true
+          true,
         ),
         fragments.record(
           {
@@ -132,7 +132,7 @@ describe('modules/manager/bazel-module/parser', () => {
             module_name: fragments.string('rules_foo'),
             urls: fragments.string('/path/to/repo'),
           },
-          true
+          true,
         ),
       ]);
     });
@@ -154,7 +154,7 @@ describe('modules/manager/bazel-module/parser', () => {
             name: fragments.string('rules_foo'),
             version: fragments.string('1.2.3'),
           },
-          true
+          true,
         ),
         fragments.record(
           {
@@ -163,7 +163,7 @@ describe('modules/manager/bazel-module/parser', () => {
             version: fragments.string('1.2.3'),
             registry: fragments.string('https://example.com/custom_registry'),
           },
-          true
+          true,
         ),
       ]);
     });

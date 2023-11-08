@@ -40,7 +40,7 @@ describe('workers/repository/update/pr/body/index', () => {
     beforeEach(() => {
       changelogs.getChangelogs.mockReturnValueOnce('getChangelogs');
       configDescription.getPrConfigDescription.mockReturnValueOnce(
-        'getPrConfigDescription'
+        'getPrConfigDescription',
       );
       controls.getControls.mockReturnValueOnce('getControls');
       footer.getPrFooter.mockReturnValueOnce('getPrFooter');
@@ -65,7 +65,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {}
+        {},
       );
       expect(res).toBeEmptyString();
     });
@@ -96,7 +96,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {}
+        {},
       );
 
       expect(upgrade).toMatchObject({
@@ -135,7 +135,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {}
+        {},
       );
 
       expect(upgrade).toMatchObject({
@@ -164,7 +164,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {}
+        {},
       );
       expect(res).toContain('PR BODY');
       expect(res).toContain(`<!--renovate-debug`);
@@ -189,7 +189,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {}
+        {},
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
     });
@@ -212,7 +212,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {}
+        {},
       );
 
       const match = prDebugDataRe.exec(res);
@@ -262,7 +262,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {}
+        {},
       );
       const expected =
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +

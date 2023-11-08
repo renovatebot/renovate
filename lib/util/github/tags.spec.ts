@@ -27,7 +27,7 @@ describe('util/github/tags', () => {
         undefined,
         'some-org/repo',
         'v2.0.0',
-        http
+        http,
       );
       expect(commit).toBe('abc');
     });
@@ -39,7 +39,7 @@ describe('util/github/tags', () => {
         'https://my-enterprise-github.dev',
         'some-org/repo',
         'v2.0.0',
-        http
+        http,
       );
       expect(commit).toBeNull();
       expect(githubGraphql.queryTags).toHaveBeenCalledWith(
@@ -47,7 +47,7 @@ describe('util/github/tags', () => {
           packageName: 'some-org/repo',
           registryUrl: 'https://my-enterprise-github.dev',
         },
-        http
+        http,
       );
     });
 
@@ -58,7 +58,7 @@ describe('util/github/tags', () => {
         undefined,
         'some-org/repo',
         'v2.0.0',
-        http
+        http,
       );
       expect(commit).toBeNull();
     });
@@ -70,7 +70,7 @@ describe('util/github/tags', () => {
         undefined,
         'some-org/repo',
         'v2.0.0',
-        http
+        http,
       );
       expect(commit).toBeNull();
     });

@@ -7,7 +7,7 @@ export const BicepResourceVersionIndex = z
       z.object({
         RelativePath: z.string(),
         Index: z.number(),
-      })
+      }),
     ),
     Functions: z.record(
       z.string(),
@@ -17,9 +17,9 @@ export const BicepResourceVersionIndex = z
           z.object({
             RelativePath: z.string(),
             Index: z.number(),
-          })
-        )
-      )
+          }),
+        ),
+      ),
     ),
   })
   .transform(({ Resources, Functions }) => {

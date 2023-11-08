@@ -28,7 +28,7 @@ export abstract class Datasource implements DatasourceApi {
   protected http: Http;
 
   abstract getReleases(
-    getReleasesConfig: GetReleasesConfig
+    getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null>;
 
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;

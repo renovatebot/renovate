@@ -57,7 +57,7 @@ function getAuthJson(): string | null {
       : undefined,
     isArtifactAuthEnabled(gitTagsHostRule)
       ? findGithubToken(gitTagsHostRule)
-      : undefined
+      : undefined,
   );
 
   if (selectedGithubToken) {
@@ -181,7 +181,7 @@ export async function updateArtifacts({
           'update ' +
           updatedDeps
             .map((dep) =>
-              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName
+              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName,
             )
             .filter(is.string)
             .map((dep) => quote(dep))
@@ -241,7 +241,7 @@ export async function updateArtifacts({
     }
     if (
       err.message?.includes(
-        'Your requirements could not be resolved to an installable set of packages.'
+        'Your requirements could not be resolved to an installable set of packages.',
       )
     ) {
       logger.info('Composer requirements cannot be resolved');

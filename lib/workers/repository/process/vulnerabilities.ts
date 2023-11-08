@@ -57,11 +57,11 @@ export class Vulnerabilities {
 
   async appendVulnerabilityPackageRules(
     config: RenovateConfig,
-    packageFiles: Record<string, PackageFile[]>
+    packageFiles: Record<string, PackageFile[]>,
   ): Promise<void> {
     const dependencyVulnerabilities = await this.fetchDependencyVulnerabilities(
       config,
-      packageFiles
+      packageFiles,
     );
 
     config.packageRules ??= [];
@@ -85,22 +85,22 @@ export class Vulnerabilities {
 
   async fetchVulnerabilities(
     config: RenovateConfig,
-    packageFiles: Record<string, PackageFile[]>
+    packageFiles: Record<string, PackageFile[]>,
   ): Promise<Vulnerability[]> {
     const groups = await this.fetchDependencyVulnerabilities(
       config,
-      packageFiles
+      packageFiles,
     );
     return groups.flatMap((group) => group.vulnerabilities);
   }
 
   private async fetchDependencyVulnerabilities(
     config: RenovateConfig,
-    packageFiles: Record<string, PackageFile[]>
+    packageFiles: Record<string, PackageFile[]>,
   ): Promise<DependencyVulnerabilities[]> {
     const managers = Object.keys(packageFiles);
     const allManagerJobs = managers.map((manager) =>
-      this.fetchManagerVulnerabilities(config, packageFiles, manager)
+      this.fetchManagerVulnerabilities(config, packageFiles, manager),
     );
     return (await Promise.all(allManagerJobs)).flat();
   }
@@ -108,16 +108,16 @@ export class Vulnerabilities {
   private async fetchManagerVulnerabilities(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
-    manager: string
+    manager: string,
   ): Promise<DependencyVulnerabilities[]> {
     const managerConfig = getManagerConfig(config, manager);
     const queue = packageFiles[manager].map(
       (pFile) => (): Promise<DependencyVulnerabilities[]> =>
-        this.fetchManagerPackageFileVulnerabilities(managerConfig, pFile)
+        this.fetchManagerPackageFileVulnerabilities(managerConfig, pFile),
     );
     logger.trace(
       { manager, queueLength: queue.length },
-      'fetchManagerVulnerabilities starting'
+      'fetchManagerVulnerabilities starting',
     );
     const result = (await p.all(queue)).flat();
     logger.trace({ manager }, 'fetchManagerVulnerabilities finished');
@@ -126,24 +126,24 @@ export class Vulnerabilities {
 
   private async fetchManagerPackageFileVulnerabilities(
     managerConfig: RenovateConfig,
-    pFile: PackageFile
+    pFile: PackageFile,
   ): Promise<DependencyVulnerabilities[]> {
     const { packageFile } = pFile;
     const packageFileConfig = mergeChildConfig(managerConfig, pFile);
     const { manager } = packageFileConfig;
     const queue = pFile.deps.map(
       (dep) => (): Promise<DependencyVulnerabilities | null> =>
-        this.fetchDependencyVulnerability(packageFileConfig, dep)
+        this.fetchDependencyVulnerability(packageFileConfig, dep),
     );
     logger.trace(
       { manager, packageFile, queueLength: queue.length },
-      'fetchManagerPackageFileVulnerabilities starting with concurrency'
+      'fetchManagerPackageFileVulnerabilities starting with concurrency',
     );
 
     const result = await p.all(queue);
     logger.trace(
       { packageFile },
-      'fetchManagerPackageFileVulnerabilities finished'
+      'fetchManagerPackageFileVulnerabilities finished',
     );
 
     return result.filter(is.truthy);
@@ -151,7 +151,7 @@ export class Vulnerabilities {
 
   private async fetchDependencyVulnerability(
     packageFileConfig: RenovateConfig & PackageFile,
-    dep: PackageDependency
+    dep: PackageDependency,
   ): Promise<DependencyVulnerabilities | null> {
     const ecosystem = Vulnerabilities.datasourceEcosystemMap[dep.datasource!];
     if (!ecosystem) {
@@ -168,14 +168,14 @@ export class Vulnerabilities {
     try {
       const osvVulnerabilities = await this.osvOffline?.getVulnerabilities(
         ecosystem,
-        packageName
+        packageName,
       );
       if (
         is.nullOrUndefined(osvVulnerabilities) ||
         is.emptyArray(osvVulnerabilities)
       ) {
         logger.trace(
-          `No vulnerabilities found in OSV database for ${packageName}`
+          `No vulnerabilities found in OSV database for ${packageName}`,
         );
         return null;
       }
@@ -188,7 +188,7 @@ export class Vulnerabilities {
 
       if (!versioningApi.isVersion(depVersion)) {
         logger.debug(
-          `Skipping vulnerability lookup for package ${packageName} due to unsupported version ${depVersion}`
+          `Skipping vulnerability lookup for package ${packageName} due to unsupported version ${depVersion}`,
         );
         return null;
       }
@@ -197,7 +197,7 @@ export class Vulnerabilities {
       for (const osvVulnerability of osvVulnerabilities) {
         if (osvVulnerability.withdrawn) {
           logger.trace(
-            `Skipping withdrawn vulnerability ${osvVulnerability.id}`
+            `Skipping withdrawn vulnerability ${osvVulnerability.id}`,
           );
           continue;
         }
@@ -208,20 +208,20 @@ export class Vulnerabilities {
             packageName,
             depVersion,
             affected,
-            versioningApi
+            versioningApi,
           );
           if (!isVulnerable) {
             continue;
           }
 
           logger.debug(
-            `Vulnerability ${osvVulnerability.id} affects ${packageName} ${depVersion}`
+            `Vulnerability ${osvVulnerability.id} affects ${packageName} ${depVersion}`,
           );
           const fixedVersion = this.getFixedVersion(
             ecosystem,
             depVersion,
             affected,
-            versioningApi
+            versioningApi,
           );
 
           vulnerabilities.push({
@@ -240,7 +240,7 @@ export class Vulnerabilities {
     } catch (err) {
       logger.warn(
         { err },
-        `Error fetching vulnerability information for ${packageName}`
+        `Error fetching vulnerability information for ${packageName}`,
       );
       return null;
     }
@@ -248,7 +248,7 @@ export class Vulnerabilities {
 
   private sortByFixedVersion(
     packageRules: PackageRule[],
-    versioningApi: VersioningApi
+    versioningApi: VersioningApi,
   ): void {
     const versionsCleaned: Record<string, string> = {};
     for (const rule of packageRules) {
@@ -258,15 +258,15 @@ export class Vulnerabilities {
     packageRules.sort((a, b) =>
       versioningApi.sortVersions(
         versionsCleaned[a.allowedVersions as string],
-        versionsCleaned[b.allowedVersions as string]
-      )
+        versionsCleaned[b.allowedVersions as string],
+      ),
     );
   }
 
   // https://ossf.github.io/osv-schema/#affectedrangesevents-fields
   private sortEvents(
     events: Osv.Event[],
-    versioningApi: VersioningApi
+    versioningApi: VersioningApi,
   ): Osv.Event[] {
     const sortedCopy: Osv.Event[] = [];
     let zeroEvent: Osv.Event | null = null;
@@ -283,7 +283,7 @@ export class Vulnerabilities {
 
     sortedCopy.sort((a, b) =>
       // no pre-processing, as there are only very few values to sort
-      versioningApi.sortVersions(Object.values(a)[0], Object.values(b)[0])
+      versioningApi.sortVersions(Object.values(a)[0], Object.values(b)[0]),
     );
 
     if (zeroEvent) {
@@ -296,7 +296,7 @@ export class Vulnerabilities {
   private isPackageAffected(
     ecosystem: Ecosystem,
     packageName: string,
-    affected: Osv.Affected
+    affected: Osv.Affected,
   ): boolean {
     return (
       affected.package?.name === packageName &&
@@ -306,7 +306,7 @@ export class Vulnerabilities {
 
   private includedInVersions(
     depVersion: string,
-    affected: Osv.Affected
+    affected: Osv.Affected,
   ): boolean {
     return !!affected.versions?.includes(depVersion);
   }
@@ -314,7 +314,7 @@ export class Vulnerabilities {
   private includedInRanges(
     depVersion: string,
     affected: Osv.Affected,
-    versioningApi: VersioningApi
+    versioningApi: VersioningApi,
   ): boolean {
     for (const range of affected.ranges ?? []) {
       if (range.type === 'GIT') {
@@ -356,7 +356,7 @@ export class Vulnerabilities {
     packageName: string,
     depVersion: string,
     affected: Osv.Affected,
-    versioningApi: VersioningApi
+    versioningApi: VersioningApi,
   ): boolean {
     return (
       this.isPackageAffected(ecosystem, packageName, affected) &&
@@ -369,7 +369,7 @@ export class Vulnerabilities {
     ecosystem: Ecosystem,
     depVersion: string,
     affected: Osv.Affected,
-    versioningApi: VersioningApi
+    versioningApi: VersioningApi,
   ): string | null {
     const fixedVersions: string[] = [];
     const lastAffectedVersions: string[] = [];
@@ -396,7 +396,7 @@ export class Vulnerabilities {
 
     fixedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
     const fixedVersion = fixedVersions.find((version) =>
-      this.isVersionGt(version, depVersion, versioningApi)
+      this.isVersionGt(version, depVersion, versioningApi),
     );
     if (fixedVersion) {
       return ecosystem === 'PyPI' ? `==${fixedVersion}` : fixedVersion;
@@ -404,7 +404,7 @@ export class Vulnerabilities {
 
     lastAffectedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
     const lastAffected = lastAffectedVersions.find((version) =>
-      this.isVersionGtOrEq(version, depVersion, versioningApi)
+      this.isVersionGtOrEq(version, depVersion, versioningApi),
     );
     if (lastAffected) {
       return `> ${lastAffected}`;
@@ -416,7 +416,7 @@ export class Vulnerabilities {
   private isVersionGt(
     version: string,
     other: string,
-    versioningApi: VersioningApi
+    versioningApi: VersioningApi,
   ): boolean {
     return (
       versioningApi.isVersion(version) &&
@@ -428,7 +428,7 @@ export class Vulnerabilities {
   private isVersionGtOrEq(
     version: string,
     other: string,
-    versioningApi: VersioningApi
+    versioningApi: VersioningApi,
   ): boolean {
     return (
       versioningApi.isVersion(version) &&
@@ -450,18 +450,18 @@ export class Vulnerabilities {
     } = vul;
     if (is.nullOrUndefined(fixedVersion)) {
       logger.info(
-        `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
+        `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
       );
       return null;
     }
 
     logger.debug(
-      `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
+      `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
     );
 
     const severityDetails = this.extractSeverityDetails(
       vulnerability,
-      affected
+      affected,
     );
 
     return {
@@ -493,7 +493,7 @@ export class Vulnerabilities {
 
   private generatePrBodyNotes(
     vulnerability: Osv.Vulnerability,
-    affected: Osv.Affected
+    affected: Osv.Affected,
   ): string[] {
     let aliases = [vulnerability.id].concat(vulnerability.aliases ?? []).sort();
     aliases = aliases.map((id) => {
@@ -517,14 +517,14 @@ export class Vulnerabilities {
 
     const details = vulnerability.details?.replace(
       regEx(/^#{1,4} /gm),
-      '##### '
+      '##### ',
     );
     content += `#### Details\n${details ?? 'No details.'}\n`;
 
     content += '#### Severity\n';
     const severityDetails = this.extractSeverityDetails(
       vulnerability,
-      affected
+      affected,
     );
 
     if (severityDetails.cvssVector) {
@@ -560,7 +560,7 @@ export class Vulnerabilities {
 
   private extractSeverityDetails(
     vulnerability: Osv.Vulnerability,
-    affected: Osv.Affected
+    affected: Osv.Affected,
   ): SeverityDetails {
     let severityLevel = 'UNKNOWN';
     let score = 'Unknown';

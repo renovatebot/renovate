@@ -7,7 +7,7 @@ import { detectPnpmWorkspaces } from '../pnpm';
 import { matchesAnyPattern } from '../utils';
 
 export async function detectMonorepos(
-  packageFiles: Partial<PackageFile<NpmManagerData>>[]
+  packageFiles: Partial<PackageFile<NpmManagerData>>[],
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting workspaces');
@@ -29,8 +29,8 @@ export async function detectMonorepos(
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(
           getParentDir(sp.packageFile!),
-          internalPackagePatterns
-        )
+          internalPackagePatterns,
+        ),
       );
       const internalPackageNames = internalPackageFiles
         .map((sp) => sp.managerData?.packageJsonName)

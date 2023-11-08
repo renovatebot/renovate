@@ -21,7 +21,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://old-galaxy.ansible.com/'];
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -48,7 +48,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     if (!baseUrlResponse?.body) {
       logger.warn(
         { dependency: packageName },
-        `Received invalid data from ${baseUrl}`
+        `Received invalid data from ${baseUrl}`,
       );
       return null;
     }
@@ -59,9 +59,8 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
     try {
-      versionsUrlResponse = await this.http.getJson<VersionsProjectResult>(
-        versionsUrl
-      );
+      versionsUrlResponse =
+        await this.http.getJson<VersionsProjectResult>(versionsUrl);
     } catch (err) {
       this.handleGenericErrors(err);
     }
@@ -83,10 +82,10 @@ export class GalaxyCollectionDatasource extends Datasource {
       (basicRelease) =>
         this.http
           .getJson<VersionsDetailResult>(
-            `${versionsUrl}${basicRelease.version}/`
+            `${versionsUrl}${basicRelease.version}/`,
           )
           .then(
-            (versionDetailResultResponse) => versionDetailResultResponse.body
+            (versionDetailResultResponse) => versionDetailResultResponse.body,
           )
           .then((versionDetails) => {
             try {
@@ -106,11 +105,11 @@ export class GalaxyCollectionDatasource extends Datasource {
             } catch (err) {
               logger.warn(
                 { dependency: packageName, err },
-                `Received invalid data from ${versionsUrl}${basicRelease.version}/`
+                `Received invalid data from ${versionsUrl}${basicRelease.version}/`,
               );
               return null;
             }
-          })
+          }),
     );
     // filter failed versions
     const filteredReleases = enrichedReleases.filter(is.truthy);

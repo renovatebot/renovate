@@ -65,7 +65,7 @@ export function storeInTokenMap(ctx: Ctx, tokenMapKey: string): Ctx {
 
 export function loadFromTokenMap(
   ctx: Ctx,
-  tokenMapKey: string
+  tokenMapKey: string,
 ): NonEmptyArray<lexer.Token> {
   const tokens = ctx.tokenMap[tokenMapKey];
   if (!tokens) {
@@ -112,10 +112,35 @@ export function coalesceVariable(ctx: Ctx): Ctx {
   return ctx;
 }
 
+export function findVariableInKotlinImport(
+  name: string,
+  ctx: Ctx,
+  variables: PackageVariables,
+): VariableData | undefined {
+  if (ctx.tmpKotlinImportStore.length && name.includes('.')) {
+    for (const tokens of ctx.tmpKotlinImportStore) {
+      const lastToken = tokens[tokens.length - 1];
+      if (lastToken && name.startsWith(`${lastToken.value}.`)) {
+        const prefix = tokens
+          .slice(0, -1)
+          .map((token) => token.value)
+          .join('.');
+        const identifier = `${prefix}.${name}`;
+
+        if (variables[identifier]) {
+          return variables[identifier];
+        }
+      }
+    }
+  }
+
+  return undefined;
+}
+
 export function findVariable(
   name: string,
   ctx: Ctx,
-  variables: PackageVariables = ctx.globalVars
+  variables: PackageVariables = ctx.globalVars,
 ): VariableData | undefined {
   if (ctx.tmpNestingDepth.length) {
     const prefixParts = ctx.tmpNestingDepth.map((token) => token.value);
@@ -129,13 +154,17 @@ export function findVariable(
     }
   }
 
-  return variables[name];
+  if (variables[name]) {
+    return variables[name];
+  }
+
+  return findVariableInKotlinImport(name, ctx, variables);
 }
 
 export function interpolateString(
   childTokens: lexer.Token[],
   ctx: Ctx,
-  variables: PackageVariables = ctx.globalVars
+  variables: PackageVariables = ctx.globalVars,
 ): string | null {
   const resolvedSubstrings: string[] = [];
   for (const childToken of childTokens) {
@@ -183,10 +212,10 @@ export const qVariableAssignmentIdentifier = q
         startsWith: '[',
         endsWith: ']',
         search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
-      })
+      }),
     ),
     0,
-    32
+    32,
   )
   .handler(stripReservedPrefixFromKeyTokens);
 
@@ -217,7 +246,7 @@ export const qPropertyAccessIdentifier = q
     q
       .sym<Ctx>(regEx(/^(?:extra|ext)$/))
       .op('.')
-      .sym('get')
+      .sym('get'),
   )
   .tree({
     maxDepth: 1,
@@ -251,7 +280,7 @@ export const qTemplateString = q
         ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
         ctx.varTokens = [];
         return ctx;
-      })
+      }),
     ),
   })
   .handler((ctx) => {
@@ -269,5 +298,16 @@ export const qConcatExpr = (
 export const qValueMatcher = qConcatExpr(
   qTemplateString,
   qPropertyAccessIdentifier,
-  qVariableAccessIdentifier
+  qVariableAccessIdentifier,
 );
+
+// import foo.bar
+// runtimeOnly("some:foo:${bar.bazVersion}")
+export const qKotlinImport = q
+  .sym<Ctx>('import')
+  .join(qVariableAssignmentIdentifier)
+  .handler((ctx) => {
+    ctx.tmpKotlinImportStore.push(ctx.varTokens);
+    return ctx;
+  })
+  .handler(cleanupTempVars);

@@ -13,12 +13,12 @@ export function check({
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(
-        (confManager) => !allManagersList.includes(confManager)
+        (confManager) => !allManagersList.includes(confManager),
       )
     ) {
       managersErrMessage = `${currentPath}:
         You have included an unsupported manager in a package rule. Your list: ${String(
-          resolvedRule.matchManagers
+          resolvedRule.matchManagers,
         )}.
         Supported managers are: (${allManagersList.join(', ')}).`;
     }

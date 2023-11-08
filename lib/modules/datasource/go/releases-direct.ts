@@ -52,7 +52,7 @@ export class GoDirectDatasource extends Datasource {
     if (!source) {
       logger.info(
         { packageName },
-        'Unsupported go host - cannot look up versions'
+        'Unsupported go host - cannot look up versions',
       );
       return null;
     }
@@ -126,8 +126,8 @@ export class GoDirectDatasource extends Datasource {
     }
 
     if (res.releases) {
-      res.releases = res.releases.filter((release) =>
-        release.version?.startsWith('v')
+      res.releases = res.releases.filter(
+        (release) => release.version?.startsWith('v'),
       );
     }
 

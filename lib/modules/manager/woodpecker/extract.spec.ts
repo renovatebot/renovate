@@ -23,6 +23,15 @@ describe('modules/manager/woodpecker/extract', () => {
       expect(res).toEqual({
         deps: [
           {
+            depName: 'woodpeckerci/plugin-git',
+            currentValue: '2.0.3',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:2.0.3',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
             depName: 'quay.io/something/redis',
             currentValue: 'alpine',
             currentDigest: undefined,
@@ -94,6 +103,15 @@ describe('modules/manager/woodpecker/extract', () => {
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
           },
+          {
+            depName: 'postgres',
+            currentValue: '9.5.0',
+            currentDigest: undefined,
+            replaceString: 'postgres:9.5.0',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
         ],
       });
     });
@@ -110,7 +128,7 @@ describe('modules/manager/woodpecker/extract', () => {
           registryAliases: {
             'quay.io': 'my-quay-mirror.registry.com',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
@@ -139,7 +157,7 @@ describe('modules/manager/woodpecker/extract', () => {
           registryAliases: {
             'index.docker.io': 'my-docker-mirror.registry.com',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
@@ -169,7 +187,7 @@ describe('modules/manager/woodpecker/extract', () => {
             'quay.io': 'my-quay-mirror.registry.com',
             'my-quay-mirror.registry.com': 'quay.io',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
@@ -194,7 +212,7 @@ describe('modules/manager/woodpecker/extract', () => {
             image: quay.io/something/redis:alpine
           `,
         '',
-        {}
+        {},
       );
       expect(res).toEqual({
         deps: [
@@ -222,7 +240,7 @@ describe('modules/manager/woodpecker/extract', () => {
             image: quay.io/something/redis:alpine
         `,
         '',
-        {}
+        {},
       );
 
       expect(res).toEqual({
@@ -257,7 +275,7 @@ describe('modules/manager/woodpecker/extract', () => {
             image: woodpeckerci/plugin-git:latest
         `,
         '',
-        {}
+        {},
       );
 
       expect(res).toEqual({
@@ -283,7 +301,7 @@ describe('modules/manager/woodpecker/extract', () => {
             3.5
         `,
         '',
-        {}
+        {},
       );
 
       expect(res).toBeNull();

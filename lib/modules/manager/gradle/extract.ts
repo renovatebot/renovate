@@ -31,11 +31,12 @@ const mavenDatasource = MavenDatasource.id;
 
 function updatePackageRegistries(
   packageRegistries: PackageRegistry[],
-  urls: PackageRegistry[]
+  urls: PackageRegistry[],
 ): void {
   for (const url of urls) {
     const registryAlreadyKnown = packageRegistries.some(
-      (item) => item.registryUrl === url.registryUrl && item.scope === url.scope
+      (item) =>
+        item.registryUrl === url.registryUrl && item.scope === url.scope,
     );
     if (!registryAlreadyKnown) {
       packageRegistries.push(url);
@@ -45,7 +46,7 @@ function updatePackageRegistries(
 
 function getRegistryUrlsForDep(
   packageRegistries: PackageRegistry[],
-  dep: PackageDependency<GradleManagerData>
+  dep: PackageDependency<GradleManagerData>,
 ): string[] {
   const scope = dep.depType === 'plugin' ? 'plugin' : 'dep';
 
@@ -65,7 +66,7 @@ async function parsePackageFiles(
   packageFiles: string[],
   extractedDeps: PackageDependency<GradleManagerData>[],
   packageFilesByName: Record<string, PackageFile>,
-  packageRegistries: PackageRegistry[]
+  packageRegistries: PackageRegistry[],
 ): Promise<PackageDependency<GradleManagerData>[]> {
   const varRegistry: VariableRegistry = {};
   const fileContents = await getLocalFiles(packageFiles);
@@ -100,7 +101,7 @@ async function parsePackageFiles(
         const { vars: gradleVars, deps } = parseKotlinSource(
           content,
           vars,
-          packageFile
+          packageFile,
         );
         updateVars(varRegistry, '/', gradleVars);
         extractedDeps.push(...deps);
@@ -118,7 +119,7 @@ async function parsePackageFiles(
     } catch (err) {
       logger.debug(
         { err, config, packageFile },
-        `Failed to process Gradle file`
+        `Failed to process Gradle file`,
       );
     }
   }
@@ -128,14 +129,14 @@ async function parsePackageFiles(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const kotlinSourceFiles = packageFiles.filter(isKotlinSourceFile);
   const gradleFiles = reorderFiles(
-    packageFiles.filter((e) => !kotlinSourceFiles.includes(e))
+    packageFiles.filter((e) => !kotlinSourceFiles.includes(e)),
   );
 
   await parsePackageFiles(
@@ -143,7 +144,7 @@ export async function extractAllPackageFiles(
     [...kotlinSourceFiles, ...kotlinSourceFiles, ...gradleFiles],
     extractedDeps,
     packageFilesByName,
-    packageRegistries
+    packageRegistries,
   );
 
   if (!extractedDeps.length) {
@@ -185,7 +186,7 @@ export async function extractAllPackageFiles(
         (item) =>
           item.depName === dep.depName &&
           item.managerData?.fileReplacePosition ===
-            dep.managerData?.fileReplacePosition
+            dep.managerData?.fileReplacePosition,
       );
       if (!depAlreadyInPkgFile) {
         pkgFile.deps.push(dep);

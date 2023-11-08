@@ -86,7 +86,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const text =
           "Cause your deps need an update and if they dont update, well they're no deps of mine";
         const message = `${prefix}: ${text.charAt(0).toLowerCase()}${text.slice(
-          1
+          1,
         )}`;
 
         config.commitMessagePrefix = prefix;
@@ -139,7 +139,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         const text =
           'I say, we can update when we want to, a commit they will never mind';
         const message = `${prefix}: ${text.charAt(0).toLowerCase()}${text.slice(
-          1
+          1,
         )}`;
 
         config.semanticCommits = 'enabled';

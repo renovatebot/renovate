@@ -12,7 +12,7 @@ interface NodeJsSchedule {
 export type NodeJsData = Record<string, NodeJsSchedule>;
 
 const nodeSchedule: NodeJsData = JSON.parse(
-  dataFiles.get('data/node-js-schedule.json')!
+  dataFiles.get('data/node-js-schedule.json')!,
 );
 
 export type NodeJsScheduleWithVersion = { version: string } & NodeJsSchedule;
@@ -29,7 +29,7 @@ for (const version of Object.keys(nodeSchedule)) {
 }
 
 export function findScheduleForCodename(
-  codename: string
+  codename: string,
 ): NodeJsScheduleWithVersion | null {
   return nodeCodenames.get(codename?.toUpperCase()) ?? null;
 }

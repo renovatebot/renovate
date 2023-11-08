@@ -11,7 +11,7 @@ describe('util/package-rules/package-prefixes', () => {
         },
         {
           matchPackagePrefixes: ['@opentelemetry'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -24,7 +24,7 @@ describe('util/package-rules/package-prefixes', () => {
         },
         {
           matchPackagePrefixes: ['def'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -37,7 +37,7 @@ describe('util/package-rules/package-prefixes', () => {
         },
         {
           matchPackagePrefixes: ['abc'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -51,7 +51,7 @@ describe('util/package-rules/package-prefixes', () => {
         },
         {
           excludePackagePrefixes: ['@opentelemetry'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });

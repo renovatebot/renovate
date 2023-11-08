@@ -56,6 +56,25 @@ describe('config/index', () => {
       expect(config.constraints.node).toBe('<15');
     });
 
+    it('merges forced options', () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        force: {
+          schedule: 'at any time',
+        },
+      });
+      const childConfig = {
+        force: {
+          constraints: {
+            node: '<15',
+          },
+        },
+      };
+      const config = mergeChildConfig(parentConfig, childConfig);
+      expect(config.force.schedule).toBe('at any time');
+      expect(config.force.constraints.node).toBe('<15');
+    });
+
     it('handles null parent packageRules', async () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
