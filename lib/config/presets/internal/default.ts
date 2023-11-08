@@ -137,7 +137,7 @@ export const presets: Record<string, Preset> = {
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
-    description: 'Do not renovate `devDependencies` versions/ranges.',
+    description: 'Do not update `devDependencies` versions/ranges.',
     packageRules: [
       {
         enabled: false,
@@ -180,7 +180,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   disablePeerDependencies: {
-    description: 'Do not renovate `peerDependencies` versions/ranges.',
+    description: 'Do not update `peerDependencies` versions/ranges.',
     packageRules: [
       {
         enabled: false,
@@ -362,7 +362,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   onlyNpm: {
-    description: 'Renovate only npm dependencies.',
+    description: 'Only update npm dependencies.',
     'docker-compose': {
       enabled: false,
     },
@@ -497,7 +497,7 @@ export const presets: Record<string, Preset> = {
   },
   renovatePrefix: {
     branchPrefix: 'renovate/',
-    description: 'Prefix `renovate/` to all branch names.',
+    description: 'Add the prefix `renovate/` to all branch names.',
   },
   respectLatest: {
     description: 'Upgrade versions up to the "latest" tag in the npm registry.',
