@@ -361,18 +361,6 @@ export const presets: Record<string, Preset> = {
       enabled: true,
     },
   },
-  onlyNpm: {
-    description: 'Only update npm dependencies.',
-    'docker-compose': {
-      enabled: false,
-    },
-    dockerfile: {
-      enabled: false,
-    },
-    meteor: {
-      enabled: false,
-    },
-  },
   pathSemanticCommitType: {
     description:
       'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
