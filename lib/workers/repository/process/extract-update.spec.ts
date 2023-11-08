@@ -175,7 +175,7 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('new_sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`
+        `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`,
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
@@ -184,7 +184,7 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Cached extract result cannot be used due to config change'
+        'Cached extract result cannot be used due to config change',
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
@@ -196,11 +196,11 @@ describe('workers/repository/process/extract-update', () => {
         isCacheExtractValid(
           'sha',
           'hash',
-          restOfCache as never as BaseBranchCache
-        )
+          restOfCache as never as BaseBranchCache,
+        ),
       ).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Cached extract is missing extractionFingerprints, so cannot be used'
+        'Cached extract is missing extractionFingerprints, so cannot be used',
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
@@ -216,7 +216,7 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Cached extract for sha=sha is valid and can be used'
+        'Cached extract for sha=sha is valid and can be used',
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });

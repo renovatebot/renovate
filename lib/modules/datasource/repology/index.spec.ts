@@ -28,7 +28,7 @@ const mockResolverCall = (
   repo: string,
   name: string,
   name_type: string,
-  response: ResponseMock
+  response: ResponseMock,
 ) => {
   const query = {
     repo,
@@ -77,7 +77,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -94,7 +94,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'this_should/never-exist',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -113,7 +113,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -127,7 +127,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -145,7 +145,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -164,7 +164,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -178,7 +178,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -193,7 +193,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'ubuntu_20_04/git',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -203,7 +203,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'invalid-lookup-name',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -214,7 +214,7 @@ describe('modules/datasource/repology/index', () => {
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
-        })
+        }),
       ).toBeNull();
     });
 

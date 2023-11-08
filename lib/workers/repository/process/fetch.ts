@@ -21,7 +21,7 @@ import type { LookupUpdateConfig } from './lookup/types';
 
 async function withLookupStats<T>(
   datasource: string,
-  callback: () => Promise<T>
+  callback: () => Promise<T>,
 ): Promise<T> {
   const start = Date.now();
   const result = await callback();
@@ -34,7 +34,7 @@ async function withLookupStats<T>(
 
 async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
-  indep: PackageDependency
+  indep: PackageDependency,
 ): Promise<PackageDependency> {
   const dep = clone(indep);
   dep.updates = [];
@@ -70,7 +70,7 @@ async function fetchDepUpdates(
     if (depConfig.datasource) {
       try {
         const updateResult = await withLookupStats(depConfig.datasource, () =>
-          lookupUpdates(depConfig as LookupUpdateConfig)
+          lookupUpdates(depConfig as LookupUpdateConfig),
         );
         Object.assign(dep, updateResult);
       } catch (err) {
@@ -98,7 +98,7 @@ async function fetchDepUpdates(
 async function fetchManagerPackagerFileUpdates(
   config: RenovateConfig,
   managerConfig: RenovateConfig,
-  pFile: PackageFile
+  pFile: PackageFile,
 ): Promise<void> {
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
@@ -111,11 +111,11 @@ async function fetchManagerPackagerFileUpdates(
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => (): Promise<PackageDependency> =>
-      fetchDepUpdates(packageFileConfig, dep)
+      fetchDepUpdates(packageFileConfig, dep),
   );
   logger.trace(
     { manager, packageFile, queueLength: queue.length },
-    'fetchManagerPackagerFileUpdates starting with concurrency'
+    'fetchManagerPackagerFileUpdates starting with concurrency',
   );
 
   pFile.deps = await p.all(queue);
@@ -125,16 +125,16 @@ async function fetchManagerPackagerFileUpdates(
 async function fetchManagerUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
-  manager: string
+  manager: string,
 ): Promise<void> {
   const managerConfig = getManagerConfig(config, manager);
   const queue = packageFiles[manager].map(
     (pFile) => (): Promise<void> =>
-      fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
+      fetchManagerPackagerFileUpdates(config, managerConfig, pFile),
   );
   logger.trace(
     { manager, queueLength: queue.length },
-    'fetchManagerUpdates starting'
+    'fetchManagerUpdates starting',
   );
   await p.all(queue);
   logger.trace({ manager }, 'fetchManagerUpdates finished');
@@ -142,16 +142,16 @@ async function fetchManagerUpdates(
 
 export async function fetchUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
   const allManagerJobs = managers.map((manager) =>
-    fetchManagerUpdates(config, packageFiles, manager)
+    fetchManagerUpdates(config, packageFiles, manager),
   );
   await Promise.all(allManagerJobs);
   PackageFiles.add(config.baseBranch!, { ...packageFiles });
   logger.debug(
     { baseBranch: config.baseBranch },
-    'Package releases lookups complete'
+    'Package releases lookups complete',
   );
 }

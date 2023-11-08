@@ -25,7 +25,7 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return poetry.isValid(range)
     ? poetry.getSatisfyingVersion(versions, range)
@@ -34,7 +34,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return poetry.isValid(range)
     ? poetry.minSatisfyingVersion(versions, range)

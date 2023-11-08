@@ -43,7 +43,7 @@ describe('modules/platform/azure/util', () => {
 
     it('should parse valid genre and name with slash', () => {
       const context = getGitStatusContextFromCombinedName(
-        'my-genre/status-name'
+        'my-genre/status-name',
       );
       expect(context).toEqual({
         genre: 'my-genre',
@@ -53,7 +53,7 @@ describe('modules/platform/azure/util', () => {
 
     it('should parse valid genre and name with multiple slashes', () => {
       const context = getGitStatusContextFromCombinedName(
-        'my-genre/sub-genre/status-name'
+        'my-genre/sub-genre/status-name',
       );
       expect(context).toEqual({
         genre: 'my-genre/sub-genre',
@@ -170,8 +170,8 @@ describe('modules/platform/azure/util', () => {
     it('should return an error', () => {
       expect(() => getProjectAndRepo('prjName/myRepoName/blalba')).toThrow(
         Error(
-          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
-        )
+          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`,
+        ),
       );
     });
   });
@@ -185,7 +185,7 @@ describe('modules/platform/azure/util', () => {
 
     it('returns null when repo is not found', () => {
       expect(
-        getRepoByName('foo/foo', [{ name: 'bar', project: { name: 'bar' } }])
+        getRepoByName('foo/foo', [{ name: 'bar', project: { name: 'bar' } }]),
       ).toBeNull();
     });
 
@@ -198,7 +198,7 @@ describe('modules/platform/azure/util', () => {
           { id: '2', name: 'bar' },
           { id: '3', name: 'bar', project: { name: 'foo' } },
           { id: '4', name: 'bar', project: { name: 'foo' } },
-        ])
+        ]),
       ).toMatchObject({ id: '3' });
     });
 
@@ -207,7 +207,7 @@ describe('modules/platform/azure/util', () => {
         getRepoByName('foo', [
           { id: '1', name: 'bar', project: { name: 'bar' } },
           { id: '2', name: 'foo', project: { name: 'foo' } },
-        ])
+        ]),
       ).toMatchObject({ id: '2' });
     });
 

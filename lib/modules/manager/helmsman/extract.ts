@@ -15,7 +15,7 @@ const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
 function createDep(
   key: string,
-  doc: HelmsmanDocument
+  doc: HelmsmanDocument,
 ): PackageDependency | null {
   const dep: PackageDependency = {
     depName: key,
@@ -65,7 +65,7 @@ function createDep(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig
+  _config: ExtractConfig,
 ): PackageFileContent | null {
   try {
     // TODO: fix me (#9610)

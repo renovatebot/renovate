@@ -141,7 +141,7 @@ export function setNpmrc(input?: string): void {
       ) {
         logger.debug(
           { key, val },
-          'Detected localhost registry - rejecting npmrc file'
+          'Detected localhost registry - rejecting npmrc file',
         );
         npmrc = existingNpmrc;
         return;
@@ -182,10 +182,10 @@ export function resolveRegistryUrl(packageName: string): string {
 
 export function resolvePackageUrl(
   registryUrl: string,
-  packageName: string
+  packageName: string,
 ): string {
   return url.resolve(
     ensureTrailingSlash(registryUrl),
-    encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
+    encodeURIComponent(packageName).replace(regEx(/^%40/), '@'),
   );
 }

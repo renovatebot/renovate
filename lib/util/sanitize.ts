@@ -23,10 +23,10 @@ export const redactedFields = [
 // TODO: returns null or undefined only when input is null or undefined.
 export function sanitize(input: string): string;
 export function sanitize(
-  input: string | null | undefined
+  input: string | null | undefined,
 ): string | null | undefined;
 export function sanitize(
-  input: string | null | undefined
+  input: string | null | undefined,
 ): string | null | undefined {
   if (!input) {
     return input;
@@ -46,7 +46,7 @@ const GITHUB_APP_TOKEN_PREFIX = 'x-access-token:';
 
 export function addSecretForSanitizing(
   secret: string | undefined,
-  type = 'repo'
+  type = 'repo',
 ): void {
   if (!is.nonEmptyString(secret)) {
     return;

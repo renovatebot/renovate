@@ -22,7 +22,7 @@ const basicEnvVars = [
 ];
 
 export function getChildProcessEnv(
-  customEnvVars: string[] = []
+  customEnvVars: string[] = [],
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {

@@ -21,13 +21,13 @@ const shortCodesByHex = new Map<string, string>();
 const hexCodesByShort = new Map<string, string>();
 
 const EmojiShortcodesSchema = Json.pipe(
-  z.record(z.string(), z.union([z.string(), z.array(z.string())]))
+  z.record(z.string(), z.union([z.string(), z.array(z.string())])),
 );
 
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
     const result = EmojiShortcodesSchema.safeParse(
-      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
+      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!,
     );
     // istanbul ignore if: not easily testable
     if (!result.success) {
@@ -65,7 +65,7 @@ export function emojify(text: string): string {
 }
 
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
-  ({ source }) => source
+  ({ source }) => source,
 );
 const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12875 cannot figure it out
 const excludedModifiers = new Set([

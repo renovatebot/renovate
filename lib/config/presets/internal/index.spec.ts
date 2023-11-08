@@ -17,7 +17,7 @@ describe('config/presets/internal/index', () => {
     const preset = 'foo:bar';
     const presetConfig = { extends: [preset] };
     await expect(resolveConfigPresets(presetConfig)).rejects.toThrow(
-      CONFIG_VALIDATION
+      CONFIG_VALIDATION,
     );
   });
 
@@ -28,7 +28,7 @@ describe('config/presets/internal/index', () => {
         it(`${preset} validates`, async () => {
           try {
             const config = await resolveConfigPresets(
-              massageConfig(presetConfig)
+              massageConfig(presetConfig),
             );
             const res = await validateConfig(config, true);
             expect(res.errors).toHaveLength(0);

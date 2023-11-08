@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { clone } from '../../../util/clone';
+import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -15,26 +16,33 @@ export class JenkinsPluginsDatasource extends Datasource {
     super(JenkinsPluginsDatasource.id);
   }
 
+  override readonly customRegistrySupport = true;
+
   override readonly defaultRegistryUrls = ['https://updates.jenkins.io'];
 
   override readonly registryStrategy = 'hunt';
 
-  private static readonly packageInfoUrl =
-    'https://updates.jenkins.io/current/update-center.actual.json';
-  private static readonly packageVersionsUrl =
-    'https://updates.jenkins.io/current/plugin-versions.json';
+  private static readonly packageInfoPath = 'current/update-center.actual.json';
+  private static readonly packageVersionsPath = 'current/plugin-versions.json';
 
   async getReleases({
     packageName,
+    registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const plugins = await this.getJenkinsPluginInfo();
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+    const updateSiteUrl = ensureTrailingSlash(registryUrl);
+
+    const plugins = await this.getJenkinsPluginInfo(updateSiteUrl);
     const plugin = plugins[packageName];
     if (!plugin) {
       return null;
     }
 
     const result = clone(plugin);
-    const versions = await this.getJenkinsPluginVersions();
+    const versions = await this.getJenkinsPluginVersions(updateSiteUrl);
     const releases = versions[packageName];
     result.releases = releases ? clone(releases) : [];
     return result;
@@ -45,10 +53,12 @@ export class JenkinsPluginsDatasource extends Datasource {
     key: 'info',
     ttlMinutes: 1440,
   })
-  async getJenkinsPluginInfo(): Promise<Record<string, ReleaseResult>> {
+  async getJenkinsPluginInfo(
+    updateSiteUrl: string,
+  ): Promise<Record<string, ReleaseResult>> {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsInfoResponse>(
-        JenkinsPluginsDatasource.packageInfoUrl
+        `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`,
       );
 
     const info: Record<string, ReleaseResult> = {};
@@ -62,10 +72,12 @@ export class JenkinsPluginsDatasource extends Datasource {
   }
 
   @cache({ namespace: JenkinsPluginsDatasource.id, key: 'versions' })
-  async getJenkinsPluginVersions(): Promise<Record<string, Release[]>> {
+  async getJenkinsPluginVersions(
+    updateSiteUrl: string,
+  ): Promise<Record<string, Release[]>> {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsVersionsResponse>(
-        JenkinsPluginsDatasource.packageVersionsUrl
+        `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`,
       );
 
     const versions: Record<string, Release[]> = {};
@@ -96,7 +108,7 @@ export class JenkinsPluginsDatasource extends Datasource {
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(
         { durationMs },
-        `jenkins-plugins: Fetched Jenkins plugins from ${url}`
+        `jenkins-plugins: Fetched Jenkins plugins from ${url}`,
       );
     } catch (err) /* istanbul ignore next */ {
       this.handleGenericErrors(err);

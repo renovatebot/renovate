@@ -24,7 +24,7 @@ export function getSliceEndNumber(
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`ansible-galaxy.extractPackageFile(${packageFile})`);
   const galaxyFileNameRegEx = regEx(/galaxy\.ya?ml$/);
@@ -59,8 +59,8 @@ export function extractPackageFile(
           getSliceEndNumber(
             positions.collections,
             lines.length,
-            positions.roles
-          )
+            positions.roles,
+          ),
         );
         const collectionDeps = extractCollections(collectionLines);
         deps.push(...collectionDeps);
@@ -70,8 +70,8 @@ export function extractPackageFile(
           getSliceEndNumber(
             positions.roles,
             lines.length,
-            positions.collections
-          )
+            positions.collections,
+          ),
         );
         const roleDeps = extractRoles(roleLines);
         deps.push(...roleDeps);

@@ -22,7 +22,7 @@ const http = new GithubHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory: string
+  sourceDirectory: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
@@ -34,7 +34,7 @@ export async function getReleaseNotesMd(
   const res = await http.getJson<GithubGitTree>(
     `${apiPrefix}/git/trees/${defaultBranch}${
       sourceDirectory ? '?recursive=1' : ''
-    }`
+    }`,
   );
 
   // istanbul ignore if
@@ -49,8 +49,8 @@ export async function getReleaseNotesMd(
       .filter((f) => f.path.startsWith(sourceDirectory))
       .filter((f) =>
         changelogFilenameRegex.test(
-          f.path.replace(ensureTrailingSlash(sourceDirectory), '')
-        )
+          f.path.replace(ensureTrailingSlash(sourceDirectory), ''),
+        ),
       );
   }
   if (!files.length) {
@@ -64,13 +64,13 @@ export async function getReleaseNotesMd(
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile}`
+      `Multiple candidates for changelog file, using ${changelogFile}`,
     );
   }
 
   // https://docs.github.com/en/rest/reference/git#get-a-blob
   const fileRes = await http.getJson<GithubGitBlob>(
-    `${apiPrefix}/git/blobs/${sha}`
+    `${apiPrefix}/git/blobs/${sha}`,
   );
 
   const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
@@ -79,7 +79,7 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  _release: ChangeLogRelease
+  _release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
   const apiBaseUrl = project.apiBaseUrl;
@@ -88,14 +88,14 @@ export async function getReleaseList(
     apiBaseUrl,
     'repos',
     repository,
-    'releases'
+    'releases',
   );
   const releases = await queryReleases(
     {
       registryUrl: apiBaseUrl,
       packageName: repository,
     },
-    http
+    http,
   );
 
   const result = releases.map(
@@ -106,7 +106,7 @@ export async function getReleaseList(
       tag,
       name,
       body,
-    })
+    }),
   );
   return result;
 }

@@ -53,5 +53,6 @@ nav:
       - 'Frequently Asked Questions': 'faq.md'
       - 'Known Limitations': 'known-limitations.md'
       - 'Release notes for major versions': 'release-notes-for-major-versions.md'
+      - Bot comparison: 'bot-comparison.md'
   - About Us: 'about-us.md'
   - Contributing to Renovate: 'contributing-to-renovate.md'

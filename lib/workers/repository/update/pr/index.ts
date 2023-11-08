@@ -45,12 +45,12 @@ import {
 } from './pr-fingerprint';
 
 export function getPlatformPrOptions(
-  config: RenovateConfig & PlatformPrOptions
+  config: RenovateConfig & PlatformPrOptions,
 ): PlatformPrOptions {
   const usePlatformAutomerge = Boolean(
     config.automerge &&
       (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-      config.platformAutomerge
+      config.platformAutomerge,
   );
 
   return {
@@ -114,7 +114,7 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
-  prConfig: BranchConfig
+  prConfig: BranchConfig,
 ): Promise<EnsurePrResult> {
   const config: BranchConfig = { ...prConfig };
   const filteredPrConfig = generatePrBodyFingerprintConfig(config);
@@ -129,7 +129,7 @@ export async function ensurePr(
     upgrades,
   } = config;
   const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests)
+    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests),
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
@@ -179,7 +179,7 @@ export async function ensurePr(
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
           logger.debug(
-            'Branch exceeds prNotPending hours - forcing PR creation'
+            'Branch exceeds prNotPending hours - forcing PR creation',
           );
           config.forcePr = true;
         }
@@ -216,7 +216,7 @@ export async function ensurePr(
               elapsedHours < config.prNotPendingHours))
         ) {
           logger.debug(
-            `Branch is ${elapsedHours} hours old - skipping PR creation`
+            `Branch is ${elapsedHours} hours old - skipping PR creation`,
           );
           return {
             type: 'without-pr',
@@ -225,7 +225,7 @@ export async function ensurePr(
         }
         const prNotPendingHours = String(config.prNotPendingHours);
         logger.debug(
-          `prNotPendingHours=${prNotPendingHours} threshold hit - creating PR`
+          `prNotPendingHours=${prNotPendingHours} threshold hit - creating PR`,
         );
       }
       logger.debug('Branch status success');
@@ -236,7 +236,7 @@ export async function ensurePr(
   const commitRepos: string[] = [];
 
   function getRepoNameWithSourceDirectory(
-    upgrade: BranchUpgradeConfig
+    upgrade: BranchUpgradeConfig,
   ): string {
     // TODO: types (#22198)
     return `${upgrade.repoName!}${
@@ -244,7 +244,7 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchReleaseNotes === 'pr') {
+  if (config.fetchChangeLogs === 'pr') {
     // fetch changelogs when not already done;
     await embedChangelogs(upgrades);
   }
@@ -318,7 +318,7 @@ export async function ensurePr(
       if (releaseNotesSources.includes(notesSourceUrl)) {
         logger.debug(
           { depName: upgrade.depName },
-          'Removing duplicate release notes'
+          'Removing duplicate release notes',
         );
         upgrade.hasReleaseNotes = false;
       } else {
@@ -336,7 +336,7 @@ export async function ensurePr(
         existingPr?.bodyStruct?.debugData
       ),
     },
-    config
+    config,
   );
 
   try {
@@ -373,7 +373,7 @@ export async function ensurePr(
         // adds or-cache for existing PRs
         setPrCache(branchName, prBodyFingerprint, false);
         logger.debug(
-          `Pull Request #${existingPr.number} does not need updating`
+          `Pull Request #${existingPr.number} does not need updating`,
         );
         return { type: 'with-pr', pr: existingPr };
       }
@@ -392,7 +392,7 @@ export async function ensurePr(
             oldBaseBranch: existingPr?.targetBranch,
             newBaseBranch: config.baseBranch,
           },
-          'PR base branch has changed'
+          'PR base branch has changed',
         );
         updatePrConfig.targetBranch = config.baseBranch;
       }
@@ -428,14 +428,14 @@ export async function ensurePr(
             oldPrTitle: existingPr.title,
             newPrTitle: prTitle,
           },
-          'PR title changed'
+          'PR title changed',
         );
       } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
             prTitle,
           },
-          'PR body changed'
+          'PR body changed',
         );
       }
 
@@ -492,8 +492,9 @@ export async function ensurePr(
         if (
           err.body?.message === 'Validation failed' &&
           err.body.errors?.length &&
-          err.body.errors.some((error: { message?: string }) =>
-            error.message?.startsWith('A pull request already exists')
+          err.body.errors.some(
+            (error: { message?: string }) =>
+              error.message?.startsWith('A pull request already exists'),
           )
         ) {
           logger.warn('A pull requests already exists');
@@ -502,7 +503,7 @@ export async function ensurePr(
         if (err.statusCode === 502) {
           logger.warn(
             { branch: branchName },
-            'Deleting branch due to server error'
+            'Deleting branch due to server error',
           );
           await scm.deleteBranch(branchName);
         }
@@ -540,7 +541,7 @@ export async function ensurePr(
         (await getBranchStatus()) !== 'red'
       ) {
         logger.debug(
-          `Skipping assignees and reviewers as automerge=${config.automerge}`
+          `Skipping assignees and reviewers as automerge=${config.automerge}`,
         );
       } else {
         await addParticipants(config, pr);

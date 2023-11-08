@@ -65,7 +65,7 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
         'some/repo',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -84,7 +84,7 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
         'some/repo',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -103,7 +103,7 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
         'some/repo',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -122,7 +122,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -142,7 +142,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://api.gitea.example.com',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -161,7 +161,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -182,7 +182,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://api.github.example.com',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -202,7 +202,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -224,7 +224,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://api.github.example.com',
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -244,7 +244,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -265,7 +265,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://gitlab.example.com/api/v4',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -284,7 +284,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -306,7 +306,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://gitlab.example.com/api/v4',
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });

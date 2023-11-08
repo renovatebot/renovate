@@ -115,13 +115,13 @@ describe('modules/manager/osgi/extract', () => {
 
     it('returns null for unsupported version of feature model definition', () => {
       expect(
-        extractPackageFile(unsupportedFeatureVersion, '', undefined)
+        extractPackageFile(unsupportedFeatureVersion, '', undefined),
       ).toBeNull();
     });
 
     it('returns null for an invalid version of feature model definition', () => {
       expect(
-        extractPackageFile(invalidFeatureVersion, '', undefined)
+        extractPackageFile(invalidFeatureVersion, '', undefined),
       ).toBeNull();
     });
 
@@ -137,7 +137,7 @@ describe('modules/manager/osgi/extract', () => {
       const packageFile = extractPackageFile(
         featureWithBundlesAsObjects,
         '',
-        undefined
+        undefined,
       );
       expect(packageFile).toEqual({
         deps: [
@@ -159,7 +159,7 @@ describe('modules/manager/osgi/extract', () => {
       const packageFile = extractPackageFile(
         featureWithBundlesAsStrings,
         '',
-        undefined
+        undefined,
       );
       expect(packageFile).toEqual({
         deps: [
@@ -207,7 +207,7 @@ describe('modules/manager/osgi/extract', () => {
       const packageFile = extractPackageFile(
         doubleSlashNotComment,
         '',
-        undefined
+        undefined,
       );
       expect(packageFile).toEqual({
         deps: [
@@ -242,7 +242,7 @@ describe('modules/manager/osgi/extract', () => {
       const packageFile = extractPackageFile(
         malformedDefinitions,
         '',
-        undefined
+        undefined,
       );
       expect(packageFile).toEqual({
         deps: [
@@ -263,7 +263,7 @@ describe('modules/manager/osgi/extract', () => {
       const packageFile = extractPackageFile(
         versionWithVariable,
         '',
-        undefined
+        undefined,
       );
       expect(packageFile).toEqual({
         deps: [

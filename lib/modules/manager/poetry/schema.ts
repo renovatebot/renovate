@@ -88,7 +88,7 @@ const PoetryPypiDependency = z.union([
       datasource: PypiDatasource.id,
       currentValue: version,
       managerData: { nestedVersion: false },
-    })
+    }),
   ),
 ]);
 
@@ -96,7 +96,7 @@ const PoetryArrayDependency = z.array(z.unknown()).transform(
   (): PackageDependency => ({
     datasource: PypiDatasource.id,
     skipReason: 'multiple-constraint-dep',
-  })
+  }),
 );
 
 const PoetryDependency = z.union([
@@ -131,7 +131,7 @@ export const PoetryDependencies = LooseRecord(
 
     dep.skipReason = 'invalid-version';
     return dep;
-  })
+  }),
 ).transform((record) => {
   const deps: PackageDependency[] = [];
   for (const [depName, dep] of Object.entries(record)) {
@@ -152,7 +152,7 @@ export const PoetryDependencies = LooseRecord(
 
 function withDepType<
   Output extends PackageDependency[],
-  Schema extends ZodType<Output, ZodTypeDef, unknown>
+  Schema extends ZodType<Output, ZodTypeDef, unknown>,
 >(schema: Schema, depType: string): ZodEffects<Schema> {
   return schema.transform((deps) => {
     for (const dep of deps) {
@@ -166,7 +166,7 @@ export const PoetryGroupDependencies = LooseRecord(
   z.string(),
   z
     .object({ dependencies: PoetryDependencies })
-    .transform(({ dependencies }) => dependencies)
+    .transform(({ dependencies }) => dependencies),
 ).transform((record) => {
   const deps: PackageDependency[] = [];
   for (const [groupName, group] of Object.entries(record)) {
@@ -183,7 +183,7 @@ export const PoetrySectionSchema = z
     dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
     'dev-dependencies': withDepType(
       PoetryDependencies,
-      'dev-dependencies'
+      'dev-dependencies',
     ).optional(),
     extras: withDepType(PoetryDependencies, 'extras').optional(),
     group: PoetryGroupDependencies.optional(),
@@ -192,7 +192,7 @@ export const PoetrySectionSchema = z
         .object({
           url: z.string(),
         })
-        .transform(({ url }) => url)
+        .transform(({ url }) => url),
     )
       .refine((urls) => urls.length > 0)
       .transform((urls) => [
@@ -225,7 +225,7 @@ export const PoetrySectionSchema = z
       }
 
       return res;
-    }
+    },
   );
 
 export type PoetrySectionSchema = z.infer<typeof PoetrySectionSchema>;
@@ -258,11 +258,11 @@ export const PoetrySchema = z
           // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
           (buildBackend) =>
             buildBackend === 'poetry.masonry.api' ||
-            buildBackend === 'poetry.core.masonry.api'
+            buildBackend === 'poetry.core.masonry.api',
         ),
         requires: LooseArray(BuildSystemRequireVal).transform((vals) => {
           const req = vals.find(
-            ({ depName }) => depName === 'poetry' || depName === 'poetry_core'
+            ({ depName }) => depName === 'poetry' || depName === 'poetry_core',
           );
           return req?.poetryRequirement;
         }),
@@ -275,7 +275,7 @@ export const PoetrySchema = z
     ({ tool: packageFileContent, 'build-system': poetryRequirement }) => ({
       packageFileContent,
       poetryRequirement,
-    })
+    }),
   );
 
 export type PoetrySchema = z.infer<typeof PoetrySchema>;
@@ -296,7 +296,7 @@ export const Lockfile = Toml.pipe(
           name: z.string(),
           version: z.string(),
         })
-        .transform(({ name, version }): [string, string] => [name, version])
+        .transform(({ name, version }): [string, string] => [name, version]),
     )
       .transform((entries) => Object.fromEntries(entries))
       .catch({}),
@@ -316,17 +316,17 @@ export const Lockfile = Toml.pipe(
         }) => ({
           poetryConstraint,
           pythonVersions,
-        })
+        }),
       )
       .catch({
         poetryConstraint: undefined,
         pythonVersions: undefined,
       }),
-  })
+  }),
 ).transform(
   ({ package: lock, metadata: { poetryConstraint, pythonVersions } }) => ({
     lock,
     poetryConstraint,
     pythonVersions,
-  })
+  }),
 );

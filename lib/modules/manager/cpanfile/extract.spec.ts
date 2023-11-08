@@ -18,8 +18,8 @@ describe('modules/manager/cpanfile/extract', () => {
         expect(
           extractPackageFile(
             `requires 'perl', ${version as string};`,
-            'cpanfile'
-          )
+            'cpanfile',
+          ),
         ).toEqual({
           deps: [
             {
@@ -52,8 +52,8 @@ describe('modules/manager/cpanfile/extract', () => {
             requires 'C', '> 1.3';
             requires 'CC', '> v1.3';
           `,
-          'cpanfile'
-        )
+          'cpanfile',
+        ),
       ).toEqual({
         deps: [
           {
@@ -117,8 +117,8 @@ describe('modules/manager/cpanfile/extract', () => {
             recommends 'Crypt::URandom';
             recommends 'HTTP::XSCookies', '0.000015';
           `,
-          'cpanfile'
-        )
+          'cpanfile',
+        ),
       ).toEqual({
         deps: [
           {
@@ -142,8 +142,8 @@ describe('modules/manager/cpanfile/extract', () => {
             suggests 'Test::MockTime::HiRes', '0.06';
             suggests 'Authen::Simple::Passwd';
           `,
-          'cpanfile'
-        )
+          'cpanfile',
+        ),
       ).toEqual({
         deps: [
           {
@@ -169,8 +169,8 @@ describe('modules/manager/cpanfile/extract', () => {
                 requires "ExtUtils::MakeMaker" => "0";
               };
             `,
-            'cpanfile'
-          )
+            'cpanfile',
+          ),
         ).toEqual({
           deps: [
             {
@@ -191,8 +191,8 @@ describe('modules/manager/cpanfile/extract', () => {
                 requires 'Test::More', '0.98';
               };
             `,
-            'cpanfile'
-          )
+            'cpanfile',
+          ),
         ).toEqual({
           deps: [
             {
@@ -214,8 +214,8 @@ describe('modules/manager/cpanfile/extract', () => {
                 requires 'Test::Requires';
               };
             `,
-            'cpanfile'
-          )
+            'cpanfile',
+          ),
         ).toEqual({
           deps: [
             {
@@ -243,8 +243,8 @@ describe('modules/manager/cpanfile/extract', () => {
                 suggests 'FCGI::ProcManager';
               };
             `,
-            'cpanfile'
-          )
+            'cpanfile',
+          ),
         ).toEqual({
           deps: [
             {
@@ -272,8 +272,8 @@ describe('modules/manager/cpanfile/extract', () => {
                 requires "Term::Table" => "0.013";
               };
             `,
-            'cpanfile'
-          )
+            'cpanfile',
+          ),
         ).toEqual({
           deps: [
             {
@@ -304,8 +304,8 @@ describe('modules/manager/cpanfile/extract', () => {
         expect(
           extractPackageFile(
             `${shortcut as string} 'Capture::Tiny', '0.12';`,
-            'cpanfile'
-          )
+            'cpanfile',
+          ),
         ).toEqual({
           deps: [
             {

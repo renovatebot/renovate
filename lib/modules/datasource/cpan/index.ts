@@ -61,7 +61,7 @@ export class CpanDatasource extends Datasource {
       };
       const res = await this.http.postJson<MetaCpanApiFileSearchResult>(
         searchUrl,
-        { body }
+        { body },
       );
       hits = res.body?.hits?.hits?.map(({ _source }) => _source);
     } catch (err) {
@@ -79,9 +79,8 @@ export class CpanDatasource extends Datasource {
           deprecated: isDeprecated,
           maturity,
         } = hit;
-        const version = module.find(
-          ({ name }) => name === packageName
-        )?.version;
+        const version = module.find(({ name }) => name === packageName)
+          ?.version;
         if (version) {
           // https://metacpan.org/pod/CPAN::DistnameInfo#maturity
           const isStable = maturity === 'released';

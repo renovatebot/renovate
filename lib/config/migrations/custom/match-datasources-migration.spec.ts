@@ -13,7 +13,7 @@ describe('config/migrations/custom/match-datasources-migration', () => {
           'npm',
           'node-version',
         ],
-      }
+      },
     );
   });
 });
