@@ -2553,7 +2553,6 @@ describe('modules/platform/gitlab/index', () => {
             source_branch: 'branch-a',
             title: 'branch a pr',
             state: 'open',
-            description: `<!--labels:WyJvbGRfbGFiZWwiXQ==-->`, // equivallent to labels array : ['old_label']
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')

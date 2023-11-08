@@ -1370,8 +1370,7 @@ describe('modules/platform/bitbucket/index', () => {
       const prBody =
         '<details><summary>foo</summary>\n<blockquote>\n\n<details><summary>text</summary>' +
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
-        '\n\n</details>\n\n</blockquote>\n</details>' +
-        `<!--labels:aSdwerfwefmk1-->`;
+        '\n\n</details>\n\n</blockquote>\n</details>';
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });

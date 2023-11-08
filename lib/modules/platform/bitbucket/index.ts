@@ -564,8 +564,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
-    .replace(regEx(/<!--labels:.*?-->/g), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
 export async function ensureIssue({

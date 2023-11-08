@@ -2036,6 +2036,10 @@ Behaviour details:
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
+<!-- prettier-ignore -->
+!!! note
+    Currently updating of the labels on open PRs is only supported for the platforms: github, gitlab and gitea
+
 ## lockFileMaintenance
 
 You can use `lockFileMaintenance` to refresh lock files to keep them up-to-date.

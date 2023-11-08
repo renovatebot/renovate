@@ -1743,7 +1743,6 @@ describe('modules/platform/bitbucket-server/index', () => {
 <!---->
 Empty comment.
 <!-- This is another comment -->
-<!--labels:aSwedlninfa-->
 Followed by some information.
 <!-- followed by some more comments -->`);
           expect(prBody).toMatchSnapshot();

@@ -754,8 +754,10 @@ export async function mergePr({
   logger.trace(
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
-    }) with lastMergeSourceCommit ${// TODO: types (#22198)
-    pr.lastMergeSourceCommit?.commitId} using mergeStrategy ${mergeStrategy} (${
+    }) with lastMergeSourceCommit ${
+      // TODO: types (#22198)
+      pr.lastMergeSourceCommit?.commitId
+    } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
     })`,
   );
@@ -810,8 +812,7 @@ export function massageMarkdown(input: string): string {
       'renaming the PR to start with "rebase!"',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
-    .replace(regEx(/<!--labels:.*?-->/g), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
 /* istanbul ignore next */

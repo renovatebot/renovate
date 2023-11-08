@@ -53,7 +53,9 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   it('validates massageMarkdown functionality', () => {
-    const newStr = codeCommit.massageMarkdown();
+    const newStr = codeCommit.massageMarkdown(
+      '<details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123-->',
+    );
     expect(newStr).toBe(
       '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)',
     );
