@@ -103,3 +103,22 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
 
   return config.rangeStrategy;
 }
+
+/**
+ * Filter a list of managers based on enabled managers.
+ *
+ * If enabledManagers is provided, this function returns a subset of allManagersList
+ * that matches the enabled manager names, including custom managers. If enabledManagers
+ * is not provided or is an empty array, it returns the full list of managers.
+ */
+export function getEnabledManagersList(enabledManagers?: string[]): string[] {
+  if (enabledManagers?.length) {
+    return allManagersList.filter(
+      (manager) =>
+        enabledManagers.includes(manager) ||
+        enabledManagers.includes(`custom.${manager}`),
+    );
+  }
+
+  return allManagersList;
+}

@@ -1,6 +1,6 @@
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
-import { allManagersList } from '../../../modules/manager';
+import { getEnabledManagersList } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
@@ -55,13 +55,7 @@ export function generateFingerprintConfig(
   config: RenovateConfig,
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
-  let managerList: Set<string>;
-  const { enabledManagers } = config;
-  if (enabledManagers?.length) {
-    managerList = new Set(enabledManagers);
-  } else {
-    managerList = new Set(allManagersList);
-  }
+  const managerList = new Set(getEnabledManagersList(config.enabledManagers));
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
