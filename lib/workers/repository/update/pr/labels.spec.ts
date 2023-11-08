@@ -107,7 +107,7 @@ describe('workers/repository/update/pr/labels', () => {
 
     it('returns false', () => {
       expect(areLabelsModified(['node', 'npm'], ['node', 'npm'])).toBeFalse();
-      expect(areLabelsModified([], [])).toBeTrue();
+      expect(areLabelsModified([], [])).toBeFalse();
     });
   });
 
