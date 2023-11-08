@@ -2826,6 +2826,7 @@ Managers which do not support replacement:
 - `homebrew`
 - `maven`
 - `regex`
+- `sbt`
 
 Use the `replacementName` config option to set the name of a replacement package.
 
