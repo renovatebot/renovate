@@ -362,7 +362,7 @@ export async function ensurePr(
       const labelsNeedUpdate = shouldUpdateLabels(
         labelsFromDebugData,
         existingPr.labels,
-        config.labels,
+        prepareLabels(config),
       );
       if (
         existingPr?.targetBranch === config.baseBranch &&
@@ -492,9 +492,8 @@ export async function ensurePr(
         if (
           err.body?.message === 'Validation failed' &&
           err.body.errors?.length &&
-          err.body.errors.some(
-            (error: { message?: string }) =>
-              error.message?.startsWith('A pull request already exists'),
+          err.body.errors.some((error: { message?: string }) =>
+            error.message?.startsWith('A pull request already exists'),
           )
         ) {
           logger.warn('A pull requests already exists');

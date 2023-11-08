@@ -24,10 +24,10 @@ export function getChangedLabels(
 }
 
 export function areLabelsModified(
-  oldLabels: string[],
-  newLabels?: string[],
+  labelsFromDebugData: string[],
+  labelsInPr: string[],
 ): boolean {
-  const modified = !dequal(oldLabels.sort(), newLabels?.sort());
+  const modified = !dequal(labelsFromDebugData.sort(), labelsInPr.sort());
 
   if (modified) {
     logger.debug(
@@ -39,19 +39,22 @@ export function areLabelsModified(
 }
 
 export function shouldUpdateLabels(
-  labelsInDebugData?: string[],
-  labelsInPr?: string[],
-  newLabels?: string[],
+  labelsInDebugData: string[] | undefined,
+  labelsInPr: string[] | undefined,
+  newLabels: string[] | undefined,
 ): boolean {
-  if (!labelsInDebugData) {
+  if (!is.array(labelsInDebugData)) {
+    logger.debug({labelsInDebugData}, 'No labels in PR');
     return false;
   }
 
-  if (areLabelsModified(labelsInDebugData, labelsInPr)) {
+  if (areLabelsModified(labelsInDebugData, labelsInPr ?? [])) {
+    logger.debug({labelsInDebugData, labelsInPr}, 'Labels in PR have been modified by user');
     return false;
   }
 
   if (dequal((newLabels ?? []).sort(), labelsInDebugData.sort())) {
+    logger.debug({newLabels, existingLabels: labelsInDebugData}, 'New labels and existing labels are same');
     return false;
   }
 
