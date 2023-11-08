@@ -18,7 +18,7 @@ export interface PresetTemplate {
 }
 
 function generatePackageRules(
-  replacementRules: ReplacementRule[]
+  replacementRules: ReplacementRule[],
 ): PackageRule[] {
   const rules: PackageRule[] = [];
   for (const replacementRule of replacementRules) {

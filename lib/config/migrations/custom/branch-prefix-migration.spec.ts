@@ -9,7 +9,7 @@ describe('config/migrations/custom/branch-prefix-migration', () => {
       {
         additionalBranchPrefix: '{{parentDir}}-',
         branchPrefix: 'renovate/',
-      }
+      },
     );
   });
 
@@ -21,7 +21,7 @@ describe('config/migrations/custom/branch-prefix-migration', () => {
       {
         branchPrefix: 'test',
       },
-      false
+      false,
     );
   });
 
@@ -33,7 +33,7 @@ describe('config/migrations/custom/branch-prefix-migration', () => {
       {
         branchPrefix: true,
       } as any,
-      false
+      false,
     );
   });
 });

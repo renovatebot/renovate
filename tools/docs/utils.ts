@@ -17,14 +17,14 @@ export function formatName(input: string): string {
 
 export function getDisplayName(
   moduleName: string,
-  moduleDefinition: ModuleApi
+  moduleDefinition: ModuleApi,
 ): string {
   return moduleDefinition.displayName ?? formatName(moduleName);
 }
 
 export function getNameWithUrl(
   moduleName: string,
-  moduleDefinition: ModuleApi
+  moduleDefinition: ModuleApi,
 ): string {
   const displayName = getDisplayName(moduleName, moduleDefinition);
   if (moduleDefinition.url) {
@@ -59,7 +59,7 @@ export function formatUrls(urls: string[] | null | undefined): string {
 
 export async function formatDescription(
   type: string,
-  name: string
+  name: string,
 ): Promise<string> {
   const content = await readFile(`lib/modules/${type}/${name}/readme.md`);
   if (!content) {

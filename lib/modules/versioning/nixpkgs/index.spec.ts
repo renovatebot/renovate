@@ -64,9 +64,9 @@ describe('modules/versioning/nixpkgs/index', () => {
     '$versions -> sortVersions -> $expected ',
     ({ versions, expected }: { versions: string[]; expected: string[] }) => {
       expect(versions.sort((a, b) => versioning.sortVersions(a, b))).toEqual(
-        expected
+        expected,
       );
-    }
+    },
   );
 
   it.each`

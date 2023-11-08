@@ -13,7 +13,7 @@ describe('modules/platform/util', () => {
       '("$repoId", "$endpoint") === $fingerprint',
       ({ repoId, endpoint, fingerprint }) => {
         expect(repoFingerprint(repoId, endpoint)).toBe(fingerprint);
-      }
+      },
     );
   });
 

@@ -48,6 +48,10 @@ const repoGroups = {
   ],
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
+  'aws-sdk-rust': [
+    'https://github.com/awslabs/smithy-rs',
+    'https://github.com/awslabs/aws-sdk-rust',
+  ],
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
   'azure azure-libraries-for-net':
     'https://github.com/Azure/azure-libraries-for-net',
@@ -287,6 +291,7 @@ const repoGroups = {
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
+  'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
@@ -436,6 +441,7 @@ const repoGroups = {
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
+  'trust-dns': 'https://github.com/bluejekyll/trust-dns',
   tsoa: 'https://github.com/lukeautry/tsoa',
   turbo: 'https://github.com/vercel/turbo',
   typefaces: 'https://github.com/KyleAMathews/typefaces',

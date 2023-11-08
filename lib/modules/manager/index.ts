@@ -20,7 +20,7 @@ export const allManagersList = [...managerList, ...customManagerList];
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
-  name: T
+  name: T,
 ): ManagerApi[T] | undefined {
   return isCustomManager(manager)
     ? customManagers.get(manager)?.[name]
@@ -43,7 +43,7 @@ export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
 export async function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
-  files: string[]
+  files: string[],
 ): Promise<PackageFile[] | null> {
   if (!managers.has(manager)) {
     return null;
@@ -64,7 +64,7 @@ export function extractPackageFile(
   manager: string,
   content: string,
   fileName: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Result<PackageFileContent | null> {
   const m = managers.get(manager)! ?? customManagers.get(manager)!;
   if (!m) {

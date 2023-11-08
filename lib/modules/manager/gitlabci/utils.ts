@@ -16,7 +16,7 @@ export function replaceReferenceTags(content: string): string {
 }
 
 const depProxyRe = regEx(
-  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?/)(?<depName>.+)`
+  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?/)(?<depName>.+)`,
 );
 
 /**
@@ -26,7 +26,7 @@ const depProxyRe = regEx(
  */
 export function getGitlabDep(
   imageName: string,
-  registryAliases?: Record<string, string>
+  registryAliases?: Record<string, string>,
 ): PackageDependency {
   const match = depProxyRe.exec(imageName);
   if (match?.groups) {

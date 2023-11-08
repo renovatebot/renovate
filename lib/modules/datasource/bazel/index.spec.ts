@@ -14,7 +14,7 @@ describe('modules/datasource/bazel/index', () => {
     it('throws for error', async () => {
       httpMock.scope(defaultRegistryUrl).get(path).replyWithError('error');
       await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
-        EXTERNAL_HOST_ERROR
+        EXTERNAL_HOST_ERROR,
       );
     });
 
@@ -39,7 +39,7 @@ describe('modules/datasource/bazel/index', () => {
     it('throws for 5xx', async () => {
       httpMock.scope(defaultRegistryUrl).get(path).reply(502);
       await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
-        EXTERNAL_HOST_ERROR
+        EXTERNAL_HOST_ERROR,
       );
     });
 

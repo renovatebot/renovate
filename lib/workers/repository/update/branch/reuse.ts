@@ -11,7 +11,7 @@ type ParentBranch = {
 };
 
 export async function shouldReuseExistingBranch(
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<ParentBranch> {
   const { baseBranch, branchName } = config;
   const result: ParentBranch = { reuseExistingBranch: false };
@@ -41,7 +41,7 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`
+      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`,
     );
   }
 
@@ -82,7 +82,7 @@ export async function shouldReuseExistingBranch(
       groupedByPackageFile[packageFile].has('update-lockfile')
     ) {
       logger.debug(
-        `Detected multiple rangeStrategies along with update-lockfile`
+        `Detected multiple rangeStrategies along with update-lockfile`,
       );
       result.reuseExistingBranch = false;
       result.isModified = false;

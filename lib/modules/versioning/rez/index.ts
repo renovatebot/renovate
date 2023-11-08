@@ -101,14 +101,14 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.getSatisfyingVersion(versions, rez2npm(range));
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.minSatisfyingVersion(versions, rez2npm(range));
 }
@@ -162,18 +162,18 @@ function getNewValue({
     const upperAscVersionCurrent = matchAscRange.groups.range_upper_asc_version;
     const [lowerBoundAscPep440, upperBoundAscPep440] = pep440Value.split(', ');
     const lowerAscVersionNew = coerceString(
-      regEx(versionGroup).exec(lowerBoundAscPep440)?.[0]
+      regEx(versionGroup).exec(lowerBoundAscPep440)?.[0],
     );
     const upperAscVersionNew = coerceString(
-      regEx(versionGroup).exec(upperBoundAscPep440)?.[0]
+      regEx(versionGroup).exec(upperBoundAscPep440)?.[0],
     );
     const lowerBoundAscNew = lowerBoundAscCurrent.replace(
       lowerAscVersionCurrent,
-      lowerAscVersionNew
+      lowerAscVersionNew,
     );
     const upperBoundAscNew = upperBoundAscCurrent.replace(
       upperAscVersionCurrent,
-      upperAscVersionNew
+      upperAscVersionNew,
     );
     const separator = currentValue.includes(',') ? ',' : '';
 
@@ -193,18 +193,18 @@ function getNewValue({
       pep440Value.split(', ');
 
     const upperDescVersionNew = coerceString(
-      regEx(versionGroup).exec(upperBoundDescPep440)?.[0]
+      regEx(versionGroup).exec(upperBoundDescPep440)?.[0],
     );
     const lowerDescVersionNew = coerceString(
-      regEx(versionGroup).exec(lowerBoundDescPep440)?.[0]
+      regEx(versionGroup).exec(lowerBoundDescPep440)?.[0],
     );
     const upperBoundDescNew = upperBoundDescCurrent.replace(
       upperDescVersionCurrent,
-      upperDescVersionNew
+      upperDescVersionNew,
     );
     const lowerBoundDescNew = lowerBoundDescCurrent.replace(
       lowerDescVersionCurrent,
-      lowerDescVersionNew
+      lowerDescVersionNew,
     );
     // Descending ranges are only supported with a comma.
     const separator = ',';

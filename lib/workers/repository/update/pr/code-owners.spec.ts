@@ -27,7 +27,7 @@ describe('workers/repository/update/pr/code-owners', () => {
         codeBlock`
           * @jimmy
           yarn.lock
-        `
+        `,
       );
       git.getBranchFiles.mockResolvedValueOnce(['yarn.lock']);
       const codeOwners = await codeOwnersForPr(pr);
@@ -43,7 +43,7 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     it('returns more specific code owners', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
-        ['* @jimmy', 'package.json @john @maria'].join('\n')
+        ['* @jimmy', 'package.json @john @maria'].join('\n'),
       );
       git.getBranchFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
@@ -178,7 +178,7 @@ describe('workers/repository/update/pr/code-owners', () => {
           server/pom.xml @reviewer-1
           client/package.json @reviewer-1
           client/package-lock.json @reviewer-1
-        `
+        `,
       );
       git.getBranchFiles.mockResolvedValueOnce(['server/pom.xml']);
       const codeOwners = await codeOwnersForPr(pr);
@@ -197,7 +197,7 @@ describe('workers/repository/update/pr/code-owners', () => {
           server/pom.xml @reviewer-1
           client/package.json @reviewer-1
           client/package-lock.json @reviewer-1
-        `
+        `,
       );
       git.getBranchFiles.mockResolvedValueOnce([
         'client/package.json',
@@ -221,7 +221,7 @@ describe('workers/repository/update/pr/code-owners', () => {
           '   * @jimmy     # inline comment     ',
           '        # comment line with leading whitespace',
           ' package.json @john @maria#inline comment without leading whitespace  ',
-        ].join('\n')
+        ].join('\n'),
       );
       git.getBranchFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
@@ -237,7 +237,7 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     it('returns empty array when no code owners match', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
-        ['package-lock.json @mike'].join('\n')
+        ['package-lock.json @mike'].join('\n'),
       );
       git.getBranchFiles.mockResolvedValueOnce(['yarn.lock']);
       const codeOwners = await codeOwnersForPr(pr);

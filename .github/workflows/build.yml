@@ -344,6 +344,8 @@ jobs:
 
       - name: Unit tests
         shell: bash
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
         run: |
           for shard in ${{ matrix.shards }};
           do

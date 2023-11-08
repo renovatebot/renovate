@@ -15,6 +15,7 @@ export class BazelDatasource extends Datasource {
     'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main';
 
   override readonly defaultRegistryUrls = [BazelDatasource.bazelCentralRepoUrl];
+  override readonly registryStrategy = 'hunt';
   override readonly customRegistrySupport = true;
   override readonly caching = true;
 
@@ -42,7 +43,7 @@ export class BazelDatasource extends Datasource {
     try {
       const { body: metadata } = await this.http.getJson(
         url,
-        BazelModuleMetadata
+        BazelModuleMetadata,
       );
       result.releases = metadata.versions
         .map((v) => new BzlmodVersion(v))

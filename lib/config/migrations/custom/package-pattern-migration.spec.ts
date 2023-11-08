@@ -8,7 +8,7 @@ describe('config/migrations/custom/package-pattern-migration', () => {
       },
       {
         packagePatterns: ['test'],
-      }
+      },
     );
   });
 });

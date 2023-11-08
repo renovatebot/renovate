@@ -36,9 +36,7 @@ You as user can set authentication for private crates by adding a `hostRules` co
 All token `hostRules` with a `hostType` (e.g. `github`, `gitlab`, `bitbucket`, etc.) and host rules without a `hostType` will be automatically setup for authentication.
 You can also configure a `hostRules` that's only for Cargo authentication (e.g. `hostType: 'cargo'`).
 
-Here's an example of authentication for a private GitHub and Cargo registry:
-
-```js
+```js title="Example of authentication for a private GitHub and Cargo registry:"
 module.exports = {
   hostRules: [
     {

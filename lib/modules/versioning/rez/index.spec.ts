@@ -15,7 +15,7 @@ describe('modules/versioning/rez/index', () => {
     'equals("$version", "$equal") === $expected',
     ({ version, equal, expected }) => {
       expect(versioning.equals(version, equal)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -61,7 +61,7 @@ describe('modules/versioning/rez/index', () => {
     'isGreaterThan("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(versioning.isGreaterThan(version, other)).toEqual(expected);
-    }
+    },
   );
 
   it.each`
@@ -129,7 +129,7 @@ describe('modules/versioning/rez/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -139,7 +139,7 @@ describe('modules/versioning/rez/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -152,7 +152,7 @@ describe('modules/versioning/rez/index', () => {
     'isLessThanRange($version, "$range") === $expected',
     ({ version, range, expected }) => {
       expect(versioning.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -172,7 +172,7 @@ describe('modules/versioning/rez/index', () => {
     'matches($version, "$range") === $expected',
     ({ version, range, expected }) => {
       expect(versioning.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -187,7 +187,7 @@ describe('modules/versioning/rez/index', () => {
       const dockerSorted = versioning.sortVersions(a, b);
       const semverSorted = semver.sortVersions(a, b);
       expect(dockerSorted).toBe(semverSorted);
-    }
+    },
   );
 
   it.each`
@@ -437,7 +437,7 @@ describe('modules/versioning/rez/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 
   it.each`

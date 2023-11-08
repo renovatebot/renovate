@@ -41,7 +41,7 @@ describe('config/decrypt', () => {
       config.encrypted = { a: 1 };
       GlobalConfig.set({ privateKey, privateKeyOld: 'invalid-key' });
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
 
@@ -60,7 +60,7 @@ describe('config/decrypt', () => {
       expect(res.encrypted).toBeUndefined();
       expect(res.npmToken).toBeUndefined();
       expect(res.npmrc).toBe(
-        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n'
+        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n',
       );
     });
 
@@ -98,11 +98,11 @@ describe('config/decrypt', () => {
       expect(res.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.encrypted).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.branchPrefix).toBe(
-        'abcdef-ghijklm-nopqf-stuvwxyz'
+        'abcdef-ghijklm-nopqf-stuvwxyz',
       );
       expect(res.packageFiles[0].devDependencies.npmToken).toBeUndefined();
       expect(res.packageFiles[0].devDependencies.npmrc).toBe(
-        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n'
+        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n',
       );
     });
 
@@ -113,7 +113,7 @@ describe('config/decrypt', () => {
           'long-but-wrong-wcFMAw+4H7SgaqGOAQ//ZNPgHJ4RQBdfFoDX8Ywe9UxqMlc8k6VasCszQ2JULh/BpEdKdgRUGNaKaeZ+oBKYDBmDwAD5V5FEMlsg+KO2gykp/p2BAwvKGtYK0MtxLh4h9yJbN7TrVnGO3/cC+Inp8exQt0gD6f1Qo/9yQ9NE4/BIbaSs2b2DgeIK7Ed8N675AuSo73UOa6o7t+9pKeAAK5TQwgSvolihbUs8zjnScrLZD+nhvL3y5gpAqK9y//a+bTu6xPA1jdLjsswoCUq/lfVeVsB2GWV2h6eex/0fRKgN7xxNgdMn0a7msrvumhTawP8mPisPY2AAsHRIgQ9vdU5HbOPdGoIwI9n9rMdIRn9Dy7/gcX9Ic+RP2WwS/KnPHLu/CveY4W5bYqYoikWtJs9HsBCyWFiHIRrJF+FnXwtKdoptRfxTfJIkBoLrV6fDIyKo79iL+xxzgrzWs77KEJUJfexZBEGBCnrV2o7mo3SU197S0qx7HNvqrmeCj8CLxq8opXC71TNa+XE6BQUVyhMFxtW9LNxZUHRiNzrTSikArT4hzjyr3f9cb0kZVcs6XJQsm1EskU3WXo7ETD7nsukS9GfbwMn7tfYidB/yHSHl09ih871BcgByDmEKKdmamcNilW2bmTAqB5JmtaYT5/H8jRQWo/VGrEqlmiA4KmwSv7SZPlDnaDFrmzmMZZDSRgHe5KWl283XLmSeE8J0NPqwFH3PeOv4fIbOjJrnbnFBwSAsgsMe2K4OyFDh2COfrho7s8EP1Kl5lBkYJ+VRreGRerdSu24',
       };
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
       config.encrypted = {
         // Missing value
@@ -121,7 +121,7 @@ describe('config/decrypt', () => {
           'wcFMAw+4H7SgaqGOAQ//ZNPgHJ4RQBdfFoDX8Ywe9UxqMlc8k6VasCszQ2JULh/BpEdKdgRUGNaKaeZ+oBKYDBmDwAD5V5FEMlsg+KO2gykp/p2BAwvKGtYK0MtxLh4h9yJbN7TrVnGO3/cC+Inp8exQt0gD6f1Qo/9yQ9NE4/BIbaSs2b2DgeIK7Ed8N675AuSo73UOa6o7t+9pKeAAK5TQwgSvolihbUs8zjnScrLZD+nhvL3y5gpAqK9y//a+bTu6xPA1jdLjsswoCUq/lfVeVsB2GWV2h6eex/0fRKgN7xxNgdMn0a7msrvumhTawP8mPisPY2AAsHRIgQ9vdU5HbOPdGoIwI9n9rMdIRn9Dy7/gcX9Ic+RP2WwS/KnPHLu/CveY4W5bYqYoikWtJs9HsBCyWFiHIRrJF+FnXwtKdoptRfxTfJIkBoLrV6fDIyKo79iL+xxzgrzWs77KEJUJfexZBEGBCnrV2o7mo3SU197S0qx7HNvqrmeCj8CLxq8opXC71TNa+XE6BQUVyhMFxtW9LNxZUHRiNzrTSikArT4hzjyr3f9cb0kZVcs6XJQsm1EskU3WXo7ETD7nsukS9GfbwMn7tfYidB/yHSHl09ih871BcgByDmEKKdmamcNilW2bmTAqB5JmtaYT5/H8jRQWo/VGrEqlmiA4KmwSv7SZPlDnaDFrmzmMZZDSRgHe5KWl283XLmSeE8J0NPqwFH3PeOv4fIbOjJrnbnFBwSAsgsMe2K4OyFDh2COfrho7s8EP1Kl5lBkYJ+VRreGRerdSu24',
       };
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
       config.encrypted = {
         // Missing org scope
@@ -129,7 +129,7 @@ describe('config/decrypt', () => {
           'wcFMAw+4H7SgaqGOAQ//W38A3PmaZnE9XTCHGDQFD52Kz78UYnaiYeAT13cEqYWTwEvQ57B7D7I6i4jCLe7KwkUCS90kyoqd7twD75W/sO70MyIveKnMlqqnpkagQkFgmzMaXXNHaJXEkjzsflTELZu6UsUs/kZYmab7r14YLl9HbH/pqN9exil/9s3ym9URCPOyw/l04KWntdMAy0D+c5M4mE+obv6fz6nDb8tkdeT5Rt2uU+qw3gH1OsB2yu+zTWpI/xTGwDt5nB5txnNTsVrQ/ZK85MSktacGVcYuU9hsEDmSrShmtqlg6Myq+Hjb7cYAp2g4n13C/I3gGGaczl0PZaHD7ALMjI7p6O1q+Ix7vMxipiKMVjS3omJoqBCz3FKc6DVhyX4tfhxgLxFo0DpixNwGbBRbMBO8qZfUk7bicAl/oCRc2Ijmay5DDYuvtkw3G3Ou+sZTe6DNpWUFy6VA4ai7hhcLvcAuiYmLdwPISRR/X4ePa8ZrmSVPyVOvbmmwLhcDYSDlC9Mw4++7ELomlve5kvjVSHvPv9BPVb5sJF7gX4vOT4FrcKalQRPmhNCZrE8tY2lvlrXwV2EEhya8EYv4QTd3JUYEYW5FXiJrORK5KDTnISw+U02nFZjFlnoz9+R6h+aIT1crS3/+YjCHE/EIKvSftOnieYb02Gk7M9nqU19EYL9ApYw4+IjSRgFM3DShIrvuDwDkAwUfaq8mKtr9Vjg/r+yox//GKS3u3r4I3+dfCljA3OwskTPfbSD+huBk4mylIvaL5v8Fngxo979wiLw',
       };
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
       config.encrypted = {
         // Impossible to parse
@@ -137,13 +137,13 @@ describe('config/decrypt', () => {
           'wcFMAw+4H7SgaqGOAQ//Wa/gHgQdH7tj3LQdW6rWKjzmkYVKZW9EbexJExu4WLaMgEKodlRMilcqCKfQZpjzoiC31J8Ly/x6Soury+lQnLVbtIQ4KWa/uCIz4lXCpPpGNgN2jPfOmdwWBMOcXIT+BgAMxRu3rAmvTtunrkACJ3J92eYNwJhTzp2Azn9LpT7kHnZ64z2SPhbdUgMMhCBwBG5BPArPzF5fdaqa8uUSbKhY0GMiqPXq6Zeq+EBNoPc/RJp2urpYTknO+nRb39avKjihd9MCZ/1d3QYymbRj7SZC3LJhenVF0hil3Uk8TBASnGQiDmBcIXQFhJ0cxavXqKjx+AEALq+kTdwGu5vuE2+2B820/o3lAXR9OnJHr8GodJ2ZBpzOaPrQe5zvxL0gLEeUUPatSOwuLhdo/6+bRCl2wNz23jIjDEFFTmsLqfEHcdVYVTH2QqvLjnUYcCRRuM32vS4rCMOEe0l6p0CV2rk22UZDIPcxqXjKucxse2Sow8ATWiPoIw7zWj7XBLqUKHFnMpPV2dCIKFKBsOKYgLjF4BvKzZJyhmVEPgMcKQLYqeT/2uWDR77NSWH0Cyiwk9M3KbOIMmV3pWh9PiXk6CvumECELbJHYH0Mc+P//BnbDq2Ie9dHdmKhFgRyHU7gWvkPhic9BX36xyldPcnhTgr1XWRoVe0ETGLDPCcqrQ/SUQGrLiujSOgxGu2K/6LDJhi4IKz1/nf7FUSj5eTIDqQiSPP5pXDjlH7oYxXXrHI/aYOCZ5sBx7mOzlEcENIrYblCHO/CYMTWdCJ4Wrftqk7K/A=',
       };
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
       config.encrypted = {
         token: 'too-short',
       };
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
 
@@ -157,7 +157,7 @@ describe('config/decrypt', () => {
       expect(res.encrypted).toBeUndefined();
       expect(res.token).toBe('123');
       await expect(decryptConfig(config, 'wrong/org')).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
 
@@ -174,7 +174,7 @@ describe('config/decrypt', () => {
       expect(res.encrypted).toBeUndefined();
       expect(res.token).toBe('123');
       await expect(decryptConfig(config, 'wrong/org')).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
 
@@ -188,7 +188,7 @@ describe('config/decrypt', () => {
       expect(res.encrypted).toBeUndefined();
       expect(res.token).toBe('123');
       await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
 
@@ -205,7 +205,7 @@ describe('config/decrypt', () => {
       expect(res.encrypted).toBeUndefined();
       expect(res.token).toBe('123');
       await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
   });

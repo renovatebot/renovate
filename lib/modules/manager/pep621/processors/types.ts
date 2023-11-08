@@ -8,7 +8,7 @@ import type { PyProject } from '../schema';
 export interface PyProjectProcessor {
   updateArtifacts(
     updateArtifact: UpdateArtifact,
-    project: PyProject
+    project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null>;
 
   /**

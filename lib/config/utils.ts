@@ -6,7 +6,7 @@ import type { RenovateConfig } from './types';
 
 export function mergeChildConfig<
   T extends Record<string, any>,
-  TChild extends Record<string, any> | undefined
+  TChild extends Record<string, any> | undefined,
 >(parent: T, child: TChild): T & TChild {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {
@@ -20,7 +20,7 @@ export function mergeChildConfig<
   if (config?.isVulnerabilityAlert) {
     config.vulnerabilitySeverity = getHighestVulnerabilitySeverity(
       parent,
-      child
+      child,
     );
   }
 
@@ -39,17 +39,17 @@ export function mergeChildConfig<
         };
       } else if (option.type === 'array') {
         config[option.name] = (parentConfig[option.name] as unknown[]).concat(
-          config[option.name]
+          config[option.name],
         );
       } else {
         config[option.name] = mergeChildConfig(
           parentConfig[option.name] as RenovateConfig,
-          childConfig[option.name] as RenovateConfig
+          childConfig[option.name] as RenovateConfig,
         );
       }
       logger.trace(
         { result: config[option.name] },
-        `Merged config.${option.name}`
+        `Merged config.${option.name}`,
       );
     }
   }

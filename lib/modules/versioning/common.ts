@@ -2,7 +2,7 @@ import { regEx } from '../../util/regex';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 
 export function isVersioningApiConstructor(
-  obj: VersioningApi | VersioningApiConstructor
+  obj: VersioningApi | VersioningApiConstructor,
 ): obj is VersioningApiConstructor {
   return typeof obj === 'function';
 }
