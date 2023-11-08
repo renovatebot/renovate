@@ -283,7 +283,7 @@ export function extractPackageFile(
       instruction += '\n' + lineLookahead;
     }
 
-    const syntaxRegex = regEx('^#[ \\t]*syntax=(?<image>\\S+)', 'im');
+    const syntaxRegex = regEx('^#[ \\t]*syntax=(?<image>\\S+)', 'm');
     const syntaxMatch = instruction.match(syntaxRegex);
     if (syntaxMatch?.groups?.image) {
       const syntaxImage = syntaxMatch.groups.image;
