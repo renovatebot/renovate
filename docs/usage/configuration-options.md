@@ -1170,6 +1170,16 @@ Example:
 }
 ```
 
+To enable custom managers you will need to add `custom.` prefix before their names
+
+Example:
+
+```json
+{
+  "enabledManagers": ["custom.regex"]
+}
+```
+
 For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
 
 ## encrypted
@@ -2821,6 +2831,7 @@ Managers which do not support replacement:
 - `homebrew`
 - `maven`
 - `regex`
+- `sbt`
 
 Use the `replacementName` config option to set the name of a replacement package.
 

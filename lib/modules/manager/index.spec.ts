@@ -37,6 +37,16 @@ describe('modules/manager/index', () => {
     });
   });
 
+  describe('getEnabledManagersList()', () => {
+    it('works', () => {
+      expect(manager.getEnabledManagersList()).toEqual(manager.allManagersList);
+      expect(manager.getEnabledManagersList(['custom.regex', 'npm'])).toEqual([
+        'npm',
+        'regex',
+      ]);
+    });
+  });
+
   it('validates', () => {
     function validate(module: ManagerApi, moduleName: string): boolean {
       // no need to validate custom as it is a wrapper and not an actual manager

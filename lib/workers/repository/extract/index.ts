@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { allManagersList, hashMap } from '../../../modules/manager';
+import { getEnabledManagersList, hashMap } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
@@ -13,14 +13,7 @@ import { processSupersedesManagers } from './supersedes';
 export async function extractAllDependencies(
   config: RenovateConfig,
 ): Promise<ExtractResult> {
-  let managerList = allManagersList;
-  const { enabledManagers } = config;
-  if (is.nonEmptyArray(enabledManagers)) {
-    logger.debug('Applying enabledManagers filtering');
-    managerList = managerList.filter((manager) =>
-      enabledManagers.includes(manager),
-    );
-  }
+  const managerList = getEnabledManagersList(config.enabledManagers);
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
 
@@ -91,7 +84,9 @@ export async function extractAllDependencies(
   // If not, log a warning to indicate possible misconfiguration.
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
-      if (!(enabledManager in extractResult.packageFiles)) {
+      if (
+        !(enabledManager.replace('custom.', '') in extractResult.packageFiles)
+      ) {
         logger.debug(
           { manager: enabledManager },
           `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,

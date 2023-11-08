@@ -236,7 +236,7 @@ describe('config/validation', () => {
       [
         'multiple enabled managers',
         {
-          enabledManagers: ['npm', 'gradle', 'maven', 'regex'],
+          enabledManagers: ['npm', 'gradle', 'maven', 'custom.regex'],
         },
       ],
     ])('validates enabled managers for %s', async (_case, config) => {
