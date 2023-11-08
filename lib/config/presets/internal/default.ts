@@ -497,7 +497,7 @@ export const presets: Record<string, Preset> = {
   },
   renovatePrefix: {
     branchPrefix: 'renovate/',
-    description: 'Add the prefix `renovate/` to all branch names.',
+    description: 'Add the `renovate/` prefix to all branch names.',
   },
   respectLatest: {
     description: 'Upgrade versions up to the "latest" tag in the npm registry.',
