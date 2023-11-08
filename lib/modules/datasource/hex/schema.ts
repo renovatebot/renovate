@@ -11,7 +11,6 @@ export const HexRelease = z
           Github: z.string(),
         }),
       })
-      .transform((meta) => meta.links.Github)
       .nullable()
       .catch(null),
     releases: LooseArray(
@@ -20,29 +19,30 @@ export const HexRelease = z
           version: z.string(),
           inserted_at: z.string().optional(),
         })
-        .transform(({ version, inserted_at: releaseTimestamp }): Release => {
-          const release: Release = { version };
-
-          if (releaseTimestamp) {
-            release.releaseTimestamp = releaseTimestamp;
-          }
-
-          return release;
-        })
     ).refine((releases) => releases.length > 0, 'No releases found'),
   })
   .transform(
-    ({ releases, html_url: homepage, meta: sourceUrl }): ReleaseResult => {
-      const result: ReleaseResult = { releases };
+    (hexResponse): ReleaseResult => {
+      const releases: Release[] = hexResponse.releases.map(({ version, inserted_at: releaseTimestamp }): Release => {
+        const release: Release = { version };
 
-      if (homepage) {
-        result.homepage = homepage;
+        if (releaseTimestamp) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+
+        return release;
+      })
+
+      const releaseResult: ReleaseResult = { releases };
+
+      if (hexResponse.html_url) {
+        releaseResult.homepage = hexResponse.html_url;
       }
 
-      if (sourceUrl) {
-        result.sourceUrl = sourceUrl;
+      if (hexResponse.meta?.links?.Github) {
+        releaseResult.sourceUrl = hexResponse.meta.links.Github;
       }
 
-      return result;
+      return releaseResult;
     }
   );
