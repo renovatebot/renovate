@@ -113,14 +113,14 @@ describe('workers/repository/update/pr/labels', () => {
   describe('shouldUpdateLabels', () => {
     it('returns true', () => {
       expect(
-        shouldUpdateLabels(['npm', 'node'], ['npm', 'node'], ['npm'])
+        shouldUpdateLabels(['npm', 'node'], ['npm', 'node'], ['npm']),
       ).toBeTrue();
       expect(shouldUpdateLabels(['npm', 'node'], ['npm', 'node'])).toBeTrue();
     });
 
     it('returns false if no labels found in debugData', () => {
       expect(
-        shouldUpdateLabels(undefined, ['npm', 'node'], ['npm', 'node'])
+        shouldUpdateLabels(undefined, ['npm', 'node'], ['npm', 'node']),
       ).toBeFalse();
     });
 
@@ -130,7 +130,7 @@ describe('workers/repository/update/pr/labels', () => {
 
     it('returns false if labels are not changed', () => {
       expect(
-        shouldUpdateLabels(['npm', 'node'], ['npm', 'node'], ['npm', 'node'])
+        shouldUpdateLabels(['npm', 'node'], ['npm', 'node'], ['npm', 'node']),
       ).toBeFalse();
     });
   });

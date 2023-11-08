@@ -78,7 +78,7 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 export function updatePrDebugData(
   targetBranch: string,
   labels: string[],
-  debugData: PrDebugData | undefined
+  debugData: PrDebugData | undefined,
 ): PrDebugData {
   const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
   const updatedByRenovateVersion = pkg.version;
@@ -333,7 +333,7 @@ export async function ensurePr(
       debugData: updatePrDebugData(
         config.baseBranch,
         prepareLabels(config).sort(),
-        existingPr?.bodyStruct?.debugData
+        existingPr?.bodyStruct?.debugData,
       ),
     },
     config,
@@ -362,7 +362,7 @@ export async function ensurePr(
       const labelsNeedUpdate = shouldUpdateLabels(
         labelsFromDebugData,
         existingPr.labels,
-        config.labels
+        config.labels,
       );
       if (
         existingPr?.targetBranch === config.baseBranch &&
@@ -407,11 +407,11 @@ export async function ensurePr(
             oldLabels: labelsFromDebugData,
             newLabels,
           },
-          'PR labels have changed'
+          'PR labels have changed',
         );
         const [addLabels, removeLabels] = getChangedLabels(
           labelsFromDebugData!,
-          newLabels
+          newLabels,
         );
 
         // for gitea

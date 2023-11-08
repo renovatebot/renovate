@@ -310,7 +310,7 @@ export async function assignLabel(
   repoPath: string,
   issue: number,
   label: number,
-  options?: GiteaHttpOptions
+  options?: GiteaHttpOptions,
 ): Promise<void> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${issue}/labels`;
   await giteaHttp.patchJson(url, {

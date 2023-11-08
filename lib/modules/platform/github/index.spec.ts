@@ -3083,10 +3083,10 @@ describe('modules/platform/github/index', () => {
 
       await expect(github.updatePr(pr)).toResolve();
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        `Adding labels 'new_label' to #1234`
+        `Adding labels 'new_label' to #1234`,
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        `Deleting label old_label from #1234`
+        `Deleting label old_label from #1234`,
       );
     });
   });

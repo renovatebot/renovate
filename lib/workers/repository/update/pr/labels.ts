@@ -15,7 +15,7 @@ export function prepareLabels(config: RenovateConfig): string[] {
 
 export function getChangedLabels(
   oldLabels: string[],
-  newLabels: string[]
+  newLabels: string[],
 ): [string[] | null, string[] | null] {
   const labelsToAdd = newLabels?.filter((l) => !oldLabels?.includes(l));
   const labelsToRemove = oldLabels?.filter((l) => !newLabels?.includes(l));
@@ -25,13 +25,13 @@ export function getChangedLabels(
 
 export function areLabelsModified(
   oldLabels: string[],
-  newLabels?: string[]
+  newLabels?: string[],
 ): boolean {
   const modified = !dequal(oldLabels.sort(), newLabels?.sort());
 
   if (modified) {
     logger.debug(
-      'PR labels have been modified by user, skipping labels update'
+      'PR labels have been modified by user, skipping labels update',
     );
   }
 
@@ -41,7 +41,7 @@ export function areLabelsModified(
 export function shouldUpdateLabels(
   labelsInDebugData?: string[],
   labelsInPr?: string[],
-  newLabels?: string[]
+  newLabels?: string[],
 ): boolean {
   if (!labelsInDebugData) {
     return false;

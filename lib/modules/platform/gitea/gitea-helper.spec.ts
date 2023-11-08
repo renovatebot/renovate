@@ -389,7 +389,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
       await expect(
         mergePR(mockRepo.full_name, mockPR.number, {
           Do: 'rebase',
-        })
+        }),
       ).toResolve();
     });
   });
@@ -613,7 +613,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
       const res = await assignLabel(
         mockRepo.full_name,
         mockIssue.number,
-        mockLabel.id
+        mockLabel.id,
       );
       expect(res).toBeUndefined();
     });

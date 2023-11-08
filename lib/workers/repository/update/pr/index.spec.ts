@@ -282,16 +282,16 @@ describe('workers/repository/update/pr/index', () => {
           ...pr,
           bodyStruct: getPrBodyStruct(
             `\n<!--renovate-debug:${toBase64(
-              JSON.stringify(prDebugData)
-            )}-->\n Some body`
+              JSON.stringify(prDebugData),
+            )}-->\n Some body`,
           ),
           labels: ['old_label'],
         };
         platform.getBranchPr.mockResolvedValueOnce(existingPr);
         prBody.getPrBody.mockReturnValueOnce(
           `\n<!--renovate-debug:${toBase64(
-            JSON.stringify({ ...prDebugData, labels: ['new_label'] })
-          )}-->\n Some body`
+            JSON.stringify({ ...prDebugData, labels: ['new_label'] }),
+          )}-->\n Some body`,
         );
         config.labels = ['new_label'];
         const res = await ensurePr(config);
@@ -319,7 +319,7 @@ describe('workers/repository/update/pr/index', () => {
             oldLabels: ['old_label'],
             newLabels: ['new_label'],
           },
-          `PR labels have changed`
+          `PR labels have changed`,
         );
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -347,7 +347,7 @@ describe('workers/repository/update/pr/index', () => {
             oldLabels: ['old_label'],
             newLabels: ['new_label'],
           },
-          `PR labels have changed`
+          `PR labels have changed`,
         );
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -364,8 +364,8 @@ describe('workers/repository/update/pr/index', () => {
           ...pr,
           bodyStruct: getPrBodyStruct(
             `\n<!--renovate-debug:${toBase64(
-              JSON.stringify(prDebugData)
-            )}-->\n Some body`
+              JSON.stringify(prDebugData),
+            )}-->\n Some body`,
           ),
         };
         platform.getBranchPr.mockResolvedValueOnce(existingPr);
@@ -395,7 +395,7 @@ describe('workers/repository/update/pr/index', () => {
             oldLabels: ['old_label'],
             newLabels: ['new_label'],
           },
-          `PR labels have changed`
+          `PR labels have changed`,
         );
         // expect(logger.logger.debug).toHaveBeenCalledWith(
         //   'PR labels have been modified by user, skipping labels update'
