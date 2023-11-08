@@ -18,8 +18,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
-import { noLeadingAtSymbol } from '../../../util/common';
-import { parseJson } from '../../../util/common';
+import { noLeadingAtSymbol, parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';

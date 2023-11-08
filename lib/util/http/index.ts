@@ -332,6 +332,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return res;
   }
 
+  async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
+    const opt = options ?? {};
+    return await this.get(url, {
+      headers: {
+        Accept: 'text/plain',
+      },
+      ...opt,
+    });
+  }
+
   getJson<ResT>(
     url: string,
     options?: Opts & HttpRequestOptions<ResT>,
