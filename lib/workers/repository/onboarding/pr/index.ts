@@ -175,7 +175,9 @@ If you need any further assistance then you can also [request help here](${
       // TODO #22198
       const prTitle =
         config.semanticCommits === 'enabled'
-          ? `chore: ${config.onboardingPrTitle}`
+          ? `${config.semanticCommitType ?? 'chore'}: ${
+              config.onboardingPrTitle
+            }`
           : config.onboardingPrTitle!;
       const pr = await platform.createPr({
         sourceBranch: config.onboardingBranch!,
