@@ -77,6 +77,19 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
+    it('creates semantic PR', async () => {
+      await ensureOnboardingPr(
+        { ...config, semanticCommits: 'enabled' },
+        packageFiles,
+        branches,
+      );
+      expect(platform.createPr).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prTitle: 'chore: Configure Renovate',
+        }),
+      );
+    });
+
     it('creates PR with labels', async () => {
       await ensureOnboardingPr(
         {
