@@ -79,7 +79,11 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('creates semantic PR', async () => {
       await ensureOnboardingPr(
-        { ...config, semanticCommits: 'enabled' },
+        {
+          ...config,
+          semanticCommitType: undefined, // should default to "chore"
+          semanticCommits: 'enabled',
+        },
         packageFiles,
         branches,
       );
