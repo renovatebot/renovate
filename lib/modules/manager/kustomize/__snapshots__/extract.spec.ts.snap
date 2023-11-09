@@ -46,6 +46,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from ne
 {
   "deps": [
     {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "11",
       "datasource": "docker",
@@ -54,6 +55,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() extracts from ne
       "replaceString": "11",
     },
     {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "currentValue": "11",
       "datasource": "docker",
@@ -214,6 +216,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract d
     "depType": "Component",
   },
   {
+    "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v0.1.0",
     "datasource": "docker",
@@ -227,6 +230,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract d
 exports[`modules/manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
 [
   {
+    "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v0.1.0",
     "datasource": "docker",
@@ -235,6 +239,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "replaceString": "v0.1.0",
   },
   {
+    "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v0.0.1",
     "datasource": "docker",
@@ -243,6 +248,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "replaceString": "v0.0.1",
   },
   {
+    "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v0.0.2",
     "datasource": "docker",
@@ -251,6 +257,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "replaceString": "v0.0.2",
   },
   {
+    "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v0.0.3",
     "datasource": "docker",
@@ -259,6 +266,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() should extract o
     "replaceString": "v0.0.3",
   },
   {
+    "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "v0.0.4",
     "datasource": "docker",

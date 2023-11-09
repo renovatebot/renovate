@@ -8,16 +8,16 @@ import { extractTerragruntProvider } from './providers';
 import type { ExtractionResult, TerraformManagerData } from './types';
 
 export const githubRefMatchRegex = regEx(
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
 export function extractTerragruntModule(
   startingLine: number,
-  lines: string[]
+  lines: string[],
 ): ExtractionResult {
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
@@ -29,7 +29,7 @@ export function extractTerragruntModule(
 }
 
 export function analyseTerragruntModule(
-  dep: PackageDependency<TerraformManagerData>
+  dep: PackageDependency<TerraformManagerData>,
 ): void {
   // TODO #22198
   const source = dep.managerData!.source;
@@ -40,7 +40,7 @@ export function analyseTerragruntModule(
     dep.depType = 'github';
     dep.packageName = githubRefMatch.groups.project.replace(
       regEx(/\.git$/),
-      ''
+      '',
     );
     dep.depName = 'github.com/' + dep.packageName;
     dep.currentValue = githubRefMatch.groups.tag;

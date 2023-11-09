@@ -19,9 +19,9 @@ import * as yarnHelper from './yarn';
 jest.mock('fs-extra', () =>
   jest
     .requireActual<typeof import('../../../../../test/fixtures')>(
-      '../../../../../test/fixtures'
+      '../../../../../test/fixtures',
     )
-    .fsExtra()
+    .fsExtra(),
 );
 jest.mock('../../../../util/exec/env');
 jest.mock('./node-version');
@@ -69,7 +69,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
           'yarn.lock': 'package-lock-contents',
         },
-        '/some-dir'
+        '/some-dir',
       );
       GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
       const execSnapshots = mockExecAll({
@@ -88,13 +88,13 @@ describe('modules/manager/npm/post-update/yarn', () => {
           YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn',
           YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
         },
-        config
+        config,
       );
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-    }
+    },
   );
 
   it('only skips build if skipInstalls is false', async () => {
@@ -102,7 +102,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       {
         'yarn.lock': 'package-lock-contents',
       },
-      'some-dir'
+      'some-dir',
     );
     const execSnapshots = mockExecAll({
       stdout: '3.0.0',
@@ -130,7 +130,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       {
         'yarn.lock': 'package-lock-contents',
       },
-      'some-dir'
+      'some-dir',
     );
     const execSnapshots = mockExecAll({
       stdout: '3.0.0',
@@ -152,7 +152,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       {
         'yarn.lock': 'package-lock-contents',
       },
-      'some-dir'
+      'some-dir',
     );
     const execSnapshots = mockExecAll({
       stdout: '2.1.0',
@@ -181,7 +181,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         {
           'yarn.lock': 'package-lock-contents',
         },
-        'some-dir'
+        'some-dir',
       );
       const execSnapshots = mockExecAll({
         stdout: yarnVersion,
@@ -206,7 +206,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-    }
+    },
   );
 
   it.each([['1.22.0']])(
@@ -216,7 +216,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         {
           'yarn.lock': 'package-lock-contents',
         },
-        'some-dir'
+        'some-dir',
       );
       const execSnapshots = mockExecAll({
         stdout: yarnVersion,
@@ -230,7 +230,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-    }
+    },
   );
 
   it.each([
@@ -245,7 +245,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           '.yarnrc': null,
           'yarn.lock': 'package-lock-contents',
         },
-        'some-dir'
+        'some-dir',
       );
       const execSnapshots = mockExecAll({
         stdout: yarnVersion,
@@ -266,7 +266,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       // expected the lock file not to be deleted.
       expect(res.lockFile).toBe('');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-    }
+    },
   );
 
   it.each([
@@ -287,7 +287,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           }),
           'sub_workspace/yarn.lock': 'sub-workspace-lock-contents',
         },
-        'some-dir'
+        'some-dir',
       );
       const execSnapshots = mockExecAll({
         stdout: yarnVersion,
@@ -303,7 +303,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         'some-dir/sub_workspace',
         {},
         config,
-        [{ isLockFileMaintenance: true }]
+        [{ isLockFileMaintenance: true }],
       );
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsReadCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
@@ -314,10 +314,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(res.lockFile).toBe('');
       expect(fs.outputFile).toHaveBeenCalledTimes(1);
       expect(mockedFunction(fs.outputFile).mock.calls[0][0]).toEndWith(
-        'some-dir/sub_workspace/yarn.lock'
+        'some-dir/sub_workspace/yarn.lock',
       );
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-    }
+    },
   );
 
   it.each([
@@ -330,7 +330,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         {
           'yarn.lock': 'package-lock-contents',
         },
-        'some-dir'
+        'some-dir',
       );
       const execSnapshots = mockExecAll({
         stdout: yarnVersion,
@@ -350,7 +350,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-    }
+    },
   );
 
   it('catches errors', async () => {
@@ -375,7 +375,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         'package.json': '{ "packageManager": "yarn@3.0.0" }',
         'yarn.lock': 'package-lock-contents',
       },
-      'some-dir'
+      'some-dir',
     );
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
@@ -421,7 +421,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         'package.json': '{ "packageManager": "yarn@3.0.0" }',
         'yarn.lock': 'package-lock-contents',
       },
-      'some-dir'
+      'some-dir',
     );
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
@@ -472,7 +472,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         'package.json': '{ "packageManager": "yarn@3.0.0" }',
         'yarn.lock': 'package-lock-contents',
       },
-      'some-dir'
+      'some-dir',
     );
 
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
@@ -532,7 +532,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           '{ "packageManager": "yarn@1.22.18", "dependencies": { "chalk": "^2.4.1" } }',
         'yarn.lock': plocktest1YarnLockV1,
       },
-      'some-dir'
+      'some-dir',
     );
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }, { version: '2.4.3' }],
@@ -568,7 +568,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         'yarn.lock': plocktest1YarnLockV1,
         '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
       },
-      'some-dir'
+      'some-dir',
     );
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
@@ -611,7 +611,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         'yarn.lock': plocktest1YarnLockV1,
         '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
       },
-      'some-dir'
+      'some-dir',
     );
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
@@ -648,7 +648,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           '/tmp/renovate/.yarnrc':
             'yarn-offline-mirror "./packages-cache"\nyarn-path "./.yarn/cli.js"\n',
         },
-        '/'
+        '/',
       );
       GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
       expect(await yarnHelper.checkYarnrc('.')).toEqual({
@@ -663,7 +663,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           '.yarn/cli.js': '',
           '.yarnrc': 'yarn-path "./.yarn/cli.js"\n',
         },
-        'some-dir'
+        'some-dir',
       );
       expect(await yarnHelper.checkYarnrc('some-dir')).toEqual({
         offlineMirror: false,
@@ -676,7 +676,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         {
           '/tmp/renovate/.yarnrc': 'yarn-offline-mirror "./packages-cache"\n',
         },
-        '/'
+        '/',
       );
       GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
       expect(await yarnHelper.checkYarnrc('.')).toEqual({
@@ -691,7 +691,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           '.yarn/cli.js': '',
           '/tmp/renovate/.yarnrc': 'yarn-path /.yarn/cli.js\n',
         },
-        '/'
+        '/',
       );
       GlobalConfig.set({ localDir: '/tmp', cacheDir: '/tmp/cache' });
       expect(await yarnHelper.checkYarnrc('renovate')).toEqual({
@@ -705,7 +705,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         {
           '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
         },
-        '/tmp/renovate'
+        '/tmp/renovate',
       );
       GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
       const { offlineMirror, yarnPath } = await yarnHelper.checkYarnrc('.');
@@ -719,7 +719,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         {
           '.yarnrc': `--install.pure-lockfile true\n--install.frozen-lockfile true\n`,
         },
-        '/tmp/renovate'
+        '/tmp/renovate',
       );
       GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
       await yarnHelper.checkYarnrc('/tmp/renovate');

@@ -26,17 +26,13 @@ There are some exceptions:
 
 You can override the default settings, and disable or enable semantic commits.
 
-If you want Renovate to use semantic commits: add `":semanticCommits"` to your `extends` array:
-
-```json
+```json title="If you want Renovate to use semantic commits"
 {
   "extends": [":semanticCommits"]
 }
 ```
 
-If you want Renovate to stop using semantic commits: add `":semanticCommitsDisabled"` to your `extends` array:
-
-```json
+```json title="If you want Renovate to stop using semantic commits"
 {
   "extends": [":semanticCommitsDisabled"]
 }

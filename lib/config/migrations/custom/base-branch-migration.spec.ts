@@ -8,7 +8,7 @@ describe('config/migrations/custom/base-branch-migration', () => {
       },
       {
         baseBranches: ['test'],
-      }
+      },
     );
   });
 
@@ -19,7 +19,7 @@ describe('config/migrations/custom/base-branch-migration', () => {
       } as any,
       {
         baseBranches: ['test'],
-      }
+      },
     );
   });
 });

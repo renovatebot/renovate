@@ -11,7 +11,7 @@ describe('modules/manager/bazel-module/starlark', () => {
 
   it('asBoolean', () => {
     expect(() => starlark.asBoolean('bad')).toThrow(
-      new Error('Invalid Starlark boolean string: bad')
+      new Error('Invalid Starlark boolean string: bad'),
     );
   });
 });

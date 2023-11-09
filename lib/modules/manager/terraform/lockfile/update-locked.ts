@@ -4,18 +4,18 @@ import type { UpdateLockedConfig, UpdateLockedResult } from '../../types';
 import { extractLocks } from './util';
 
 export function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   // TODO: fix types (#22198)
   logger.debug(
-    `terraform.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `terraform.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
   try {
     const locked = extractLocks(coerceString(lockFileContent));
     const lockedDep = locked?.find(
-      (dep) => dep.packageName === coerceString(depName)
+      (dep) => dep.packageName === coerceString(depName),
     );
     if (lockedDep?.version === newVersion) {
       return { status: 'already-updated' };

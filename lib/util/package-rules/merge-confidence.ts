@@ -7,7 +7,7 @@ import { Matcher } from './base';
 export class MergeConfidenceMatcher extends Matcher {
   override matches(
     { mergeConfidenceLevel }: PackageRuleInputConfig,
-    { matchConfidence }: PackageRule
+    { matchConfidence }: PackageRule,
   ): boolean | null {
     if (is.nullOrUndefined(matchConfidence)) {
       return null;

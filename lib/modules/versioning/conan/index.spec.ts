@@ -351,7 +351,7 @@ describe('modules/versioning/conan/index', () => {
     ({ version, range, result }) => {
       const res = !!conan.isCompatible(version, range);
       expect(res).toBe(result);
-    }
+    },
   );
 
   // matches(version: string, range: string | Range): string | boolean | null;
@@ -546,7 +546,7 @@ describe('modules/versioning/conan/index', () => {
     ({ version, range, result }) => {
       const res = !!conan.matches(version, range);
       expect(res).toBe(result);
-    }
+    },
   );
 
   // isStable(version: string): boolean;
@@ -643,7 +643,7 @@ describe('modules/versioning/conan/index', () => {
         newVersion,
       });
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // getSatisfyingVersion(versions: string[], range: string): string | null;
@@ -701,7 +701,7 @@ describe('modules/versioning/conan/index', () => {
     ({ versions, range, result }) => {
       const res = conan.getSatisfyingVersion(versions, range);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // minSatisfyingVersion(versions: string[], range: string): string | null;
@@ -722,7 +722,7 @@ describe('modules/versioning/conan/index', () => {
     ({ versions, range, result }) => {
       const res = conan.minSatisfyingVersion(versions, range);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // test 4-digit
@@ -745,7 +745,7 @@ describe('modules/versioning/conan/index', () => {
       expect(conan.getMajor(version)).toBe(major);
       expect(conan.getMinor(version)).toBe(minor);
       expect(conan.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   // getMajor(version: string): null | number;
@@ -827,7 +827,7 @@ describe('modules/versioning/conan/index', () => {
     ({ version, other, result }) => {
       const res = conan.equals(version, other);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // isGreaterThan(version: string, other: string): boolean;
@@ -873,7 +873,7 @@ describe('modules/versioning/conan/index', () => {
     ({ version, other, result }) => {
       const res = conan.isGreaterThan(version, other);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // sortVersions(version: string, other: string): boolean;
@@ -888,7 +888,7 @@ describe('modules/versioning/conan/index', () => {
     ({ version, other, result }) => {
       const res = conan.sortVersions(version, other);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // isLessThanRange(version: string, range: string): boolean;
@@ -902,6 +902,6 @@ describe('modules/versioning/conan/index', () => {
     ({ version, range, result }) => {
       const res = conan.isLessThanRange?.(version, range);
       expect(res).toEqual(result);
-    }
+    },
   );
 });

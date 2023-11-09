@@ -16,7 +16,7 @@ import { VersionsEndpointCache } from './versions-endpoint-cache';
 
 function unlessServerSide<
   T extends NonNullable<unknown>,
-  E extends NonNullable<unknown>
+  E extends NonNullable<unknown>,
 >(err: E, cb: () => AsyncResult<T, E>): AsyncResult<T, E> {
   if (err instanceof HttpError && err.response?.statusCode) {
     const code = err.response.statusCode;
@@ -71,9 +71,9 @@ export class RubyGemsDatasource extends Datasource {
     let result: AsyncResult<ReleaseResult, Error | string>;
     if (registryHostname === 'rubygems.org') {
       result = Result.wrap(
-        this.versionsEndpointCache.getVersions(registryUrl, packageName)
+        this.versionsEndpointCache.getVersions(registryUrl, packageName),
       ).transform((versions) =>
-        this.metadataCache.getRelease(registryUrl, packageName, versions)
+        this.metadataCache.getRelease(registryUrl, packageName, versions),
       );
     } else if (
       registryHostname === 'rubygems.pkg.github.com' ||
@@ -84,13 +84,13 @@ export class RubyGemsDatasource extends Datasource {
       result = getV1Releases(this.http, registryUrl, packageName)
         .catch((err) =>
           unlessServerSide(err, () =>
-            this.getReleasesViaInfoEndpoint(registryUrl, packageName)
-          )
+            this.getReleasesViaInfoEndpoint(registryUrl, packageName),
+          ),
         )
         .catch((err) =>
           unlessServerSide(err, () =>
-            this.getReleasesViaDeprecatedAPI(registryUrl, packageName)
-          )
+            this.getReleasesViaDeprecatedAPI(registryUrl, packageName),
+          ),
         );
     }
 
@@ -109,7 +109,7 @@ export class RubyGemsDatasource extends Datasource {
 
   private getReleasesViaInfoEndpoint(
     registryUrl: string,
-    packageName: string
+    packageName: string,
   ): AsyncResult<ReleaseResult, Error | ZodError> {
     const url = joinUrlParts(registryUrl, '/info', packageName);
     return Result.wrap(this.http.get(url))
@@ -119,14 +119,14 @@ export class RubyGemsDatasource extends Datasource {
 
   private getReleasesViaDeprecatedAPI(
     registryUrl: string,
-    packageName: string
+    packageName: string,
   ): AsyncResult<ReleaseResult, Error | ZodError> {
     const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
     const query = getQueryString({ gems: packageName });
     const url = `${path}?${query}`;
     const bufPromise = this.http.getBuffer(url);
     return Result.wrap(bufPromise).transform(({ body }) =>
-      MarshalledVersionInfo.safeParse(Marshal.parse(body))
+      MarshalledVersionInfo.safeParse(Marshal.parse(body)),
     );
   }
 }

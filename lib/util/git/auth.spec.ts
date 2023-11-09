@@ -16,7 +16,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -35,7 +35,7 @@ describe('util/git/auth', () => {
           password: 'password',
           hostType: 'github',
           matchHost: 'example.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
@@ -58,7 +58,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -76,7 +76,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -94,7 +94,7 @@ describe('util/git/auth', () => {
           token: 'x-access-token:token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
@@ -118,8 +118,8 @@ describe('util/git/auth', () => {
             hostType: 'github',
             matchHost: 'github.com',
           },
-          { GIT_CONFIG_COUNT: '1' }
-        )
+          { GIT_CONFIG_COUNT: '1' },
+        ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -141,8 +141,8 @@ describe('util/git/auth', () => {
             hostType: 'github',
             matchHost: 'github.com',
           },
-          { GIT_CONFIG_COUNT: '1' }
-        )
+          { GIT_CONFIG_COUNT: '1' },
+        ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -161,7 +161,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -182,8 +182,8 @@ describe('util/git/auth', () => {
             hostType: 'github',
             matchHost: 'github.com',
           },
-          { RANDOM_VARIABLE: 'random' }
-        )
+          { RANDOM_VARIABLE: 'random' },
+        ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -203,7 +203,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -221,7 +221,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'gitlab',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
@@ -241,7 +241,7 @@ describe('util/git/auth', () => {
         getGitAuthenticatedEnvironmentVariables('https://gitlab.com/', {
           token: 'token1234',
           matchHost: 'gitlab.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
@@ -264,8 +264,8 @@ describe('util/git/auth', () => {
             hostType: 'gitlab',
             matchHost: 'gitlab.com',
           },
-          { env: 'value' }
-        )
+          { env: 'value' },
+        ),
       ).toStrictEqual({
         env: 'value',
       });
@@ -277,7 +277,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.http://ssh:token1234@github.com/.insteadOf',
@@ -295,7 +295,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/org.insteadOf',
@@ -313,7 +313,7 @@ describe('util/git/auth', () => {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
-        })
+        }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
@@ -335,8 +335,8 @@ describe('util/git/auth', () => {
             token: 'token1234',
             hostType: 'github',
             matchHost: 'github.com',
-          }
-        )
+          },
+        ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:

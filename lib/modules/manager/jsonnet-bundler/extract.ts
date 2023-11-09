@@ -8,7 +8,7 @@ import type { Dependency, JsonnetFile } from './types';
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace({ packageFile }, 'jsonnet-bundler.extractPackageFile()');
 
@@ -53,7 +53,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
   const depName = join(
     gitRemote.host,
     gitRemote.pathname.replace(/\.git$/, ''),
-    coerceString(dependency.source.git.subdir)
+    coerceString(dependency.source.git.subdir),
   );
 
   return {

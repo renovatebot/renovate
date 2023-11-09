@@ -21,7 +21,7 @@ export class EditorConfig {
   }
 
   private static getIndentationType(
-    knownProps: KnownProps
+    knownProps: KnownProps,
   ): IndentationType | undefined {
     const { indent_style: indentStyle } = knownProps;
 
@@ -37,7 +37,7 @@ export class EditorConfig {
   }
 
   private static getIndentationSize(
-    knownProps: KnownProps
+    knownProps: KnownProps,
   ): number | undefined {
     const indentSize = Number(knownProps.indent_size);
 

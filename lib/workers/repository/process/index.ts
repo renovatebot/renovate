@@ -20,7 +20,7 @@ import type { WriteUpdateResult } from './write';
 
 async function getBaseBranchConfig(
   baseBranch: string,
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
@@ -32,7 +32,7 @@ async function getBaseBranchConfig(
   ) {
     logger.debug(
       { baseBranch },
-      `Merging config from base branch because useBaseBranchConfig=merge`
+      `Merging config from base branch because useBaseBranchConfig=merge`,
     );
 
     // Retrieve config file name autodetected for this repo
@@ -44,13 +44,13 @@ async function getBaseBranchConfig(
       baseBranchConfig = await platform.getJsonFile(
         configFileName,
         config.repository,
-        baseBranch
+        baseBranch,
       );
       logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
     } catch (err) {
       logger.error(
         { configFileName, baseBranch },
-        `Error fetching config file from base branch - possible config name mismatch between branches?`
+        `Error fetching config file from base branch - possible config name mismatch between branches?`,
       );
 
       const error = new Error(CONFIG_VALIDATION);
@@ -67,7 +67,7 @@ async function getBaseBranchConfig(
     if (config.printConfig) {
       logger.info(
         { config: baseBranchConfig },
-        'Base branch config after merge'
+        'Base branch config after merge',
       );
     }
 
@@ -87,7 +87,7 @@ async function getBaseBranchConfig(
 
 function unfoldBaseBranches(
   defaultBranch: string,
-  baseBranches: string[]
+  baseBranches: string[],
 ): string[] {
   const unfoldedList: string[] = [];
 
@@ -97,7 +97,7 @@ function unfoldBaseBranches(
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
       logger.debug(
-        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`
+        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`,
       );
       unfoldedList.push(...matchingBranches);
     } else if (baseBranch === '$default') {
@@ -112,7 +112,7 @@ function unfoldBaseBranches(
 }
 
 export async function extractDependencies(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<ExtractResult> {
   await readDashboardBody(config);
   let res: ExtractResult = {
@@ -123,7 +123,7 @@ export async function extractDependencies(
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,
-      config.baseBranches
+      config.baseBranches,
     );
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
@@ -166,7 +166,7 @@ export async function extractDependencies(
 
 export function updateRepo(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: BranchConfig[],
 ): Promise<WriteUpdateResult | undefined> {
   logger.debug('processRepo()');
 

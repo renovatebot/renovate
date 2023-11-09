@@ -82,7 +82,7 @@ export class AwsMachineImageDataSource extends Datasource {
       `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
   async getSortedAwsMachineImages(
-    serializedAmiFilter: string
+    serializedAmiFilter: string,
   ): Promise<Image[]> {
     const [amiFilter, clientConfig] = this.loadConfig(serializedAmiFilter);
     const amiFilterCmd = this.getAmiFilterCommand(amiFilter);
@@ -108,7 +108,7 @@ export class AwsMachineImageDataSource extends Datasource {
   })
   override async getDigest(
     { packageName: serializedAmiFilter }: GetReleasesConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
     if (images.length < 1) {
@@ -117,7 +117,7 @@ export class AwsMachineImageDataSource extends Datasource {
 
     if (newValue) {
       const newValueMatchingImages = images.filter(
-        (image) => image.ImageId === newValue
+        (image) => image.ImageId === newValue,
       );
       if (newValueMatchingImages.length === 1) {
         return (

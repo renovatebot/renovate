@@ -3,14 +3,14 @@ import { readFile, readdir } from 'fs-extra';
 describe('modules/versioning/versioning-metadata', () => {
   it('readme no markdown headers', async () => {
     const allVersioning = (await readdir('lib/modules/versioning')).filter(
-      (item) => !item.includes('.')
+      (item) => !item.includes('.'),
     );
     for (const versioning of allVersioning) {
       let readme: string | undefined;
       try {
         readme = await readFile(
           'lib/modules/versioning/' + versioning + '/readme.md',
-          'utf8'
+          'utf8',
         );
       } catch (err) {
         // ignore missing file
@@ -24,7 +24,7 @@ describe('modules/versioning/versioning-metadata', () => {
 
   it('contains mandatory fields', async () => {
     const allVersioning = (await readdir('lib/modules/versioning')).filter(
-      (item) => !item.includes('.') && !item.startsWith('_')
+      (item) => !item.includes('.') && !item.startsWith('_'),
     );
 
     for (const versioning of allVersioning) {

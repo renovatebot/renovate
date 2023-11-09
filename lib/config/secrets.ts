@@ -25,13 +25,13 @@ function validateSecrets(secrets_: unknown): void {
       }
       if (!is.string(secretValue)) {
         validationErrors.push(
-          `Secret values must be strings. Found type ${typeof secretValue} for secret ${secretName}`
+          `Secret values must be strings. Found type ${typeof secretValue} for secret ${secretName}`,
         );
       }
     }
   } else {
     validationErrors.push(
-      `Config secrets must be a plain object. Found: ${typeof secrets_}`
+      `Config secrets must be a plain object. Found: ${typeof secrets_}`,
     );
   }
   if (validationErrors.length) {
@@ -54,7 +54,7 @@ export function validateConfigSecrets(config: AllConfig): void {
 function replaceSecretsInString(
   key: string,
   value: string,
-  secrets: Record<string, string>
+  secrets: Record<string, string>,
 ): string {
   // do nothing if no secret template found
   if (!secretTemplateRegex.test(value)) {
@@ -77,7 +77,7 @@ function replaceSecretsInString(
     error.validationSource = 'config';
     error.validationError = 'Unknown secret name';
     error.validationMessage = `The following secret name was not found in config: ${String(
-      secretName
+      secretName,
     )}`;
     throw error;
   });
@@ -86,7 +86,7 @@ function replaceSecretsInString(
 function replaceSecretsInObject(
   config_: RenovateConfig,
   secrets: Record<string, string>,
-  deleteSecrets: boolean
+  deleteSecrets: boolean,
 ): RenovateConfig {
   const config = { ...config_ };
   if (deleteSecrets) {
@@ -105,7 +105,7 @@ function replaceSecretsInObject(
           value[arrayIndex] = replaceSecretsInObject(
             arrayItem,
             secrets,
-            deleteSecrets
+            deleteSecrets,
           );
         } else if (is.string(arrayItem)) {
           value[arrayIndex] = replaceSecretsInString(key, arrayItem, secrets);
@@ -119,7 +119,7 @@ function replaceSecretsInObject(
 export function applySecretsToConfig(
   config: RenovateConfig,
   secrets = config.secrets,
-  deleteSecrets = true
+  deleteSecrets = true,
 ): RenovateConfig {
   // Add all secrets to be sanitized
   if (is.plainObject(secrets)) {

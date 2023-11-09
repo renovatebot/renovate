@@ -9,7 +9,7 @@ describe('config/migrations/custom/extends-migration', () => {
       } as any,
       {
         extends: ['config:js-app'],
-      }
+      },
     );
 
     expect(ExtendsMigration).toMigrate(
@@ -18,7 +18,7 @@ describe('config/migrations/custom/extends-migration', () => {
       } as any,
       {
         extends: ['foo'],
-      }
+      },
     );
   });
 
@@ -29,7 +29,7 @@ describe('config/migrations/custom/extends-migration', () => {
       },
       {
         extends: ['foo', 'config:js-app', 'bar'],
-      }
+      },
     );
   });
 
@@ -40,7 +40,7 @@ describe('config/migrations/custom/extends-migration', () => {
       } as any,
       {
         extends: [],
-      }
+      },
     );
   });
 
@@ -51,7 +51,7 @@ describe('config/migrations/custom/extends-migration', () => {
       },
       {
         extends: [],
-      }
+      },
     );
   });
 
@@ -68,7 +68,7 @@ describe('config/migrations/custom/extends-migration', () => {
       },
       {
         extends: ['local>org/renovate-config'],
-      }
+      },
     );
     GlobalConfig.reset();
   });
@@ -80,7 +80,7 @@ describe('config/migrations/custom/extends-migration', () => {
       },
       {
         extends: ['mergeConfidence:all-badges'],
-      }
+      },
     );
   });
 });

@@ -10,7 +10,7 @@ import type { MultiLineParseResult } from './types';
 function getDep(
   lineNumber: number,
   match: RegExpMatchArray,
-  type: string
+  type: string,
 ): PackageDependency {
   const [, , currentValue] = match;
   let [, depName] = match;
@@ -51,7 +51,7 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
@@ -65,7 +65,7 @@ export function extractPackageFile(
         deps.push(dep);
       }
       const replaceMatch = regEx(
-        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
+        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/,
       ).exec(line);
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
@@ -91,7 +91,7 @@ export function extractPackageFile(
           lineNumber,
           lines,
           matcher,
-          'require'
+          'require',
         );
         lineNumber = reachedLine;
         deps.push(...detectedDeps);
@@ -102,7 +102,7 @@ export function extractPackageFile(
           lineNumber,
           lines,
           matcher,
-          'replace'
+          'replace',
         );
         lineNumber = reachedLine;
         deps.push(...detectedDeps);
@@ -121,7 +121,7 @@ function parseMultiLine(
   startingLine: number,
   lines: string[],
   matchRegex: RegExp,
-  blockType: 'require' | 'replace'
+  blockType: 'require' | 'replace',
 ): MultiLineParseResult {
   const deps: PackageDependency[] = [];
   let lineNumber = startingLine;

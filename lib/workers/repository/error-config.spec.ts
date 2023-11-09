@@ -47,10 +47,10 @@ Message: some-message
       expect(res).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
         { configError: error, res: 'created' },
-        'Configuration Warning'
+        'Configuration Warning',
       );
       expect(platform.ensureIssue).toHaveBeenCalledWith(
-        expect.objectContaining({ body: expectedBody })
+        expect.objectContaining({ body: expectedBody }),
       );
     });
 
@@ -66,7 +66,7 @@ Message: some-message
       expect(res).toBeUndefined();
       expect(logger.info).toHaveBeenCalledWith(
         { configError: error },
-        'DRY-RUN: Would ensure configuration error issue'
+        'DRY-RUN: Would ensure configuration error issue',
       );
     });
 
@@ -85,7 +85,7 @@ Message: some-message
 
       expect(res).toBeUndefined();
       expect(platform.updatePr).toHaveBeenCalledWith(
-        expect.objectContaining({ prTitle: pr.title, number: pr.number })
+        expect.objectContaining({ prTitle: pr.title, number: pr.number }),
       );
     });
 
@@ -104,7 +104,7 @@ Message: some-message
 
       expect(res).toBeUndefined();
       expect(logger.info).toHaveBeenCalledWith(
-        `DRY-RUN: Would update PR #${pr.number}`
+        `DRY-RUN: Would update PR #${pr.number}`,
       );
     });
 
@@ -126,7 +126,7 @@ Message: some-message
       expect(res).toBeUndefined();
       expect(logger.info).toHaveBeenCalledWith(
         { notificationName },
-        'Configuration failure, issues will be suppressed'
+        'Configuration failure, issues will be suppressed',
       );
     });
   });

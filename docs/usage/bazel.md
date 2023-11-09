@@ -36,16 +36,12 @@ Renovate:
 In this example, there is a `.bazelrc` file which imports another file called `.registry.bazelrc`.
 Both files have `--registry` values:
 
-```
-# -------------
-# .bazelrc File
-# -------------
+```title=".bazelrc"
 import .registry.bazelrc
 build --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
+```
 
-# ----------------------
-# .registry.bazelrc File
-# ----------------------
+```title=".registry.bazelrc"
 build --registry=https://example.com/custom_registry
 ```
 
@@ -58,10 +54,7 @@ The final registry list is:
 
 In this example, a `.bazelrc` file has registry values with and without a configuration:
 
-```
-# -------------
-# .bazelrc File
-# -------------
+```title=".bazelrc"
 build:ci --registry=https://internal.server/custom_registry
 build --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
 ```
@@ -164,8 +157,8 @@ Renovate extracts dependencies from the following repository rules:
 - `http_archive`
 - `http_file`
 
-It also recognizes when these repository rule names are prefixed with an
-underscore. For example, `_http_archive` is treated the same as `http_archive`.
+It also recognizes when these repository rule names are prefixed with an underscore.
+For example, `_http_archive` is treated the same as `http_archive`.
 
 ### `git_repository`
 
