@@ -1166,7 +1166,7 @@ describe('modules/manager/dockerfile/extract', () => {
     const res = extractPackageFile(
       '# syntax=docker/dockerfile:1.1.7\n' + 'FROM alpine:3.13.5\n',
       '',
-      {}
+      {},
     );
     expect(res).toEqual({
       deps: [

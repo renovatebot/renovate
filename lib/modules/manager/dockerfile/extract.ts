@@ -297,7 +297,7 @@ export function extractPackageFile(
           currentValue: dep.currentValue,
           currentDigest: dep.currentDigest,
         },
-        'Dockerfile # syntax'
+        'Dockerfile # syntax',
       );
       deps.push(dep);
     }
