@@ -7,7 +7,7 @@ export class BranchNameMigration extends AbstractMigration {
   override run(value: unknown): void {
     if (is.string(value) && value.includes('{{managerBranchPrefix}}')) {
       this.rewrite(
-        value.replace('{{managerBranchPrefix}}', '{{additionalBranchPrefix}}')
+        value.replace('{{managerBranchPrefix}}', '{{additionalBranchPrefix}}'),
       );
     }
   }

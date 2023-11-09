@@ -205,14 +205,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
   }
 
   const configOptionsRaw = (await readFile(`docs/usage/${configFile}`)).split(
-    '\n'
+    '\n',
   );
 
   const indexed = indexMarkdown(configOptionsRaw);
 
   options
     .filter(
-      (option) => !!option.globalOnly === bot && !managers.has(option.name)
+      (option) => !!option.globalOnly === bot && !managers.has(option.name),
     )
     .forEach((option) => {
       // TODO: fix types (#22198,#9610)
@@ -220,7 +220,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       if (!indexed[option.name]) {
         throw new Error(
-          `Config option "${option.name}" is missing an entry in ${configFile}`
+          `Config option "${option.name}" is missing an entry in ${configFile}`,
         );
       }
 

@@ -24,7 +24,7 @@ describe('modules/platform/bitbucket/comments', () => {
           number: 3,
           topic: 'topic',
           content: 'content',
-        })
+        }),
       ).toBeFalse();
     });
 
@@ -43,7 +43,7 @@ describe('modules/platform/bitbucket/comments', () => {
           number: 5,
           topic: 'topic',
           content: 'content',
-        })
+        }),
       ).toBeTrue();
     });
 
@@ -136,7 +136,7 @@ describe('modules/platform/bitbucket/comments', () => {
           number: 5,
           topic: null,
           content: 'blablabla',
-        })
+        }),
       ).toBeTrue();
     });
   });
@@ -153,7 +153,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-topic',
           number: 5,
           topic: 'topic',
-        })
+        }),
       ).toResolve();
     });
 
@@ -178,7 +178,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-topic',
           number: 5,
           topic: 'some-subject',
-        })
+        }),
       ).toResolve();
     });
 
@@ -203,7 +203,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-content',
           number: 5,
           content: 'some-content',
-        })
+        }),
       ).toResolve();
     });
 
@@ -219,7 +219,7 @@ describe('modules/platform/bitbucket/comments', () => {
           type: 'by-content',
           number: 5,
           content: 'topic',
-        })
+        }),
       ).toResolve();
     });
   });

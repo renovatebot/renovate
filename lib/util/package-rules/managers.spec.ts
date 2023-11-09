@@ -11,7 +11,7 @@ describe('util/package-rules/managers', () => {
         },
         {
           matchManagers: ['npm', 'regex'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -23,7 +23,7 @@ describe('util/package-rules/managers', () => {
         },
         {
           matchManagers: ['docker'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -33,7 +33,7 @@ describe('util/package-rules/managers', () => {
         {
           manager: 'npm',
         },
-        {}
+        {},
       );
       expect(result).toBeNull();
     });
@@ -43,7 +43,7 @@ describe('util/package-rules/managers', () => {
         {},
         {
           matchManagers: ['npm'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });

@@ -2,7 +2,7 @@ import { hash } from '../../util/hash';
 
 export function repoFingerprint(
   repoId: number | string,
-  endpoint: string | undefined
+  endpoint: string | undefined,
 ): string {
   const input = endpoint ? `${endpoint}::${repoId}` : `${repoId}`;
   const fingerprint = hash(input);

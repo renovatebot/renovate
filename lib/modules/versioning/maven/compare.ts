@@ -27,7 +27,7 @@ export type Token = NumberToken | QualifierToken;
 
 function iterateChars(
   str: string,
-  cb: (p: string | null, n: string | null) => void
+  cb: (p: string | null, n: string | null) => void,
 ): void {
   let prev = null;
   let next = null;
@@ -443,7 +443,7 @@ function rangeToStr(fullRange: Range[] | null): string | null {
       ',',
       valToStr(val.rightValue),
       val.rightBracket,
-    ].join('')
+    ].join(''),
   );
   return intervals.join(',');
 }
@@ -480,7 +480,7 @@ function incrementRangeValue(value: string): string {
 
 function autoExtendMavenRange(
   currentRepresentation: string,
-  newValue: string
+  newValue: string,
 ): string | null {
   const range = parseRange(currentRepresentation);
   if (!range) {
@@ -535,7 +535,7 @@ function autoExtendMavenRange(
       }
     } else {
       interval.rightValue = incrementRangeValue(
-        coerceRangeValue(rightValue, newValue)
+        coerceRangeValue(rightValue, newValue),
       );
     }
   } else if (leftValue !== null) {

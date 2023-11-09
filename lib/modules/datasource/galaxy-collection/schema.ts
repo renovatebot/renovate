@@ -14,7 +14,7 @@ export const GalaxyV3Versions = z.object({
     z.object({
       version: z.string(),
       created_at: z.string().datetime(),
-    })
+    }),
   ),
 });
 

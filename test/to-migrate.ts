@@ -13,7 +13,7 @@ declare global {
       toMigrate(
         originalConfig: RenovateConfig,
         expectedConfig: RenovateConfig,
-        isMigrated?: boolean
+        isMigrated?: boolean,
       ): R;
     }
   }
@@ -24,12 +24,12 @@ expect.extend({
     CustomMigration: MigrationConstructor,
     originalConfig: RenovateConfig,
     expectedConfig: RenovateConfig,
-    isMigrated: boolean = true
+    isMigrated: boolean = true,
   ) {
     class CustomMigrationsService extends MigrationsService {
       public static override getMigrations(
         original: RenovateConfig,
-        migrated: RenovateConfig
+        migrated: RenovateConfig,
       ): ReadonlyArray<Migration> {
         return [new CustomMigration(original, migrated)];
       }
@@ -51,7 +51,7 @@ expect.extend({
       return {
         message: (): string =>
           `Migration failed\n\nReceived config:\n${JSON.stringify(
-            migratedConfig
+            migratedConfig,
           )}\n\nExpected config:\n${JSON.stringify(expectedConfig)}`,
         pass: false,
       };

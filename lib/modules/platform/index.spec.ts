@@ -11,6 +11,7 @@ jest.unmock('./scm');
 describe('modules/platform/index', () => {
   beforeEach(() => {
     jest.resetModules();
+    process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
   });
 
   it('validates', () => {
@@ -26,7 +27,7 @@ describe('modules/platform/index', () => {
     const loadedMgr = loadModules(
       __dirname,
       undefined,
-      (m) => !['utils', 'git'].includes(m)
+      (m) => !['utils', 'git'].includes(m),
     );
     expect(Array.from(platforms.keys())).toEqual(Object.keys(loadedMgr));
 
@@ -38,7 +39,7 @@ describe('modules/platform/index', () => {
 
   it('throws if no platform', () => {
     expect(() => platform.platform.initPlatform({})).toThrow(
-      PLATFORM_NOT_FOUND
+      PLATFORM_NOT_FOUND,
     );
   });
 
@@ -148,6 +149,29 @@ describe('modules/platform/index', () => {
             username: 'USERNAME',
           },
           {
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: '123',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
             hostType: 'github',
             matchHost: 'github.com',
             token: '456',
@@ -183,6 +207,29 @@ describe('modules/platform/index', () => {
             matchHost: 'ghcr.io',
             password: '123',
             username: 'USERNAME',
+          },
+          {
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: '123',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: '123',
+            username: 'abc',
           },
           {
             hostType: 'github',

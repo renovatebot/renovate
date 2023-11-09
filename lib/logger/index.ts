@@ -131,7 +131,7 @@ export function removeMeta(fields: string[]): void {
 }
 
 export /* istanbul ignore next */ function addStream(
-  stream: bunyan.Stream
+  stream: bunyan.Stream,
 ): void {
   bunyanLogger.addStream(withSanitizer(stream));
 }

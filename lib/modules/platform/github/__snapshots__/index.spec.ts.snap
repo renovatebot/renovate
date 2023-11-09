@@ -31,14 +31,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "matchHost": "ghcr.io",
-      "password": "123test",
-      "username": "USERNAME",
-    },
-  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -48,14 +40,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "matchHost": "ghcr.io",
-      "password": "123test",
-      "username": "USERNAME",
-    },
-  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -65,14 +49,6 @@ exports[`modules/platform/github/index initPlatform() should support default end
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "matchHost": "ghcr.io",
-      "password": "123test",
-      "username": "USERNAME",
-    },
-  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -82,14 +58,6 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "matchHost": "ghcr.io",
-      "password": "123test",
-      "username": "USERNAME",
-    },
-  ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }

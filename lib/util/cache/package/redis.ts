@@ -26,7 +26,7 @@ async function rm(namespace: string, key: string): Promise<void> {
 
 export async function get<T = never>(
   namespace: string,
-  key: string
+  key: string,
 ): Promise<T | undefined> {
   if (!client) {
     return undefined;
@@ -58,7 +58,7 @@ export async function set(
   namespace: string,
   key: string,
   value: unknown,
-  ttlMinutes = 5
+  ttlMinutes = 5,
 ): Promise<void> {
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
 
@@ -73,7 +73,7 @@ export async function set(
         value: await compress(JSON.stringify(value)),
         expiry: DateTime.local().plus({ minutes: ttlMinutes }),
       }),
-      { EX: redisTTL }
+      { EX: redisTTL },
     );
   } catch (err) {
     logger.once.debug({ err }, 'Error while setting cache value');

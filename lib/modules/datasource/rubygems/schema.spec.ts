@@ -26,7 +26,7 @@ describe('modules/datasource/rubygems/schema', () => {
 
     it('errors on empty input', () => {
       expect(() => MarshalledVersionInfo.parse([])).toThrow(
-        'Empty response from `/v1/dependencies` endpoint'
+        'Empty response from `/v1/dependencies` endpoint',
       );
     });
   });
@@ -153,7 +153,7 @@ describe('modules/datasource/rubygems/schema', () => {
 
     it('errors on empty input', () => {
       expect(() => GemInfo.parse('')).toThrow(
-        'Empty response from `/info` endpoint'
+        'Empty response from `/info` endpoint',
       );
     });
   });

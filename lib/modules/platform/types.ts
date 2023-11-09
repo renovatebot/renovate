@@ -184,18 +184,18 @@ export interface Platform {
   getRawFile(
     fileName: string,
     repoName?: string,
-    branchOrTag?: string
+    branchOrTag?: string,
   ): Promise<string | null>;
   getJsonFile(
     fileName: string,
     repoName?: string,
-    branchOrTag?: string
+    branchOrTag?: string,
   ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
-    issueConfig: EnsureIssueConfig
+    issueConfig: EnsureIssueConfig,
   ): Promise<EnsureIssueResult | null>;
   massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
@@ -210,12 +210,12 @@ export interface Platform {
   getBranchStatusCheck(
     branchName: string,
     // TODO: can be undefined or null ? #22198
-    context: string | null | undefined
+    context: string | null | undefined,
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:
       | EnsureCommentRemovalConfigByTopic
-      | EnsureCommentRemovalConfigByContent
+      | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   getPr(number: number): Promise<Pr | null>;
@@ -223,12 +223,13 @@ export interface Platform {
   refreshPr?(number: number): Promise<void>;
   getBranchStatus(
     branchName: string,
-    internalChecksAsSuccess: boolean
+    internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+  expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 }
 
 export interface PlatformScm {

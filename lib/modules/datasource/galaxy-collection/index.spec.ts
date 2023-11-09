@@ -6,16 +6,16 @@ import { GalaxyCollectionDatasource } from '.';
 
 const communityKubernetesBase = Fixtures.get('community_kubernetes_base.json');
 const communityKubernetesVersions = Fixtures.get(
-  'community_kubernetes_versions.json'
+  'community_kubernetes_versions.json',
 );
 const communityKubernetesDetails121 = Fixtures.get(
-  'community_kubernetes_version_details_1.2.1.json'
+  'community_kubernetes_version_details_1.2.1.json',
 );
 const communityKubernetesDetails120 = Fixtures.get(
-  'community_kubernetes_version_details_1.2.0.json'
+  'community_kubernetes_version_details_1.2.0.json',
 );
 const communityKubernetesDetails0111 = Fixtures.get(
-  'community_kubernetes_version_details_0.11.1.json'
+  'community_kubernetes_version_details_0.11.1.json',
 );
 
 const baseUrl = 'https://galaxy.ansible.com';
@@ -32,7 +32,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'foo.bar',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -42,7 +42,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         getPkgReleases({
           datasource,
           packageName: 'foo.bar',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -55,7 +55,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'community.kubernetes',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -70,7 +70,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'community.kubernetes',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -85,7 +85,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         getPkgReleases({
           datasource,
           packageName: 'community.kubernetes',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -94,7 +94,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         await getPkgReleases({
           datasource,
           packageName: '',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -103,7 +103,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         await getPkgReleases({
           datasource,
           packageName: '',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -116,7 +116,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'foo.bar',
-        })
+        }),
       ).toBeNull();
     });
 

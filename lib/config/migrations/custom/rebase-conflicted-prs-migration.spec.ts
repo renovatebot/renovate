@@ -8,7 +8,7 @@ describe('config/migrations/custom/rebase-conflicted-prs-migration', () => {
       },
       {
         rebaseWhen: 'never',
-      }
+      },
     );
   });
 });

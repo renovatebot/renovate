@@ -5,7 +5,7 @@ const cache = new Map<string, Minimatch>();
 export function minimatch(
   pattern: string,
   options?: MinimatchOptions,
-  useCache = true
+  useCache = true,
 ): Minimatch {
   const key = options ? `${pattern}:${JSON.stringify(options)}` : pattern;
 

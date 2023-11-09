@@ -2,7 +2,7 @@
 export function matchAt(
   content: string,
   index: number,
-  match: string
+  match: string,
 ): boolean {
   return content.substring(index, index + match.length) === match;
 }
@@ -12,7 +12,7 @@ export function replaceAt(
   content: string,
   index: number,
   oldString: string,
-  newString: string
+  newString: string,
 ): string {
   return (
     content.substring(0, index) +
@@ -38,14 +38,14 @@ export function fromBase64(input: string): string {
 export function uniqueStrings(
   element: string,
   index: number,
-  elements: string[]
+  elements: string[],
 ): boolean {
   return elements.indexOf(element) === index;
 }
 
 export function looseEquals(
   a: string | null | undefined,
-  b: string | null | undefined
+  b: string | null | undefined,
 ): boolean {
   if (!(a && b)) {
     return a === b;
@@ -90,7 +90,7 @@ export function copystr(x: string): string {
  */
 export function coerceString(
   val: string | null | undefined,
-  def?: string
+  def?: string,
 ): string {
   return val ?? def ?? '';
 }

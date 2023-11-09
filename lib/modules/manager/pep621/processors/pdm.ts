@@ -27,8 +27,8 @@ export class PdmProcessor implements PyProjectProcessor {
     deps.push(
       ...parseDependencyGroupRecord(
         depTypes.pdmDevDependencies,
-        pdm['dev-dependencies']
-      )
+        pdm['dev-dependencies'],
+      ),
     );
 
     const pdmSource = pdm.source;
@@ -54,7 +54,7 @@ export class PdmProcessor implements PyProjectProcessor {
 
   async updateArtifacts(
     updateArtifact: UpdateArtifact,
-    project: PyProject
+    project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
@@ -140,7 +140,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         addPackageToCMDRecord(
           packagesByCMD,
           `${pdmUpdateCMD} -G ${group}`,
-          name
+          name,
         );
         break;
       }
@@ -149,7 +149,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         addPackageToCMDRecord(
           packagesByCMD,
           `${pdmUpdateCMD} -dG ${group}`,
-          name
+          name,
         );
         break;
       }
@@ -171,7 +171,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
 function addPackageToCMDRecord(
   packagesByCMD: Record<string, string[]>,
   commandPrefix: string,
-  packageName: string
+  packageName: string,
 ): void {
   if (is.nullOrUndefined(packagesByCMD[commandPrefix])) {
     packagesByCMD[commandPrefix] = [];

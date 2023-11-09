@@ -28,7 +28,7 @@ export async function getAppDetails(token: string): Promise<UserDetails> {
 
 export async function getUserDetails(
   endpoint: string,
-  token: string
+  token: string,
 ): Promise<UserDetails> {
   try {
     const userData = (
@@ -36,7 +36,7 @@ export async function getUserDetails(
         endpoint + 'user',
         {
           token,
-        }
+        },
       )
     ).body;
     return {
@@ -52,7 +52,7 @@ export async function getUserDetails(
 
 export async function getUserEmail(
   endpoint: string,
-  token: string
+  token: string,
 ): Promise<string | null> {
   try {
     const emails = (
@@ -63,7 +63,7 @@ export async function getUserEmail(
     return emails?.[0].email ?? null;
   } catch (err) {
     logger.debug(
-      'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor'
+      'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor',
     );
     return null;
   }

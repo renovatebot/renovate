@@ -9,7 +9,7 @@ import { getOnboardingConfigContents } from './config';
 const defaultConfigFile = configFileNames[0];
 
 export async function createOnboardingBranch(
-  config: Partial<RenovateConfig>
+  config: Partial<RenovateConfig>,
 ): Promise<string | null> {
   // TODO #22198
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)
@@ -23,7 +23,7 @@ export async function createOnboardingBranch(
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
-    configFile!
+    configFile!,
   );
   const commitMessage = commitMessageFactory.create();
 

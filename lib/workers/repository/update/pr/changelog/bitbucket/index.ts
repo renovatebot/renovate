@@ -17,7 +17,7 @@ const bitbucketHttp = new BitbucketHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  _sourceDirectory?: string
+  _sourceDirectory?: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('bitbucket.getReleaseNotesMd()');
 
@@ -25,7 +25,7 @@ export async function getReleaseNotesMd(
     apiBaseUrl,
     `2.0/repositories`,
     repository,
-    'src'
+    'src',
   );
 
   const rootFiles = (
@@ -34,7 +34,7 @@ export async function getReleaseNotesMd(
       {
         paginate: true,
       },
-      PagedSourceResultsSchema
+      PagedSourceResultsSchema,
     )
   ).body.values;
 
@@ -50,7 +50,7 @@ export async function getReleaseNotesMd(
 
   if (files.length !== 0) {
     logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile.path}`
+      `Multiple candidates for changelog file, using ${changelogFile.path}`,
     );
   }
 
@@ -58,8 +58,8 @@ export async function getReleaseNotesMd(
     joinUrlParts(
       repositorySourceURl,
       changelogFile.commit.hash,
-      changelogFile.path
-    )
+      changelogFile.path,
+    ),
   );
 
   const changelogMd = `${fileRes.body}\n#\n##`;
@@ -68,11 +68,11 @@ export async function getReleaseNotesMd(
 
 export function getReleaseList(
   _project: ChangeLogProject,
-  _release: ChangeLogRelease
+  _release: ChangeLogRelease,
 ): ChangeLogNotes[] {
   logger.trace('bitbucket.getReleaseList()');
   logger.info(
-    'Unsupported Bitbucket Cloud feature.  Skipping release fetching.'
+    'Unsupported Bitbucket Cloud feature.  Skipping release fetching.',
   );
   return [];
 }

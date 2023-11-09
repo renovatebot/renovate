@@ -33,13 +33,13 @@ export function getPrConfigDescription(config: BranchConfig): string {
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
-      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`
+      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`,
     );
   } else {
     prBody += emojify(
       `:no_bell: **Ignore**: Close this PR and you won't be reminded about ${
         config.upgrades.length === 1 ? 'this update' : 'these updates'
-      } again.\n\n`
+      } again.\n\n`,
     );
   }
   return prBody;
@@ -47,7 +47,7 @@ export function getPrConfigDescription(config: BranchConfig): string {
 
 function scheduleToString(
   schedule: string[] | undefined,
-  timezone: string | undefined
+  timezone: string | undefined,
 ): string {
   let scheduleString = '';
   if (schedule && schedule[0] !== 'at any time') {

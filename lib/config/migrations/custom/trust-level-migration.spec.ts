@@ -10,7 +10,7 @@ describe('config/migrations/custom/trust-level-migration', () => {
         allowCustomCrateRegistries: true,
         allowScripts: true,
         exposeAllEnv: true,
-      }
+      },
     );
   });
 
@@ -26,7 +26,7 @@ describe('config/migrations/custom/trust-level-migration', () => {
         allowCustomCrateRegistries: false,
         allowScripts: false,
         exposeAllEnv: false,
-      }
+      },
     );
   });
 });

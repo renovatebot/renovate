@@ -35,8 +35,8 @@ export class GalaxyCollectionDatasource extends Datasource {
         registryUrl!,
         'api/v3/plugin/ansible/content/published/collections/index',
         namespace,
-        projectName
-      )
+        projectName,
+      ),
     );
 
     let baseUrlResponse;
@@ -54,7 +54,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     try {
       versionsUrlResponse = await this.http.getJson(
         versionsUrl,
-        GalaxyV3Versions
+        GalaxyV3Versions,
       );
     } catch (err) {
       this.handleGenericErrors(err);
@@ -71,12 +71,12 @@ export class GalaxyCollectionDatasource extends Datasource {
         };
         return release;
       },
-      { concurrency: 4 }
+      { concurrency: 4 },
     );
 
     // asynchronously get release details
     const enrichedReleases = await p.map(releases, (release) =>
-      this.getVersionDetails(versionsUrl, release)
+      this.getVersionDetails(versionsUrl, release),
     );
 
     // filter failed versions
@@ -95,11 +95,11 @@ export class GalaxyCollectionDatasource extends Datasource {
   })
   async getVersionDetails(
     versionsUrl: string,
-    basicRelease: Release
+    basicRelease: Release,
   ): Promise<Release> {
     const response = await this.http.getJson(
       ensureTrailingSlash(joinUrlParts(versionsUrl, basicRelease.version)),
-      GalaxyV3DetailedVersion
+      GalaxyV3DetailedVersion,
     );
     const versionDetails = response.body;
     return {
