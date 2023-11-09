@@ -112,6 +112,16 @@ describe('modules/platform/gitea/index', () => {
         sha: 'other-head-sha',
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
+      labels: [
+        {
+          color: '00aabb',
+          description: 'Used to mark PRs that resolve a bug',
+          exclusive: false,
+          id: 1,
+          name: 'bug',
+          url: 'https://some-url',
+        },
+      ],
     }),
     partial<MockPr>({
       number: 3,
