@@ -19,7 +19,7 @@ export interface PR {
   state: PRState;
   title: string;
   body: string;
-  labels?:Record<string, any>[],
+  labels?: Record<string, any>[];
   mergeable: boolean;
   created_at: string;
   closed_at: string;

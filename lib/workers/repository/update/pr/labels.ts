@@ -30,7 +30,8 @@ export function areLabelsModified(
   const modified = !dequal(labelsFromDebugData.sort(), labelsInPr.sort());
 
   if (modified) {
-    logger.debug( {labelsFromDebugData, labelsInPr},
+    logger.debug(
+      { labelsFromDebugData, labelsInPr },
       'PR labels have been modified by user, skipping labels update',
     );
   }
