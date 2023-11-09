@@ -89,8 +89,11 @@ export function updatePrDebugData(
     targetBranch,
   };
 
-  // this might seems confusing but we wither want there to be no debugData ie. this is a new PR in creation
-  // or debugData with labels array ie. pr created with the new update labels logic
+  /**
+   * Update the labels field in this struct
+   * 1. When a new PR is created ie. debugData will be undefined
+   * 2. When a PR was created using the new update labels logic ie. debugData.labels will be an array
+   */
   if (!debugData || is.array(debugData?.labels)) {
     updatedPrDebugData.labels = labels;
   }

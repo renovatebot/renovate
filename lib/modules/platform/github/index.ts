@@ -1699,7 +1699,7 @@ export async function updatePr({
 
   try {
     // add and remove labels before updating pr body because if by some mishap
-    // labels aren't changed then pr body will have wrong labelsHash
+    // labels aren't changed then pr body will have wrong labels in debugData hash
     if (labelsToAdd) {
       await addLabels(prNo, labelsToAdd);
     }

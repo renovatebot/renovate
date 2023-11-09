@@ -3074,7 +3074,6 @@ describe('modules/platform/github/index', () => {
           state: 'open',
           title: 'old title',
           updated_at: '01-09-2022',
-          body: '<!--labels:WyJvbGRfbGFiZWwiXQ==-->', // equivalent to labels array : ['old_label]
         })
         .post('/repos/some/repo/issues/1234/labels')
         .reply(200, pr)

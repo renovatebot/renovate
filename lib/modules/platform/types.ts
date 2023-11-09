@@ -120,8 +120,14 @@ export interface UpdatePrConfig {
   prBody?: string;
   state?: 'open' | 'closed';
   targetBranch?: string;
-  labels?: string[] | null; // gitea updates labels by replacing the labels array so this is needed
-  // github, gitlab have specific endpoints to add new or remove old labels
+
+  /**
+   * three fields for labels might seem confusing but they are needed to handle
+   * the update of labels on different platforms
+   * 1. gitea:  updates labels by replacing the labels array so this is needed
+   * 2. github, gitlab:  have specific endpoints to add and remove labels
+   */
+  labels?: string[] | null;
   addLabels?: string[] | null;
   removeLabels?: string[] | null;
 }

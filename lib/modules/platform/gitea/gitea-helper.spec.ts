@@ -594,12 +594,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
         )
         .reply(200);
 
-      const res = await unassignLabel(
-        mockRepo.full_name,
-        mockIssue.number,
-        mockLabel.id,
-      );
-      expect(res).toBeUndefined();
+      await expect(
+        unassignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
+      ).toResolve();
     });
   });
 
@@ -610,12 +607,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .patch(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels`)
         .reply(200);
 
-      const res = await assignLabel(
-        mockRepo.full_name,
-        mockIssue.number,
-        mockLabel.id,
-      );
-      expect(res).toBeUndefined();
+      await expect(
+        assignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
+      ).toResolve();
     });
   });
 
