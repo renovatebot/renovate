@@ -30,7 +30,7 @@ export function areLabelsModified(
   const modified = !dequal(labelsFromDebugData.sort(), labelsInPr.sort());
 
   if (modified) {
-    logger.debug(
+    logger.debug( {labelsFromDebugData, labelsInPr},
       'PR labels have been modified by user, skipping labels update',
     );
   }
@@ -44,23 +44,14 @@ export function shouldUpdateLabels(
   newLabels: string[] | undefined,
 ): boolean {
   if (!is.array(labelsInDebugData)) {
-    logger.debug({ labelsInDebugData }, 'No labels in PR');
     return false;
   }
 
   if (areLabelsModified(labelsInDebugData, labelsInPr ?? [])) {
-    logger.debug(
-      { labelsInDebugData, labelsInPr },
-      'Labels in PR have been modified by user',
-    );
     return false;
   }
 
   if (dequal((newLabels ?? []).sort(), labelsInDebugData.sort())) {
-    logger.debug(
-      { newLabels, existingLabels: labelsInDebugData },
-      'New labels and existing labels are same',
-    );
     return false;
   }
 
