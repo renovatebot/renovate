@@ -119,7 +119,10 @@ function toRenovatePR(data: PR): Pr | null {
     isDraft = true;
   }
 
+  const prLabels= data.labels?.map(label => label.name);
+
   return {
+    labels: prLabels,
     number: data.number,
     state: data.state,
     title,
