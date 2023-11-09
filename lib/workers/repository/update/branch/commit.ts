@@ -9,16 +9,17 @@ import { sanitize } from '../../../../util/sanitize';
 import type { BranchConfig } from '../../../types';
 
 export function commitFilesToBranch(
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<string | null> {
   let updatedFiles = config.updatedPackageFiles!.concat(
-    config.updatedArtifacts!
+    config.updatedArtifacts!,
   );
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
       const matchesExcludePaths = config.excludeCommitPaths!.some(
-        (excludedPath) => minimatch(excludedPath, { dot: true }).match(filePath)
+        (excludedPath) =>
+          minimatch(excludedPath, { dot: true }).match(filePath),
       );
       if (matchesExcludePaths) {
         logger.debug(`Excluding ${filePath} from commit`);
@@ -45,7 +46,7 @@ export function commitFilesToBranch(
   ) {
     logger.debug(
       { branchName: config.branchName },
-      'Secrets exposed in branchName or commitMessage'
+      'Secrets exposed in branchName or commitMessage',
     );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }

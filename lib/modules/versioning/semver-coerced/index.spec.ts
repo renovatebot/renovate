@@ -184,7 +184,7 @@ describe('modules/versioning/semver-coerced/index', () => {
       expect(semverCoerced.isValid('renovatebot/renovate')).toBeFalse();
       expect(semverCoerced.isValid('renovatebot/renovate#master')).toBeFalse();
       expect(
-        semverCoerced.isValid('https://github.com/renovatebot/renovate.git')
+        semverCoerced.isValid('https://github.com/renovatebot/renovate.git'),
       ).toBeFalse();
     });
   });
@@ -224,13 +224,13 @@ describe('modules/versioning/semver-coerced/index', () => {
   describe('.getSatisfyingVersion(versions, range)', () => {
     it('should return max satisfying version in range', () => {
       expect(
-        semverCoerced.getSatisfyingVersion(['1.0.0', '1.0.4'], '^1.0')
+        semverCoerced.getSatisfyingVersion(['1.0.0', '1.0.4'], '^1.0'),
       ).toBe('1.0.4');
     });
 
     it('should support coercion', () => {
       expect(
-        semverCoerced.getSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0')
+        semverCoerced.getSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0'),
       ).toBe('1.0.4');
     });
   });
@@ -238,13 +238,13 @@ describe('modules/versioning/semver-coerced/index', () => {
   describe('.minSatisfyingVersion(versions, range)', () => {
     it('should return min satisfying version in range', () => {
       expect(
-        semverCoerced.minSatisfyingVersion(['1.0.0', '1.0.4'], '^1.0')
+        semverCoerced.minSatisfyingVersion(['1.0.0', '1.0.4'], '^1.0'),
       ).toBe('1.0.0');
     });
 
     it('should support coercion', () => {
       expect(
-        semverCoerced.minSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0')
+        semverCoerced.minSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0'),
       ).toBe('1.0.0');
     });
   });
@@ -257,7 +257,7 @@ describe('modules/versioning/semver-coerced/index', () => {
           rangeStrategy: 'bump',
           currentVersion: '1.0.0',
           newVersion: '1.1.0',
-        })
+        }),
       ).toBe('1.1.0');
     });
   });

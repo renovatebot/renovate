@@ -43,7 +43,7 @@ export class PackagistDatasource extends Datasource {
 
   private async getJson<T, U extends z.ZodSchema<T>>(
     url: string,
-    schema: U
+    schema: U,
   ): Promise<z.infer<typeof schema>> {
     const opts = PackagistDatasource.getHostOpts(url);
     const { body } = await this.http.getJson(url, opts);
@@ -67,7 +67,7 @@ export class PackagistDatasource extends Datasource {
 
   private static getPackagistFileUrl(
     regUrl: string,
-    regFile: RegistryFile
+    regFile: RegistryFile,
   ): string {
     const { key, hash } = regFile;
     const fileName = hash
@@ -87,7 +87,7 @@ export class PackagistDatasource extends Datasource {
   })
   async getPackagistFile(
     regUrl: string,
-    regFile: RegistryFile
+    regFile: RegistryFile,
   ): Promise<PackagistFile> {
     const url = PackagistDatasource.getPackagistFileUrl(regUrl, regFile);
     const packagistFile = await this.getJson(url, PackagistFile);
@@ -96,7 +96,7 @@ export class PackagistDatasource extends Datasource {
 
   async fetchProviderPackages(
     regUrl: string,
-    meta: RegistryMeta
+    meta: RegistryMeta,
   ): Promise<void> {
     await p.map(meta.files, async (file) => {
       const res = await this.getPackagistFile(regUrl, file);
@@ -106,7 +106,7 @@ export class PackagistDatasource extends Datasource {
 
   async fetchIncludesPackages(
     regUrl: string,
-    meta: RegistryMeta
+    meta: RegistryMeta,
   ): Promise<void> {
     await p.map(meta.includesFiles, async (file) => {
       const res = await this.getPackagistFile(regUrl, file);
@@ -125,21 +125,21 @@ export class PackagistDatasource extends Datasource {
   async packagistV2Lookup(
     registryUrl: string,
     metadataUrl: string,
-    packageName: string
+    packageName: string,
   ): Promise<ReleaseResult | null> {
     const pkgUrl = replaceUrlPath(
       registryUrl,
-      metadataUrl.replace('%package%', packageName)
+      metadataUrl.replace('%package%', packageName),
     );
     const pkgPromise = this.getJson(pkgUrl, z.unknown());
 
     const devUrl = replaceUrlPath(
       registryUrl,
-      metadataUrl.replace('%package%', `${packageName}~dev`)
+      metadataUrl.replace('%package%', `${packageName}~dev`),
     );
     const devPromise = this.getJson(devUrl, z.unknown()).then(
       (x) => x,
-      () => null
+      () => null,
     );
 
     const responses: NonNullable<unknown>[] = await Promise.all([
@@ -152,7 +152,7 @@ export class PackagistDatasource extends Datasource {
   public getPkgUrl(
     packageName: string,
     registryUrl: string,
-    registryMeta: RegistryMeta
+    registryMeta: RegistryMeta,
   ): string | null {
     if (
       registryMeta.providersUrl &&
@@ -169,7 +169,7 @@ export class PackagistDatasource extends Datasource {
     if (registryMeta.providersLazyUrl) {
       return replaceUrlPath(
         registryUrl,
-        registryMeta.providersLazyUrl.replace('%package%', packageName)
+        registryMeta.providersLazyUrl.replace('%package%', packageName),
       );
     }
 
@@ -201,7 +201,7 @@ export class PackagistDatasource extends Datasource {
         const packagistResult = await this.packagistV2Lookup(
           registryUrl,
           meta.metadataUrl,
-          packageName
+          packageName,
         );
         return packagistResult;
       }

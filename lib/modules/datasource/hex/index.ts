@@ -71,7 +71,7 @@ export class HexDatasource extends Datasource {
               version,
               releaseTimestamp: inserted_at,
             }
-          : { version }
+          : { version },
       ),
     };
 

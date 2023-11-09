@@ -29,7 +29,7 @@ const repositoriesToSkipMdFetching = ['facebook/react-native'];
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  release: ChangeLogRelease
+  release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
@@ -53,7 +53,7 @@ export async function getReleaseList(
     } else {
       logger.debug(
         { repository, type, apiBaseUrl, err },
-        'getReleaseList error'
+        'getReleaseList error',
       );
     }
   }
@@ -62,7 +62,7 @@ export async function getReleaseList(
 
 export function getCachedReleaseList(
   project: ChangeLogProject,
-  release: ChangeLogRelease
+  release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   const { repository, apiBaseUrl } = project;
   // TODO: types (#22198)
@@ -79,7 +79,7 @@ export function getCachedReleaseList(
 
 export function massageBody(
   input: string | undefined | null,
-  baseUrl: string
+  baseUrl: string,
 ): string {
   let body = coerceString(input);
   // Convert line returns
@@ -90,14 +90,14 @@ export function massageBody(
     regEx(
       `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
-      false
+      false,
     ),
-    ''
+    '',
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
     regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
-    '\n'
+    '\n',
   );
   // Reduce headings size
   body = body
@@ -110,7 +110,7 @@ export function massageBody(
 
 export function massageName(
   input: string | undefined | null,
-  version: string | undefined
+  version: string | undefined,
 ): string | undefined {
   let name = input ?? '';
 
@@ -129,7 +129,7 @@ export function massageName(
 export async function getReleaseNotes(
   project: ChangeLogProject,
   release: ChangeLogRelease,
-  config: BranchUpgradeConfig
+  config: BranchUpgradeConfig,
 ): Promise<ChangeLogNotes | null> {
   const { packageName, repository } = project;
   const { version, gitRef } = release;
@@ -147,7 +147,7 @@ export async function getReleaseNotes(
         r.tag === version ||
         r.tag === `v${version}` ||
         r.tag === gitRef ||
-        r.tag === `v${gitRef}`
+        r.tag === `v${gitRef}`,
     );
   }
   if (is.undefined(matchedRelease) && config.extractVersion) {
@@ -166,19 +166,19 @@ export async function getReleaseNotes(
 function getExactReleaseMatch(
   packageName: string,
   version: string,
-  releases: ChangeLogNotes[]
+  releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
   const exactReleaseReg = regEx(`${packageName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
-    exactReleaseReg.test(r.tag!)
+    exactReleaseReg.test(r.tag!),
   );
   return matchedRelease;
 }
 
 async function releaseNotesResult(
   releaseMatch: ChangeLogNotes | undefined,
-  project: ChangeLogProject
+  project: ChangeLogProject,
 ): Promise<ChangeLogNotes | null> {
   if (!releaseMatch) {
     return null;
@@ -238,7 +238,7 @@ function sectionize(text: string, level: number): string[] {
 }
 
 export async function getReleaseNotesMdFileInner(
-  project: ChangeLogProject
+  project: ChangeLogProject,
 ): Promise<ChangeLogFile | null> {
   const { repository, type } = project;
   const apiBaseUrl = project.apiBaseUrl;
@@ -249,25 +249,25 @@ export async function getReleaseNotesMdFileInner(
         return await gitea.getReleaseNotesMd(
           repository,
           apiBaseUrl,
-          sourceDirectory
+          sourceDirectory,
         );
       case 'gitlab':
         return await gitlab.getReleaseNotesMd(
           repository,
           apiBaseUrl,
-          sourceDirectory
+          sourceDirectory,
         );
       case 'github':
         return await github.getReleaseNotesMd(
           repository,
           apiBaseUrl,
-          sourceDirectory
+          sourceDirectory,
         );
       case 'bitbucket':
         return await bitbucket.getReleaseNotesMd(
           repository,
           apiBaseUrl,
-          sourceDirectory
+          sourceDirectory,
         );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
@@ -277,12 +277,12 @@ export async function getReleaseNotesMdFileInner(
     if (err.statusCode === 404) {
       logger.debug(
         { repository, type, apiBaseUrl },
-        'Error 404 getting changelog md'
+        'Error 404 getting changelog md',
       );
     } else {
       logger.debug(
         { err, repository, type, apiBaseUrl },
-        'Error getting changelog md'
+        'Error getting changelog md',
       );
     }
   }
@@ -290,7 +290,7 @@ export async function getReleaseNotesMdFileInner(
 }
 
 export function getReleaseNotesMdFile(
-  project: ChangeLogProject
+  project: ChangeLogProject,
 ): Promise<ChangeLogFile | null> {
   const { sourceDirectory, repository, apiBaseUrl } = project;
   // TODO: types (#22198)
@@ -309,7 +309,7 @@ export function getReleaseNotesMdFile(
 
 export async function getReleaseNotesMd(
   project: ChangeLogProject,
-  release: ChangeLogRelease
+  release: ChangeLogRelease,
 ): Promise<ChangeLogNotes | null> {
   const { baseUrl, repository } = project;
   const version = release.version;
@@ -326,7 +326,7 @@ export async function getReleaseNotesMd(
   const { changelogFile } = changelog;
   const changelogMd = changelog.changelogMd.replace(
     regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
-    '\n'
+    '\n',
   );
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
     const changelogParsed = sectionize(changelogMd, level);
@@ -336,7 +336,7 @@ export async function getReleaseNotesMd(
           // replace brackets and parenthesis with space
           const deParenthesizedSection = section.replace(
             regEx(/[[\]()]/g),
-            ' '
+            ' ',
           );
           const [heading] = deParenthesizedSection.split(newlineRegex);
           const title = heading
@@ -374,7 +374,7 @@ export async function getReleaseNotesMd(
         } catch (err) /* istanbul ignore next */ {
           logger.warn(
             { file: changelogFile, err },
-            `Error parsing changelog file`
+            `Error parsing changelog file`,
           );
         }
       }
@@ -412,7 +412,7 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
 
 export async function addReleaseNotes(
   input: ChangeLogResult | null | undefined,
-  config: BranchUpgradeConfig
+  config: BranchUpgradeConfig,
 ): Promise<ChangeLogResult | null> {
   if (!input?.versions || !input.project?.type) {
     logger.debug('Missing project or versions');
@@ -447,7 +447,7 @@ export async function addReleaseNotes(
       cacheNamespace,
       cacheKey,
       releaseNotes,
-      cacheMinutes
+      cacheMinutes,
     );
     output.versions!.push({
       ...v,

@@ -35,15 +35,15 @@ export class GlobalConfig {
 
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(
-    key: Key
+    key: Key,
   ): RepoGlobalConfig[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key: Key,
-    defaultValue: Required<RepoGlobalConfig>[Key]
+    defaultValue: Required<RepoGlobalConfig>[Key],
   ): Required<RepoGlobalConfig>[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key?: Key,
-    defaultValue?: RepoGlobalConfig[Key]
+    defaultValue?: RepoGlobalConfig[Key],
   ): RepoGlobalConfig | RepoGlobalConfig[Key] {
     return key ? GlobalConfig.config[key] ?? defaultValue : GlobalConfig.config;
   }

@@ -15,7 +15,7 @@ import type { NpmDepType, NpmManagerData } from '../../types';
 function renameObjKey(
   oldObj: DependenciesMeta,
   oldKey: string,
-  newKey: string
+  newKey: string,
 ): DependenciesMeta {
   const keys = Object.keys(oldObj);
   return keys.reduce((acc, key) => {
@@ -35,7 +35,7 @@ function replaceAsString(
   depName: string,
   oldValue: string,
   newValue: string,
-  parents?: string[]
+  parents?: string[],
 ): string {
   if (depType === 'packageManager') {
     parsedContents[depType] = newValue;
@@ -50,7 +50,7 @@ function replaceAsString(
         // TODO #22198
         parsedContents.dependenciesMeta!,
         oldValue,
-        newValue
+        newValue,
       );
     }
   } else if (parents && depType === 'overrides') {
@@ -58,7 +58,7 @@ function replaceAsString(
     const { depObjectReference, overrideDepName } = overrideDepPosition(
       parsedContents[depType]!,
       parents,
-      depName
+      depName,
     );
     if (depObjectReference) {
       depObjectReference[overrideDepName] = newValue;
@@ -93,7 +93,7 @@ function replaceAsString(
         fileContent,
         searchIndex,
         searchString,
-        newString
+        newString,
       );
       // Compare the parsed JSON structure of old and new
       if (dequal(parsedContents, JSON.parse(testContent))) {
@@ -119,13 +119,13 @@ export function updateDependency({
         upgrade.currentDigest,
         // TODO #22198
 
-        upgrade.newDigest!.substring(0, upgrade.currentDigest.length)
+        upgrade.newDigest!.substring(0, upgrade.currentDigest.length),
       );
     } else {
       logger.debug('Updating package.json git version tag');
       newValue = upgrade.currentRawValue.replace(
         upgrade.currentValue,
-        upgrade.newValue
+        upgrade.newValue,
       );
     }
   }
@@ -151,7 +151,7 @@ export function updateDependency({
         const { depObjectReference, overrideDepName } = overrideDepPosition(
           parsedContents['overrides']!,
           overrideDepParents,
-          depName
+          depName,
         );
         if (depObjectReference) {
           oldVersion = depObjectReference[overrideDepName]!;
@@ -174,7 +174,7 @@ export function updateDependency({
       depName,
       oldVersion!,
       newValue!,
-      overrideDepParents
+      overrideDepParents,
     );
     if (upgrade.newName) {
       newFileContent = replaceAsString(
@@ -184,14 +184,14 @@ export function updateDependency({
         depName,
         depName,
         upgrade.newName,
-        overrideDepParents
+        overrideDepParents,
       );
     }
     // istanbul ignore if
     if (!newFileContent) {
       logger.debug(
         { fileContent, parsedContents, depType, depName, newValue },
-        'Warning: updateDependency error'
+        'Warning: updateDependency error',
       );
       return fileContent;
     }
@@ -212,7 +212,7 @@ export function updateDependency({
               oldVersion,
               resolutionsVersion: parsedContents.resolutions[depKey],
             },
-            'Upgraded dependency exists in yarn resolutions but is different version'
+            'Upgraded dependency exists in yarn resolutions but is different version',
           );
         }
         newFileContent = replaceAsString(
@@ -223,7 +223,7 @@ export function updateDependency({
           // TODO #22198
           parsedContents.resolutions[depKey]!,
           // TODO #22198
-          newValue!
+          newValue!,
         );
         if (upgrade.newName) {
           if (depKey === `**/${depName}`) {
@@ -236,7 +236,7 @@ export function updateDependency({
             'resolutions',
             depKey,
             depKey,
-            upgrade.newName
+            upgrade.newName,
           );
         }
       }
@@ -251,7 +251,7 @@ export function updateDependency({
             depName,
             depKey,
             // TODO: types (#22198)
-            `${depName}@${newValue}`
+            `${depName}@${newValue}`,
           );
         }
       }
@@ -265,7 +265,7 @@ export function updateDependency({
 function overrideDepPosition(
   overrideBlock: OverrideDependency,
   parents: string[],
-  depName: string
+  depName: string,
 ): {
   depObjectReference: Record<string, string>;
   overrideDepName: string;

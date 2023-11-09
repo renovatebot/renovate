@@ -13,7 +13,7 @@ describe('workers/repository/update/pr/body/footer', () => {
         baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
-      })
+      }),
     ).toBe('');
   });
 
@@ -26,7 +26,7 @@ describe('workers/repository/update/pr/body/footer', () => {
         branchName: 'branch',
         upgrades: [],
         prFooter: 'FOOTER',
-      })
+      }),
     ).toMatchInlineSnapshot(`
       "
       ---

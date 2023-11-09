@@ -8,7 +8,7 @@ import type { LookupUpdateConfig } from './types';
 
 export function addReplacementUpdateIfValid(
   updates: LookupUpdate[],
-  config: LookupUpdateConfig
+  config: LookupUpdateConfig,
 ): void {
   const replacementNewName = determineNewReplacementName(config);
   const replacementNewValue = determineNewReplacementValue(config);
@@ -26,7 +26,7 @@ export function addReplacementUpdateIfValid(
 }
 
 export function isReplacementRulesConfigured(
-  config: LookupUpdateConfig
+  config: LookupUpdateConfig,
 ): boolean {
   return (
     is.nonEmptyString(config.replacementName) ||
@@ -36,7 +36,7 @@ export function isReplacementRulesConfigured(
 }
 
 export function determineNewReplacementName(
-  config: LookupUpdateConfig
+  config: LookupUpdateConfig,
 ): string {
   return (
     config.replacementName ??
@@ -45,7 +45,7 @@ export function determineNewReplacementName(
 }
 
 export function determineNewReplacementValue(
-  config: LookupUpdateConfig
+  config: LookupUpdateConfig,
 ): string | undefined | null {
   const versioning = allVersioning.get(config.versioning);
   const rangeStrategy = getRangeStrategy(config);

@@ -14,7 +14,7 @@ function formatContent(input: string): string {
 
 export async function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): Promise<PackageFileContent | null> {
   const res: PackageFileContent = {
     registryUrls: [],
@@ -28,7 +28,7 @@ export async function extractPackageFile(
       sourceMatch =
         sourceMatch ??
         regEx(`^source ${delimiter}([^${delimiter}]+)${delimiter}\\s*$`).exec(
-          line
+          line,
         );
     }
     if (sourceMatch) {
@@ -46,7 +46,7 @@ export async function extractPackageFile(
     }
 
     const gemMatchRegex = regEx(
-      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`
+      `^\\s*gem\\s+(['"])(?<depName>[^'"]+)(['"])(\\s*,\\s*(?<currentValue>(['"])[^'"]+['"](\\s*,\\s*['"][^'"]+['"])?))?`,
     );
     const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
@@ -77,7 +77,7 @@ export async function extractPackageFile(
         if (!is.string(groupLine)) {
           logger.debug(
             { content, packageFile, type: 'groupLine' },
-            'Bundler parsing error'
+            'Bundler parsing error',
           );
           groupLine = 'end';
         }
@@ -95,13 +95,13 @@ export async function extractPackageFile(
               lineNumber:
                 Number(dep.managerData?.lineNumber) + groupLineNumber + 1,
             },
-          }))
+          })),
         );
       }
     }
     for (const delimiter of delimiters) {
       const sourceBlockMatch = regEx(
-        `^source\\s+${delimiter}(.*?)${delimiter}\\s+do`
+        `^source\\s+${delimiter}(.*?)${delimiter}\\s+do`,
       ).exec(line);
       if (sourceBlockMatch) {
         const repositoryUrl = sourceBlockMatch[1];
@@ -115,7 +115,7 @@ export async function extractPackageFile(
           if (!is.string(sourceLine)) {
             logger.debug(
               { content, packageFile, type: 'sourceLine' },
-              'Bundler parsing error'
+              'Bundler parsing error',
             );
             sourceLine = 'end';
           }
@@ -133,7 +133,7 @@ export async function extractPackageFile(
                 lineNumber:
                   Number(dep.managerData?.lineNumber) + sourceLineNumber + 1,
               },
-            }))
+            })),
           );
         }
       }
@@ -150,7 +150,7 @@ export async function extractPackageFile(
         if (!is.string(platformsLine)) {
           logger.debug(
             { content, packageFile, type: 'platformsLine' },
-            'Bundler parsing error'
+            'Bundler parsing error',
           );
           platformsLine = 'end';
         }
@@ -167,7 +167,7 @@ export async function extractPackageFile(
               lineNumber:
                 Number(dep.managerData?.lineNumber) + platformsLineNumber + 1,
             },
-          }))
+          })),
         );
       }
     }
@@ -183,7 +183,7 @@ export async function extractPackageFile(
         if (!is.string(ifLine)) {
           logger.debug(
             { content, packageFile, type: 'ifLine' },
-            'Bundler parsing error'
+            'Bundler parsing error',
           );
           ifLine = 'end';
         }
@@ -200,7 +200,7 @@ export async function extractPackageFile(
               lineNumber:
                 Number(dep.managerData?.lineNumber) + ifLineNumber + 1,
             },
-          }))
+          })),
         );
       }
     }
@@ -214,7 +214,7 @@ export async function extractPackageFile(
     const lockContent = await readLocalFile(gemfileLockPath, 'utf8');
     if (lockContent) {
       logger.debug(
-        `Found lock file ${gemfileLockPath} for packageFile: ${packageFile}`
+        `Found lock file ${gemfileLockPath} for packageFile: ${packageFile}`,
       );
       res.lockFiles = [gemfileLockPath];
       const lockedEntries = extractLockFileEntries(lockContent);

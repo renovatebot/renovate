@@ -12,7 +12,7 @@ describe('config/migrations/custom/compatibility-migration', () => {
         constraints: {
           test: 'test',
         },
-      }
+      },
     );
   });
 
@@ -21,7 +21,7 @@ describe('config/migrations/custom/compatibility-migration', () => {
       {
         compatibility: 'test',
       },
-      {}
+      {},
     );
   });
 });

@@ -8,7 +8,7 @@ describe('config/migrations/custom/required-status-checks-migration', () => {
       },
       {
         ignoreTests: true,
-      }
+      },
     );
   });
 });

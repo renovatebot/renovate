@@ -92,7 +92,7 @@ api.set(GiteaReleasesDatasource.id, new GiteaReleasesDatasource());
 api.set(GiteaTagsDatasource.id, new GiteaTagsDatasource());
 api.set(
   GithubReleaseAttachmentsDatasource.id,
-  new GithubReleaseAttachmentsDatasource()
+  new GithubReleaseAttachmentsDatasource(),
 );
 api.set(GithubReleasesDatasource.id, new GithubReleasesDatasource());
 api.set(GithubRunnersDatasource.id, new GithubRunnersDatasource());

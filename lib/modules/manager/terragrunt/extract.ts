@@ -13,7 +13,7 @@ const contentCheckList = ['terraform {'];
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   logger.trace({ content }, `terragrunt.extractPackageFile(${packageFile!})`);
   if (!checkFileContainsDependency(content, contentCheckList)) {
@@ -27,10 +27,10 @@ export function extractPackageFile(
       const terragruntDependency = dependencyBlockExtractionRegex.exec(line);
       if (terragruntDependency?.groups) {
         logger.trace(
-          `Matched ${terragruntDependency.groups.type} on line ${lineNumber}`
+          `Matched ${terragruntDependency.groups.type} on line ${lineNumber}`,
         );
         const tfDepType = getTerragruntDependencyType(
-          terragruntDependency.groups.type
+          terragruntDependency.groups.type,
         );
         let result: ExtractionResult | null = null;
         switch (tfDepType) {
@@ -41,7 +41,7 @@ export function extractPackageFile(
           /* istanbul ignore next */
           default:
             logger.trace(
-              `Could not identify TerragruntDependencyType ${terragruntDependency.groups.type} on line ${lineNumber}.`
+              `Could not identify TerragruntDependencyType ${terragruntDependency.groups.type} on line ${lineNumber}.`,
             );
             break;
         }

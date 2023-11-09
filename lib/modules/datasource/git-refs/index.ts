@@ -60,7 +60,7 @@ export class GitRefsDatasource extends GitDatasource {
 
   override async getDigest(
     { packageName }: DigestConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     const rawRefs: RawRefs[] | null = await this.getRawRefs({ packageName });
 
@@ -73,11 +73,11 @@ export class GitRefsDatasource extends GitDatasource {
     if (newValue) {
       ref = rawRefs.find(
         (rawRef) =>
-          ['heads', 'tags'].includes(rawRef.type) && rawRef.value === newValue
+          ['heads', 'tags'].includes(rawRef.type) && rawRef.value === newValue,
       );
     } else {
       ref = rawRefs.find(
-        (rawRef) => rawRef.type === '' && rawRef.value === 'HEAD'
+        (rawRef) => rawRef.type === '' && rawRef.value === 'HEAD',
       );
     }
     if (ref) {
