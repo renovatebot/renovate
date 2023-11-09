@@ -419,8 +419,9 @@ export function extractPackageFile(
     return null;
   }
   for (const d of deps) {
-      if(!d.depType)
-       d.depType = 'stage';
+    if (!d.depType) {
+      d.depType = 'stage';
+    }
   }
   deps[deps.length - 1].depType = 'final';
   return { deps };
