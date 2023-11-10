@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as p from '../../../util/promises';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
@@ -16,7 +17,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com'];
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -39,40 +40,42 @@ export class GalaxyCollectionDatasource extends Datasource {
       ),
     );
 
-    let baseUrlResponse;
-    try {
-      baseUrlResponse = await this.http.getJson(baseUrl, GalaxyV3);
-    } catch (err) {
-      this.handleGenericErrors(err);
+    const { val: baseProject, err: baseErr } = await this.http
+      .getJsonSafe(baseUrl, GalaxyV3)
+      .onError((err) => {
+        logger.warn(
+          { datasource: this.id, packageName, err },
+          `Error fetching ${baseUrl}`,
+        );
+      })
+      .unwrap();
+    if (baseErr) {
+      this.handleGenericErrors(baseErr);
     }
-
-    const baseProject = baseUrlResponse.body;
 
     const versionsUrl = ensureTrailingSlash(joinUrlParts(baseUrl, 'versions'));
 
-    let versionsUrlResponse;
-    try {
-      versionsUrlResponse = await this.http.getJson(
-        versionsUrl,
-        GalaxyV3Versions,
-      );
-    } catch (err) {
-      this.handleGenericErrors(err);
+    const { val: versionsProject, err: versionsErr } = await this.http
+      .getJsonSafe(versionsUrl, GalaxyV3Versions)
+      .onError((err) => {
+        logger.warn(
+          { datasource: this.id, packageName, err },
+          `Error fetching ${versionsUrl}`,
+        );
+      })
+      .unwrap();
+    if (versionsErr) {
+      this.handleGenericErrors(versionsErr);
     }
 
-    const versionsProject = versionsUrlResponse.body;
-
-    const releases = versionsProject.data.map(
-      (value) => {
-        const release: Release = {
-          version: value.version,
-          releaseTimestamp: value.created_at,
-          isDeprecated: baseProject.deprecated,
-        };
-        return release;
-      },
-      { concurrency: 4 },
-    );
+    const releases = versionsProject.data.map((value) => {
+      const release: Release = {
+        version: value.version,
+        releaseTimestamp: value.created_at,
+        isDeprecated: baseProject.deprecated,
+      };
+      return release;
+    });
 
     // asynchronously get release details
     const enrichedReleases = await p.map(releases, (release) =>
