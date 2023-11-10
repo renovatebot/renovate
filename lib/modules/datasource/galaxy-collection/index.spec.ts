@@ -89,6 +89,27 @@ describe('modules/datasource/galaxy-collection/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('throws error for remote host detailed versions error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/${collectionAPIPath}/community/kubernetes/`)
+        .reply(200, communityKubernetesBase)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/`)
+        .reply(200, communityKubernetesVersions)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/1.2.0/`)
+        .reply(200, communityKubernetesDetails120)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/0.11.1/`)
+        .reply(200, communityKubernetesDetails0111)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/1.2.1/`)
+        .reply(500);
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'community.kubernetes',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
     it('returns null for empty lookup', async () => {
       expect(
         await getPkgReleases({
