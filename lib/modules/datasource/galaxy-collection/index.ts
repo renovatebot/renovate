@@ -22,6 +22,8 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
+  override readonly registryStrategy = 'hunt';
+
   override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/api/'];
 
   override readonly defaultVersioning = pep440Versioning.id;
