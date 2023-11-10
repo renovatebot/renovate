@@ -365,8 +365,10 @@ const repoGroups = {
   okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
-  'opentelemetry-erlang': 'https://github.com/open-telemetry/opentelemetry-erlang',
-  'opentelemetry-erlang-contrib': 'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
+  'opentelemetry-erlang':
+    'https://github.com/open-telemetry/opentelemetry-erlang',
+  'opentelemetry-erlang-contrib':
+    'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
