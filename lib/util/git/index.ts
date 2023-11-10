@@ -2,13 +2,13 @@ import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-// TODO: check if bug is fixed (#22198)
-// eslint-disable-next-line import/no-named-as-default
-import simpleGit, {
+import semver from 'semver';
+import {
   Options,
   ResetMode,
   SimpleGit,
   TaskOptions,
+  simpleGit,
 } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
@@ -24,7 +24,6 @@ import {
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
@@ -182,13 +181,7 @@ export async function validateGitVersion(): Promise<boolean> {
     return false;
   }
   // istanbul ignore if
-  if (
-    !(
-      version &&
-      (semverCoerced.equals(version, GIT_MINIMUM_VERSION) ||
-        semverCoerced.isGreaterThan(version, GIT_MINIMUM_VERSION))
-    )
-  ) {
+  if (!(version && semver.gte(version, GIT_MINIMUM_VERSION))) {
     logger.error(
       { detectedVersion: version, minimumVersion: GIT_MINIMUM_VERSION },
       'Git version needs upgrading',

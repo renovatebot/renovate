@@ -173,10 +173,16 @@ If you need any further assistance then you can also [request help here](${
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
       // TODO #22198
+      const prTitle =
+        config.semanticCommits === 'enabled'
+          ? `${config.semanticCommitType ?? 'chore'}: ${
+              config.onboardingPrTitle
+            }`
+          : config.onboardingPrTitle!;
       const pr = await platform.createPr({
         sourceBranch: config.onboardingBranch!,
         targetBranch: config.defaultBranch!,
-        prTitle: config.onboardingPrTitle!,
+        prTitle,
         prBody,
         labels,
         platformOptions: getPlatformPrOptions({
