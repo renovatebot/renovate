@@ -65,9 +65,7 @@ export function generateBranchName(update: RenovateConfig): void {
       }
     }
     if (update.updateType === 'minor' && update.separateMultipleMinor) {
-      const newMajor = String(update.newMajor);
-      const newMinor = String(update.newMinor);
-      update.groupSlug = `minor-${newMajor}.${newMinor}-${update.groupSlug}`;
+      update.groupSlug = `minor-${update.newMajor}.${update.newMinor}-${update.groupSlug}`;
     }
     if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
@@ -116,8 +114,7 @@ export function generateBranchName(update: RenovateConfig): void {
     update.branchName = template.compile(update.branchName, update);
   }
   if (update.updateType === 'minor' && update.separateMultipleMinor) {
-    const newMinor = String(update.newMinor);
-    update.branchName = update.branchName.replace('.x', `.${newMinor}.x`);
+    update.branchName = update.branchName.replace('.x', `.${update.newMinor}.x`);
   }
   update.branchName = cleanBranchName(
     update.branchName,
