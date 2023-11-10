@@ -55,7 +55,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const versionsUrl = ensureTrailingSlash(joinUrlParts(baseUrl, 'versions'));
 
-    const { val: versionsProject, err: versionsErr } = await this.http
+    const { val: rawReleases, err: versionsErr } = await this.http
       .getJsonSafe(versionsUrl, GalaxyV3Versions)
       .onError((err) => {
         logger.warn(
@@ -68,19 +68,17 @@ export class GalaxyCollectionDatasource extends Datasource {
       this.handleGenericErrors(versionsErr);
     }
 
-    const releases = versionsProject.data.map((value) => {
-      const release: Release = {
-        version: value.version,
-        releaseTimestamp: value.created_at,
+    const releases = rawReleases.map((value) => {
+      return {
+        ...value,
         isDeprecated: baseProject.deprecated,
       };
-      return release;
     });
 
     // asynchronously get release details
     const enrichedReleases = await p.map(
       releases,
-      (release) => this.getVersionDetails(versionsUrl, release),
+      (release) => this.getVersionDetails(packageName, versionsUrl, release),
       { concurrency: 4 },
     );
 
@@ -99,21 +97,29 @@ export class GalaxyCollectionDatasource extends Datasource {
     ttlMinutes: 10080, // 1 week
   })
   async getVersionDetails(
+    packageName: string,
     versionsUrl: string,
     basicRelease: Release,
   ): Promise<Release> {
-    const response = await this.http.getJson(
-      ensureTrailingSlash(joinUrlParts(versionsUrl, basicRelease.version)),
-      GalaxyV3DetailedVersion,
+    const detailedVersionUrl = ensureTrailingSlash(
+      joinUrlParts(versionsUrl, basicRelease.version),
     );
-    const versionDetails = response.body;
+    const { val: rawDetailedVersion, err: versionsErr } = await this.http
+      .getJsonSafe(detailedVersionUrl, GalaxyV3DetailedVersion)
+      .onError((err) => {
+        logger.warn(
+          { datasource: this.id, packageName, err },
+          `Error fetching ${versionsUrl}`,
+        );
+      })
+      .unwrap();
+    if (versionsErr) {
+      this.handleGenericErrors(versionsErr);
+    }
+
     return {
-      version: basicRelease.version,
+      ...rawDetailedVersion,
       isDeprecated: basicRelease.isDeprecated,
-      downloadUrl: versionDetails.download_url,
-      newDigest: versionDetails.artifact.sha256,
-      dependencies: versionDetails.metadata.dependencies,
-      sourceUrl: versionDetails.metadata.repository,
     };
   }
 }
