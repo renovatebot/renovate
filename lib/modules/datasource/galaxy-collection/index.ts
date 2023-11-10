@@ -78,8 +78,10 @@ export class GalaxyCollectionDatasource extends Datasource {
     });
 
     // asynchronously get release details
-    const enrichedReleases = await p.map(releases, (release) =>
-      this.getVersionDetails(versionsUrl, release),
+    const enrichedReleases = await p.map(
+      releases,
+      (release) => this.getVersionDetails(versionsUrl, release),
+      { concurrency: 4 },
     );
 
     // filter failed versions
