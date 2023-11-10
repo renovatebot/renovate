@@ -34,7 +34,10 @@ function determineDatasource(
   }
   if (hostname === 'gitlab.com' || detectPlatform(repository) === 'gitlab') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
-    return { datasource: GitlabTagsDatasource.id };
+    return {
+      datasource: GitlabTagsDatasource.id,
+      registryUrls: ['https://' + hostname],
+    };
   }
   const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
