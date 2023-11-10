@@ -54,7 +54,7 @@ export async function autodiscoverRepositories(
       discovered,
       is.string(config.autodiscoverFilter)
         ? [config.autodiscoverFilter]
-        : config.autodiscoverFilter
+        : config.autodiscoverFilter,
     );
 
     if (!discovered.length) {

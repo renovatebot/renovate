@@ -11,19 +11,19 @@ export function matchGlobOrRegex(input: string, matcher: string): boolean {
     return autodiscoveryPred(input);
   }
   // else use minimatch
-  return minimatch(matcher, { nocase: true }).match(input);
+  return minimatch(matcher, { dot: true, nocase: true }).match(input);
 }
 
 export function matchGlobOrRegexArray(
   input: string,
-  matches: string[]
+  matches: string[],
 ): boolean {
   return filterGlobOrRegexArray([input], matches).length > 0;
 }
 
 export function filterGlobOrRegexArray(
   inputs: string[],
-  matches: string[]
+  matches: string[],
 ): string[] {
   if (!matches.length || !inputs.length) {
     return [];
@@ -34,6 +34,6 @@ export function filterGlobOrRegexArray(
     (input) =>
       (positiveMatches.length === 0 ||
         positiveMatches.some((m) => matchGlobOrRegex(input, m))) &&
-      negativeMatches.every((m) => matchGlobOrRegex(input, m))
+      negativeMatches.every((m) => matchGlobOrRegex(input, m)),
   );
 }
