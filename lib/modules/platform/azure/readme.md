@@ -126,7 +126,7 @@ always-auth=true
 ### Add renovate.json file
 
 Additionally, you can create a `renovate.json` file (which holds the Renovate configuration) in the root of the repository you want to update.
-[Read more about the Renovate configuration options](../../../configuration-options/index.md)
+[Read more about the Renovate configuration options](../../../configuration-options.md)
 
 ### Using a single pipeline to update multiple repositories
 
