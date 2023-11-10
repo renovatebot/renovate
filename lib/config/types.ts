@@ -182,9 +182,9 @@ export type UpdateConfig<
 export type RenovateRepository =
   | string
   | {
-      repository: string;
-      secrets?: Record<string, string>;
-    };
+    repository: string;
+    secrets?: Record<string, string>;
+  };
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -192,11 +192,11 @@ export type ConstraintsFilter = 'strict' | 'none';
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
-    RenovateSharedConfig,
-    UpdateConfig<PackageRule>,
-    AssigneesAndReviewersConfig,
-    ConfigMigration,
-    Record<string, unknown> {
+  RenovateSharedConfig,
+  UpdateConfig<PackageRule>,
+  AssigneesAndReviewersConfig,
+  ConfigMigration,
+  Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
   useBaseBranchConfig?: UseBaseBranchConfigType;
@@ -264,14 +264,14 @@ export interface RenovateConfig
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json' | 'plain';
+  format?: 'json' | 'plain' | 'yaml';
   transformTemplates?: string[];
 }
 
 export interface AllConfig
   extends RenovateConfig,
-    GlobalOnlyConfig,
-    RepoGlobalConfig {}
+  GlobalOnlyConfig,
+  RepoGlobalConfig { }
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
@@ -313,8 +313,8 @@ export type MergeStrategy =
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig,
-    UpdateConfig,
-    Record<string, unknown> {
+  UpdateConfig,
+  Record<string, unknown> {
   description?: string | string[];
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
@@ -379,11 +379,11 @@ export interface RenovateOptionBase {
   name: string;
 
   parent?:
-    | 'customDatasources'
-    | 'hostRules'
-    | 'packageRules'
-    | 'postUpgradeTasks'
-    | 'customManagers';
+  | 'customDatasources'
+  | 'hostRules'
+  | 'packageRules'
+  | 'postUpgradeTasks'
+  | 'customManagers';
 
   stage?: RenovateConfigStage;
 
