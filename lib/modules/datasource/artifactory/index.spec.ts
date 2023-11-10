@@ -58,7 +58,7 @@ describe('modules/datasource/artifactory/index', () => {
     it('parses real data (merge strategy with 2 registries)', async () => {
       const secondRegistryUrl: string = joinUrlParts(
         testRegistryUrl,
-        'production'
+        'production',
       );
       httpMock
         .scope(testRegistryUrl)
@@ -85,7 +85,7 @@ describe('modules/datasource/artifactory/index', () => {
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         { packageName: 'project' },
-        'artifactory datasource requires custom registryUrl. Skipping datasource'
+        'artifactory datasource requires custom registryUrl. Skipping datasource',
       );
       expect(res).toBeNull();
     });
@@ -100,7 +100,7 @@ describe('modules/datasource/artifactory/index', () => {
           ...testConfig,
           datasource,
           packageName: testLookupName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -111,7 +111,7 @@ describe('modules/datasource/artifactory/index', () => {
           ...testConfig,
           datasource,
           packageName: testLookupName,
-        })
+        }),
       ).toBeNull();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -119,7 +119,7 @@ describe('modules/datasource/artifactory/index', () => {
           packageName: 'project',
           registryUrl: 'https://jfrog.company.com/artifactory',
         },
-        'artifactory: `Not Found` error'
+        'artifactory: `Not Found` error',
       );
     });
 
@@ -130,7 +130,7 @@ describe('modules/datasource/artifactory/index', () => {
           ...testConfig,
           datasource,
           packageName: testLookupName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

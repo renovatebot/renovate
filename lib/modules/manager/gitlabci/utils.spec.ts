@@ -43,7 +43,7 @@ describe('modules/manager/gitlabci/utils', () => {
           depName: 'renovate/renovate',
           currentValue: '19.70.8-slim',
         });
-      }
+      },
     );
 
     it.each`
@@ -68,12 +68,12 @@ describe('modules/manager/gitlabci/utils', () => {
           ...dep,
           replaceString: imageName,
         });
-      }
+      },
     );
 
     it('no Docker hub', () => {
       expect(
-        getGitlabDep('quay.io/prometheus/node-exporter:v1.3.1')
+        getGitlabDep('quay.io/prometheus/node-exporter:v1.3.1'),
       ).toMatchObject({
         autoReplaceStringTemplate: defaultAutoReplaceStringTemplate,
         replaceString: 'quay.io/prometheus/node-exporter:v1.3.1',

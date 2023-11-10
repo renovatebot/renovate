@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
@@ -30,7 +29,7 @@ export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig,
-  upgrades: Upgrade[] = []
+  upgrades: Upgrade[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
@@ -40,7 +39,6 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
-
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
@@ -81,31 +79,19 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      const pnpmVersionFromPackageJson = getPackageManagerVersion(
-        'pnpm',
-        await lazyPgkJson.getValue()
-      );
-
-      if (
-        pnpmVersionFromPackageJson &&
-        semver.gte(pnpmVersionFromPackageJson, '8.8.0')
-      ) {
-        commands.push('pnpm dedupe --ignore-scripts');
-      } else {
-        commands.push('pnpm dedupe');
-      }
+      commands.push('pnpm dedupe --config.ignore-scripts=true');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
       );
       try {
         await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing yarn.lock for lock file maintenance'
+          'Error removing yarn.lock for lock file maintenance',
         );
       }
     }
@@ -124,7 +110,7 @@ export async function generateLockFile(
         stderr,
         type: 'pnpm',
       },
-      'lock file error'
+      'lock file error',
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
@@ -132,7 +118,7 @@ export async function generateLockFile(
 }
 
 export async function getConstraintFromLockFile(
-  lockFileName: string
+  lockFileName: string,
 ): Promise<string | null> {
   let constraint: string | null = null;
   try {
@@ -148,7 +134,7 @@ export async function getConstraintFromLockFile(
     // if no match found use lockfileVersion 5
     // lockfileVersion 5 is the minimum version required to generate the pnpm-lock.yaml file
     const { lowerConstraint, upperConstraint } = lockToPnpmVersionMapping.find(
-      (m) => m.lockfileVersion === pnpmLock.lockfileVersion
+      (m) => m.lockfileVersion === pnpmLock.lockfileVersion,
     ) ?? {
       lockfileVersion: 5.0,
       lowerConstraint: '>=3',

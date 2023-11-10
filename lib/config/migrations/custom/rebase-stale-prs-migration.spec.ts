@@ -8,7 +8,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
       },
       {
         rebaseWhen: 'behind-base-branch',
-      }
+      },
     );
   });
 
@@ -19,7 +19,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
       },
       {
         rebaseWhen: 'conflicted',
-      }
+      },
     );
   });
 
@@ -30,7 +30,7 @@ describe('config/migrations/custom/rebase-stale-prs-migration', () => {
       },
       {
         rebaseWhen: 'auto',
-      }
+      },
     );
   });
 });

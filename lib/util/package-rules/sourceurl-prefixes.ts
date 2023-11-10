@@ -5,7 +5,7 @@ import { Matcher } from './base';
 export class SourceUrlPrefixesMatcher extends Matcher {
   override matches(
     { sourceUrl }: PackageRuleInputConfig,
-    { matchSourceUrlPrefixes }: PackageRule
+    { matchSourceUrlPrefixes }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchSourceUrlPrefixes)) {
       return null;
@@ -15,8 +15,8 @@ export class SourceUrlPrefixesMatcher extends Matcher {
     }
     const upperCaseSourceUrl = sourceUrl?.toUpperCase();
 
-    return matchSourceUrlPrefixes.some((prefix) =>
-      upperCaseSourceUrl?.startsWith(prefix.toUpperCase())
+    return matchSourceUrlPrefixes.some(
+      (prefix) => upperCaseSourceUrl?.startsWith(prefix.toUpperCase()),
     );
   }
 }

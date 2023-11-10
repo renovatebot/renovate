@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import hasha from 'hasha';
 import { minimatch } from 'minimatch';
 import upath from 'upath';
+import { hashFile, hashFromArray } from './utils/hash.mjs';
 
 console.log('generating imports');
 const newFiles = new Set();
@@ -34,9 +34,6 @@ const dataPaths = [
   'data',
   'node_modules/emojibase-data/en/shortcodes/github.json',
 ];
-const options = {
-  algorithm: 'sha256',
-};
 
 /**
  *
@@ -57,7 +54,7 @@ function expandPaths(paths) {
           .readdirSync(pathName, { withFileTypes: true })
           .filter(
             (dirent) =>
-              !(dirent.isFile() && ['.DS_Store'].includes(dirent.name))
+              !(dirent.isFile() && ['.DS_Store'].includes(dirent.name)),
           )
           .map((dirent) => upath.join(pathName, dirent.name));
         return expandPaths(dirPaths);
@@ -74,7 +71,7 @@ function expandPaths(paths) {
  */
 async function getFileHash(filePath) {
   try {
-    const hash = await hasha.fromFile(filePath, options);
+    const hash = await hashFile(filePath, 'sha256');
     return hash;
   } catch (err) {
     throw new Error(`ERROR: Unable to generate hash for ${filePath}`);
@@ -96,7 +93,7 @@ export async function getManagerHash(managerName, isCustomManager) {
   }
 
   const files = (await glob(folderPattern)).filter((fileName) =>
-    minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
+    minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true }),
   );
 
   // sort files in case glob order changes
@@ -108,7 +105,7 @@ export async function getManagerHash(managerName, isCustomManager) {
   }
 
   if (hashes.length) {
-    return hasha(hashes, options);
+    return hashFromArray(hashes, 'sha256');
   }
 
   throw new Error(`Unable to generate hash for manager/${managerName}`);
@@ -140,7 +137,7 @@ async function generateData() {
       contentMapDecl,
       contentMapAssignments.join('\n'),
       `export default data;\n`,
-    ].join('\n\n')
+    ].join('\n\n'),
   );
 }
 
@@ -176,13 +173,13 @@ async function generateHash() {
 
     //add manager hashes to hashMap {key->manager, value->hash}
     const hashStrings = (await Promise.all(hashes)).map(
-      ({ manager, hash }) => `hashMap.set('${manager}','${hash}');`
+      ({ manager, hash }) => `hashMap.set('${manager}','${hash}');`,
     );
 
     //write hashMap to fingerprint.generated.ts
     await updateFile(
       'lib/modules/manager/fingerprint.generated.ts',
-      [hashMap, hashStrings.join('\n')].join('\n\n')
+      [hashMap, hashStrings.join('\n')].join('\n\n'),
     );
   } catch (err) {
     console.log('ERROR:', err.message);
@@ -196,14 +193,12 @@ await (async () => {
     await generateData();
     await generateHash();
     await Promise.all(
-      (
-        await glob('lib/**/*.generated.ts')
-      )
+      (await glob('lib/**/*.generated.ts'))
         .map((f) => upath.join(f))
         .filter((f) => !newFiles.has(f))
         .map(async (file) => {
           await fs.remove(file);
-        })
+        }),
     );
   } catch (e) {
     console.log(e.toString());

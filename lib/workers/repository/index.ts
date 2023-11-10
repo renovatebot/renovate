@@ -35,11 +35,11 @@ import { printLookupStats, printRequestStats } from './stats';
 // istanbul ignore next
 export async function renovateRepository(
   repoConfig: RenovateConfig,
-  canRetry = true
+  canRetry = true,
 ): Promise<ProcessResult | undefined> {
   splitInit();
   let config = GlobalConfig.set(
-    applySecretsToConfig(repoConfig, undefined, false)
+    applySecretsToConfig(repoConfig, undefined, false),
   );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
@@ -70,11 +70,11 @@ export async function renovateRepository(
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
       await instrument('onboarding', () =>
-        ensureOnboardingPr(config, packageFiles, branches)
+        ensureOnboardingPr(config, packageFiles, branches),
       );
       addSplit('onboarding');
       const res = await instrument('update', () =>
-        updateRepo(config, branches)
+        updateRepo(config, branches),
       );
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -146,7 +146,7 @@ export function printRepositoryProblems(repository: string | undefined): void {
   if (repoProblems.size) {
     logger.debug(
       { repoProblems: Array.from(repoProblems) },
-      'repository problems'
+      'repository problems',
     );
   }
 }

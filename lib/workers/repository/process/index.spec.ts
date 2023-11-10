@@ -64,7 +64,7 @@ describe('workers/repository/process/index', () => {
       expect(platform.getJsonFile).not.toHaveBeenCalledWith(
         'renovate.json',
         undefined,
-        'dev'
+        'dev',
       );
     });
 
@@ -85,7 +85,7 @@ describe('workers/repository/process/index', () => {
       expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
-        'dev'
+        'dev',
       );
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
@@ -105,7 +105,7 @@ describe('workers/repository/process/index', () => {
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       await expect(extractDependencies(config)).rejects.toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
@@ -144,7 +144,7 @@ describe('workers/repository/process/index', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { baseBranches: ['release/v1', 'release/v2', 'dev', 'some-other'] },
-        'baseBranches'
+        'baseBranches',
       );
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v1' });
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v2' });

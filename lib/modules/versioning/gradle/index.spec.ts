@@ -205,7 +205,7 @@ describe('modules/versioning/gradle/index', () => {
       expect(api.getMajor(input)).toBe(major);
       expect(api.getMinor(input)).toBe(minor);
       expect(api.getPatch(input)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -233,7 +233,7 @@ describe('modules/versioning/gradle/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(api.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -250,7 +250,7 @@ describe('modules/versioning/gradle/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(api.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -260,13 +260,20 @@ describe('modules/versioning/gradle/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(api.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
     currentValue             | rangeStrategy | currentVersion | newVersion  | expected
     ${'1'}                   | ${null}       | ${null}        | ${'1.1'}    | ${'1.1'}
     ${'[1.2.3,]'}            | ${null}       | ${null}        | ${'1.2.4'}  | ${null}
+    ${'+'}                   | ${null}       | ${null}        | ${'1.2.4'}  | ${null}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'1.2.4'}  | ${'1.+'}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'2.1.2'}  | ${'2.+'}
+    ${'1.+'}                 | ${null}       | ${null}        | ${'2'}      | ${'2.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'1.3.4'}  | ${'1.3.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'1.5.2'}  | ${'1.5.+'}
+    ${'1.3.+'}               | ${null}       | ${null}        | ${'2'}      | ${'2'}
     ${'[1.2.3]'}             | ${'pin'}      | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.0.0,1.2.3]'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.2.4'}  | ${'1.2.4'}
     ${'[1.0.0,1.2.23]'}      | ${'pin'}      | ${'1.0.0'}     | ${'1.2.23'} | ${'1.2.23'}
@@ -288,6 +295,6 @@ describe('modules/versioning/gradle/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 });

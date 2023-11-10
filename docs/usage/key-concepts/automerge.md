@@ -19,7 +19,7 @@ This means merging multiple branches in a row won't work reliably, so we prefer 
 What all this means is that Renovate will only automerge at most one branch/PR per target branch per run, before you need to wait for the next run.
 
 As a general guide, we recommend that you enable automerge for any type of dependency updates where you would select "merge" anyway.
-For any updates where you want to review the release notes - or code - before you merge, you can keep automerge disabled.
+For any updates where you want to review the changelogs - or code - before you merge, you can keep automerge disabled.
 
 Automerge works particularly well for `devDependencies` as well as for production `dependencies` in projects which have great test coverage.
 
@@ -27,7 +27,7 @@ For example, if you have Jest or Mocha as a development dependency, and it has a
 If you have a linter like ESLint or TSLint and its update passes... automerge them!
 If you have an API with 100% test coverage and Express is updated... automerge it!
 
-![Automerged PR](/assets/images/automerged-pr.png){ loading=lazy }
+![Automerged PR](../assets/images/automerged-pr.png){ loading=lazy }
 
 ## Configuration examples
 
@@ -35,9 +35,8 @@ If you have an API with 100% test coverage and Express is updated... automerge i
 
 The lowest risk type of update to automerge is probably `lockFileMaintenance`.
 When Renovate performs lock file maintenance, it leaves the project dependency definitions unchanged, but refreshes the lock file completely so that the latest versions according to the package file constraints are installed.
-Here is an example of automerging lock file maintenance:
 
-```json
+```json title="Example of automerging lock file maintenance"
 {
   "lockFileMaintenance": {
     "enabled": true,
@@ -52,7 +51,7 @@ Automerging lint tool updates can be a real time-saver.
 Sometimes an update to a lint tool or plugin definition causes tests to fail, and that is usually deliberate/intentional because the lint authors have added a new rule that you need to adhere to.
 But in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well be automerged:
 
-```json
+```json title="Example of automerging lint and Prettier development packages"
 {
   "packageRules": [
     {
@@ -68,7 +67,7 @@ But in many cases the new version(s) will pass tests, and if so then there's rea
 
 Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they follow the spec), so many users enable automerge for these too:
 
-```json
+```json title="Example of automerging non-major updates in SemVer ecosystem"
 {
   "packageRules": [
     {
@@ -86,7 +85,7 @@ The `matchCurrentVersion` setting above is a rule to exclude any dependencies wh
 
 Say you want to automerge `patch` and `minor` updates for packages in the `group:ionic-nativeMonorepo` preset:
 
-```json
+```json title="Example of automerging patch and minor updates in a group from a preset"
 {
   "packageRules": [
     {
@@ -103,9 +102,7 @@ Say you want to automerge `patch` and `minor` updates for packages in the `group
 By default, Renovate uses platform-native automerge to speed up automerging.
 If you don't want Renovate to use the platform-native automerge, then set `platformAutomerge` to `false`.
 
-For example:
-
-```json
+```json title="Example of disabling platform-native automerge"
 {
   "lockFileMaintenance": {
     "enabled": true,

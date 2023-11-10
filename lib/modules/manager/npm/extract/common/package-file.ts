@@ -15,7 +15,7 @@ import { extractOverrideDepsRec } from './overrides';
 
 export function extractPackageJson(
   packageJson: NpmPackage,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent<NpmManagerData> | null {
   logger.trace(`npm.extractPackageJson(${packageFile})`);
   const deps: PackageDependency[] = [];
@@ -33,7 +33,7 @@ export function extractPackageJson(
   }
   const packageJsonName = packageJson.name;
   logger.debug(
-    `npm file ${packageFile} has name ${JSON.stringify(packageJsonName)}`
+    `npm file ${packageFile} has name ${JSON.stringify(packageJsonName)}`,
   );
   const packageFileVersion = packageJson.version;
 
@@ -55,7 +55,7 @@ export function extractPackageJson(
       try {
         if (depType === 'packageManager') {
           const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
-            dependencies as string
+            dependencies as string,
           );
           // istanbul ignore next
           if (!match?.groups) {
@@ -64,7 +64,7 @@ export function extractPackageJson(
           dependencies = { [match.groups.name]: match.groups.range };
         }
         for (const [key, val] of Object.entries(
-          dependencies as NpmPackageDependency
+          dependencies as NpmPackageDependency,
         )) {
           const depName = parseDepName(depType, key);
           let dep: PackageDependency = {
@@ -79,8 +79,8 @@ export function extractPackageJson(
             deps.push(
               ...extractOverrideDepsRec(
                 [depName],
-                val as unknown as NpmManagerData
-              )
+                val as unknown as NpmManagerData,
+              ),
             );
           } else {
             // TODO: fix type #22198
@@ -93,7 +93,7 @@ export function extractPackageJson(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { fileName: packageFile, depType, err },
-          'Error parsing package.json'
+          'Error parsing package.json',
         );
         return null;
       }
@@ -109,7 +109,7 @@ export function extractPackageJson(
     managerData: {
       packageJsonName,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
-        packageJson.packageManager
+        packageJson.packageManager,
       ),
     },
   };

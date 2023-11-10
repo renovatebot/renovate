@@ -29,6 +29,6 @@ describe('util/http/hooks', () => {
       hook(response);
       const calledTimes = expected ? 1 : 0;
       expect(destroy).toHaveBeenCalledTimes(calledTimes);
-    }
+    },
   );
 });

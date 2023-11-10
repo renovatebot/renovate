@@ -33,6 +33,13 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
     "packageName": "https://example.com/organization/repo_name.git",
   },
   {
+    "currentValue": "3.0.0",
+    "datasource": "git-tags",
+    "depName": "namespace.mycollection",
+    "depType": "galaxy-collection",
+    "packageName": "https://example.com/organization/repo_name.git",
+  },
+  {
     "currentValue": "1.2.2",
     "datasource": "git-tags",
     "depName": "example.com/organization/repo_name",

@@ -11,7 +11,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: undefined,
-        }
+        },
       );
       expect(result).toBeNull();
     });
@@ -23,7 +23,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: ['org/repo'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -35,7 +35,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: ['/^org/repo$/'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -47,7 +47,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: ['/[/'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -59,7 +59,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: ['/^org/other-repo$/'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -71,7 +71,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: ['org/**'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -83,7 +83,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: ['other-org/**'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -95,7 +95,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           matchRepositories: ['/^org/repo$/', '**/*-archived'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -109,7 +109,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: undefined,
-        }
+        },
       );
       expect(result).toBeNull();
     });
@@ -121,7 +121,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: ['org/repo'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -133,7 +133,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: ['/^org/repo$/'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -145,7 +145,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: ['/[/'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -157,7 +157,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: ['/^org/other-repo$/'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -169,7 +169,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: ['org/**'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -181,7 +181,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: ['other-org/**'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -193,7 +193,7 @@ describe('util/package-rules/repositories', () => {
         },
         {
           excludeRepositories: ['/^org/repo$/', '**/*-archived'],
-        }
+        },
       );
       expect(result).toBeTrue();
     });

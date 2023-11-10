@@ -10,14 +10,14 @@ import { clone } from '../../../../util/clone';
 import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 
 async function getOnboardingConfig(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<RenovateSharedConfig | undefined> {
   let onboardingConfig = clone(config.onboardingConfig);
 
   let orgPreset: string | undefined;
 
   logger.debug(
-    'Checking if this org/owner has a default Renovate preset which can be used.'
+    'Checking if this org/owner has a default Renovate preset which can be used.',
   );
 
   // TODO #22198
@@ -65,7 +65,7 @@ async function getOnboardingConfig(
 
   if (orgPreset) {
     logger.debug(
-      `Found org preset ${orgPreset} - using it in onboarding config`
+      `Found org preset ${orgPreset} - using it in onboarding config`,
     );
     onboardingConfig = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
@@ -74,7 +74,7 @@ async function getOnboardingConfig(
   } else {
     // Organization preset did not exist
     logger.debug(
-      'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.'
+      'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.',
     );
   }
 
@@ -84,7 +84,7 @@ async function getOnboardingConfig(
 
 async function getOnboardingConfigContents(
   config: RenovateConfig,
-  fileName: string
+  fileName: string,
 ): Promise<string> {
   const codeFormat = await EditorConfig.getCodeFormat(fileName);
   const jsonWriter = new JSONWriter(codeFormat);

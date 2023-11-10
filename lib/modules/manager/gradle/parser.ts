@@ -3,6 +3,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import { qApplyFrom } from './parser/apply-from';
 import { qAssignments } from './parser/assignments';
+import { qKotlinImport } from './parser/common';
 import { qDependencies, qLongFormDep } from './parser/dependencies';
 import { setParseGradleFunc } from './parser/handlers';
 import { qKotlinMultiObjectVarAssignment } from './parser/objects';
@@ -29,6 +30,7 @@ const ctx: Ctx = {
   registryUrls: [],
 
   varTokens: [],
+  tmpKotlinImportStore: [],
   tmpNestingDepth: [],
   tmpTokenStore: {},
   tokenMap: {},
@@ -41,7 +43,7 @@ export function parseGradle(
   initVars: PackageVariables = {},
   packageFile = '',
   fileContents: Record<string, string | null> = {},
-  recursionDepth = 0
+  recursionDepth = 0,
 ): ParseGradleResult {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
@@ -51,13 +53,14 @@ export function parseGradle(
     type: 'root-tree',
     maxDepth: 32,
     search: q.alt<Ctx>(
+      qKotlinImport,
       qAssignments,
       qDependencies,
       qPlugins,
       qRegistryUrls,
       qVersionCatalogs,
       qLongFormDep,
-      qApplyFrom
+      qApplyFrom,
     ),
   });
 
@@ -81,7 +84,7 @@ export function parseGradle(
 export function parseKotlinSource(
   input: string,
   initVars: PackageVariables = {},
-  packageFile = ''
+  packageFile = '',
 ): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
@@ -108,12 +111,12 @@ export function parseKotlinSource(
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';
 const propRegex = regEx(
-  `^(?<leftPart>\\s*(?<key>${propWord})\\s*[= :]\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
+  `^(?<leftPart>\\s*(?<key>${propWord})\\s*[= :]\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`,
 );
 
 export function parseProps(
   input: string,
-  packageFile?: string
+  packageFile?: string,
 ): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   let offset = 0;
   const vars: PackageVariables = {};

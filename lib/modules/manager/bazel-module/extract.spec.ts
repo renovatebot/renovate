@@ -22,7 +22,7 @@ describe('modules/manager/bazel-module/extract', () => {
     it('returns null if fails to parse', async () => {
       const result = await extractPackageFile(
         'blahhhhh:foo:@what\n',
-        'MODULE.bazel'
+        'MODULE.bazel',
       );
       expect(result).toBeNull();
     });
@@ -87,7 +87,7 @@ describe('modules/manager/bazel-module/extract', () => {
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
             packageName: 'example/rules_foo',
           },
-        ])
+        ]),
       );
     });
 
@@ -143,7 +143,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ])
+        ]),
       );
     });
 
@@ -174,7 +174,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ])
+        ]),
       );
     });
 
@@ -209,7 +209,7 @@ describe('modules/manager/bazel-module/extract', () => {
             skipReason: 'ignored',
             registryUrls: ['https://example.com/custom_registry'],
           },
-        ])
+        ]),
       );
     });
 

@@ -94,7 +94,7 @@ describe('modules/versioning/maven/index', () => {
       expect(getMajor(input)).toBe(major);
       expect(getMinor(input)).toBe(minor);
       expect(getPatch(input)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -123,7 +123,7 @@ describe('modules/versioning/maven/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -140,7 +140,7 @@ describe('modules/versioning/maven/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(maven.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -150,7 +150,7 @@ describe('modules/versioning/maven/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(maven.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -178,6 +178,6 @@ describe('modules/versioning/maven/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 });

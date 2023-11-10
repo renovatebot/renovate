@@ -25,7 +25,7 @@ const perlVersionMatch = q
   .alt(q.op(','), q.op('=>'))
   .alt(
     q.num<Ctx>((ctx, { value: perlVersion }) => ({ ...ctx, perlVersion })),
-    q.str<Ctx>((ctx, { value: perlVersion }) => ({ ...ctx, perlVersion }))
+    q.str<Ctx>((ctx, { value: perlVersion }) => ({ ...ctx, perlVersion })),
   )
   .op(';')
   .handler((ctx) => {
@@ -49,7 +49,7 @@ const phasedRequiresMatch = q.sym<Ctx>(
   (ctx, { value: phase }) => {
     ctx.tempPhase = phase.replace(/_requires/, '').replace(/author/, 'develop');
     return ctx;
-  }
+  },
 );
 
 // requires 'Foo::Bar';
@@ -71,8 +71,8 @@ const moduleMatch = q
       q.str<Ctx>((ctx, { value }) => {
         const currentValue = value.replace(/^(?:\s*(?:==|>=|>))?\s*v?/, '');
         return { ...ctx, currentValue };
-      })
-    )
+      }),
+    ),
   )
   .op(';')
   .handler((ctx) => {
@@ -108,7 +108,7 @@ const phaseRegex = /^(?:configure|build|test|runtime|develop)/;
 
 const phaseMatch = q.alt<Ctx>(
   q.sym(phaseRegex, (ctx, { value: phase }) => ({ ...ctx, phase })),
-  q.str(phaseRegex, (ctx, { value: phase }) => ({ ...ctx, phase }))
+  q.str(phaseRegex, (ctx, { value: phase }) => ({ ...ctx, phase })),
 );
 
 // on 'configure' => sub {
@@ -138,7 +138,7 @@ const query = q.tree<Ctx>({
 });
 
 export function parse(
-  content: string
+  content: string,
 ): Pick<Ctx, 'deps' | 'perlVersion'> | null {
   return cpanfile.query(content, query, {
     deps: [],

@@ -15,17 +15,18 @@ const hostRules = mocked(_hostRules);
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
     it.each`
-      module                     | datasource          | packageName
-      ${'gopkg.in/foo'}          | ${'github-tags'}    | ${'go-foo/foo'}
-      ${'gopkg.in/foo/bar'}      | ${'github-tags'}    | ${'foo/bar'}
-      ${'github.com/foo/bar'}    | ${'github-tags'}    | ${'foo/bar'}
-      ${'bitbucket.org/foo/bar'} | ${'bitbucket-tags'} | ${'foo/bar'}
+      module                           | datasource          | packageName
+      ${'gopkg.in/foo'}                | ${'github-tags'}    | ${'go-foo/foo'}
+      ${'gopkg.in/foo/bar'}            | ${'github-tags'}    | ${'foo/bar'}
+      ${'github.com/foo/bar'}          | ${'github-tags'}    | ${'foo/bar'}
+      ${'bitbucket.org/foo/bar'}       | ${'bitbucket-tags'} | ${'foo/bar'}
+      ${'code.cloudfoundry.org/lager'} | ${'github-tags'}    | ${'cloudfoundry/lager'}
     `(
       '$module -> $datasource: $packageName',
       async ({ module, datasource, packageName }) => {
         const res = await BaseGoDatasource.getDatasource(module);
         expect(res).toMatchObject({ datasource, packageName });
-      }
+      },
     );
   });
 
@@ -56,7 +57,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200);
 
         const res = await BaseGoDatasource.getDatasource(
-          'example.com/example/module'
+          'example.com/example/module',
         );
 
         expect(res).toBeNull();
@@ -65,7 +66,7 @@ describe('modules/datasource/go/base', () => {
       it('returns null for go-import prefix mismatch', async () => {
         const mismatchResponse = Fixtures.get('go-get-github-ee.html').replace(
           'git.enterprise.com/example/module',
-          'git.enterprise.com/badexample/badmodule'
+          'git.enterprise.com/badexample/badmodule',
         );
         httpMock
           .scope('https://example.com')
@@ -73,7 +74,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, mismatchResponse);
 
         const res = await BaseGoDatasource.getDatasource(
-          'example.com/example/module'
+          'example.com/example/module',
         );
 
         expect(res).toBeNull();
@@ -102,7 +103,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-github-ee.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'git.enterprise.com/example/module'
+          'git.enterprise.com/example/module',
         );
 
         expect(res).toEqual({
@@ -119,7 +120,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'gitlab.com/group/subgroup'
+          'gitlab.com/group/subgroup',
         );
 
         expect(res).toEqual({
@@ -136,7 +137,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'gitlab.com/group/subgroup/private.git/v3'
+          'gitlab.com/group/subgroup/private.git/v3',
         );
 
         expect(res).toEqual({
@@ -153,7 +154,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'gitlab.com/group/subgroup/my.git.module'
+          'gitlab.com/group/subgroup/my.git.module',
         );
 
         expect(res).toEqual({
@@ -166,7 +167,7 @@ describe('modules/datasource/go/base', () => {
       it('supports GitLab with URL mismatch', async () => {
         const mismatchingResponse = Fixtures.get('go-get-github.html').replace(
           'https://github.com/golang/text/',
-          'https://gitlab.com/golang/text/'
+          'https://gitlab.com/golang/text/',
         );
         httpMock
           .scope('https://golang.org')
@@ -189,7 +190,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'gitlab.com/group/subgroup/v2'
+          'gitlab.com/group/subgroup/v2',
         );
 
         expect(res).toEqual({
@@ -207,7 +208,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab-ee.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'my.custom.domain/golang/myrepo'
+          'my.custom.domain/golang/myrepo',
         );
 
         expect(res).toEqual({
@@ -225,7 +226,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab-ee-subgroup.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'my.custom.domain/golang/subgroup/myrepo'
+          'my.custom.domain/golang/subgroup/myrepo',
         );
 
         expect(res).toEqual({
@@ -243,7 +244,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab-ee-subgroup.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'my.custom.domain/golang/subgroup/myrepo/v2'
+          'my.custom.domain/golang/subgroup/myrepo/v2',
         );
 
         expect(res).toEqual({
@@ -261,7 +262,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab-ee-private-subgroup.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'my.custom.domain/golang/subgroup/myrepo.git/v2'
+          'my.custom.domain/golang/subgroup/myrepo.git/v2',
         );
 
         expect(res).toEqual({
@@ -279,7 +280,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, Fixtures.get('go-get-gitlab-ee-subgroup.html'));
 
         const res = await BaseGoDatasource.getDatasource(
-          'my.custom.domain/golang/subgroup/myrepo/monorepo'
+          'my.custom.domain/golang/subgroup/myrepo/monorepo',
         );
 
         expect(res).toEqual({
@@ -332,7 +333,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, meta);
 
         const res = await BaseGoDatasource.getDatasource(
-          'my.custom.domain/golang/myrepo'
+          'my.custom.domain/golang/myrepo',
         );
 
         expect(res).toEqual({
@@ -351,7 +352,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, meta);
 
         const res = await BaseGoDatasource.getDatasource(
-          'dev.azure.com/my-organization/my-project/_git/my-repo.git'
+          'dev.azure.com/my-organization/my-project/_git/my-repo.git',
         );
 
         expect(res).toEqual({
@@ -370,7 +371,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, meta);
 
         const res = await BaseGoDatasource.getDatasource(
-          'example.com/uncommon'
+          'example.com/uncommon',
         );
 
         expect(res).toEqual({
@@ -388,7 +389,7 @@ describe('modules/datasource/go/base', () => {
           .reply(200, meta);
 
         const res = await BaseGoDatasource.getDatasource(
-          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go'
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go',
         );
 
         expect(res).toBeNull();

@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -32,7 +33,7 @@ export async function generateLockFile(
   env: NodeJS.ProcessEnv,
   filename: string,
   config: Partial<PostUpdateConfig> = {},
-  upgrades: Upgrade[] = []
+  upgrades: Upgrade[] = [],
 ): Promise<GenerateLockFileResult> {
   // TODO: don't assume package-lock.json is in the same directory
   const lockFileName = upath.join(lockFileDir, filename);
@@ -49,10 +50,14 @@ export async function generateLockFile(
         config.constraints?.npm ??
         getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
     };
+    const supportsPreferDedupeFlag =
+      !npmToolConstraint.constraint ||
+      semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     const commands: string[] = [];
     let cmdOptions = '';
     if (
-      postUpdateOptions?.includes('npmDedupe') === true ||
+      (postUpdateOptions?.includes('npmDedupe') === true &&
+        !supportsPreferDedupeFlag) ||
       skipInstalls === false
     ) {
       logger.debug('Performing node_modules install');
@@ -60,6 +65,11 @@ export async function generateLockFile(
     } else {
       logger.debug('Updating lock file only');
       cmdOptions += '--package-lock-only --no-audit';
+    }
+
+    if (postUpdateOptions?.includes('npmDedupe') && supportsPreferDedupeFlag) {
+      logger.debug('Deduplicate dependencies on installation');
+      cmdOptions += ' --prefer-dedupe';
     }
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
@@ -107,7 +117,7 @@ export async function generateLockFile(
 
         if (currentWorkspaceUpdates.length) {
           const updateCmd = `npm install ${cmdOptions} --workspace=${workspace} ${currentWorkspaceUpdates.join(
-            ' '
+            ' ',
           )}`;
           commands.push(updateCmd);
         }
@@ -130,21 +140,24 @@ export async function generateLockFile(
     }
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('npmDedupe')) {
-      logger.debug('Performing npm dedupe');
+    if (
+      config.postUpdateOptions?.includes('npmDedupe') &&
+      !supportsPreferDedupeFlag
+    ) {
+      logger.debug('Performing npm dedupe after installation');
       commands.push('npm dedupe');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
       );
       try {
         await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing package-lock.json for lock file maintenance'
+          'Error removing package-lock.json for lock file maintenance',
         );
       }
     }
@@ -159,7 +172,7 @@ export async function generateLockFile(
     ) {
       await renameLocalFile(
         upath.join(lockFileDir, 'package-lock.json'),
-        upath.join(lockFileDir, 'npm-shrinkwrap.json')
+        upath.join(lockFileDir, 'npm-shrinkwrap.json'),
       );
     }
 
@@ -167,7 +180,7 @@ export async function generateLockFile(
     // TODO #22198
     lockFile = (await readLocalFile(
       upath.join(lockFileDir, filename),
-      'utf8'
+      'utf8',
     ))!;
 
     // Massage lockfile counterparts of package.json that were modified
@@ -203,7 +216,7 @@ export async function generateLockFile(
         err,
         type: 'npm',
       },
-      'lock file error'
+      'lock file error',
     );
     if (err.stderr?.includes('ENOSPC: no space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -215,7 +228,7 @@ export async function generateLockFile(
 
 export function divideWorkspaceAndRootDeps(
   lockFileDir: string,
-  lockUpdates: Upgrade[]
+  lockUpdates: Upgrade[],
 ): {
   lockRootUpdates: Upgrade[];
   lockWorkspacesUpdates: Upgrade[];
@@ -232,7 +245,7 @@ export function divideWorkspaceAndRootDeps(
     upgrade.managerData ??= {};
     upgrade.managerData.packageKey = generatePackageKey(
       upgrade.packageName!,
-      upgrade.newVersion!
+      upgrade.newVersion!,
     );
     if (
       upgrade.managerData.workspacesPackages?.length &&
@@ -240,7 +253,7 @@ export function divideWorkspaceAndRootDeps(
     ) {
       const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
       const packageFileDir = trimSlashes(
-        upgrade.packageFile.replace('package.json', '')
+        upgrade.packageFile.replace('package.json', ''),
       );
 
       // workspaceDir = packageFileDir - lockFileDir
@@ -252,18 +265,28 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns) {
-          if (minimatch(workspacePattern).match(workspaceDir)) {
+          const massagedPattern = (workspacePattern as string).replace(
+            /^\.\//,
+            '',
+          );
+          if (minimatch(massagedPattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;
           }
         }
-        if (
-          workspaceName &&
-          !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
-        ) {
-          workspaces.add(workspaceName);
-          upgrade.workspace = workspaceName;
-          lockWorkspacesUpdates.push(upgrade);
+        if (workspaceName) {
+          if (
+            !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
+          ) {
+            workspaces.add(workspaceName);
+            upgrade.workspace = workspaceName;
+            lockWorkspacesUpdates.push(upgrade);
+          }
+        } else {
+          logger.warn(
+            { workspacePatterns, workspaceDir },
+            'workspaceDir not found',
+          );
         }
         continue;
       }

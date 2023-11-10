@@ -25,6 +25,6 @@ export const Doc = z.object({
 export type Doc = z.infer<typeof Doc>;
 
 export const LockVersion = Yaml.pipe(
-  z.object({ version: z.string() }).transform(({ version }) => version)
+  z.object({ version: z.string() }).transform(({ version }) => version),
 );
 export type LockVersion = z.infer<typeof LockVersion>;

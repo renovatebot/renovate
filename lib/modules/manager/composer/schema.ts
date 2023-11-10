@@ -62,7 +62,7 @@ const DisablePackagist = z.object({ type: z.literal('disable-packagist') });
 export type DisablePackagist = z.infer<typeof DisablePackagist>;
 
 const bitbucketUrlRegex = regEx(
-  /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/
+  /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 
 export const ReposRecord = LooseRecord(z.union([Repo, z.literal(false)]), {
@@ -108,7 +108,7 @@ export const ReposArray = LooseArray(
     onError: ({ error: err }) => {
       logger.debug({ err }, 'Composer: error parsing repositories array');
     },
-  }
+  },
 ).transform((repos) => {
   const result: (NamedRepo | DisablePackagist)[] = [];
   for (let idx = 0; idx < repos.length; idx++) {
@@ -158,7 +158,7 @@ export const Repos = z
 export type Repos = z.infer<typeof Repos>;
 
 const RequireDefs = LooseRecord(z.string().transform((x) => x.trim())).catch(
-  {}
+  {},
 );
 
 export const PackageFile = z
@@ -189,7 +189,7 @@ export const PackageFile = z
       repositories,
       require,
       requireDev,
-    })
+    }),
   );
 export type PackageFile = z.infer<typeof PackageFile>;
 
@@ -210,7 +210,7 @@ export const Lockfile = z
       'plugin-api-version': pluginApiVersion,
       packages,
       'packages-dev': packagesDev,
-    }) => ({ pluginApiVersion, packages, packagesDev })
+    }) => ({ pluginApiVersion, packages, packagesDev }),
   );
 export type Lockfile = z.infer<typeof Lockfile>;
 
@@ -246,9 +246,9 @@ export const ComposerExtract = z
                 logger.debug({ err }, 'Composer: lockfile parsing error');
                 return null;
               }),
-          ])
+          ]),
         ),
-    })
+    }),
   )
   .transform(({ file, lockfile, lockfileName }) => {
     const { composerJsonType, require, requireDev } = file;
@@ -309,9 +309,8 @@ export const ComposerExtract = z
 
         const gitRepo = gitRepos[depName];
         if (gitRepo) {
-          const bitbucketMatchGroups = bitbucketUrlRegex.exec(
-            gitRepo.url
-          )?.groups;
+          const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitRepo.url)
+            ?.groups;
 
           if (bitbucketMatchGroups) {
             dep.datasource = BitbucketTagsDatasource.id;

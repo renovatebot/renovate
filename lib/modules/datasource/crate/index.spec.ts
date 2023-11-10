@@ -36,7 +36,7 @@ function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
         const path = `${clonePath}/my/pk/mypkg`;
         fs.mkdirSync(dirname(path), { recursive: true });
         fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-      }
+      },
     );
 
   simpleGit.mockReturnValue({
@@ -51,7 +51,7 @@ function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
     .fn()
     .mockName('clone')
     .mockImplementation((_registryUrl: string, _clonePath: string, _opts) =>
-      Promise.reject(new Error('mocked error'))
+      Promise.reject(new Error('mocked error')),
     );
 
   simpleGit.mockReturnValue({
@@ -128,7 +128,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -138,7 +138,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: ['3'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -150,7 +150,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: ['https://crates.io'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -165,7 +165,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: ['https://crates.io'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -177,7 +177,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: ['https://crates.io'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -188,7 +188,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'some_crate',
           registryUrls: ['https://crates.io'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -199,7 +199,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'some_crate',
           registryUrls: ['https://crates.io'],
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -210,7 +210,7 @@ describe('modules/datasource/crate/index', () => {
           datasource,
           packageName: 'some_crate',
           registryUrls: ['https://crates.io'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -383,7 +383,7 @@ describe('modules/datasource/crate/index', () => {
       };
       const crateDatasource = new CrateDatasource();
       await expect(
-        crateDatasource.fetchCrateRecordsPayload(info, 'benedict')
+        crateDatasource.fetchCrateRecordsPayload(info, 'benedict'),
       ).toReject();
     });
   });
