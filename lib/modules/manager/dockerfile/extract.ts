@@ -251,6 +251,7 @@ export function extractPackageFile(
 
   let escapeChar = '\\\\';
   let lookForEscapeChar = true;
+  let lookForSyntaxDirective = true;
 
   const lineFeed = content.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
   const lines = content.split(newlineRegex);
@@ -272,6 +273,33 @@ export function extractPackageFile(
       }
     }
 
+    if (lookForSyntaxDirective) {
+      const syntaxRegex = regEx(
+        '^#[ \\t]*syntax[ \\t]*=[ \\t]*(?<image>\\S+)',
+        'im',
+      );
+      const syntaxMatch = instruction.match(syntaxRegex);
+      if (syntaxMatch?.groups?.image) {
+        const syntaxImage = syntaxMatch.groups.image;
+        const lineNumberRanges: number[][] = [
+          [lineNumberInstrStart, lineNumber],
+        ];
+        const dep = getDep(syntaxImage, true, config.registryAliases);
+        dep.depType = 'syntax';
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+        logger.trace(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Dockerfile # syntax',
+        );
+        deps.push(dep);
+      }
+      lookForSyntaxDirective = false;
+    }
+
     const lineContinuationRegex = regEx(escapeChar + '[ \\t]*$|^[ \\t]*#', 'm');
     let lineLookahead = instruction;
     while (
@@ -281,25 +309,6 @@ export function extractPackageFile(
     ) {
       lineLookahead = lines[++lineNumber] || '';
       instruction += '\n' + lineLookahead;
-    }
-
-    const syntaxRegex = regEx('^#[ \\t]*syntax[ \\t]*=[ \\t]*(?<image>\\S+)', 'im');
-    const syntaxMatch = instruction.match(syntaxRegex);
-    if (syntaxMatch?.groups?.image) {
-      const syntaxImage = syntaxMatch.groups.image;
-      const lineNumberRanges: number[][] = [[lineNumberInstrStart, lineNumber]];
-      const dep = getDep(syntaxImage, true, config.registryAliases);
-      dep.depType = 'syntax';
-      processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
-      logger.trace(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Dockerfile # syntax',
-      );
-      deps.push(dep);
     }
 
     const argRegex = regEx(

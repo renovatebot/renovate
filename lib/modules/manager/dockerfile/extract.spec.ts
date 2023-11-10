@@ -1194,6 +1194,28 @@ describe('modules/manager/dockerfile/extract', () => {
     });
   });
 
+  it('ignores # syntax statements after first line', () => {
+    const res = extractPackageFile(
+      'FROM alpine:3.13.5\n' + '# syntax=docker/dockerfile:1.1.7\n',
+      '',
+      {},
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.13.5',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'final',
+          replaceString: 'alpine:3.13.5',
+        },
+      ],
+    });
+  });
+
   describe('getDep()', () => {
     it('rejects null', () => {
       expect(getDep(null)).toEqual({ skipReason: 'invalid-value' });
