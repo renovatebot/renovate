@@ -31,7 +31,7 @@ export class Puppetfile {
   }
 
   public getModulesOfForge(
-    forgeUrl: string | null | undefined
+    forgeUrl: string | null | undefined,
   ): PuppetfileModule[] {
     const modules = this.forgeModules.get(forgeUrl ?? null);
 
@@ -90,7 +90,7 @@ export function parsePuppetfile(content: string): Puppetfile {
 
 function fillPuppetfileModule(
   currentPuppetfileModule: PuppetfileModule,
-  value: string
+  value: string,
 ): void {
   // "positional" module values
   if (currentPuppetfileModule.name === undefined) {

@@ -12,7 +12,7 @@ import type { ReadContentResult } from './types';
  * updateArtifacts runs hermit install for each updated dependencies
  */
 export async function updateArtifacts(
-  update: UpdateArtifact
+  update: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName } = update;
   try {
@@ -77,7 +77,7 @@ async function getContent(file: string): Promise<ReadContentResult> {
  */
 function getAddResult(
   path: string,
-  contentRes: ReadContentResult
+  contentRes: ReadContentResult,
 ): UpdateArtifactsResult {
   return {
     file: {
@@ -107,13 +107,13 @@ function getDeleteResult(path: string): UpdateArtifactsResult {
  * has been performed for all packages
  */
 async function getUpdateResult(
-  packageFileName: string
+  packageFileName: string,
 ): Promise<UpdateArtifactsResult[]> {
   const hermitFolder = `${upath.dirname(packageFileName)}/`;
   const hermitChanges = await getRepoStatus(hermitFolder);
   logger.debug(
     { hermitChanges, hermitFolder },
-    `hermit changes after package update`
+    `hermit changes after package update`,
   );
 
   // handle added files
@@ -123,7 +123,7 @@ async function getUpdateResult(
       const contents = await getContent(path);
 
       return getAddResult(path, contents);
-    }
+    },
   );
 
   const deleted = hermitChanges.deleted.map(getDeleteResult);
@@ -136,7 +136,7 @@ async function getUpdateResult(
         getDeleteResult(path), // delete existing link
         getAddResult(path, contents), // add a new link
       ];
-    }
+    },
   );
 
   const renamed = await p.map(
@@ -147,7 +147,7 @@ async function getUpdateResult(
       const toContents = await getContent(to);
 
       return [getDeleteResult(from), getAddResult(to, toContents)];
-    }
+    },
   );
 
   return [
@@ -185,13 +185,13 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
           currentVersion: pkg.currentVersion,
           newValue: pkg.newValue,
         },
-        'missing package update information'
+        'missing package update information',
       );
 
       throw new UpdateHermitError(
         getHermitPackage(pkg.depName ?? '', pkg.currentVersion ?? ''),
         getHermitPackage(pkg.depName ?? '', pkg.newValue ?? ''),
-        'invalid package to update'
+        'invalid package to update',
       );
     }
 
@@ -218,7 +218,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
       packageFile: update.packageFileName,
       packagesToInstall,
     },
-    `performing updates`
+    `performing updates`,
   );
 
   try {
@@ -230,7 +230,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
       fromPackages,
       packagesToInstall,
       e.stderr,
-      e.stdout
+      e.stdout,
     );
   }
 }

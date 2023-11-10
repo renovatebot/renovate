@@ -16,7 +16,7 @@ describe('workers/repository/update/pr/changelog/source', () => {
         changelogSource.getBaseUrl({
           ...upgrade,
           sourceUrl: undefined,
-        })
+        }),
       ).toBeEmptyString();
     });
 
@@ -31,13 +31,13 @@ describe('workers/repository/update/pr/changelog/source', () => {
         changelogSource.getRepositoryFromUrl({
           ...upgrade,
           sourceUrl: undefined,
-        })
+        }),
       ).toBeEmptyString();
     });
 
     it('handles sourceUrl', () => {
       expect(changelogSource.getRepositoryFromUrl(upgrade)).toBe(
-        'renovatebot/renovate'
+        'renovatebot/renovate',
       );
     });
   });

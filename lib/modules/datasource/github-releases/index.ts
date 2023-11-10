@@ -43,11 +43,11 @@ export class GithubReleasesDatasource extends Datasource {
       currentDigest,
       registryUrl,
     }: DigestConfig,
-    newValue: string
+    newValue: string,
   ): Promise<string | null> {
     logger.debug(
       { repo, currentValue, currentDigest, registryUrl, newValue },
-      'getDigest'
+      'getDigest',
     );
 
     return findCommitOfTag(registryUrl, repo, newValue, this.http);

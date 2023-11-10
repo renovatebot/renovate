@@ -16,7 +16,7 @@ describe('modules/datasource/dart/index', () => {
         await getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'non_sense',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -33,7 +33,7 @@ describe('modules/datasource/dart/index', () => {
         await getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
-        })
+        }),
       ).toBeNull();
 
       const withoutLatest = {
@@ -48,7 +48,7 @@ describe('modules/datasource/dart/index', () => {
         await getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -58,7 +58,7 @@ describe('modules/datasource/dart/index', () => {
         await getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -68,7 +68,7 @@ describe('modules/datasource/dart/index', () => {
         getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -78,7 +78,7 @@ describe('modules/datasource/dart/index', () => {
         await getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
-        })
+        }),
       ).toBeNull();
     });
 

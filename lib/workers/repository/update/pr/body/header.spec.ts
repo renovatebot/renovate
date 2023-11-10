@@ -13,7 +13,7 @@ describe('workers/repository/update/pr/body/header', () => {
         baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
-      })
+      }),
     ).toBe('');
   });
 
@@ -26,7 +26,7 @@ describe('workers/repository/update/pr/body/header', () => {
         baseBranch: 'base',
         upgrades: [],
         prHeader: 'HEADER',
-      })
+      }),
     ).toMatchInlineSnapshot(`
       "HEADER
 

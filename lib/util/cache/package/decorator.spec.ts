@@ -42,7 +42,7 @@ describe('util/cache/package/decorator', () => {
       'some-namespace',
       'cache-decorator:some-key',
       { cachedAt: expect.any(String), value: '111' },
-      30
+      30,
     );
   });
 
@@ -82,7 +82,7 @@ describe('util/cache/package/decorator', () => {
       'namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: null },
-      30
+      30,
     );
   });
 
@@ -130,7 +130,7 @@ describe('util/cache/package/decorator', () => {
       'some-namespace',
       'cache-decorator:some-key',
       { cachedAt: expect.any(String), value: '111' },
-      30
+      30,
     );
   });
 
@@ -152,7 +152,7 @@ describe('util/cache/package/decorator', () => {
       'namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: '111' },
-      30
+      30,
     );
   });
 
@@ -188,7 +188,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        2
+        2,
       );
 
       jest.advanceTimersByTime(1);
@@ -198,7 +198,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '222' },
-        2
+        2,
       );
     });
 
@@ -215,7 +215,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        3
+        3,
       );
 
       jest.advanceTimersByTime(120 * 1000 - 1); // namespace default ttl is 1min
@@ -230,7 +230,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '222' },
-        3
+        3,
       );
     });
 
@@ -243,7 +243,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        2
+        2,
       );
 
       jest.advanceTimersByTime(60 * 1000);
@@ -262,7 +262,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        2
+        2,
       );
 
       jest.advanceTimersByTime(2 * 60 * 1000 - 1);

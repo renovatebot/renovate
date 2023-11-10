@@ -12,17 +12,17 @@ const terraformCloudReleaseBackendUrl =
   TerraformProviderDatasource.defaultRegistryUrls[0];
 const releaseBackendAzurerm = Fixtures.get('releaseBackendAzurerm_2_56_0.json');
 const releaseBackendGoogleSha256 = Fixtures.get(
-  'releaseBackendGoogle_4_84_0_SHA256SUMS'
+  'releaseBackendGoogle_4_84_0_SHA256SUMS',
 );
 const terraformCloudSDCJson = Fixtures.get(
   'service-discovery.json',
-  '../../../../modules/datasource/terraform-provider/'
+  '../../../../modules/datasource/terraform-provider/',
 );
 const terraformCloudBackendAzurermVersions = Fixtures.get(
-  'terraformCloudBackendAzurermVersions.json'
+  'terraformCloudBackendAzurermVersions.json',
 );
 const terraformCloudBackendGoogleVersions = Fixtures.get(
-  'terraformCloudBackendGoogleVersions.json'
+  'terraformCloudBackendGoogleVersions.json',
 );
 
 const log = logger.logger;
@@ -45,7 +45,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     const result = await TerraformProviderHash.createHashes(
       'https://example.com',
       'test/gitlab',
-      '2.56.0'
+      '2.56.0',
     );
     expect(result).toBeNull();
   });
@@ -59,7 +59,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     const result = await TerraformProviderHash.createHashes(
       'https://releases.hashicorp.com',
       'hashicorp/azurerm',
-      '2.59.0'
+      '2.59.0',
     );
     expect(result).toBeNull();
   });
@@ -73,28 +73,28 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     const result = await TerraformProviderHash.createHashes(
       'https://releases.hashicorp.com',
       'hashicorp/azurerm',
-      '2.56.0'
+      '2.56.0',
     );
     expect(result).toBeNull();
   });
 
   it('fail to create hashes', async () => {
     const readStreamLinux = createReadStream(
-      getFixturePath('releaseBackendAzurerm_2_56_0.json')
+      getFixturePath('releaseBackendAzurerm_2_56_0.json'),
     );
     const readStreamDarwin = createReadStream(
-      getFixturePath('releaseBackendAzurerm_2_56_0.json')
+      getFixturePath('releaseBackendAzurerm_2_56_0.json'),
     );
     httpMock
       .scope(releaseBackendUrl)
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .reply(200, releaseBackendAzurerm)
       .get(
-        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
+        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
       )
       .reply(200, readStreamLinux)
       .get(
-        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip'
+        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
       )
       .reply(200, readStreamDarwin);
 
@@ -102,35 +102,35 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       TerraformProviderHash.createHashes(
         'https://releases.hashicorp.com',
         'hashicorp/azurerm',
-        '2.56.0'
-      )
+        '2.56.0',
+      ),
     ).rejects.toThrow();
   });
 
   it('full walkthrough', async () => {
     const readStreamLinux = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
     const readStreamDarwin = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
     httpMock
       .scope(releaseBackendUrl)
       .get('/terraform-provider-azurerm/2.56.0/index.json')
       .reply(200, releaseBackendAzurerm)
       .get(
-        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
+        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
       )
       .reply(200, readStreamLinux)
       .get(
-        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip'
+        '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
       )
       .reply(200, readStreamDarwin);
 
     const result = await TerraformProviderHash.createHashes(
       'https://releases.hashicorp.com',
       'hashicorp/azurerm',
-      '2.56.0'
+      '2.56.0',
     );
     expect(log.error.mock.calls).toMatchSnapshot();
     expect(result).not.toBeNull();
@@ -143,10 +143,10 @@ describe('modules/manager/terraform/lockfile/hash', () => {
 
   it('full walkthrough on terraform cloud', async () => {
     const readStreamLinux = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
     const readStreamDarwin = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
     httpMock
       .scope(terraformCloudReleaseBackendUrl)
@@ -178,22 +178,22 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     httpMock
       .scope('https://github.com')
       .get(
-        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_SHA256SUMS'
+        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_SHA256SUMS',
       )
       .reply(200, releaseBackendGoogleSha256)
       .get(
-        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_linux_amd64.zip'
+        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_linux_amd64.zip',
       )
       .reply(200, readStreamLinux)
       .get(
-        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_darwin_amd64.zip'
+        '/hashicorp/terraform-provider-google/releases/download/v4.84.0/terraform-provider-google_4.84.0_darwin_amd64.zip',
       )
       .reply(200, readStreamDarwin);
 
     const result = await TerraformProviderHash.createHashes(
       'https://registry.terraform.io',
       'hashicorp/google',
-      '4.84.0'
+      '4.84.0',
     );
     expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
@@ -208,10 +208,10 @@ describe('modules/manager/terraform/lockfile/hash', () => {
 
   it('full walkthrough without ziphashes available', async () => {
     const readStreamLinux = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
     const readStreamDarwin = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
     httpMock
       .scope(terraformCloudReleaseBackendUrl)
@@ -239,18 +239,18 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     httpMock
       .scope('https://github.com')
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
+        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
       )
       .reply(200, readStreamLinux)
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip'
+        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
       )
       .reply(200, readStreamDarwin);
 
     const result = await TerraformProviderHash.createHashes(
       'https://registry.terraform.io',
       'hashicorp/azurerm',
-      '2.56.0'
+      '2.56.0',
     );
     expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
@@ -261,10 +261,10 @@ describe('modules/manager/terraform/lockfile/hash', () => {
 
   it('it does not add any ziphashes when the shasums endpoint fails`', async () => {
     const readStreamLinux = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
     const readStreamDarwin = createReadStream(
-      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip'
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
 
     httpMock
@@ -297,22 +297,22 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     httpMock
       .scope('https://github.com')
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
       )
       .replyWithError('endoint failed')
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip'
+        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
       )
       .reply(200, readStreamLinux)
       .get(
-        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip'
+        '/hashicorp/terraform-provider-azurerm/releases/download/v2.56.0/terraform-provider-azurerm_2.56.0_darwin_amd64.zip',
       )
       .reply(200, readStreamDarwin);
 
     const result = await TerraformProviderHash.createHashes(
       'https://registry.terraform.io',
       'hashicorp/azurerm',
-      '2.56.0'
+      '2.56.0',
     );
 
     expect(log.error.mock.calls).toBeEmptyArray();

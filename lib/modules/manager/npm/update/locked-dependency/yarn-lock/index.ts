@@ -7,12 +7,12 @@ import { replaceConstraintVersion } from './replace';
 import type { YarnLock, YarnLockEntryUpdate } from './types';
 
 export function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
   let yarnLock: YarnLock;
   try {
@@ -28,39 +28,39 @@ export function updateLockedDependency(
       const newLockedDeps = getLockedDependencies(
         yarnLock,
         depName,
-        newVersion
+        newVersion,
       );
       if (newLockedDeps.length) {
         logger.debug(
-          `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`
+          `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`,
         );
         return { status: 'already-updated' };
       }
       logger.debug(
-        `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
+        `${depName}@${currentVersion} not found in ${lockFile} - cannot update`,
       );
       return { status: 'update-failed' };
     }
     if ('__metadata' in yarnLock) {
       logger.debug(
-        'Cannot patch Yarn 2+ lock file directly - falling back to using yarn'
+        'Cannot patch Yarn 2+ lock file directly - falling back to using yarn',
       );
       return { status: 'unsupported' };
     }
     logger.debug(
-      `Found matching dependencies with length ${lockedDeps.length}`
+      `Found matching dependencies with length ${lockedDeps.length}`,
     );
     const updateLockedDeps: YarnLockEntryUpdate[] = [];
     for (const lockedDep of lockedDeps) {
       if (semver.matches(newVersion, lockedDep.constraint)) {
         logger.debug(
-          `Dependency ${depName} can be updated from ${newVersion} to ${newVersion} in range ${lockedDep.constraint}`
+          `Dependency ${depName} can be updated from ${newVersion} to ${newVersion} in range ${lockedDep.constraint}`,
         );
         updateLockedDeps.push({ ...lockedDep, newVersion });
         continue;
       }
       logger.debug(
-        `Dependency ${depName} cannot be updated from ${newVersion} to ${newVersion} in range ${lockedDep.constraint}`
+        `Dependency ${depName} cannot be updated from ${newVersion} to ${newVersion} in range ${lockedDep.constraint}`,
       );
       return { status: 'update-failed' };
     }
@@ -72,7 +72,7 @@ export function updateLockedDependency(
         newLockFileContent,
         depName,
         constraint,
-        newVersion
+        newVersion,
       );
     }
     // istanbul ignore if: cannot test

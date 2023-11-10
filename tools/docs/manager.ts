@@ -57,7 +57,7 @@ export const CategoryNames: Record<Category, string> = {
 
 export async function generateManagers(
   dist: string,
-  managerIssuesMap: OpenItems
+  managerIssuesMap: OpenItems,
 ): Promise<void> {
   const allManagers = [...getManagers(), ...getCustomManagers()];
 
@@ -123,7 +123,7 @@ sidebar_label: ${displayName}
       const escapedDatasources = (supportedDatasources || [])
         .map(
           (datasource) =>
-            `[\`${datasource}\`](../../datasource/#${datasource}-datasource)`
+            `[\`${datasource}\`](../../datasource/#${datasource}-datasource)`,
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
@@ -140,7 +140,7 @@ sidebar_label: ${displayName}
     const managerReadmeContent = await readFile(
       `lib/modules/manager/${
         isCustomManager(manager) ? 'custom/' + manager : manager
-      }/readme.md`
+      }/readme.md`,
     );
     if (!isCustomManager(manager)) {
       md += '\n## Additional Information\n\n';
@@ -154,7 +154,7 @@ sidebar_label: ${displayName}
 
   // add noCategoryDisplayName as last option
   const categories = Object.keys(allCategories).filter(
-    (category) => category !== noCategoryID
+    (category) => category !== noCategoryID,
   );
   categories.sort();
   categories.push(noCategoryID);

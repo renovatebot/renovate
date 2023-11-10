@@ -32,7 +32,7 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
   if (config.binarySource === 'docker' || config.binarySource === 'install') {
     if (config.containerbaseDir) {
       logger.debug(
-        'Using configured containerbaseDir: ' + config.containerbaseDir
+        'Using configured containerbaseDir: ' + config.containerbaseDir,
       );
     } else {
       config.containerbaseDir = upath.join(config.cacheDir, 'containerbase');
@@ -65,7 +65,7 @@ function setGlobalHostRules(config: RenovateConfig): void {
 }
 
 export async function globalInitialize(
-  config_: AllConfig
+  config_: AllConfig,
 ): Promise<RenovateConfig> {
   let config = config_;
   await checkVersions();

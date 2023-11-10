@@ -11,13 +11,13 @@ import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
 jest.mock('../../../../util/git');
 
 const formattedMigratedData = Fixtures.getJson(
-  './migrated-data-formatted.json'
+  './migrated-data-formatted.json',
 );
 
 describe('workers/repository/config-migration/branch/rebase', () => {
   const prettierSpy = jest.spyOn(
     MigratedDataFactory,
-    'applyPrettierFormatting'
+    'applyPrettierFormatting',
   );
 
   beforeEach(() => {
@@ -73,7 +73,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
         expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
         expect(git.getFile).toHaveBeenCalledTimes(1);
-      }
+      },
     );
 
     it.each([
@@ -120,7 +120,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
           platformCommit: false,
           baseBranch: 'dev',
         });
-      }
+      },
     );
 
     it.each([
@@ -140,7 +140,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
         expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
-      }
+      },
     );
   });
 

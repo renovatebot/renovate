@@ -41,7 +41,7 @@ describe('modules/versioning/semver/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
   it.each`

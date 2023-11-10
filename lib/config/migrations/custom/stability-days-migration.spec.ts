@@ -8,7 +8,7 @@ describe('config/migrations/custom/stability-days-migration', () => {
       },
       {
         minimumReleaseAge: null,
-      }
+      },
     );
     expect(StabilityDaysMigration).toMigrate(
       {
@@ -16,7 +16,7 @@ describe('config/migrations/custom/stability-days-migration', () => {
       },
       {
         minimumReleaseAge: '2 days',
-      }
+      },
     );
     expect(StabilityDaysMigration).toMigrate(
       {
@@ -24,7 +24,7 @@ describe('config/migrations/custom/stability-days-migration', () => {
       },
       {
         minimumReleaseAge: '1 day',
-      }
+      },
     );
   });
 });

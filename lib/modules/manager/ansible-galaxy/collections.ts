@@ -13,7 +13,7 @@ import {
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
-  dependency: AnsibleGalaxyPackageDependency
+  dependency: AnsibleGalaxyPackageDependency,
 ): void {
   const localDependency = dependency;
   const key = lineMatch[2];
@@ -30,7 +30,7 @@ function interpretLine(
     }
     case 'source': {
       localDependency.managerData.source = value;
-      if (value?.startsWith('git@')) {
+      if (value?.startsWith('git@') || value?.endsWith('.git')) {
         localDependency.packageName = value;
       } else {
         localDependency.registryUrls = value
@@ -52,7 +52,7 @@ function interpretLine(
 
 function handleGitDep(
   dep: AnsibleGalaxyPackageDependency,
-  nameMatch: RegExpExecArray | null
+  nameMatch: RegExpExecArray | null,
 ): void {
   dep.datasource = GitTagsDatasource.id;
 
@@ -67,7 +67,7 @@ function handleGitDep(
     const source = nameMatch.groups.source;
     const massagedDepName = nameMatch.groups.depName.replace(
       regEx(/.git$/),
-      ''
+      '',
     );
     dep.depName = `${nameMatch.groups.hostname}/${massagedDepName}`;
     // remove leading `git+` from URLs like `git+https://...`

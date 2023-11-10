@@ -26,7 +26,7 @@ const RE_SPECIAL_CHARS_STRICT = regEx(/[`~!@#$%^&*()_=+[\]\\|{};':",.<>?]/g);
  */
 function cleanBranchName(
   branchName: string,
-  branchNameStrict?: boolean
+  branchNameStrict?: boolean,
 ): string {
   let cleanedBranchName = branchName;
 
@@ -52,7 +52,7 @@ export function generateBranchName(update: RenovateConfig): void {
     logger.trace('Using group branchName template');
     // TODO: types (#22198)
     logger.trace(
-      `Dependency ${update.depName!} is part of group ${update.groupName}`
+      `Dependency ${update.depName!} is part of group ${update.groupName}`,
     );
     update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
       lower: true,
@@ -76,19 +76,19 @@ export function generateBranchName(update: RenovateConfig): void {
     let hashLength = update.hashedBranchLength - update.branchPrefix!.length;
     if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
-        `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`
+        `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`,
       );
       hashLength = MIN_HASH_LENGTH;
     }
 
     const additionalBranchPrefix = template.compile(
       String(update.additionalBranchPrefix ?? ''),
-      update
+      update,
     );
 
     const branchTopic = template.compile(
       String(update.branchTopic ?? ''),
-      update
+      update,
     );
 
     let hashInput = additionalBranchPrefix + branchTopic;
@@ -102,7 +102,7 @@ export function generateBranchName(update: RenovateConfig): void {
     // TODO: types (#22198)
     update.branchName = `${update.branchPrefix!}${hashedInput.slice(
       0,
-      hashLength
+      hashLength,
     )}`;
   } else {
     update.branchName = template.compile(update.branchName!, update);
@@ -114,6 +114,6 @@ export function generateBranchName(update: RenovateConfig): void {
 
   update.branchName = cleanBranchName(
     update.branchName,
-    update.branchNameStrict
+    update.branchNameStrict,
   );
 }

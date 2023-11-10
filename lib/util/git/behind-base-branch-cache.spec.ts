@@ -24,8 +24,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeNull();
     });
 
@@ -47,8 +47,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeNull();
     });
 
@@ -70,8 +70,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeNull();
     });
 
@@ -93,8 +93,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeNull();
     });
 
@@ -115,8 +115,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeNull();
     });
 
@@ -138,8 +138,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeNull();
     });
 
@@ -161,8 +161,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeNull();
     });
 
@@ -184,8 +184,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha',
           'base_branch',
-          'base_branch_sha'
-        )
+          'base_branch_sha',
+        ),
       ).toBeTrue();
     });
   });
@@ -195,7 +195,7 @@ describe('util/git/behind-base-branch-cache', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setCachedBehindBaseResult(): Branch cache not present'
+        'setCachedBehindBaseResult(): Branch cache not present',
       );
     });
 
@@ -203,7 +203,7 @@ describe('util/git/behind-base-branch-cache', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setCachedBehindBaseResult(): Branch cache not present'
+        'setCachedBehindBaseResult(): Branch cache not present',
       );
     });
 
