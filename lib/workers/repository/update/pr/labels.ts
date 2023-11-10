@@ -13,16 +13,28 @@ export function prepareLabels(config: RenovateConfig): string[] {
     .filter(is.nonEmptyStringAndNotWhitespace);
 }
 
+/**
+ * Determine changed labels between old and new label arrays.
+ *
+ * This function takes two arrays of labels, 'oldLabels' and 'newLabels', and calculates the labels
+ * that need to be added and removed to transition from 'oldLabels' to 'newLabels'.
+ */
 export function getChangedLabels(
   oldLabels: string[],
   newLabels: string[],
-): [string[] | null, string[] | null] {
+): Array<string[] | null> {
   const labelsToAdd = newLabels?.filter((l) => !oldLabels?.includes(l));
   const labelsToRemove = oldLabels?.filter((l) => !newLabels?.includes(l));
 
   return [labelsToAdd, labelsToRemove];
 }
 
+/**
+ * Check if labels in the PR have been modified.
+ *
+ * This function compares two arrays of labels, 'labelsFromDebugData' and 'labelsInPr',
+ * to determine if they are different, indicating that labels in the PR have been modified.
+ */
 export function areLabelsModified(
   labelsFromDebugData: string[],
   labelsInPr: string[],
@@ -39,19 +51,27 @@ export function areLabelsModified(
   return modified;
 }
 
+/**
+ * Determine if labels should be updated in the Pull Request
+ */
 export function shouldUpdateLabels(
   labelsInDebugData: string[] | undefined,
   labelsInPr: string[] | undefined,
   newLabels: string[] | undefined,
 ): boolean {
+  // If the 'labelsInDebugData' field is undefined
+  // it means the PR was created before the update-labels logic was merged, and labels should not be updated.
+  //  Reference: https://github.com/renovatebot/renovate/pull/25340
   if (!is.array(labelsInDebugData)) {
     return false;
   }
 
+  // If the labels in the PR have been modified by the user, they should not be updated.
   if (areLabelsModified(labelsInDebugData, labelsInPr ?? [])) {
     return false;
   }
 
+  // If the 'labels are unchanged, they should not be updated.
   if (dequal((newLabels ?? []).sort(), labelsInDebugData.sort())) {
     return false;
   }

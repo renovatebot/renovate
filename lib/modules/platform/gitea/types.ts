@@ -19,7 +19,6 @@ export interface PR {
   state: PRState;
   title: string;
   body: string;
-  labels?: Record<string, any>[];
   mergeable: boolean;
   created_at: string;
   closed_at: string;
@@ -37,6 +36,10 @@ export interface PR {
   };
   assignees?: any[];
   user?: { username?: string };
+
+  // labels returned from the Gitea API are represented as an array of objects
+  // ref: https://docs.gitea.com/api/1.20/#tag/repository/operation/repoGetPullRequest
+  labels?: Record<string, any>[];
 }
 
 export interface Issue {

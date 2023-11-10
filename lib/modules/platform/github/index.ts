@@ -1697,9 +1697,8 @@ export async function updatePr({
     options.token = config.forkToken;
   }
 
+  // Update PR labels
   try {
-    // add and remove labels before updating pr body because if by some mishap
-    // labels aren't changed then pr body will have wrong labels in debugData hash
     if (labelsToAdd) {
       await addLabels(prNo, labelsToAdd);
     }

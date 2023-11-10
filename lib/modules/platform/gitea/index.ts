@@ -119,6 +119,8 @@ function toRenovatePR(data: PR): Pr | null {
     isDraft = true;
   }
 
+  // from the labels array present in the PR
+  // create a new array with only the name of the labels to pass further (we do not need the other information)
   const prLabels = data.labels?.map((label) => label.name);
 
   return {
@@ -644,7 +646,13 @@ const platform: Platform = {
       prUpdateParams.base = targetBranch;
     }
 
-    // no need to do extra call for removing labels as gitea API replaces labels array
+    /**
+     * Update PR labels.
+     * In the Gitea API, labels are replaced on each update if the field is present.
+     * If the field is not present (i.e., undefined), labels aren't updated.
+     * However, the labels array must contain label IDs instead of names,
+     * so a lookup is performed to fetch the details (including the ID) of each label.
+     */
     if (Array.isArray(labels)) {
       prUpdateParams.labels = (
         await Promise.all(labels.map(lookupLabelByName))

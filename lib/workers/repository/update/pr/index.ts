@@ -89,11 +89,10 @@ export function updatePrDebugData(
     targetBranch,
   };
 
-  /**
-   * Update the labels field in this struct
-   * 1. When a new PR is created ie. debugData will be undefined
-   * 2. When a PR was created using the new update labels logic ie. debugData.labels will be an array
-   */
+  // Add labels to the debug data object.
+  // When to add:
+  // 1. Add it when a new PR is created, i.e., when debugData is undefined.
+  // 2. Add it if an existing PR already has labels in the debug data, confirming that we can update its labels.
   if (!debugData || is.array(debugData?.labels)) {
     updatedPrDebugData.labels = labels;
   }
@@ -335,7 +334,7 @@ export async function ensurePr(
     {
       debugData: updatePrDebugData(
         config.baseBranch,
-        prepareLabels(config).sort(),
+        prepareLabels(config).sort(), // include labels in debug data, sort them just to be safe
         existingPr?.bodyStruct?.debugData,
       ),
     },
@@ -361,12 +360,14 @@ export async function ensurePr(
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
+
       const labelsFromDebugData = existingPr.bodyStruct?.debugData?.labels;
       const labelsNeedUpdate = shouldUpdateLabels(
         labelsFromDebugData,
         existingPr.labels,
         prepareLabels(config),
       );
+
       if (
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
@@ -399,9 +400,7 @@ export async function ensurePr(
         );
         updatePrConfig.targetBranch = config.baseBranch;
       }
-      // divide labels into two categories: i) which needs to be added and ii) which needs to be removed
-      // Note: existing labels aren't present in these two categories
-      // this is necessary because some platforms handle these two categories separately
+
       if (labelsNeedUpdate) {
         const newLabels = prepareLabels(config);
         logger.debug(
@@ -412,15 +411,23 @@ export async function ensurePr(
           },
           'PR labels have changed',
         );
+
+        // Divide labels into three categories:
+        // i) addLabels: Labels that need to be added
+        // ii) removeLabels: Labels that need to be removed
+        // iii) labels: New labels for the PR, replacing the old labels array entirely.
+        // This distinction is necessary because different platforms update labels differently
+        // For more details, refer to the updatePr function of each platform
+
         const [addLabels, removeLabels] = getChangedLabels(
           labelsFromDebugData!,
           newLabels,
         );
 
-        // for gitea
+        // for Gitea
         updatePrConfig.labels = newLabels;
 
-        // for github, gitlab
+        // for Github, Gitlab
         updatePrConfig.addLabels = addLabels;
         updatePrConfig.removeLabels = removeLabels;
       }
