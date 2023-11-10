@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type GalaxyV3 = z.infer<typeof GalaxyV3Versions>;
+export type GalaxyV3 = z.infer<typeof GalaxyV3>;
 export const GalaxyV3 = z.object({
   deprecated: z.boolean(),
   highest_version: z.object({
