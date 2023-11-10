@@ -20,7 +20,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly registryStrategy = 'hunt';
 
