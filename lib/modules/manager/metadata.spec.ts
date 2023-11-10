@@ -43,8 +43,8 @@ describe('modules/manager/metadata', () => {
       }
 
       expect(
-        res.some((line) => line.startsWith('# ') || line.startsWith('## '))
+        res.some((line) => line.startsWith('# ') || line.startsWith('## ')),
       ).toBeFalse();
-    }
+    },
   );
 });

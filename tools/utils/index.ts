@@ -34,7 +34,7 @@ export function findModules(dirname: string): string[] {
 export function camelCase(input: string): string {
   return input
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (char, index) =>
-      index === 0 ? char.toLowerCase() : char.toUpperCase()
+      index === 0 ? char.toLowerCase() : char.toUpperCase(),
     )
     .replace(/-/g, '');
 }

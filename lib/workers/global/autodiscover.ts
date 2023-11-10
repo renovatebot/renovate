@@ -10,16 +10,17 @@ function repoName(value: string | { repository: string }): string {
 }
 
 export async function autodiscoverRepositories(
-  config: AllConfig
+  config: AllConfig,
 ): Promise<AllConfig> {
+  const { autodiscoverFilter } = config;
   if (config.platform === 'local') {
     if (config.repositories?.length) {
       logger.debug(
         { repositories: config.repositories },
-        'Found repositories when in local mode'
+        'Found repositories when in local mode',
       );
       throw new Error(
-        'Invalid configuration: repositories list not supported when platform=local'
+        'Invalid configuration: repositories list not supported when platform=local',
       );
     }
     config.repositories = ['local'];
@@ -28,7 +29,7 @@ export async function autodiscoverRepositories(
   if (!config.autodiscover) {
     if (!config.repositories?.length) {
       logger.warn(
-        'No repositories found - did you want to run with flag --autodiscover?'
+        'No repositories found - did you want to run with flag --autodiscover?',
       );
     }
     return config;
@@ -41,13 +42,14 @@ export async function autodiscoverRepositories(
   });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
-    logger.debug(
-      'The account associated with your token does not have access to any repos'
-    );
+    logger.debug('No repositories were autodiscovered');
     return config;
   }
 
-  if (config.autodiscoverFilter) {
+  logger.debug(`Autodiscovered ${discovered.length} repositories`);
+
+  if (autodiscoverFilter) {
+    logger.debug({ autodiscoverFilter }, 'Applying autodiscoverFilter');
     discovered = filterGlobOrRegexArray(
       discovered,
       is.string(config.autodiscoverFilter)
@@ -60,17 +62,17 @@ export async function autodiscoverRepositories(
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
+    logger.debug(
+      `Autodiscovered ${discovered.length} repositories after filter`,
+    );
   }
 
-  logger.info(
-    { length: discovered.length, repositories: discovered },
-    `Autodiscovered repositories`
-  );
+  logger.info({ repositories: discovered }, `Autodiscovered repositories`);
 
   // istanbul ignore if
   if (config.repositories?.length) {
     logger.debug(
-      'Checking autodiscovered repositories against configured repositories'
+      'Checking autodiscovered repositories against configured repositories',
     );
     for (const configuredRepo of config.repositories) {
       const repository = repoName(configuredRepo);
@@ -86,7 +88,7 @@ export async function autodiscoverRepositories(
       if (!found) {
         logger.warn(
           { repository },
-          'Configured repository is in not in autodiscover list'
+          'Configured repository is in not in autodiscover list',
         );
       }
     }

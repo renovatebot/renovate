@@ -13,7 +13,7 @@ function mockFs(files: Record<string, string>): void {
       return existingFileNameWithPath
         .slice(0, existingFileNameWithPath.lastIndexOf('/') + 1)
         .concat(otherFileName);
-    }
+    },
   );
 }
 
@@ -767,7 +767,7 @@ describe('modules/manager/gradle/parser', () => {
       const { deps } = parseGradle(content, {}, 'build.gradle');
       const replacementIndices = deps.map(({ managerData, currentValue }) =>
         // TODO #22198
-        content.slice(managerData!.fileReplacePosition).indexOf(currentValue!)
+        content.slice(managerData!.fileReplacePosition).indexOf(currentValue!),
       );
       expect(replacementIndices.every((idx) => idx === 0)).toBeTrue();
       expect(deps).toMatchSnapshot();
@@ -800,7 +800,7 @@ describe('modules/manager/gradle/parser', () => {
 
     it('attaches packageFile', () => {
       expect(
-        parseProps('foo = bar', 'foo/bar/gradle.properties')
+        parseProps('foo = bar', 'foo/bar/gradle.properties'),
       ).toMatchObject({
         vars: { foo: { packageFile: 'foo/bar/gradle.properties' } },
       });
@@ -878,7 +878,7 @@ describe('modules/manager/gradle/parser', () => {
         [def, input].join('\n'),
         {},
         '',
-        fileContents
+        fileContents,
       );
       expect(vars).toMatchObject(output);
     });
@@ -889,10 +889,10 @@ describe('modules/manager/gradle/parser', () => {
         {},
         '',
         fileContents,
-        3
+        3,
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Max recursion depth reached in script file: foo/bar.gradle'
+        'Max recursion depth reached in script file: foo/bar.gradle',
       );
       expect(vars).toBeEmpty();
     });
@@ -1049,6 +1049,43 @@ describe('modules/manager/gradle/parser', () => {
             depName: 'androidx.test:core-ktx',
             currentValue: '1.3.0-rc01',
             groupName: 'Deps.Test.version',
+          },
+        ],
+      });
+    });
+
+    it('imported objects', () => {
+      const input = codeBlock`
+        object ModuleConfiguration {
+          object Build {
+            object Database {
+              const val h2Version = "2.0.206"
+            }
+          }
+        }
+      `;
+
+      const gradleKtsInput = codeBlock`
+        import ModuleConfiguration.Build.Database
+        dependencies {
+          runtimeOnly("com.h2database:h2:\${Database.h2Version}")
+        }
+      `;
+
+      const { vars } = parseKotlinSource(input);
+      const res = parseGradle(gradleKtsInput, vars);
+      expect(res).toMatchObject({
+        vars: {
+          'ModuleConfiguration.Build.Database.h2Version': {
+            key: 'ModuleConfiguration.Build.Database.h2Version',
+            value: '2.0.206',
+          },
+        },
+        deps: [
+          {
+            depName: 'com.h2database:h2',
+            currentValue: '2.0.206',
+            groupName: 'ModuleConfiguration.Build.Database.h2Version',
           },
         ],
       });

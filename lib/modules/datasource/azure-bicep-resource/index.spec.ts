@@ -17,7 +17,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
             "Resources": {},
             "Functions": {}
           }
-        `
+        `,
       );
 
     const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
@@ -54,7 +54,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
               }
             }
           }
-        `
+        `,
       );
 
     const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
@@ -98,7 +98,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
             },
             "Functions": {}
           }
-        `
+        `,
       );
 
     const azureBicepResourceDatasource = new AzureBicepResourceDatasource();

@@ -1,10 +1,6 @@
 import { coerceObject, hasKey } from './object';
 
 describe('util/object', () => {
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   it('finds key in regular object', () => {
     expect(hasKey('foo', { foo: true })).toBeTrue();
   });

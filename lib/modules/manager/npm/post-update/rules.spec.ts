@@ -57,7 +57,7 @@ describe('modules/manager/npm/post-update/rules', () => {
             },
           },
         }
-      `
+      `,
       );
     });
 
@@ -127,7 +127,7 @@ describe('modules/manager/npm/post-update/rules', () => {
             },
           },
         }
-      `
+      `,
       );
     });
   });

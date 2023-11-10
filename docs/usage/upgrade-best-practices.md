@@ -39,7 +39,7 @@ If you're using `config:recommended` now, replace it with `config:best-practices
 + "extends": ["config:best-practices"]
 ```
 
-### What's in the `config:best-practices preset?
+### What's in the `config:best-practices` preset?
 
 The [`config:best-practices` preset](https://docs.renovatebot.com/presets-config/#configbest-practices) has this configuration:
 

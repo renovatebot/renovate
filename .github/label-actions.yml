@@ -3,7 +3,7 @@
     Hi there,
 
 
-    Get your issue fixed faster by creating a minimal reproduction.
+    Get your discussion fixed faster by creating a minimal reproduction.
     This means a repository dedicated to reproducing this issue with the minimal dependencies and config possible.
 
 
@@ -14,7 +14,7 @@
     To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
 
 
-    We may close the issue if you, or someone else, haven't created a minimal reproduction within two weeks.
+    We may close the discussion if you, or someone else, haven't created a minimal reproduction within two weeks.
     If you need more time, or are stuck, please ask for help or more time in a comment.
 
 
@@ -202,7 +202,6 @@
   unlabel:
     - 'type:bug'
     - 'type:feature'
-    - 'priority-5-triage'
     - 'status:requirements'
   comment: >
     **Please create a GitHub Discussion instead of this issue.**
@@ -272,6 +271,34 @@
 
 
     If you're unhappy with this, we suggest you stop using the repository discussions or the product altogether.
+
+
+    Thanks, the Renovate team
+
+'auto:one-topic':
+  comment: >
+    Hi there,
+
+    Please stick to one topic/question per Discussion. Start a new discussion per topic.
+
+    This prevents future users from finding this discussion and getting confused by multiple questions and answers. One question and answer per Discussion works best.
+
+    For example:
+     - Don't create a discussion with multiple questions requiring multiple answers
+     - If you got an answer to your first question, don't change topic like "Can I also ask you how I might..." which would then require a different answer. Mark the current discussion as answered and open a new one.
+
+
+    Thanks, the Renovate team
+
+'auto:no-mentions':
+  comment: >
+    Hi there,
+
+    Please do not unnecessarily `@` mention maintainers like `@rarkins` or `@viceice`. Doing so causes annoying notifications and makes it harder to maintain this repository.
+
+    For example, never `@` mention a maintainer when you are creating a discussion if your desire is to get attention. This is rude behavior, just like shouting out your coffee order in a Starbucks before it's your turn.
+
+    It's OK to comment in an issue or discussion after multiple days or weeks. But please, still don't `@` mention people. The maintainers try to answer most discussions, but they can't answer all discussions. If you're still not getting an answer, take a look at the information you've given us and see if you can improve it.
 
 
     Thanks, the Renovate team

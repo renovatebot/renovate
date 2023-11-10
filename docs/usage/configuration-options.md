@@ -648,7 +648,7 @@ When using with `npm`, we recommend you:
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
 These datasources can be referred by `customManagers` or can be used to overwrite default datasources.
 
-For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
+For more details see the [`custom` datasource documentation](modules/datasource/custom/index.md).
 
 ## customManagers
 
@@ -674,7 +674,7 @@ We recommend you use only _one_ of these methods, or you'll get confused.
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples about it, see our [documentation for the `regex` manager](/modules/manager/regex/).
+For more details and examples about it, see our [documentation for the `regex` manager](modules/manager/regex/index.md).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 <!-- prettier-ignore -->
@@ -727,9 +727,8 @@ Each provided `matchString` will be matched individually to the content of the `
 If a `matchString` has multiple matches in a file each will be interpreted as an independent dependency.
 
 As example the following configuration will update all three lines in the Dockerfile.
-renovate.json:
 
-```json
+```json title="renovate.json"
 {
   "customManagers": [
     {
@@ -746,9 +745,7 @@ renovate.json:
 }
 ```
 
-A Dockerfile:
-
-```dockerfile
+```dockerfile title="Dockerfile"
 FROM amd64/ubuntu:18.04
 ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
 ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
@@ -769,9 +766,7 @@ This is an example how this can work.
 The first custom manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
 But the second custom manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
 
-renovate.json:
-
-```json
+```json title="renovate.json"
 {
   "customManagers": [
     {
@@ -798,9 +793,7 @@ renovate.json:
 }
 ```
 
-example.json:
-
-```json
+```json title="example.json"
 {
   "backup": {
     "test": {
@@ -829,9 +822,7 @@ To update multiple dependencies with `combination` you must define multiple cust
 
 Matched group values will be merged to form a single dependency.
 
-renovate.json:
-
-```json
+```json title="renovate.json"
 {
   "customManagers": [
     {
@@ -857,9 +848,7 @@ renovate.json:
 }
 ```
 
-Ansible variable file (YAML):
-
-```yaml
+```yaml title="Ansible variable file (YAML)"
 prometheus_image: "prom/prometheus"  // a comment
 prometheus_version: "v2.21.0" // a comment
 ------
@@ -916,16 +905,12 @@ Allows overwriting how the matched string is replaced.
 This allows for some migration strategies.
 E.g. moving from one Docker image repository to another one.
 
-`helm-values.yaml`:
-
-```yaml
+```yaml title="helm-values.yaml"
 # The image of the service <registry>/<repo>/<image>:<tag>
 image: my.old.registry/aRepository/andImage:1.18-alpine
 ```
 
-The regex definition:
-
-```json
+```json title="The regex definition"
 {
   "customManagers": [
     {
@@ -955,7 +940,7 @@ You may use the `customizeDashboard` object to customize the Dependency Dashboar
 
 Supported fields:
 
-- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
 
 ### defaultRegistryUrlTemplate
 
@@ -980,7 +965,7 @@ It is not needed if either:
 ### format
 
 Defines which format the API is returning.
-Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
 
 ### transformTemplates
 
@@ -1185,7 +1170,17 @@ Example:
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+To enable custom managers you will need to add `custom.` prefix before their names
+
+Example:
+
+```json
+{
+  "enabledManagers": ["custom.regex"]
+}
+```
+
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ## encrypted
 
@@ -1239,6 +1234,11 @@ Example:
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
 
+## expandCodeOwnersGroups
+
+If configured, Renovate will expand any matching `CODEOWNERS` groups into a full list of group members and assign them individually instead of the group.
+This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
+
 ## extends
 
 See [shareable config presets](./config-presets.md) for details.
@@ -1291,29 +1291,30 @@ A similar one could strip leading `v` prefixes:
 }
 ```
 
-## fetchReleaseNotes
+## fetchChangeLogs
 
-Use this config option to configure release notes fetching.
+Use this config option to configure changelogs/release notes fetching.
 The available options are:
 
-- `off` - disable release notes fetching
-- `branch` - fetch release notes while creating/updating branch
-- `pr`(default) - fetches release notes while creating/updating pull-request
+- `off` - disable changelogs fetching
+- `branch` - fetch changelogs while creating/updating branch
+- `pr`(default) - fetches changelogs while creating/updating pull-request
 
-It is not recommended to set fetchReleaseNotes=branch unless you are embedding release notes in commit information, because it results in a performance decrease.
+Avoid setting `fetchChangeLogs=branch`, because this slows down Renovate.
+But if you're embedding changelogs in commit information, you may use `fetchChangeLogs=branch`.
 
-Renovate can fetch release notes when they are hosted on one of these platforms:
+Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 - Bitbucket Cloud
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate can only show release notes from some platforms and some package managers.
-    We're planning improvements so that Renovate can show more release notes.
+    Renovate can only show changelogs from some platforms and some package managers.
+    We're planning improvements so that Renovate can show more changelogs.
     Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
 
 ## fileMatch
@@ -1343,7 +1344,7 @@ Because `fileMatch` is mergeable, you don't need to duplicate the defaults and c
 ```
 
 If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
+The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
@@ -1630,7 +1631,7 @@ For example to also skip 404 responses then configure the following:
 Use this field to configure Renovate to abort runs for custom hosts.
 By default, Renovate will only abort for known public hosts, which has the downside that transient errors for other hosts can cause autoclosing of PRs.
 
-To abort Renovate runs for http failures from _any_ host:
+To abort Renovate runs for HTTP failures from _any_ host:
 
 ```json
 {
@@ -1769,7 +1770,7 @@ You usually don't need to configure it in a host rule if you have already config
 
 ### insecureRegistry
 
-Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only.
+Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is HTTP only.
 This is insecure and is not recommended.
 
 Example:
@@ -2411,7 +2412,7 @@ This field supports Regular Expressions if they begin and end with `/`, otherwis
 
 Use `matchCategories` to restrict rules to a particular language or group.
 Matching is done using "any" logic, i.e. "match any of the following categories".
-The categories can be found in the [manager documentation](./modules/manager/index.md).
+The categories can be found in the [manager documentation](modules/manager/index.md).
 
 <!-- prettier-ignore -->
 !!! note
@@ -2492,7 +2493,7 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ### matchDatasources
 
@@ -2564,8 +2565,8 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the version range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) used by the matched package(s).
-This is usually defined by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered them or by the default versioning for the package's [datasource](https://docs.renovatebot.com/modules/datasource/).
+The syntax of the version range must follow the [versioning scheme](modules/versioning.md#supported-versioning) used by the matched package(s).
+This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
 This field also supports Regular Expressions which must begin and end with `/`.
@@ -2764,9 +2765,7 @@ For example to apply a special label to `major` updates:
     This configuration option needs a Mend API key, and is in private beta testing only.
     API keys are not available for free or via the `renovatebot/renovate` repository.
 
-For example to group high merge confidence updates:
-
-```json
+```json title="Grouping high merge confidence updates"
 {
   "packageRules": [
     {
@@ -2793,13 +2792,11 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
-Source URLs are necessary in order to look up release notes.
+Source URLs are necessary in order to look up changelogs.
 
-Using this field we can specify the exact URL to fetch release notes from.
+Using this field we can specify the exact URL to fetch changelogs from.
 
-Example setting source URL for package "dummy":
-
-```json
+```json title="Setting the source URL for the dummy package"
 {
   "packageRules": [
     {
@@ -2829,6 +2826,7 @@ Managers which do not support replacement:
 - `homebrew`
 - `maven`
 - `regex`
+- `sbt`
 
 Use the `replacementName` config option to set the name of a replacement package.
 
@@ -2972,8 +2970,8 @@ Table with options:
 | `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
-| `npmDedupe`                  | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
-| `pnpmDedupe`                 | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
+| `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -3123,25 +3121,34 @@ This limit is enforced on a per-repository basis.
 
 ## prCreation
 
-This setting tells Renovate when you would like it to raise PRs:
+This setting tells Renovate _when_ to create PRs:
 
-- `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
-- `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
-- `status-success`: Renovate won't raise PRs unless tests pass
+- `immediate` (default): Renovate creates PRs immediately after creating the corresponding branch
+- `not-pending`: Renovate waits until status checks have completed (passed or failed) before raising the PR
+- `status-success`: Renovate only creates PRs if/when the the test pass
+- `approval`: Renovate creates branches for updates immediately, but creates the PR _after_ getting Dependency Dashboard approval
 
-Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
+When prCreation is set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
+You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR.
 
-With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
-You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
-
-With prCreation set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
+When prCreation is set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-If there are no checks associated, Renovate will create the PR once 24 hrs have elapsed since creation of the commit.
+If there are no checks associated, Renovate will create the PR once 24 hours have elapsed since creation of the commit.
 
-With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
+When prCreation is set to `status-success`, Renovate creates the PR only if all tests have passed.
+When a branch remains without PR due to a failing test: select the corresponding PR from the Dependency Dashboard, and push your fixes to the branch.
 
-For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
-Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
+When prCreation is set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
+Renovate still creates the _branch_ immediately.
+
+<!-- prettier-ignore -->
+!!! note
+    For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+    Instead, Renovate create the PR on its _next_ run after the relevant tests have completed, so there will be some delay.
+
+<!-- prettier-ignore -->
+!!! warning
+    If you set `prCreation=approval` you must _not_ use `dependencyDashboardApproval=true`!
 
 ## prFooter
 
@@ -3328,17 +3335,27 @@ You can use the `registryAliases` object to set registry aliases.
 
 This feature works with the following managers:
 
-- [`ansible`](/modules/manager/ansible)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`droneci`](/modules/manager/droneci)
-- [`gitlabci`](/modules/manager/gitlabci/)
-- [`helm-requirements`](/modules/manager/helm-requirements/)
-- [`helmfile`](/modules/manager/helmfile/)
-- [`helmv3`](/modules/manager/helmv3/)
-- [`kubernetes`](/modules/manager/kubernetes)
-- [`terraform`](/modules/manager/terraform)
-- [`woodpecker`](/modules/manager/woodpecker)
+- [`ansible`](modules/manager/ansible/index.md)
+- [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
+- [`docker-compose`](modules/manager/docker-compose/index.md)
+- [`dockerfile`](modules/manager/dockerfile/index.md)
+- [`droneci`](modules/manager/droneci/index.md)
+- [`gitlabci`](modules/manager/gitlabci/index.md)
+- [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helmfile`](modules/manager/helmfile/index.md)
+- [`helmv3`](modules/manager/helmv3/index.md)
+- [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`terraform`](modules/manager/terraform/index.md)
+- [`woodpecker`](modules/manager/woodpecker/index.md)
+
+```json
+{
+  "registryAliases": {
+    "jfrogecosystem": "some.jfrog.mirror",
+    "jfrog.com": "some.jfrog.mirror"
+  }
+}
+```
 
 ## registryUrls
 
@@ -3428,9 +3445,7 @@ i.e. Renovate will run on the repository around the clock.
 The easiest way to define a schedule is to use a preset if one of them fits your requirements.
 See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think it would help others.
 
-Otherwise, here are some text schedules that are known to work:
-
-```
+```title="Some text schedules that are known to work"
 every weekend
 before 5:00am
 after 10pm and before 5:00am
@@ -3557,7 +3572,7 @@ You can set your own label name with the `"stopUpdatingLabel"` field:
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
-Example:
+For example:
 
 ```json
 {
@@ -3623,7 +3638,7 @@ You can edit these user-facing strings:
 - `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
 - `ignoreTopic`: Topic of the PR comment.
 
-Example:
+For example:
 
 ```json
 {
@@ -3635,6 +3650,43 @@ Example:
   }
 }
 ```
+
+## versionCompatibility
+
+This option is used for advanced use cases where the version string embeds more data than just the version.
+It's typically used with docker and tags datasources.
+
+Here are two examples:
+
+- The image tag `ghcr.io/umami-software/umami:postgresql-v1.37.0` embeds text like `postgresql-` as a prefix to the actual version to differentiate different DB types.
+- Docker image tags like `node:18.10.0-alpine` embed the base image as a suffix to the version.
+
+Here is an example of solving these types of cases:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/umami-software/umami"],
+      "versionCompatibility": "^(?<compatibility>.*)-(?<version>.*)$",
+      "versioning": "semver"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["node"],
+      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
+      "versioning": "node"
+    }
+  ]
+}
+```
+
+This feature is most useful when the `currentValue` is a version and not a range/constraint.
+
+This feature _can_ be used in combination with `extractVersion` although that's likely only a rare edge case.
+When combined, `extractVersion` is applied to datasource results first, and then `versionCompatibility`.
+`extractVersion` should be used when the raw version string returned by the `datasource` contains extra details (such as a `v` prefix) when compared to the value/version used within the repository.
 
 ## versioning
 
@@ -3667,9 +3719,8 @@ Follow these steps:
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
 You may use the `vulnerabilityAlerts` configuration object to customize vulnerability-fix PRs.
-For example, to set a custom label and assignee:
 
-```json
+```json title="Setting a custom label and assignee"
 {
   "vulnerabilityAlerts": {
     "labels": ["security"],
@@ -3692,7 +3743,7 @@ For example, to set a custom label and assignee:
 
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 
-```json
+```json title="Disabling vulnerability alerts"
 {
   "vulnerabilityAlerts": {
     "enabled": false

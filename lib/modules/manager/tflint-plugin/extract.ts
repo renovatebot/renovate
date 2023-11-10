@@ -10,19 +10,19 @@ import type { ExtractionResult } from './types';
 import { checkFileContainsPlugins } from './util';
 
 const dependencyBlockExtractionRegex = regEx(
-  /^\s*plugin\s+"(?<pluginName>[^"]+)"\s+{\s*$/
+  /^\s*plugin\s+"(?<pluginName>[^"]+)"\s+{\s*$/,
 );
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig
+  _config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace({ content }, `tflint.extractPackageFile(${packageFile})`);
   if (!checkFileContainsPlugins(content)) {
     logger.debug(
       { packageFile },
-      'preflight content check has not found any relevant content'
+      'preflight content check has not found any relevant content',
     );
     return null;
   }
@@ -41,7 +41,7 @@ export function extractPackageFile(
         result = extractTFLintPlugin(
           lineNumber,
           lines,
-          tfLintPlugin.groups.pluginName
+          tfLintPlugin.groups.pluginName,
         );
         if (result) {
           lineNumber = result.lineNumber;

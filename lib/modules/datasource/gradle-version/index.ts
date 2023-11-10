@@ -21,7 +21,7 @@ export class GradleVersionDatasource extends Datasource {
   override readonly registryStrategy = 'merge';
 
   private static readonly buildTimeRegex = regEx(
-    '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
+    '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$',
   );
 
   @cache({
@@ -80,7 +80,7 @@ export class GradleVersionDatasource extends Datasource {
     if (GradleVersionDatasource.buildTimeRegex.test(timeStr)) {
       return timeStr.replace(
         GradleVersionDatasource.buildTimeRegex,
-        '$1-$2-$3T$4:$5:$6$7'
+        '$1-$2-$3T$4:$5:$6$7',
       );
     }
     return null;

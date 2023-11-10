@@ -43,7 +43,7 @@ nav:
       - 'Regex Manager Presets': 'presets-regexManagers.md'
       - 'Replacement Presets': 'presets-replacements.md'
       - 'Schedule Presets': 'presets-schedule.md'
-      - 'Security Presets': 'security-schedule.md'
+      - 'Security Presets': 'presets-security.md'
       - 'Workaround Presets': 'presets-workarounds.md'
   - All Other:
       - ... | user-stories
@@ -53,4 +53,6 @@ nav:
       - 'Frequently Asked Questions': 'faq.md'
       - 'Known Limitations': 'known-limitations.md'
       - 'Release notes for major versions': 'release-notes-for-major-versions.md'
+      - Bot comparison: 'bot-comparison.md'
   - About Us: 'about-us.md'
+  - Contributing to Renovate: 'contributing-to-renovate.md'

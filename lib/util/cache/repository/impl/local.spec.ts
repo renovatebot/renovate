@@ -13,7 +13,7 @@ jest.mock('../../../fs');
 
 async function createCacheRecord(
   data: RepoCacheData,
-  repository = 'some/repo'
+  repository = 'some/repo',
 ): Promise<RepoCacheRecord> {
   const revision = CACHE_REVISION;
 
@@ -42,7 +42,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
     expect(localRepoCache.getData()).toBeEmpty();
     expect(localRepoCache.isModified()).toBeUndefined();
@@ -52,11 +52,11 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
     expect(logger.debug).toHaveBeenCalledWith(
-      "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping"
+      "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping",
     );
     expect(localRepoCache.isModified()).toBeUndefined();
   });
@@ -65,7 +65,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
     expect(logger.debug).not.toHaveBeenCalledWith();
@@ -79,7 +79,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
 
     await localRepoCache.load();
@@ -110,7 +110,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
 
     await localRepoCache.load();
@@ -123,7 +123,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
 
     await localRepoCache.load();
@@ -138,7 +138,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
 
     await localRepoCache.load();
@@ -154,7 +154,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      'local'
+      'local',
     );
     await localRepoCache.load();
 
@@ -171,7 +171,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      cacheType
+      cacheType,
     );
     await localRepoCache.load();
     const data = localRepoCache.getData();
@@ -185,11 +185,11 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.isModified()).toBeTrue();
     expect(logger.warn).toHaveBeenCalledWith(
       { cacheType },
-      `Repository cache type not supported using type "local" instead`
+      `Repository cache type not supported using type "local" instead`,
     );
     expect(fs.outputCacheFile).toHaveBeenCalledWith(
       '/tmp/cache/renovate/repository/github/some/repo.json',
-      JSON.stringify(newCacheRecord)
+      JSON.stringify(newCacheRecord),
     );
   });
 
@@ -202,7 +202,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      cacheType
+      cacheType,
     );
 
     await localRepoCache.load();
@@ -224,7 +224,7 @@ describe('util/cache/repository/impl/local', () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',
       '0123456789abcdef',
-      cacheType
+      cacheType,
     );
 
     await localRepoCache.load();

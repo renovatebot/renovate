@@ -116,7 +116,7 @@ function massageTimestamps(dep: ReleaseResult): void {
 export function addMetaData(
   dep: ReleaseResult,
   datasource: string,
-  packageName: string
+  packageName: string,
 ): void {
   massageTimestamps(dep);
 
@@ -205,7 +205,7 @@ export function addMetaData(
  */
 export function shouldDeleteHomepage(
   sourceUrl: string | null | undefined,
-  homepage: string | undefined
+  homepage: string | undefined,
 ): boolean {
   if (is.nullOrUndefined(sourceUrl) || is.undefined(homepage)) {
     return false;

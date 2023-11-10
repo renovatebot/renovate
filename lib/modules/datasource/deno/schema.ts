@@ -42,5 +42,5 @@ export const DenoAPIModuleVersionResponse = z
         sourceUrl = getGithubSourceUrl(repository);
       }
       return { version, gitRef, releaseTimestamp, sourceUrl };
-    }
+    },
   );

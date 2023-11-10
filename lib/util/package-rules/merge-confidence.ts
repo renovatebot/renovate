@@ -7,7 +7,7 @@ import { Matcher } from './base';
 export class MergeConfidenceMatcher extends Matcher {
   override matches(
     { mergeConfidenceLevel }: PackageRuleInputConfig,
-    { matchConfidence }: PackageRule
+    { matchConfidence }: PackageRule,
   ): boolean | null {
     if (is.nullOrUndefined(matchConfidence)) {
       return null;
@@ -18,8 +18,9 @@ export class MergeConfidenceMatcher extends Matcher {
      */
     if (is.undefined(getApiToken())) {
       const error = new Error(MISSING_API_CREDENTIALS);
-      error.validationMessage = 'Missing credentials';
-      error.validationError =
+      error.validationSource = 'MatchConfidence Authenticator';
+      error.validationError = 'Missing credentials';
+      error.validationMessage =
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.';
       throw error;
     }

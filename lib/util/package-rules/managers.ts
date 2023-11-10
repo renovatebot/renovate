@@ -5,7 +5,7 @@ import { Matcher } from './base';
 export class ManagersMatcher extends Matcher {
   override matches(
     { manager }: PackageRuleInputConfig,
-    { matchManagers }: PackageRule
+    { matchManagers }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchManagers)) {
       return null;

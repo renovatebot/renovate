@@ -17,7 +17,7 @@ describe('modules/datasource/galaxy/index', () => {
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'non_existent_crate',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -30,7 +30,7 @@ describe('modules/datasource/galaxy/index', () => {
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'non_existent_crate',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -43,7 +43,7 @@ describe('modules/datasource/galaxy/index', () => {
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'non_existent_crate',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -56,7 +56,7 @@ describe('modules/datasource/galaxy/index', () => {
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'some_crate',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -69,7 +69,7 @@ describe('modules/datasource/galaxy/index', () => {
         await getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'some_crate',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -77,7 +77,7 @@ describe('modules/datasource/galaxy/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
-        .reply(200, Fixtures.get('timezone'));
+        .reply(200, Fixtures.get('timezone.json'));
       const res = await getPkgReleases({
         datasource: GalaxyDatasource.id,
         packageName: 'yatesr.timezone',
@@ -108,7 +108,7 @@ describe('modules/datasource/galaxy/index', () => {
         getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'some_crate',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

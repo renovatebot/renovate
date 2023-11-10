@@ -9,6 +9,7 @@ describe('modules/manager/custom/index', () => {
     it('works', () => {
       expect(customManager.isCustomManager('npm')).toBe(false);
       expect(customManager.isCustomManager('regex')).toBe(true);
+      expect(customManager.isCustomManager('custom.regex')).toBe(false);
     });
   });
 });

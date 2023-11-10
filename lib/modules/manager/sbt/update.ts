@@ -6,11 +6,11 @@ import type { BumpPackageVersionResult } from '../types';
 export function bumpPackageVersion(
   content: string,
   currentValue: string,
-  bumpVersion: ReleaseType
+  bumpVersion: ReleaseType,
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
-    'Checking if we should bump build.sbt version'
+    'Checking if we should bump build.sbt version',
   );
   let bumpedContent = content;
   const bumpedVersion = semver.inc(currentValue, bumpVersion);
@@ -20,7 +20,7 @@ export function bumpPackageVersion(
   }
   bumpedContent = content.replace(
     regEx(/^(version\s*:=\s*).*$/m),
-    `$1"${bumpedVersion}"`
+    `$1"${bumpedVersion}"`,
   );
 
   if (bumpedContent === content) {

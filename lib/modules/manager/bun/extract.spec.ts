@@ -26,7 +26,7 @@ describe('modules/manager/bun/extract', () => {
           _id: 1,
           _args: 1,
           _from: 1,
-        })
+        }),
       );
       expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
     });
@@ -40,7 +40,7 @@ describe('modules/manager/bun/extract', () => {
           dependencies: {
             dep1: '1.0.0',
           },
-        })
+        }),
       );
       expect(await extractAllPackageFiles({}, ['bun.lockb'])).toMatchObject([
         {

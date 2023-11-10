@@ -1,28 +1,31 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { z } from 'zod';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
+import { Result } from '../../../../util/result';
+import { Yaml } from '../../../../util/schema-utils';
 
-const YarnrcYmlSchema = z.object({
-  npmRegistryServer: z.string().optional(),
-  npmScopes: z
-    .record(
-      z.object({
-        npmRegistryServer: z.string().optional(),
-      })
-    )
-    .optional(),
-});
+const YarnrcYmlSchema = Yaml.pipe(
+  z.object({
+    npmRegistryServer: z.string().optional(),
+    npmScopes: z
+      .record(
+        z.object({
+          npmRegistryServer: z.string().optional(),
+        }),
+      )
+      .optional(),
+  }),
+);
 
 export type YarnConfig = z.infer<typeof YarnrcYmlSchema>;
 
 const registryRegEx = regEx(
-  /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm
+  /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,
 );
 
 export function loadConfigFromLegacyYarnrc(
-  legacyYarnrc: string
+  legacyYarnrc: string,
 ): YarnConfig | null {
   const registryMatches = [...legacyYarnrc.matchAll(registryRegEx)]
     .map((m) => m.groups)
@@ -43,24 +46,16 @@ export function loadConfigFromLegacyYarnrc(
 }
 
 export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
-  try {
-    const obj = load(yarnrcYml, {
-      json: true,
-    });
-    if (!obj) {
-      // emtpy yaml file
-      return null;
-    }
-    return YarnrcYmlSchema.parse(obj);
-  } catch (err) {
-    logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
-    return null;
-  }
+  return Result.parse(yarnrcYml, YarnrcYmlSchema)
+    .onError((err) => {
+      logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
+    })
+    .unwrapOrNull();
 }
 
 export function resolveRegistryUrl(
   packageName: string,
-  yarnConfig: YarnConfig
+  yarnConfig: YarnConfig,
 ): string | null {
   if (yarnConfig.npmScopes) {
     for (const scope in yarnConfig.npmScopes) {

@@ -163,7 +163,7 @@ describe('modules/datasource/packagist/index', () => {
         .get('/packages.json')
         .reply(200, packagesJson)
         .get(
-          '/include/all$093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86.json'
+          '/include/all$093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86.json',
         )
         .reply(200, includesJson);
       const res = await getPkgReleases({
@@ -304,11 +304,11 @@ describe('modules/datasource/packagist/index', () => {
         .get('/packages.json')
         .reply(200, packagesJson)
         .get(
-          '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json'
+          '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json',
         )
         .reply(200, fileJson)
         .get(
-          '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json'
+          '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json',
         )
         .reply(200, beytJson);
       const res = await getPkgReleases({
@@ -349,7 +349,7 @@ describe('modules/datasource/packagist/index', () => {
         .get('/packages.json')
         .reply(200, packagesJson)
         .get(
-          '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json'
+          '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json',
         )
         .reply(200, fileJson);
       httpMock
@@ -389,7 +389,7 @@ describe('modules/datasource/packagist/index', () => {
         .get('/packages.json')
         .reply(200, packagesJson)
         .get(
-          '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json'
+          '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json',
         )
         .reply(200, beytJson);
       const res = await getPkgReleases({
@@ -483,7 +483,7 @@ describe('modules/datasource/packagist/index', () => {
           datasource,
           versioning,
           packageName: 'drewm/mailchimp-api',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -503,7 +503,7 @@ describe('modules/datasource/packagist/index', () => {
           datasource,
           versioning,
           packageName: 'drewm/mailchimp-api',
-        })
+        }),
       ).toMatchSnapshot();
     });
 

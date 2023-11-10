@@ -5,7 +5,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
-        extractPackageFile('nothing here', 'bitbucket-pipelines.yaml', {})
+        extractPackageFile('nothing here', 'bitbucket-pipelines.yaml', {}),
       ).toBeNull();
     });
 
@@ -14,8 +14,8 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
         extractPackageFile(
           'image:\n  username: ccc',
           'bitbucket-pipelines.yaml',
-          {}
-        )
+          {},
+        ),
       ).toBeNull();
     });
 
@@ -23,7 +23,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
       const res = extractPackageFile(
         Fixtures.get('bitbucket-pipelines.yaml'),
         'bitbucket-pipelines.yaml',
-        {}
+        {},
       );
       expect(res).toMatchObject({
         deps: [
@@ -87,7 +87,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
           registryAliases: {
             jfrogecosystem: 'some.jfrog.mirror',
           },
-        }
+        },
       );
       expect(res).toMatchObject({
         deps: [

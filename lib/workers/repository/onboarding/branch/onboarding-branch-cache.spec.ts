@@ -136,7 +136,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       git.getBranchCommit.mockReturnValueOnce('onboarding-sha');
       scm.isBranchModified.mockResolvedValueOnce(false);
       expect(
-        await isOnboardingBranchModified('configure/renovate')
+        await isOnboardingBranchModified('configure/renovate'),
       ).toBeFalse();
     });
 
@@ -178,7 +178,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         .mockReturnValueOnce('default-sha');
       scm.isBranchConflicted.mockResolvedValueOnce(false);
       expect(
-        await isOnboardingBranchConflicted('master', 'configure/renovate')
+        await isOnboardingBranchConflicted('master', 'configure/renovate'),
       ).toBeFalse();
     });
 
@@ -197,7 +197,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         .mockReturnValueOnce('new-default-sha');
       scm.isBranchConflicted.mockResolvedValueOnce(false);
       expect(
-        await isOnboardingBranchConflicted('master', 'configure/renovate')
+        await isOnboardingBranchConflicted('master', 'configure/renovate'),
       ).toBeFalse();
     });
 
@@ -216,7 +216,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         .mockReturnValueOnce('default-sha');
       scm.isBranchConflicted.mockResolvedValueOnce(false);
       expect(
-        await isOnboardingBranchConflicted('master', 'configure/renovate')
+        await isOnboardingBranchConflicted('master', 'configure/renovate'),
       ).toBeFalse();
     });
 
@@ -234,7 +234,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         .mockReturnValueOnce('onboarding-sha')
         .mockReturnValueOnce('default-sha');
       expect(
-        await isOnboardingBranchConflicted('master', 'configure/renovate')
+        await isOnboardingBranchConflicted('master', 'configure/renovate'),
       ).toBeTrue();
     });
   });

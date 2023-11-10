@@ -14,7 +14,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  matchedFiles: string[]
+  matchedFiles: string[],
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
   for (const matchedFile of matchedFiles) {
@@ -42,11 +42,13 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'No dependencies found');
       continue;
     }
-    packageFiles.push({
+
+    const res: PackageFile = {
       ...extracted,
       packageFile,
       lockFiles: [matchedFile],
-    });
+    };
+    packageFiles.push(res);
   }
 
   return packageFiles;

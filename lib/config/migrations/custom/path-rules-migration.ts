@@ -12,7 +12,7 @@ export class PathRulesMigration extends AbstractMigration {
     if (is.array<PackageRule>(value)) {
       this.setHard(
         'packageRules',
-        is.array(packageRules) ? packageRules.concat(value) : value
+        is.array(packageRules) ? packageRules.concat(value) : value,
       );
     }
   }
