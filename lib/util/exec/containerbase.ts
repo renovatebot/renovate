@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { getPkgReleases } from '../../modules/datasource';
+import type { ReleaseResult } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
 import { id as gradleVersioningId } from '../../modules/versioning/gradle';
@@ -197,6 +197,19 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
 };
+
+let _getPkgReleases: Promise<typeof import('../../modules/datasource')> | null =
+  null;
+
+async function getPkgReleases(
+  toolConfig: ToolConfig,
+): Promise<ReleaseResult | null> {
+  if (_getPkgReleases === null) {
+    _getPkgReleases = import('../../modules/datasource');
+  }
+  const { getPkgReleases } = await _getPkgReleases;
+  return getPkgReleases(toolConfig);
+}
 
 export function supportsDynamicInstall(toolName: string): boolean {
   return !!allToolConfig[toolName];
