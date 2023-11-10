@@ -120,7 +120,7 @@ After the conversion, any `jsonata` rules defined in the `transformTemplates` se
 
 ### Yaml
 
-If `yaml` is used, response is processed by the `ts-yaml` library and then is converted into JSON.
+If `yaml` is used, response is parsed and converted into JSON for further processing.
 
 Suppose the body of the HTTP response is as follows:
 
