@@ -64,7 +64,7 @@ describe('workers/global/initialize', () => {
 
         expect(foundRule.httpsPrivateKey).toEqual(hostRule.httpsPrivateKey);
         expect(foundRule.httpsCertificateAuthority).toEqual(
-          hostRule.httpsCertificateAuthority
+          hostRule.httpsCertificateAuthority,
         );
         expect(foundRule.httpsCertificate).toEqual(hostRule.httpsCertificate);
 
