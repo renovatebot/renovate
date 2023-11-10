@@ -119,7 +119,7 @@ sidebar_label: ${displayName}
           md += '\n```\n\n';
         }
       }
-      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
+      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](../index.md#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
       const escapedDatasources = (supportedDatasources || [])
         .map(
