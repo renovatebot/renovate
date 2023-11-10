@@ -80,7 +80,7 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
-The pattern matches against the organization/repo string.
+The pattern matches against the organization/repo path.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
