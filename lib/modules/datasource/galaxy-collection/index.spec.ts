@@ -163,5 +163,19 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(res).toBeDefined();
       expect(res?.releases).toHaveLength(3);
     });
+
+    it('returns null but matches automation hub url', async () => {
+      httpMock
+        .scope('https://my.automationhub.local/api/galaxy/content/community/')
+        .get(`/v3/plugin/ansible/content/community/collections/index/foo/bar/`)
+        .reply(500);
+      await expect(
+         getPkgReleases({
+          datasource,
+          packageName: 'foo.bar',
+          registryUrls: ['https://my.automationhub.local/api/galaxy/content/community/'],
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
   });
 });
