@@ -12,20 +12,20 @@ const YarnrcYmlSchema = Yaml.pipe(
       .record(
         z.object({
           npmRegistryServer: z.string().optional(),
-        })
+        }),
       )
       .optional(),
-  })
+  }),
 );
 
 export type YarnConfig = z.infer<typeof YarnrcYmlSchema>;
 
 const registryRegEx = regEx(
-  /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm
+  /^"?(@(?<scope>[^:]+):)?registry"? "?(?<registryUrl>[^"]+)"?$/gm,
 );
 
 export function loadConfigFromLegacyYarnrc(
-  legacyYarnrc: string
+  legacyYarnrc: string,
 ): YarnConfig | null {
   const registryMatches = [...legacyYarnrc.matchAll(registryRegEx)]
     .map((m) => m.groups)
@@ -55,7 +55,7 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
 
 export function resolveRegistryUrl(
   packageName: string,
-  yarnConfig: YarnConfig
+  yarnConfig: YarnConfig,
 ): string | null {
   if (yarnConfig.npmScopes) {
     for (const scope in yarnConfig.npmScopes) {

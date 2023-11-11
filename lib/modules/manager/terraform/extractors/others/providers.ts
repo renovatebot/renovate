@@ -12,7 +12,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
 
   extract(
     hclRoot: TerraformDefinitionFile,
-    locks: ProviderLock[]
+    locks: ProviderLock[],
   ): PackageDependency[] {
     const providerTypes = hclRoot?.provider;
     if (is.nullOrUndefined(providerTypes)) {
@@ -23,7 +23,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
     if (!is.plainObject(providerTypes)) {
       logger.debug(
         { providerTypes },
-        'Terraform: unexpected `providerTypes` value'
+        'Terraform: unexpected `providerTypes` value',
       );
       return [];
     }
@@ -39,7 +39,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
             },
           },
           locks,
-          'provider'
+          'provider',
         );
         dependencies.push(dep);
       }

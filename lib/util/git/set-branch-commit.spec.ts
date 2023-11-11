@@ -21,7 +21,7 @@ describe('util/git/set-branch-commit', () => {
       git.getBranchCommit.mockReturnValueOnce('base_SHA' as LongCommitSha);
       setBranchNewCommit('branch_name', 'base_branch', 'SHA');
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setBranchCommit(): Branch cache not present'
+        'setBranchCommit(): Branch cache not present',
       );
       expect(repoCache.branches).toEqual([
         {

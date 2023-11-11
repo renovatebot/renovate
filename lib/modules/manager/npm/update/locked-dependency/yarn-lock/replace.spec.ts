@@ -13,7 +13,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarn2Lock,
         'chalk',
         '^2.4.1',
-        '2.5.0'
+        '2.5.0',
       );
       expect(res).toBe(yarn2Lock);
     });
@@ -23,7 +23,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock1,
         'fresh',
         '~0.2.1',
-        '0.2.5'
+        '0.2.5',
       );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
@@ -48,7 +48,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock1,
         'express',
         '4.0.0',
-        '4.4.0'
+        '4.4.0',
       );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
@@ -74,7 +74,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         'express',
         '4.0.0',
         '4.4.0',
-        '4.4.0'
+        '4.4.0',
       );
       expect(res).not.toEqual(yarnLock1);
       const diffRes = Diff.diffLines(yarnLock1, res);
@@ -101,7 +101,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock2,
         'string-width',
         '^1.0.1 || ^2.0.0',
-        '2.2.0'
+        '2.2.0',
       );
       expect(res).not.toEqual(yarnLock2);
       const diffRes = Diff.diffLines(yarnLock2, res);
@@ -126,7 +126,7 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
         yarnLock2,
         '@embroider/addon-shim',
         '^0.48.0',
-        '0.48.1'
+        '0.48.1',
       );
       expect(res).not.toEqual(yarnLock2);
       const diffRes = Diff.diffLines(yarnLock2, res);

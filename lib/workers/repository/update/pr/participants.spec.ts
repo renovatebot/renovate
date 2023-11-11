@@ -46,6 +46,67 @@ describe('workers/repository/update/pr/participants', () => {
       expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b']);
     });
 
+    it('expands group code owners assignees', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce([
+        'user',
+        '@group',
+        'u@email.com',
+      ]);
+      platform.expandGroupMembers = jest
+        .fn()
+        .mockResolvedValueOnce(['u@email.com', 'user', 'group.user']);
+      await addParticipants(
+        {
+          ...config,
+          assigneesFromCodeOwners: true,
+          expandCodeOwnersGroups: true,
+        },
+        pr,
+      );
+      expect(platform.expandGroupMembers).toHaveBeenCalledWith([
+        'user',
+        '@group',
+        'u@email.com',
+      ]);
+      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
+      expect(platform.addAssignees).toHaveBeenCalledWith(123, [
+        'a',
+        'b',
+        'c',
+        'u@email.com',
+        'user',
+        'group.user',
+      ]);
+    });
+
+    it('does not expand group code owners assignees when assigneesFromCodeOwners disabled', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
+      platform.expandGroupMembers = jest
+        .fn()
+        .mockResolvedValueOnce(['user', 'group.user']);
+      await addParticipants(config, pr);
+      expect(codeOwners.codeOwnersForPr).not.toHaveBeenCalled();
+      expect(platform.expandGroupMembers).not.toHaveBeenCalled();
+      expect(platform.addAssignees).toHaveBeenCalledWith(123, ['a', 'b', 'c']);
+    });
+
+    it('does not expand group code owners assignees when expandCodeOwnersGroups disabled', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
+      platform.expandGroupMembers = jest
+        .fn()
+        .mockResolvedValueOnce(['user', 'group.user']);
+      await addParticipants({ ...config, assigneesFromCodeOwners: true }, pr);
+      expect(codeOwners.codeOwnersForPr).toHaveBeenCalledOnce();
+      expect(platform.expandGroupMembers).not.toHaveBeenCalled();
+      expect(platform.addAssignees).toHaveBeenCalledWith(123, [
+        'a',
+        'b',
+        'c',
+        'user',
+        'group',
+      ]);
+    });
+
     it('supports assigneesSampleSize', async () => {
       util.sampleSize.mockReturnValueOnce(['a', 'c']);
       await addParticipants({ ...config, assigneesSampleSize: 2 }, pr);
@@ -121,7 +182,7 @@ describe('workers/repository/update/pr/participants', () => {
     it('supports additionalReviewers', async () => {
       await addParticipants(
         { ...config, additionalReviewers: ['foo', 'bar', 'baz'] },
-        pr
+        pr,
       );
       expect(platform.addReviewers).toHaveBeenCalledWith(123, [
         'x',

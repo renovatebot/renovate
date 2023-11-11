@@ -4,10 +4,10 @@ import { extractPackageFile } from '.';
 const jsonnetfile = Fixtures.get('jsonnetfile.json');
 const jsonnetfileWithName = Fixtures.get('jsonnetfile-with-name.json');
 const jsonnetfileNoDependencies = Fixtures.get(
-  'jsonnetfile-no-dependencies.json'
+  'jsonnetfile-no-dependencies.json',
 );
 const jsonnetfileLocalDependencies = Fixtures.get(
-  'jsonnetfile-local-dependencies.json'
+  'jsonnetfile-local-dependencies.json',
 );
 const jsonnetfileEmptyGitSource = JSON.stringify({
   version: 1,
@@ -23,25 +23,25 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for invalid jsonnetfile', () => {
       expect(
-        extractPackageFile('this is not a jsonnetfile', 'jsonnetfile.json')
+        extractPackageFile('this is not a jsonnetfile', 'jsonnetfile.json'),
       ).toBeNull();
     });
 
     it('returns null for jsonnetfile with no dependencies', () => {
       expect(
-        extractPackageFile(jsonnetfileNoDependencies, 'jsonnetfile.json')
+        extractPackageFile(jsonnetfileNoDependencies, 'jsonnetfile.json'),
       ).toBeNull();
     });
 
     it('returns null for local dependencies', () => {
       expect(
-        extractPackageFile(jsonnetfileLocalDependencies, 'jsonnetfile.json')
+        extractPackageFile(jsonnetfileLocalDependencies, 'jsonnetfile.json'),
       ).toBeNull();
     });
 
     it('returns null for vendored dependencies', () => {
       expect(
-        extractPackageFile(jsonnetfile, 'vendor/jsonnetfile.json')
+        extractPackageFile(jsonnetfile, 'vendor/jsonnetfile.json'),
       ).toBeNull();
     });
 
@@ -49,8 +49,8 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
       expect(
         extractPackageFile(
           jsonnetfileEmptyGitSource,
-          'jsonnetfile-empty-git-source.json'
-        )
+          'jsonnetfile-empty-git-source.json',
+        ),
       ).toBeNull();
     });
 

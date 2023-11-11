@@ -16,7 +16,7 @@ export abstract class AbstractMigration implements Migration {
   abstract run(value: unknown, key: string): void;
 
   protected get<Key extends keyof RenovateConfig>(
-    key: Key
+    key: Key,
   ): RenovateConfig[Key] {
     return this.migratedConfig[key] ?? this.originalConfig[key];
   }
@@ -27,7 +27,7 @@ export abstract class AbstractMigration implements Migration {
 
   protected setSafely<Key extends keyof RenovateConfig>(
     key: Key,
-    value: RenovateConfig[Key]
+    value: RenovateConfig[Key],
   ): void {
     if (
       is.nullOrUndefined(this.originalConfig[key]) &&
@@ -39,7 +39,7 @@ export abstract class AbstractMigration implements Migration {
 
   protected setHard<Key extends keyof RenovateConfig>(
     key: Key,
-    value: RenovateConfig[Key]
+    value: RenovateConfig[Key],
   ): void {
     this.migratedConfig[key] = value;
   }

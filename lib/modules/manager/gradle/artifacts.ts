@@ -29,7 +29,7 @@ function isLockFile(fileName: string): boolean {
 }
 
 async function getUpdatedLockfiles(
-  oldLockFileContentMap: Record<string, string | null>
+  oldLockFileContentMap: Record<string, string | null>,
 ): Promise<UpdateArtifactsResult[]> {
   const res: UpdateArtifactsResult[] = [];
 
@@ -58,7 +58,7 @@ async function getUpdatedLockfiles(
 
 async function getSubProjectList(
   cmd: string,
-  execOptions: ExecOptions
+  execOptions: ExecOptions,
 ): Promise<string[]> {
   const subprojects = ['']; // = root project
   const subprojectsRegex = regEx(/^[ \t]*subprojects: \[(?<subprojects>.+)\]/m);
@@ -81,7 +81,7 @@ async function getSubProjectList(
 async function getGradleVersion(gradlewFile: string): Promise<string | null> {
   const propertiesFile = join(
     dirname(gradlewFile),
-    'gradle/wrapper/gradle-wrapper.properties'
+    'gradle/wrapper/gradle-wrapper.properties',
   );
   const properties = await readLocalFile(propertiesFile, 'utf8');
   const extractResult = extractGradleVersion(properties ?? '');
@@ -91,7 +91,7 @@ async function getGradleVersion(gradlewFile: string): Promise<string | null> {
 
 async function buildUpdateVerificationMetadataCmd(
   verificationMetadataFile: string | undefined,
-  baseCmd: string
+  baseCmd: string,
 ): Promise<string | null> {
   if (!verificationMetadataFile) {
     return null;
@@ -113,11 +113,11 @@ async function buildUpdateVerificationMetadataCmd(
   }
   if (
     verificationMetadata?.includes(
-      '<verify-signatures>true</verify-signatures>'
+      '<verify-signatures>true</verify-signatures>',
     )
   ) {
     logger.debug(
-      'Dependency signature verification enabled - generating PGP signatures'
+      'Dependency signature verification enabled - generating PGP signatures',
     );
     // signature verification requires at least one checksum type as fallback.
     if (!hashTypes.length) {
@@ -142,11 +142,11 @@ export async function updateArtifacts({
   const fileList = await scm.getFileList();
   const lockFiles = fileList.filter((file) => isLockFile(file));
   const verificationMetadataFile = fileList.find((fileName) =>
-    fileName.endsWith('gradle/verification-metadata.xml')
+    fileName.endsWith('gradle/verification-metadata.xml'),
   );
   if (!lockFiles.length && !verificationMetadataFile) {
     logger.debug(
-      'No Gradle dependency lockfiles or verification metadata found - skipping update'
+      'No Gradle dependency lockfiles or verification metadata found - skipping update',
     );
     return null;
   }
@@ -155,7 +155,7 @@ export async function updateArtifacts({
   const gradlewFile = await findUpLocal(gradlewName, dirname(packageFileName));
   if (!gradlewFile) {
     logger.debug(
-      'Found Gradle dependency lockfiles but no gradlew - aborting update'
+      'Found Gradle dependency lockfiles but no gradlew - aborting update',
     );
     return null;
   }
@@ -166,7 +166,7 @@ export async function updateArtifacts({
       dirname(packageFileName) !== dirname(gradlewFile))
   ) {
     logger.trace(
-      'No build.gradle(.kts) file or not in root project - skipping lock file maintenance'
+      'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',
     );
     return null;
   }
@@ -221,7 +221,7 @@ export async function updateArtifacts({
     const updateVerificationMetadataCmd =
       await buildUpdateVerificationMetadataCmd(
         verificationMetadataFile,
-        baseCmd
+        baseCmd,
       );
     if (updateVerificationMetadataCmd) {
       cmds.push(updateVerificationMetadataCmd);

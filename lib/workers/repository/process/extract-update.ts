@@ -36,7 +36,7 @@ export interface Stats {
 
 // istanbul ignore next
 function extractStats(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): Stats | null {
   if (!packageFiles) {
     return null;
@@ -67,14 +67,14 @@ function extractStats(
 export function isCacheExtractValid(
   baseBranchSha: string,
   configHash: string,
-  cachedExtract?: BaseBranchCache
+  cachedExtract?: BaseBranchCache,
 ): boolean {
   if (!(cachedExtract?.sha && cachedExtract.configHash)) {
     return false;
   }
   if (cachedExtract.sha !== baseBranchSha) {
     logger.debug(
-      `Cached extract result cannot be used due to base branch SHA change (old=${cachedExtract.sha}, new=${baseBranchSha})`
+      `Cached extract result cannot be used due to base branch SHA change (old=${cachedExtract.sha}, new=${baseBranchSha})`,
     );
     return false;
   }
@@ -84,13 +84,13 @@ export function isCacheExtractValid(
   }
   if (!cachedExtract.extractionFingerprints) {
     logger.debug(
-      'Cached extract is missing extractionFingerprints, so cannot be used'
+      'Cached extract is missing extractionFingerprints, so cannot be used',
     );
     return false;
   }
   const changedManagers = new Set();
   for (const [manager, fingerprint] of Object.entries(
-    cachedExtract.extractionFingerprints
+    cachedExtract.extractionFingerprints,
   )) {
     if (fingerprint !== hashMap.get(manager)) {
       changedManagers.add(manager);
@@ -99,18 +99,18 @@ export function isCacheExtractValid(
   if (changedManagers.size > 0) {
     logger.debug(
       { changedManagers: [...changedManagers] },
-      'Manager fingerprint(s) have changed, extract cache cannot be reused'
+      'Manager fingerprint(s) have changed, extract cache cannot be reused',
     );
     return false;
   }
   logger.debug(
-    `Cached extract for sha=${baseBranchSha} is valid and can be used`
+    `Cached extract for sha=${baseBranchSha} is valid and can be used`,
   );
   return true;
 }
 
 export async function extract(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
@@ -160,7 +160,7 @@ export async function extract(
   const stats = extractStats(packageFiles);
   logger.info(
     { baseBranch: config.baseBranch, stats },
-    `Dependency extraction complete`
+    `Dependency extraction complete`,
   );
   logger.trace({ config: packageFiles }, 'packageFiles');
   ensureGithubToken(packageFiles);
@@ -169,7 +169,7 @@ export async function extract(
 
 async function fetchVulnerabilities(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
   if (config.osvVulnerabilityAlerts) {
     logger.debug('fetchVulnerabilities() - osvVulnerabilityAlerts=true');
@@ -177,7 +177,7 @@ async function fetchVulnerabilities(
       const vulnerabilities = await Vulnerabilities.create();
       await vulnerabilities.appendVulnerabilityPackageRules(
         config,
-        packageFiles
+        packageFiles,
       );
     } catch (err) {
       logger.warn({ err }, 'Unable to read vulnerability information');
@@ -187,18 +187,18 @@ async function fetchVulnerabilities(
 
 export async function lookup(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
   await raiseDeprecationWarnings(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
-    packageFiles
+    packageFiles,
   );
   logger.debug(
     { baseBranch: config.baseBranch, config: packageFiles },
-    'packageFiles with updates'
+    'packageFiles with updates',
   );
   sortBranches(branches);
   return { branches, branchList, packageFiles };
@@ -206,7 +206,7 @@ export async function lookup(
 
 export async function update(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: BranchConfig[],
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else

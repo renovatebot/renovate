@@ -118,6 +118,10 @@ export const presets: Record<string, Preset> = {
           'java-jre',
           'sapmachine',
         ],
+        matchPackagePatterns: [
+          '^azul/zulu-openjdk',
+          '^bellsoft/liberica-openj(dk|re)-',
+        ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
       },
@@ -135,11 +139,12 @@ export const presets: Record<string, Preset> = {
   },
   reduceRepologyServerLoad: {
     description:
-      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
+      'Limit requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
     hostRules: [
       {
         concurrentRequestLimit: 1,
         matchHost: 'repology.org',
+        maxRequestsPerSecond: 0.5,
       },
     ],
   },

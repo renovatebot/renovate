@@ -8,7 +8,7 @@ export class DefaultGitScm implements PlatformScm {
   }
 
   commitAndPush(
-    commitConfig: CommitFilesConfig
+    commitConfig: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
     return git.commitFiles(commitConfig);
   }

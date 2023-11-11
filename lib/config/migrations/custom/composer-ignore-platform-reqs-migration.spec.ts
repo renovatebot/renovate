@@ -8,7 +8,7 @@ describe('config/migrations/custom/composer-ignore-platform-reqs-migration', () 
       },
       {
         composerIgnorePlatformReqs: [],
-      }
+      },
     );
   });
 
@@ -19,7 +19,7 @@ describe('config/migrations/custom/composer-ignore-platform-reqs-migration', () 
       },
       {
         composerIgnorePlatformReqs: null,
-      }
+      },
     );
   });
 
@@ -31,7 +31,7 @@ describe('config/migrations/custom/composer-ignore-platform-reqs-migration', () 
       {
         composerIgnorePlatformReqs: [],
       },
-      false
+      false,
     );
   });
 });

@@ -11,7 +11,7 @@ import type { PackageLockOrEntry } from './types';
 
 export async function updateLockedDependency(
   config: UpdateLockedConfig,
-  isParentUpdate = false
+  isParentUpdate = false,
 ): Promise<UpdateLockedResult> {
   const {
     depName,
@@ -25,7 +25,7 @@ export async function updateLockedDependency(
     allowHigherOrRemoved = false,
   } = config;
   logger.debug(
-    `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
   try {
     let packageJson: PackageJson;
@@ -45,11 +45,11 @@ export async function updateLockedDependency(
     const lockedDeps = getLockedDependencies(
       packageLockJson,
       depName,
-      currentVersion
+      currentVersion,
     );
     if (lockedDeps.some((dep) => dep.bundled)) {
       logger.info(
-        `Package ${depName}@${currentVersion} is bundled and cannot be updated`
+        `Package ${depName}@${currentVersion} is bundled and cannot be updated`,
       );
       return { status: 'update-failed' };
     }
@@ -57,19 +57,19 @@ export async function updateLockedDependency(
       const newLockedDeps = getLockedDependencies(
         packageLockJson,
         depName,
-        newVersion
+        newVersion,
       );
       let status: 'update-failed' | 'already-updated';
       if (newLockedDeps.length) {
         logger.debug(
-          `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`
+          `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`,
         );
         status = 'already-updated';
       } else {
         if (lockfileVersion !== 1) {
           logger.debug(
             // TODO: types (#22198)
-            `Found lockfileVersion ${packageLockJson.lockfileVersion!}`
+            `Found lockfileVersion ${packageLockJson.lockfileVersion!}`,
           );
           status = 'update-failed';
         } else if (allowHigherOrRemoved) {
@@ -77,34 +77,34 @@ export async function updateLockedDependency(
           const anyVersionLocked = getLockedDependencies(
             packageLockJson,
             depName,
-            null
+            null,
           );
           if (anyVersionLocked.length) {
             if (
               anyVersionLocked.every((dep) =>
-                semver.isGreaterThan(dep.version, newVersion)
+                semver.isGreaterThan(dep.version, newVersion),
               )
             ) {
               logger.debug(
-                `${depName} found in ${lockFile} with higher version - looks like it's already updated`
+                `${depName} found in ${lockFile} with higher version - looks like it's already updated`,
               );
               status = 'already-updated';
             } else {
               logger.debug(
                 { anyVersionLocked },
-                `Found alternative versions of qs`
+                `Found alternative versions of qs`,
               );
               status = 'update-failed';
             }
           } else {
             logger.debug(
-              `${depName} not found in ${lockFile} - looks like it's already removed`
+              `${depName} not found in ${lockFile} - looks like it's already removed`,
             );
             status = 'already-updated';
           }
         } else {
           logger.debug(
-            `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
+            `${depName}@${currentVersion} not found in ${lockFile} - cannot update`,
           );
           status = 'update-failed';
         }
@@ -122,20 +122,20 @@ export async function updateLockedDependency(
       return { status };
     }
     logger.debug(
-      `Found matching dependencies with length ${lockedDeps.length}`
+      `Found matching dependencies with length ${lockedDeps.length}`,
     );
     const constraints = findDepConstraints(
       packageJson,
       packageLockJson,
       depName,
       currentVersion,
-      newVersion
+      newVersion,
     );
     logger.trace({ deps: lockedDeps, constraints }, 'Matching details');
     if (!constraints.length) {
       logger.info(
         { depName, currentVersion, newVersion },
-        'Could not find constraints for the locked dependency - cannot remediate'
+        'Could not find constraints for the locked dependency - cannot remediate',
       );
       return { status: 'update-failed' };
     }
@@ -154,12 +154,12 @@ export async function updateLockedDependency(
             parentDepName
               ? `${parentDepName}@${parentVersion!}`
               : /* istanbul ignore next: hard to test */ packageFile
-          }`
+          }`,
         );
       } else if (parentDepName && parentVersion) {
         if (!allowParentUpdates) {
           logger.debug(
-            `Cannot update ${depName} to ${newVersion} without an update to ${parentDepName}`
+            `Cannot update ${depName} to ${newVersion} without an update to ${parentDepName}`,
           );
           return { status: 'update-failed' };
         }
@@ -168,17 +168,17 @@ export async function updateLockedDependency(
           parentDepName,
           parentVersion,
           depName,
-          newVersion
+          newVersion,
         );
         if (parentNewVersion) {
           if (parentNewVersion === parentVersion) {
             logger.debug(
-              `Update of ${depName} to ${newVersion} already achieved in parent ${parentDepName}@${parentNewVersion}`
+              `Update of ${depName} to ${newVersion} already achieved in parent ${parentDepName}@${parentNewVersion}`,
             );
           } else {
             // Update the parent dependency so that we can update this dependency
             logger.debug(
-              `Update of ${depName} to ${newVersion} can be achieved due to parent ${parentDepName}`
+              `Update of ${depName} to ${newVersion} can be achieved due to parent ${parentDepName}`,
             );
             const parentUpdate: Partial<UpdateLockedConfig> = {
               depName: parentDepName,
@@ -190,7 +190,7 @@ export async function updateLockedDependency(
         } else {
           // For some reason it's not possible to update the parent to a version compatible with our desired dep version
           logger.debug(
-            `Update of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`
+            `Update of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`,
           );
           return { status: 'update-failed' };
         }
@@ -219,7 +219,7 @@ export async function updateLockedDependency(
     let newLockFileContent = JSON.stringify(
       packageLockJson,
       null,
-      detectedIndent
+      detectedIndent,
     );
     // iterate through the parent updates first
     for (const parentUpdate of parentUpdates) {
@@ -231,13 +231,13 @@ export async function updateLockedDependency(
       };
       const parentUpdateResult = await updateLockedDependency(
         parentUpdateConfig,
-        true
+        true,
       );
       // istanbul ignore if: hard to test due to recursion
       if (!parentUpdateResult.files) {
         logger.debug(
           // TODO: types (#22198)
-          `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`
+          `Update of ${depName} to ${newVersion} impossible due to failed update of parent ${parentUpdate.depName} to ${parentUpdate.newVersion}`,
         );
         return { status: 'update-failed' };
       }
@@ -255,7 +255,7 @@ export async function updateLockedDependency(
       files[packageFile] = newPackageJsonContent;
     } else if (lockfileVersion !== 1) {
       logger.debug(
-        'Remediations which change package-lock.json only are not supported unless lockfileVersion=1'
+        'Remediations which change package-lock.json only are not supported unless lockfileVersion=1',
       );
       return { status: 'unsupported' };
     }

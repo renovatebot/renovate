@@ -6,11 +6,11 @@ export function getCachedBehindBaseResult(
   branchName: string,
   branchSha: LongCommitSha | null,
   baseBranch: string,
-  baseBranchSha: LongCommitSha | null
+  baseBranchSha: LongCommitSha | null,
 ): boolean | null {
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branch.branchName === branchName
+    (branch) => branch.branchName === branchName,
   );
 
   if (
@@ -28,11 +28,11 @@ export function getCachedBehindBaseResult(
 
 export function setCachedBehindBaseResult(
   branchName: string,
-  isBehindBase: boolean
+  isBehindBase: boolean,
 ): void {
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branch.branchName === branchName
+    (branch) => branch.branchName === branchName,
   );
 
   if (!branch) {

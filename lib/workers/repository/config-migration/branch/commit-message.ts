@@ -6,7 +6,7 @@ import { CommitMessageFactory } from '../../model/commit-message-factory';
 export class ConfigMigrationCommitMessageFactory {
   constructor(
     private readonly config: RenovateConfig,
-    private readonly configFile: string
+    private readonly configFile: string,
   ) {}
 
   private create(commitMessageTopic: string): CommitMessage {

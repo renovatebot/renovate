@@ -20,7 +20,7 @@ export function sanitizeMarkdown(markdown: string): string {
   res = res.replace(regEx(/`#&#8203;(\d+)`/g), '`#$1`');
   res = res.replace(
     regEx(/(?<before>[^\n]\n)(?<title>#.*)/g),
-    '$<before>\n$<title>'
+    '$<before>\n$<title>',
   );
   return res;
 }
@@ -33,7 +33,7 @@ export function sanitizeMarkdown(markdown: string): string {
  */
 export async function linkify(
   content: string,
-  options: github.RemarkGithubOptions
+  options: github.RemarkGithubOptions,
 ): Promise<string> {
   // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
   const output = await remark()

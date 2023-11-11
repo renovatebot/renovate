@@ -38,7 +38,7 @@ describe('modules/versioning/distro', () => {
     'getVersionByCodename("$version") === $expected',
     ({ version, expected }) => {
       expect(di.getVersionByCodename(version)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -55,7 +55,7 @@ describe('modules/versioning/distro', () => {
     'getCodenameByVersion("$version") === $expected',
     ({ version, expected }) => {
       expect(di.getCodenameByVersion(version)).toBe(expected);
-    }
+    },
   );
 
   it.each`

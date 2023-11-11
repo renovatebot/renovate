@@ -69,7 +69,7 @@ describe('modules/versioning/pep440/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ range, expected }) => {
       expect(pep440.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -80,7 +80,7 @@ describe('modules/versioning/pep440/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ range, expected }) => {
       expect(pep440.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -189,7 +189,7 @@ describe('modules/versioning/pep440/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
   it.each`
@@ -306,7 +306,7 @@ describe('modules/versioning/pep440/index', () => {
         isReplacement,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
   it.each`
@@ -337,6 +337,6 @@ describe('modules/versioning/pep440/index', () => {
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 });

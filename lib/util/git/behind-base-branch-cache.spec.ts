@@ -25,8 +25,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeNull();
     });
 
@@ -48,8 +48,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeNull();
     });
 
@@ -71,8 +71,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeNull();
     });
 
@@ -94,8 +94,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeNull();
     });
 
@@ -116,8 +116,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeNull();
     });
 
@@ -139,8 +139,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeNull();
     });
 
@@ -162,8 +162,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeNull();
     });
 
@@ -185,8 +185,8 @@ describe('util/git/behind-base-branch-cache', () => {
           'branch',
           'branch_sha' as LongCommitSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha
-        )
+          'base_branch_sha' as LongCommitSha,
+        ),
       ).toBeTrue();
     });
   });
@@ -196,7 +196,7 @@ describe('util/git/behind-base-branch-cache', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setCachedBehindBaseResult(): Branch cache not present'
+        'setCachedBehindBaseResult(): Branch cache not present',
       );
     });
 
@@ -204,7 +204,7 @@ describe('util/git/behind-base-branch-cache', () => {
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setCachedBehindBaseResult(): Branch cache not present'
+        'setCachedBehindBaseResult(): Branch cache not present',
       );
     });
 

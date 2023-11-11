@@ -118,7 +118,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
           datasource,
           packageName: 'some/dep2',
         },
-        'v1.0.0'
+        'v1.0.0',
       );
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
@@ -138,7 +138,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
           datasource,
           packageName: 'some/dep2',
         },
-        'v1.0.0'
+        'v1.0.0',
       );
       expect(res).toBeNull();
     });

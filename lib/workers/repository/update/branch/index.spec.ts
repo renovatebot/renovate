@@ -86,7 +86,7 @@ const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
 function findFileContent(
   files: FileChange[] | undefined,
-  path: string
+  path: string,
 ): string | null {
   const f = files?.find((file) => file.path === path);
   if (f?.type === 'addition' && f.contents) {
@@ -253,7 +253,7 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           state: 'open',
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
@@ -268,7 +268,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           number: 13,
           state: 'closed',
-        })
+        }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -283,7 +283,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           number: 13,
           state: 'closed',
-        })
+        }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -299,7 +299,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           number: 13,
           state: 'merged',
-        })
+        }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -312,7 +312,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           number: 13,
           state: 'closed',
-        })
+        }),
       );
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -330,7 +330,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Matching PR #${pr.number} was merged previously`
+        `Matching PR #${pr.number} was merged previously`,
       );
     });
 
@@ -340,11 +340,11 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           state: 'merged',
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
-        REPOSITORY_CHANGED
+        REPOSITORY_CHANGED,
       );
     });
 
@@ -355,7 +355,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           state: 'open',
           labels: ['rebase'],
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
@@ -386,11 +386,11 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        `PR has been edited, PrNo:${pr.number}`
+        `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledWith(
-        expect.objectContaining({ ...ensureCommentConfig })
+        expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
 
@@ -418,11 +418,11 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        `PR has been edited, PrNo:${pr.number}`
+        `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledWith(
-        expect.objectContaining({ ...ensureCommentConfig })
+        expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
 
@@ -444,7 +444,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        `PR has been edited, PrNo:${pr.number}`
+        `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
     });
@@ -466,7 +466,7 @@ describe('workers/repository/update/branch/index', () => {
           bodyStruct: partial<PrBodyStruct>({
             debugData: partial<PrDebugData>({ targetBranch: 'master' }),
           }),
-        })
+        }),
       );
       config.baseBranch = 'master';
       scm.isBranchModified.mockResolvedValueOnce(false);
@@ -477,11 +477,11 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        `PR has been edited, PrNo:${pr.number}`
+        `PR has been edited, PrNo:${pr.number}`,
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledWith(
-        expect.objectContaining({ ...ensureCommentConfig })
+        expect.objectContaining({ ...ensureCommentConfig }),
       );
     });
 
@@ -620,7 +620,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -640,7 +640,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -658,7 +658,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -679,7 +679,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -699,7 +699,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -725,7 +725,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -751,7 +751,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -777,7 +777,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -803,7 +803,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -829,7 +829,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -840,7 +840,7 @@ describe('workers/repository/update/branch/index', () => {
         ignoreTests: true,
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
-        fetchReleaseNotes: 'branch',
+        fetchChangeLogs: 'branch',
       } satisfies BranchConfig;
       scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({
@@ -859,7 +859,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -883,7 +883,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -909,18 +909,18 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips when automerge is off schedule', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
-        partial<PackageFilesResult>()
+        partial<PackageFilesResult>(),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce(
         partial<WriteExistingFilesResult>({
           artifactErrors: [],
           updatedArtifacts: [],
-        })
+        }),
       );
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('off schedule');
       prWorker.ensurePr.mockResolvedValueOnce(
-        partial<ResultWithPr>({ type: 'with-pr' })
+        partial<ResultWithPr>({ type: 'with-pr' }),
       );
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -935,7 +935,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        'Branch cannot automerge now because automergeSchedule is off schedule - skipping'
+        'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
@@ -946,7 +946,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [partial<ArtifactError>()],
@@ -970,7 +970,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [partial<ArtifactError>()],
@@ -995,7 +995,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [partial<ArtifactError>()],
@@ -1020,7 +1020,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [partial<ArtifactError>()],
@@ -1035,7 +1035,7 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
-        Error(MANAGER_LOCKFILE_ERROR)
+        Error(MANAGER_LOCKFILE_ERROR),
       );
     });
 
@@ -1043,7 +1043,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [partial<ArtifactError>()],
@@ -1081,7 +1081,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [partial<ArtifactError>()],
@@ -1109,7 +1109,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [partial<ArtifactError>()],
@@ -1124,7 +1124,7 @@ describe('workers/repository/update/branch/index', () => {
         skipBranchUpdate: true,
       });
       expect(logger.debug).toHaveBeenCalledWith(
-        'Base branch changed by user, rebasing the branch onto new base'
+        'Base branch changed by user, rebasing the branch onto new base',
       );
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
@@ -1134,7 +1134,7 @@ describe('workers/repository/update/branch/index', () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1161,7 +1161,7 @@ describe('workers/repository/update/branch/index', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce(
         partial<Pr>({
           state: 'closed',
-        })
+        }),
       );
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       expect(await branchWorker.processBranch(config)).toEqual({
@@ -1186,7 +1186,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-edited',
       });
       expect(logger.info).toHaveBeenCalledWith(
-        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`
+        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
       );
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
@@ -1230,7 +1230,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       expect(logger.info).toHaveBeenCalledWith(
-        `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`
+        `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
       );
     });
 
@@ -1239,7 +1239,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<PackageFilesResult>({
           updatedPackageFiles: [],
           artifactErrors: [],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1254,7 +1254,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1268,7 +1268,7 @@ describe('workers/repository/update/branch/index', () => {
         await branchWorker.processBranch({
           ...config,
           artifactErrors: [],
-        })
+        }),
       ).toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -1277,7 +1277,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       expect(logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would ensure comment removal in PR #undefined'
+        'DRY-RUN: Would ensure comment removal in PR #undefined',
       );
     });
 
@@ -1287,7 +1287,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1302,7 +1302,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1328,7 +1328,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1341,7 +1341,7 @@ describe('workers/repository/update/branch/index', () => {
           state: 'open',
           labels: ['stop-updating'],
           bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1365,7 +1365,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           sourceBranch: 'old/some-branch',
           state: 'open',
-        })
+        }),
       );
       const inconfig = {
         ...config,
@@ -1392,7 +1392,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1408,7 +1408,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1434,7 +1434,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1447,7 +1447,7 @@ describe('workers/repository/update/branch/index', () => {
           state: 'open',
           labels: ['stop-updating'],
           bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -1497,7 +1497,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
@@ -1505,7 +1505,7 @@ describe('workers/repository/update/branch/index', () => {
           modified: ['modified_file'],
           not_added: [],
           deleted: ['deleted_file'],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('modified file content');
       fs.localPathExists
@@ -1554,12 +1554,12 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       const errorMessage = expect.stringContaining(
-        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand"
+        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand",
       );
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
           content: errorMessage,
-        })
+        }),
       );
       expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
     });
@@ -1593,7 +1593,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
@@ -1601,7 +1601,7 @@ describe('workers/repository/update/branch/index', () => {
           modified: ['modified_file'],
           not_added: [],
           deleted: ['deleted_file'],
-        })
+        }),
       );
 
       fs.readLocalFile.mockResolvedValueOnce('modified file content');
@@ -1643,7 +1643,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
           content: errorMessage,
-        })
+        }),
       );
       expect(sanitize.sanitize).toHaveBeenCalledWith(errorMessage);
     });
@@ -1678,7 +1678,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
@@ -1686,7 +1686,7 @@ describe('workers/repository/update/branch/index', () => {
           modified: ['modified_file'],
           not_added: [],
           deleted: ['deleted_file'],
-        })
+        }),
       );
 
       fs.readLocalFile.mockResolvedValueOnce('modified file content');
@@ -1748,7 +1748,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedPackageFiles: [updatedPackageFile],
           artifactErrors: [],
           updatedArtifacts: [],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1769,7 +1769,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus
@@ -1778,14 +1778,14 @@ describe('workers/repository/update/branch/index', () => {
             modified: ['modified_file', 'modified_then_deleted_file'],
             not_added: [],
             deleted: ['deleted_file', 'deleted_then_created_file'],
-          })
+          }),
         )
         .mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['modified_file', 'deleted_then_created_file'],
             not_added: [],
             deleted: ['deleted_file', 'modified_then_deleted_file'],
-          })
+          }),
         );
 
       fs.readLocalFile
@@ -1870,27 +1870,28 @@ describe('workers/repository/update/branch/index', () => {
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
       const updatedArtifacts = calledWithConfig.updatedArtifacts;
       expect(findFileContent(updatedArtifacts, 'modified_file')).toBe(
-        'modified file content again'
+        'modified file content again',
       );
       expect(
-        findFileContent(updatedArtifacts, 'deleted_then_created_file')
+        findFileContent(updatedArtifacts, 'deleted_then_created_file'),
       ).toBe('this file was once deleted');
       expect(
         updatedArtifacts?.find(
-          (f) => f.type === 'deletion' && f.path === 'deleted_then_created_file'
-        )
+          (f) =>
+            f.type === 'deletion' && f.path === 'deleted_then_created_file',
+        ),
       ).toBeUndefined();
       expect(
         updatedArtifacts?.find(
           (f) =>
-            f.type === 'addition' && f.path === 'modified_then_deleted_file'
-        )
+            f.type === 'addition' && f.path === 'modified_then_deleted_file',
+        ),
       ).toBeUndefined();
       expect(
         updatedArtifacts?.find(
           (f) =>
-            f.type === 'deletion' && f.path === 'modified_then_deleted_file'
-        )
+            f.type === 'deletion' && f.path === 'modified_then_deleted_file',
+        ),
       ).toBeDefined();
     });
 
@@ -1905,7 +1906,7 @@ describe('workers/repository/update/branch/index', () => {
           updatedPackageFiles: [updatedPackageFile],
           artifactErrors: [],
           updatedArtifacts: [],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1926,7 +1927,7 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- rebase-check -->`),
             rebaseRequested: true,
           },
-        })
+        }),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce(
@@ -1934,7 +1935,7 @@ describe('workers/repository/update/branch/index', () => {
           modified: ['modified_file', 'modified_then_deleted_file'],
           not_added: [],
           deleted: ['deleted_file', 'deleted_then_created_file'],
-        })
+        }),
       );
 
       fs.readLocalFile
@@ -2015,8 +2016,8 @@ describe('workers/repository/update/branch/index', () => {
       expect(
         findFileContent(
           commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts,
-          'modified_file'
-        )
+          'modified_file',
+        ),
       ).toBe('modified file content');
     });
 
@@ -2031,7 +2032,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
-        await branchWorker.processBranch({ ...config, rebaseWhen: 'never' })
+        await branchWorker.processBranch({ ...config, rebaseWhen: 'never' }),
       ).toMatchObject({ result: 'no-work' });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
@@ -2051,14 +2052,14 @@ describe('workers/repository/update/branch/index', () => {
           ...config,
           rebaseWhen: 'never',
           dependencyDashboardChecks: { 'renovate/some-branch': 'other' },
-        })
+        }),
       ).toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
     it('continues when checked by checkedBranches', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
-        updatedPackageFiles
+        updatedPackageFiles,
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -2072,7 +2073,7 @@ describe('workers/repository/update/branch/index', () => {
           dependencyDashboardChecks: {
             'renovate/some-branch': 'global-config',
           },
-        })
+        }),
       ).toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
@@ -2091,7 +2092,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           sourceBranch: 'old/some-branch',
           state: 'open',
-        })
+        }),
       );
       const inconfig = {
         ...config,
@@ -2109,7 +2110,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
       expect(logger.debug).toHaveBeenCalledWith(
-        'No package files need updating'
+        'No package files need updating',
       );
     });
 
@@ -2127,7 +2128,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           sourceBranch: 'old/some-branch',
           state: 'open',
-        })
+        }),
       );
       config.reuseExistingBranch = true;
       config.skipBranchUpdate = true;
@@ -2146,7 +2147,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR');
       expect(logger.debug).not.toHaveBeenCalledWith(
-        'No package files need updating'
+        'No package files need updating',
       );
     });
 
@@ -2155,7 +2156,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -2170,14 +2171,14 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- approve-all-pending-prs -->`),
             rebaseRequested: false,
           },
-        })
+        }),
       );
       scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
       expect(
         await branchWorker.processBranch({
           ...config,
           dependencyDashboardAllPending: true,
-        })
+        }),
       ).toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -2192,7 +2193,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -2207,14 +2208,14 @@ describe('workers/repository/update/branch/index', () => {
             hash: hashBody(`- [x] <!-- create-all-rate-limited-prs -->`),
             rebaseRequested: false,
           },
-        })
+        }),
       );
       scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
       expect(
         await branchWorker.processBranch({
           ...config,
           dependencyDashboardAllRateLimited: true,
-        })
+        }),
       ).toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -2229,7 +2230,7 @@ describe('workers/repository/update/branch/index', () => {
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
-        })
+        }),
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -2262,12 +2263,12 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           state: 'open',
-        })
+        }),
       );
       jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
-        })
+        }),
       );
       const inconfig = {
         ...config,
@@ -2298,11 +2299,11 @@ describe('workers/repository/update/branch/index', () => {
       // Check that the last checkoutBranch call is after the only commitFilesToBranch call
       const checkoutBranchCalledTimes = scm.checkoutBranch.mock.calls.length;
       expect(
-        commit.commitFilesToBranch.mock.invocationCallOrder[0]
+        commit.commitFilesToBranch.mock.invocationCallOrder[0],
       ).toBeLessThan(
         scm.checkoutBranch.mock.invocationCallOrder[
           checkoutBranchCalledTimes - 1
-        ]
+        ],
       );
     });
   });

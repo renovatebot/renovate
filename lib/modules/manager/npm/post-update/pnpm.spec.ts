@@ -75,7 +75,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     const res = await pnpmHelper.generateLockFile(
       'some-dir',
       {},
-      { ...config, postUpdateOptions }
+      { ...config, postUpdateOptions },
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -122,7 +122,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           depType: 'packageManager',
           depName: 'pnpm',
         },
-      ]
+      ],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -164,7 +164,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           depType: 'packageManager',
           depName: 'pnpm',
         },
-      ]
+      ],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -200,7 +200,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-folder',
       {},
       configTemp,
-      []
+      [],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('lockfileVersion: 5.3\n');
@@ -219,7 +219,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     const res = await pnpmHelper.generateLockFile(
       'some-dir',
       {},
-      { ...config, constraints: { pnpm: '6.0.0' } }
+      { ...config, constraints: { pnpm: '6.0.0' } },
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -253,7 +253,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     const res = await pnpmHelper.generateLockFile(
       'some-dir',
       {},
-      { ...config, constraints: { pnpm: '6.0.0' } }
+      { ...config, constraints: { pnpm: '6.0.0' } },
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');

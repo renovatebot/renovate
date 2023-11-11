@@ -25,7 +25,7 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve();
   }
   commitAndPush(
-    commitConfig: CommitFilesConfig
+    commitConfig: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
     return Promise.resolve(null);
   }

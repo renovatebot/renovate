@@ -37,7 +37,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     key: ({ packageName }: GetReleasesConfig) => `getReleases-${packageName}`,
   })
   async getReleases(
-    getReleasesConfig: GetReleasesConfig
+    getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const resourceVersionIndex = await this.getResourceVersionIndex();
     const packageName = getReleasesConfig.packageName.toLowerCase();
@@ -62,7 +62,7 @@ export class AzureBicepResourceDatasource extends Datasource {
   async getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
     const { body } = await this.http.getJson(
       BICEP_TYPES_INDEX_URL,
-      BicepResourceVersionIndex
+      BicepResourceVersionIndex,
     );
     return body;
   }

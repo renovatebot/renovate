@@ -82,7 +82,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: [''],
-      })
+      }),
     );
 
     const res = await updateArtifacts({
@@ -102,7 +102,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -131,7 +131,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
     hostRules.find.mockReturnValueOnce({ token: 'token' });
@@ -161,7 +161,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
     hostRules.find.mockReturnValueOnce({ token: 'x-access-token:token' });
@@ -191,7 +191,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -236,7 +236,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -289,7 +289,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -318,7 +318,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
 

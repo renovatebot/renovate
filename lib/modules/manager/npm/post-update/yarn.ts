@@ -31,14 +31,14 @@ import type { GenerateLockFileResult } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 export async function checkYarnrc(
-  lockFileDir: string
+  lockFileDir: string,
 ): Promise<{ offlineMirror: boolean; yarnPath: string | null }> {
   let offlineMirror = false;
   let yarnPath: string | null = null;
   try {
     const yarnrc = await readLocalFile(
       upath.join(lockFileDir, '.yarnrc'),
-      'utf8'
+      'utf8',
     );
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
@@ -64,7 +64,7 @@ export async function checkYarnrc(
       if (!yarnBinaryExists) {
         scrubbedYarnrc = scrubbedYarnrc.replace(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
-          ''
+          '',
         );
         yarnPath = null;
       }
@@ -72,7 +72,7 @@ export async function checkYarnrc(
         logger.debug(`Writing scrubbed .yarnrc to ${lockFileDir}`);
         await writeLocalFile(
           upath.join(lockFileDir, '.yarnrc'),
-          scrubbedYarnrc
+          scrubbedYarnrc,
         );
       }
     }
@@ -94,7 +94,7 @@ export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: Partial<PostUpdateConfig<NpmManagerData>> = {},
-  upgrades: Upgrade[] = []
+  upgrades: Upgrade[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
@@ -225,7 +225,7 @@ export async function generateLockFile(
             .filter(is.string)
             .filter(uniqueStrings)
             .map(quote)
-            .join(' ')}${cmdOptions}`
+            .join(' ')}${cmdOptions}`,
         );
       } else {
         // `yarn up -R` updates to the latest release in each range
@@ -235,7 +235,7 @@ export async function generateLockFile(
             .map((update) => `${update.depName!}`)
             .filter(uniqueStrings)
             .map(quote)
-            .join(' ')}${cmdOptions}`
+            .join(' ')}${cmdOptions}`,
         );
       }
     }
@@ -244,7 +244,7 @@ export async function generateLockFile(
     ['fewer', 'highest'].forEach((s) => {
       if (
         config.postUpdateOptions?.includes(
-          `yarnDedupe${s.charAt(0).toUpperCase()}${s.slice(1)}`
+          `yarnDedupe${s.charAt(0).toUpperCase()}${s.slice(1)}`,
         )
       ) {
         logger.debug(`Performing yarn dedupe ${s}`);
@@ -262,7 +262,7 @@ export async function generateLockFile(
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
       );
 
       // Note: Instead of just deleting the `yarn.lock` file, we just wipe it
@@ -276,7 +276,7 @@ export async function generateLockFile(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error clearing `yarn.lock` for lock file maintenance'
+          'Error clearing `yarn.lock` for lock file maintenance',
         );
       }
     }
@@ -295,7 +295,7 @@ export async function generateLockFile(
         err,
         type: 'yarn',
       },
-      'lock file error'
+      'lock file error',
     );
     const stdouterr = String(err.stdout) + String(err.stderr);
     if (
