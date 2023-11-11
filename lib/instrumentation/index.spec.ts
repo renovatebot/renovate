@@ -104,7 +104,7 @@ describe('instrumentation/index', () => {
       expect(() =>
         instrument('test', () => {
           throw error;
-        })
+        }),
       ).toThrow(error);
     });
 
@@ -124,7 +124,7 @@ describe('instrumentation/index', () => {
         instrument('test', async () => {
           await Promise.resolve();
           throw error;
-        })
+        }),
       ).rejects.toThrow(error);
     });
   });

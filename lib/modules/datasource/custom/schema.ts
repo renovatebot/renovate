@@ -9,7 +9,7 @@ export const ReleaseResultZodSchema = z.object({
       sourceUrl: z.string().optional(),
       sourceDirectory: z.string().optional(),
       changelogUrl: z.string().optional(),
-    })
+    }),
   ),
   sourceUrl: z.string().optional(),
   sourceDirectory: z.string().optional(),

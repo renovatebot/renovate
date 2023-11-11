@@ -8,7 +8,7 @@ import { matcherOR } from './utils';
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
-  packageRule: PackageRule
+  packageRule: PackageRule,
 ): boolean {
   let positiveMatch = true;
   let matchApplied = false;
@@ -18,7 +18,7 @@ function matchesRule(
       'matches',
       groupMatchers,
       inputConfig,
-      packageRule
+      packageRule,
     );
 
     // no rules are defined
@@ -44,7 +44,7 @@ function matchesRule(
       'excludes',
       groupExcludes,
       inputConfig,
-      packageRule
+      packageRule,
     );
 
     // no rules are defined
@@ -61,13 +61,13 @@ function matchesRule(
 }
 
 export function applyPackageRules<T extends PackageRuleInputConfig>(
-  inputConfig: T
+  inputConfig: T,
 ): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules ?? [];
   logger.trace(
     { dependency: config.depName, packageRules },
-    `Checking against ${packageRules.length} packageRules`
+    `Checking against ${packageRules.length} packageRules`,
   );
   for (const packageRule of packageRules) {
     // This rule is considered matched if there was at least one positive match and no negative matches

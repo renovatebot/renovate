@@ -9,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import JSON5 from 'json5';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -18,6 +17,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -95,7 +95,7 @@ export function initPlatform({
   }
   if (!token && !(username && password)) {
     throw new Error(
-      'Init: You must configure an Azure DevOps token, or a username and password'
+      'Init: You must configure an Azure DevOps token, or a username and password',
     );
   }
   // TODO: Add a connection check that endpoint/token combination are valid (#9593)
@@ -122,7 +122,7 @@ export async function getRepos(): Promise<string[]> {
 export async function getRawFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<string | null> {
   try {
     const azureApiGit = await azureApi.gitApi();
@@ -154,7 +154,7 @@ export async function getRawFile(
       undefined,
       undefined,
       undefined,
-      branchOrTag ? versionDescriptor : undefined
+      branchOrTag ? versionDescriptor : undefined,
     );
 
     const str = await streamToString(buf);
@@ -164,7 +164,7 @@ export async function getRawFile(
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
     ) {
       logger.debug(
-        'Azure DevOps is currently unavailable when attempting to fetch file - throwing ExternalHostError'
+        'Azure DevOps is currently unavailable when attempting to fetch file - throwing ExternalHostError',
       );
       throw new ExternalHostError(err, id);
     }
@@ -181,10 +181,10 @@ export async function getRawFile(
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return raw ? JSON5.parse(raw) : null;
+  return parseJson(raw, fileName);
 }
 
 export async function initRepo({
@@ -229,7 +229,7 @@ export async function initRepo({
   });
   // TODO: types (#22198)
   const manualUrl = `${defaults.endpoint!}${encodeURIComponent(
-    projectName
+    projectName,
   )}/_git/${encodeURIComponent(repoName)}`;
   const url = repo.remoteUrl ?? manualUrl;
   await git.initRepo({
@@ -264,7 +264,7 @@ export async function getPrList(): Promise<AzurePr[]> {
         config.project,
         0,
         skip,
-        100
+        100,
       );
       prs = prs.concat(fetchedPrs);
       skip += 100;
@@ -282,7 +282,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     return null;
   }
   const azurePr = (await getPrList()).find(
-    (item) => item.number === pullRequestId
+    (item) => item.number === pullRequestId,
   );
 
   if (!azurePr) {
@@ -292,7 +292,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   const azureApiGit = await azureApi.gitApi();
   const labels = await azureApiGit.getPullRequestLabels(
     config.repoId,
-    pullRequestId
+    pullRequestId,
   );
 
   azurePr.labels = labels
@@ -313,12 +313,12 @@ export async function findPr({
     const prs = await getPrList();
 
     prsFiltered = prs.filter(
-      (item) => item.sourceRefName === getNewBranchName(branchName)
+      (item) => item.sourceRefName === getNewBranchName(branchName),
     );
 
     if (prTitle) {
       prsFiltered = prsFiltered.filter(
-        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase(),
       );
     }
 
@@ -350,7 +350,7 @@ export async function findPr({
 
 export async function getBranchPr(
   branchName: string,
-  targetBranch?: string
+  targetBranch?: string,
 ): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName}, ${targetBranch})`);
   const existingPr = await findPr({
@@ -367,7 +367,7 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
     config.repoId,
 
     // TODO: fix undefined (#22198)
-    getBranchNameWithoutRefsheadsPrefix(branchName)!
+    getBranchNameWithoutRefsheadsPrefix(branchName)!,
   );
   // only grab the latest statuses, it will group any by context
   return azureApiGit.getStatuses(
@@ -377,7 +377,7 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
     undefined,
     undefined,
     undefined,
-    true
+    true,
   );
 }
 
@@ -392,7 +392,7 @@ const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
 
 export async function getBranchStatusCheck(
   branchName: string,
-  context: string
+  context: string,
 ): Promise<BranchStatus | null> {
   const res = await getStatusCheck(branchName);
   for (const check of res) {
@@ -406,7 +406,7 @@ export async function getBranchStatusCheck(
 
 export async function getBranchStatus(
   branchName: string,
-  internalChecksAsSuccess: boolean
+  internalChecksAsSuccess: boolean,
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatusCheck(branchName);
@@ -418,7 +418,7 @@ export async function getBranchStatus(
   const noOfFailures = statuses.filter(
     (status) =>
       status.state === GitStatusState.Error ||
-      status.state === GitStatusState.Failed
+      status.state === GitStatusState.Failed,
   ).length;
   if (noOfFailures) {
     return 'red';
@@ -426,7 +426,7 @@ export async function getBranchStatus(
   const noOfPending = statuses.filter(
     (status) =>
       status.state === GitStatusState.NotSet ||
-      status.state === GitStatusState.Pending
+      status.state === GitStatusState.Pending,
   ).length;
   if (noOfPending) {
     return 'yellow';
@@ -436,11 +436,11 @@ export async function getBranchStatus(
     statuses.every(
       (status) =>
         status.state === GitStatusState.Succeeded &&
-        status.context?.genre === 'renovate'
+        status.context?.genre === 'renovate',
     )
   ) {
     logger.debug(
-      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
     );
     return 'yellow';
   }
@@ -448,7 +448,7 @@ export async function getBranchStatus(
 }
 
 async function getMergeStrategy(
-  targetRefName: string
+  targetRefName: string,
 ): Promise<GitPullRequestMergeStrategy> {
   return (
     config.mergeMethods[targetRefName] ??
@@ -456,7 +456,7 @@ async function getMergeStrategy(
       config.repoId,
       config.project,
       targetRefName,
-      config.defaultBranch
+      config.defaultBranch,
     ))
   );
 }
@@ -488,7 +488,7 @@ export async function createPr({
       workItemRefs,
       isDraft: draftPR,
     },
-    config.repoId
+    config.repoId,
   );
   if (platformOptions?.usePlatformAutomerge) {
     const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
@@ -506,7 +506,7 @@ export async function createPr({
       },
       config.repoId,
       // TODO #22198
-      pr.pullRequestId!
+      pr.pullRequestId!,
     );
   }
   if (platformOptions?.autoApprove) {
@@ -520,7 +520,7 @@ export async function createPr({
       config.repoId,
       // TODO #22198
       pr.pullRequestId!,
-      pr.createdBy!.id!
+      pr.createdBy!.id!,
     );
   }
   await Promise.all(
@@ -531,9 +531,9 @@ export async function createPr({
         },
         config.repoId,
         // TODO #22198
-        pr.pullRequestId!
-      )
-    )
+        pr.pullRequestId!,
+      ),
+    ),
   );
   return getRenovatePRFormat(pr);
 }
@@ -567,7 +567,7 @@ export async function updatePr({
         status: PullRequestStatus.Active,
       },
       config.repoId,
-      prNo
+      prNo,
     );
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
@@ -584,7 +584,7 @@ export async function updatePr({
       config.repoId,
       // TODO #22198
       pr.pullRequestId!,
-      pr.createdBy!.id!
+      pr.createdBy!.id!,
     );
   }
 
@@ -624,11 +624,11 @@ export async function ensureComment({
         status: 1,
       },
       config.repoId,
-      number
+      number,
     );
     logger.info(
       { repository: config.repository, issueNo: number, topic },
-      'Comment added'
+      'Comment added',
     );
   } else if (commentNeedsUpdating) {
     await azureApiGit.updateComment(
@@ -639,16 +639,16 @@ export async function ensureComment({
       number,
       threadIdFound,
       // TODO #22198
-      commentIdFound!
+      commentIdFound!,
     );
     logger.debug(
       { repository: config.repository, issueNo: number, topic },
-      'Comment updated'
+      'Comment updated',
     );
   } else {
     logger.debug(
       { repository: config.repository, issueNo: number, topic },
-      'Comment is already update-to-date'
+      'Comment is already update-to-date',
     );
   }
 
@@ -656,7 +656,7 @@ export async function ensureComment({
 }
 
 export async function ensureCommentRemoval(
-  removeConfig: EnsureCommentRemovalConfig
+  removeConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   const { number: issueNo } = removeConfig;
   const key =
@@ -673,14 +673,14 @@ export async function ensureCommentRemoval(
     const thread = threads.find(
       (thread: GitPullRequestCommentThread): boolean =>
         !!thread.comments?.[0].content?.startsWith(
-          `### ${removeConfig.topic}\n\n`
-        )
+          `### ${removeConfig.topic}\n\n`,
+        ),
     );
     threadIdFound = thread?.id;
   } else {
     const thread = threads.find(
       (thread: GitPullRequestCommentThread): boolean =>
-        thread.comments?.[0].content?.trim() === removeConfig.content
+        thread.comments?.[0].content?.trim() === removeConfig.content,
     );
     threadIdFound = thread?.id;
   }
@@ -692,7 +692,7 @@ export async function ensureCommentRemoval(
       },
       config.repoId,
       issueNo,
-      threadIdFound
+      threadIdFound,
     );
   }
 }
@@ -711,12 +711,12 @@ export async function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   logger.debug(
-    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl!})`
+    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl!})`,
   );
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
     config.repoId,
-    getBranchNameWithoutRefsheadsPrefix(branchName)!
+    getBranchNameWithoutRefsheadsPrefix(branchName)!,
   );
   const statusToCreate: GitStatus = {
     description,
@@ -728,7 +728,7 @@ export async function setBranchStatus({
     statusToCreate,
     // TODO #22198
     branch.commit!.commitId!,
-    config.repoId
+    config.repoId,
   );
   logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
@@ -756,19 +756,17 @@ export async function mergePr({
   logger.trace(
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
-    }) with lastMergeSourceCommit ${
-      // TODO: types (#22198)
-      pr.lastMergeSourceCommit?.commitId
-    } using mergeStrategy ${mergeStrategy} (${
+    }) with lastMergeSourceCommit ${// TODO: types (#22198)
+    pr.lastMergeSourceCommit?.commitId} using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
-    })`
+    })`,
   );
 
   try {
     const response = await azureApiGit.updatePullRequest(
       objToUpdate,
       config.repoId,
-      pullRequestId
+      pullRequestId,
     );
 
     let retries = 0;
@@ -778,7 +776,7 @@ export async function mergePr({
       const sleepMs = retries * 1000;
       logger.trace(
         { pullRequestId, status: pr.status, retries },
-        `Updated PR to closed status but change has not taken effect yet. Retrying...`
+        `Updated PR to closed status but change has not taken effect yet. Retrying...`,
       );
 
       await setTimeout(sleepMs);
@@ -792,7 +790,7 @@ export async function mergePr({
         `Expected PR to have status ${
           PullRequestStatus[PullRequestStatus.Completed]
           // TODO #22198
-        }. However, it is ${PullRequestStatus[pr.status!]}.`
+        }. However, it is ${PullRequestStatus[pr.status!]}.`,
       );
     }
     return true;
@@ -807,11 +805,11 @@ export function massageMarkdown(input: string): string {
   return smartTruncate(input, 4000)
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"'
+      'rename PR to start with "rebase!"',
     )
     .replace(
       'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"'
+      'renaming the PR to start with "rebase!"',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -856,9 +854,9 @@ async function getUserIds(users: string[]): Promise<User[]> {
         await azureApiCore.getTeamMembersWithExtendedProperties(
           // TODO #22198
           repo.project!.id!,
-          t.id!
-        )
-    )
+          t.id!,
+        ),
+    ),
   );
 
   const ids: { id: string; name: string; isRequired: boolean }[] = [];
@@ -915,7 +913,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
  */
 export async function addAssignees(
   issueNo: number,
-  assignees: string[]
+  assignees: string[],
 ): Promise<void> {
   logger.trace(`addAssignees(${issueNo}, [${assignees.join(', ')}])`);
   const ids = await getUserIds(assignees);
@@ -933,7 +931,7 @@ export async function addAssignees(
  */
 export async function addReviewers(
   prNo: number,
-  reviewers: string[]
+  reviewers: string[],
 ): Promise<void> {
   logger.trace(`addReviewers(${prNo}, [${reviewers.join(', ')}])`);
   const azureApiGit = await azureApi.gitApi();
@@ -948,16 +946,16 @@ export async function addReviewers(
         },
         config.repoId,
         prNo,
-        obj.id
+        obj.id,
       );
       logger.debug(`Reviewer added: ${obj.name}`);
-    })
+    }),
   );
 }
 
 export async function deleteLabel(
   prNumber: number,
-  label: string
+  label: string,
 ): Promise<void> {
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();

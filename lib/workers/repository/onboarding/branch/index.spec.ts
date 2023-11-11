@@ -51,21 +51,21 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('throws if no package files', async () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
-        REPOSITORY_NO_PACKAGE_FILES
+        REPOSITORY_NO_PACKAGE_FILES,
       );
     });
 
     it("doesn't throw if there are no package files and onboardingNoDeps config option is set", async () => {
       config.onboardingNoDeps = true;
       await expect(checkOnboardingBranch(config)).resolves.not.toThrow(
-        REPOSITORY_NO_PACKAGE_FILES
+        REPOSITORY_NO_PACKAGE_FILES,
       );
     });
 
     it('throws if fork', async () => {
       config.isFork = true;
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
-        REPOSITORY_FORKED
+        REPOSITORY_FORKED,
       );
     });
 
@@ -79,12 +79,12 @@ describe('workers/repository/onboarding/branch/index', () => {
       async ({ checkboxEnabled, expected }) => {
         config.onboardingRebaseCheckbox = checkboxEnabled;
         configModule.getOnboardingConfig.mockResolvedValue(
-          config.onboardingConfig
+          config.onboardingConfig,
         );
         configModule.getOnboardingConfigContents.mockResolvedValue(
           '{\n' +
             '  "$schema": "https://docs.renovatebot.com/renovate-schema.json"\n' +
-            '}\n'
+            '}\n',
         );
         scm.getFileList.mockResolvedValue(['package.json']);
         fs.readLocalFile.mockResolvedValue('{}');
@@ -98,7 +98,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         });
         expect(OnboardingState.prUpdateRequested).toBe(expected);
-      }
+      },
     );
 
     it('uses discovered onboarding config', async () => {
@@ -109,7 +109,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         '{\n' +
           '  "$schema": "https://docs.renovatebot.com/renovate-schema.json",\n' +
           '  "extends": ["some/renovate-config"]\n' +
-          '}\n'
+          '}\n',
       );
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
@@ -124,7 +124,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       delete expectConfig.ignorePresets;
       expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(
         expectConfig,
-        configFileNames[0]
+        configFileNames[0],
       );
       const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
@@ -186,17 +186,17 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
       expect(logger.debug).toHaveBeenCalledWith(
-        'Checking cached config file name'
+        'Checking cached config file name',
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Existing config file confirmed'
+        'Existing config file confirmed',
       );
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: '.renovaterc',
           config: {},
         },
-        'Repository config'
+        'Repository config',
       );
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -207,10 +207,10 @@ describe('workers/repository/onboarding/branch/index', () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
       expect(logger.debug).toHaveBeenCalledWith(
-        'Checking cached config file name'
+        'Checking cached config file name',
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Existing config file confirmed'
+        'Existing config file confirmed',
       );
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -219,7 +219,7 @@ describe('workers/repository/onboarding/branch/index', () => {
             renovate: {},
           },
         },
-        'Repository config'
+        'Repository config',
       );
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -278,7 +278,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null); // finds closed onboarding pr
       platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({ bodyStruct: { rebaseRequested: false } })
+        mock<Pr>({ bodyStruct: { rebaseRequested: false } }),
       ); // finds open onboarding pr
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
@@ -316,7 +316,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         'default-sha',
         'new-onboarding-sha',
         false,
-        true
+        true,
       );
       expect(dummyCache).toMatchObject({
         scan: {},
@@ -340,7 +340,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         'default-sha',
         'onboarding-sha',
         true,
-        true
+        true,
       );
     });
 
@@ -358,7 +358,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         'default-sha',
         'onboarding-sha',
         false,
-        false
+        false,
       );
     });
 
@@ -379,7 +379,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(logger.trace).toHaveBeenCalledWith(
-          `Platform '${pl}' does not support extended markdown`
+          `Platform '${pl}' does not support extended markdown`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(scm.mergeToLocal).toHaveBeenCalledOnce();
@@ -393,7 +393,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(logger.debug).toHaveBeenCalledWith(
-          `No rebase checkbox was found in the onboarding PR`
+          `No rebase checkbox was found in the onboarding PR`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(scm.mergeToLocal).toHaveBeenCalledOnce();
@@ -407,7 +407,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(logger.debug).toHaveBeenCalledWith(
-          `Manual onboarding PR update requested`
+          `Manual onboarding PR update requested`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(scm.mergeToLocal).toHaveBeenCalledOnce();

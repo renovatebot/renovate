@@ -30,7 +30,7 @@ type UserPolicy =
  */
 function getRangePrecision(ranges: Range[]): UserPolicy {
   const bound = coerceArray(
-    parseVersion((ranges[1] || ranges[0]).version)?.release
+    parseVersion((ranges[1] || ranges[0]).version)?.release,
   );
   let rangePrecision = -1;
   // range is defined by a single bound.
@@ -74,11 +74,11 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
 function getFutureVersion(
   policy: UserPolicy,
   newVersion: string,
-  baseVersion?: string
+  baseVersion?: string,
 ): number[] {
   const toRelease = coerceArray(parseVersion(newVersion)?.release);
   const baseRelease = coerceArray(
-    parseVersion(baseVersion ?? newVersion)?.release
+    parseVersion(baseVersion ?? newVersion)?.release,
   );
   return baseRelease.map((_, index) => {
     const toPart = toRelease[index] ?? 0;
@@ -139,7 +139,7 @@ export function getNewValue({
           currentVersion,
           newVersion,
         },
-        ranges
+        ranges,
       );
       break;
     case 'widen':
@@ -150,7 +150,7 @@ export function getNewValue({
           currentVersion,
           newVersion,
         },
-        ranges
+        ranges,
       );
       break;
     case 'bump':
@@ -161,7 +161,7 @@ export function getNewValue({
           currentVersion,
           newVersion,
         },
-        ranges
+        ranges,
       );
       break;
     default:
@@ -171,7 +171,7 @@ export function getNewValue({
       logger.debug(
         'Unsupported rangeStrategy: ' +
           rangeStrategy +
-          '. Using "replace" instead.'
+          '. Using "replace" instead.',
       );
       return getNewValue({
         currentValue,
@@ -188,14 +188,14 @@ export function getNewValue({
   }
   const checkedResult = checkRangeAndRemoveUnnecessaryRangeLimit(
     result,
-    newVersion
+    newVersion,
   );
 
   if (!satisfies(newVersion, checkedResult)) {
     // we failed at creating the range
     logger.warn(
       { result, newVersion, currentValue },
-      'pep440: failed to calculate newValue'
+      'pep440: failed to calculate newValue',
     );
     return null;
   }
@@ -212,7 +212,7 @@ export function isLessThanRange(input: string, range: string): boolean {
         x
           .replace(regEx(/\s*/g), '')
           .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/))
-          .slice(1)
+          .slice(1),
       )
       .map(([op, version]) => {
         if (['!=', '<=', '<'].includes(op)) {
@@ -275,7 +275,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
       const futureVersion = getFutureVersion(
         precision,
         newVersion,
-        range.version
+        range.version,
       );
       return range.operator + futureVersion.join('.');
     }
@@ -288,7 +288,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
 
 function updateRangeValue(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  range: Range
+  range: Range,
 ): string | null {
   // used to exclude versions,
   // we assume that's for a good reason
@@ -301,7 +301,7 @@ function updateRangeValue(
     const futureVersion = getFutureVersion(
       UserPolicyPrecisionMap.None,
       newVersion,
-      range.version
+      range.version,
     ).join('.');
     return range.operator + futureVersion + '.*';
   }
@@ -347,7 +347,7 @@ function updateRangeValue(
   // istanbul ignore next
   logger.error(
     { newVersion, currentValue, range },
-    'pep440: failed to process range'
+    'pep440: failed to process range',
   );
   // istanbul ignore next
   return null;
@@ -394,7 +394,7 @@ function divideCompatibleReleaseRange(currentRange: Range): Range[] {
 
 function handleWidenStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  ranges: Range[]
+  ranges: Range[],
 ): (string | null)[] {
   // newVersion is within range
   if (satisfies(newVersion, currentValue)) {
@@ -427,7 +427,7 @@ function handleWidenStrategy(
       let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
-        range.version
+        range.version,
       );
       if (trimZeros) {
         futureVersion = trimTrailingZeros(futureVersion);
@@ -442,14 +442,14 @@ function handleWidenStrategy(
         currentVersion,
         newVersion,
       },
-      range
+      range,
     );
   });
 }
 
 function handleReplaceStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  ranges: Range[]
+  ranges: Range[],
 ): (string | null)[] {
   // newVersion is within range
   if (satisfies(newVersion, currentValue)) {
@@ -463,7 +463,7 @@ function handleReplaceStrategy(
       let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
-        range.version
+        range.version,
       );
       if (trimZeros) {
         futureVersion = trimTrailingZeros(futureVersion);
@@ -501,14 +501,14 @@ function handleReplaceStrategy(
         currentVersion,
         newVersion,
       },
-      range
+      range,
     );
   });
 }
 
 function handleBumpStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  ranges: Range[]
+  ranges: Range[],
 ): (string | null)[] {
   return ranges.map((range) => {
     // bump lower bound to current new version
@@ -522,14 +522,14 @@ function handleBumpStrategy(
         currentVersion,
         newVersion,
       },
-      range
+      range,
     );
   });
 }
 
 export function checkRangeAndRemoveUnnecessaryRangeLimit(
   rangeInput: string,
-  newVersion: string
+  newVersion: string,
 ): string {
   let newRange: string = rangeInput;
   if (rangeInput.includes(',')) {

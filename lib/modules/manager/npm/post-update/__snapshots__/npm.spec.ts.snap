@@ -3,25 +3,7 @@
 exports[`modules/manager/npm/post-update/npm generates lock files 1`] = `
 [
   {
-    "cmd": "npm install --no-audit --ignore-scripts",
-    "options": {
-      "cwd": "some-dir",
-      "encoding": "utf-8",
-      "env": {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  {
-    "cmd": "npm dedupe",
+    "cmd": "npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",

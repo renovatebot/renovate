@@ -28,7 +28,7 @@ export class DebianVersioningApi extends GenericVersioningApi {
   override isValid(version: string): boolean {
     const isValid = super.isValid(version);
     const schedule = this._distroInfo.getSchedule(
-      this._rollingReleases.getVersionByLts(version)
+      this._rollingReleases.getVersionByLts(version),
     );
     return isValid && schedule !== null && RELEASE_PROP in schedule;
   }

@@ -10,7 +10,7 @@ import type { ChangeLogResult } from './types';
 export * from './types';
 
 export async function getChangeLogJSON(
-  _config: BranchUpgradeConfig
+  _config: BranchUpgradeConfig,
 ): Promise<ChangeLogResult | null> {
   const sourceUrl = _config.customChangelogUrl ?? _config.sourceUrl!;
   const config: BranchUpgradeConfig = { ..._config, sourceUrl };
@@ -24,7 +24,7 @@ export async function getChangeLogJSON(
       return null;
     }
     logger.debug(
-      `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${newVersion})`
+      `Fetching changelog: ${sourceUrl} (${currentVersion} -> ${newVersion})`,
     );
 
     const platform = detectPlatform(sourceUrl);
@@ -32,7 +32,7 @@ export async function getChangeLogJSON(
     if (is.nullOrUndefined(platform)) {
       logger.info(
         { sourceUrl, hostType: platform },
-        'Unknown platform, skipping changelog fetching.'
+        'Unknown platform, skipping changelog fetching.',
       );
       return null;
     }
@@ -42,7 +42,7 @@ export async function getChangeLogJSON(
     if (is.nullOrUndefined(changeLogSource)) {
       logger.info(
         { sourceUrl, hostType: platform },
-        'Unknown changelog source, skipping changelog fetching.'
+        'Unknown changelog source, skipping changelog fetching.',
       );
       return null;
     }
@@ -55,7 +55,7 @@ export async function getChangeLogJSON(
 }
 
 export function getChangeLogSourceFor(
-  platform: string
+  platform: string,
 ): ChangeLogSource | null {
   return api.get(platform) ?? null;
 }

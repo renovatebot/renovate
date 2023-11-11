@@ -66,7 +66,7 @@ export async function updateArtifacts({
   }
 
   const match = regEx(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
-    existingLockFileContent
+    existingLockFileContent,
   );
   const cocoapods = match?.groups?.cocoapodsVersion ?? null;
 

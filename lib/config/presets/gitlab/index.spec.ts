@@ -15,7 +15,7 @@ describe('config/presets/gitlab/index', () => {
         gitlab.getPreset({
           repo: 'some/repo',
           presetName: 'non-default',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -25,7 +25,7 @@ describe('config/presets/gitlab/index', () => {
         gitlab.getPreset({
           repo: 'some/repo',
           presetName: 'non-default',
-        })
+        }),
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
     });
 
@@ -40,7 +40,7 @@ describe('config/presets/gitlab/index', () => {
         .get(`${basePath}/files/renovate.json/raw?ref=master`)
         .reply(404);
       await expect(gitlab.getPreset({ repo: 'some/repo' })).rejects.toThrow(
-        PRESET_DEP_NOT_FOUND
+        PRESET_DEP_NOT_FOUND,
       );
     });
 
@@ -140,8 +140,8 @@ describe('config/presets/gitlab/index', () => {
         await gitlab.getPresetFromEndpoint(
           'some/repo',
           'some/preset/file',
-          undefined
-        )
+          undefined,
+        ),
       ).toEqual({});
     });
 
@@ -159,8 +159,8 @@ describe('config/presets/gitlab/index', () => {
           'some/repo',
           'some/preset/file',
           undefined,
-          'https://gitlab.example.org/api/v4'
-        )
+          'https://gitlab.example.org/api/v4',
+        ),
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
     });
 
@@ -175,8 +175,8 @@ describe('config/presets/gitlab/index', () => {
           'some/preset/file',
           undefined,
           'https://gitlab.com/api/v4',
-          'someTag'
-        )
+          'someTag',
+        ),
       ).toEqual({});
     });
 
@@ -191,8 +191,8 @@ describe('config/presets/gitlab/index', () => {
           'some/preset/file',
           undefined,
           'https://gitlab.example.org/api/v4',
-          'someTag'
-        )
+          'someTag',
+        ),
       ).toEqual({});
     });
   });

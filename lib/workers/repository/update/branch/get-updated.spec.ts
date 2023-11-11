@@ -570,7 +570,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           await getUpdatedPackageFiles(config);
           expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
           expect(bundler.updateArtifacts).toHaveBeenCalledWith(
-            expect.objectContaining({ newPackageFileContent: 'new contents' })
+            expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
       });
@@ -586,7 +586,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           await getUpdatedPackageFiles(config);
           expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
           expect(bundler.updateArtifacts).toHaveBeenCalledWith(
-            expect.objectContaining({ newPackageFileContent: 'new contents' })
+            expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
       });
@@ -605,7 +605,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           await getUpdatedPackageFiles(config);
           expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
           expect(bundler.updateArtifacts).toHaveBeenCalledWith(
-            expect.objectContaining({ newPackageFileContent: newContent })
+            expect.objectContaining({ newPackageFileContent: newContent }),
           );
         });
       });
@@ -624,7 +624,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           await getUpdatedPackageFiles(config);
           expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
           expect(bundler.updateArtifacts).toHaveBeenCalledWith(
-            expect.objectContaining({ newPackageFileContent: newContent })
+            expect.objectContaining({ newPackageFileContent: newContent }),
           );
         });
       });
@@ -645,7 +645,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           await getUpdatedPackageFiles(config);
           expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
           expect(bundler.updateArtifacts).toHaveBeenCalledWith(
-            expect.objectContaining({ newPackageFileContent: 'new contents' })
+            expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
       });
@@ -666,7 +666,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           await getUpdatedPackageFiles(config);
           expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
           expect(bundler.updateArtifacts).toHaveBeenCalledWith(
-            expect.objectContaining({ newPackageFileContent: 'new contents' })
+            expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
       });

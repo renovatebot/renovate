@@ -5,7 +5,7 @@ import { commitFiles } from './';
 
 export class GithubScm extends DefaultGitScm {
   override commitAndPush(
-    commitConfig: CommitFilesConfig
+    commitConfig: CommitFilesConfig,
   ): Promise<CommitSha | null> {
     return commitConfig.platformCommit
       ? commitFiles(commitConfig)

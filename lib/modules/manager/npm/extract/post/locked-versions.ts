@@ -9,7 +9,7 @@ import { getPnpmLock } from '../pnpm';
 import type { LockFile } from '../types';
 import { getYarnLock, getYarnVersionFromLock } from '../yarn';
 export async function getLockedVersions(
-  packageFiles: PackageFile<NpmManagerData>[]
+  packageFiles: PackageFile<NpmManagerData>[],
 ): Promise<void> {
   const lockFileCache: Record<string, LockFile> = {};
   logger.debug('Finding locked versions');
@@ -92,7 +92,7 @@ export async function getLockedVersions(
       } else {
         logger.warn(
           { lockfileVersion, npmLock },
-          'Found unsupported npm lockfile version'
+          'Found unsupported npm lockfile version',
         );
         return;
       }
@@ -104,7 +104,7 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         // TODO: types (#22198)
         dep.lockedVersion = semver.valid(
-          lockFileCache[npmLock].lockedVersions?.[dep.depName!]
+          lockFileCache[npmLock].lockedVersions?.[dep.depName!],
         )!;
       }
     } else if (pnpmShrinkwrap) {
@@ -125,7 +125,7 @@ export async function getLockedVersions(
         const lockedVersion = semver.valid(
           lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[relativeDir]?.[
             depType!
-          ]?.[depName!]
+          ]?.[depName!],
         );
         if (is.string(lockedVersion)) {
           dep.lockedVersion = lockedVersion;

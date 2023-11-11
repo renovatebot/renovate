@@ -9,7 +9,7 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
       },
       {
         postUpdateOptions: ['test', 'gomodTidy'],
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
       },
       {
         postUpdateOptions: ['gomodTidy'],
-      }
+      },
     );
   });
 
@@ -29,7 +29,7 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
       {
         gomodTidy: false,
       },
-      {}
+      {},
     );
   });
 });

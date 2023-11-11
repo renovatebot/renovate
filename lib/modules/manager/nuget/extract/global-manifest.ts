@@ -6,7 +6,7 @@ import type { MsbuildGlobalManifest } from '../types';
 
 export function extractMsbuildGlobalManifest(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: MsbuildGlobalManifest;

@@ -11,7 +11,7 @@ describe('modules/versioning/hashicorp/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(semver.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -23,7 +23,7 @@ describe('modules/versioning/hashicorp/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(semver.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -53,7 +53,7 @@ describe('modules/versioning/hashicorp/index', () => {
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
       expect(semver.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -66,7 +66,7 @@ describe('modules/versioning/hashicorp/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(semver.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -104,6 +104,6 @@ describe('modules/versioning/hashicorp/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 });
