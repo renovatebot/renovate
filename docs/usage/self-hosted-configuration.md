@@ -102,19 +102,8 @@ The configuration:
 
 ```json
 {
-  "autodiscoverFilter": ["project/*"]
+  "autodiscoverFilter": ["my-org/*"]
 }
-```
-
-will match any repository in the "project" organization, while:
-
-```json
-{
-  "autodiscoverFilter": ["MyRepo/my-*"]
-}
-```
-
-will match any repo in the "MyRepo" organization that begins with "my-".
 
 The search for repositories is case-insensitive.
 
