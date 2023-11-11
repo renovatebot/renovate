@@ -8,7 +8,7 @@ describe('config/migrations/custom/datasource-migration', () => {
       },
       {
         datasource: 'java-version',
-      }
+      },
     );
   });
 
@@ -19,7 +19,7 @@ describe('config/migrations/custom/datasource-migration', () => {
       },
       {
         datasource: 'dotnet-version',
-      }
+      },
     );
   });
 
@@ -30,7 +30,7 @@ describe('config/migrations/custom/datasource-migration', () => {
       },
       {
         datasource: 'node-version',
-      }
+      },
     );
   });
 });

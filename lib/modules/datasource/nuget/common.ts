@@ -28,14 +28,13 @@ export function parseRegistryUrl(registryUrl: string): ParsedRegistryUrl {
   if (!parsedUrl) {
     logger.debug(
       { urL: registryUrl },
-      `nuget registry failure: can't parse ${registryUrl}`
+      `nuget registry failure: can't parse ${registryUrl}`,
     );
     return { feedUrl: registryUrl, protocolVersion: null };
   }
   let protocolVersion = 2;
-  const protocolVersionMatch = protocolVersionRegExp.exec(
-    parsedUrl.hash
-  )?.groups;
+  const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash)
+    ?.groups;
   if (protocolVersionMatch) {
     const { protocol } = protocolVersionMatch;
     parsedUrl.hash = '';

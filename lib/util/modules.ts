@@ -27,7 +27,7 @@ function relatePath(here: string, there: string): string {
 export function loadModules<T>(
   dirname: string,
   validate?: (module: T, moduleName: string) => boolean,
-  filter: (moduleName: string) => boolean = () => true
+  filter: (moduleName: string) => boolean = () => true,
 ): Record<string, T> {
   const result: Record<string, T> = {};
 

@@ -110,7 +110,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   if (!content) {
     return null;

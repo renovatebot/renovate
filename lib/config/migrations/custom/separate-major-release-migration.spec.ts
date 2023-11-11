@@ -9,7 +9,7 @@ describe('config/migrations/custom/separate-major-release-migration', () => {
       {
         separateMajorMinor: true,
         separateMajorReleases: true,
-      }
+      },
     );
   });
 });

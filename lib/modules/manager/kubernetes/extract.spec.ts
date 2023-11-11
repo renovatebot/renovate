@@ -67,7 +67,7 @@ describe('modules/manager/kubernetes/extract', () => {
       const res = extractPackageFile(
         kubernetesArraySyntaxFile,
         'file.yaml',
-        {}
+        {},
       );
       expect(res?.deps).toStrictEqual([
         {

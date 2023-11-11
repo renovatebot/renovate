@@ -1,7 +1,6 @@
 import URL from 'node:url';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import JSON5 from 'json5';
 import pMap from 'p-map';
 import semver from 'semver';
 import {
@@ -19,6 +18,7 @@ import {
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
+import { noLeadingAtSymbol, parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -53,7 +53,13 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
+import {
+  getMemberUserIDs,
+  getMemberUsernames,
+  getUserID,
+  gitlabApi,
+  isUserBusy,
+} from './http';
 import { getMR, updateMR } from './merge-request';
 import { LastPipelineId } from './schema';
 import type {
@@ -138,7 +144,7 @@ export async function initPlatform({
   } catch (err) {
     logger.debug(
       { err },
-      'Error authenticating with GitLab. Check that your token includes "api" permissions'
+      'Error authenticating with GitLab. Check that your token includes "api" permissions',
     );
     throw new Error('Init: Authentication failure');
   }
@@ -172,9 +178,9 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       ...config.namespaces.map(
         (namespace) =>
           `groups/${urlEscape(namespace)}/projects?${getQueryString(
-            queryParams
-          )}`
-      )
+            queryParams,
+          )}`,
+      ),
     );
   } else {
     urls.push('projects?' + getQueryString(queryParams));
@@ -190,7 +196,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
           }),
         {
           concurrency: 2,
-        }
+        },
       )
     ).flatMap((response) => response.body);
 
@@ -213,7 +219,7 @@ function urlEscape(str: string | undefined): string | undefined {
 export async function getRawFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
@@ -229,17 +235,16 @@ export async function getRawFile(
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<any> {
-  // TODO #22198
-  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return JSON5.parse(raw);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  return parseJson(raw, fileName);
 }
 
 function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
-  res: HttpResponse<RepoResponse>
+  res: HttpResponse<RepoResponse>,
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
@@ -264,7 +269,7 @@ function getRepoUrl(
     }
     if (process.env.GITLAB_IGNORE_REPO_URL) {
       logger.warn(
-        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.'
+        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
       );
     }
 
@@ -308,30 +313,30 @@ export async function initRepo({
   let res: HttpResponse<RepoResponse>;
   try {
     res = await gitlabApi.getJson<RepoResponse>(
-      `projects/${config.repository}`
+      `projects/${config.repository}`,
     );
     if (res.body.archived) {
       logger.debug(
-        'Repository is archived - throwing error to abort renovation'
+        'Repository is archived - throwing error to abort renovation',
       );
       throw new Error(REPOSITORY_ARCHIVED);
     }
 
     if (res.body.mirror && includeMirrors !== true) {
       logger.debug(
-        'Repository is a mirror - throwing error to abort renovation'
+        'Repository is a mirror - throwing error to abort renovation',
       );
       throw new Error(REPOSITORY_MIRRORED);
     }
     if (res.body.repository_access_level === 'disabled') {
       logger.debug(
-        'Repository portion of project is disabled - throwing error to abort renovation'
+        'Repository portion of project is disabled - throwing error to abort renovation',
       );
       throw new Error(REPOSITORY_DISABLED);
     }
     if (res.body.merge_requests_access_level === 'disabled') {
       logger.debug(
-        'MRs are disabled for the project - throwing error to abort renovation'
+        'MRs are disabled for the project - throwing error to abort renovation',
       );
       throw new Error(REPOSITORY_DISABLED);
     }
@@ -410,7 +415,7 @@ interface GitlabBranchStatus {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  useCache = true,
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
   try {
@@ -450,7 +455,7 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
-  internalChecksAsSuccess: boolean
+  internalChecksAsSuccess: boolean,
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
 
@@ -463,7 +468,7 @@ export async function getBranchStatus(
   if (!is.array(branchStatuses)) {
     logger.warn(
       { branchName, branchStatuses },
-      'Empty or unexpected branch statuses'
+      'Empty or unexpected branch statuses',
     );
     return 'yellow';
   }
@@ -487,11 +492,11 @@ export async function getBranchStatus(
     branchStatuses.every(
       (check) =>
         check.name?.startsWith('renovate/') &&
-        gitlabToRenovateStatusMapping[check.status] === 'green'
+        gitlabToRenovateStatusMapping[check.status] === 'green',
     )
   ) {
     logger.debug(
-      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
     );
     return 'yellow';
   }
@@ -506,7 +511,7 @@ export async function getBranchStatus(
         if (!mappedStatus) {
           logger.warn(
             { check },
-            'Could not map GitLab check.status to Renovate status'
+            'Could not map GitLab check.status to Renovate status',
           );
           mappedStatus = 'yellow';
         }
@@ -560,7 +565,7 @@ async function fetchPrList(): Promise<Pr[]> {
         title: pr.title,
         state: pr.state === 'opened' ? 'open' : pr.state,
         createdAt: pr.created_at,
-      })
+      }),
     );
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
@@ -592,17 +597,18 @@ async function ignoreApprovals(pr: number): Promise<void> {
     const ruleName = 'renovateIgnoreApprovals';
 
     const existingAnyApproverRule = rules?.find(
-      ({ rule_type }) => rule_type === 'any_approver'
+      ({ rule_type }) => rule_type === 'any_approver',
     );
     const existingRegularApproverRules = rules?.filter(
-      ({ rule_type, name }) => rule_type !== 'any_approver' && name !== ruleName
+      ({ rule_type, name }) =>
+        rule_type !== 'any_approver' && name !== ruleName,
     );
 
     if (existingRegularApproverRules?.length) {
       await p.all(
         existingRegularApproverRules.map((rule) => async (): Promise<void> => {
           await gitlabApi.deleteJson(`${url}/${rule.id}`);
-        })
+        }),
       );
     }
 
@@ -629,7 +635,7 @@ async function ignoreApprovals(pr: number): Promise<void> {
 
 async function tryPrAutomerge(
   pr: number,
-  platformOptions: PlatformPrOptions | undefined
+  platformOptions: PlatformPrOptions | undefined,
 ): Promise<void> {
   if (platformOptions?.usePlatformAutomerge) {
     try {
@@ -660,7 +666,7 @@ async function tryPrAutomerge(
             should_remove_source_branch: true,
             merge_when_pipeline_succeeds: true,
           },
-        }
+        },
       );
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Automerge on PR creation failed');
@@ -671,7 +677,7 @@ async function tryPrAutomerge(
 async function approvePr(pr: number): Promise<void> {
   try {
     await gitlabApi.postJson(
-      `projects/${config.repository}/merge_requests/${pr}/approve`
+      `projects/${config.repository}/merge_requests/${pr}/approve`,
     );
   } catch (err) {
     logger.warn({ err }, 'GitLab: Error approving merge request');
@@ -705,7 +711,7 @@ export async function createPr({
         labels: (labels ?? []).join(','),
         squash: config.squash,
       },
-    }
+    },
   );
   const pr = res.body;
   pr.number = pr.iid;
@@ -775,7 +781,7 @@ export async function updatePr({
 
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
-    { body }
+    { body },
   );
 
   if (platformOptions?.autoApprove) {
@@ -793,7 +799,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
         body: {
           should_remove_source_branch: true,
         },
-      }
+      },
     );
     return true;
   } catch (err) /* istanbul ignore next */ {
@@ -823,7 +829,7 @@ export function massageMarkdown(input: string): string {
   if (semver.lt(defaults.version, '13.4.0')) {
     logger.debug(
       { version: defaults.version },
-      'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters'
+      'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters',
     );
 
     desc = smartTruncate(desc, 25000);
@@ -858,14 +864,14 @@ export async function findPr({
       (p: { sourceBranch: string; title: string; state: string }) =>
         p.sourceBranch === branchName &&
         (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-        matchesState(p.state, state)
+        matchesState(p.state, state),
     ) ?? null
   );
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(
-  branchName: string
+  branchName: string,
 ): Promise<GitlabPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
@@ -877,7 +883,7 @@ export async function getBranchPr(
 
 export async function getBranchStatusCheck(
   branchName: string,
-  context: string
+  context: string,
 ): Promise<BranchStatus | null> {
   // cache-bust in case we have rebased
   const res = await getStatus(branchName, false);
@@ -932,7 +938,7 @@ export async function setBranchStatus({
     await setTimeout(
       process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY
         ? parseInt(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 10)
-        : 1000
+        : 1000,
     );
 
     await gitlabApi.postJson(url, { body: options });
@@ -942,7 +948,7 @@ export async function setBranchStatus({
   } catch (err) /* istanbul ignore next */ {
     if (
       err.body?.message?.startsWith(
-        'Cannot transition status via :enqueue from :pending'
+        'Cannot transition status via :enqueue from :pending',
       )
     ) {
       // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
@@ -985,13 +991,13 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
 
 export async function getIssue(
   number: number,
-  useCache = true
+  useCache = true,
 ): Promise<Issue | null> {
   try {
     const issueBody = (
       await gitlabApi.getJson<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
-        { memCache: useCache }
+        { memCache: useCache },
       )
     ).body.description;
     return {
@@ -1037,7 +1043,7 @@ export async function ensureIssue({
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJson<{ description: string }>(
-          `projects/${config.repository}/issues/${issue.iid}`
+          `projects/${config.repository}/issues/${issue.iid}`,
         )
       ).body.description;
       if (issue.title !== title || existingDescription !== description) {
@@ -1051,7 +1057,7 @@ export async function ensureIssue({
               labels: (labels ?? issue.labels ?? []).join(','),
               confidential: confidential ?? false,
             },
-          }
+          },
         );
         return 'updated';
       }
@@ -1089,7 +1095,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
         `projects/${config.repository}/issues/${issue.iid}`,
         {
           body: { state_event: 'close' },
-        }
+        },
       );
     }
   }
@@ -1097,7 +1103,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
 
 export async function addAssignees(
   iid: number,
-  assignees: string[]
+  assignees: string[],
 ): Promise<void> {
   try {
     logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
@@ -1119,14 +1125,14 @@ export async function addAssignees(
 
 export async function addReviewers(
   iid: number,
-  reviewers: string[]
+  reviewers: string[],
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${iid}`);
 
   if (semver.lt(defaults.version, '13.9.0')) {
     logger.warn(
       { version: defaults.version },
-      'Adding reviewers is only available in GitLab 13.9 and onwards'
+      'Adding reviewers is only available in GitLab 13.9 and onwards',
     );
     return;
   }
@@ -1158,7 +1164,7 @@ export async function addReviewers(
             // Unable to fetch userId, try resolve as a group
             return getMemberUserIDs(r);
           }
-        })
+        }),
       )
     ).flat();
   } catch (err) {
@@ -1181,7 +1187,7 @@ export async function addReviewers(
 
 export async function deleteLabel(
   issueNo: number,
-  label: string
+  label: string,
 ): Promise<void> {
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   try {
@@ -1193,7 +1199,7 @@ export async function deleteLabel(
       `projects/${config.repository}/merge_requests/${issueNo}`,
       {
         body: { labels },
-      }
+      },
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
@@ -1217,31 +1223,31 @@ async function addComment(issueNo: number, body: string): Promise<void> {
     `projects/${config.repository}/merge_requests/${issueNo}/notes`,
     {
       body: { body },
-    }
+    },
   );
 }
 
 async function editComment(
   issueNo: number,
   commentId: number,
-  body: string
+  body: string,
 ): Promise<void> {
   // PUT projects/:owner/:repo/merge_requests/:number/notes/:id
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
     {
       body: { body },
-    }
+    },
   );
 }
 
 async function deleteComment(
   issueNo: number,
-  commentId: number
+  commentId: number,
 ): Promise<void> {
   // DELETE projects/:owner/:repo/merge_requests/:number/notes/:id
   await gitlabApi.deleteJson(
-    `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`
+    `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
   );
 }
 
@@ -1287,13 +1293,13 @@ export async function ensureComment({
     await addComment(number, body);
     logger.debug(
       { repository: config.repository, issueNo: number },
-      'Added comment'
+      'Added comment',
     );
   } else if (commentNeedsUpdating) {
     await editComment(number, commentId, body);
     logger.debug(
       { repository: config.repository, issueNo: number },
-      'Updated comment'
+      'Updated comment',
     );
   } else {
     logger.debug('Comment is already update-to-date');
@@ -1302,7 +1308,7 @@ export async function ensureComment({
 }
 
 export async function ensureCommentRemoval(
-  deleteConfig: EnsureCommentRemovalConfig
+  deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   const { number: issueNo } = deleteConfig;
   const key =
@@ -1330,7 +1336,7 @@ export async function ensureCommentRemoval(
 }
 
 export async function filterUnavailableUsers(
-  users: string[]
+  users: string[],
 ): Promise<string[]> {
   const filteredUsers: string[] = [];
   for (const user of users) {
@@ -1339,4 +1345,37 @@ export async function filterUnavailableUsers(
     }
   }
   return filteredUsers;
+}
+
+export async function expandGroupMembers(
+  reviewersOrAssignees: string[],
+): Promise<string[]> {
+  const expandedReviewersOrAssignees: string[] = [];
+  const normalizedReviewersOrAssigneesWithoutEmails: string[] = [];
+
+  // Skip passing user emails to Gitlab API, but include them in the final result
+  for (const reviewerOrAssignee of reviewersOrAssignees) {
+    if (reviewerOrAssignee.indexOf('@') > 0) {
+      expandedReviewersOrAssignees.push(reviewerOrAssignee);
+      continue;
+    }
+
+    // Normalize the potential group names before passing to Gitlab API
+    normalizedReviewersOrAssigneesWithoutEmails.push(
+      noLeadingAtSymbol(reviewerOrAssignee),
+    );
+  }
+
+  for (const reviewerOrAssignee of normalizedReviewersOrAssigneesWithoutEmails) {
+    try {
+      const members = await getMemberUsernames(reviewerOrAssignee);
+      expandedReviewersOrAssignees.push(...members);
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        logger.debug({ err, reviewerOrAssignee }, 'Unable to fetch group');
+      }
+      expandedReviewersOrAssignees.push(reviewerOrAssignee);
+    }
+  }
+  return expandedReviewersOrAssignees;
 }

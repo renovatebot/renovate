@@ -61,7 +61,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       partial<Stats>({
         isFile: () => true,
         mode: 0o555,
-      })
+      }),
     );
 
     // java
@@ -85,14 +85,14 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             'gradlew',
             'gradlew.bat',
           ],
-        })
+        }),
       );
 
       const res = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get(
-          'expectedFiles/gradle/wrapper/gradle-wrapper.properties'
+          'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
         config: { ...config, newValue: '6.3' },
       });
@@ -108,7 +108,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             path: fileProjectPath,
             contents: 'test',
           },
-        }))
+        })),
       );
       expect(execSnapshots).toMatchObject([
         {
@@ -131,7 +131,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         partial<Stats>({
           isFile: () => false,
           mode: 0o555,
-        })
+        }),
       );
 
       const result = await updateArtifacts({
@@ -150,7 +150,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
-        })
+        }),
       );
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -175,12 +175,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         .get('/distributions/gradle-6.3-bin.zip.sha256')
         .reply(
           200,
-          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
         );
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['gradle/wrapper/gradle-wrapper.properties'],
-        })
+        }),
       );
       GlobalConfig.set({
         ...adminConfig,
@@ -233,12 +233,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         .get('/distributions/gradle-6.3-bin.zip.sha256')
         .reply(
           200,
-          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
         );
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['gradle/wrapper/gradle-wrapper.properties'],
-        })
+        }),
       );
       GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
@@ -301,14 +301,14 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             'sub/gradlew',
             'sub/gradlew.bat',
           ],
-        })
+        }),
       );
 
       const res = await updateArtifacts({
         packageFileName: 'sub/gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get(
-          'expectedFiles/gradle/wrapper/gradle-wrapper.properties'
+          'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
         config: { ...config, newValue: '6.3' },
       });
@@ -324,7 +324,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             path: fileProjectPath,
             contents: 'test',
           },
-        }))
+        })),
       );
       expect(execSnapshots).toMatchObject([
         {
@@ -360,7 +360,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
               distributionUrl = "https://services.gradle.org/distributions/gradle-6.3-bin.zip"
             }`);
           return Promise.resolve();
-        }
+        },
       );
 
       const res = await updateBuildFile('', {
@@ -389,7 +389,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
               distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
             }`);
           return Promise.resolve();
-        }
+        },
       );
 
       const res = await updateBuildFile('', {
@@ -412,7 +412,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           'https://services.gradle.org/distributions/gradle-6.3-bin.zip',
       });
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'build.gradle or build.gradle.kts not found'
+        'build.gradle or build.gradle.kts not found',
       );
       expect(res).toBe('build.gradle.kts');
     });
@@ -424,7 +424,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const res = await updateLockFiles('', {});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'build.gradle or build.gradle.kts not found'
+        'build.gradle or build.gradle.kts not found',
       );
       expect(res).toBeNull();
     });
@@ -445,7 +445,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({
           modified: ['gradle.lockfile'],
-        })
+        }),
       );
 
       const res = await updateArtifacts({

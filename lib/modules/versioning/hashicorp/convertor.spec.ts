@@ -25,7 +25,7 @@ describe('modules/versioning/hashicorp/convertor', () => {
     ({ hashicorp, npm }) => {
       expect(hashicorp2npm(hashicorp)).toBe(npm);
       expect(npm2hashicorp(npm)).toBe(hashicorp);
-    }
+    },
   );
 
   // These are non-reflective cases for hashicorp2npm

@@ -6,7 +6,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
       {
         semanticCommits: true,
       } as any,
-      { semanticCommits: 'enabled' }
+      { semanticCommits: 'enabled' },
     );
   });
 
@@ -15,7 +15,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
       {
         semanticCommits: false,
       } as any,
-      { semanticCommits: 'disabled' }
+      { semanticCommits: 'disabled' },
     );
   });
 
@@ -24,7 +24,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
       {
         semanticCommits: null,
       } as any,
-      { semanticCommits: 'auto' }
+      { semanticCommits: 'auto' },
     );
   });
 
@@ -33,7 +33,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
       {
         semanticCommits: 'test',
       } as any,
-      { semanticCommits: 'auto' }
+      { semanticCommits: 'auto' },
     );
   });
 
@@ -43,7 +43,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
         semanticCommits: 'enabled',
       } as any,
       { semanticCommits: 'enabled' },
-      false
+      false,
     );
   });
 
@@ -53,7 +53,7 @@ describe('config/migrations/custom/semantic-commits-migration', () => {
         semanticCommits: 'disabled',
       } as any,
       { semanticCommits: 'disabled' },
-      false
+      false,
     );
   });
 });

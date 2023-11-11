@@ -9,7 +9,7 @@ import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 
 export function checkGithubToken(
-  packageFiles: Record<string, PackageFileContent[]> = {}
+  packageFiles: Record<string, PackageFileContent[]> = {},
 ): void {
   const { token } = hostRules.find({
     hostType: 'github',
@@ -47,13 +47,13 @@ export function checkGithubToken(
 
   if (githubDeps.length > 0) {
     const warningLogged = memCache.get<boolean | undefined>(
-      'github-token-required-warning-logged'
+      'github-token-required-warning-logged',
     );
     if (!warningLogged) {
       const withoutDuplicates = [...new Set(githubDeps)];
       logger.warn(
         { githubDeps: withoutDuplicates },
-        `GitHub token is required for some dependencies`
+        `GitHub token is required for some dependencies`,
       );
       memCache.set('github-token-required-warning-logged', true);
     }
@@ -73,14 +73,14 @@ export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
 }
 
 export function findGithubToken(
-  searchResult: HostRuleSearchResult
+  searchResult: HostRuleSearchResult,
 ): string | undefined {
   return searchResult?.token?.replace('x-access-token:', '');
 }
 
 export function takePersonalAccessTokenIfPossible(
   githubToken: string | undefined,
-  gitTagsGithubToken: string | undefined
+  gitTagsGithubToken: string | undefined,
 ): string | undefined {
   if (gitTagsGithubToken && isGithubPersonalAccessToken(gitTagsGithubToken)) {
     logger.debug('Using GitHub Personal Access Token (git-tags)');

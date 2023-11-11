@@ -64,7 +64,7 @@ export abstract class CommitMessage {
     this._subject = this.normalizeInput(value);
     this._subject = this._subject?.replace(
       CommitMessage.EXTRA_WHITESPACES,
-      ' '
+      ' ',
     );
   }
 

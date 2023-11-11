@@ -8,12 +8,12 @@ export const GalaxyV1 = z.object({
         versions: z.array(
           z.object({
             name: z.string(),
-            release_date: z.string(),
-          })
+            created: z.string(),
+          }),
         ),
       }),
       github_user: z.string().optional(),
       github_repo: z.string().optional(),
-    })
+    }),
   ),
 });

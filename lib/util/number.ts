@@ -6,7 +6,7 @@
  */
 export function coerceNumber(
   val: number | null | undefined,
-  def?: number
+  def?: number,
 ): number {
   return val ?? def ?? 0;
 }

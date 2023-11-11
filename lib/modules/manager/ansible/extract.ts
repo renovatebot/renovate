@@ -11,7 +11,7 @@ import type {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`ansible.extractPackageFile(${packageFile})`);
   let deps: PackageDependency[] = [];
@@ -27,7 +27,7 @@ export function extractPackageFile(
           currentValue: dep.currentValue,
           currentDigest: dep.currentDigest,
         },
-        'Docker image inside ansible'
+        'Docker image inside ansible',
       );
       dep.versioning = dockerVersioning.id;
       deps.push(dep);

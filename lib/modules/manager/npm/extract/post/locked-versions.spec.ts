@@ -20,7 +20,7 @@ jest.mock('../pnpm');
 describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     function getPackageFiles(
-      yarnVersion: string
+      yarnVersion: string,
     ): PackageFile<NpmManagerData>[] {
       return [
         {
@@ -750,7 +750,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
         lockfileVersion: 99,
         npmLock: 'package-lock.json',
       },
-      'Found unsupported npm lockfile version'
+      'Found unsupported npm lockfile version',
     );
   });
 

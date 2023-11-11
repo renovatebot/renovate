@@ -7,12 +7,12 @@ import * as v2 from './v2';
 import * as v3 from './v3';
 
 // https://api.nuget.org/v3/index.json is a default official nuget feed
-export const defaultRegistryUrls = ['https://api.nuget.org/v3/index.json'];
+export const nugetOrg = 'https://api.nuget.org/v3/index.json';
 
 export class NugetDatasource extends Datasource {
   static readonly id = 'nuget';
 
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override readonly defaultRegistryUrls = [nugetOrg];
 
   override readonly defaultVersioning = nugetVersioning.id;
 

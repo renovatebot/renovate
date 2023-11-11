@@ -9,7 +9,7 @@ export function getDepHost(registryUrl: string = defaultRegistryUrl): string {
 
 export function getSourceUrl(
   packageName: string,
-  registryUrl?: string
+  registryUrl?: string,
 ): string {
   const depHost = getDepHost(registryUrl);
   return joinUrlParts(depHost, packageName);

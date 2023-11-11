@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     const res = await isOnboarded(config);
     expect(res).toBeFalse();
     expect(logger.debug).toHaveBeenCalledWith(
-      'Onboarding cache is valid. Repo is not onboarded'
+      'Onboarding cache is valid. Repo is not onboarded',
     );
   });
 
@@ -55,7 +55,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     scm.getFileList.mockResolvedValue([]);
     await isOnboarded(config);
     expect(logger.debug).not.toHaveBeenCalledWith(
-      'Onboarding cache is valid. Repo is not onboarded'
+      'Onboarding cache is valid. Repo is not onboarded',
     );
   });
 
@@ -64,7 +64,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     platform.findPr.mockResolvedValue(partial<Pr>());
     scm.getFileList.mockResolvedValue([]);
     await expect(isOnboarded(config)).rejects.toThrow(
-      REPOSITORY_CLOSED_ONBOARDING
+      REPOSITORY_CLOSED_ONBOARDING,
     );
   });
 });

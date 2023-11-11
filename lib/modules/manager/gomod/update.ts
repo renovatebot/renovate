@@ -40,7 +40,7 @@ export function updateDependency({
     ) {
       logger.debug(
         { lineToChange, depName },
-        "go.mod current line doesn't contain dependency"
+        "go.mod current line doesn't contain dependency",
       );
       return null;
     }
@@ -52,11 +52,11 @@ export function updateDependency({
     if (depType === 'replace') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(
-          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
         );
       } else {
         updateLineExp = regEx(
-          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
         );
       }
     } else if (depType === 'require' || depType === 'indirect') {
@@ -64,7 +64,7 @@ export function updateDependency({
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
         updateLineExp = regEx(
-          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/
+          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/,
         );
       }
     }
@@ -76,25 +76,25 @@ export function updateDependency({
     if (upgrade.updateType === 'digest') {
       const newDigestRightSized = upgrade.newDigest!.substring(
         0,
-        upgrade.currentDigest!.length
+        upgrade.currentDigest!.length,
       );
       if (lineToChange.includes(newDigestRightSized)) {
         return fileContent;
       }
       logger.debug(
         { depName, lineToChange, newDigestRightSized },
-        'gomod: need to update digest'
+        'gomod: need to update digest',
       );
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>$<divider>${newDigestRightSized}`
+        `$<depPart>$<divider>${newDigestRightSized}`,
       );
     } else {
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>$<divider>${upgrade.newValue}`
+        `$<depPart>$<divider>${upgrade.newValue}`,
       );
     }
     if (upgrade.updateType === 'major') {
@@ -105,7 +105,7 @@ export function updateDependency({
         // Package renames - I couldn't think of a better place to do this
         newLine = newLine.replace(
           'gorethink/gorethink.v5',
-          'rethinkdb/rethinkdb-go.v5'
+          'rethinkdb/rethinkdb-go.v5',
         );
       } else if (
         upgrade.newMajor! > 1 &&
@@ -120,7 +120,7 @@ export function updateDependency({
           const [oldV] = upgrade.currentValue!.split('.');
           newLine = newLine.replace(
             regEx(`/${oldV}(\\s+)`, undefined, false),
-            `/v${upgrade.newMajor}$1`
+            `/v${upgrade.newMajor}$1`,
           );
         }
       }
@@ -144,7 +144,7 @@ export function updateDependency({
     if (depType === 'indirect') {
       newLine = newLine.replace(
         regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
-        ' // indirect'
+        ' // indirect',
       );
     }
 

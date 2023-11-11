@@ -1,7 +1,7 @@
 // TODO: types (#22198)
-import hasha from 'hasha';
 import semver from 'semver';
 import { logger } from '../../../logger';
+import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import type { UpdateDependencyConfig } from '../types';
 import { parseUrlPath } from './extract';
@@ -13,7 +13,7 @@ function replaceUrl(
   idx: number,
   content: string,
   oldUrl: string,
-  newUrl: string
+  newUrl: string,
 ): string | null {
   let i = idx;
   i += 'url'.length;
@@ -31,7 +31,7 @@ function replaceUrl(
 function getUrlTestContent(
   content: string,
   oldUrl: string,
-  newUrl: string
+  newUrl: string,
 ): string | null {
   const urlRegExp = /(^|\s)url(\s)/;
   const cleanContent = removeComments(content);
@@ -46,7 +46,7 @@ function getUrlTestContent(
 function updateUrl(
   content: string,
   oldUrl: string,
-  newUrl: string
+  newUrl: string,
 ): string | null {
   const urlRegExp = /(^|\s)url(\s)/;
   let i = content.search(urlRegExp);
@@ -76,7 +76,7 @@ function replaceSha256(
   idx: number,
   content: string,
   oldSha256: string,
-  newSha256: string
+  newSha256: string,
 ): string | null {
   let i = idx;
   i += 'sha256'.length;
@@ -95,7 +95,7 @@ function replaceSha256(
 function getSha256TestContent(
   content: string,
   oldSha256: string,
-  newSha256: string
+  newSha256: string,
 ): string | null {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   const cleanContent = removeComments(content);
@@ -110,7 +110,7 @@ function getSha256TestContent(
 function updateSha256(
   content: string,
   oldSha256: string,
-  newSha256: string
+  newSha256: string,
 ): string | null {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   let i = content.search(sha256RegExp);
@@ -152,7 +152,7 @@ export async function updateDependency({
   const oldParsedUrlPath = parseUrlPath(upgrade.managerData?.url);
   if (!oldParsedUrlPath || !upgrade.managerData) {
     logger.debug(
-      `Failed to update - upgrade.managerData.url is invalid ${upgrade.depName}`
+      `Failed to update - upgrade.managerData.url is invalid ${upgrade.depName}`,
     );
     return fileContent;
   }
@@ -163,23 +163,19 @@ export async function updateDependency({
     newUrl = `https://github.com/${ownerName}/${repoName}/releases/download/${
       upgrade.newValue
     }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
-    newSha256 = await hasha.fromStream(http.stream(newUrl), {
-      algorithm: 'sha256',
-    });
+    newSha256 = await hashStream(http.stream(newUrl), 'sha256');
   } catch (errOuter) {
     logger.debug(
-      `Failed to download release download for ${upgrade.depName} - trying archive instead`
+      `Failed to download release download for ${upgrade.depName} - trying archive instead`,
     );
     try {
       const ownerName = String(upgrade.managerData.ownerName);
       const repoName = String(upgrade.managerData.repoName);
       newUrl = `https://github.com/${ownerName}/${repoName}/archive/${upgrade.newValue}.tar.gz`;
-      newSha256 = await hasha.fromStream(http.stream(newUrl), {
-        algorithm: 'sha256',
-      });
+      newSha256 = await hashStream(http.stream(newUrl), 'sha256');
     } catch (errInner) {
       logger.debug(
-        `Failed to download archive download for ${upgrade.depName} - update failed`
+        `Failed to download archive download for ${upgrade.depName} - update failed`,
       );
       return fileContent;
     }
@@ -187,7 +183,7 @@ export async function updateDependency({
   // istanbul ignore next
   if (!newSha256) {
     logger.debug(
-      `Failed to generate new sha256 for ${upgrade.depName} - update failed`
+      `Failed to generate new sha256 for ${upgrade.depName} - update failed`,
     );
     return fileContent;
   }
