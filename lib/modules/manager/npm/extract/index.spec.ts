@@ -31,7 +31,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         'not json',
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toBeNull();
     });
@@ -40,7 +40,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         invalidNameContent,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         deps: [{ skipReason: 'invalid-name' }],
@@ -51,7 +51,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         vendorisedContent,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toBeNull();
     });
@@ -61,8 +61,8 @@ describe('modules/manager/npm/extract/index', () => {
         npmExtract.extractPackageFile(
           '{ "renovate": {} }',
           'backend/package.json',
-          defaultExtractConfig
-        )
+          defaultExtractConfig,
+        ),
       ).rejects.toThrow();
     });
 
@@ -70,7 +70,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         '{ "renovate": {} }',
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toBeNull();
     });
@@ -79,7 +79,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         '{"dependencies": true, "devDependencies": []}',
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toBeNull();
     });
@@ -88,7 +88,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -115,7 +115,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01GlobContent,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res?.deps).toHaveLength(13);
       expect(res).toMatchSnapshot({
@@ -150,7 +150,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         managerData: {
@@ -172,10 +172,10 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+        'Updating multiple npm lock files is deprecated and support will be removed in future versions.',
       );
       expect(res).toMatchObject({
         managerData: {
@@ -195,7 +195,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        {}
+        {},
       );
       expect(res?.npmrc).toBe('save-exact = true\n');
     });
@@ -205,7 +205,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { ...defaultExtractConfig, npmrc: 'config-npmrc' }
+        { ...defaultExtractConfig, npmrc: 'config-npmrc' },
       );
       expect(res?.npmrc).toBe('config-npmrc');
     });
@@ -220,7 +220,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { npmrc: 'config-npmrc' }
+        { npmrc: 'config-npmrc' },
       );
       expect(res?.npmrc).toBe('config-npmrc');
     });
@@ -235,7 +235,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { npmrc: 'config-npmrc', npmrcMerge: true }
+        { npmrc: 'config-npmrc', npmrcMerge: true },
       );
       expect(res?.npmrc).toBe(`config-npmrc\nrepo-npmrc\n`);
     });
@@ -244,7 +244,7 @@ describe('modules/manager/npm/extract/index', () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.npmrc') {
           return Promise.resolve(
-            'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n'
+            'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n',
           );
         }
         return Promise.resolve(null);
@@ -252,7 +252,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        {}
+        {},
       );
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
@@ -261,7 +261,7 @@ describe('modules/manager/npm/extract/index', () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
           return Promise.resolve(
-            'npmRegistryServer: https://registry.example.com'
+            'npmRegistryServer: https://registry.example.com',
           );
         }
         return Promise.resolve(null);
@@ -269,10 +269,10 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input02Content,
         'package.json',
-        {}
+        {},
       );
       expect(
-        res?.deps.flatMap((dep) => dep.registryUrls)
+        res?.deps.flatMap((dep) => dep.registryUrls),
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
@@ -286,10 +286,10 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input02Content,
         'package.json',
-        {}
+        {},
       );
       expect(
-        res?.deps.flatMap((dep) => dep.registryUrls)
+        res?.deps.flatMap((dep) => dep.registryUrls),
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
@@ -300,7 +300,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         workspacesContent,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         managerData: { workspacesPackages: ['packages/*'] },
@@ -333,7 +333,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         extractedConstraints: {
@@ -417,7 +417,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -454,7 +454,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -497,7 +497,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
 
       expect(res).toMatchObject({
@@ -551,7 +551,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -650,7 +650,7 @@ describe('modules/manager/npm/extract/index', () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
           return Promise.resolve(
-            'npmRegistryServer: https://registry.example.com'
+            'npmRegistryServer: https://registry.example.com',
           );
         }
         return Promise.resolve(null);
@@ -670,7 +670,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchObject({
         deps: [
@@ -725,10 +725,10 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"'
+        'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"',
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -767,7 +767,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot();
     });
@@ -780,7 +780,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
         extractedConstraints: { yarn: '3.0.0' },
@@ -822,7 +822,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         content,
         'package.json',
-        defaultExtractConfig
+        defaultExtractConfig,
       );
       expect(res).toMatchObject({
         deps: [
@@ -883,7 +883,7 @@ describe('modules/manager/npm/extract/index', () => {
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
       const res = await npmExtract.extractAllPackageFiles(
         defaultExtractConfig,
-        ['package.json']
+        ['package.json'],
       );
       expect(res).toEqual([
         {

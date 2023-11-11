@@ -9,11 +9,11 @@ export const GalaxyV1 = z.object({
           z.object({
             name: z.string(),
             created: z.string(),
-          })
+          }),
         ),
       }),
       github_user: z.string().optional(),
       github_repo: z.string().optional(),
-    })
+    }),
   ),
 });

@@ -3,7 +3,7 @@ import { getCache } from '../../../util/cache/repository';
 
 export function setReconfigureBranchCache(
   reconfigureBranchSha: string,
-  isConfigValid: boolean
+  isConfigValid: boolean,
 ): void {
   const cache = getCache();
   const reconfigureBranchCache = {

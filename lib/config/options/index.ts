@@ -373,7 +373,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.23.11',
+    default: 'ghcr.io/containerbase/sidecar:9.24.0',
     globalOnly: true,
   },
   {
@@ -2093,6 +2093,14 @@ const options: RenovateOptions[] = [
       'Determine assignees based on configured code owners and changes in PR.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'expandCodeOwnersGroups',
+    description:
+      'Expand the configured code owner groups into a full list of group members.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'assigneesSampleSize',

@@ -7,7 +7,7 @@ export class RemovePropertyMigration extends AbstractMigration {
   constructor(
     propertyName: string,
     originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    migratedConfig: RenovateConfig,
   ) {
     super(originalConfig, migratedConfig);
     this.propertyName = propertyName;

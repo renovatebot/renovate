@@ -49,8 +49,8 @@ describe('workers/global/config/parse/cli', () => {
       argv.push('badvalue');
       expect(() => cli.getConfig(argv)).toThrow(
         Error(
-          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
-        )
+          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'",
+        ),
       );
     });
 
@@ -93,7 +93,7 @@ describe('workers/global/config/parse/cli', () => {
 
     it('parses json lists correctly', () => {
       argv.push(
-        `--host-rules=[{"matchHost":"docker.io","hostType":"${DockerDatasource.id}","username":"user","password":"password"}]`
+        `--host-rules=[{"matchHost":"docker.io","hostType":"${DockerDatasource.id}","username":"user","password":"password"}]`,
       );
       expect(cli.getConfig(argv)).toEqual({
         hostRules: [
@@ -167,7 +167,7 @@ describe('workers/global/config/parse/cli', () => {
     it('throws exception for invalid json object', () => {
       argv.push('--onboarding-config=Hello_World');
       expect(() => cli.getConfig(argv)).toThrow(
-        Error("Invalid JSON value: 'Hello_World'")
+        Error("Invalid JSON value: 'Hello_World'"),
       );
     });
 

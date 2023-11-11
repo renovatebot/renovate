@@ -1,14 +1,30 @@
 import { EnabledManagersMigration } from './enabled-managers-migration';
 
 describe('config/migrations/custom/enabled-managers-migration', () => {
-  it('should replace yarn with npm', () => {
+  it('migrates', () => {
     expect(EnabledManagersMigration).toMigrate(
       {
-        enabledManagers: ['test1', 'yarn', 'test2'],
+        enabledManagers: ['test1', 'yarn', 'test2', 'regex', 'custom.regex'],
       },
       {
-        enabledManagers: ['test1', 'npm', 'test2'],
-      }
+        enabledManagers: [
+          'test1',
+          'npm',
+          'test2',
+          'custom.regex',
+          'custom.regex',
+        ],
+      },
+    );
+
+    // coverage
+    expect(EnabledManagersMigration).not.toMigrate(
+      {
+        enabledManagers: undefined,
+      },
+      {
+        enabledManagers: undefined,
+      },
     );
   });
 });

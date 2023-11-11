@@ -690,6 +690,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-json-to-scoped': {
+    description: 'The json plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-json'],
+        replacementName: '@rollup/plugin-json',
+        replacementVersion: '4.0.0',
+      },
+    ],
+  },
   'rollup-node-resolve-to-scoped': {
     description: 'The node-resolve plugin for rollup became scoped.',
     packageRules: [

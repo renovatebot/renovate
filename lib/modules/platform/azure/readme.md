@@ -9,6 +9,13 @@ Let Renovate use your PAT by doing _one_ of the following:
 - Set your PAT as an environment variable `RENOVATE_TOKEN`
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
+Permissions for your PAT should be at minimum:
+
+| Scope        | Permission   | Description                       |
+| ------------ | ------------ | --------------------------------- |
+| `Code`       | Read & Write | Required                          |
+| `Work Items` | Read & write | Only needed for link to work item |
+
 Remember to set `platform=azure` somewhere in your Renovate config file.
 
 ## Features awaiting implementation
@@ -20,12 +27,12 @@ Remember to set `platform=azure` somewhere in your Renovate config file.
 ### Setting up a new pipeline
 
 Create a brand new pipeline within Azure DevOps, and select your source:
-![Azure DevOps create new pipeline](/assets/images/azure-devops-setup-1.png){ loading=lazy }
+![Azure DevOps create new pipeline](../../../assets/images/azure-devops-setup-1.png){ loading=lazy }
 
 Then select your repository.
 
 Within _Configure your pipeline_ select: **Starter pipeline**
-![Azure DevOps starter pipeline template](/assets/images/azure-devops-setup-2.png){ loading=lazy }
+![Azure DevOps starter pipeline template](../../../assets/images/azure-devops-setup-2.png){ loading=lazy }
 
 Replace _all_ content in the starter pipeline with:
 
@@ -126,7 +133,7 @@ always-auth=true
 ### Add renovate.json file
 
 Additionally, you can create a `renovate.json` file (which holds the Renovate configuration) in the root of the repository you want to update.
-[Read more about the Renovate configuration options](https://docs.renovatebot.com/configuration-options/)
+[Read more about the Renovate configuration options](../../../configuration-options.md)
 
 ### Using a single pipeline to update multiple repositories
 

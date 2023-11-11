@@ -235,7 +235,7 @@ describe('modules/datasource/npm/get', () => {
       .reply(200, 'not-a-json');
     registryUrl = resolveRegistryUrl('npm-parse-error');
     await expect(
-      getDependency(http, registryUrl, 'npm-parse-error')
+      getDependency(http, registryUrl, 'npm-parse-error'),
     ).rejects.toThrow(ExternalHostError);
 
     httpMock
@@ -266,7 +266,7 @@ describe('modules/datasource/npm/get', () => {
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
     expect(dep?.sourceUrl).toBe(
-      'https://github.com/neutrinojs/neutrino/tree/master/packages/react'
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBeUndefined();
 
@@ -305,7 +305,7 @@ describe('modules/datasource/npm/get', () => {
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
     expect(dep?.sourceUrl).toBe(
-      'https://github.com/neutrinojs/neutrino/tree/master/packages/react'
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBeUndefined();
   });
@@ -347,7 +347,7 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceUrl).toBe('https://github.com/vuejs/vue.git');
     expect(dep?.releases[0].sourceUrl).toBeUndefined();
     expect(dep?.releases[1].sourceUrl).toBe(
-      'https://github.com/vuejs/vue-next.git'
+      'https://github.com/vuejs/vue-next.git',
     );
   });
 
@@ -412,7 +412,7 @@ describe('modules/datasource/npm/get', () => {
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
     expect(dep?.sourceUrl).toBe(
-      'https://github.com/neutrinojs/neutrino/tree/master/packages/react'
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBe('packages/foo');
 
@@ -452,7 +452,7 @@ describe('modules/datasource/npm/get', () => {
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
     expect(dep?.sourceUrl).toBe(
-      'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react'
+      'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBeUndefined();
 

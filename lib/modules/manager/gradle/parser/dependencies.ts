@@ -17,15 +17,15 @@ import {
 } from './handlers';
 
 const qGroupId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'groupId')
+  storeInTokenMap(ctx, 'groupId'),
 );
 
 const qArtifactId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'artifactId')
+  storeInTokenMap(ctx, 'artifactId'),
 );
 
 const qVersion = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'version')
+  storeInTokenMap(ctx, 'version'),
 );
 
 // "foo:bar:1.2.3"
@@ -72,7 +72,7 @@ const qDependencySet = q
           startsWith: '(',
           endsWith: ')',
           search: q.begin<Ctx>().join(qArtifactId).end(),
-        })
+        }),
       )
       .handler(handleLongFormDep),
   })
@@ -140,7 +140,7 @@ const qKotlinMapNotationDependencies = q
 // someMethod("foo", "bar", "1.2.3")
 export const qLongFormDep = q
   .opt<Ctx>(
-    q.sym(storeVarToken).handler((ctx) => storeInTokenMap(ctx, 'methodName'))
+    q.sym(storeVarToken).handler((ctx) => storeInTokenMap(ctx, 'methodName')),
   )
   .tree({
     type: 'wrapped-tree',
@@ -175,7 +175,7 @@ const qImplicitGradlePlugin = q
           endsWith: '}',
           search: q
             .sym<Ctx>(
-              GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS][0]
+              GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS][0],
             )
             .alt(
               // toolVersion = "1.2.3"
@@ -189,10 +189,10 @@ const qImplicitGradlePlugin = q
                   startsWith: '(',
                   endsWith: ')',
                   search: q.begin<Ctx>().join(qVersion).end(),
-                })
+                }),
             ),
-        })
-    )
+        }),
+    ),
   )
   .handler(handleImplicitGradlePlugin)
   .handler(cleanupTempVars);
@@ -203,5 +203,5 @@ export const qDependencies = q.alt(
   qGroovyMapNotationDependencies,
   qKotlinShortNotationDependencies,
   qKotlinMapNotationDependencies,
-  qImplicitGradlePlugin
+  qImplicitGradlePlugin,
 );

@@ -41,7 +41,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -55,7 +55,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -69,7 +69,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -335,7 +335,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'test/.terraform.lock.hcl'
+      'test/.terraform.lock.hcl',
     );
 
     mockHash.mockResolvedValueOnce([
@@ -421,7 +421,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'test/.terraform.lock.hcl'
+      'test/.terraform.lock.hcl',
     );
 
     mockHash.mockResolvedValue([
@@ -658,7 +658,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'subfolder/.terraform.lock.hcl'
+      'subfolder/.terraform.lock.hcl',
     );
 
     mockGetPkgReleases
@@ -680,7 +680,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       })
       .mockResolvedValueOnce(
         // random
-        null
+        null,
       );
     mockHash.mockResolvedValue([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -743,7 +743,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
           "2.56.0",
         ],
       ]
-    `
+    `,
     );
   });
 
@@ -893,7 +893,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
           "2.2.2",
         ],
       ]
-    `
+    `,
     );
   });
 

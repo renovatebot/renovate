@@ -15,7 +15,7 @@ describe('modules/datasource/maven/util', () => {
     it('returns empty object for unsupported protocols', async () => {
       const res = await downloadMavenXml(
         null as never, // #22198
-        parseUrl('unsupported://server.com/')
+        parseUrl('unsupported://server.com/'),
       );
       expect(res).toEqual({});
     });
@@ -23,7 +23,7 @@ describe('modules/datasource/maven/util', () => {
     it('returns empty object for invalid URLs', async () => {
       const res = await downloadMavenXml(
         null as never, // #22198
-        null
+        null,
       );
       expect(res).toEqual({});
     });
@@ -83,7 +83,7 @@ describe('modules/datasource/maven/util', () => {
     it('returns not found for unsupported protocols', async () => {
       const res = await checkResource(
         null as never, // #22198
-        'unsupported://server.com/'
+        'unsupported://server.com/',
       );
       expect(res).toBe('not-found');
     });
@@ -91,7 +91,7 @@ describe('modules/datasource/maven/util', () => {
     it('returns error for invalid URLs', async () => {
       const res = await checkResource(
         null as never, // #22198
-        'not-a-valid-url'
+        'not-a-valid-url',
       );
       expect(res).toBe('error');
     });

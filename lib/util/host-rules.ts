@@ -32,7 +32,7 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
     result.matchHost = matchHost;
   } else if (hostValues.length > 1) {
     throw new Error(
-      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
+      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`,
     );
   }
 
@@ -52,7 +52,7 @@ export function add(params: HostRule): void {
           // TODO: types (#22198)
           `Adding ${field} authentication for ${rule.matchHost!} (hostType=${
             rule.hostType
-          }) to hostRules`
+          }) to hostRules`,
         );
       }
     });
@@ -65,7 +65,7 @@ export function add(params: HostRule): void {
   });
   if (rule.username && rule.password) {
     sanitize.addSecretForSanitizing(
-      toBase64(`${rule.username}:${rule.password}`)
+      toBase64(`${rule.username}:${rule.password}`),
     );
   }
   hostRules.push(rule);
@@ -153,7 +153,7 @@ export function find(search: HostRuleSearch): HostRuleSearchResult {
       (rule) =>
         isMultiRule(rule) &&
         matchesHostType(rule, search) &&
-        matchesHost(rule, search)
+        matchesHost(rule, search),
     )
     .sort(prioritizeLongestMatchHost)
     .forEach((rule) => {

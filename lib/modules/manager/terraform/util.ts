@@ -7,7 +7,7 @@ import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
 
 export function checkFileContainsDependency(
   content: string,
-  checkList: string[]
+  checkList: string[],
 ): boolean {
   return checkList.some((check) => content.includes(check));
 }
@@ -35,7 +35,7 @@ export function massageProviderLookupName(dep: PackageDependency): void {
 
 export function getLockedVersion(
   dep: PackageDependency,
-  locks: ProviderLock[]
+  locks: ProviderLock[],
 ): string | undefined {
   const depRegistryUrl = dep.registryUrls
     ? dep.registryUrls[0]
@@ -43,7 +43,7 @@ export function getLockedVersion(
   const foundLock = locks.find(
     (lock) =>
       lock.packageName === dep.packageName &&
-      lock.registryUrl === depRegistryUrl
+      lock.registryUrl === depRegistryUrl,
   );
   if (foundLock) {
     return foundLock.version;
@@ -52,7 +52,7 @@ export function getLockedVersion(
 }
 
 export async function extractLocksForPackageFile(
-  fileName: string
+  fileName: string,
 ): Promise<ProviderLock[]> {
   const locks: ProviderLock[] = [];
   const lockFilePath = await findLockFile(fileName);

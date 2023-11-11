@@ -49,7 +49,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       expect(res?.deps[0].currentValue).toBe('2.7.5');
       expect(res?.deps[0].registryUrls).toBeUndefined();
       expect(res?.deps[0].packageName).toBe(
-        'git@github.com:ansible-collections/community.docker'
+        'git@github.com:ansible-collections/community.docker',
       );
     });
 

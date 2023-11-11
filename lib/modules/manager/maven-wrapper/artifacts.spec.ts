@@ -23,7 +23,7 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(
     partial<StatusResult>({
       modified: [`maven.mvn/wrapper/${fileName}`],
-    })
+    }),
   );
 }
 
@@ -35,7 +35,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       partial<Stats>({
         isFile: () => true,
         mode: 0o555,
-      })
+      }),
     );
 
     resetPrefetchedImages();

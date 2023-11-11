@@ -36,23 +36,23 @@ function isUnknownGraphqlError(err: Error): boolean {
 function canBeSolvedByShrinking(err: Error): boolean {
   const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
   return errors.some(
-    (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e)
+    (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e),
   );
 }
 
 export class GithubGraphqlDatasourceFetcher<
   GraphqlItem,
-  ResultItem extends GithubDatasourceItem
+  ResultItem extends GithubDatasourceItem,
 > {
   static async query<T, U extends GithubDatasourceItem>(
     config: GithubPackageConfig,
     http: GithubHttp,
-    adapter: GithubGraphqlDatasourceAdapter<T, U>
+    adapter: GithubGraphqlDatasourceAdapter<T, U>,
   ): Promise<U[]> {
     const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,
-      adapter
+      adapter,
     );
     const items = await instance.getItems();
     return items;
@@ -76,7 +76,7 @@ export class GithubGraphqlDatasourceFetcher<
     private datasourceAdapter: GithubGraphqlDatasourceAdapter<
       GraphqlItem,
       ResultItem
-    >
+    >,
   ) {
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
@@ -207,7 +207,7 @@ export class GithubGraphqlDatasourceFetcher<
         const { body, ...options } = this.getRawQueryOptions();
         logger.debug(
           { options, newSize: this.itemsPerQuery },
-          'Shrinking GitHub GraphQL page size after error'
+          'Shrinking GitHub GraphQL page size after error',
         );
       }
     }
@@ -245,7 +245,7 @@ export class GithubGraphqlDatasourceFetcher<
               packageName: `${this.repoOwner}/${this.repoName}`,
               baseUrl: this.baseUrl,
             },
-            `GitHub GraphQL datasource: skipping empty item`
+            `GitHub GraphQL datasource: skipping empty item`,
           );
           continue;
         }

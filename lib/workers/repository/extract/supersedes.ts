@@ -3,7 +3,7 @@ import { get } from '../../../modules/manager';
 import type { ExtractResults } from './types';
 
 export function processSupersedesManagers(
-  extractResults: ExtractResults[]
+  extractResults: ExtractResults[],
 ): void {
   for (const { manager, packageFiles } of extractResults) {
     if (!packageFiles) {
@@ -12,11 +12,11 @@ export function processSupersedesManagers(
     const supersedesManagers = get(manager, 'supersedesManagers');
     if (is.nonEmptyArray(supersedesManagers)) {
       const supercedingPackageFileNames = packageFiles.map(
-        (packageFile) => packageFile.packageFile
+        (packageFile) => packageFile.packageFile,
       );
       for (const supercededManager of supersedesManagers) {
         const supercededManagerResults = extractResults.find(
-          (result) => result.manager === supercededManager
+          (result) => result.manager === supercededManager,
         );
         if (supercededManagerResults?.packageFiles) {
           supercededManagerResults.packageFiles =

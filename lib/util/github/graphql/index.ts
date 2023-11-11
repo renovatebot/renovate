@@ -10,24 +10,24 @@ import type {
 
 export async function queryTags(
   config: GithubPackageConfig,
-  http: GithubHttp
+  http: GithubHttp,
 ): Promise<GithubTagItem[]> {
   const res = await GithubGraphqlDatasourceFetcher.query(
     config,
     http,
-    tagsAdapter
+    tagsAdapter,
   );
   return res;
 }
 
 export async function queryReleases(
   config: GithubPackageConfig,
-  http: GithubHttp
+  http: GithubHttp,
 ): Promise<GithubReleaseItem[]> {
   const res = await GithubGraphqlDatasourceFetcher.query(
     config,
     http,
-    releasesAdapter
+    releasesAdapter,
   );
   return res;
 }

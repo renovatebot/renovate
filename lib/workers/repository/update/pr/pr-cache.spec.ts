@@ -53,7 +53,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
       cache.getCache.mockReturnValue(dummyCache);
       setPrCache('branch_1', 'fingerprint_hash', false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'setPrCache(): Branch cache not present'
+        'setPrCache(): Branch cache not present',
       );
     });
 

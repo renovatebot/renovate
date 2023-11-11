@@ -37,7 +37,7 @@ export class PypiDatasource extends Datasource {
     let dependency: ReleaseResult | null = null;
     // TODO: null check (#22198)
     const hostUrl = ensureTrailingSlash(
-      registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi')
+      registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi'),
     );
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
@@ -45,11 +45,11 @@ export class PypiDatasource extends Datasource {
     if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
       logger.trace(
         { packageName, hostUrl },
-        'Looking up pypi simple dependency'
+        'Looking up pypi simple dependency',
       );
       dependency = await this.getSimpleDependency(
         normalizedLookupName,
-        hostUrl
+        hostUrl,
       );
     } else {
       logger.trace({ packageName, hostUrl }, 'Looking up pypi api dependency');
@@ -64,11 +64,11 @@ export class PypiDatasource extends Datasource {
         // error contacting json-style api -- attempt to fallback to a simple-style api
         logger.trace(
           { packageName, hostUrl },
-          'Looking up pypi simple dependency via fallback'
+          'Looking up pypi simple dependency via fallback',
         );
         dependency = await this.getSimpleDependency(
           normalizedLookupName,
-          hostUrl
+          hostUrl,
         );
       }
     }
@@ -85,11 +85,11 @@ export class PypiDatasource extends Datasource {
 
   private async getDependency(
     packageName: string,
-    hostUrl: string
+    hostUrl: string,
   ): Promise<ReleaseResult | null> {
     const lookupUrl = url.resolve(
       hostUrl,
-      `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`
+      `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`,
     );
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
@@ -109,7 +109,7 @@ export class PypiDatasource extends Datasource {
       if (isGitHubRepo(dep.info.home_page)) {
         dependency.sourceUrl = dep.info.home_page.replace(
           'http://',
-          'https://'
+          'https://',
         );
       }
     }
@@ -172,7 +172,7 @@ export class PypiDatasource extends Datasource {
 
   private static extractVersionFromLinkText(
     text: string,
-    packageName: string
+    packageName: string,
   ): string | null {
     // source packages
     const srcText = PypiDatasource.normalizeName(text);
@@ -212,22 +212,24 @@ export class PypiDatasource extends Datasource {
         // Certain simple repositories like artifactory don't escape > and <
         .replace(
           regEx(/data-requires-python="([^"]*?)>([^"]*?)"/g),
-          'data-requires-python="$1&gt;$2"'
+          'data-requires-python="$1&gt;$2"',
         )
         .replace(
           regEx(/data-requires-python="([^"]*?)<([^"]*?)"/g),
-          'data-requires-python="$1&lt;$2"'
+          'data-requires-python="$1&lt;$2"',
         )
     );
   }
 
   private async getSimpleDependency(
     packageName: string,
-    hostUrl: string
+    hostUrl: string,
   ): Promise<ReleaseResult | null> {
     const lookupUrl = url.resolve(
       hostUrl,
-      ensureTrailingSlash(PypiDatasource.normalizeNameForUrlLookup(packageName))
+      ensureTrailingSlash(
+        PypiDatasource.normalizeNameForUrlLookup(packageName),
+      ),
     );
     const dependency: ReleaseResult = { releases: [] };
     const response = await this.http.get(lookupUrl);
@@ -245,7 +247,7 @@ export class PypiDatasource extends Datasource {
     for (const link of Array.from(links)) {
       const version = PypiDatasource.extractVersionFromLinkText(
         link.text,
-        packageName
+        packageName,
       );
       if (version) {
         const release: PypiJSONRelease = {
@@ -273,7 +275,7 @@ export class PypiDatasource extends Datasource {
       result.constraints = {
         // TODO: string[] isn't allowed here
         python: versionReleases.map(
-          ({ requires_python }) => requires_python
+          ({ requires_python }) => requires_python,
         ) as any,
       };
       return result;

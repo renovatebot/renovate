@@ -97,7 +97,7 @@ export function getTrace(): RequestLogItem[] /* istanbul ignore next */ {
         'Completed requests:',
         ...requestLog.map(({ method, url }) => `  ${method} ${url}`),
         ...errorLines,
-      ].join('\n')
+      ].join('\n'),
     );
   }
   return requestLog;

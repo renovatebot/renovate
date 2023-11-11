@@ -279,6 +279,8 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'google-api-dotnet-client':
+    'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -291,6 +293,7 @@ const repoGroups = {
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
+  'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
@@ -362,6 +365,10 @@ const repoGroups = {
   okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-erlang':
+    'https://github.com/open-telemetry/opentelemetry-erlang',
+  'opentelemetry-erlang-contrib':
+    'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
@@ -440,6 +447,7 @@ const repoGroups = {
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
+  'trust-dns': 'https://github.com/bluejekyll/trust-dns',
   tsoa: 'https://github.com/lukeautry/tsoa',
   turbo: 'https://github.com/vercel/turbo',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
