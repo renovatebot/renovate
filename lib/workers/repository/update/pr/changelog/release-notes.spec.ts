@@ -147,7 +147,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     it('returns ChangeLogResult without release notes', async () => {
       httpMock
         .scope(
-          'https://gitlab.com/api/v4/projects/gitlab-org%2Fgitter%2Fwebapp'
+          'https://gitlab.com/api/v4/projects/gitlab-org%2Fgitter%2Fwebapp',
         )
         .get('/repository/tree?per_page=100&path=lib')
         .reply(200, [])
@@ -250,7 +250,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://gitlab.com/')
         .get(
-          '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100'
+          '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100',
         )
         .reply(200, [
           { tag_name: `v1.0.0` },
@@ -288,7 +288,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://my.custom.domain/')
         .get(
-          '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100'
+          '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100',
         )
         .reply(200, [
           { tag_name: `v1.0.0` },
@@ -1080,7 +1080,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://api.gitlab.com/')
         .get(
-          '/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100'
+          '/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100',
         )
         .reply(200, gitlabTreeResponse)
         .get('/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw')
@@ -1111,7 +1111,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://my.custom.domain/')
         .get(
-          '/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100'
+          '/projects/gitlab-org%2Fgitter%2Fwebapp/repository/tree?per_page=100',
         )
         .reply(200, gitlabTreeResponse)
         .get('/projects/gitlab-org%2Fgitter%2Fwebapp/repository/blobs/abcd/raw')
@@ -1317,11 +1317,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         httpMock
           .scope('https://gitlab.com/')
           .get(
-            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100'
+            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100',
           )
           .reply(200, gitlabTreeResponse)
           .get(
-            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw'
+            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw',
           )
           .reply(200, adapterutilsChangelogMd);
         const res = await getReleaseNotesMd(
@@ -1353,11 +1353,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         httpMock
           .scope('https://gitlab.com/')
           .get(
-            `/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100&path=${sourceDirectory}`
+            `/api/v4/projects/itentialopensource%2Fadapter-utils/repository/tree?per_page=100&path=${sourceDirectory}`,
           )
           .reply(200, response)
           .get(
-            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw'
+            '/api/v4/projects/itentialopensource%2Fadapter-utils/repository/blobs/abcd/raw',
           )
           .reply(200, adapterutilsChangelogMd);
         const res = await getReleaseNotesMd(

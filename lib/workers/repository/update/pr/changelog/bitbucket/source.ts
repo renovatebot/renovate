@@ -28,7 +28,7 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
     baseUrl: string,
     repository: string,
     prevHead: string,
-    nextHead: string
+    nextHead: string,
   ): string {
     return `${baseUrl}${repository}/branches/compare/${nextHead}%0D${prevHead}`;
   }

@@ -11,7 +11,7 @@ import {
 
 const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
 const pipeline = load(
-  replaceReferenceTags(yamlFileMultiConfig)
+  replaceReferenceTags(yamlFileMultiConfig),
 ) as GitlabPipeline;
 const includeLocal = { local: 'something' };
 const includeProject = { project: 'something' };

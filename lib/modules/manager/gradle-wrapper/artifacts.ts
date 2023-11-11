@@ -36,7 +36,7 @@ type Ctx = string[];
 
 async function addIfUpdated(
   status: StatusResult,
-  fileProjectPath: string
+  fileProjectPath: string,
 ): Promise<UpdateArtifactsResult | null> {
   if (status.modified.includes(fileProjectPath)) {
     return {
@@ -69,7 +69,7 @@ async function getDistributionChecksum(url: string): Promise<string> {
 
 export async function updateBuildFile(
   localGradleDir: string,
-  wrapperProperties: Record<string, string | undefined | null>
+  wrapperProperties: Record<string, string | undefined | null>,
 ): Promise<string> {
   let buildFileName = join(localGradleDir, 'build.gradle');
   if (!(await localPathExists(buildFileName))) {
@@ -99,7 +99,7 @@ export async function updateBuildFile(
             buildFileUpdated,
             offset,
             value,
-            newValue
+            newValue,
           );
           return ctx;
         }),
@@ -114,7 +114,7 @@ export async function updateBuildFile(
 
 export async function updateLockFiles(
   buildFileName: string,
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): Promise<UpdateArtifactsResult[] | null> {
   const buildFileContent = await readLocalFile(buildFileName, 'utf8');
   if (!buildFileContent) {
@@ -159,8 +159,8 @@ export async function updateArtifacts({
           packageFileName,
           newPackageFileContent.replace(
             /distributionSha256Sum=.*/,
-            `distributionSha256Sum=${checksum}`
-          )
+            `distributionSha256Sum=${checksum}`,
+          ),
         );
         cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
@@ -189,7 +189,7 @@ export async function updateArtifacts({
       }
       logger.warn(
         { err },
-        'Error executing gradle wrapper update command. It can be not a critical one though.'
+        'Error executing gradle wrapper update command. It can be not a critical one though.',
       );
     }
 
@@ -205,14 +205,14 @@ export async function updateArtifacts({
       packageFileName,
       buildFileName,
       ...['gradle/wrapper/gradle-wrapper.jar', 'gradlew', 'gradlew.bat'].map(
-        (filename) => join(localGradleDir, filename)
+        (filename) => join(localGradleDir, filename),
       ),
     ];
     const updateArtifactsResult = (
       await Promise.all(
         artifactFileNames.map((fileProjectPath) =>
-          addIfUpdated(status, fileProjectPath)
-        )
+          addIfUpdated(status, fileProjectPath),
+        ),
       )
     ).filter(is.truthy);
     if (lockFiles) {
@@ -221,7 +221,7 @@ export async function updateArtifacts({
 
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
-      `Returning updated gradle-wrapper files`
+      `Returning updated gradle-wrapper files`,
     );
     return updateArtifactsResult;
   } catch (err) {

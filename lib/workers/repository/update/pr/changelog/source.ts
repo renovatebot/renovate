@@ -28,7 +28,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
       | 'bitbucket-tags'
       | 'gitea-tags'
       | 'github-tags'
-      | 'gitlab-tags'
+      | 'gitlab-tags',
   ) {
     super(platform);
     this.cacheNamespace = `changelog-${platform}-release`;
@@ -38,7 +38,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
     baseUrl: string,
     repository: string,
     prevHead: string,
-    nextHead: string
+    nextHead: string,
   ): string;
 
   abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
@@ -56,7 +56,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
 
     if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
       logger.debug(
-        `No ${this.datasource} tags found for repository: ${repository}`
+        `No ${this.datasource} tags found for repository: ${repository}`,
       );
 
       return [];
@@ -66,7 +66,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
   }
 
   public async getChangeLogJSON(
-    config: BranchUpgradeConfig
+    config: BranchUpgradeConfig,
   ): Promise<ChangeLogResult | null> {
     logger.trace(`getChangeLogJSON for ${this.platform}`);
 
@@ -132,7 +132,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
       }
       let release = await packageCache.get(
         this.cacheNamespace,
-        this.getCacheKey(sourceUrl, packageName, prev.version, next.version)
+        this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
       );
       if (!release) {
         release = {
@@ -151,7 +151,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
             baseUrl,
             repository,
             prevHead,
-            nextHead
+            nextHead,
           );
         }
         const cacheMinutes = 55;
@@ -159,7 +159,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
           this.cacheNamespace,
           this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
           release,
-          cacheMinutes
+          cacheMinutes,
         );
       }
       changelogReleases.unshift(release);
@@ -186,7 +186,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
     version: allVersioning.VersioningApi,
     packageName: string,
     depNewVersion: string,
-    tags: string[]
+    tags: string[],
   ): string | undefined {
     const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
     const exactReleaseRegex = regEx(`${packageName}[@\\-_]v?${depNewVersion}`);
@@ -203,13 +203,13 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
     version: allVersioning.VersioningApi,
     packageName: string,
     release: Release,
-    tags: string[]
+    tags: string[],
   ): string | null {
     const tagName = this.findTagOfRelease(
       version,
       packageName,
       release.version,
-      tags
+      tags,
     );
     if (is.nonEmptyString(tagName)) {
       return tagName;
@@ -224,7 +224,7 @@ export abstract class ChangeLogSource extends ChangeLogContentSource {
     sourceUrl: string,
     packageName: string,
     prev: string,
-    next: string
+    next: string,
   ): string {
     return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
   }

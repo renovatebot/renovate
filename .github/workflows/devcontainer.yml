@@ -21,6 +21,6 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Build and run dev container task
-        uses: devcontainers/ci@57eaf0c9b518a76872bc429cdceefd65a912309b # v0.3.1900000329
+        uses: devcontainers/ci@c3e31cc561800ac318ed000e22ffc6713c93d009 # v0.3.1900000338
         with:
           runCmd: pnpm build

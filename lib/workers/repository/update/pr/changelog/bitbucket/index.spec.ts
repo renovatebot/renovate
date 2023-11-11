@@ -97,7 +97,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
     const res = await getReleaseList(
       bitbucketProject,
       partial<ChangeLogRelease>({}),
-      bitbucketChangeLogSource
+      bitbucketChangeLogSource,
     );
     expect(res).toBeEmptyArray();
   });
@@ -111,9 +111,9 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
     it('returns get ref comparison url', () => {
       const source = new BitbucketChangeLogSource();
       expect(
-        source.getCompareURL(baseUrl, 'some-org/some-repo', 'abc', 'xzy')
+        source.getCompareURL(baseUrl, 'some-org/some-repo', 'abc', 'xzy'),
       ).toBe(
-        'https://bitbucket.org/some-org/some-repo/branches/compare/xzy%0Dabc'
+        'https://bitbucket.org/some-org/some-repo/branches/compare/xzy%0Dabc',
       );
     });
   });

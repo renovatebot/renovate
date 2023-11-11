@@ -9,7 +9,7 @@ describe('modules/manager/git-submodules/artifact', () => {
           updatedDeps: [{ depName: '' }],
           newPackageFileContent: '',
           config: {},
-        })
+        }),
       ).toMatchObject([{ file: { type: 'addition', path: '', contents: '' } }]);
     });
 
@@ -20,7 +20,7 @@ describe('modules/manager/git-submodules/artifact', () => {
           updatedDeps: [{ depName: 'renovate' }, { depName: 'renovate-pro' }],
           newPackageFileContent: '',
           config: {},
-        })
+        }),
       ).toMatchObject([
         { file: { type: 'addition', path: 'renovate', contents: '' } },
         { file: { type: 'addition', path: 'renovate-pro', contents: '' } },

@@ -27,7 +27,7 @@ export class GiteaTagsDatasource extends Datasource {
   static getApiUrl(registryUrl?: string): string {
     const res = GiteaTagsDatasource.getRegistryURL(registryUrl).replace(
       regEx(/\/api\/v1$/),
-      ''
+      '',
     );
     return `${ensureTrailingSlash(res)}api/v1/`;
   }
@@ -35,7 +35,7 @@ export class GiteaTagsDatasource extends Datasource {
   static getCacheKey(
     registryUrl: string | undefined,
     repo: string,
-    type: string
+    type: string,
   ): string {
     return `${GiteaTagsDatasource.getRegistryURL(registryUrl)}:${repo}:${type}`;
   }
@@ -57,7 +57,7 @@ export class GiteaTagsDatasource extends Datasource {
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl
+      registryUrl,
     )}repos/${repo}/tags`;
     const tags = (
       await this.http.getJson(
@@ -65,7 +65,7 @@ export class GiteaTagsDatasource extends Datasource {
         {
           paginate: true,
         },
-        TagsSchema
+        TagsSchema,
       )
     ).body;
 
@@ -92,10 +92,10 @@ export class GiteaTagsDatasource extends Datasource {
   async getTagCommit(
     registryUrl: string | undefined,
     repo: string,
-    tag: string
+    tag: string,
   ): Promise<string | null> {
     const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl
+      registryUrl,
     )}repos/${repo}/tags/${tag}`;
 
     const { body } = await this.http.getJson(url, TagSchema);
@@ -112,14 +112,14 @@ export class GiteaTagsDatasource extends Datasource {
   })
   override async getDigest(
     { packageName: repo, registryUrl }: DigestConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     if (newValue?.length) {
       return this.getTagCommit(registryUrl, repo, newValue);
     }
 
     const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl
+      registryUrl,
     )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
     const { body } = await this.http.getJson(url, CommitsSchema);
 

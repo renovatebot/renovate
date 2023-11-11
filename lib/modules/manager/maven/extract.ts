@@ -39,7 +39,7 @@ function containsPlaceholder(str: string | null | undefined): boolean {
 
 function depFromNode(
   node: XmlElement,
-  underBuildSettingsElement: boolean
+  underBuildSettingsElement: boolean,
 ): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
@@ -99,7 +99,7 @@ function deepExtract(
   node: XmlElement,
   result: PackageDependency[] = [],
   isRoot = true,
-  underBuildSettingsElement = false
+  underBuildSettingsElement = false,
 ): PackageDependency[] {
   const dep = depFromNode(node, underBuildSettingsElement);
   if (dep && !isRoot) {
@@ -113,7 +113,7 @@ function deepExtract(
         false,
         node.name === 'build' ||
           node.name === 'reporting' ||
-          underBuildSettingsElement
+          underBuildSettingsElement,
       );
     }
   }
@@ -123,7 +123,7 @@ function deepExtract(
 function applyProps(
   dep: PackageDependency<Record<string, any>>,
   depPackageFile: string,
-  props: MavenProp
+  props: MavenProp,
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
@@ -134,7 +134,7 @@ function applyProps(
       result,
       depPackageFile,
       props,
-      alreadySeenProps
+      alreadySeenProps,
     );
     if (fatal) {
       dep.skipReason = 'recursive-placeholder';
@@ -157,7 +157,7 @@ function applyPropsInternal(
   dep: PackageDependency<Record<string, any>>,
   depPackageFile: string,
   props: MavenProp,
-  previouslySeenProps: Set<string>
+  previouslySeenProps: Set<string>,
 ): [PackageDependency<Record<string, any>>, boolean, boolean] {
   let anyChange = false;
   let fatal = false;
@@ -211,7 +211,7 @@ function applyPropsInternal(
         return propValue.val;
       }
       return substr;
-    }
+    },
   );
 
   const result: PackageDependency = {
@@ -256,7 +256,7 @@ interface MavenInterimPackageFile extends PackageFile {
 
 export function extractPackage(
   rawContent: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFile | null {
   if (!rawContent) {
     return null;
@@ -471,7 +471,7 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
@@ -487,7 +487,7 @@ export async function extractAllPackageFiles(
       if (registries) {
         logger.debug(
           { registries, packageFile },
-          'Found registryUrls in settings.xml'
+          'Found registryUrls in settings.xml',
         );
         additionalRegistryUrls.push(...registries);
       }

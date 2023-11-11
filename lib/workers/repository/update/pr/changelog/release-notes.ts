@@ -63,7 +63,7 @@ export function getCachedReleaseList(
 
 export function massageBody(
   input: string | undefined | null,
-  baseUrl: string
+  baseUrl: string,
 ): string {
   let body = coerceString(input);
   // Convert line returns
@@ -74,14 +74,14 @@ export function massageBody(
     regEx(
       `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
-      false
+      false,
     ),
-    ''
+    '',
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
     regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
-    '\n'
+    '\n',
   );
   // Reduce headings size
   body = body
@@ -94,7 +94,7 @@ export function massageBody(
 
 export function massageName(
   input: string | undefined | null,
-  version: string | undefined
+  version: string | undefined,
 ): string | undefined {
   let name = input ?? '';
 
@@ -131,7 +131,7 @@ export async function getReleaseNotes(
         r.tag === version ||
         r.tag === `v${version}` ||
         r.tag === gitRef ||
-        r.tag === `v${gitRef}`
+        r.tag === `v${gitRef}`,
     );
   }
   if (is.undefined(matchedRelease) && config.extractVersion) {
@@ -150,19 +150,19 @@ export async function getReleaseNotes(
 function getExactReleaseMatch(
   packageName: string,
   version: string,
-  releases: ChangeLogNotes[]
+  releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
   const exactReleaseReg = regEx(`${packageName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
-    exactReleaseReg.test(r.tag!)
+    exactReleaseReg.test(r.tag!),
   );
   return matchedRelease;
 }
 
 async function releaseNotesResult(
   releaseMatch: ChangeLogNotes | undefined,
-  project: ChangeLogProject
+  project: ChangeLogProject,
 ): Promise<ChangeLogNotes | null> {
   if (!releaseMatch) {
     return null;
@@ -289,7 +289,7 @@ export async function getReleaseNotesMd(
   const { changelogFile } = changelog;
   const changelogMd = changelog.changelogMd.replace(
     regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
-    '\n'
+    '\n',
   );
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
     const changelogParsed = sectionize(changelogMd, level);
@@ -299,7 +299,7 @@ export async function getReleaseNotesMd(
           // replace brackets and parenthesis with space
           const deParenthesizedSection = section.replace(
             regEx(/[[\]()]/g),
-            ' '
+            ' ',
           );
           const [heading] = deParenthesizedSection.split(newlineRegex);
           const title = heading
@@ -337,7 +337,7 @@ export async function getReleaseNotesMd(
         } catch (err) /* istanbul ignore next */ {
           logger.warn(
             { file: changelogFile, err },
-            `Error parsing changelog file`
+            `Error parsing changelog file`,
           );
         }
       }
@@ -411,7 +411,7 @@ export async function addReleaseNotes(
       cacheNamespace,
       cacheKey,
       releaseNotes,
-      cacheMinutes
+      cacheMinutes,
     );
     output.versions!.push({
       ...v,

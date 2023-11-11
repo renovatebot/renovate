@@ -8,7 +8,7 @@ describe('config/migrations/custom/recreate-closed-migration', () => {
       },
       {
         recreateWhen: 'always',
-      }
+      },
     );
   });
 
@@ -19,7 +19,7 @@ describe('config/migrations/custom/recreate-closed-migration', () => {
       },
       {
         recreateWhen: 'auto',
-      }
+      },
     );
   });
 });

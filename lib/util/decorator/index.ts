@@ -1,11 +1,11 @@
 export type Handler<T> = (
-  parameters: DecoratorParameters<T>
+  parameters: DecoratorParameters<T>,
 ) => Promise<unknown>;
 export type Method<T> = (this: T, ...args: any[]) => Promise<any>;
 export type Decorator<T> = <U extends T>(
   target: U,
   key: keyof U,
-  descriptor: TypedPropertyDescriptor<Method<T>>
+  descriptor: TypedPropertyDescriptor<Method<T>>,
 ) => TypedPropertyDescriptor<Method<T>>;
 
 export interface DecoratorParameters<T, U extends any[] = any[]> {
@@ -43,7 +43,7 @@ export function decorate<T>(fn: Handler<T>): Decorator<T> {
       configurable: true,
       writable: true,
       ...Object.getOwnPropertyDescriptor(target, key),
-    }
+    },
   ) => {
     const { value } = descriptor;
 

@@ -106,7 +106,7 @@ Renovate can be configured to access more repositories and access repositories a
 This example shows how you can use a `config.js` file to configure Renovate for use with Artifactory.
 We're using environment variables to pass the Artifactory username and password to Renovate bot.
 
-```js
+```js title="config.js"
 module.exports = {
   hostRules: [
     {

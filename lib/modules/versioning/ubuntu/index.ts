@@ -145,14 +145,14 @@ function isGreaterThan(version: string, other: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return versions.find((version) => equals(version, range)) ? range : null;
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return getSatisfyingVersion(versions, range);
 }

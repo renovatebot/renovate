@@ -32,12 +32,12 @@ export class SbtPackageDatasource extends MavenDatasource {
   async getArtifactSubdirs(
     searchRoot: string,
     artifact: string,
-    scalaVersion: string
+    scalaVersion: string,
   ): Promise<string[] | null> {
     const pkgUrl = ensureTrailingSlash(searchRoot);
     const { body: indexContent } = await downloadHttpProtocol(
       this.http,
-      pkgUrl
+      pkgUrl,
     );
     if (indexContent) {
       const parseSubdirs = (content: string): string[] =>
@@ -69,7 +69,7 @@ export class SbtPackageDatasource extends MavenDatasource {
 
   async getPackageReleases(
     searchRoot: string,
-    artifactSubdirs: string[] | null
+    artifactSubdirs: string[] | null,
   ): Promise<string[] | null> {
     if (artifactSubdirs) {
       const releases: string[] = [];
@@ -95,7 +95,7 @@ export class SbtPackageDatasource extends MavenDatasource {
   async getUrls(
     searchRoot: string,
     artifactDirs: string[] | null,
-    version: string | null
+    version: string | null,
   ): Promise<Partial<ReleaseResult>> {
     const result: Partial<ReleaseResult> = {};
 
@@ -144,7 +144,7 @@ export class SbtPackageDatasource extends MavenDatasource {
   }
 
   override async getReleases(
-    config: GetReleasesConfig
+    config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const { packageName, registryUrl } = config;
     // istanbul ignore if
@@ -168,17 +168,17 @@ export class SbtPackageDatasource extends MavenDatasource {
       const artifactSubdirs = await this.getArtifactSubdirs(
         searchRoot,
         artifact,
-        scalaVersion
+        scalaVersion,
       );
       const versions = await this.getPackageReleases(
         searchRoot,
-        artifactSubdirs
+        artifactSubdirs,
       );
       const latestVersion = getLatestVersion(versions);
       const urls = await this.getUrls(
         searchRoot,
         artifactSubdirs,
-        latestVersion
+        latestVersion,
       );
 
       const dependencyUrl = searchRoot;
@@ -194,7 +194,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     }
 
     logger.debug(
-      `No versions discovered for ${packageName} listing organization root package folder, fallback to maven datasource for version discovery`
+      `No versions discovered for ${packageName} listing organization root package folder, fallback to maven datasource for version discovery`,
     );
     const mavenReleaseResult = await super.getReleases(config);
     if (mavenReleaseResult) {
@@ -202,7 +202,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     }
 
     logger.debug(
-      `No versions found for ${packageName} in ${searchRoots.length} repositories`
+      `No versions found for ${packageName} in ${searchRoots.length} repositories`,
     );
     return null;
   }

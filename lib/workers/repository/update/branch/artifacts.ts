@@ -4,7 +4,7 @@ import { platform } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 
 export async function setArtifactErrorStatus(
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<void> {
   if (!config.artifactErrors?.length) {
     // no errors
@@ -16,7 +16,7 @@ export async function setArtifactErrorStatus(
   const state = 'red';
   const existingState = await platform.getBranchStatusCheck(
     config.branchName,
-    context
+    context,
   );
 
   // Check if state needs setting

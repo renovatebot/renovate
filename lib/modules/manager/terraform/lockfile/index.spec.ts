@@ -41,7 +41,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -55,7 +55,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -69,7 +69,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -335,7 +335,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'test/.terraform.lock.hcl'
+      'test/.terraform.lock.hcl',
     );
 
     mockHash.mockResolvedValueOnce([
@@ -421,7 +421,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'test/.terraform.lock.hcl'
+      'test/.terraform.lock.hcl',
     );
 
     mockHash.mockResolvedValue([
@@ -658,7 +658,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'subfolder/.terraform.lock.hcl'
+      'subfolder/.terraform.lock.hcl',
     );
 
     mockGetPkgReleases
@@ -680,7 +680,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       })
       .mockResolvedValueOnce(
         // random
-        null
+        null,
       );
     mockHash.mockResolvedValue([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -743,7 +743,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
           "2.56.0",
         ],
       ]
-    `
+    `,
     );
   });
 
@@ -893,7 +893,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
           "2.2.2",
         ],
       ]
-    `
+    `,
     );
   });
 
@@ -909,5 +909,184 @@ describe('modules/manager/terraform/lockfile/index', () => {
       config: localConfig,
     });
     expect(result).toBeNull();
+  });
+
+  it('preserves constraints when current value and new value are same', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      provider "registry.terraform.io/hashicorp/aws" {
+        version     = "3.0.0"
+        constraints = "~> 3.0.0"
+        hashes = [
+          "aaa",
+          "bbb",
+          "ccc",
+        ]
+      }
+    `);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+    mockHash.mockResolvedValueOnce([
+      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+    ]);
+
+    const result = await updateArtifacts({
+      packageFileName: 'main.tf',
+      updatedDeps: [
+        {
+          depName: 'aws',
+          depType: 'provider',
+          packageName: 'hashicorp/aws',
+          registryUrls: ['https://registry.example.com'],
+          newVersion: '3.36.1',
+          currentValue: '~> 3.36',
+          newValue: '~> 3.36',
+        },
+      ],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(result).toEqual([
+      {
+        file: {
+          contents: codeBlock`
+            provider "registry.terraform.io/hashicorp/aws" {
+              version     = "3.36.1"
+              constraints = "~> 3.0.0"
+              hashes = [
+                "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+              ]
+            }
+          `,
+          path: '.terraform.lock.hcl',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(mockHash.mock.calls).toEqual([
+      ['https://registry.example.com', 'hashicorp/aws', '3.36.1'],
+    ]);
+  });
+
+  it('replaces current value to new version within a constraint', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      provider "registry.terraform.io/hashicorp/aws" {
+        version     = "3.0.0"
+        constraints = "~> 3.0.0"
+        hashes = [
+          "aaa",
+          "bbb",
+          "ccc",
+        ]
+      }
+    `);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+    mockHash.mockResolvedValueOnce([
+      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+    ]);
+
+    const result = await updateArtifacts({
+      packageFileName: 'main.tf',
+      updatedDeps: [
+        {
+          depName: 'aws',
+          depType: 'provider',
+          packageName: 'hashicorp/aws',
+          registryUrls: ['https://registry.example.com'],
+          newVersion: '3.37.0',
+          currentValue: '~> 3.0.0',
+          newValue: '~> 3.37.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(result).toEqual([
+      {
+        file: {
+          contents: codeBlock`
+            provider "registry.terraform.io/hashicorp/aws" {
+              version     = "3.37.0"
+              constraints = "~> 3.37.0"
+              hashes = [
+                "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+              ]
+            }
+          `,
+          path: '.terraform.lock.hcl',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(mockHash.mock.calls).toEqual([
+      ['https://registry.example.com', 'hashicorp/aws', '3.37.0'],
+    ]);
+  });
+
+  it('replaces current version to new version within a constraint', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      provider "registry.terraform.io/hashicorp/aws" {
+        version     = "3.0.0"
+        constraints = "~> 3.0.0"
+        hashes = [
+          "aaa",
+          "bbb",
+          "ccc",
+        ]
+      }
+    `);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+    mockHash.mockResolvedValueOnce([
+      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+    ]);
+
+    const result = await updateArtifacts({
+      packageFileName: 'main.tf',
+      updatedDeps: [
+        {
+          depName: 'aws',
+          depType: 'provider',
+          packageName: 'hashicorp/aws',
+          registryUrls: ['https://registry.example.com'],
+          newVersion: '3.37.0',
+          currentVersion: '3.0.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(result).toEqual([
+      {
+        file: {
+          contents: codeBlock`
+            provider "registry.terraform.io/hashicorp/aws" {
+              version     = "3.37.0"
+              constraints = "~> 3.37.0"
+              hashes = [
+                "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+              ]
+            }
+          `,
+          path: '.terraform.lock.hcl',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(mockHash.mock.calls).toEqual([
+      ['https://registry.example.com', 'hashicorp/aws', '3.37.0'],
+    ]);
   });
 });

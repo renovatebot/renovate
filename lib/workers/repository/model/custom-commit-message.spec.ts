@@ -25,7 +25,7 @@ describe('workers/repository/model/custom-commit-message', () => {
         commitMessage.prefix = prefix;
 
         expect(commitMessage.toString()).toEqual(result);
-      }
+      },
     );
 
     it('should provide ability to set body and footer', () => {

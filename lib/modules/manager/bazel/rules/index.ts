@@ -33,7 +33,7 @@ const supportedRules = [
 export const supportedRulesRegex = regEx(`^(?:${supportedRules.join('|')})$`);
 
 export function extractDepsFromFragmentData(
-  fragmentData: FragmentData
+  fragmentData: FragmentData,
 ): PackageDependency[] {
   const res = Target.safeParse(fragmentData);
   if (!res.success) {
@@ -43,7 +43,7 @@ export function extractDepsFromFragmentData(
 }
 
 export function extractDepsFromFragment(
-  fragment: Fragment
+  fragment: Fragment,
 ): PackageDependency[] {
   const fragmentData = extract(fragment);
   return extractDepsFromFragmentData(fragmentData);

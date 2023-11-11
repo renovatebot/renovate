@@ -28,7 +28,7 @@ export class GitLabChangeLogSource extends ChangeLogSource {
     baseUrl: string,
     repository: string,
     prevHead: string,
-    nextHead: string
+    nextHead: string,
   ): string {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
   }

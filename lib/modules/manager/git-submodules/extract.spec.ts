@@ -24,7 +24,7 @@ describe('modules/manager/git-submodules/extract', () => {
 
       gitMock.env.mockImplementation(() => gitMock);
       gitMock.subModule.mockResolvedValue(
-        '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
+        '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
       );
 
       gitMock.raw.mockImplementation((options) => {
@@ -33,7 +33,7 @@ describe('modules/manager/git-submodules/extract', () => {
           options.includes('remote.origin.url')
         ) {
           return Promise.resolve(
-            'https://github.com/renovatebot/renovate.git'
+            'https://github.com/renovatebot/renovate.git',
           ) as Response<string>;
         }
         return git.raw(options);
@@ -49,7 +49,7 @@ describe('modules/manager/git-submodules/extract', () => {
 
     it('default branch is detected when no branch is specified', async () => {
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);
@@ -58,7 +58,7 @@ describe('modules/manager/git-submodules/extract', () => {
 
     it('default branch is detected with using git environment variables when no branch is specified', async () => {
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       hostRules.add({
         hostType: 'github',
@@ -86,7 +86,7 @@ describe('modules/manager/git-submodules/extract', () => {
 
     it('combined token from host rule is used to detect branch', async () => {
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       hostRules.add({
         hostType: 'github',
@@ -131,13 +131,13 @@ describe('modules/manager/git-submodules/extract', () => {
       const res = await extractPackageFile('', '.gitmodules.4', {});
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].packageName).toBe(
-        'https://github.com/PowerShell/PowerShell-Docs'
+        'https://github.com/PowerShell/PowerShell-Docs',
       );
     });
 
     it('combined username+pwd from host rule is used to detect branch for gitlab', async () => {
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       hostRules.add({
         hostType: 'gitlab',
@@ -166,7 +166,7 @@ describe('modules/manager/git-submodules/extract', () => {
 
     it('combined username+pwd from host rule is used to detect branch for git-refs and git-tags', async () => {
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       hostRules.add({
         hostType: 'git-refs',
@@ -224,19 +224,19 @@ describe('modules/manager/git-submodules/extract', () => {
         hostType: 'gitlab',
       });
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/master  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/master  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/dev  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/dev  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       const res = await extractPackageFile('', '.gitmodules.5', {});
       expect(res).toEqual({
@@ -283,7 +283,7 @@ describe('modules/manager/git-submodules/extract', () => {
         hostType: 'azure',
       });
       gitMock.listRemote.mockResolvedValueOnce(
-        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+        'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD',
       );
       const res = await extractPackageFile('', '.gitmodules.6', {});
       expect(res).toEqual({
@@ -295,6 +295,43 @@ describe('modules/manager/git-submodules/extract', () => {
             depName: 'some-azure',
             packageName:
               'https://dev.azure.com/organization/whitespace%20project/_git/repo',
+          },
+        ],
+      });
+    });
+
+    it('fallback to current branch if special value is detected', async () => {
+      gitMock.branch.mockResolvedValueOnce({
+        all: ['staging', 'main'],
+        branches: {
+          staging: {
+            current: true,
+            name: 'staging',
+            commit: '9eeb873',
+            label: 'staging branch',
+            linkedWorkTree: false,
+          },
+          main: {
+            current: false,
+            name: 'main',
+            commit: 'e14c7e1',
+            label: 'main branch',
+            linkedWorkTree: false,
+          },
+        },
+        current: 'staging',
+        detached: false,
+      });
+
+      const res = await extractPackageFile('', '.gitmodules.7', {});
+      expect(res).toEqual({
+        datasource: 'git-refs',
+        deps: [
+          {
+            currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            currentValue: 'staging',
+            depName: 'PowerShell-Docs',
+            packageName: 'https://github.com/PowerShell/PowerShell-Docs',
           },
         ],
       });

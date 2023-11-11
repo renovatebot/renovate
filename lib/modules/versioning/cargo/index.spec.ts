@@ -12,7 +12,7 @@ describe('modules/versioning/cargo/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(semver.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -23,7 +23,7 @@ describe('modules/versioning/cargo/index', () => {
     'getSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(semver.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -57,7 +57,7 @@ describe('modules/versioning/cargo/index', () => {
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(semver.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -71,7 +71,7 @@ describe('modules/versioning/cargo/index', () => {
     'minSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(semver.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -147,8 +147,8 @@ describe('modules/versioning/cargo/index', () => {
           rangeStrategy,
           currentVersion,
           newVersion,
-        })
+        }),
       ).toBe(expected);
-    }
+    },
   );
 });
