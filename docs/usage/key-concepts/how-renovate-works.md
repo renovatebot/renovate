@@ -5,12 +5,17 @@ description: Learn how Renovate works
 
 # Introduction
 
-Renovate first finds all the dependencies in your repository, and then checks for updates to those dependencies.
+Renovate usually performs these steps:
+
+- Clones the repo
+- Scans package files to extract dependencies
+- Looks up registries to check for available updates
+- Applies any grouping rules defined
+- Pushes branches and raises Pull Requests
+
 
 Because Renovate needs to support a lot of dependency naming and versioning conventions, it has modules for each known convention.
-You can define your own modules, if you want.
-
-Please add comments to the [issue#25091](https://github.com/renovatebot/renovate/issues/25091) if you wish to see a part (better) shown in the graph below
+You can contribute your own modules, if you want.
 
 ## Modules
 
@@ -23,8 +28,8 @@ Renovate's modules are:
 Renovate uses these modules in order:
 
 1. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
-2. The datasource module looks for the existing versions of the dependency
-3. the versioning module search for a valid version regarding the dependency's version
+2. The datasource module looks up versions of the dependency
+3. the versioning module validates and sorts the returned versions
 
 For example:
 
@@ -40,15 +45,15 @@ Here's a high-level overview of Renovate's workflow, where it collects dependenc
 
 ```mermaid
 flowchart LR
-  subgraph COLLECT
+  subgraph EXTRACT
     direction TB
     CC[[For each manager]]
     CC -->|managerA| CD["..."]
-    CC -->|managerB| CCF["collect files"]
+    CC -->|managerB| CCF["match files"]
 
     CCF --> CFEF[[For each file]]
 
-    CFEF -->|file1| CCD1[Collect dependency]
+    CFEF -->|file1| CCD1[Extract dependency]
     CFEF -->|file2| CCD2[...]
   end
 
@@ -65,7 +70,7 @@ flowchart LR
 
     FED -->|dep1| D1[...]
     D1 -..-> CU
-    FED -->|dep2| D2[use datasource to\n get possible updates]
+    FED -->|dep2| D2[use datasource to\n fetch versions]
     D2 --> J[use versioning to find \n next valid update]
 
     FED2 -...-> CU
@@ -75,7 +80,7 @@ flowchart LR
 
     CU --> FEU[[For each update]]
 
-    FEU --> AU[Create branch\nApply update\nSetup PR]
+    FEU --> AU[Create branch\nApply update\nCreate PR]
 
   end
 
