@@ -100,15 +100,15 @@ flowchart TB
        direction TB
        FER[[For each repository]]
 
-      subgraph COLLECTD[COLLECT DEPENDENCIES]
+      subgraph EXTRACTD[EXTRACT DEPENDENCIES]
           direction TB
           CLBRANCH[Collect existing branches]
           CLBRANCH --> VULN[Check for vulnerabilities]
           VULN --> CC[[For each manager]]
           CC -->|managerA| CD["..."]
-          CC -->|managerB| CCF["collect files"]
+          CC -->|managerB| CCF["match files"]
           CCF --> CFEF[[For each file]]
-          CFEF -->|file1| CCD1[Collect dependency]
+          CFEF -->|file1| CCD1[Extract dependency]
           CFEF -->|file2| CCD2[...]
       end
 
@@ -121,7 +121,7 @@ flowchart TB
           UFEF -->|file2| FED2[...]
           FED -->|dep1| D1[...]
           D1 -..-> CU
-          FED -->|dep2| D2[use datasource to \n get possible updates]
+          FED -->|dep2| D2[use datasource to \n fetch versions]
           D2 --> J[use versioning to find \n next valid update]
           FED2 -...-> CU
           UD -....-> CU
@@ -132,7 +132,7 @@ flowchart TB
         direction TB
         FEU[[For each update]]
         FEU --> AUCOND[Check if branch needed: \n existing/rebase/concurrent amount]
-        AUCOND --> AU[Create branch\nApply update\nSetup PR]
+        AUCOND --> AU[Create branch\nApply update\nCreate PR]
       end
 
       subgraph FINALIZE[FINALIZE]
@@ -144,8 +144,8 @@ flowchart TB
 
       FER --> IRPO[Initialize repository]
 
-      IRPO --> COLLECTD
-      COLLECTD --> COLLECTU
+      IRPO --> EXTRACTD
+      EXTRACTD --> COLLECTU
 
       COLLECTU --> WRITEU
 
