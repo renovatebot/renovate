@@ -52,9 +52,9 @@ export async function autodiscoverRepositories(
     logger.debug({ autodiscoverFilter }, 'Applying autodiscoverFilter');
     discovered = filterGlobOrRegexArray(
       discovered,
-      is.string(config.autodiscoverFilter)
-        ? [config.autodiscoverFilter]
-        : config.autodiscoverFilter,
+      is.string(autodiscoverFilter)
+        ? [autodiscoverFilter]
+        : autodiscoverFilter,
     );
 
     if (!discovered.length) {
