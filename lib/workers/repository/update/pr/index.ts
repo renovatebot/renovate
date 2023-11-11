@@ -405,7 +405,6 @@ export async function ensurePr(
       }
 
       if (labelsNeedUpdate) {
-        const newLabels = prepareLabels(config);
         logger.debug(
           {
             branchName,
@@ -423,7 +422,7 @@ export async function ensurePr(
         // For more details, refer to the updatePr function of each platform
 
         const [addLabels, removeLabels] = getChangedLabels(
-          prCurrentLabels,
+          prCurrentLabels!,
           configuredLabels,
         );
 

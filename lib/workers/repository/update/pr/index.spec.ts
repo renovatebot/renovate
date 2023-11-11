@@ -316,8 +316,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
             branchName: 'renovate-branch',
-            oldLabels: ['old_label'],
-            newLabels: ['new_label'],
+            prCurrentLabels: ['old_label'],
+            configuredLabels: ['new_label'],
           },
           `PR labels have changed`,
         );
@@ -392,8 +392,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).not.toHaveBeenCalledWith(
           {
             branchName: 'renovate-branch',
-            oldLabels: ['old_label'],
-            newLabels: ['new_label'],
+            prCurrentLabels: ['old_label'],
+            configuredLabels: ['new_label'],
           },
           `PR labels have changed`,
         );

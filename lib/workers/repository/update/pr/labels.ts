@@ -32,18 +32,18 @@ export function getChangedLabels(
 /**
  * Check if labels in the PR have been modified.
  *
- * This function compares two arrays of labels, 'labelsFromDebugData' and 'labelsInPr',
+ * This function compares two arrays of labels, 'prInitialLabels' and 'prCurrentLabels',
  * to determine if they are different, indicating that labels in the PR have been modified.
  */
 export function areLabelsModified(
-  labelsFromDebugData: string[],
-  labelsInPr: string[],
+  prInitialLabels: string[],
+  prCurrentLabels: string[],
 ): boolean {
-  const modified = !dequal(labelsFromDebugData.sort(), labelsInPr.sort());
+  const modified = !dequal(prInitialLabels.sort(), prCurrentLabels.sort());
 
   if (modified) {
     logger.debug(
-      { labelsFromDebugData, labelsInPr },
+      { prInitialLabels, prCurrentLabels },
       'PR labels have been modified by user, skipping labels update',
     );
   }
@@ -55,24 +55,24 @@ export function areLabelsModified(
  * Determine if labels should be updated in the Pull Request
  */
 export function shouldUpdateLabels(
-  labelsInDebugData: string[] | undefined,
-  labelsInPr: string[] | undefined,
-  newLabels: string[] | undefined,
+  prInitialLabels: string[] | undefined,
+  prCurrentLabels: string[] | undefined,
+  configuredLabels: string[] | undefined,
 ): boolean {
   // If the 'labelsInDebugData' field is undefined
   // it means the PR was created before the update-labels logic was merged, and labels should not be updated.
   //  Reference: https://github.com/renovatebot/renovate/pull/25340
-  if (!is.array(labelsInDebugData)) {
+  if (!is.array(prInitialLabels)) {
     return false;
   }
 
   // If the labels in the PR have been modified by the user, they should not be updated.
-  if (areLabelsModified(labelsInDebugData, labelsInPr ?? [])) {
+  if (areLabelsModified(prInitialLabels, prCurrentLabels ?? [])) {
     return false;
   }
 
   // If the 'labels are unchanged, they should not be updated.
-  if (dequal((newLabels ?? []).sort(), labelsInDebugData.sort())) {
+  if (dequal((configuredLabels ?? []).sort(), prInitialLabels.sort())) {
     return false;
   }
 
