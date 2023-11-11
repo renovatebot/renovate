@@ -13,7 +13,6 @@ Renovate usually performs these steps:
 - Applies any grouping rules defined
 - Pushes branches and raises Pull Requests
 
-
 Because Renovate needs to support a lot of dependency naming and versioning conventions, it has modules for each known convention.
 You can contribute your own modules, if you want.
 
