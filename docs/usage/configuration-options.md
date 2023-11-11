@@ -2039,7 +2039,7 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 Behaviour details:
 
-- Renovate creates PRs with labels, if they are configured
+- Renovate adds labels to the PR at time of PR creation, if any have been configured
 - If any other bot or users modifies labels in a PR which Renovate created, it won't touch labels again in that open PR
 - If the labels for a PR change through configuration or other means, they are applied to any open PRs with unmodified labels (GitHub, GitLab, and Gitea only)
 

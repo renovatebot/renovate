@@ -344,6 +344,7 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
+
       if (
         !existingPr.hasAssignees &&
         !hasNotIgnoredReviewers(existingPr, config) &&
@@ -354,18 +355,20 @@ export async function ensurePr(
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addParticipants(config, existingPr);
       }
-
       // Check if existing PR needs updating
       const existingPrTitle = stripEmojis(existingPr.title);
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
 
-      const labelsFromDebugData = existingPr.bodyStruct?.debugData?.labels;
+      const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
+      const prCurrentLabels = existingPr.labels;
+      const configuredLabels = prepareLabels(config);
+
       const labelsNeedUpdate = shouldUpdateLabels(
-        labelsFromDebugData,
-        existingPr.labels,
-        prepareLabels(config),
+        prInitialLabels,
+        prCurrentLabels,
+        configuredLabels,
       );
 
       if (
@@ -406,8 +409,8 @@ export async function ensurePr(
         logger.debug(
           {
             branchName,
-            oldLabels: labelsFromDebugData,
-            newLabels,
+            prCurrentLabels,
+            configuredLabels,
           },
           'PR labels have changed',
         );
@@ -420,12 +423,12 @@ export async function ensurePr(
         // For more details, refer to the updatePr function of each platform
 
         const [addLabels, removeLabels] = getChangedLabels(
-          labelsFromDebugData!,
-          newLabels,
+          prCurrentLabels,
+          configuredLabels,
         );
 
         // for Gitea
-        updatePrConfig.labels = newLabels;
+        updatePrConfig.labels = configuredLabels;
 
         // for Github, Gitlab
         updatePrConfig.addLabels = addLabels;
