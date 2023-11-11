@@ -170,10 +170,12 @@ describe('modules/datasource/galaxy-collection/index', () => {
         .get(`/v3/plugin/ansible/content/community/collections/index/foo/bar/`)
         .reply(500);
       await expect(
-         getPkgReleases({
+        getPkgReleases({
           datasource,
           packageName: 'foo.bar',
-          registryUrls: ['https://my.automationhub.local/api/galaxy/content/community/'],
+          registryUrls: [
+            'https://my.automationhub.local/api/galaxy/content/community/',
+          ],
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
