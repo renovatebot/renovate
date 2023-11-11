@@ -398,7 +398,7 @@ describe('workers/repository/update/pr/index', () => {
           `PR labels have changed`,
         );
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          { labelsFromDebugData: ['old_label'], labelsInPr: [] },
+          { prInitialLabels: ['old_label'], prCurrentLabels: [] },
           'PR labels have been modified by user, skipping labels update',
         );
         expect(prCache.setPrCache).toHaveBeenCalled();
