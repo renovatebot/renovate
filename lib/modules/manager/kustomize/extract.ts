@@ -131,6 +131,7 @@ export function extractImage(image: Image): PackageDependency | null {
       ...nameDep,
       datasource: DockerDatasource.id,
       replaceString: image.newName,
+      pinDigests: false,
     };
   }
 
