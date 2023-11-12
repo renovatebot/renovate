@@ -132,6 +132,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options: HttpOptions = {},
   ) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
+
+    if (process.env.NODE_ENV === 'test') {
+      this.options.retry = 0;
+    }
   }
 
   protected getThrottle(url: string): Throttle | null {
@@ -167,9 +171,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       };
     }
 
-    if (process.env.NODE_ENV === 'test') {
-      options.retry = 0;
-    }
     options.hooks = {
       beforeRedirect: [removeAuthorization],
     };
