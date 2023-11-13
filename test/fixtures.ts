@@ -22,7 +22,7 @@ export class Fixtures {
       upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
       {
         encoding: 'utf-8',
-      }
+      },
     );
   }
 
@@ -34,7 +34,7 @@ export class Fixtures {
    */
   static getBinary(name: string, fixturesRoot = '.'): Buffer {
     return realFs.readFileSync(
-      upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name)
+      upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
     );
   }
 
@@ -50,8 +50,8 @@ export class Fixtures {
         upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
         {
           encoding: 'utf-8',
-        }
-      )
+        },
+      ),
     ) as T;
   }
 
@@ -74,7 +74,7 @@ export class Fixtures {
   static toJSON(
     paths?: PathLike | PathLike[],
     json?: Record<string, unknown>,
-    isRelative?: boolean
+    isRelative?: boolean,
   ): DirectoryJSON {
     return vol.toJSON(paths, json, isRelative);
   }
@@ -126,7 +126,7 @@ export function readFile(fileName: string, options: any): Promise<TDataOut> {
 
 export async function outputFile(
   file: string,
-  data: string | Buffer | Uint8Array
+  data: string | Buffer | Uint8Array,
 ): Promise<void> {
   const dir = upath.dirname(file);
 

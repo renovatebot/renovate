@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import { glob } from 'glob';
 import { logger } from '../../../logger';
-import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
+import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import type { PlatformScm } from '../types';
 
 let fileList: string[] | undefined;
@@ -45,7 +45,7 @@ export class LocalFs implements PlatformScm {
     return fileList;
   }
 
-  checkoutBranch(branchName: string): Promise<CommitSha> {
+  checkoutBranch(branchName: string): Promise<LongCommitSha> {
     return Promise.resolve('');
   }
 

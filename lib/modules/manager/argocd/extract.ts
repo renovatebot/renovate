@@ -21,12 +21,12 @@ import { fileTestRegex } from './util';
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig
+  _config?: ExtractConfig,
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
   if (fileTestRegex.test(content) === false) {
     logger.debug(
-      `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`
+      `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`,
     );
     return null;
   }
@@ -86,7 +86,7 @@ function processSource(source: ApplicationSource): PackageDependency | null {
 }
 
 function processAppSpec(
-  definition: ApplicationDefinition
+  definition: ApplicationDefinition,
 ): PackageDependency[] {
   const spec: ApplicationSpec | null | undefined =
     definition.kind === 'Application'

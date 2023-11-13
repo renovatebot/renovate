@@ -112,7 +112,7 @@ yamlfmt 0.9.0
 typos 1.16.1
 steampipe 0.20.10
 dummy 1.2.3
-`
+`,
       );
       expect(res).toEqual({
         deps: [
@@ -578,7 +578,7 @@ dummy 1.2.3
 adr-tools 3.0.0
 argocd    2.5.4
 awscli    2.8.6
-`
+`,
       );
       expect(res).toEqual({
         deps: [
@@ -641,7 +641,7 @@ awscli    2.8.6
         ],
       });
       const adoptOpenJreRes = extractPackageFile(
-        'java adoptopenjdk-jre-16.0.0+36'
+        'java adoptopenjdk-jre-16.0.0+36',
       );
       expect(adoptOpenJreRes).toEqual({
         deps: [
@@ -654,7 +654,7 @@ awscli    2.8.6
         ],
       });
       const semeruJdkRes = extractPackageFile(
-        'java semeru-openj9-17.0.8.1+1_openj9-0.40.0'
+        'java semeru-openj9-17.0.8.1+1_openj9-0.40.0',
       );
       expect(semeruJdkRes).toEqual({
         deps: [
@@ -667,7 +667,7 @@ awscli    2.8.6
         ],
       });
       const semeruJreRes = extractPackageFile(
-        'java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0'
+        'java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0',
       );
       expect(semeruJreRes).toEqual({
         deps: [
@@ -774,12 +774,12 @@ awscli    2.8.6
               ],
             });
           });
-        }
+        },
       );
 
       it('invalid comment placements fail to parse', () => {
         const res = extractPackageFile(
-          'nodejs 16.16.0# invalid comment spacing'
+          'nodejs 16.16.0# invalid comment spacing',
         );
         expect(res).toBeNull();
       });
@@ -791,7 +791,7 @@ awscli    2.8.6
 
       it('ignores comments across multiple lines', () => {
         const res = extractPackageFile(
-          '# this is a full line comment\nnodejs 16.16.0 # this is a comment\n'
+          '# this is a full line comment\nnodejs 16.16.0 # this is a comment\n',
         );
         expect(res).toEqual({
           deps: [

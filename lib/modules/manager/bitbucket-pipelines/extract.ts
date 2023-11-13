@@ -17,7 +17,7 @@ import {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
@@ -40,7 +40,7 @@ export function extractPackageFile(
           lineIdx,
           len,
           dockerImageObjectGroups.spaces,
-          config.registryAliases
+          config.registryAliases,
         );
         continue;
       }
@@ -67,7 +67,7 @@ export function extractPackageFile(
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { err, packageFile },
-      'Error extracting Bitbucket Pipes dependencies'
+      'Error extracting Bitbucket Pipes dependencies',
     );
   }
   if (!deps.length) {

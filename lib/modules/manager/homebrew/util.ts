@@ -1,7 +1,7 @@
 export function skip(
   idx: number,
   content: string,
-  cond: (s: string) => boolean
+  cond: (s: string) => boolean,
 ): number {
   let i = idx;
   while (i < content.length) {

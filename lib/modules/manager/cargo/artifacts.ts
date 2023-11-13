@@ -14,10 +14,10 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
-  constraint: string | undefined
+  constraint: string | undefined,
 ): Promise<void> {
   let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
-    manifestPath
+    manifestPath,
   )}`;
   // If we're updating a specific crate, `cargo-update` requires `--workspace`
   // for more information, see: https://github.com/renovatebot/renovate/issues/12332
@@ -56,7 +56,7 @@ export async function updateArtifacts({
   // will be further up.
   const lockFileName = await findLocalSiblingOrParent(
     packageFileName,
-    'Cargo.lock'
+    'Cargo.lock',
   );
   const existingLockFileContent = lockFileName
     ? await readLocalFile(lockFileName)
@@ -71,7 +71,7 @@ export async function updateArtifacts({
     await cargoUpdate(
       packageFileName,
       isLockFileMaintenance,
-      config.constraints?.rust
+      config.constraints?.rust,
     );
     logger.debug('Returning updated Cargo.lock');
     const newCargoLockContent = await readLocalFile(lockFileName);

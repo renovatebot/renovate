@@ -12,7 +12,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
         '0.0.2',
-        'mirror:chalk'
+        'mirror:chalk',
       );
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
@@ -22,7 +22,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
         '0.0.2',
-        'mirror:a'
+        'mirror:a',
       );
       expect(bumpedContent).toEqual(content);
     });
@@ -31,7 +31,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
         '0.0.2',
-        'patch'
+        'patch',
       );
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
@@ -41,7 +41,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
         '0.0.1',
-        'patch'
+        'patch',
       );
       expect(bumpedContent).toEqual(content);
     });
@@ -50,7 +50,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       const { bumpedContent } = npmUpdater.bumpPackageVersion(
         content,
         '0.0.1',
-        'minor'
+        'minor',
       );
       expect(bumpedContent).toMatchSnapshot();
       expect(bumpedContent).not.toEqual(content);
@@ -66,7 +66,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
       const { bumpedContent } = npmUpdater1.bumpPackageVersion(
         content,
         '0.0.2',
-        true as any
+        true as any,
       );
       expect(bumpedContent).toEqual(content);
     });

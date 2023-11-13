@@ -9,7 +9,7 @@ import { api as semver } from '../../../../../versioning/npm';
 const pkgCache = new Map<string, Promise<ReleaseResult | null>>();
 
 function getPkgReleasesCached(
-  packageName: string
+  packageName: string,
 ): Promise<ReleaseResult | null> {
   let cachedResult = pkgCache.get(packageName);
   if (!cachedResult) {
@@ -33,7 +33,7 @@ export async function findFirstParentVersion(
   parentName: string,
   parentStartingVersion: string,
   targetDepName: string,
-  targetVersion: string
+  targetVersion: string,
 ): Promise<string | null> {
   // istanbul ignore if
   if (!semver.isVersion(parentStartingVersion)) {
@@ -41,7 +41,7 @@ export async function findFirstParentVersion(
     return null;
   }
   logger.debug(
-    `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`
+    `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`,
   );
   try {
     const targetDep = await getPkgReleasesCached(targetDepName);
@@ -49,7 +49,7 @@ export async function findFirstParentVersion(
     if (!targetDep) {
       logger.info(
         { targetDepName },
-        'Could not look up target dependency for remediation'
+        'Could not look up target dependency for remediation',
       );
       return null;
     }
@@ -60,14 +60,14 @@ export async function findFirstParentVersion(
           semver.isVersion(version) &&
           semver.isStable(version) &&
           (version === targetVersion ||
-            semver.isGreaterThan(version, targetVersion))
+            semver.isGreaterThan(version, targetVersion)),
       );
     const parentDep = await getPkgReleasesCached(parentName);
     // istanbul ignore if
     if (!parentDep) {
       logger.info(
         { parentName },
-        'Could not look up parent dependency for remediation'
+        'Could not look up parent dependency for remediation',
       );
       return null;
     }
@@ -78,24 +78,24 @@ export async function findFirstParentVersion(
           semver.isVersion(version) &&
           semver.isStable(version) &&
           (version === parentStartingVersion ||
-            semver.isGreaterThan(version, parentStartingVersion))
+            semver.isGreaterThan(version, parentStartingVersion)),
       )
       .sort((v1, v2) => semver.sortVersions(v1, v2));
     // iterate through parentVersions in sorted order
     for (const parentVersion of parentVersions) {
       const constraint = parentDep.releases.find(
-        (release) => release.version === parentVersion
+        (release) => release.version === parentVersion,
       )?.dependencies?.[targetDepName];
       if (!constraint) {
         logger.debug(
-          `${targetDepName} has been removed from ${parentName}@${parentVersion}`
+          `${targetDepName} has been removed from ${parentName}@${parentVersion}`,
         );
         return parentVersion;
       }
       if (semver.matches(targetVersion, constraint)) {
         // could be version or range
         logger.debug(
-          `${targetDepName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to ${targetVersion}`
+          `${targetDepName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to ${targetVersion}`,
         );
         return parentVersion;
       }
@@ -103,7 +103,7 @@ export async function findFirstParentVersion(
         if (semver.isGreaterThan(constraint, targetVersion)) {
           // it's not the version we were after - the parent skipped to a higher version
           logger.debug(
-            `${targetDepName} needs ${parentName}@${parentVersion} which uses version "${constraint}" in order to update to greater than ${targetVersion}`
+            `${targetDepName} needs ${parentName}@${parentVersion} which uses version "${constraint}" in order to update to greater than ${targetVersion}`,
           );
           return parentVersion;
         }
@@ -113,7 +113,7 @@ export async function findFirstParentVersion(
       ) {
         // the constraint didn't match the version we wanted, but it matches one of the versions higher
         logger.debug(
-          `${targetDepName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`
+          `${targetDepName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`,
         );
         return parentVersion;
       }
@@ -121,7 +121,7 @@ export async function findFirstParentVersion(
   } catch (err) /* istanbul ignore next */ {
     logger.warn(
       { parentName, parentStartingVersion, targetDepName, targetVersion, err },
-      'findFirstParentVersion error'
+      'findFirstParentVersion error',
     );
     return null;
   }

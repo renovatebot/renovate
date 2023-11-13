@@ -29,7 +29,7 @@ import { getConfiguredRegistries, getDefaultRegistries } from './util';
 
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
-  packageFileName: string
+  packageFileName: string,
 ): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
@@ -46,13 +46,13 @@ async function createCachedNuGetConfigFile(
 async function runDotnetRestore(
   packageFileName: string,
   dependentPackageFileNames: string[],
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): Promise<void> {
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
   const nugetConfigFile = await createCachedNuGetConfigFile(
     nugetCacheDir,
-    packageFileName
+    packageFileName,
   );
 
   const execOptions: ExecOptions = {
@@ -70,8 +70,8 @@ async function runDotnetRestore(
     ...dependentPackageFileNames.map(
       (fileName) =>
         `dotnet restore ${quote(
-          fileName
-        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`
+          fileName,
+        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
     ),
   ];
   await exec(cmds, execOptions);
@@ -103,35 +103,35 @@ export async function updateArtifacts({
     // have been changed in such cases.
     logger.debug(
       { packageFileName },
-      'Not updating lock file for non project files'
+      'Not updating lock file for non project files',
     );
     return null;
   }
 
   const deps = await getDependentPackageFiles(
     packageFileName,
-    isCentralManament
+    isCentralManament,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
   logger.trace(
     { packageFiles },
-    `Found ${packageFiles.length} dependent package files`
+    `Found ${packageFiles.length} dependent package files`,
   );
 
   const lockFileNames = deps.map((f) =>
-    getSiblingFileName(f.name, 'packages.lock.json')
+    getSiblingFileName(f.name, 'packages.lock.json'),
   );
 
   const existingLockFileContentMap = await getFiles(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
-    (val) => !!val
+    (val) => !!val,
   );
   if (!hasLockFileContent) {
     logger.debug(
       { packageFileName },
-      'No lock file found for package or dependents'
+      'No lock file found for package or dependents',
     );
     return null;
   }
@@ -139,7 +139,7 @@ export async function updateArtifacts({
   try {
     if (updatedDeps.length === 0 && config.isLockFileMaintenance !== true) {
       logger.debug(
-        `Not updating lock file because no deps changed and no lock file maintenance.`
+        `Not updating lock file because no deps changed and no lock file maintenance.`,
       );
       return null;
     }

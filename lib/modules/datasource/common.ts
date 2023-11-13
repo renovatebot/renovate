@@ -20,7 +20,7 @@ export function getDatasourceFor(datasource: string): DatasourceApi | null {
 }
 
 export function getDefaultVersioning(
-  datasourceName: string | undefined
+  datasourceName: string | undefined,
 ): string {
   if (!datasourceName) {
     return defaultVersioning.id;
@@ -41,14 +41,14 @@ export function getDefaultVersioning(
 }
 
 export function isGetPkgReleasesConfig(
-  input: unknown
+  input: unknown,
 ): input is GetPkgReleasesConfig {
   return (
     is.nonEmptyStringAndNotWhitespace(
-      (input as GetPkgReleasesConfig).datasource
+      (input as GetPkgReleasesConfig).datasource,
     ) &&
     is.nonEmptyStringAndNotWhitespace(
-      (input as GetPkgReleasesConfig).packageName
+      (input as GetPkgReleasesConfig).packageName,
     )
   );
 }
@@ -56,7 +56,7 @@ export function isGetPkgReleasesConfig(
 export function applyVersionCompatibility(
   releaseResult: ReleaseResult,
   versionCompatibility: string | undefined,
-  currentCompatibility: string | undefined
+  currentCompatibility: string | undefined,
 ): ReleaseResult {
   if (!versionCompatibility) {
     return releaseResult;
@@ -80,7 +80,7 @@ export function applyVersionCompatibility(
 
 export function applyExtractVersion(
   releaseResult: ReleaseResult,
-  extractVersion: string | undefined
+  extractVersion: string | undefined,
 ): ReleaseResult {
   if (!extractVersion) {
     return releaseResult;
@@ -101,28 +101,28 @@ export function applyExtractVersion(
 }
 
 export function filterValidVersions<
-  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
+  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>,
 >(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
 
   releaseResult.releases = filterMap(releaseResult.releases, (release) =>
-    versioning.isVersion(release.version) ? release : null
+    versioning.isVersion(release.version) ? release : null,
   );
 
   return releaseResult;
 }
 
 export function sortAndRemoveDuplicates<
-  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
+  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>,
 >(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
 
   releaseResult.releases = releaseResult.releases.sort((a, b) =>
-    versioning.sortVersions(a.version, b.version)
+    versioning.sortVersions(a.version, b.version),
   );
 
   // Once releases are sorted, deduplication is straightforward and efficient
@@ -146,7 +146,7 @@ export function applyConstraintsFiltering<
     | 'datasource'
     | 'constraints'
     | 'packageName'
-  >
+  >,
 >(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   if (config?.constraintsFiltering !== 'strict') {
     for (const release of releaseResult.releases) {
@@ -187,7 +187,7 @@ export function applyConstraintsFiltering<
         (releaseConstraint) =>
           !releaseConstraint ||
           (versioning.subset?.(configConstraint, releaseConstraint) ??
-            versioning.matches(configConstraint, releaseConstraint))
+            versioning.matches(configConstraint, releaseConstraint)),
       );
 
       if (!satisfiesConstraints) {
@@ -204,7 +204,7 @@ export function applyConstraintsFiltering<
     const packageName = config.packageName;
     const releases = filteredReleases.join(', ');
     logger.debug(
-      `Filtered ${count} releases for ${packageName} due to constraintsFiltering=strict: ${releases}`
+      `Filtered ${count} releases for ${packageName} due to constraintsFiltering=strict: ${releases}`,
     );
   }
 

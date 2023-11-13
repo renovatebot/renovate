@@ -14,7 +14,7 @@ describe('documentation', () => {
       markdownFiles.map(async (markdownFile) => {
         const markdownText = await fs.readFile(markdownFile, 'utf8');
         expect(markdownText).not.toMatch(regEx(/\.md\/#/));
-      })
+      }),
     );
   });
 
@@ -22,7 +22,7 @@ describe('documentation', () => {
     describe('configuration-options', () => {
       const doc = fs.readFileSync(
         'docs/usage/configuration-options.md',
-        'utf8'
+        'utf8',
       );
 
       const headers = doc
@@ -64,7 +64,7 @@ describe('documentation', () => {
     describe('self-hosted-configuration', () => {
       const doc = fs.readFileSync(
         'docs/usage/self-hosted-configuration.md',
-        'utf8'
+        'utf8',
       );
 
       const headers = doc

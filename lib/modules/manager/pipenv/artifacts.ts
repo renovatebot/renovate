@@ -22,7 +22,7 @@ import { PipfileLockSchema } from './schema';
 
 export function getPythonConstraint(
   existingLockFileContent: string,
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): string | undefined {
   const { constraints = {} } = config;
   const { python } = constraints;
@@ -54,7 +54,7 @@ export function getPythonConstraint(
 
 export function getPipenvConstraint(
   existingLockFileContent: string,
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): string {
   const { constraints = {} } = config;
   const { pipenv } = constraints;
@@ -135,7 +135,7 @@ export async function updateArtifacts({
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const pipenvConstraint = getPipenvConstraint(
       existingLockFileContent,
-      config
+      config,
     );
     const extraEnv: Opt<ExtraEnv> = {
       PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),

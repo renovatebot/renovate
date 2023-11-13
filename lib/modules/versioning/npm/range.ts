@@ -183,7 +183,7 @@ export function getNewValue({
         .join(' ');
     }
     logger.debug(
-      'Unsupported range type for rangeStrategy=bump: ' + currentValue
+      'Unsupported range type for rangeStrategy=bump: ' + currentValue,
     );
     return null;
   }

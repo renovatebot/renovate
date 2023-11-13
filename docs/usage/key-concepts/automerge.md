@@ -19,7 +19,7 @@ This means merging multiple branches in a row won't work reliably, so we prefer 
 What all this means is that Renovate will only automerge at most one branch/PR per target branch per run, before you need to wait for the next run.
 
 As a general guide, we recommend that you enable automerge for any type of dependency updates where you would select "merge" anyway.
-For any updates where you want to review the release notes - or code - before you merge, you can keep automerge disabled.
+For any updates where you want to review the changelogs - or code - before you merge, you can keep automerge disabled.
 
 Automerge works particularly well for `devDependencies` as well as for production `dependencies` in projects which have great test coverage.
 
@@ -27,7 +27,7 @@ For example, if you have Jest or Mocha as a development dependency, and it has a
 If you have a linter like ESLint or TSLint and its update passes... automerge them!
 If you have an API with 100% test coverage and Express is updated... automerge it!
 
-![Automerged PR](/assets/images/automerged-pr.png){ loading=lazy }
+![Automerged PR](../assets/images/automerged-pr.png){ loading=lazy }
 
 ## Configuration examples
 

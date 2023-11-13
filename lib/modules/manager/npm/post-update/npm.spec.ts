@@ -37,7 +37,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { skipInstalls, postUpdateOptions },
-      updates
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeFalse();
@@ -57,7 +57,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { skipInstalls, constraints: { npm: '^6.0.0' } },
-      updates
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
@@ -68,7 +68,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   it('performs lock file updates retaining the package.json counterparts', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(
-      Fixtures.get('update-lockfile-massage-1/package-lock.json')
+      Fixtures.get('update-lockfile-massage-1/package-lock.json'),
     );
     const skipInstalls = true;
     const updates = [
@@ -86,7 +86,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { skipInstalls, constraints: { npm: '^6.0.0' } },
-      updates
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
@@ -103,17 +103,17 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls, constraints: { npm: '^6.0.0' } }
+      { skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.renameLocalFile).toHaveBeenCalledWith(
       upath.join('some-dir', 'package-lock.json'),
-      upath.join('some-dir', 'npm-shrinkwrap.json')
+      upath.join('some-dir', 'npm-shrinkwrap.json'),
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
-      'utf8'
+      'utf8',
     );
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
@@ -130,13 +130,13 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls, constraints: { npm: '^6.0.0' } }
+      { skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
-      'utf8'
+      'utf8',
     );
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
@@ -153,7 +153,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, binarySource, constraints: { npm: '^6.0.0' } }
+      { skipInstalls, binarySource, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
@@ -176,7 +176,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { postUpdateOptions },
-      updates
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBeFalse();
@@ -202,7 +202,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { postUpdateOptions, constraints: { npm: '^6.0.0' } },
-      updates
+      updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
@@ -227,7 +227,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { binarySource, constraints: { npm: '^6.0.0' } },
-      [{ isRemediation: true }]
+      [{ isRemediation: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
@@ -243,7 +243,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
-      'package-lock.json'
+      'package-lock.json',
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
@@ -259,7 +259,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
-      'package-lock.json'
+      'package-lock.json',
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -274,7 +274,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource: 'docker', constraints: { npm: '^6.0.0' } }
+      { binarySource: 'docker', constraints: { npm: '^6.0.0' } },
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -292,7 +292,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       {},
-      [{ isLockFileMaintenance: true }]
+      [{ isLockFileMaintenance: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
@@ -315,7 +315,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { constraints: { npm: '6.0.0' } },
-      [{ isLockFileMaintenance: true }]
+      [{ isLockFileMaintenance: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -355,7 +355,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       'package-lock.json',
       { constraints: { npm: '6.0.0' } },
-      [{ isLockFileMaintenance: true }]
+      [{ isLockFileMaintenance: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -459,6 +459,17 @@ describe('modules/manager/npm/post-update/npm', () => {
           workspacesPackages: ['docs/*', 'web/*'],
         },
       },
+      {
+        packageFile: 'some-missing-dir/docs/a/package.json',
+        packageName: 'hello',
+        depType: 'dependencies',
+        newVersion: '1.1.1',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['docs/*', 'web/*'],
+        },
+      },
     ];
 
     it('workspace in sub-folder', async () => {
@@ -472,7 +483,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         {},
         'package-lock.json',
         { skipInstalls },
-        updates
+        updates,
       );
       expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
       expect(res.error).toBeFalse();
@@ -507,7 +518,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         {},
         'package-lock.json',
         { skipInstalls },
-        modifiedUpdates
+        modifiedUpdates,
       );
       expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
       expect(res.error).toBeFalse();
@@ -524,7 +535,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         },
       ]);
       expect(
-        npmHelper.divideWorkspaceAndRootDeps('.', modifiedUpdates)
+        npmHelper.divideWorkspaceAndRootDeps('.', modifiedUpdates),
       ).toMatchObject({
         lockRootUpdates: [
           {
