@@ -199,6 +199,7 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       ${'4'}                           | ${'a'}                           | ${true}
       ${'abc'}                         | ${'abd'}                         | ${true}
       ${'pre'}                         | ${'pre.foo'}                     | ${true}
+      ${'1.2.3-pre.20230417.1'}        | ${'1.2.4-pre.20230417.1'}        | ${true}
     `('$a is isLessThan $b', ({ a, b, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
@@ -223,6 +224,7 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       ${'1.2.3'}                | ${'1.2.3'}                 | ${0}
       ${'1.2.3-pre.20230417.1'} | ${'1.2.3'}                 | ${-1}
       ${'1.2.3'}                | ${'1.2.3-pre.20230417.1'}  | ${1}
+      ${'1.2.4-pre.20230417.1'} | ${'1.2.3-pre.20230417.1'}  | ${1}
       ${'2'}                    | ${'1.0'}                   | ${1}
       ${''}                     | ${'1.0'}                   | ${1}
       ${''}                     | ${'1.0+build'}             | ${1}
