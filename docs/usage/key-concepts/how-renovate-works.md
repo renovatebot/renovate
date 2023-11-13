@@ -20,15 +20,18 @@ You can contribute your own modules, if you want.
 
 Renovate's modules are:
 
-- [manager](../modules/manager/index.md)
 - [datasource](../modules/datasource/index.md)
+- [manager](../modules/manager/index.md)
+- [platform](../modules/platform/index.md)
 - [versioning](../modules/versioning.md).
 
 Renovate uses these modules in order:
 
 1. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
 2. The datasource module looks up versions of the dependency
-3. the versioning module validates and sorts the returned versions
+3. The versioning module validates and sorts the returned versions
+
+The platform handles the interaction with the remote repositories, for example creating the PRs.
 
 For example:
 
