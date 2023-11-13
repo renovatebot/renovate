@@ -3,7 +3,7 @@ import type { Http } from '../../../../util/http';
 import { newlineRegex } from '../../../../util/regex';
 import type { ReleaseResult } from '../../types';
 
-function convertLinesToVersions(content: string): ReleaseResult | null {
+function convertLinesToVersions(content: string): ReleaseResult {
   const lines = content.split(newlineRegex).map((line) => line.trim());
 
   const versions = lines.map((value) => {
@@ -29,7 +29,7 @@ export async function fetch(
   return convertLinesToVersions(response.body);
 }
 
-export async function read(path: string): Promise<unknown> {
+export async function read(path: string): Promise<ReleaseResult> {
   const fileContent = await fs.readFile(path, 'utf8');
 
   return convertLinesToVersions(fileContent);
