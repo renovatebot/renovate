@@ -33,30 +33,37 @@ export class CustomDatasource extends Datasource {
       format,
     } = config;
 
-    let response: unknown;
-    try {
+    let data: unknown;
+    if (isLocalRegistry) {
       switch (format) {
         case 'plain':
-          response = await (isLocalRegistry
-            ? plainRead(defaultRegistryUrlTemplate)
-            : plainFetch(this.http, defaultRegistryUrlTemplate));
+          data = await plainRead(defaultRegistryUrlTemplate);
           break;
         case 'yaml':
-          response = await (isLocalRegistry
-            ? yamlRead(defaultRegistryUrlTemplate)
-            : yamlFetch(this.http, defaultRegistryUrlTemplate));
+          data = await yamlRead(defaultRegistryUrlTemplate);
           break;
         case 'json':
-          response = await (isLocalRegistry
-            ? jsonRead(defaultRegistryUrlTemplate)
-            : jsonFetch(this.http, defaultRegistryUrlTemplate));
+          data = await jsonRead(defaultRegistryUrlTemplate);
+          break;
       }
-    } catch (e) {
-      this.handleHttpErrors(e);
-      return null;
+    } else {
+      try {
+        switch (format) {
+          case 'plain':
+            data = await plainFetch(this.http, defaultRegistryUrlTemplate);
+            break;
+          case 'yaml':
+            data = await yamlFetch(this.http, defaultRegistryUrlTemplate);
+            break;
+          case 'json':
+            data = await jsonFetch(this.http, defaultRegistryUrlTemplate);
+            break;
+        }
+      } catch (e) {
+        this.handleHttpErrors(e);
+        return null;
+      }
     }
-
-    let data = response;
 
     for (const transformTemplate of transformTemplates) {
       const expression = jsonata(transformTemplate);
