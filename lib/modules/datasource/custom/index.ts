@@ -3,6 +3,7 @@ import jsonata from 'jsonata';
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { fetch as jsonFetch } from './formats/json';
 import { fetch as plainFetch } from './formats/plain';
 import { fetch as yamlFetch } from './formats/yaml';
 import { ReleaseResultZodSchema } from './schema';
@@ -36,7 +37,7 @@ export class CustomDatasource extends Datasource {
           response = await yamlFetch(this.http, defaultRegistryUrlTemplate);
           break;
         case 'json':
-          response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+          response = await jsonFetch(this.http, defaultRegistryUrlTemplate);
       }
     } catch (e) {
       this.handleHttpErrors(e);
