@@ -284,6 +284,47 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('return releases for json file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      const json = codeBlock`{
+        "releases": [
+          { "version": "1.0.0" },
+          { "version": "2.0.0" },
+          { "version": "3.0.0" }
+        ]
+      }`;
+
+      const file = Buffer.from(json);
+      fs.readFile.mockResolvedValueOnce(file as never);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            isLocalRegistry: true,
+            defaultRegistryUrlTemplate: 'test.json',
+            format: 'json',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
     it('return release when templating registryUrl', async () => {
       const expected = {
         releases: [
