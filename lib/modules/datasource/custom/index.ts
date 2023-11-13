@@ -3,9 +3,9 @@ import jsonata from 'jsonata';
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { fetch as jsonFetch } from './formats/json';
-import { fetch as plainFetch } from './formats/plain';
-import { fetch as yamlFetch } from './formats/yaml';
+import { fetch as jsonFetch, read as jsonRead } from './formats/json';
+import { fetch as plainFetch, read as plainRead } from './formats/plain';
+import { fetch as yamlFetch, read as yamlRead } from './formats/yaml';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
 
@@ -26,18 +26,30 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
-    const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
+    const {
+      isLocalRegistry,
+      defaultRegistryUrlTemplate,
+      transformTemplates,
+      format,
+    } = config;
+
     let response: unknown;
     try {
       switch (format) {
         case 'plain':
-          response = await plainFetch(this.http, defaultRegistryUrlTemplate);
+          response = await (isLocalRegistry
+            ? plainRead(defaultRegistryUrlTemplate)
+            : plainFetch(this.http, defaultRegistryUrlTemplate));
           break;
         case 'yaml':
-          response = await yamlFetch(this.http, defaultRegistryUrlTemplate);
+          response = await (isLocalRegistry
+            ? yamlRead(defaultRegistryUrlTemplate)
+            : yamlFetch(this.http, defaultRegistryUrlTemplate));
           break;
         case 'json':
-          response = await jsonFetch(this.http, defaultRegistryUrlTemplate);
+          response = await (isLocalRegistry
+            ? jsonRead(defaultRegistryUrlTemplate)
+            : jsonFetch(this.http, defaultRegistryUrlTemplate));
       }
     } catch (e) {
       this.handleHttpErrors(e);
