@@ -15,13 +15,13 @@ import type { DataSource } from './types';
 // TODO: figure out class hierarchy (#10532)
 export class BaseGoDatasource {
   private static readonly gitlabHttpsRegExp = regEx(
-    /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/
+    /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/,
   );
   private static readonly gitlabRegExp = regEx(
-    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/
+    /^(?<regExpUrl>gitlab\.[^/]*)\/(?<regExpPath>.+?)(?:\/v\d+)?[/]?$/,
   );
   private static readonly gitVcsRegexp = regEx(
-    /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/
+    /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/,
   );
 
   private static readonly id = 'go';
@@ -58,11 +58,23 @@ export class BaseGoDatasource {
       };
     }
 
+    if (goModule.startsWith('code.cloudfoundry.org/')) {
+      const packageName = goModule.replace(
+        'code.cloudfoundry.org',
+        'cloudfoundry',
+      );
+      return {
+        datasource: GithubTagsDatasource.id,
+        packageName,
+        registryUrl: 'https://github.com',
+      };
+    }
+
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
   private static async goGetDatasource(
-    goModule: string
+    goModule: string,
   ): Promise<DataSource | null> {
     const pkgUrl = `https://${goModule}?go-get=1`;
     // GitHub Enterprise only returns a go-import meta
@@ -75,10 +87,10 @@ export class BaseGoDatasource {
 
   private static goSourceHeader(
     res: string,
-    goModule: string
+    goModule: string,
   ): DataSource | null {
     const sourceMatch = regEx(
-      `<meta\\s+name="?go-source"?\\s+content="([^\\s]+)\\s+([^\\s]+)`
+      `<meta\\s+name="?go-source"?\\s+content="([^\\s]+)\\s+([^\\s]+)`,
     ).exec(res);
     if (!sourceMatch) {
       return null;
@@ -94,7 +106,7 @@ export class BaseGoDatasource {
 
   private static detectDatasource(
     goSourceUrl: string,
-    goModule: string
+    goModule: string,
   ): DataSource | null {
     if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
@@ -168,10 +180,10 @@ export class BaseGoDatasource {
 
   private static goImportHeader(
     res: string,
-    goModule: string
+    goModule: string,
   ): DataSource | null {
     const importMatch = regEx(
-      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)"\\s*\\/?>`
+      `<meta\\s+name="?go-import"?\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)"\\s*\\/?>`,
     ).exec(res);
 
     if (!importMatch) {
@@ -196,7 +208,7 @@ export class BaseGoDatasource {
 
     const datasource = this.detectDatasource(
       goImportURL.replace(regEx(/\.git$/), ''),
-      goModule
+      goModule,
     );
     if (datasource !== null) {
       return datasource;

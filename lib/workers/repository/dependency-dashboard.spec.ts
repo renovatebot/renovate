@@ -64,7 +64,7 @@ function genRandString(length: number): string {
 
 function genRandPackageFile(
   depsNum: number,
-  depNameLen: number
+  depNameLen: number,
 ): Record<string, PackageFile[]> {
   const deps: PackageDependency[] = [];
   for (let i = 0; i < depsNum; i++) {
@@ -80,12 +80,12 @@ async function dryRun(
   branches: BranchConfig[],
   platform: jest.MockedObject<Platform>,
   ensureIssueClosingCalls: number,
-  ensureIssueCalls: number
+  ensureIssueCalls: number,
 ) {
   GlobalConfig.set({ dryRun: 'full' });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
-    ensureIssueClosingCalls
+    ensureIssueClosingCalls,
   );
   expect(platform.ensureIssue).toHaveBeenCalledTimes(ensureIssueCalls);
 }
@@ -121,7 +121,7 @@ describe('workers/repository/dependency-dashboard', () => {
         body:
           Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
             '- [ ]',
-            '- [x]'
+            '- [x]',
           ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -171,7 +171,7 @@ describe('workers/repository/dependency-dashboard', () => {
         number: 1,
         body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- approve-all-pending-prs -->',
-          '- [x] <!-- approve-all-pending-prs -->'
+          '- [x] <!-- approve-all-pending-prs -->',
         ),
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -197,7 +197,7 @@ describe('workers/repository/dependency-dashboard', () => {
         number: 1,
         body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- create-all-rate-limited-prs -->',
-          '- [x] <!-- create-all-rate-limited-prs -->'
+          '- [x] <!-- create-all-rate-limited-prs -->',
         ),
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -260,7 +260,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -287,7 +287,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -304,7 +304,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -329,13 +329,13 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        /platform:github/
+        /platform:github/,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        /repository:test/
+        /repository:test/,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -415,10 +415,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-8-PR.txt')
+        Fixtures.get('dependency-dashboard-with-8-PR.txt'),
       );
 
       // same with dry run
@@ -452,10 +452,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt'),
       );
 
       // same with dry run
@@ -497,10 +497,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt'),
       );
 
       // same with dry run
@@ -532,10 +532,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt'),
       );
 
       // same with dry run
@@ -582,10 +582,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt'),
       );
 
       // same with dry run
@@ -668,7 +668,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
-        'platform is github'
+        'platform is github',
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
@@ -710,28 +710,28 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       const checkApprovePendingSelectAll = regEx(
-        / - \[ ] <!-- approve-all-pending-prs -->/g
+        / - \[ ] <!-- approve-all-pending-prs -->/g,
       );
       const checkApprovePendingBranch1 = regEx(
-        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g
+        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g,
       );
       const checkApprovePendingBranch2 = regEx(
-        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g
+        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g,
       );
       expect(
         checkApprovePendingSelectAll.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
         checkApprovePendingBranch1.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
         checkApprovePendingBranch2.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
     });
 
@@ -769,24 +769,28 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       const checkRateLimitedSelectAll = regEx(
-        / - \[ ] <!-- create-all-rate-limited-prs -->/g
+        / - \[ ] <!-- create-all-rate-limited-prs -->/g,
       );
       const checkRateLimitedBranch1 = regEx(
-        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g
+        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g,
       );
       const checkRateLimitedBranch2 = regEx(
-        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g
+        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g,
       );
       expect(
         checkRateLimitedSelectAll.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
-        checkRateLimitedBranch1.test(platform.ensureIssue.mock.calls[0][0].body)
+        checkRateLimitedBranch1.test(
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
-        checkRateLimitedBranch2.test(platform.ensureIssue.mock.calls[0][0].body)
+        checkRateLimitedBranch2.test(
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
     });
 
@@ -859,7 +863,7 @@ describe('workers/repository/dependency-dashboard', () => {
     describe('checks detected dependencies section', () => {
       const packageFiles = Fixtures.getJson('./package-files.json');
       const packageFilesWithDigest = Fixtures.getJson(
-        './package-files-digest.json'
+        './package-files-digest.json',
       );
       let config: RenovateConfig;
 
@@ -969,7 +973,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(
             platform.ensureIssue.mock.calls[0][0].body.length <
-              GitHubMaxPrBodyLen
+              GitHubMaxPrBodyLen,
           ).toBeTrue();
 
           // same with dry run
@@ -1003,7 +1007,7 @@ describe('workers/repository/dependency-dashboard', () => {
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
-            packageFiles
+            packageFiles,
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
@@ -1084,13 +1088,13 @@ describe('workers/repository/dependency-dashboard', () => {
 
   describe('getDashboardMarkdownVulnerabilities()', () => {
     const packageFiles = Fixtures.getJson<Record<string, PackageFile[]>>(
-      './package-files.json'
+      './package-files.json',
     );
 
     it('return empty string if summary is empty', async () => {
       const result = await getDashboardMarkdownVulnerabilities(
         config,
-        packageFiles
+        packageFiles,
       );
       expect(result).toBeEmpty();
     });
@@ -1101,7 +1105,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...config,
           dependencyDashboardOSVVulnerabilitySummary: 'none',
         },
-        packageFiles
+        packageFiles,
       );
       expect(result).toBeEmpty();
     });
@@ -1118,10 +1122,10 @@ describe('workers/repository/dependency-dashboard', () => {
           ...config,
           dependencyDashboardOSVVulnerabilitySummary: 'all',
         },
-        {}
+        {},
       );
       expect(result).toBe(
-        `## Vulnerabilities\n\nRenovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n`
+        `## Vulnerabilities\n\nRenovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n`,
       );
     });
 
@@ -1160,7 +1164,7 @@ describe('workers/repository/dependency-dashboard', () => {
           dependencyDashboardOSVVulnerabilitySummary: 'all',
           osvVulnerabilityAlerts: true,
         },
-        packageFiles
+        packageFiles,
       );
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
@@ -1226,7 +1230,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...config,
           dependencyDashboardOSVVulnerabilitySummary: 'unresolved',
         },
-        packageFiles
+        packageFiles,
       );
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 

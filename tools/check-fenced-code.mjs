@@ -27,11 +27,11 @@ function checkValidJson(file, token) {
     issues += 1;
     if (process.env.CI) {
       console.log(
-        `::error file=${file},line=${start},endLine=${end},title=${errorTitle}::${err.message}. ${errorBody}`
+        `::error file=${file},line=${start},endLine=${end},title=${errorTitle}::${err.message}. ${errorBody}`,
       );
     } else {
       console.log(
-        `${errorTitle} (${file} lines ${start}-${end}): ${err.message}`
+        `${errorTitle} (${file} lines ${start}-${end}): ${err.message}`,
       );
     }
   }
@@ -61,7 +61,7 @@ await (async () => {
 
   if (issues) {
     console.error(
-      `${issues} issues found. ${errorBody} See above for lines affected.`
+      `${issues} issues found. ${errorBody} See above for lines affected.`,
     );
     process.exit(1);
   }

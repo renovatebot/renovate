@@ -24,16 +24,16 @@ interface DependencyDashboard {
 
 const rateLimitedRe = regEx(
   ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->',
-  'g'
+  'g',
 );
 const pendingApprovalRe = regEx(
   ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->',
-  'g'
+  'g',
 );
 const generalBranchRe = regEx(' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->');
 const markedBranchesRe = regEx(
   ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->',
-  'g'
+  'g',
 );
 
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
@@ -65,7 +65,7 @@ function selectAllRelevantBranches(issueBody: string): string[] {
 
 function getAllSelectedBranches(
   issueBody: string,
-  dependencyDashboardChecks: Record<string, string>
+  dependencyDashboardChecks: Record<string, string>,
 ): Record<string, string> {
   const allRelevantBranches = selectAllRelevantBranches(issueBody);
   for (const branch of allRelevantBranches) {
@@ -82,7 +82,7 @@ function getCheckedBranches(issueBody: string): Record<string, string> {
   }
   dependencyDashboardChecks = getAllSelectedBranches(
     issueBody,
-    dependencyDashboardChecks
+    dependencyDashboardChecks,
   );
   return dependencyDashboardChecks;
 }
@@ -102,7 +102,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
 }
 
 export async function readDashboardBody(
-  config: SelectAllConfig
+  config: SelectAllConfig,
 ): Promise<void> {
   config.dependencyDashboardChecks = {};
   const stringifiedConfig = JSON.stringify(config);
@@ -123,7 +123,7 @@ export async function readDashboardBody(
           config.checkedBranches.map((branchName) => [
             branchName,
             'global-config',
-          ])
+          ]),
         );
         dashboardChecks.dependencyDashboardChecks = {
           ...dashboardChecks.dependencyDashboardChecks,
@@ -176,7 +176,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 export async function ensureDependencyDashboard(
   config: SelectAllConfig,
   allBranches: BranchConfig[],
-  packageFiles: Record<string, PackageFile[]> = {}
+  packageFiles: Record<string, PackageFile[]> = {},
 ): Promise<void> {
   logger.debug('ensureDependencyDashboard()');
   // legacy/migrated issue
@@ -184,7 +184,7 @@ export async function ensureDependencyDashboard(
   const branches = allBranches.filter(
     (branch) =>
       branch.result !== 'automerged' &&
-      !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible)
+      !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
   if (
     !(
@@ -195,14 +195,14 @@ export async function ensureDependencyDashboard(
       branches.some(
         (branch) =>
           !!branch.dependencyDashboardApproval ||
-          !!branch.dependencyDashboardPrApproval
+          !!branch.dependencyDashboardPrApproval,
       )
     )
   ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
-        'DRY-RUN: Would close Dependency Dashboard'
+        'DRY-RUN: Would close Dependency Dashboard',
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
@@ -221,7 +221,7 @@ export async function ensureDependencyDashboard(
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
-        'DRY-RUN: Would close Dependency Dashboard'
+        'DRY-RUN: Would close Dependency Dashboard',
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
@@ -238,7 +238,7 @@ export async function ensureDependencyDashboard(
   issueBody = appendRepoProblems(config, issueBody);
 
   const pendingApprovals = branches.filter(
-    (branch) => branch.result === 'needs-approval'
+    (branch) => branch.result === 'needs-approval',
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -254,7 +254,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    (branch) => branch.result === 'not-scheduled'
+    (branch) => branch.result === 'not-scheduled',
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
@@ -269,7 +269,7 @@ export async function ensureDependencyDashboard(
     (branch) =>
       branch.result === 'branch-limit-reached' ||
       branch.result === 'pr-limit-reached' ||
-      branch.result === 'commit-limit-reached'
+      branch.result === 'commit-limit-reached',
   );
   if (rateLimited.length) {
     issueBody += '## Rate-Limited\n\n';
@@ -296,7 +296,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    (branch) => branch.result === 'needs-pr-approval'
+    (branch) => branch.result === 'needs-pr-approval',
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -326,7 +326,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const prPendingBranchAutomerge = branches.filter(
-    (branch) => branch.prBlockedBy === 'BranchAutomerge'
+    (branch) => branch.prBlockedBy === 'BranchAutomerge',
   );
   if (prPendingBranchAutomerge.length) {
     issueBody += '## Pending Branch Automerge\n\n';
@@ -359,10 +359,10 @@ export async function ensureDependencyDashboard(
   let inProgress = branches.filter(
     (branch) =>
       !otherRes.includes(branch.result!) &&
-      branch.prBlockedBy !== 'BranchAutomerge'
+      branch.prBlockedBy !== 'BranchAutomerge',
   );
   const otherBranches = inProgress.filter(
-    (branch) => !!branch.prBlockedBy || !branch.prNo
+    (branch) => !!branch.prBlockedBy || !branch.prNo,
   );
   // istanbul ignore if
   if (otherBranches.length) {
@@ -374,7 +374,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   inProgress = inProgress.filter(
-    (branch) => branch.prNo && !branch.prBlockedBy
+    (branch) => branch.prNo && !branch.prBlockedBy,
   );
   if (inProgress.length) {
     issueBody += '## Open\n\n';
@@ -392,7 +392,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) => branch.result === 'already-existed'
+    (branch) => branch.result === 'already-existed',
   );
   if (alreadyExisted.length) {
     issueBody += '## Ignored or Blocked\n\n';
@@ -415,7 +415,7 @@ export async function ensureDependencyDashboard(
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
-    GitHubMaxPrBodyLen - issueBody.length - footer.length
+    GitHubMaxPrBodyLen - issueBody.length - footer.length,
   );
 
   issueBody += footer;
@@ -423,11 +423,11 @@ export async function ensureDependencyDashboard(
   if (config.dependencyDashboardIssue) {
     const updatedIssue = await platform.getIssue?.(
       config.dependencyDashboardIssue,
-      false
+      false,
     );
     if (updatedIssue) {
       const { dependencyDashboardChecks } = parseDashboardIssue(
-        coerceString(updatedIssue.body)
+        coerceString(updatedIssue.body),
       );
       for (const branchName of Object.keys(config.dependencyDashboardChecks!)) {
         delete dependencyDashboardChecks[branchName];
@@ -436,7 +436,7 @@ export async function ensureDependencyDashboard(
         const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
         issueBody = issueBody.replace(
           checkText,
-          checkText.replace('[ ]', '[x]')
+          checkText.replace('[ ]', '[x]'),
         );
       }
     }
@@ -445,7 +445,7 @@ export async function ensureDependencyDashboard(
   if (GlobalConfig.get('dryRun')) {
     logger.info(
       { title: config.dependencyDashboardTitle },
-      'DRY-RUN: Would ensure Dependency Dashboard'
+      'DRY-RUN: Would ensure Dependency Dashboard',
     );
   } else {
     await platform.ensureIssue({
@@ -472,7 +472,7 @@ function getFooter(config: RenovateConfig): string {
 
 export async function getDashboardMarkdownVulnerabilities(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<string> {
   let result = '';
 
@@ -488,7 +488,7 @@ export async function getDashboardMarkdownVulnerabilities(
   const vulnerabilityFetcher = await Vulnerabilities.create();
   const vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
     config,
-    packageFiles
+    packageFiles,
   );
 
   if (vulnerabilities.length === 0) {
@@ -498,7 +498,7 @@ export async function getDashboardMarkdownVulnerabilities(
   }
 
   const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
-    is.nullOrUndefined(value.fixedVersion)
+    is.nullOrUndefined(value.fixedVersion),
   );
   const resolvedVulnerabilitiesLength =
     vulnerabilities.length - unresolvedVulnerabilities.length;
@@ -535,20 +535,20 @@ export async function getDashboardMarkdownVulnerabilities(
     }
     if (
       is.nullOrUndefined(
-        managerRecords[manager!][packageFile][vulnerability.packageName]
+        managerRecords[manager!][packageFile][vulnerability.packageName],
       )
     ) {
       managerRecords[manager!][packageFile][vulnerability.packageName] = [];
     }
     managerRecords[manager!][packageFile][vulnerability.packageName].push(
-      vulnerability
+      vulnerability,
     );
   }
 
   for (const [manager, packageFileRecords] of Object.entries(managerRecords)) {
     result += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
     for (const [packageFile, packageNameRecords] of Object.entries(
-      packageFileRecords
+      packageFileRecords,
     )) {
       result += `<details><summary>${packageFile}</summary>\n<blockquote>\n\n`;
       for (const [packageName, cves] of Object.entries(packageNameRecords)) {

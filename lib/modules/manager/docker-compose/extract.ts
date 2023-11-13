@@ -17,7 +17,7 @@ class LineMapper {
 
   pluckLineNumber(imageName: string | undefined): number | null {
     const lineMeta = this.imageLines.find(
-      ({ line, used }) => !used && imageName && line.includes(imageName)
+      ({ line, used }) => !used && imageName && line.includes(imageName),
     );
     // istanbul ignore if
     if (!lineMeta) {
@@ -31,7 +31,7 @@ class LineMapper {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  extractConfig: ExtractConfig
+  extractConfig: ExtractConfig,
 ): PackageFileContent | null {
   logger.debug(`docker-compose.extractPackageFile(${packageFile})`);
   let config: DockerComposeConfig;
@@ -41,21 +41,21 @@ export function extractPackageFile(
     if (!config) {
       logger.debug(
         { packageFile },
-        'Null config when parsing Docker Compose content'
+        'Null config when parsing Docker Compose content',
       );
       return null;
     }
     if (typeof config !== 'object') {
       logger.debug(
         { packageFile, type: typeof config },
-        'Unexpected type for Docker Compose content'
+        'Unexpected type for Docker Compose content',
       );
       return null;
     }
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      `Parsing Docker Compose config YAML failed`
+      `Parsing Docker Compose config YAML failed`,
     );
     return null;
   }
@@ -72,7 +72,7 @@ export function extractPackageFile(
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
     const deps = Object.values(
-      services || /* istanbul ignore next: can never happen */ {}
+      services || /* istanbul ignore next: can never happen */ {},
     )
       .filter((service) => is.string(service?.image) && !service?.build)
       .map((service) => {

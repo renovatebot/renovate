@@ -7,7 +7,7 @@
  */
 export function hasKey<K extends string, T>(
   k: K,
-  o: T
+  o: T,
 ): o is T & Record<K, unknown> {
   return o && typeof o === 'object' && k in o;
 }

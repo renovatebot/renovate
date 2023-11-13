@@ -34,7 +34,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -49,7 +49,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         isClean(): boolean {
           return true;
         },
-      })
+      }),
     );
     expect(
       await updateArtifacts({
@@ -57,7 +57,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -73,7 +73,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         isClean(): boolean {
           return false;
         },
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.json');
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
@@ -97,7 +97,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         ],
         newPackageFileContent: 'Updated jsonnetfile.json',
         config,
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -146,7 +146,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         isClean(): boolean {
           return false;
         },
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     expect(
@@ -158,7 +158,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -183,7 +183,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         isClean(): boolean {
           return false;
         },
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     expect(
@@ -195,7 +195,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
         },
-      })
+      }),
     ).toMatchObject([
       {
         artifactError: {

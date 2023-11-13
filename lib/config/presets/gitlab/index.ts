@@ -12,10 +12,10 @@ export const Endpoint = 'https://gitlab.com/api/v4/';
 
 async function getDefaultBranchName(
   urlEncodedPkgName: string,
-  endpoint: string
+  endpoint: string,
 ): Promise<string> {
   const res = await gitlabApi.getJson<GitlabProject>(
-    `${endpoint}projects/${urlEncodedPkgName}`
+    `${endpoint}projects/${urlEncodedPkgName}`,
   );
   return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
 }
@@ -24,7 +24,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string | undefined
+  tag?: string | undefined,
 ): Promise<Preset> {
   let url = endpoint;
   let ref = '';
@@ -37,7 +37,7 @@ export async function fetchJSONFile(
     } else {
       const defaultBranchName = await getDefaultBranchName(
         urlEncodedRepo,
-        endpoint
+        endpoint,
       );
       ref = `?ref=${defaultBranchName}`;
     }
@@ -52,7 +52,7 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(res.body);
+  return parsePreset(res.body, fileName);
 }
 
 export function getPresetFromEndpoint(
@@ -60,7 +60,7 @@ export function getPresetFromEndpoint(
   presetName: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string | undefined
+  tag?: string | undefined,
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

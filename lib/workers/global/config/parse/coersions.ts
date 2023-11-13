@@ -10,7 +10,9 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       return false;
     }
     throw new Error(
-      "Invalid boolean value: expected 'true' or 'false', but got '" + val + "'"
+      "Invalid boolean value: expected 'true' or 'false', but got '" +
+        val +
+        "'",
     );
   },
   array: (val: string): string[] => {

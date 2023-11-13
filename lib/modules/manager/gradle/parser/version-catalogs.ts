@@ -11,11 +11,11 @@ import {
 import { handleLibraryDep, handlePlugin } from './handlers';
 
 const qGroupId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'groupId')
+  storeInTokenMap(ctx, 'groupId'),
 );
 
 const qArtifactId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'artifactId')
+  storeInTokenMap(ctx, 'artifactId'),
 );
 
 const qVersionCatalogVersion = q
@@ -34,7 +34,7 @@ const qVersionCatalogVersion = q
       startsWith: '(',
       endsWith: ')',
       search: q.begin<Ctx>().join(qValueMatcher).end(),
-    })
+    }),
   )
   .handler((ctx) => storeInTokenMap(ctx, 'version'));
 
@@ -113,5 +113,5 @@ const qVersionCatalogAliasDependencies = q
 export const qVersionCatalogs = q.alt(
   qVersionCatalogDependencies,
   qVersionCatalogPlugins,
-  qVersionCatalogAliasDependencies
+  qVersionCatalogAliasDependencies,
 );

@@ -7,7 +7,7 @@ import type { VelaPipelineConfiguration } from './types';
 
 export function extractPackageFile(
   file: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   let doc: VelaPipelineConfiguration | undefined;
 

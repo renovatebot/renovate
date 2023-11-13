@@ -35,7 +35,7 @@ describe('modules/datasource/orb/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-workflows',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -48,7 +48,7 @@ describe('modules/datasource/orb/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-wonkflows',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -58,7 +58,7 @@ describe('modules/datasource/orb/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-workflows',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -68,7 +68,7 @@ describe('modules/datasource/orb/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-workflows',
-        })
+        }),
       ).toBeNull();
     });
 

@@ -230,7 +230,7 @@ describe('util/fs/index', () => {
       await writeLocalFile('test/test.txt', '');
       await fs.symlink(
         join(localDir, 'test/test.txt'),
-        join(localDir, 'test/test')
+        join(localDir, 'test/test'),
       );
 
       const result = await readLocalSymlink('test/test');
@@ -242,7 +242,7 @@ describe('util/fs/index', () => {
       await writeLocalFile('test/test.txt', '');
       await fs.symlink(
         join(localDir, 'test/test.txt'),
-        join(localDir, 'test/test')
+        join(localDir, 'test/test'),
       );
 
       const notExistsResult = await readLocalSymlink('test/not-exists');
@@ -257,22 +257,22 @@ describe('util/fs/index', () => {
       await writeLocalFile('Cargo.lock', 'bar');
 
       expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock')
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock'),
       ).toBe('Cargo.lock');
       expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock')
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock'),
       ).toBeNull();
 
       await writeLocalFile('crates/one/Cargo.lock', '');
 
       expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock')
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.lock'),
       ).toBe('crates/one/Cargo.lock');
       expect(await findLocalSiblingOrParent('crates/one', 'Cargo.lock')).toBe(
-        'Cargo.lock'
+        'Cargo.lock',
       );
       expect(
-        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock')
+        await findLocalSiblingOrParent('crates/one/Cargo.toml', 'Cargo.mock'),
       ).toBeNull();
     });
 
@@ -458,7 +458,7 @@ describe('util/fs/index', () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
       expect(await readCacheFile(`foo/bar/file.txt`, 'utf8')).toBe('foobar');
       expect(await readCacheFile(`foo/bar/file.txt`)).toEqual(
-        Buffer.from('foobar')
+        Buffer.from('foobar'),
       );
     });
   });

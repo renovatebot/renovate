@@ -3,7 +3,7 @@ import { extractPackageFile } from '.';
 
 const genericCaseFileContent = Fixtures.get('generic-case.main.kts');
 const customRepositoriesFileContent = Fixtures.get(
-  'custom-repositories.main.kts'
+  'custom-repositories.main.kts',
 );
 const missingPartsFileContent = Fixtures.get('missing-parts.main.kts');
 

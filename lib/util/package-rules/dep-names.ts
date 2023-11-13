@@ -5,7 +5,7 @@ import { Matcher } from './base';
 export class DepNameMatcher extends Matcher {
   override matches(
     { depName }: PackageRuleInputConfig,
-    { matchDepNames }: PackageRule
+    { matchDepNames }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchDepNames)) {
       return null;
@@ -18,7 +18,7 @@ export class DepNameMatcher extends Matcher {
 
   override excludes(
     { depName }: PackageRuleInputConfig,
-    { excludeDepNames }: PackageRule
+    { excludeDepNames }: PackageRule,
   ): boolean | null {
     if (is.undefined(excludeDepNames)) {
       return null;
