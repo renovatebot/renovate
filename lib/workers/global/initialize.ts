@@ -69,6 +69,7 @@ export async function globalInitialize(
 ): Promise<RenovateConfig> {
   let config = config_;
   await checkVersions();
+  setGlobalHostRules(config);
   config = await initPlatform(config);
   config = await setDirectories(config);
   await packageCache.init(config);

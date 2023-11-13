@@ -30,7 +30,7 @@ import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
   CommitFilesConfig,
   CommitResult,
-  CommitSha,
+  LongCommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
@@ -1896,7 +1896,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 async function pushFiles(
   { branchName, message }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   try {
     // Push the commit to GitHub using a custom ref
     // The associated blobs will be pushed automatically
@@ -1929,7 +1929,7 @@ async function pushFiles(
 
 export async function commitFiles(
   config: CommitFilesConfig,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   const commitResult = await git.prepareCommit(config); // Commit locally and don't push
   const { branchName, files } = config;
   if (!commitResult) {
