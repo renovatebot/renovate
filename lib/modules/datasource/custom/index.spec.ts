@@ -1,7 +1,11 @@
 import { codeBlock } from 'common-tags';
+import _fs from 'fs-extra';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import { CustomDatasource } from './index';
+
+const fs = mocked(_fs);
 
 describe('modules/datasource/custom/index', () => {
   describe('getReleases', () => {
@@ -231,6 +235,45 @@ describe('modules/datasource/custom/index', () => {
         customDatasources: {
           foo: {
             defaultRegistryUrlTemplate: 'https://example.com/v1',
+            format: 'yaml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for yaml file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      const yaml = codeBlock`
+        releases:
+          - version: 1.0.0
+          - version: 2.0.0
+          - version: 3.0.0
+      `;
+
+      fs.readFile.mockResolvedValueOnce(yaml as never);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            isLocalRegistry: true,
+            defaultRegistryUrlTemplate: 'test.yaml',
             format: 'yaml',
           },
         },
