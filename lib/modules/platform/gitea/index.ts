@@ -121,7 +121,7 @@ function toRenovatePR(data: PR): Pr | null {
 
   // from the labels array present in the PR
   // create a new array with only the name of the labels to pass further (we do not need the other information)
-  const prLabels = data.labels?.map((label) => label.name);
+  const prLabels = data.labels?.map((label) => label.name).filter(is.string);
 
   return {
     labels: prLabels,

@@ -2,7 +2,6 @@ import * as httpMock from '../../../../test/http-mock';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
 import {
-  assignLabel,
   closeIssue,
   closePR,
   createComment,
@@ -596,19 +595,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       await expect(
         unassignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
-      ).toResolve();
-    });
-  });
-
-  describe('assignLabel', () => {
-    it('should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint', async () => {
-      httpMock
-        .scope(baseUrl)
-        .patch(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}/labels`)
-        .reply(200);
-
-      await expect(
-        assignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
       ).toResolve();
     });
   });

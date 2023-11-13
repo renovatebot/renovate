@@ -270,7 +270,6 @@ describe('workers/repository/update/pr/index', () => {
     });
 
     describe('Update', () => {
-      // updates labels
       it('updates PR if labels have changed in config', async () => {
         const prDebugData = {
           createdInVer: '1.0.0',
@@ -324,7 +323,6 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
-      // skips updating labels if existing pr doesn't have labels in debugData
       it('skips pr update if existing pr does not have labels in debugData', async () => {
         const existingPr: Pr = {
           ...pr,
@@ -352,7 +350,6 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
-      // skip updating labels if pr labels have been modified by user
       it('skips pr update if pr labels have been modified by user', async () => {
         const prDebugData = {
           createdInVer: '1.0.0',

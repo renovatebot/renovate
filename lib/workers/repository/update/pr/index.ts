@@ -93,7 +93,7 @@ export function updatePrDebugData(
   // When to add:
   // 1. Add it when a new PR is created, i.e., when debugData is undefined.
   // 2. Add it if an existing PR already has labels in the debug data, confirming that we can update its labels.
-  if (!debugData || is.array(debugData?.labels)) {
+  if (!debugData || is.array(debugData.labels)) {
     updatedPrDebugData.labels = labels;
   }
 

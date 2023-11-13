@@ -14,6 +14,14 @@ export type CommitStatusType =
   | 'unknown';
 export type PRMergeMethod = 'merge' | 'rebase' | 'rebase-merge' | 'squash';
 
+export interface GiteaLabel {
+  color: string;
+  description: string;
+  exclusive: boolean;
+  id: number;
+  name: string;
+  url: string;
+}
 export interface PR {
   number: number;
   state: PRState;
@@ -39,7 +47,7 @@ export interface PR {
 
   // labels returned from the Gitea API are represented as an array of objects
   // ref: https://docs.gitea.com/api/1.20/#tag/repository/operation/repoGetPullRequest
-  labels?: Record<string, any>[];
+  labels?: GiteaLabel[];
 }
 
 export interface Issue {
