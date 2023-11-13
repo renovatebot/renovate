@@ -88,7 +88,7 @@ function getMatchingHostRule(url: string | undefined): HostRule {
 
 async function findPipfileSourceUrlWithCredentials(
   pipfileContent: string,
-  pipfileName: string
+  pipfileName: string,
 ): Promise<string | null> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
   if (!pipfile) {
@@ -106,7 +106,7 @@ async function findPipfileSourceUrlWithCredentials(
   ];
 
   const sourceWithCredentials = pipfile.registryUrls?.find((url) =>
-    credentialTokens.some((token) => url.includes(token))
+    credentialTokens.some((token) => url.includes(token)),
   );
 
   // Only one source is currently supported
@@ -158,7 +158,7 @@ export async function updateArtifacts({
 
     const sourceUrl = await findPipfileSourceUrlWithCredentials(
       newPipfileContent,
-      pipfileName
+      pipfileName,
     );
     if (sourceUrl) {
       logger.trace('Pipfile contains credentials');

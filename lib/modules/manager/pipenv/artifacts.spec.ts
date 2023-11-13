@@ -334,14 +334,14 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('passes private credential environment vars', async () => {
     fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv'
+      '/tmp/renovate/cache/others/pipenv',
     );
     fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['Pipfile.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
 
@@ -358,7 +358,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: pipfile,
         config: { ...config, constraints: { python: '== 3.8.*' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -396,14 +396,14 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('does not pass private credential environment vars if variable names differ from allowed', async () => {
     fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv'
+      '/tmp/renovate/cache/others/pipenv',
     );
     fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['Pipfile.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
 
@@ -415,7 +415,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: pipfile,
         config: { ...config, constraints: { python: '== 3.8.*' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
