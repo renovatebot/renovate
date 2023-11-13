@@ -5,6 +5,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import { CustomDatasource } from './index';
 
+jest.mock('fs-extra');
 const fs = mocked(_fs);
 
 describe('modules/datasource/custom/index', () => {
@@ -265,7 +266,8 @@ describe('modules/datasource/custom/index', () => {
           - version: 3.0.0
       `;
 
-      fs.readFile.mockResolvedValueOnce(yaml as never);
+      const file = Buffer.from(yaml);
+      fs.readFile.mockResolvedValueOnce(file as never);
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
