@@ -3,7 +3,7 @@ import type { Http } from '../../../../util/http';
 import { newlineRegex } from '../../../../util/regex';
 import type { ReleaseResult } from '../../types';
 
-const convertLinesToVersions = (content: string): ReleaseResult | null => {
+function convertLinesToVersions(content: string): ReleaseResult | null {
   const lines = content.split(newlineRegex).map((line) => line.trim());
 
   const versions = lines.map((value) => {
@@ -13,7 +13,7 @@ const convertLinesToVersions = (content: string): ReleaseResult | null => {
   return {
     releases: versions,
   };
-};
+}
 
 export async function fetch(
   http: Http,
