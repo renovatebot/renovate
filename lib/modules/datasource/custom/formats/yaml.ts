@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import { promises as fs } from 'fs';
 import yaml from 'js-yaml';
 
 import type { Http } from '../../../../util/http';

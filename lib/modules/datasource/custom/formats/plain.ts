@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import { promises as fs } from 'fs';
 import type { Http } from '../../../../util/http';
 import { newlineRegex } from '../../../../util/regex';
 import type { ReleaseResult } from '../../types';

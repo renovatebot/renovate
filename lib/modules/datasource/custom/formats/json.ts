@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import { promises as fs } from 'fs';
 import type { Http } from '../../../../util/http';
 
 export async function fetch(http: Http, url: string): Promise<unknown> {

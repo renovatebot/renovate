@@ -1,5 +1,5 @@
+import { promises as _fs } from 'fs';
 import { codeBlock } from 'common-tags';
-import _fs from 'fs-extra';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
